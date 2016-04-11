@@ -1,0 +1,80 @@
+{
+  "version": "7.0.0-*",
+  "description": "Command line utilities for Entity Framework.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/aspnet/entityframework"
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk"
+  },
+  "compile": "..\\Shared\\*.cs",
+  "namedResource": {
+    "EntityFramework.Commands.CommandsStrings": "Properties/CommandsStrings.resx"
+  },
+  "dependencies": {
+    "EntityFramework.Commands": "7.0.0-rc2-16649"
+  },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.ComponentModel.DataAnnotations": "4.0.0.0",
+        "System.IO": {
+          "version": "4.0.0.0",
+          "type": "build"
+        },
+        "System.Text.Encoding": {
+          "version": "4.0.0.0",
+          "type": "build"
+        },
+        "System.Threading.Tasks": {
+          "version": "4.0.0.0",
+          "type": "build"
+        }
+      }
+    },
+    "dnx451": {
+      "dependencies": {
+        "Microsoft.AspNet.Hosting.Abstractions": "1.0.0-*",
+        "Microsoft.Dnx.Runtime": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+          "version": "1.0.0-*",
+          "type": "build"
+        },
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "Microsoft.AspNet.Hosting.Abstractions": "1.0.0-*",
+        "Microsoft.Dnx.Runtime": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+          "version": "1.0.0-*",
+          "type": "build"
+        },
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
+        "System.Console": "4.0.0-*",
+        "System.IO.FileSystem": "4.0.1-*"
+      }
+    },
+    "netcore50": {
+      "bin": {
+        "assembly": "lib\\netcore50\\_._"
+      }
+    }
+  },
+  "packInclude": {
+    "build/": "build/**",
+    "lib/": "lib/**",
+    "tools/": [
+      "tools/**",
+      "Design\\OperationHandlers.cs"
+    ]
+  },
+  "commands": {
+    "ef": "EntityFramework.Commands"
+  },
+  "entryPoint": "EntityFramework.Commands",
+  "loadable": false
+}

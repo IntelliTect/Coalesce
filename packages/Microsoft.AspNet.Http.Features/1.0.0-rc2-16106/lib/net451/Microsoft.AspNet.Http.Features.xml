@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Http.Features</name>
+    </assembly>
+    <members>
+        <member name="M:Microsoft.AspNet.Http.Features.FeatureCollectionExtensions.Get``1(Microsoft.AspNet.Http.Features.IFeatureCollection)">
+            <summary>
+            Retrieves the requested feature from the collection.
+            </summary>
+            <typeparam name="TFeature">The feature key.</typeparam>
+            <param name="features">The collection.</param>
+            <returns>The requested feature, or null if it is not present.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Http.Features.FeatureCollectionExtensions.Set``1(Microsoft.AspNet.Http.Features.IFeatureCollection,``0)">
+            <summary>
+            Sets the given feature in the collection.
+            </summary>
+            <typeparam name="TFeature">The feature key.</typeparam>
+            <param name="features">The collection.</param>
+            <param name="instance">The feature value.</param>
+        </member>
+        <member name="T:Microsoft.AspNet.Http.Features.IFeatureCollection">
+            <summary>
+            Represents a collection of HTTP features.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Http.Features.IFeatureCollection.IsReadOnly">
+            <summary>
+            Indicates if the collection can be modified.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Http.Features.IFeatureCollection.Revision">
+            <summary>
+            Incremented for each modification and can be used to verify cached results.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Http.Features.IFeatureCollection.Item(System.Type)">
+            <summary>
+            Gets or sets a given feature. Setting a null value removes the feature.
+            </summary>
+            <param name="key"></param>
+            <returns>The requested feature, or null if it is not present.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Http.Features.IHttpRequestIdentifierFeature">
+            <summary>
+            Feature to identify a request.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Http.Features.IHttpRequestIdentifierFeature.TraceIdentifier">
+            <summary>
+            Identifier to trace a request.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Http.Features.ITlsConnectionFeature.ClientCertificate">
+            <summary>
+            Synchronously retrieves the client certificate, if any.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Http.Features.ITlsConnectionFeature.GetClientCertificateAsync(System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously retrieves the client certificate, if any.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Http.Features.ITlsTokenBindingFeature">
+            <summary>
+            Provides information regarding TLS token binding parameters.
+            </summary>
+            <remarks>
+            TLS token bindings help mitigate the risk of impersonation by an attacker in the
+            event an authenticated client's bearer tokens are somehow exfiltrated from the
+            client's machine. See https://datatracker.ietf.org/doc/draft-popov-token-binding/
+            for more information.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Http.Features.ITlsTokenBindingFeature.GetProvidedTokenBindingId">
+            <summary>
+            Gets the 'provided' token binding identifier associated with the request.
+            </summary>
+            <returns>The token binding identifier, or null if the client did not
+            supply a 'provided' token binding or valid proof of possession of the
+            associated private key. The caller should treat this identifier as an
+            opaque blob and should not try to parse it.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Http.Features.ITlsTokenBindingFeature.GetReferredTokenBindingId">
+            <summary>
+            Gets the 'referred' token binding identifier associated with the request.
+            </summary>
+            <returns>The token binding identifier, or null if the client did not
+            supply a 'referred' token binding or valid proof of possession of the
+            associated private key. The caller should treat this identifier as an
+            opaque blob and should not try to parse it.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Http.IHeaderDictionary">
+            <summary>
+            Represents HttpRequest and HttpResponse headers
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Http.IHeaderDictionary.Item(System.String)">
+            <summary>
+            IHeaderDictionary has a different indexer contract than IDictionary, where it will return StringValues.Empty for missing entries.
+            </summary>
+            <param name="key"></param>
+            <returns>The stored value, or StringValues.Empty if the key is not present.</returns>
+        </member>
+    </members>
+</doc>

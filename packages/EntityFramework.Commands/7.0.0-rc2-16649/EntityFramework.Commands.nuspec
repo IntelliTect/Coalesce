@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>EntityFramework.Commands</id>
+    <version>7.0.0-rc2-16649</version>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://www.asp.net/</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <description>Command line utilities for Entity Framework.</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.1">
+        <dependency id="EntityFramework.Relational.Design" version="7.0.0-rc2-16649" />
+      </group>
+      <group targetFramework="DNX4.5.1">
+        <dependency id="EntityFramework.Relational.Design" version="7.0.0-rc2-16649" />
+        <dependency id="Microsoft.AspNet.Hosting.Abstractions" version="1.0.0-rc2-16161" />
+        <dependency id="Microsoft.Dnx.Runtime" version="1.0.0-rc2-16357" />
+        <dependency id="Microsoft.Extensions.PlatformAbstractions" version="1.0.0-rc2-16530" />
+      </group>
+      <group targetFramework="DNXCore5.0">
+        <dependency id="EntityFramework.Relational.Design" version="7.0.0-rc2-16649" />
+        <dependency id="Microsoft.AspNet.Hosting.Abstractions" version="1.0.0-rc2-16161" />
+        <dependency id="Microsoft.Dnx.Runtime" version="1.0.0-rc2-16357" />
+        <dependency id="Microsoft.Extensions.PlatformAbstractions" version="1.0.0-rc2-16530" />
+        <dependency id="System.Console" version="4.0.0-rc2-23623" />
+        <dependency id="System.IO.FileSystem" version="4.0.1-rc2-23623" />
+      </group>
+      <group targetFramework=".NETCore5.0">
+        <dependency id="EntityFramework.Relational.Design" version="7.0.0-rc2-16649" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="mscorlib" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="mscorlib" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="DNX4.5.1" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

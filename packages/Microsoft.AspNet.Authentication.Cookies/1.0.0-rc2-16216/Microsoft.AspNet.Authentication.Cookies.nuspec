@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.AspNet.Authentication.Cookies</id>
+    <version>1.0.0-rc2-16216</version>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://www.asp.net/</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <description>ASP.NET middleware that enables an application to use cookie based authentication, similar to ASP.NET's forms authentication.</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.1">
+        <dependency id="Microsoft.AspNet.Authentication" version="1.0.0-rc2-16216" />
+        <dependency id="Microsoft.Extensions.WebEncoders" version="1.0.0-rc2-16105" />
+        <dependency id="Newtonsoft.Json" version="6.0.6" />
+      </group>
+      <group targetFramework=".NETPlatform5.4">
+        <dependency id="Microsoft.AspNet.Authentication" version="1.0.0-rc2-16216" />
+        <dependency id="Microsoft.Extensions.WebEncoders" version="1.0.0-rc2-16105" />
+        <dependency id="Newtonsoft.Json" version="6.0.6" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="mscorlib" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.1" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

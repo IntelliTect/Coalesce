@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.IISPlatformHandler</name>
+    </assembly>
+    <members>
+        <member name="P:Microsoft.AspNet.IISPlatformHandler.IISPlatformHandlerOptions.AutomaticAuthentication">
+            <summary>
+            If true the authentication middleware alter the request user coming in and respond to generic challenges.
+            If false the authentication middleware will only provide identity and respond to challenges when explicitly indicated
+            by the AuthenticationScheme.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.IISPlatformHandler.IISPlatformHandlerOptions.FlowWindowsAuthentication">
+            <summary>
+            If true authentication middleware will try to authenticate using platform handler windows authentication
+            If false authentication middleware won't be added
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.IISPlatformHandler.IISPlatformHandlerOptions.AuthenticationDescriptions">
+            <summary>
+            Additional information about the authentication type which is made available to the application.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.IISPlatformHandlerMiddlewareExtensions.UseIISPlatformHandler(Microsoft.AspNet.Builder.IApplicationBuilder)">
+            <summary>
+            Adds middleware for interacting with the IIS HttpPlatformHandler reverse proxy module.
+            This will handle forwarded Windows Authentication, request scheme, remote IPs, etc..
+            </summary>
+            <param name="app"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.IISPlatformHandlerMiddlewareExtensions.UseIISPlatformHandler(Microsoft.AspNet.Builder.IApplicationBuilder,System.Action{Microsoft.AspNet.IISPlatformHandler.IISPlatformHandlerOptions})">
+            <summary>
+            Adds middleware for interacting with the IIS HttpPlatformHandler reverse proxy module.
+            This will handle forwarded Windows Authentication, request scheme, remote IPs, etc..
+            </summary>
+            <param name="app"></param>
+            <param name="configureOptions"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.IISPlatformHandlerMiddlewareExtensions.UseIISPlatformHandler(Microsoft.AspNet.Builder.IApplicationBuilder,Microsoft.AspNet.IISPlatformHandler.IISPlatformHandlerOptions)">
+            <summary>
+            Adds middleware for interacting with the IIS HttpPlatformHandler reverse proxy module.
+            This will handle forwarded Windows Authentication, request scheme, remote IPs, etc..
+            </summary>
+            <param name="app"></param>
+            <param name="options"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Extensions.Internal.SecurityHelper">
+            <summary>
+            Helper code used when implementing authentication middleware
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.SecurityHelper.MergeUserPrincipal(System.Security.Claims.ClaimsPrincipal,System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Add all ClaimsIdentities from an additional ClaimPrincipal to the ClaimsPrincipal
+            Merges a new claims principal, placing all new identities first, and eliminating
+            any empty unauthenticated identities from context.User
+            </summary>
+            <param name="identity"></param>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Mvc.Cors</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter">
+            <summary>
+            A filter which applies the given <see cref="T:Microsoft.AspNet.Cors.Infrastructure.CorsPolicy"/> and adds appropriate response headers.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter.#ctor(Microsoft.AspNet.Cors.Infrastructure.ICorsService,Microsoft.AspNet.Cors.Infrastructure.ICorsPolicyProvider)">
+            <summary>
+            Creates a new instance of <see cref="T:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter"/>.
+            </summary>
+            <param name="corsService">The <see cref="T:Microsoft.AspNet.Cors.Infrastructure.ICorsService"/>.</param>
+            <param name="policyProvider">The <see cref="T:Microsoft.AspNet.Cors.Infrastructure.ICorsPolicyProvider"/>.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter.PolicyName">
+            <summary>
+            The policy name used to fetch a <see cref="T:Microsoft.AspNet.Cors.Infrastructure.CorsPolicy"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter.Order">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNet.Mvc.Filters.AuthorizationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilterFactory">
+            <summary>
+            A filter factory which creates a new instance of <see cref="T:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilter"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilterFactory.#ctor(System.String)">
+            <summary>
+            Creates a new instance of <see cref="T:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilterFactory"/>.
+            </summary>
+            <param name="policyName">Name used to fetch a CORS policy.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Mvc.Cors.CorsAuthorizationFilterFactory.Order">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Mvc.Cors.DisableCorsAuthorizationFilter">
+            <summary>
+            An <see cref="T:Microsoft.AspNet.Mvc.Filters.ICorsAuthorizationFilter"/> which ensures that an action does not run for a pre-flight request.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Mvc.Cors.DisableCorsAuthorizationFilter.Order">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.AspNet.Mvc.Cors.DisableCorsAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNet.Mvc.Filters.AuthorizationContext)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

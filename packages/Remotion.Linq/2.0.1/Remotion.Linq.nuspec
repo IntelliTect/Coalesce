@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Remotion.Linq</id>
+    <version>2.0.1</version>
+    <title>re-linq - re-motion Linq Library</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <authors>rubicon IT GmbH</authors>
+    <owners>rubicon IT GmbH</owners>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <projectUrl>http://relinq.codeplex.com/</projectUrl>
+    <description>With re-linq, it's now easier than ever to create full-featured LINQ providers.</description>
+    <copyright>Copyright (c) rubicon IT GmbH, www.rubicon.eu - Licensed under Apache License, Version 2.0</copyright>
+    <tags>re-motion LINQ ExpressionTrees</tags>
+  </metadata>
+</package>

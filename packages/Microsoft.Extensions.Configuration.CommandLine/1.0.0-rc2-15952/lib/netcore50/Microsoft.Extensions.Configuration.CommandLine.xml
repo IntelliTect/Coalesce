@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Extensions.Configuration.CommandLine</name>
+    </assembly>
+    <members>
+        <member name="P:Microsoft.Extensions.Configuration.CommandLine.Resources.Error_DuplicatedKeyInSwitchMappings">
+            <summary>
+            Keys in switch mappings are case-insensitive. A duplicated key '{0}' was found.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.CommandLine.Resources.FormatError_DuplicatedKeyInSwitchMappings(System.Object)">
+            <summary>
+            Keys in switch mappings are case-insensitive. A duplicated key '{0}' was found.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Configuration.CommandLine.Resources.Error_InvalidSwitchMapping">
+            <summary>
+            The switch mappings contain an invalid switch '{0}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.CommandLine.Resources.FormatError_InvalidSwitchMapping(System.Object)">
+            <summary>
+            The switch mappings contain an invalid switch '{0}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Configuration.CommandLine.Resources.Error_ShortSwitchNotDefined">
+            <summary>
+            The short switch '{0}' is not defined in the switch mappings.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.CommandLine.Resources.FormatError_ShortSwitchNotDefined(System.Object)">
+            <summary>
+            The short switch '{0}' is not defined in the switch mappings.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Configuration.CommandLine.Resources.Error_UnrecognizedArgumentFormat">
+            <summary>
+            Unrecognized argument format: '{0}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.CommandLine.Resources.FormatError_UnrecognizedArgumentFormat(System.Object)">
+            <summary>
+            Unrecognized argument format: '{0}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Configuration.CommandLine.Resources.Error_ValueIsMissing">
+            <summary>
+            Value for switch '{0}' is missing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Configuration.CommandLine.Resources.FormatError_ValueIsMissing(System.Object)">
+            <summary>
+            Value for switch '{0}' is missing.
+            </summary>
+        </member>
+    </members>
+</doc>

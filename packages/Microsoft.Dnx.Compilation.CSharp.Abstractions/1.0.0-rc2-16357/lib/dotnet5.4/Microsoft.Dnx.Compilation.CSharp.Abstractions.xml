@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Dnx.Compilation.CSharp.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Dnx.Compilation.CSharp.ICompileModule">
+            <summary>
+            Module that allows plugging into the compilation pipeline
+            </summary>
+        </member>
+        <member name="M:Microsoft.Dnx.Compilation.CSharp.ICompileModule.BeforeCompile(Microsoft.Dnx.Compilation.CSharp.BeforeCompileContext)">
+            <summary>
+            Runs after the roslyn compilation is created but before anything is emitted
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:Microsoft.Dnx.Compilation.CSharp.ICompileModule.AfterCompile(Microsoft.Dnx.Compilation.CSharp.AfterCompileContext)">
+            <summary>
+            Runs after the compilation is emitted. Changing the compilation will not have any effect at this point
+            but the assembly can be changed before it is saved on disk or loaded into memory.
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="T:Microsoft.Dnx.Compilation.CSharp.ProjectContext">
+            <summary>
+            Stores information about the project
+            </summary>
+        </member>
+        <member name="P:Microsoft.Dnx.Compilation.CSharp.ProjectContext.ProjectDirectory">
+            <summary>
+            Path to the project directory
+            </summary>
+        </member>
+        <member name="P:Microsoft.Dnx.Compilation.CSharp.ProjectContext.ProjectFilePath">
+            <summary>
+            Path to the project file
+            </summary>
+        </member>
+        <member name="P:Microsoft.Dnx.Compilation.CSharp.ProjectContext.Name">
+            <summary>
+            The name of the project
+            </summary>
+        </member>
+        <member name="P:Microsoft.Dnx.Compilation.CSharp.ProjectContext.TargetFramework">
+            <summary>
+            The target framework of the project currently being compiled
+            </summary>
+        </member>
+        <member name="P:Microsoft.Dnx.Compilation.CSharp.ProjectContext.Configuration">
+            <summary>
+            The configuration of the project currently being compiled
+            </summary>
+        </member>
+        <member name="P:Microsoft.Dnx.Compilation.CSharp.ProjectContext.Version">
+            <summary>
+            Project version
+            </summary>
+        </member>
+    </members>
+</doc>

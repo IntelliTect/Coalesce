@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.FileProviders.Physical</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.FileProviders.PhysicalFileProvider">
+            <summary>
+            Looks up files using the on-disk file system
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.FileProviders.PhysicalFileProvider.#ctor(System.String)">
+            <summary>
+            Creates a new instance of a PhysicalFileProvider at the given root directory.
+            </summary>
+            <param name="root">The root directory. This should be an absolute path.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.FileProviders.PhysicalFileProvider.Root">
+            <summary>
+            The root directory for this instance.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.FileProviders.PhysicalFileProvider.GetFileInfo(System.String)">
+            <summary>
+            Locate a file at the given path by directly mapping path segments to physical directories.
+            </summary>
+            <param name="subpath">A path under the root directory</param>
+            <returns>The file information. Caller must check Exists property. </returns>
+        </member>
+        <member name="M:Microsoft.AspNet.FileProviders.PhysicalFileProvider.GetDirectoryContents(System.String)">
+            <summary>
+            Enumerate a directory at the given path, if any.
+            </summary>
+            <param name="subpath">A path under the root directory</param>
+            <returns>Contents of the directory. Caller must check Exists property.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.FileProviders.NotFoundFileInfo">
+            <summary>
+            Represents a non-existing file.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Extensions.CodeGeneration.Templating</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Extensions.CodeGeneration.Templating.MessageStrings">
+            <summary>
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Templating.MessageStrings.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Templating.MessageStrings.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Templating.MessageStrings.TemplateProcessingError">
+            <summary>
+               Looks up a localized string similar to Template Processing Failed:{0}.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.CodeGeneration.Resource">
+            <summary>
+               A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Resource.ResourceManager">
+            <summary>
+               Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Resource.Culture">
+            <summary>
+               Overrides the current thread's CurrentUICulture property for all
+               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Resource.NullParamError">
+            <summary>
+               Looks up a localized string similar to Parameter &apos;{0}&apos; cannot be null or empty..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.CodeGeneration.Resource.UnexpectedTypeLibraryForTemplates">
+            <summary>
+               Looks up a localized string similar to Unexpected type of library information for template folders.
+            </summary>
+        </member>
+    </members>
+</doc>

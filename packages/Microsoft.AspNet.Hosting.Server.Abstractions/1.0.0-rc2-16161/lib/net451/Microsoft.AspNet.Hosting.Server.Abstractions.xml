@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Hosting.Server.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.Hosting.Server.IHttpApplication`1">
+            <summary>
+            Represents an HttpApplication.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Hosting.Server.IHttpApplication`1.CreateContext(Microsoft.AspNet.Http.Features.IFeatureCollection)">
+            <summary>
+            Create a TContext given a collection of HTTP features.
+            </summary>
+            <param name="contextFeatures">A collection of HTTP features to be used for creating the TContext.</param>
+            <returns>The created TContext.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Hosting.Server.IHttpApplication`1.ProcessRequestAsync(`0)">
+            <summary>
+            Asynchronously processes an TContext.
+            </summary>
+            <param name="context">The TContext that the operation will process.</param>
+        </member>
+        <member name="M:Microsoft.AspNet.Hosting.Server.IHttpApplication`1.DisposeContext(`0,System.Exception)">
+            <summary>
+            Dispose a given TContext.
+            </summary>
+            <param name="context">The TContext to be disposed.</param>
+            <param name="exception">The Exception thrown when processing did not complete successfully, otherwise null.</param>
+        </member>
+        <member name="T:Microsoft.AspNet.Hosting.Server.IServer">
+            <summary>
+            Represents a server.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Hosting.Server.IServer.Features">
+            <summary>
+            A collection of HTTP features of the server.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Hosting.Server.IServer.Start``1(Microsoft.AspNet.Hosting.Server.IHttpApplication{``0})">
+            <summary>
+            Start the server with an HttpApplication.
+            </summary>
+            <param name="application">An instance of <see cref="!:IHttpApplication"/>.</param>
+        </member>
+        <member name="T:Microsoft.AspNet.Hosting.Server.IServerFactory">
+            <summary>
+            Represents a factory for creating servers.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Hosting.Server.IServerFactory.CreateServer(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Creates <see cref="T:Microsoft.AspNet.Hosting.Server.IServer"/> based on the given configuration.
+            </summary>
+            <param name="configuration">An instance of <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/>.</param>
+            <returns>The created server.</returns>
+        </member>
+    </members>
+</doc>

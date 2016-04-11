@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Authorization</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.Authorization.AllowAnonymousAttribute">
+            <summary>
+            Specifies that the class or method that this attribute is applied to does not require authorization.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authorization.AuthorizationContext">
+            <summary>
+            Contains authorization information used by <see cref="T:Microsoft.AspNet.Authorization.IAuthorizationHandler"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.AuthorizationOptions.DefaultPolicy">
+            <summary>
+            The initial default policy is to require any authenticated user
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.AuthorizationServiceExtensions.AuthorizeAsync(Microsoft.AspNet.Authorization.IAuthorizationService,System.Security.Claims.ClaimsPrincipal,System.Object,Microsoft.AspNet.Authorization.IAuthorizationRequirement)">
+            <summary>
+            Checks if a user meets a specific requirement for the specified resource
+            </summary>
+            <param name="user"></param>
+            <param name="resource"></param>
+            <param name="requirement"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.AuthorizationServiceExtensions.AuthorizeAsync(Microsoft.AspNet.Authorization.IAuthorizationService,System.Security.Claims.ClaimsPrincipal,System.Object,Microsoft.AspNet.Authorization.AuthorizationPolicy)">
+            <summary>
+            Checks if a user meets a specific authorization policy
+            </summary>
+            <param name="service">The authorization service.</param>
+            <param name="user">The user to check the policy against.</param>
+            <param name="resource">The resource the policy should be checked with.</param>
+            <param name="policy">The policy to check against a specific context.</param>
+            <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.AuthorizationServiceExtensions.AuthorizeAsync(Microsoft.AspNet.Authorization.IAuthorizationService,System.Security.Claims.ClaimsPrincipal,Microsoft.AspNet.Authorization.AuthorizationPolicy)">
+            <summary>
+            Checks if a user meets a specific authorization policy
+            </summary>
+            <param name="service">The authorization service.</param>
+            <param name="user">The user to check the policy against.</param>
+            <param name="policy">The policy to check against a specific context.</param>
+            <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.AuthorizationServiceExtensions.AuthorizeAsync(Microsoft.AspNet.Authorization.IAuthorizationService,System.Security.Claims.ClaimsPrincipal,System.String)">
+            <summary>
+            Checks if a user meets a specific authorization policy
+            </summary>
+            <param name="service">The authorization service.</param>
+            <param name="user">The user to check the policy against.</param>
+            <param name="policyName">The name of the policy to check against a specific context.</param>
+            <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Authorization.AuthorizeAttribute">
+            <summary>
+            Specifies that the class or method that this attribute is applied to requires the specified authorization.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.AuthorizeAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Authorization.AuthorizeAttribute"/> class. 
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.AuthorizeAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Authorization.AuthorizeAttribute"/> class with the specified policy. 
+            </summary>
+            <param name="policy">The name of the policy to require for authorization.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.AuthorizeAttribute.Policy">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.AuthorizeAttribute.Roles">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.AuthorizeAttribute.ActiveAuthenticationSchemes">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Authorization.IAuthorizationService">
+            <summary>
+            Checks policy based permissions for a user
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.IAuthorizationService.AuthorizeAsync(System.Security.Claims.ClaimsPrincipal,System.Object,System.Collections.Generic.IEnumerable{Microsoft.AspNet.Authorization.IAuthorizationRequirement})">
+            <summary>
+            Checks if a user meets a specific set of requirements for the specified resource
+            </summary>
+            <param name="user"></param>
+            <param name="resource"></param>
+            <param name="requirements"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.IAuthorizationService.AuthorizeAsync(System.Security.Claims.ClaimsPrincipal,System.Object,System.String)">
+            <summary>
+            Checks if a user meets a specific authorization policy
+            </summary>
+            <param name="user">The user to check the policy against.</param>
+            <param name="resource">The resource the policy should be checked with.</param>
+            <param name="policyName">The name of the policy to check against a specific context.</param>
+            <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Authorization.IAuthorizeData">
+            <summary>
+            Defines the set of data required to apply authorization rules to a resource.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.IAuthorizeData.Policy">
+            <summary>
+            Gets or sets the policy name that determines access to the resource.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.IAuthorizeData.Roles">
+            <summary>
+            Gets or sets a comma-separated list of roles that are allowed to access the resource.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authorization.Infrastructure.NameAuthorizationRequirement">
+            <summary>
+            Requirement that ensures a specific Name
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.Resources.Exception_AuthorizationPolicyEmpty">
+            <summary>
+            AuthorizationPolicy must have at least one requirement.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.Resources.FormatException_AuthorizationPolicyEmpty">
+            <summary>
+            AuthorizationPolicy must have at least one requirement.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.Resources.Exception_AuthorizationPolicyNotFound">
+            <summary>
+            The AuthorizationPolicy named: '{0}' was not found.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.Resources.FormatException_AuthorizationPolicyNotFound(System.Object)">
+            <summary>
+            The AuthorizationPolicy named: '{0}' was not found.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authorization.Resources.Exception_RoleRequirementEmpty">
+            <summary>
+            At least one role must be specified.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authorization.Resources.FormatException_RoleRequirementEmpty">
+            <summary>
+            At least one role must be specified.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.AuthorizationServiceCollectionExtensions">
+            <summary>
+            Extension methods for setting up authorization services in an <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AuthorizationServiceCollectionExtensions.AddAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds authorization services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />. 
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to add services to.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AuthorizationServiceCollectionExtensions.AddAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Microsoft.AspNet.Authorization.AuthorizationOptions})">
+            <summary>
+            Adds authorization services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />. 
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to add services to.</param>
+            <param name="configure">An action delegate to configure the provided <see cref="T:Microsoft.AspNet.Authorization.AuthorizationOptions"/>.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+    </members>
+</doc>

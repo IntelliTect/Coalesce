@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>xunit.runner.dnx</name>
+    </assembly>
+    <members>
+        <member name="T:Xunit.Runner.Dnx.StackFrameTransformer">
+            <summary>
+            Transforms stack frames and stack traces into compiler-like output
+            so they can be double-clicked in Visual Studio.
+            </summary>
+        </member>
+        <member name="M:Xunit.Runner.Dnx.StackFrameTransformer.TransformFrame(System.String,System.String)">
+            <summary/>
+        </member>
+        <member name="M:Xunit.Runner.Dnx.StackFrameTransformer.TransformStack(System.String,System.String)">
+            <summary/>
+        </member>
+        <member name="T:Xunit.ConsoleRunnerLogger">
+            <summary>
+            An implementation of <see cref="T:Xunit.IRunnerLogger"/> which logs messages
+            to <see cref="T:System.Console"/> and <see cref="P:System.Console.Error"/>.
+            </summary>
+        </member>
+        <member name="M:Xunit.ConsoleRunnerLogger.#ctor(System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Xunit.ConsoleRunnerLogger"/> class.
+            </summary>
+            <param name="useColors">A flag to indicate whether colors should be used when
+            logging messages.</param>
+        </member>
+        <member name="P:Xunit.ConsoleRunnerLogger.LockObject">
+            <inheritdoc/>
+        </member>
+        <member name="M:Xunit.ConsoleRunnerLogger.LogError(Xunit.StackFrameInfo,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Xunit.ConsoleRunnerLogger.LogImportantMessage(Xunit.StackFrameInfo,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Xunit.ConsoleRunnerLogger.LogMessage(Xunit.StackFrameInfo,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Xunit.ConsoleRunnerLogger.LogWarning(Xunit.StackFrameInfo,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Guard">
+            <summary>
+            Guard class, used for guard clauses and argument validation
+            </summary>
+        </member>
+        <member name="M:Guard.ArgumentNotNull(System.String,System.Object)">
+            <summary/>
+        </member>
+        <member name="M:Guard.ArgumentNotNullOrEmpty(System.String,System.Collections.IEnumerable)">
+            <summary/>
+        </member>
+        <member name="M:Guard.ArgumentValid(System.String,System.String,System.Boolean)">
+            <summary/>
+        </member>
+        <member name="M:Guard.FileExists(System.String,System.String)">
+            <summary/>
+        </member>
+    </members>
+</doc>

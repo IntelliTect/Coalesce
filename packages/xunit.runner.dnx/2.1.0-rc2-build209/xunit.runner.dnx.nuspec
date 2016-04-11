@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>xunit.runner.dnx</id>
+    <version>2.1.0-rc2-build209</version>
+    <title>xUnit.net [Runner: DNX / DNX Core]</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <authors>James Newkirk,Brad Wilson</authors>
+    <owners>James Newkirk,Brad Wilson</owners>
+    <licenseUrl>https://raw.githubusercontent.com/xunit/xunit/master/license.txt</licenseUrl>
+    <projectUrl>https://github.com/xunit/dnx.xunit</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/xunit/media/master/logo-512-transparent.png</iconUrl>
+    <description>Console and Visual Studio runner for xUnit.net.
+
+Supported platforms:
+- DNX 4.5.1+
+- DNX Core 5+</description>
+    <dependencies>
+      <group targetFramework="DNX4.5.1">
+        <dependency id="Microsoft.Dnx.Testing.Abstractions" version="1.0.0-rc2-16044" />
+        <dependency id="Microsoft.Dnx.TestHost" version="1.0.0-rc2-16044" />
+        <dependency id="Microsoft.Extensions.PlatformAbstractions" version="1.0.0-rc2-16530" />
+        <dependency id="xunit.runner.reporters" version="2.1.0" />
+      </group>
+      <group targetFramework="DNXCore5.0">
+        <dependency id="Microsoft.Dnx.Testing.Abstractions" version="1.0.0-rc2-16044" />
+        <dependency id="Microsoft.Dnx.TestHost" version="1.0.0-rc2-16044" />
+        <dependency id="Microsoft.Extensions.PlatformAbstractions" version="1.0.0-rc2-16530" />
+        <dependency id="xunit.runner.reporters" version="2.1.0" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.0.0-beta-23516" />
+        <dependency id="System.Threading.ThreadPool" version="4.0.10-beta-23516" />
+        <dependency id="System.Xml.XDocument" version="4.0.11-beta-23516" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Collections" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System.Threading" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System.Xml.XDocument" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="mscorlib" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="DNX4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="DNX4.5.1" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

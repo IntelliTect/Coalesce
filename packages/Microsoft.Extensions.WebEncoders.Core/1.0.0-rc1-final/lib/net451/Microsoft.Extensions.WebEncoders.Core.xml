@@ -1,0 +1,1898 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Extensions.WebEncoders.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Extensions.WebEncoders.CodePointFilter">
+            <summary>
+            Represents a filter which allows only certain Unicode code points through.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.#ctor">
+            <summary>
+            Instantiates an empty filter (allows no code points through by default).
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.#ctor(Microsoft.Extensions.WebEncoders.ICodePointFilter)">
+            <summary>
+            Instantiates the filter by cloning the allow list of another <see cref="T:Microsoft.Extensions.WebEncoders.ICodePointFilter"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.#ctor(Microsoft.Extensions.WebEncoders.UnicodeRange[])">
+            <summary>
+            Instantiates the filter where only the character ranges specified by <paramref name="allowedRanges"/>
+            are allowed by the filter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.AllowChar(System.Char)">
+            <summary>
+            Allows the character specified by <paramref name="c"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.AllowChars(System.Char[])">
+            <summary>
+            Allows all characters specified by <paramref name="chars"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.AllowChars(System.String)">
+            <summary>
+            Allows all characters in the string <paramref name="chars"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.AllowFilter(Microsoft.Extensions.WebEncoders.ICodePointFilter)">
+            <summary>
+            Allows all characters specified by <paramref name="filter"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.AllowRange(Microsoft.Extensions.WebEncoders.UnicodeRange)">
+            <summary>
+            Allows all characters specified by <paramref name="range"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.AllowRanges(Microsoft.Extensions.WebEncoders.UnicodeRange[])">
+            <summary>
+            Allows all characters specified by <paramref name="ranges"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.Clear">
+            <summary>
+            Resets this filter by disallowing all characters.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.ForbidChar(System.Char)">
+            <summary>
+            Disallows the character <paramref name="c"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.ForbidChars(System.Char[])">
+            <summary>
+            Disallows all characters specified by <paramref name="chars"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.ForbidChars(System.String)">
+            <summary>
+            Disallows all characters in the string <paramref name="chars"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.ForbidRange(Microsoft.Extensions.WebEncoders.UnicodeRange)">
+            <summary>
+            Disallows all characters specified by <paramref name="range"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.ForbidRanges(Microsoft.Extensions.WebEncoders.UnicodeRange[])">
+            <summary>
+            Disallows all characters specified by <paramref name="ranges"/> through the filter.
+            </summary>
+            <returns>
+            The 'this' instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.GetAllowedCharsBitmap">
+            <summary>
+            Retrieves the bitmap of allowed characters from this filter.
+            The returned bitmap is a clone of the original bitmap to avoid unintentional modification.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.GetAllowedCodePoints">
+            <summary>
+            Gets an enumeration of all allowed code points.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.IsCharacterAllowed(System.Char)">
+            <summary>
+            Returns a value stating whether the character <paramref name="c"/> is allowed through the filter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.CodePointFilter.Wrap(Microsoft.Extensions.WebEncoders.ICodePointFilter)">
+            <summary>
+            Wraps the provided filter as a CodePointFilter, avoiding the clone if possible.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.EncoderExtensions">
+            <summary>
+            Helpful extension methods for the encoder classes.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.EncoderExtensions.HtmlEncode(Microsoft.Extensions.WebEncoders.IHtmlEncoder,System.String,System.IO.TextWriter)">
+            <summary>
+            HTML-encodes a string and writes the result to the supplied output.
+            </summary>
+            <remarks>
+            The encoded value is also safe for inclusion inside an HTML attribute
+            as long as the attribute value is surrounded by single or double quotes.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.EncoderExtensions.JavaScriptStringEncode(Microsoft.Extensions.WebEncoders.IJavaScriptStringEncoder,System.String,System.IO.TextWriter)">
+            <summary>
+            JavaScript-escapes a string and writes the result to the supplied output.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.EncoderExtensions.UrlEncode(Microsoft.Extensions.WebEncoders.IUrlEncoder,System.String,System.IO.TextWriter)">
+            <summary>
+            URL-encodes a string and writes the result to the supplied output.
+            </summary>
+            <remarks>
+            The encoded value is safe for use in the segment, query, or
+            fragment portion of a URI.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.EncoderServiceProviderExtensions">
+            <summary>
+            Contains extension methods for fetching encoders from an <see cref="T:System.IServiceProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.EncoderServiceProviderExtensions.GetHtmlEncoder(System.IServiceProvider)">
+            <summary>
+            Retrieves an <see cref="T:Microsoft.Extensions.WebEncoders.IHtmlEncoder"/> from an <see cref="T:System.IServiceProvider"/>.
+            </summary>
+            <remarks>
+            This method is guaranteed never to return null.
+            It will return a default encoder instance if <paramref name="serviceProvider"/> does not contain one or is null.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.EncoderServiceProviderExtensions.GetJavaScriptStringEncoder(System.IServiceProvider)">
+            <summary>
+            Retrieves an <see cref="T:Microsoft.Extensions.WebEncoders.IJavaScriptStringEncoder"/> from an <see cref="T:System.IServiceProvider"/>.
+            </summary>
+            <remarks>
+            This method is guaranteed never to return null.
+            It will return a default encoder instance if <paramref name="serviceProvider"/> does not contain one or is null.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.EncoderServiceProviderExtensions.GetUrlEncoder(System.IServiceProvider)">
+            <summary>
+            Retrieves an <see cref="T:Microsoft.Extensions.WebEncoders.IUrlEncoder"/> from an <see cref="T:System.IServiceProvider"/>.
+            </summary>
+            <remarks>
+            This method is guaranteed never to return null.
+            It will return a default encoder instance if <paramref name="serviceProvider"/> does not contain one or is null.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.HexUtil">
+            <summary>
+            Contains helpers for dealing with byte-hex char conversions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HexUtil.IntToChar(System.UInt32)">
+            <summary>
+            Converts a number 0 - 15 to its associated hex character '0' - 'F'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HexUtil.ParseHexCharacter(System.Char)">
+            <summary>
+            Returns the integral form of this hexadecimal character.
+            </summary>
+            <returns>0 - 15 if the character is valid, -1 if the character is invalid.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HexUtil.WriteHexEncodedByte(System.Byte,System.Char@,System.Char@)">
+            <summary>
+            Gets the uppercase hex-encoded form of a byte.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.HtmlEncoder">
+            <summary>
+            A class which can perform HTML encoding given an allow list of characters which
+            can be represented unencoded.
+            </summary>
+            <remarks>
+            Instances of this type will always encode a certain set of characters (such as &lt;
+            and &gt;), even if the filter provided in the constructor allows such characters.
+            Once constructed, instances of this class are thread-safe for multiple callers.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HtmlEncoder.#ctor">
+            <summary>
+            Instantiates an encoder using <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/> as its allow list.
+            Any character not in the <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/> range will be escaped.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HtmlEncoder.#ctor(Microsoft.Extensions.WebEncoders.UnicodeRange[])">
+            <summary>
+            Instantiates an encoder specifying which Unicode character ranges are allowed to
+            pass through the encoder unescaped. Any character not in the set of ranges specified
+            by <paramref name="allowedRanges"/> will be escaped.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HtmlEncoder.#ctor(Microsoft.Extensions.WebEncoders.ICodePointFilter)">
+            <summary>
+            Instantiates an encoder using a custom code point filter. Any character not in the
+            set returned by <paramref name="filter"/>'s <see cref="M:Microsoft.Extensions.WebEncoders.ICodePointFilter.GetAllowedCodePoints"/>
+            method will be escaped.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.HtmlEncoder.Default">
+            <summary>
+            A default instance of <see cref="T:Microsoft.Extensions.WebEncoders.HtmlEncoder"/>.
+            </summary>
+            <remarks>
+            This normally corresponds to <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/>. However, this property is
+            settable so that a developer can change the default implementation application-wide.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HtmlEncoder.HtmlEncode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Everybody's favorite HtmlEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HtmlEncoder.HtmlEncode(System.String)">
+            <summary>
+            Everybody's favorite HtmlEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.HtmlEncoder.HtmlEncode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Everybody's favorite HtmlEncode routine.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.ICodePointFilter">
+            <summary>
+            Represents a filter which allows only certain Unicode code points through.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.ICodePointFilter.GetAllowedCodePoints">
+            <summary>
+            Gets an enumeration of all allowed code points.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.IHtmlEncoder">
+            <summary>
+            Provides services for HTML-encoding input.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IHtmlEncoder.HtmlEncode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            HTML-encodes a character array and writes the result to the supplied
+            output.
+            </summary>
+            <remarks>
+            The encoded value is also appropriately encoded for inclusion inside an HTML attribute
+            as long as the attribute value is surrounded by single or double quotes.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IHtmlEncoder.HtmlEncode(System.String)">
+            <summary>
+            HTML-encodes a given input string.
+            </summary>
+            <returns>
+            The HTML-encoded value, or null if the input string was null.
+            </returns>
+            <remarks>
+            The return value is also appropriately encoded for inclusion inside an HTML attribute
+            as long as the attribute value is surrounded by single or double quotes.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IHtmlEncoder.HtmlEncode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            HTML-encodes a given input string and writes the result to the
+            supplied output.
+            </summary>
+            <remarks>
+            The encoded value is also appropriately encoded for inclusion inside an HTML attribute
+            as long as the attribute value is surrounded by single or double quotes.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.IJavaScriptStringEncoder">
+            <summary>
+            Provides services for JavaScript-escaping strings.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IJavaScriptStringEncoder.JavaScriptStringEncode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            JavaScript-escapes a character array and writes the result to the
+            supplied output.
+            </summary>
+            <remarks>
+            The encoded value is appropriately encoded for inclusion inside a quoted JSON string.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IJavaScriptStringEncoder.JavaScriptStringEncode(System.String)">
+            <summary>
+            JavaScript-escapes a given input string.
+            </summary>
+            <returns>
+            The JavaScript-escaped value, or null if the input string was null.
+            The encoded value is appropriately encoded for inclusion inside a quoted JSON string.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IJavaScriptStringEncoder.JavaScriptStringEncode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            JavaScript-escapes a given input string and writes the
+            result to the supplied output.
+            </summary>
+            <remarks>
+            The encoded value is appropriately encoded for inclusion inside a quoted JSON string.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.IUrlEncoder">
+            <summary>
+            Provides services for URL-escaping strings.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IUrlEncoder.UrlEncode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            URL-escapes a character array and writes the result to the supplied
+            output.
+            </summary>
+            <remarks>
+            The encoded value is appropriately encoded for inclusion in the segment, query, or
+            fragment portion of a URI.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IUrlEncoder.UrlEncode(System.String)">
+            <summary>
+            URL-escapes a given input string.
+            </summary>
+            <returns>
+            The URL-escaped value, or null if the input string was null.
+            </returns>
+            <remarks>
+            The return value is appropriately encoded for inclusion in the segment, query, or
+            fragment portion of a URI.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.IUrlEncoder.UrlEncode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            URL-escapes a string and writes the result to the supplied output.
+            </summary>
+            <remarks>
+            The encoded value is appropriately encoded for inclusion in the segment, query, or
+            fragment portion of a URI.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder">
+            <summary>
+            A class which can perform JavaScript string escaping given an allow list of characters which
+            can be represented unescaped.
+            </summary>
+            <remarks>
+            Instances of this type will always encode a certain set of characters (such as '
+            and "), even if the filter provided in the constructor allows such characters.
+            Once constructed, instances of this class are thread-safe for multiple callers.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.#ctor">
+            <summary>
+            Instantiates an encoder using <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/> as its allow list.
+            Any character not in the <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/> range will be escaped.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.#ctor(Microsoft.Extensions.WebEncoders.UnicodeRange[])">
+            <summary>
+            Instantiates an encoder specifying which Unicode character ranges are allowed to
+            pass through the encoder unescaped. Any character not in the set of ranges specified
+            by <paramref name="allowedRanges"/> will be escaped.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.#ctor(Microsoft.Extensions.WebEncoders.ICodePointFilter)">
+            <summary>
+            Instantiates an encoder using a custom code point filter. Any character not in the
+            set returned by <paramref name="filter"/>'s <see cref="M:Microsoft.Extensions.WebEncoders.ICodePointFilter.GetAllowedCodePoints"/>
+            method will be escaped.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.Default">
+            <summary>
+            A default instance of <see cref="T:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder"/>.
+            </summary>
+            <remarks>
+            This normally corresponds to <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/>. However, this property is
+            settable so that a developer can change the default implementation application-wide.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.JavaScriptStringEncode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Everybody's favorite JavaScriptStringEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.JavaScriptStringEncode(System.String)">
+            <summary>
+            Everybody's favorite JavaScriptStringEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.JavaScriptStringEncoder.JavaScriptStringEncode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Everybody's favorite JavaScriptStringEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeEncoderBase.#ctor(Microsoft.Extensions.WebEncoders.CodePointFilter,System.Int32)">
+            <summary>
+            Instantiates an encoder using a custom allow list of characters.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeEncoderBase.Encode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Entry point to the encoder.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeEncoderBase.Encode(System.String)">
+            <summary>
+            Entry point to the encoder.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeEncoderBase.Encode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Entry point to the encoder.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.UnicodeEncoderBase.Writer">
+            <summary>
+            Provides an abstraction over both StringBuilder and TextWriter.
+            Declared as a struct so we can allocate on the stack and pass by
+            reference. Eliminates chatty virtual dispatches on hot paths.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.UnicodeHelpers">
+            <summary>
+            Contains helpers for dealing with Unicode code points.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.WebEncoders.UnicodeHelpers.UNICODE_REPLACEMENT_CHAR">
+            <summary>
+            Used for invalid Unicode sequences or other unrepresentable values.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.WebEncoders.UnicodeHelpers.UNICODE_LAST_CODEPOINT">
+            <summary>
+            The last code point defined by the Unicode specification.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeHelpers.CreateDefinedCharacterBitmap">
+            <summary>
+            Helper method which creates a bitmap of all characters which are
+            defined per version 8.0 of the Unicode specification.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeHelpers.GetDefinedCharacterBitmap">
+            <summary>
+            Returns a bitmap of all characters which are defined per version 8.0
+            of the Unicode specification.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeHelpers.GetScalarValueFromUtf16(System.Char*,System.Boolean)">
+            <summary>
+            Given a UTF-16 character stream, reads the next scalar value from the stream.
+            Set 'endOfString' to true if 'pChar' points to the last character in the stream.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeHelpers.GetUtf8RepresentationForScalarValue(System.UInt32)">
+            <summary>
+            Given a Unicode scalar value, returns the UTF-8 representation of the value.
+            The return value's bytes should be popped from the LSB.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeHelpers.IsCharacterDefined(System.Char)">
+            <summary>
+            Returns a value stating whether a character is defined per version 8.0
+            of the Unicode specification. Certain classes of characters (control chars,
+            private use, surrogates, some whitespace) are considered "undefined" for
+            our purposes.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeHelpers.IsSupplementaryCodePoint(System.Int32)">
+            <summary>
+            Determines whether the given scalar value is in the supplementary plane and thus
+            requires 2 characters to be represented in UTF-16 (as a surrogate pair).
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.UnicodeRange">
+            <summary>
+            Represents a contiguous range of Unicode code points.
+            </summary>
+            <remarks>
+            Currently only the Basic Multilingual Plane is supported.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeRange.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/>.
+            </summary>
+            <param name="firstCodePoint">The first code point in the range.</param>
+            <param name="rangeSize">The number of code points in the range.</param>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRange.FirstCodePoint">
+            <summary>
+            The first code point in this range.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRange.RangeSize">
+            <summary>
+            The number of code points in this range.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UnicodeRange.FromSpan(System.Char,System.Char)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> from a span of characters.
+            </summary>
+            <param name="firstChar">The first character in the range.</param>
+            <param name="lastChar">The last character in the range.</param>
+            <returns>The <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> representing this span.</returns>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.UnicodeRanges">
+            <summary>
+            Contains predefined <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> instances which correspond to blocks
+            from the Unicode 8.0 specification.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.None">
+            <summary>
+            An empty <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/>. This range contains no code points.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.All">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> which contains all characters in the Unicode Basic
+            Multilingual Plane (U+0000..U+FFFF).
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Basic Latin' Unicode block (U+0000..U+007F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0000.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Latin1Supplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin-1 Supplement' Unicode block (U+0080..U+00FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0080.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LatinExtendedA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin Extended-A' Unicode block (U+0100..U+017F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0100.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LatinExtendedB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin Extended-B' Unicode block (U+0180..U+024F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0180.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.IPAExtensions">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'IPA Extensions' Unicode block (U+0250..U+02AF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0250.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SpacingModifierLetters">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Spacing Modifier Letters' Unicode block (U+02B0..U+02FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U02B0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CombiningDiacriticalMarks">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Combining Diacritical Marks' Unicode block (U+0300..U+036F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0300.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.GreekandCoptic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Greek and Coptic' Unicode block (U+0370..U+03FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0370.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Cyrillic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cyrillic' Unicode block (U+0400..U+04FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0400.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CyrillicSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cyrillic Supplement' Unicode block (U+0500..U+052F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0500.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Armenian">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Armenian' Unicode block (U+0530..U+058F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0530.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Hebrew">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hebrew' Unicode block (U+0590..U+05FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0590.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Arabic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Arabic' Unicode block (U+0600..U+06FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0600.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Syriac">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Syriac' Unicode block (U+0700..U+074F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0700.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.ArabicSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Arabic Supplement' Unicode block (U+0750..U+077F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0750.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Thaana">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Thaana' Unicode block (U+0780..U+07BF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0780.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.NKo">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'NKo' Unicode block (U+07C0..U+07FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U07C0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Samaritan">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Samaritan' Unicode block (U+0800..U+083F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0800.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Mandaic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Mandaic' Unicode block (U+0840..U+085F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0840.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.ArabicExtendedA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Arabic Extended-A' Unicode block (U+08A0..U+08FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U08A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Devanagari">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Devanagari' Unicode block (U+0900..U+097F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0900.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Bengali">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Bengali' Unicode block (U+0980..U+09FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0980.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Gurmukhi">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Gurmukhi' Unicode block (U+0A00..U+0A7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0A00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Gujarati">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Gujarati' Unicode block (U+0A80..U+0AFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0A80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Oriya">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Oriya' Unicode block (U+0B00..U+0B7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0B00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Tamil">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tamil' Unicode block (U+0B80..U+0BFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0B80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Telugu">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Telugu' Unicode block (U+0C00..U+0C7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0C00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Kannada">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Kannada' Unicode block (U+0C80..U+0CFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0C80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Malayalam">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Malayalam' Unicode block (U+0D00..U+0D7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0D00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Sinhala">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Sinhala' Unicode block (U+0D80..U+0DFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0D80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Thai">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Thai' Unicode block (U+0E00..U+0E7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0E00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Lao">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Lao' Unicode block (U+0E80..U+0EFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0E80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Tibetan">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tibetan' Unicode block (U+0F00..U+0FFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U0F00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Myanmar">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Myanmar' Unicode block (U+1000..U+109F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1000.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Georgian">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Georgian' Unicode block (U+10A0..U+10FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U10A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.HangulJamo">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hangul Jamo' Unicode block (U+1100..U+11FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1100.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Ethiopic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ethiopic' Unicode block (U+1200..U+137F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1200.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.EthiopicSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ethiopic Supplement' Unicode block (U+1380..U+139F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1380.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Cherokee">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cherokee' Unicode block (U+13A0..U+13FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U13A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.UnifiedCanadianAboriginalSyllabics">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Unified Canadian Aboriginal Syllabics' Unicode block (U+1400..U+167F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1400.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Ogham">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ogham' Unicode block (U+1680..U+169F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1680.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Runic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Runic' Unicode block (U+16A0..U+16FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U16A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Tagalog">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tagalog' Unicode block (U+1700..U+171F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1700.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Hanunoo">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hanunoo' Unicode block (U+1720..U+173F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1720.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Buhid">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Buhid' Unicode block (U+1740..U+175F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1740.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Tagbanwa">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tagbanwa' Unicode block (U+1760..U+177F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1760.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Khmer">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Khmer' Unicode block (U+1780..U+17FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1780.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Mongolian">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Mongolian' Unicode block (U+1800..U+18AF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1800.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.UnifiedCanadianAboriginalSyllabicsExtended">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Unified Canadian Aboriginal Syllabics Extended' Unicode block (U+18B0..U+18FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U18B0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Limbu">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Limbu' Unicode block (U+1900..U+194F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1900.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.TaiLe">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tai Le' Unicode block (U+1950..U+197F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1950.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.NewTaiLue">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'New Tai Lue' Unicode block (U+1980..U+19DF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1980.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.KhmerSymbols">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Khmer Symbols' Unicode block (U+19E0..U+19FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U19E0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Buginese">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Buginese' Unicode block (U+1A00..U+1A1F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1A00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.TaiTham">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tai Tham' Unicode block (U+1A20..U+1AAF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1A20.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CombiningDiacriticalMarksExtended">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Combining Diacritical Marks Extended' Unicode block (U+1AB0..U+1AFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1AB0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Balinese">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Balinese' Unicode block (U+1B00..U+1B7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1B00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Sundanese">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Sundanese' Unicode block (U+1B80..U+1BBF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1B80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Batak">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Batak' Unicode block (U+1BC0..U+1BFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1BC0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Lepcha">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Lepcha' Unicode block (U+1C00..U+1C4F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1C00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.OlChiki">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ol Chiki' Unicode block (U+1C50..U+1C7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1C50.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SundaneseSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Sundanese Supplement' Unicode block (U+1CC0..U+1CCF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1CC0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.VedicExtensions">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Vedic Extensions' Unicode block (U+1CD0..U+1CFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1CD0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.PhoneticExtensions">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Phonetic Extensions' Unicode block (U+1D00..U+1D7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1D00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.PhoneticExtensionsSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Phonetic Extensions Supplement' Unicode block (U+1D80..U+1DBF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1D80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CombiningDiacriticalMarksSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Combining Diacritical Marks Supplement' Unicode block (U+1DC0..U+1DFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1DC0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LatinExtendedAdditional">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin Extended Additional' Unicode block (U+1E00..U+1EFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1E00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.GreekExtended">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Greek Extended' Unicode block (U+1F00..U+1FFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U1F00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.GeneralPunctuation">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'General Punctuation' Unicode block (U+2000..U+206F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2000.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SuperscriptsandSubscripts">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Superscripts and Subscripts' Unicode block (U+2070..U+209F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2070.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CurrencySymbols">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Currency Symbols' Unicode block (U+20A0..U+20CF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U20A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CombiningDiacriticalMarksforSymbols">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Combining Diacritical Marks for Symbols' Unicode block (U+20D0..U+20FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U20D0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LetterlikeSymbols">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Letterlike Symbols' Unicode block (U+2100..U+214F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2100.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.NumberForms">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Number Forms' Unicode block (U+2150..U+218F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2150.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Arrows">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Arrows' Unicode block (U+2190..U+21FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2190.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MathematicalOperators">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Mathematical Operators' Unicode block (U+2200..U+22FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2200.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MiscellaneousTechnical">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Miscellaneous Technical' Unicode block (U+2300..U+23FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2300.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.ControlPictures">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Control Pictures' Unicode block (U+2400..U+243F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2400.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.OpticalCharacterRecognition">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Optical Character Recognition' Unicode block (U+2440..U+245F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2440.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.EnclosedAlphanumerics">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Enclosed Alphanumerics' Unicode block (U+2460..U+24FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2460.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BoxDrawing">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Box Drawing' Unicode block (U+2500..U+257F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2500.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BlockElements">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Block Elements' Unicode block (U+2580..U+259F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2580.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.GeometricShapes">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Geometric Shapes' Unicode block (U+25A0..U+25FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U25A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MiscellaneousSymbols">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Miscellaneous Symbols' Unicode block (U+2600..U+26FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2600.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Dingbats">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Dingbats' Unicode block (U+2700..U+27BF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2700.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MiscellaneousMathematicalSymbolsA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Miscellaneous Mathematical Symbols-A' Unicode block (U+27C0..U+27EF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U27C0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SupplementalArrowsA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Supplemental Arrows-A' Unicode block (U+27F0..U+27FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U27F0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BraillePatterns">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Braille Patterns' Unicode block (U+2800..U+28FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2800.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SupplementalArrowsB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Supplemental Arrows-B' Unicode block (U+2900..U+297F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2900.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MiscellaneousMathematicalSymbolsB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Miscellaneous Mathematical Symbols-B' Unicode block (U+2980..U+29FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2980.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SupplementalMathematicalOperators">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Supplemental Mathematical Operators' Unicode block (U+2A00..U+2AFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2A00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MiscellaneousSymbolsandArrows">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Miscellaneous Symbols and Arrows' Unicode block (U+2B00..U+2BFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2B00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Glagolitic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Glagolitic' Unicode block (U+2C00..U+2C5F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2C00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LatinExtendedC">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin Extended-C' Unicode block (U+2C60..U+2C7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2C60.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Coptic">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Coptic' Unicode block (U+2C80..U+2CFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2C80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.GeorgianSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Georgian Supplement' Unicode block (U+2D00..U+2D2F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2D00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Tifinagh">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tifinagh' Unicode block (U+2D30..U+2D7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2D30.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.EthiopicExtended">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ethiopic Extended' Unicode block (U+2D80..U+2DDF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2D80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CyrillicExtendedA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cyrillic Extended-A' Unicode block (U+2DE0..U+2DFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2DE0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SupplementalPunctuation">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Supplemental Punctuation' Unicode block (U+2E00..U+2E7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2E00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKRadicalsSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Radicals Supplement' Unicode block (U+2E80..U+2EFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2E80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.KangxiRadicals">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Kangxi Radicals' Unicode block (U+2F00..U+2FDF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2F00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.IdeographicDescriptionCharacters">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ideographic Description Characters' Unicode block (U+2FF0..U+2FFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U2FF0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKSymbolsandPunctuation">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Symbols and Punctuation' Unicode block (U+3000..U+303F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3000.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Hiragana">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hiragana' Unicode block (U+3040..U+309F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3040.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Katakana">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Katakana' Unicode block (U+30A0..U+30FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U30A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Bopomofo">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Bopomofo' Unicode block (U+3100..U+312F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3100.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.HangulCompatibilityJamo">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hangul Compatibility Jamo' Unicode block (U+3130..U+318F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3130.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Kanbun">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Kanbun' Unicode block (U+3190..U+319F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3190.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BopomofoExtended">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Bopomofo Extended' Unicode block (U+31A0..U+31BF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U31A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKStrokes">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Strokes' Unicode block (U+31C0..U+31EF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U31C0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.KatakanaPhoneticExtensions">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Katakana Phonetic Extensions' Unicode block (U+31F0..U+31FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U31F0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.EnclosedCJKLettersandMonths">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Enclosed CJK Letters and Months' Unicode block (U+3200..U+32FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3200.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKCompatibility">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Compatibility' Unicode block (U+3300..U+33FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3300.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKUnifiedIdeographsExtensionA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Unified Ideographs Extension A' Unicode block (U+3400..U+4DBF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U3400.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.YijingHexagramSymbols">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Yijing Hexagram Symbols' Unicode block (U+4DC0..U+4DFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U4DC0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKUnifiedIdeographs">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Unified Ideographs' Unicode block (U+4E00..U+9FFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/U4E00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.YiSyllables">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Yi Syllables' Unicode block (U+A000..U+A48F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA000.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.YiRadicals">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Yi Radicals' Unicode block (U+A490..U+A4CF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA490.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Lisu">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Lisu' Unicode block (U+A4D0..U+A4FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA4D0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Vai">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Vai' Unicode block (U+A500..U+A63F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA500.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CyrillicExtendedB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cyrillic Extended-B' Unicode block (U+A640..U+A69F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA640.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Bamum">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Bamum' Unicode block (U+A6A0..U+A6FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA6A0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.ModifierToneLetters">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Modifier Tone Letters' Unicode block (U+A700..U+A71F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA700.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LatinExtendedD">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin Extended-D' Unicode block (U+A720..U+A7FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA720.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SylotiNagri">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Syloti Nagri' Unicode block (U+A800..U+A82F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA800.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CommonIndicNumberForms">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Common Indic Number Forms' Unicode block (U+A830..U+A83F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA830.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Phagspa">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Phags-pa' Unicode block (U+A840..U+A87F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA840.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Saurashtra">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Saurashtra' Unicode block (U+A880..U+A8DF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA880.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.DevanagariExtended">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Devanagari Extended' Unicode block (U+A8E0..U+A8FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA8E0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.KayahLi">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Kayah Li' Unicode block (U+A900..U+A92F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA900.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Rejang">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Rejang' Unicode block (U+A930..U+A95F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA930.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.HangulJamoExtendedA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hangul Jamo Extended-A' Unicode block (U+A960..U+A97F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA960.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Javanese">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Javanese' Unicode block (U+A980..U+A9DF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA980.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MyanmarExtendedB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Myanmar Extended-B' Unicode block (U+A9E0..U+A9FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UA9E0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Cham">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cham' Unicode block (U+AA00..U+AA5F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAA00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MyanmarExtendedA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Myanmar Extended-A' Unicode block (U+AA60..U+AA7F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAA60.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.TaiViet">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Tai Viet' Unicode block (U+AA80..U+AADF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAA80.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MeeteiMayekExtensions">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Meetei Mayek Extensions' Unicode block (U+AAE0..U+AAFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAAE0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.EthiopicExtendedA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Ethiopic Extended-A' Unicode block (U+AB00..U+AB2F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAB00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.LatinExtendedE">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Latin Extended-E' Unicode block (U+AB30..U+AB6F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAB30.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CherokeeSupplement">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Cherokee Supplement' Unicode block (U+AB70..U+ABBF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAB70.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.MeeteiMayek">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Meetei Mayek' Unicode block (U+ABC0..U+ABFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UABC0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.HangulSyllables">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hangul Syllables' Unicode block (U+AC00..U+D7AF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UAC00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.HangulJamoExtendedB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Hangul Jamo Extended-B' Unicode block (U+D7B0..U+D7FF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UD7B0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKCompatibilityIdeographs">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Compatibility Ideographs' Unicode block (U+F900..U+FAFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UF900.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.AlphabeticPresentationForms">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Alphabetic Presentation Forms' Unicode block (U+FB00..U+FB4F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFB00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.ArabicPresentationFormsA">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Arabic Presentation Forms-A' Unicode block (U+FB50..U+FDFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFB50.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.VariationSelectors">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Variation Selectors' Unicode block (U+FE00..U+FE0F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFE00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.VerticalForms">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Vertical Forms' Unicode block (U+FE10..U+FE1F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFE10.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CombiningHalfMarks">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Combining Half Marks' Unicode block (U+FE20..U+FE2F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFE20.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.CJKCompatibilityForms">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'CJK Compatibility Forms' Unicode block (U+FE30..U+FE4F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFE30.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.SmallFormVariants">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Small Form Variants' Unicode block (U+FE50..U+FE6F).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFE50.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.ArabicPresentationFormsB">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Arabic Presentation Forms-B' Unicode block (U+FE70..U+FEFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFE70.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.HalfwidthandFullwidthForms">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Halfwidth and Fullwidth Forms' Unicode block (U+FF00..U+FFEF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFF00.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.Specials">
+            <summary>
+            A <see cref="T:Microsoft.Extensions.WebEncoders.UnicodeRange"/> corresponding to the 'Specials' Unicode block (U+FFF0..U+FFFF).
+            </summary>
+            <remarks>
+            See http://www.unicode.org/charts/PDF/UFFF0.pdf for the full set of characters in this block.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.UrlEncoder">
+            <summary>
+            A class which can perform URL string escaping given an allow list of characters which
+            can be represented unescaped.
+            </summary>
+            <remarks>
+            Instances of this type will always encode a certain set of characters (such as +
+            and ?), even if the filter provided in the constructor allows such characters.
+            Once constructed, instances of this class are thread-safe for multiple callers.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UrlEncoder.#ctor">
+            <summary>
+            Instantiates an encoder using <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/> as its allow list.
+            Any character not in the <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/> range will be escaped.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UrlEncoder.#ctor(Microsoft.Extensions.WebEncoders.UnicodeRange[])">
+            <summary>
+            Instantiates an encoder specifying which Unicode character ranges are allowed to
+            pass through the encoder unescaped. Any character not in the set of ranges specified
+            by <paramref name="allowedRanges"/> will be escaped.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UrlEncoder.#ctor(Microsoft.Extensions.WebEncoders.ICodePointFilter)">
+            <summary>
+            Instantiates an encoder using a custom code point filter. Any character not in the
+            set returned by <paramref name="filter"/>'s <see cref="M:Microsoft.Extensions.WebEncoders.ICodePointFilter.GetAllowedCodePoints"/>
+            method will be escaped.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.UrlEncoder.Default">
+            <summary>
+            A default instance of <see cref="T:Microsoft.Extensions.WebEncoders.UrlEncoder"/>.
+            </summary>
+            <remarks>
+            This normally corresponds to <see cref="P:Microsoft.Extensions.WebEncoders.UnicodeRanges.BasicLatin"/>. However, this property is
+            settable so that a developer can change the default implementation application-wide.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UrlEncoder.UrlEncode(System.Char[],System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Everybody's favorite UrlEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UrlEncoder.UrlEncode(System.String)">
+            <summary>
+            Everybody's favorite UrlEncode routine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.WebEncoders.UrlEncoder.UrlEncode(System.String,System.Int32,System.Int32,System.IO.TextWriter)">
+            <summary>
+            Everybody's favorite UrlEncode routine.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.WebEncoders.WebEncoderOptions">
+            <summary>
+            Specifies options common to all three encoders (HtmlEncode, JavaScriptStringEncode, UrlEncode).
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.WebEncoders.WebEncoderOptions.CodePointFilter">
+            <summary>
+            Specifies which code points are allowed to be represented unescaped by the encoders.
+            </summary>
+            <remarks>
+            If this property is null, then the encoders will use their default allow lists.
+            </remarks>
+        </member>
+    </members>
+</doc>

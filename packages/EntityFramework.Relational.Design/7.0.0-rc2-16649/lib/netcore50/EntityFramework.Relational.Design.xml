@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EntityFramework.Relational.Design</name>
+    </assembly>
+    <members>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.CannotFindTypeMappingForColumn(System.Object,System.Object)">
+            <summary>
+            Could not find type mapping for column '{columnName}' with data type '{dateType}'. Skipping column.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ForeignKeyScaffoldErrorPrincipalKeyNotFound(System.Object,System.Object,System.Object)">
+            <summary>
+            Could not scaffold the foreign key '{foreignKeyName}'. A key for '{columnsList}' was not found in the principal entity type '{principalEntityType}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ForeignKeyScaffoldErrorPrincipalTableNotFound(System.Object)">
+            <summary>
+            Could not scaffold the foreign key '{foreignKeyName}'. The referenced table could not be found. This most likely occurred because the referenced table was excluded from scaffolding.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ForeignKeyScaffoldErrorPrincipalTableScaffoldingError(System.Object,System.Object)">
+            <summary>
+            Could not scaffold the foreign key '{foreignKeyName}'. The referenced table '{principalTableName}' could not be scaffolded.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ForeignKeyScaffoldErrorPropertyNotFound(System.Object)">
+            <summary>
+            Could not scaffold the foreign key '{foreignKeyName}'.  Some columns in the foreign key could not be scaffolded.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.PrimaryKeyErrorPropertyNotFound(System.Object)">
+            <summary>
+            Could not scaffold the primary key for '{tableName}'. Some columns in the primary key could not be scaffolded.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.MissingPrimaryKey(System.Object)">
+            <summary>
+            Unable to identify the primary key for table '{tableName}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ProviderReturnedNullModel(System.Object)">
+            <summary>
+            Metadata model returned should not be null. Provider: {providerTypeName}.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ReadOnlyFiles(System.Object,System.Object)">
+            <summary>
+            No files generated in directory {outputDirectoryName}. The following file(s) already exist and must be made writeable to continue: {readOnlyFiles}.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.UnableToGenerateEntityType(System.Object)">
+            <summary>
+            Unable to generate entity type for table '{tableName}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.UnableToScaffoldIndexMissingProperty(System.Object)">
+            <summary>
+            Unable to scaffold the index '{indexName}' because at least one of the properties it contains could not be scaffolded.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Data.Entity.Internal.RelationalDesignStrings.MissingUseProviderMethodNameAnnotation">
+            <summary>
+            Cannot scaffold the connection string. The "UseProviderMethodName" is missing from the scaffolding model.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.ExistingFiles(System.Object,System.Object)">
+            <summary>
+            The following file(s) already exist in directory {outputDirectoryName}: {existingFiles}. Use the Force flag to overwrite these files.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Data.Entity.Internal.RelationalDesignStrings.SequencesRequireName">
+            <summary>
+            Sequence name cannot be null or empty. Entity Framework cannot model a sequence that does not have a name.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Data.Entity.Internal.RelationalDesignStrings.BadSequenceType(System.Object,System.Object)">
+            <summary>
+            For sequence '{sequenceName}'. Unable to scaffold because it uses an unsupported type: '{typeName}'.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,1110 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Routing</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.Builder.RoutingBuilderExtensions">
+            <summary>
+            Extension methods for adding the <see cref="T:Microsoft.AspNet.Builder.RouterMiddleware"/> middleware to an <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.RoutingBuilderExtensions.UseRouter(Microsoft.AspNet.Builder.IApplicationBuilder,Microsoft.AspNet.Routing.IRouter)">
+            <summary>
+            Adds a <see cref="T:Microsoft.AspNet.Builder.RouterMiddleware"/> middleware to the specified <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/> with the specified <see cref="T:Microsoft.AspNet.Routing.IRouter"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/> to add the middleware to.</param>
+            <param name="router">The <see cref="T:Microsoft.AspNet.Routing.IRouter"/> to use for routing requests.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Builder.MapRouteRouteBuilderExtensions">
+            <summary>
+            Provides extension methods for <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> to add routes.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.MapRouteRouteBuilderExtensions.MapRoute(Microsoft.AspNet.Routing.IRouteBuilder,System.String,System.String)">
+            <summary>
+            Adds a route to the <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> with the specified name and template.
+            </summary>
+            <param name="routeBuilder">The <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> to add the route to.</param>
+            <param name="name">The name of the route.</param>
+            <param name="template">The URL pattern of the route.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.MapRouteRouteBuilderExtensions.MapRoute(Microsoft.AspNet.Routing.IRouteBuilder,System.String,System.String,System.Object)">
+            <summary>
+            Adds a route to the <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> with the specified name, template, and default values.
+            </summary>
+            <param name="routeBuilder">The <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> to add the route to.</param>
+            <param name="name">The name of the route.</param>
+            <param name="template">The URL pattern of the route.</param>
+            <param name="defaults">
+            An object that contains default values for route parameters. The object's properties represent the names 
+            and values of the default values.
+            </param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.MapRouteRouteBuilderExtensions.MapRoute(Microsoft.AspNet.Routing.IRouteBuilder,System.String,System.String,System.Object,System.Object)">
+            <summary>
+            Adds a route to the <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> with the specified name, template, default values, and
+            constraints.
+            </summary>
+            <param name="routeBuilder">The <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> to add the route to.</param>
+            <param name="name">The name of the route.</param>
+            <param name="template">The URL pattern of the route.</param>
+            <param name="defaults">
+            An object that contains default values for route parameters. The object's properties represent the names
+            and values of the default values.
+            </param>
+            <param name="constraints">
+            An object that contains constraints for the route. The object's properties represent the names and values
+            of the constraints.
+            </param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.MapRouteRouteBuilderExtensions.MapRoute(Microsoft.AspNet.Routing.IRouteBuilder,System.String,System.String,System.Object,System.Object,System.Object)">
+            <summary>
+            Adds a route to the <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> with the specified name, template, default values, and
+            data tokens.
+            </summary>
+            <param name="routeBuilder">The <see cref="T:Microsoft.AspNet.Routing.IRouteBuilder"/> to add the route to.</param>
+            <param name="name">The name of the route.</param>
+            <param name="template">The URL pattern of the route.</param>
+            <param name="defaults">
+            An object that contains default values for route parameters. The object's properties represent the names
+            and values of the default values.
+            </param>
+            <param name="constraints">
+            An object that contains constraints for the route. The object's properties represent the names and values
+            of the constraints.
+            </param>
+            <param name="dataTokens">
+            An object that contains data tokens for the route. The object's properties represent the names and values
+            of the data tokens.
+            </param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.DefaultInlineConstraintResolver">
+            <summary>
+            The default implementation of <see cref="T:Microsoft.AspNet.Routing.IInlineConstraintResolver"/>. Resolves constraints by parsing
+            a constraint key and constraint arguments, using a map to resolve the constraint type, and calling an
+            appropriate constructor for the constraint type.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.DefaultInlineConstraintResolver.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.AspNet.Routing.RouteOptions})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.DefaultInlineConstraintResolver"/> class.
+            </summary>
+            <param name="routeOptions">
+            Accessor for <see cref="T:Microsoft.AspNet.Routing.RouteOptions"/> containing the constraints of interest.
+            </param>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.DefaultInlineConstraintResolver.ResolveConstraint(System.String)">
+            <inheritdoc />
+            <example>
+            A typical constraint looks like the following
+            "exampleConstraint(arg1, arg2, 12)".
+            Here if the type registered for exampleConstraint has a single constructor with one argument,
+            The entire string "arg1, arg2, 12" will be treated as a single argument.
+            In all other cases arguments are split at comma.
+            </example>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.IInlineConstraintResolver">
+            <summary>
+            Defines an abstraction for resolving inline constraints as instances of <see cref="T:Microsoft.AspNet.Routing.IRouteConstraint"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.IInlineConstraintResolver.ResolveConstraint(System.String)">
+            <summary>
+            Resolves the inline constraint.
+            </summary>
+            <param name="inlineConstraint">The inline constraint to resolve.</param>
+            <returns>The <see cref="T:Microsoft.AspNet.Routing.IRouteConstraint"/> the inline constraint was resolved to.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.IRouteBuilder">
+            <summary>
+            Defines a contract for a route builder in an application. A route builder specifies the routes for
+            an application.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.IRouteBuilder.ApplicationBuilder">
+            <summary>
+            Gets the <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.IRouteBuilder.DefaultHandler">
+            <summary>
+            Gets or sets the default <see cref="T:Microsoft.AspNet.Routing.IRouter"/> that is used as a handler if an <see cref="T:Microsoft.AspNet.Routing.IRouter"/>
+            is added to the list of routes but does not specify its own.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.IRouteBuilder.ServiceProvider">
+            <summary>
+            Gets the sets the <see cref="T:System.IServiceProvider"/> used to resolve services for routes.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.IRouteBuilder.Routes">
+            <summary>
+            Gets the routes configured in the builder.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.IRouteBuilder.Build">
+            <summary>
+            Builds an <see cref="T:Microsoft.AspNet.Routing.IRouter"/> that routes the routes specified in the <see cref="P:Microsoft.AspNet.Routing.IRouteBuilder.Routes"/> property.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteBase.RouteAsync(Microsoft.AspNet.Routing.RouteContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteBase.GetVirtualPath(Microsoft.AspNet.Routing.VirtualPathContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.RouteConstraintBuilder">
+            <summary>
+            A builder for produding a mapping of keys to see <see cref="T:Microsoft.AspNet.Routing.IRouteConstraint"/>.
+            </summary>
+            <remarks>
+            <see cref="T:Microsoft.AspNet.Routing.RouteConstraintBuilder"/> allows iterative building a set of route constraints, and will
+            merge multiple entries for the same key.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteConstraintBuilder.#ctor(Microsoft.AspNet.Routing.IInlineConstraintResolver,System.String)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.AspNet.Routing.RouteConstraintBuilder"/> instance.
+            </summary>
+            <param name="inlineConstraintResolver">The <see cref="T:Microsoft.AspNet.Routing.IInlineConstraintResolver"/>.</param>
+            <param name="displayName">The display name (for use in error messages).</param>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteConstraintBuilder.Build">
+            <summary>
+            Builds a mapping of constraints.
+            </summary>
+            <returns>An <see cref="T:System.Collections.Generic.IDictionary`2"/> of the constraints.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteConstraintBuilder.AddConstraint(System.String,System.Object)">
+             <summary>
+             Adds a constraint instance for the given key.
+             </summary>
+             <param name="key">The key.</param>
+             <param name="value">
+             The constraint instance. Must either be a string or an instance of <see cref="T:Microsoft.AspNet.Routing.IRouteConstraint"/>.
+             </param>
+             <remarks>
+             If the <paramref name="value"/> is a string, it will be converted to a <see cref="T:Microsoft.AspNet.Routing.Constraints.RegexRouteConstraint"/>.
+            
+             For example, the string <code>Product[0-9]+</code> will be converted to the regular expression
+             <code>^(Product[0-9]+)</code>. See <see cref="T:System.Text.RegularExpressions.Regex"/> for more details.
+             </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteConstraintBuilder.AddResolvedConstraint(System.String,System.String)">
+            <summary>
+            Adds a constraint for the given key, resolved by the <see cref="T:Microsoft.AspNet.Routing.IInlineConstraintResolver"/>.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="constraintText">The text to be resolved by <see cref="T:Microsoft.AspNet.Routing.IInlineConstraintResolver"/>.</param>
+            <remarks>
+            The <see cref="T:Microsoft.AspNet.Routing.IInlineConstraintResolver"/> can create <see cref="T:Microsoft.AspNet.Routing.IRouteConstraint"/> instances
+            based on <paramref name="constraintText"/>. See <see cref="P:Microsoft.AspNet.Routing.RouteOptions.ConstraintMap"/> to register
+            custom constraint types.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteConstraintBuilder.SetOptional(System.String)">
+            <summary>
+            Sets the given key as optional.
+            </summary>
+            <param name="key">The key.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.RouteOptions.LowercaseUrls">
+            <summary>
+            Gets or sets a value indicating whether all generated URLs are lower-case.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.RouteOptions.AppendTrailingSlash">
+            <summary>
+            Gets or sets a value indicating whether a trailing slash should be appended to the generated URLs.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.RouteValueEqualityComparer">
+             <summary>
+             An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> implementation that compares objects as-if
+             they were route value strings.
+             </summary>
+             <remarks>
+             Values that are are not strings are converted to strings using
+             <c>Convert.ToString(x, CultureInfo.InvariantCulture)</c>. <c>null</c> values are converted
+             to the empty string.
+            
+             strings are compared using <see cref="F:System.StringComparison.OrdinalIgnoreCase"/>.
+             </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteValueEqualityComparer.Equals(System.Object,System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.RouteValueEqualityComparer.GetHashCode(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.AlphaRouteConstraint">
+            <summary>
+            Constrains a route parameter to contain only lowercase or uppercase letters A through Z in the English alphabet.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.AlphaRouteConstraint.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.AlphaRouteConstraint" /> class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.BoolRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only Boolean values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.BoolRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.CompositeRouteConstraint">
+            <summary>
+            Constrains a route by several child constraints.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.CompositeRouteConstraint.#ctor(System.Collections.Generic.IEnumerable{Microsoft.AspNet.Routing.IRouteConstraint})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.CompositeRouteConstraint" /> class.
+            </summary>
+            <param name="constraints">The child constraints that must match for this constraint to match.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.CompositeRouteConstraint.Constraints">
+            <summary>
+            Gets the child constraints that must match for this constraint to match.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.CompositeRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.DateTimeRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only <see cref="T:System.DateTime"/> values.
+            </summary>
+            <remarks>
+            This constraint tries to parse strings by using all of the formats returned by the
+            CultureInfo.InvariantCulture.DateTimeFormat.GetAllDateTimePatterns() method.
+            For a sample on how to list all formats which are considered, please visit
+            http://msdn.microsoft.com/en-us/library/aszyst2c(v=vs.110).aspx
+            </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.DateTimeRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.DecimalRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only decimal values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.DecimalRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.DoubleRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only 64-bit floating-point values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.DoubleRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.FloatRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only 32-bit floating-point values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.FloatRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.GuidRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only <see cref="T:System.Guid"/> values.
+            Matches values specified in any of the five formats "N", "D", "B", "P", or "X",
+            supported by Guid.ToString(string) and Guid.ToString(String, IFormatProvider) methods.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.GuidRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.HttpMethodRouteConstraint">
+            <summary>
+            Constrains the HTTP method of request or a route.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.HttpMethodRouteConstraint.#ctor(System.String[])">
+            <summary>
+            Creates a new <see cref="T:Microsoft.AspNet.Routing.Constraints.HttpMethodRouteConstraint"/> that accepts the HTTP methods specified
+            by <paramref name="allowedMethods"/>.
+            </summary>
+            <param name="allowedMethods">The allowed HTTP methods.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.HttpMethodRouteConstraint.AllowedMethods">
+            <summary>
+            Gets the HTTP methods allowed by the constraint.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.HttpMethodRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.IntRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only 32-bit integer values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.IntRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint">
+            <summary>
+            Constrains a route parameter to be a string of a given length or within a given range of lengths.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint" /> class that constrains
+            a route parameter to be a string of a given length.
+            </summary>
+            <param name="length">The length of the route parameter.</param>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint" /> class that constrains
+            a route parameter to be a string of a given length.
+            </summary>
+            <param name="minLength">The minimum length allowed for the route parameter.</param>
+            <param name="maxLength">The maximum length allowed for the route parameter.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint.MinLength">
+            <summary>
+            Gets the minimum length allowed for the route parameter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint.MaxLength">
+            <summary>
+            Gets the maximum length allowed for the route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.LengthRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.LongRouteConstraint">
+            <summary>
+            Constrains a route parameter to represent only 64-bit integer values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.LongRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.MaxLengthRouteConstraint">
+            <summary>
+            Constrains a route parameter to be a string with a maximum length.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MaxLengthRouteConstraint.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.MaxLengthRouteConstraint" /> class.
+            </summary>
+            <param name="maxLength">The maximum length allowed for the route parameter.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.MaxLengthRouteConstraint.MaxLength">
+            <summary>
+            Gets the maximum length allowed for the route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MaxLengthRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.MaxRouteConstraint">
+            <summary>
+            Constrains a route parameter to be an integer with a maximum value.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MaxRouteConstraint.#ctor(System.Int64)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.MaxRouteConstraint" /> class.
+            </summary>
+            <param name="max">The maximum value allowed for the route parameter.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.MaxRouteConstraint.Max">
+            <summary>
+            Gets the maximum allowed value of the route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MaxRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.MinLengthRouteConstraint">
+            <summary>
+            Constrains a route parameter to be a string with a minimum length.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MinLengthRouteConstraint.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.MinLengthRouteConstraint" /> class.
+            </summary>
+            <param name="minLength">The minimum length allowed for the route parameter.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.MinLengthRouteConstraint.MinLength">
+            <summary>
+            Gets the minimum length allowed for the route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MinLengthRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.MinRouteConstraint">
+            <summary>
+            Constrains a route parameter to be a long with a minimum value.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MinRouteConstraint.#ctor(System.Int64)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.MinRouteConstraint" /> class.
+            </summary>
+            <param name="min">The minimum value allowed for the route parameter.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.MinRouteConstraint.Min">
+            <summary>
+            Gets the minimum allowed value of the route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.MinRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.OptionalRouteConstraint">
+            <summary>
+            Defines a constraint on an optional parameter. If the parameter is present, then it is constrained by InnerConstraint. 
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.RangeRouteConstraint">
+            <summary>
+            Constraints a route parameter to be an integer within a given range of values.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.RangeRouteConstraint.#ctor(System.Int64,System.Int64)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.RangeRouteConstraint" /> class.
+            </summary>
+            <param name="min">The minimum value.</param>
+            <param name="max">The maximum value.</param>
+            <remarks>The minimum value should be less than or equal to the maximum value.</remarks>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.RangeRouteConstraint.Min">
+            <summary>
+            Gets the minimum allowed value of the route parameter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Constraints.RangeRouteConstraint.Max">
+            <summary>
+            Gets the maximum allowed value of the route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.RangeRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.RegexInlineRouteConstraint">
+            <summary>
+            Represents a regex constraint which can be used as an inlineConstraint.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.RegexInlineRouteConstraint.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Routing.Constraints.RegexInlineRouteConstraint" /> class.
+            </summary>
+            <param name="regexPattern">The regular expression pattern to match.</param>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Constraints.RequiredRouteConstraint">
+            <summary>
+            Constraints a route parameter that must have a value.
+            </summary>
+            <remarks>
+            This constraint is primarily used to enforce that a non-parameter value is present during
+            URL generation.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Constraints.RequiredRouteConstraint.Match(Microsoft.AspNet.Http.HttpContext,Microsoft.AspNet.Routing.IRouter,System.String,Microsoft.AspNet.Routing.RouteValueDictionary,Microsoft.AspNet.Routing.RouteDirection)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Logging.Internal.LogFormatter.Formatter(System.Object,System.Exception)">
+            <summary>
+            A formatter for use with <see cref="M:Microsoft.Extensions.Logging.ILogger.Log(Microsoft.Extensions.Logging.LogLevel,System.Int32,System.Object,System.Exception,System.Func{System.Object,System.Exception,System.String})"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.ArgumentMustBeGreaterThanOrEqualTo">
+            <summary>
+            Value must be greater than or equal to {0}.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatArgumentMustBeGreaterThanOrEqualTo(System.Object)">
+            <summary>
+            Value must be greater than or equal to {0}.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.RangeConstraint_MinShouldBeLessThanOrEqualToMax">
+            <summary>
+            The value for argument '{0}' should be less than or equal to the value for the argument '{1}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatRangeConstraint_MinShouldBeLessThanOrEqualToMax(System.Object,System.Object)">
+            <summary>
+            The value for argument '{0}' should be less than or equal to the value for the argument '{1}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.PropertyOfTypeCannotBeNull">
+            <summary>
+            The '{0}' property of '{1}' must not be null.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatPropertyOfTypeCannotBeNull(System.Object,System.Object)">
+            <summary>
+            The '{0}' property of '{1}' must not be null.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.NamedRoutes_AmbiguousRoutesFound">
+            <summary>
+            The supplied route name '{0}' is ambiguous and matched more than one route.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatNamedRoutes_AmbiguousRoutesFound(System.Object)">
+            <summary>
+            The supplied route name '{0}' is ambiguous and matched more than one route.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.DefaultHandler_MustBeSet">
+            <summary>
+            A default handler must be set on the RouteCollection.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatDefaultHandler_MustBeSet">
+            <summary>
+            A default handler must be set on the RouteCollection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.DefaultInlineConstraintResolver_AmbiguousCtors">
+            <summary>
+            The constructor to use for activating the constraint type '{0}' is ambiguous. Multiple constructors were found with the following number of parameters: {1}.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatDefaultInlineConstraintResolver_AmbiguousCtors(System.Object,System.Object)">
+            <summary>
+            The constructor to use for activating the constraint type '{0}' is ambiguous. Multiple constructors were found with the following number of parameters: {1}.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.DefaultInlineConstraintResolver_CouldNotFindCtor">
+            <summary>
+            Could not find a constructor for constraint type '{0}' with the following number of parameters: {1}.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatDefaultInlineConstraintResolver_CouldNotFindCtor(System.Object,System.Object)">
+            <summary>
+            Could not find a constructor for constraint type '{0}' with the following number of parameters: {1}.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.DefaultInlineConstraintResolver_TypeNotConstraint">
+            <summary>
+            The constraint type '{0}' which is mapped to constraint key '{1}' must implement the '{2}' interface.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatDefaultInlineConstraintResolver_TypeNotConstraint(System.Object,System.Object,System.Object)">
+            <summary>
+            The constraint type '{0}' which is mapped to constraint key '{1}' must implement the '{2}' interface.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_CannotHaveCatchAllInMultiSegment">
+            <summary>
+            A path segment that contains more than one section, such as a literal section or a parameter, cannot contain a catch-all parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_CannotHaveCatchAllInMultiSegment">
+            <summary>
+            A path segment that contains more than one section, such as a literal section or a parameter, cannot contain a catch-all parameter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_CannotHaveDefaultValueSpecifiedInlineAndExplicitly">
+            <summary>
+            The route parameter '{0}' has both an inline default value and an explicit default value specified. A route parameter cannot contain an inline default value when a default value is specified explicitly. Consider removing one of them.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_CannotHaveDefaultValueSpecifiedInlineAndExplicitly(System.Object)">
+            <summary>
+            The route parameter '{0}' has both an inline default value and an explicit default value specified. A route parameter cannot contain an inline default value when a default value is specified explicitly. Consider removing one of them.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_CannotHaveConsecutiveParameters">
+            <summary>
+            A path segment cannot contain two consecutive parameters. They must be separated by a '/' or by a literal string.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_CannotHaveConsecutiveParameters">
+            <summary>
+            A path segment cannot contain two consecutive parameters. They must be separated by a '/' or by a literal string.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_CannotHaveConsecutiveSeparators">
+            <summary>
+            The route template separator character '/' cannot appear consecutively. It must be separated by either a parameter or a literal value.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_CannotHaveConsecutiveSeparators">
+            <summary>
+            The route template separator character '/' cannot appear consecutively. It must be separated by either a parameter or a literal value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_CatchAllCannotBeOptional">
+            <summary>
+            A catch-all parameter cannot be marked optional.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_CatchAllCannotBeOptional">
+            <summary>
+            A catch-all parameter cannot be marked optional.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_OptionalCannotHaveDefaultValue">
+            <summary>
+            An optional parameter cannot have default value.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_OptionalCannotHaveDefaultValue">
+            <summary>
+            An optional parameter cannot have default value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_CatchAllMustBeLast">
+            <summary>
+            A catch-all parameter can only appear as the last segment of the route template.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_CatchAllMustBeLast">
+            <summary>
+            A catch-all parameter can only appear as the last segment of the route template.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_InvalidLiteral">
+            <summary>
+            The literal section '{0}' is invalid. Literal sections cannot contain the '?' character.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_InvalidLiteral(System.Object)">
+            <summary>
+            The literal section '{0}' is invalid. Literal sections cannot contain the '?' character.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_InvalidParameterName">
+            <summary>
+            The route parameter name '{0}' is invalid. Route parameter names must be non-empty and cannot contain these characters: '{{', '}}', '/'. The '?' character marks a parameter as optional, and can occur only at the end of the parameter. The '*' character marks a parameter as catch-all, and can occur only at the start of the parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_InvalidParameterName(System.Object)">
+            <summary>
+            The route parameter name '{0}' is invalid. Route parameter names must be non-empty and cannot contain these characters: '{{', '}}', '/'. The '?' character marks a parameter as optional, and can occur only at the end of the parameter. The '*' character marks a parameter as catch-all, and can occur only at the start of the parameter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_InvalidRouteTemplate">
+            <summary>
+            The route template cannot start with a '/' or '~' character.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_InvalidRouteTemplate">
+            <summary>
+            The route template cannot start with a '/' or '~' character.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_MismatchedParameter">
+            <summary>
+            There is an incomplete parameter in the route template. Check that each '{' character has a matching '}' character.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_MismatchedParameter">
+            <summary>
+            There is an incomplete parameter in the route template. Check that each '{' character has a matching '}' character.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_RepeatedParameter">
+            <summary>
+            The route parameter name '{0}' appears more than one time in the route template.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_RepeatedParameter(System.Object)">
+            <summary>
+            The route parameter name '{0}' appears more than one time in the route template.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.RouteConstraintBuilder_ValidationMustBeStringOrCustomConstraint">
+            <summary>
+            The constraint entry '{0}' - '{1}' on the route '{2}' must have a string value or be of a type which implements '{3}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatRouteConstraintBuilder_ValidationMustBeStringOrCustomConstraint(System.Object,System.Object,System.Object,System.Object)">
+            <summary>
+            The constraint entry '{0}' - '{1}' on the route '{2}' must have a string value or be of a type which implements '{3}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.RouteConstraintBuilder_CouldNotResolveConstraint">
+            <summary>
+            The constraint entry '{0}' - '{1}' on the route '{2}' could not be resolved by the constraint resolver of type '{3}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatRouteConstraintBuilder_CouldNotResolveConstraint(System.Object,System.Object,System.Object,System.Object)">
+            <summary>
+            The constraint entry '{0}' - '{1}' on the route '{2}' could not be resolved by the constraint resolver of type '{3}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_UnescapedBrace">
+            <summary>
+            In a route parameter, '{' and '}' must be escaped with '{{' and '}}'
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_UnescapedBrace">
+            <summary>
+            In a route parameter, '{' and '}' must be escaped with '{{' and '}}'
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_OptionalParameterCanbBePrecededByPeriod">
+            <summary>
+            In the segment '{0}', the optional parameter '{1}' is preceded by an invalid segment '{2}'.  Only a period (.) can precede an optional parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_OptionalParameterCanbBePrecededByPeriod(System.Object,System.Object,System.Object)">
+            <summary>
+            In the segment '{0}', the optional parameter '{1}' is preceded by an invalid segment '{2}'.  Only a period (.) can precede an optional parameter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.TemplateRoute_OptionalParameterHasTobeTheLast">
+            <summary>
+            An optional parameter must be at the end of the segment. In the segment '{0}', optional parameter '{1}' is followed by '{2}'.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatTemplateRoute_OptionalParameterHasTobeTheLast(System.Object,System.Object,System.Object)">
+            <summary>
+            An optional parameter must be at the end of the segment. In the segment '{0}', optional parameter '{1}' is followed by '{2}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Resources.AttributeRoute_DifferentLinkGenerationEntries_SameName">
+            <summary>
+            Two or more routes named '{0}' have different templates.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Resources.FormatAttributeRoute_DifferentLinkGenerationEntries_SameName(System.Object)">
+            <summary>
+            Two or more routes named '{0}' have different templates.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Template.InlineConstraint">
+            <summary>
+            The parsed representation of an inline constraint in a route parameter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Template.InlineConstraint.#ctor(System.String)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.AspNet.Routing.Template.InlineConstraint"/>.
+            </summary>
+            <param name="constraint">The constraint text.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Template.InlineConstraint.Constraint">
+            <summary>
+            Gets the constraint text.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Template.RoutePrecedence">
+            <summary>
+            Computes precedence for an attribute route template.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Template.TemplateBinder.RoutePartsEqual(System.Object,System.Object)">
+            <summary>
+            Compares two objects for equality as parts of a case-insensitive path.
+            </summary>
+            <param name="a">An object to compare.</param>
+            <param name="b">An object to compare.</param>
+            <returns>True if the object are equal, otherwise false.</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Template.TemplateValuesResult">
+            <summary>
+            The values used as inputs for constraints and link generation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Template.TemplateValuesResult.AcceptedValues">
+            <summary>
+            The set of values that will appear in the URL.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Template.TemplateValuesResult.CombinedValues">
+             <summary>
+             The set of values that that were supplied for URL generation.
+             </summary>
+             <remarks>
+             This combines implicit (ambient) values from the <see cref="T:Microsoft.AspNet.Routing.RouteData"/> of the current request
+             (if applicable), explictly provided values, and default values for parameters that appear in
+             the route template.
+            
+             Implicit (ambient) values which are invalidated due to changes in values lexically earlier in the
+             route template are excluded from this set.
+             </remarks>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry">
+            <summary>
+            Used to build a <see cref="T:Microsoft.AspNet.Routing.Tree.TreeRouter"/>. Represents an individual URL-generating route that will be
+            aggregated into the <see cref="T:Microsoft.AspNet.Routing.Tree.TreeRouter"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Binder">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.AspNet.Routing.Template.TemplateBinder"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Constraints">
+            <summary>
+            Gets or sets the route constraints.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Defaults">
+            <summary>
+            Gets or sets the route defaults.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Order">
+            <summary>
+            Gets or sets the order of the template.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.GenerationPrecedence">
+            <summary>
+            Gets or sets the precedence of the template for link generation. A greater value of
+            <see cref="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.GenerationPrecedence"/> means that an entry is considered first.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Name">
+            <summary>
+            Gets or sets the name of the route.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.RouteGroup">
+            <summary>
+            Gets or sets the route group.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.RequiredLinkValues">
+            <summary>
+            Gets or sets the set of values that must be present for link genration.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Template">
+            <summary>
+            Gets or sets the <see cref="P:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry.Template"/>.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry">
+            <summary>
+            Used to build an <see cref="T:Microsoft.AspNet.Routing.Tree.TreeRouter"/>. Represents an individual URL-matching route that will be
+            aggregated into the <see cref="T:Microsoft.AspNet.Routing.Tree.TreeRouter"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.Order">
+            <summary>
+            The order of the template.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.Precedence">
+            <summary>
+            The precedence of the template.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.Target">
+            <summary>
+            The <see cref="T:Microsoft.AspNet.Routing.IRouter"/> to invoke when this entry matches.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.RouteName">
+            <summary>
+            The name of the route.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.RouteTemplate">
+            <summary>
+            The <see cref="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.RouteTemplate"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.TemplateMatcher">
+            <summary>
+            The <see cref="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.TemplateMatcher"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouteMatchingEntry.Constraints">
+            <summary>
+            The route constraints.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Routing.Tree.TreeRouter">
+            <summary>
+            An <see cref="T:Microsoft.AspNet.Routing.IRouter"/> implementation for attribute routing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Tree.TreeRouter.#ctor(Microsoft.AspNet.Routing.IRouter,Microsoft.AspNet.Routing.Tree.UrlMatchingTree[],System.Collections.Generic.IEnumerable{Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry},Microsoft.Extensions.Logging.ILogger,Microsoft.Extensions.Logging.ILogger,System.Int32)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.AspNet.Routing.Tree.TreeRouter"/>.
+            </summary>
+            <param name="next">The next router. Invoked when a route entry matches.</param>
+            <param name="trees">The list of <see cref="T:Microsoft.AspNet.Routing.Tree.UrlMatchingTree"/> that contains the route entries.</param>
+            <param name="linkGenerationEntries">The set of <see cref="T:Microsoft.AspNet.Routing.Tree.TreeRouteLinkGenerationEntry"/>.</param>
+            <param name="routeLogger">The <see cref="T:Microsoft.Extensions.Logging.ILogger"/> instance.</param>
+            <param name="constraintLogger">The <see cref="T:Microsoft.Extensions.Logging.ILogger"/> instance used
+            in <see cref="T:Microsoft.AspNet.Routing.RouteConstraintMatcher"/>.</param>
+            <param name="version">The version of this route.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Routing.Tree.TreeRouter.Version">
+            <summary>
+            Gets the version of this route.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Tree.TreeRouter.GetVirtualPath(Microsoft.AspNet.Routing.VirtualPathContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.AspNet.Routing.Tree.TreeRouter.RouteAsync(Microsoft.AspNet.Routing.RouteContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.RoutingServiceCollectionExtensions">
+            <summary>
+            Contains extension methods to <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.#ctor(System.Reflection.PropertyInfo)">
+            <summary>
+            Initializes a fast <see cref="T:Microsoft.Extensions.Internal.PropertyHelper"/>.
+            This constructor does not cache the helper. For caching, use <see cref="M:Microsoft.Extensions.Internal.PropertyHelper.GetProperties(System.Object)"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Internal.PropertyHelper.Property">
+            <summary>
+            Gets the backing <see cref="T:System.Reflection.PropertyInfo"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Internal.PropertyHelper.Name">
+            <summary>
+            Gets (or sets in derived types) the property name.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Internal.PropertyHelper.ValueGetter">
+            <summary>
+            Gets the property value getter.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.Internal.PropertyHelper.ValueSetter">
+            <summary>
+            Gets the property value setter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.GetValue(System.Object)">
+            <summary>
+            Returns the property value for the specified <paramref name="instance"/>.
+            </summary>
+            <param name="instance">The object whose property value will be returned.</param>
+            <returns>The property value.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.SetValue(System.Object,System.Object)">
+            <summary>
+            Sets the property value for the specified <paramref name="instance" />.
+            </summary>
+            <param name="instance">The object whose property value will be set.</param>
+            <param name="value">The property value.</param>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.GetProperties(System.Object)">
+            <summary>
+            Creates and caches fast property helpers that expose getters for every public get property on the
+            underlying type.
+            </summary>
+            <param name="instance">the instance to extract property accessors for.</param>
+            <returns>a cached array of all public property getters from the underlying type of target instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.GetProperties(System.Type)">
+            <summary>
+            Creates and caches fast property helpers that expose getters for every public get property on the
+            specified type.
+            </summary>
+            <param name="type">the type to extract property accessors for.</param>
+            <returns>a cached array of all public property getters from the type of target instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.GetVisibleProperties(System.Object)">
+            <summary>
+            <para>
+            Creates and caches fast property helpers that expose getters for every non-hidden get property
+            on the specified type.
+            </para>
+            <para>
+            <see cref="M:Microsoft.Extensions.Internal.PropertyHelper.GetVisibleProperties(System.Object)"/> excludes properties defined on base types that have been
+            hidden by definitions using the <c>new</c> keyword.
+            </para>
+            </summary>
+            <param name="instance">The instance to extract property accessors for.</param>
+            <returns>
+            A cached array of all public property getters from the instance's type.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.GetVisibleProperties(System.Type)">
+            <summary>
+            <para>
+            Creates and caches fast property helpers that expose getters for every non-hidden get property
+            on the specified type.
+            </para>
+            <para>
+            <see cref="M:Microsoft.Extensions.Internal.PropertyHelper.GetVisibleProperties(System.Object)"/> excludes properties defined on base types that have been
+            hidden by definitions using the <c>new</c> keyword.
+            </para>
+            </summary>
+            <param name="type">The type to extract property accessors for.</param>
+            <returns>
+            A cached array of all public property getters from the type.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.MakeFastPropertyGetter(System.Reflection.PropertyInfo)">
+            <summary>
+            Creates a single fast property getter. The result is not cached.
+            </summary>
+            <param name="propertyInfo">propertyInfo to extract the getter for.</param>
+            <returns>a fast getter.</returns>
+            <remarks>
+            This method is more memory efficient than a dynamically compiled lambda, and about the
+            same speed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.MakeNullSafeFastPropertyGetter(System.Reflection.PropertyInfo)">
+            <summary>
+            Creates a single fast property getter which is safe for a null input object. The result is not cached.
+            </summary>
+            <param name="propertyInfo">propertyInfo to extract the getter for.</param>
+            <returns>a fast getter.</returns>
+            <remarks>
+            This method is more memory efficient than a dynamically compiled lambda, and about the
+            same speed.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.MakeFastPropertySetter(System.Reflection.PropertyInfo)">
+            <summary>
+            Creates a single fast property setter for reference types. The result is not cached.
+            </summary>
+            <param name="propertyInfo">propertyInfo to extract the setter for.</param>
+            <returns>a fast getter.</returns>
+            <remarks>
+            This method is more memory efficient than a dynamically compiled lambda, and about the
+            same speed. This only works for reference types.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.PropertyHelper.ObjectToDictionary(System.Object)">
+             <summary>
+             Given an object, adds each instance property with a public get method as a key and its
+             associated value to a dictionary.
+            
+             If the object is already an <see cref="T:System.Collections.Generic.IDictionary`2"/> instance, then a copy
+             is returned.
+             </summary>
+             <remarks>
+             The implementation of PropertyHelper will cache the property accessors per-type. This is
+             faster when the the same type is used multiple times with ObjectToDictionary.
+             </remarks>
+        </member>
+    </members>
+</doc>

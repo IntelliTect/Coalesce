@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Tooling.Razor</name>
+    </assembly>
+    <members>
+        <member name="M:Microsoft.AspNet.Tooling.Razor.AssemblyTagHelperDescriptorResolver.GetTagHelperTypes(System.String,Microsoft.AspNet.Razor.ErrorSink)">
+            <summary>
+            Protected virtual for testing.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Tooling.Razor.Internal.ResolveProtocolCommand.ResolveProtocol(System.Int32,System.Int32)">
+            <summary>
+            Internal for testing.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Tooling.Razor.Resources.InvalidProtocolValue">
+            <summary>
+            '{0}'s cannot be resolved with protocol '{1}'. Protocol not supported.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Tooling.Razor.Resources.FormatInvalidProtocolValue(System.Object,System.Object)">
+            <summary>
+            '{0}'s cannot be resolved with protocol '{1}'. Protocol not supported.
+            </summary>
+        </member>
+    </members>
+</doc>

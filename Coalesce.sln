@@ -21,6 +21,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Domain.Tests", "sr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3D54FE4D-75AC-4E0C-99B9-13C3D7AAFFAF}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		global.json = global.json
 		NuGet.config = NuGet.config
 	EndProjectSection
@@ -78,43 +79,5 @@ Global
 		{1E015AC9-1537-4078-9167-B5C49A1C7DEE} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{06AD3635-FFFE-4254-80EB-F3F3424A8460} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{EAFB9FAA-FD5B-4D7F-B627-D72D4379C28F} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://idahopower.visualstudio.com/defaultcollection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = src\\Coalesce.Domain\\Coalesce.Domain.xproj
-		SccProjectTopLevelParentUniqueName1 = Coalesce.sln
-		SccProjectName1 = src/Coalesce.Domain
-		SccLocalPath1 = src\\Coalesce.Domain
-		SccProjectUniqueName2 = src\\Coalesce.Web\\Coalesce.Web.xproj
-		SccProjectTopLevelParentUniqueName2 = Coalesce.sln
-		SccProjectName2 = src/Coalesce.Web
-		SccLocalPath2 = src\\Coalesce.Web
-		SccProjectUniqueName3 = src\\Intellitect.ComponentModel\\Intellitect.ComponentModel.xproj
-		SccProjectTopLevelParentUniqueName3 = Coalesce.sln
-		SccProjectName3 = src/Intellitect.ComponentModel
-		SccLocalPath3 = src\\Intellitect.ComponentModel
-		SccProjectUniqueName4 = src\\Intellitect.Extensions.CodeGenerators.Mvc\\Intellitect.Extensions.CodeGenerators.Mvc.xproj
-		SccProjectTopLevelParentUniqueName4 = Coalesce.sln
-		SccProjectName4 = src/Intellitect.Extensions.CodeGenerators.Mvc
-		SccLocalPath4 = src\\Intellitect.Extensions.CodeGenerators.Mvc
-		SccProjectUniqueName5 = src\\Coalesce.Web.Tests\\Coalesce.Web.Tests.xproj
-		SccProjectTopLevelParentUniqueName5 = Coalesce.sln
-		SccProjectName5 = src/Coalesce.Web.Tests
-		SccLocalPath5 = src\\Coalesce.Web.Tests
-		SccProjectUniqueName6 = src\\Intellitect.ComponentModel.Tests\\Intellitect.ComponentModel.Tests.xproj
-		SccProjectTopLevelParentUniqueName6 = Coalesce.sln
-		SccProjectName6 = src/Intellitect.ComponentModel.Tests
-		SccLocalPath6 = src\\Intellitect.ComponentModel.Tests
-		SccProjectUniqueName7 = src\\Coalesce.Domain.Tests\\Coalesce.Domain.Tests.xproj
-		SccProjectTopLevelParentUniqueName7 = Coalesce.sln
-		SccProjectName7 = src/Coalesce.Domain.Tests
-		SccLocalPath7 = src\\Coalesce.Domain.Tests
-		SccProjectUniqueName8 = src\\Intellitect.NLog.Extensions\\Intellitect.NLog.Extensions.xproj
-		SccProjectTopLevelParentUniqueName8 = Coalesce.sln
-		SccProjectName8 = src/Intellitect.NLog.Extensions
-		SccLocalPath8 = src\\Intellitect.NLog.Extensions
 	EndGlobalSection
 EndGlobal

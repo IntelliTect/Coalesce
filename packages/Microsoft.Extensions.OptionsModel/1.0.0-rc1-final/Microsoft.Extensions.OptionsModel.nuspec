@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Extensions.OptionsModel</id>
+    <version>1.0.0-rc1-final</version>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://www.asp.net/</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <description>Provides a strongly typed way of specifying and accessing settings using dependency injection.</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.1">
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="1.0.0-rc1-final" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="1.0.0-rc1-final" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="1.0.0-rc1-final" />
+      </group>
+      <group targetFramework=".NETPlatform5.4">
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="1.0.0-rc1-final" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="1.0.0-rc1-final" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="1.0.0-rc1-final" />
+        <dependency id="System.ComponentModel" version="4.0.1-beta-23516" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.11-beta-23516" />
+        <dependency id="System.Globalization" version="4.0.11-beta-23516" />
+        <dependency id="System.Linq" version="4.0.1-beta-23516" />
+        <dependency id="System.Linq.Expressions" version="4.0.11-beta-23516" />
+        <dependency id="System.Reflection" version="4.0.10" />
+        <dependency id="System.Reflection.TypeExtensions" version="4.0.1-beta-23409" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.1-beta-23516" />
+        <dependency id="System.Runtime" version="4.0.21-beta-23516" />
+        <dependency id="System.Runtime.Extensions" version="4.0.11-beta-23516" />
+        <dependency id="System.Threading" version="4.0.11-beta-23516" />
+      </group>
+      <group targetFramework=".NETCore5.0">
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="1.0.0-rc1-final" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="1.0.0-rc1-final" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="1.0.0-rc1-final" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.10" />
+        <dependency id="System.Globalization" version="4.0.10" />
+        <dependency id="System.Linq" version="4.0.0" />
+        <dependency id="System.Reflection" version="4.0.10" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.0" />
+        <dependency id="System.Runtime" version="4.0.20" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="mscorlib" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.1" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

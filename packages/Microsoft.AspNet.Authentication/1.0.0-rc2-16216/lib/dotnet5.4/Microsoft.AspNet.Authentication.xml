@@ -1,0 +1,386 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.AspNet.Authentication</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNet.Authentication.AuthenticateResult">
+            <summary>
+            Contains the result of an Authenticate call
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticateResult.Succeeded">
+            <summary>
+            If a ticket was produced, authenticate was successful.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticateResult.Ticket">
+            <summary>
+            The authentication ticket.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticateResult.Failure">
+            <summary>
+            Holds failure information from the authentication.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticateResult.Skipped">
+            <summary>
+            Indicates that this stage of authentication was skipped by user intervention.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.AuthenticationHandler`1">
+            <summary>
+            Base class for the per-request work performed by most authentication middleware.
+            </summary>
+            <typeparam name="TOptions">Specifies which type for of AuthenticationOptions property</typeparam>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.AuthenticationHandler`1.InitializeAsync(`0,Microsoft.AspNet.Http.HttpContext,Microsoft.Extensions.Logging.ILogger,System.Text.Encodings.Web.UrlEncoder)">
+            <summary>
+            Initialize is called once per request to contextualize this instance with appropriate state.
+            </summary>
+            <param name="options">The original options passed by the application control behavior</param>
+            <param name="context">The utility object to observe the current request and response</param>
+            <param name="logger">The logging factory used to create loggers</param>
+            <returns>async completion</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.AuthenticationHandler`1.FinishResponseAsync">
+            <summary>
+            Hook that is called when the response about to be sent
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.AuthenticationHandler`1.TeardownAsync">
+            <summary>
+            Called once after Invoke by AuthenticationMiddleware.
+            </summary>
+            <returns>async completion</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.AuthenticationHandler`1.HandleRequestAsync">
+            <summary>
+            Called once by common code after initialization. If an authentication middleware responds directly to
+            specifically known paths it must override this virtual, compare the request path to it's known paths, 
+            provide any response information as appropriate, and true to stop further processing.
+            </summary>
+            <returns>Returning false will cause the common code to call the next middleware in line. Returning true will
+            cause the common code to begin the async completion journey without calling the rest of the middleware
+            pipeline.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.AuthenticationHandler`1.HandleUnauthorizedAsync(Microsoft.AspNet.Http.Features.Authentication.ChallengeContext)">
+            <summary>
+            Override this method to deal with 401 challenge concerns, if an authentication scheme in question
+            deals an authentication interaction as part of it's request flow. (like adding a response header, or
+            changing the 401 result to 302 of a login page or external sign-in location.)
+            </summary>
+            <param name="context"></param>
+            <returns>True if no other handlers should be called</returns>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.AuthenticationOptions">
+            <summary>
+            Base Options for all authentication middleware
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationOptions.AuthenticationScheme">
+            <summary>
+            The AuthenticationScheme in the options corresponds to the logical name for a particular authentication scheme. A different
+            value may be assigned in order to use the same authentication middleware type more than once in a pipeline.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationOptions.AutomaticAuthenticate">
+            <summary>
+            If true the authentication middleware alter the request user coming in. If false the authentication middleware will only provide
+            identity when explicitly indicated by the AuthenticationScheme.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationOptions.AutomaticChallenge">
+            <summary>
+            If true the authentication middleware should handle automatic challenge.
+            If false the authentication middleware will only alter responses when explicitly indicated by the AuthenticationScheme.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationOptions.ClaimsIssuer">
+            <summary>
+            Gets or sets the issuer that should be used for any claims that are created
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationOptions.Description">
+            <summary>
+            Additional information about the authentication type which is made available to the application.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.AuthenticationTicket">
+            <summary>
+            Contains user identity information as well as additional authentication state.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.AuthenticationTicket.#ctor(System.Security.Claims.ClaimsPrincipal,Microsoft.AspNet.Http.Authentication.AuthenticationProperties,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNet.Authentication.AuthenticationTicket"/> class
+            </summary>
+            <param name="principal">the <see cref="T:System.Security.Claims.ClaimsPrincipal"/> that represents the authenticated user.</param>
+            <param name="properties">additional properties that can be consumed by the user or runtime.</param>
+            <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationTicket.AuthenticationScheme">
+            <summary>
+            Gets the authentication type.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationTicket.Principal">
+            <summary>
+            Gets the claims-principal with authenticated user identities.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.AuthenticationTicket.Properties">
+            <summary>
+            Additional state values for the authentication session.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.ClaimsTransformationHandler">
+            <summary>
+            Handler that applies ClaimsTransformation to authentication
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.ISystemClock">
+            <summary>
+            Abstracts the system clock to facilitate testing.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.ISystemClock.UtcNow">
+            <summary>
+            Retrieves the current system time in UTC.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.RemoteAuthenticationOptions.BackchannelTimeout">
+            <summary>
+            Gets or sets timeout value in milliseconds for back channel communications with Twitter.
+            </summary>
+            <value>
+            The back channel timeout.
+            </value>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.RemoteAuthenticationOptions.BackchannelHttpHandler">
+            <summary>
+            The HttpMessageHandler used to communicate with Twitter.
+            This cannot be set at the same time as BackchannelCertificateValidator unless the value 
+            can be downcast to a WebRequestHandler.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.RemoteAuthenticationOptions.CallbackPath">
+            <summary>
+            The request path within the application's base path where the user-agent will be returned.
+            The middleware will process this request when it arrives.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.RemoteAuthenticationOptions.SignInScheme">
+            <summary>
+            Gets or sets the authentication scheme corresponding to the middleware
+            responsible of persisting user's identity after a successful authentication.
+            This value typically corresponds to a cookie middleware registered in the Startup class.
+            When omitted, <see cref="P:Microsoft.AspNet.Authentication.SharedAuthenticationOptions.SignInScheme"/> is used as a fallback value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.RemoteAuthenticationOptions.DisplayName">
+            <summary>
+            Get or sets the text that the user can display on a sign in user interface.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.RemoteAuthenticationOptions.SaveTokensAsClaims">
+            <summary>
+            Defines whether access and refresh tokens should be stored in the
+            <see cref="!:ClaimsPrincipal"/> after a successful authentication.
+            This property is set to <c>false</c> by default to reduce
+            the size of the final authentication cookie.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.SharedAuthenticationOptions.SignInScheme">
+            <summary>
+            Gets or sets the authentication scheme corresponding to the default middleware
+            responsible of persisting user's identity after a successful authentication.
+            This value typically corresponds to a cookie middleware registered in the Startup class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.SystemClock">
+            <summary>
+            Provides access to the normal system clock.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.SystemClock.UtcNow">
+            <summary>
+            Retrieves the current system time in UTC.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.BaseControlContext.HandleResponse">
+            <summary>
+            Discontinue all processing for this request and return to the client.
+            The caller is responsible for generating the full response.
+            Set the <see cref="P:Microsoft.AspNet.Authentication.BaseControlContext.AuthenticationTicket"/> to trigger SignIn.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.BaseControlContext.SkipToNextMiddleware">
+            <summary>
+            Discontinue processing the request in the current middleware and pass control to the next one.
+            SignIn will not be called.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.BaseControlContext.AuthenticationTicket">
+            <summary>
+            Gets or set the <see cref="P:Microsoft.AspNet.Authentication.BaseControlContext.AuthenticationTicket"/> to return if this event signals it handled the event.
+            </summary>
+        </member>
+        <member name="F:Microsoft.AspNet.Authentication.EventResultState.Continue">
+            <summary>
+            Continue with normal processing.
+            </summary>
+        </member>
+        <member name="F:Microsoft.AspNet.Authentication.EventResultState.Skipped">
+            <summary>
+            Discontinue processing the request in the current middleware and pass control to the next one.
+            </summary>
+        </member>
+        <member name="F:Microsoft.AspNet.Authentication.EventResultState.HandledResponse">
+            <summary>
+            Discontinue all processing for this request.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.FailureContext">
+            <summary>
+            Provides failure context information to middleware providers.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.FailureContext.Failure">
+            <summary>
+            User friendly error message for the error.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.IRemoteAuthenticationEvents.RemoteFailure(Microsoft.AspNet.Authentication.FailureContext)">
+            <summary>
+            Invoked when the remote authentication process has an error.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.IRemoteAuthenticationEvents.TicketReceived(Microsoft.AspNet.Authentication.TicketReceivedContext)">
+            <summary>
+            Invoked before sign in.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.RemoteAuthenticationEvents.RemoteFailure(Microsoft.AspNet.Authentication.FailureContext)">
+            <summary>
+            Invoked when there is a remote failure
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.RemoteAuthenticationEvents.TicketReceived(Microsoft.AspNet.Authentication.TicketReceivedContext)">
+            <summary>
+            Invoked after the remote ticket has been received.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Authentication.TicketReceivedContext">
+            <summary>
+            Provides context information to middleware providers.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.Resources.Exception_DefaultDpapiRequiresAppNameKey">
+            <summary>
+            The default data protection provider may only be used when the IApplicationBuilder.Properties contains an appropriate 'host.AppName' key.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.Resources.FormatException_DefaultDpapiRequiresAppNameKey">
+            <summary>
+            The default data protection provider may only be used when the IApplicationBuilder.Properties contains an appropriate 'host.AppName' key.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.Resources.Exception_UnhookAuthenticationStateType">
+            <summary>
+            The state passed to UnhookAuthentication may only be the return value from HookAuthentication.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.Resources.FormatException_UnhookAuthenticationStateType">
+            <summary>
+            The state passed to UnhookAuthentication may only be the return value from HookAuthentication.
+            </summary>
+        </member>
+        <member name="P:Microsoft.AspNet.Authentication.Resources.Exception_AuthenticationTokenDoesNotProvideSyncMethods">
+            <summary>
+            The AuthenticationTokenProvider's required synchronous events have not been registered.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Authentication.Resources.FormatException_AuthenticationTokenDoesNotProvideSyncMethods">
+            <summary>
+            The AuthenticationTokenProvider's required synchronous events have not been registered.
+            </summary>
+        </member>
+        <member name="T:Microsoft.AspNet.Builder.ClaimsTransformationAppBuilderExtensions">
+            <summary>
+            Extension methods to add claims transformation capabilities to an HTTP application pipeline.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.ClaimsTransformationAppBuilderExtensions.UseClaimsTransformation(Microsoft.AspNet.Builder.IApplicationBuilder,System.Func{System.Security.Claims.ClaimsPrincipal,System.Threading.Tasks.Task{System.Security.Claims.ClaimsPrincipal}})">
+            <summary>
+            Adds the <see cref="T:Microsoft.AspNet.Authentication.ClaimsTransformationMiddleware"/> middleware to the specified <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/>, which enables claims transformation capabilities.
+            </summary>
+            <param name="app">The <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/> to add the middleware to.</param>
+            <param name="transform">A function that asynchronously transforms one <see cref="T:System.Security.Claims.ClaimsPrincipal"/> to another.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.ClaimsTransformationAppBuilderExtensions.UseClaimsTransformation(Microsoft.AspNet.Builder.IApplicationBuilder,System.Action{Microsoft.AspNet.Authentication.ClaimsTransformationOptions})">
+            <summary>
+            Adds the <see cref="T:Microsoft.AspNet.Authentication.ClaimsTransformationMiddleware"/> middleware to the specified <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/>, which enables claims transformation capabilities.
+            </summary>
+            <param name="app">The <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/> to add the middleware to.</param>
+            <param name="configureOptions">An action delegate to configure the provided <see cref="T:Microsoft.AspNet.Authentication.ClaimsTransformationOptions"/>.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.AspNet.Builder.ClaimsTransformationAppBuilderExtensions.UseClaimsTransformation(Microsoft.AspNet.Builder.IApplicationBuilder,Microsoft.AspNet.Authentication.ClaimsTransformationOptions)">
+            <summary>
+            Adds the <see cref="T:Microsoft.AspNet.Authentication.ClaimsTransformationMiddleware"/> middleware to the specified <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/>, which enables claims transformation capabilities.
+            </summary>
+            <param name="app">The <see cref="T:Microsoft.AspNet.Builder.IApplicationBuilder"/> to add the middleware to.</param>
+            <param name="options">The <see cref="T:Microsoft.AspNet.Authentication.ClaimsTransformationOptions"/> to configure the middleware with.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.AuthenticationServiceCollectionExtensions">
+            <summary>
+            Extension methods for setting up authentication services in an <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AuthenticationServiceCollectionExtensions.AddAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds authentication services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />. 
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to add services to.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AuthenticationServiceCollectionExtensions.AddAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Microsoft.AspNet.Authentication.SharedAuthenticationOptions})">
+            <summary>
+            Adds authentication services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />. 
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to add services to.</param>
+            <param name="configureOptions">An action delegate to configure the provided <see cref="T:Microsoft.AspNet.Authentication.SharedAuthenticationOptions"/>.</param>
+            <returns>A reference to this instance after the operation has completed.</returns>
+        </member>
+        <member name="T:Microsoft.Extensions.Internal.SecurityHelper">
+            <summary>
+            Helper code used when implementing authentication middleware
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.Internal.SecurityHelper.MergeUserPrincipal(System.Security.Claims.ClaimsPrincipal,System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            Add all ClaimsIdentities from an additional ClaimPrincipal to the ClaimsPrincipal
+            Merges a new claims principal, placing all new identities first, and eliminating
+            any empty unauthenticated identities from context.User
+            </summary>
+            <param name="identity"></param>
+        </member>
+        <member name="M:Microsoft.Win32.NativeMethods.CryptEncodeObject(System.UInt32,System.IntPtr,Microsoft.Win32.NativeMethods.CERT_PUBLIC_KEY_INFO@,System.Byte[],System.UInt32@)">
+            <summary>
+            Encodes a structure of the type indicated by the value of the lpszStructType parameter.
+            </summary>
+            <param name="dwCertEncodingType">Type of encoding used.</param>
+            <param name="lpszStructType">The high-order word is zero, the low-order word specifies the integer identifier for the type of the specified structure so
+            we can use the constants in http://msdn.microsoft.com/en-us/library/windows/desktop/aa378145%28v=vs.85%29.aspx</param>
+            <param name="pvStructInfo">A pointer to the structure to be encoded.</param>
+            <param name="pbEncoded">A pointer to a buffer to receive the encoded structure. This parameter can be NULL to retrieve the size of this information for memory allocation purposes.</param>
+            <param name="pcbEncoded">A pointer to a DWORD variable that contains the size, in bytes, of the buffer pointed to by the pbEncoded parameter.</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

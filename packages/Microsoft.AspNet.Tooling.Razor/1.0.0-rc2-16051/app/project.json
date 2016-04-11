@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk"
+  },
+  "dependencies": {
+    "Microsoft.AspNet.Tooling.Razor": "1.0.0-rc2-16051"
+  },
+  "frameworks": {
+    "net451": {
+      "dependencies": {}
+    },
+    "dotnet5.4": {
+      "dependencies": {
+        "System.Console": "4.0.0-*"
+      }
+    }
+  },
+  "commands": {
+    "razor-tooling": "Microsoft.AspNet.Tooling.Razor"
+  },
+  "entryPoint": "Microsoft.AspNet.Tooling.Razor",
+  "loadable": false
+}

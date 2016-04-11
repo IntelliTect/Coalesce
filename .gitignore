@@ -199,3 +199,4 @@ FakesAssemblies/
 **/wwwroot/*
 !**/wwwroot/web.config
 artifacts/
+project.lock.json

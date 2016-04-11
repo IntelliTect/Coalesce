@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Coalesce";
+    Layout = "_DocsLayout";
+}
+
+<h2>Code Generation</h2>
+<h3>Overview</h3>
+<p>
+    Coalesce uses a combination of code generation, base classes, and runtime reflection to provide its features. At the core is the Roslyn compiler used for code generation.  
+</p>
+
+<h3>Setting up your project</h3>
+<p>Follow these steps to set your project up for code generation. The assumption is that you have a domain project with your POCO objects and your DbContext and a web project that contains your web site.</p>
+<ul>
+    <li>From the web project reference the domain project.</li>
+    <li>In the domain project, add a reference to Intellitect.ComponentModel.</li>
+    <li>In the web project, add a reference to Intellitect.Extensions.CodeGeneration.Mvc. This automatically references Intellitect.ComponentModel</li>
+    <li>
+        <p>
+            From a command prompt in the folder for the web project run the following command.
+        </p>
+        <code>
+            dnx gen scripts -dc [nameOfDbContextClass]
+        </code>
+    </li>
+</ul>
+<p>This will generate the view models and copy the salient files to your solution. If you don't have Gulp or other tooling files, this will give you templates as well as run an initial restore of the 3rd party tooling that is needed (e.g. node modules that are referenced in package.json and bower components that are listed in bower.json). If you don't change these templates, they will continue to update. If you change them, new copies can be found in the IntelliTect folder in your solution.</p>
+
+
+<h3>Web Configuration</h3>
+<p>Several configurations are necessary for the admin pages to work correctly out of the box.</p>
+<ul>
+    <li>
+        <p>
+            To startup.cs add the following line to the ConfigureServices method. This seeds the ReflectionRepository with the objects from your data context. This can then be used to access server side view models that represent your data model at runtime. This allows you to easily do dynamic view generation.
+        </p>
+        <code>ReflectionRepository.AddContext&lt;AppContext&gt;();</code>
+    </li>
+    <li>
+        <p>
+            Make sure entity framework is configured in the ConfigureServices method with something like the following.
+        </p>
+        <pre><code>
+        services.AddEntityFramework()
+        .AddSqlServer()
+        .AddDbContext&lt;AppContext&gt;
+            (options => options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
+        </code></pre>
+    </li>
+    <li>
+        <p>
+            Make sure JSON serialization is configured to ignore looping in the ConfigureServices method..
+        </p>
+        <pre><code>
+        services.AddMvc().AddJsonOptions(options =>
+        {
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        });
+        </code></pre>
+    </li>
+</ul>
+
+<h3>_layout.cshtml for admin pages.</h3>
+<p>
+    By default, the admin pages use the _layout.cshtml file in the View\Shared folder. If you are starting from a blank project, an _layout.cshtml file will be copied into your View\Shared folder. If an _layout.cshtml file already exists, you will need to either copy the _layout.cshtml from the IntelliTect folder or just copy and paste the scripts and styles sections.
+</p>
+

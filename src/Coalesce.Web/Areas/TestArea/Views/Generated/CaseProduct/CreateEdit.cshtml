@@ -1,0 +1,56 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+        </div>
+        <h1 class="clearfix" style="display:inline-block;">Case Product</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    </div>
+
+    <div class="panel-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-4 control-label">Case</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<CaseProduct>(p => p.Case))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Product</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<CaseProduct>(p => p.Product))
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        var acaseProduct = new TestArea.ViewModels.CaseProduct();
+        acaseProduct.includes = "Editor";
+
+        @if (ViewBag.Id != null)
+        {
+            @:acaseProduct.load('@ViewBag.Id');
+        }
+        @if (ViewBag.ParentIdName != null)
+        {
+        @:acaseProduct.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+        }
+
+        acaseProduct.isSavingAutomatically = false;
+        acaseProduct.loadChildren(function() {
+            ko.applyBindings(acaseProduct);
+            acaseProduct.isSavingAutomatically = true;
+        });
+    </script>
+}

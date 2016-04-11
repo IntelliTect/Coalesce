@@ -1,0 +1,26 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Coalesce.Domain.Tests Class Library",
+  "authors": [ "grant" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "xunit": "2.1.0-rc2-build3178",
+    "xunit.runner.dnx": "2.1.0-rc2-build209",
+    "Intellitect.ComponentModel": "",
+    "Coalesce.Domain": "",
+    "System.Linq": "4.0.1-beta-23516",
+    "System.Linq.Queryable": "4.0.1-beta-23516"
+  },
+
+  "commands": {
+    "test": "xunit.runner.dnx",
+    "vsotest": "xunit.runner.dnx -xml ..\\..\\..\\TestResults\\Ipc.Fuse.Web.Tests.Results.xml"
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  }
+}

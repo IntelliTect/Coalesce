@@ -1,0 +1,104 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+        </div>
+        <h1 class="clearfix" style="display:inline-block;">Case</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    </div>
+
+    <div class="panel-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-4 control-label">Assigned To</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Attachment</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Case>(p => p.Attachment))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Case Products</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Description</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Case>(p => p.Description))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Dev Team Assigned</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Opened At</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Case>(p => p.OpenedAt))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Reported By</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Severity</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectFor<Case>(p => p.Severity))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Status</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectFor<Case>(p => p.Status))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Title</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Case>(p => p.Title))
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        var acase = new ViewModels.Case();
+        acase.includes = "Editor";
+
+        @if (ViewBag.Id != null)
+        {
+            @:acase.load('@ViewBag.Id');
+        }
+        @if (ViewBag.ParentIdName != null)
+        {
+        @:acase.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+        }
+
+        acase.isSavingAutomatically = false;
+        acase.loadChildren(function() {
+            ko.applyBindings(acase);
+            acase.isSavingAutomatically = true;
+        });
+    </script>
+}

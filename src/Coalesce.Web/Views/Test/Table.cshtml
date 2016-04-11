@@ -1,0 +1,15 @@
+﻿@using Intellitect.ComponentModel.Helpers
+@using Intellitect.ComponentModel.Models
+@using Coalesce.Domain
+@{
+    ViewBag.Title = "Generated Views";
+}
+<div class="container">
+    <h2>People Table</h2>
+    @TableHelper.Create(Table.Create<Person>().AddDefaultColumns())
+
+@section Scripts
+{
+    @(ScriptHelper.StandardBinding<Person>());
+}
+</div>

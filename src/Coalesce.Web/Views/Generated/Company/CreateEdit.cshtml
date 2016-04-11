@@ -1,0 +1,92 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+        </div>
+        <h1 class="clearfix" style="display:inline-block;">Company</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    </div>
+
+    <div class="panel-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-4 control-label">Address1</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Company>(p => p.Address1))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Address2</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Company>(p => p.Address2))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Alt Name</label>
+                <div class="col-md-8">
+                    @(Knockout.DisplayFor<Company>(p => p.AltName))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">City</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Company>(p => p.City))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Employees</label>
+                <div class="col-md-8">
+                    <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Name</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Company>(p => p.Name))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">State</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Company>(p => p.State))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Zip Code</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Company>(p => p.ZipCode))
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        var acompany = new ViewModels.Company();
+        acompany.includes = "Editor";
+
+        @if (ViewBag.Id != null)
+        {
+            @:acompany.load('@ViewBag.Id');
+        }
+        @if (ViewBag.ParentIdName != null)
+        {
+        @:acompany.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+        }
+
+        acompany.isSavingAutomatically = false;
+        acompany.loadChildren(function() {
+            ko.applyBindings(acompany);
+            acompany.isSavingAutomatically = true;
+        });
+    </script>
+}

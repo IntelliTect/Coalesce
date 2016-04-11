@@ -1,0 +1,8 @@
+@{
+    Layout = "_Layout";
+}
+@RenderBody()
+@section Scripts {
+    <script src="~/TestArea/js/app.js"></script>
+    @RenderSection("Scripts", required: false)
+}

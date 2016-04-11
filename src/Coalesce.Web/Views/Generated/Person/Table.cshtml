@@ -1,0 +1,314 @@
+@using Intellitect.ComponentModel.Helpers
+@{ ViewBag.Fluid = true; }
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+                <a href="~/Person/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Create</a>
+                <button data-bind="click:load" class="btn btn-sm btn-default ">Refresh</button>
+                @if (ViewBag.Editable)
+                {
+                <a href="~/Person/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Read-only</a>
+                }
+                else
+                {
+                <a href="~/Person/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default ">Editable</a>
+                }
+        </div>
+        <h1 style="display:inline-block">
+            Person List
+                <span style="font-size: .5em;"><a href="~/Person/Docs">Docs</a></span>
+        </h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+        <div>
+            <div style="display:inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+                Page
+                <span data-bind="text: page"></span>
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+            </div>
+            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display:inline-block">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="10000">10000</option>
+            </select>
+            <input class="form-control pull-right" style="width: 200px;" data-bind="textInput: search" placeholder="Search" />
+        </div>
+    </div>
+        <table class="table table-striped @(ViewBag.Editable ? " editable" : "" )">
+    <thead>
+        <tr>
+                <th>Title</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Birth Date</th>
+                <th>Cases Assigned</th>
+                <th>Cases Reported</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Gender</th>
+                <th>Last Bath</th>
+                <th>Name</th>
+                <th>Next Upgrade</th>
+                <th>Person Stats</th>
+                <th>Time Zone</th>
+            <th 
+                                    style="width: 150px;"
+                >
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- ko foreach: items -->
+        <tr>
+            @if (@ViewBag.Editable)
+            {
+            <td>
+                @(Knockout.SelectFor<Person>(p => p.Title))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.FirstName))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.LastName))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.BirthDate))
+            </td>
+            <td>
+                <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
+            </td>
+            <td>
+                <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
+            </td>
+            <td>
+                @(Knockout.SelectForObject<Person>(p => p.Company))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.Email))
+            </td>
+            <td>
+                @(Knockout.SelectFor<Person>(p => p.Gender))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.LastBath))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Name))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.NextUpgrade))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.PersonStats))
+            </td>
+            <td>
+                @(Knockout.InputFor<Person>(p => p.TimeZone))
+            </td>
+            }
+            else
+            {
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Title))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.FirstName))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.LastName))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.BirthDate))
+            </td>
+            <td>
+                <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
+            </td>
+            <td>
+                <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Company))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Email))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Gender))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.LastBath))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Name))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.NextUpgrade))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.PersonStats))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.TimeZone))
+            </td>
+            }
+            <td>
+
+                <!-- Editor buttons -->
+                <div class="btn-group pull-right" role="group">
+                    <!-- Action buttons -->
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Actions <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                                <li><a href="#" data-bind = 'click: renameUi'>Rename</a></li>
+                                <li><a href="#" data-bind = 'click: fixNameUi'>Fix Name</a></li>
+                        </ul>
+                    </div>
+                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                        <i class="fa fa-remove"></i>
+                    </button>
+
+                </div>
+            </td>
+        </tr>
+        <!-- /ko -->
+    </tbody>
+</table>
+    
+<div class="panel-body">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Actions</h4>
+            </div>
+            <table class="table">
+                <tr>
+                    <th style="width:20%;">Action</th>
+                    <th style="width:50%;">Result</th>
+                    <th style="width:20%;">Successful</th>
+                    <th style="width:10%;"></th>
+                </tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: addUi">Add</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: addResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: addWasSuccessful"></span>
+                            <span class="" data-bind="visible: addWasSuccessful(), text: addMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: addIsLoading()">Loading</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: getUserUi">Get User</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: getUserResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: getUserWasSuccessful"></span>
+                            <span class="" data-bind="visible: getUserWasSuccessful(), text: getUserMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: getUserIsLoading()">Loading</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: getUserPublicUi">Get User Public</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: getUserPublicResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: getUserPublicWasSuccessful"></span>
+                            <span class="" data-bind="visible: getUserPublicWasSuccessful(), text: getUserPublicMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: getUserPublicIsLoading()">Loading</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithUi">Names Starting With</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: namesStartingWithResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: namesStartingWithWasSuccessful"></span>
+                            <span class="" data-bind="visible: namesStartingWithWasSuccessful(), text: namesStartingWithMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: namesStartingWithIsLoading()">Loading</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithPublicUi">Names Starting With Public</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: namesStartingWithPublicResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: namesStartingWithPublicWasSuccessful"></span>
+                            <span class="" data-bind="visible: namesStartingWithPublicWasSuccessful(), text: namesStartingWithPublicMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: namesStartingWithPublicIsLoading()">Loading</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: borCPeopleUi">Bor C People</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: borCPeopleResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: borCPeopleWasSuccessful"></span>
+                            <span class="" data-bind="visible: borCPeopleWasSuccessful(), text: borCPeopleMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: borCPeopleIsLoading()">Loading</span>
+                        </td>
+                    </tr>
+            </table>
+        </div>
+</div>
+</div>
+
+
+    @section Scripts
+    {
+    <script>
+        var personList = new ListViewModels.PersonList();
+        @if (ViewBag.ParentIdName != null)
+        {
+            @:personList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        personList.isSavingAutomatically = false;
+        ko.applyBindings(personList);
+        personList.isSavingAutomatically = true;
+
+        personList.includes = "Editor";
+        personList.load();
+    </script>
+    }

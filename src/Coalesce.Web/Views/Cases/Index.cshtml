@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "Cases";
+}
+    <div class="row">
+        <div class="col-md-3">
+            <a asp-controller="Cases" asp-action="Create" class="btn btn-default">Add New</a>
+        </div>
+        <span class="label label-info" style="float:right" data-bind="fadeVisible: cases.isLoading(), text: 'Loading...'"></span>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Case #</th>
+                <th>Title</th>
+                <th>Reported On</th>
+                <th>Reported By</th>
+                <th>Assigned To</th>
+                <th>Severity</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: cases.items">
+            <tr>
+                <th data-bind="text: caseKey, click: showEditor" style="cursor:pointer"></th>
+                <td data-bind="text: title"></td>
+                <td data-bind="moment: openedAt, format: 'MM/DD/YYYY hh:mm a'"></td>
+                <td data-bind="with: reportedBy"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></td>
+                <td data-bind="with: assignedTo"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></td>
+                <td data-bind="text: severity"></td>
+                <td data-bind="text: statusText"></td>
+            </tr>
+        </tbody>
+    </table>
+@section Scripts {
+    <script src="~/js/cases.index.js"></script>
+}

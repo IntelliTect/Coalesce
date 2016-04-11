@@ -1,0 +1,110 @@
+@using Intellitect.ComponentModel.Helpers
+@{ ViewBag.Fluid = true; }
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+                <a href="~/Product/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Create</a>
+                <button data-bind="click:load" class="btn btn-sm btn-default ">Refresh</button>
+                @if (ViewBag.Editable)
+                {
+                <a href="~/Product/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Read-only</a>
+                }
+                else
+                {
+                <a href="~/Product/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default ">Editable</a>
+                }
+        </div>
+        <h1 style="display:inline-block">
+            Product List
+                <span style="font-size: .5em;"><a href="~/Product/Docs">Docs</a></span>
+        </h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+        <div>
+            <div style="display:inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+                Page
+                <span data-bind="text: page"></span>
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+            </div>
+            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display:inline-block">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="10000">10000</option>
+            </select>
+            <input class="form-control pull-right" style="width: 200px;" data-bind="textInput: search" placeholder="Search" />
+        </div>
+    </div>
+        <table class="table table-striped @(ViewBag.Editable ? " editable" : "" )">
+    <thead>
+        <tr>
+                <th>Name</th>
+            <th 
+                                    style="width: 80px;"
+                >
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- ko foreach: items -->
+        <tr>
+            @if (@ViewBag.Editable)
+            {
+            <td>
+                @(Knockout.InputFor<Product>(p => p.Name))
+            </td>
+            }
+            else
+            {
+            <td>
+                @(Knockout.DisplayFor<Product>(p => p.Name))
+            </td>
+            }
+            <td>
+
+                <!-- Editor buttons -->
+                <div class="btn-group pull-right" role="group">
+                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                        <i class="fa fa-remove"></i>
+                    </button>
+
+                </div>
+            </td>
+        </tr>
+        <!-- /ko -->
+    </tbody>
+</table>
+    
+<div class="panel-body">
+
+</div>
+</div>
+
+
+    @section Scripts
+    {
+    <script>
+        var productList = new ListViewModels.ProductList();
+        @if (ViewBag.ParentIdName != null)
+        {
+            @:productList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        productList.isSavingAutomatically = false;
+        ko.applyBindings(productList);
+        productList.isSavingAutomatically = true;
+
+        productList.includes = "Editor";
+        productList.load();
+    </script>
+    }

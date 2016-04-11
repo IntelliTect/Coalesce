@@ -1,0 +1,26 @@
+﻿@model Case
+
+<div class="form-horizontal" data-bind="with: newCase">
+    <div class="form-group">
+        @(Knockout.InputWithLabelFor<Case>(c => c.Title, 3, 9))
+    </div>
+    <div class="form-group">
+        @(Knockout.InputWithLabelFor<Case>(c => c.Description, 3, 9))
+    </div>
+    <div class="form-group">
+        @(Knockout.SelectWithLabelForObject<Case>(c => c.ReportedBy, 3, 9))
+    </div>
+    <div class="form-group">
+        @(Knockout.SelectWithLabelForObject<Case>(c => c.AssignedTo, 3, 9))
+    </div>
+    <div class="form-group">
+        @(Knockout.InputWithLabelFor<Case>(c => c.OpenedAt, labelCols: 3, inputCols: 9, label: "Reported At"))
+    </div>
+    <div class="btn-group">
+        <a class="btn btn-primary" data-bind="click: save">Create</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/cases.create.js"></script>
+}

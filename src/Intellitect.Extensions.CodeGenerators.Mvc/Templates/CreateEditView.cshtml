@@ -1,0 +1,131 @@
+﻿@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+@using Intellitect.ComponentModel.Utilities
+@using Intellitect.ComponentModel.TypeDefinition
+@using Intellitect.ComponentModel.DataAnnotations
+@using Intellitect.ComponentModel.Helpers
+@{
+    ClassViewModel model = Model.Model;
+    string viewModelsNamespace = "ViewModels";
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        viewModelsNamespace = Model.AreaName + "." + viewModelsNamespace;
+    }
+    if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
+    {
+        viewModelsNamespace = Model.ModulePrefix + "." + viewModelsNamespace;
+    }
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+        </div>
+        <h1 class="clearfix" style="display:inline-block;">@(model.Name.ToProperCase())</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    </div>
+
+    <div class="panel-body">
+        <div class="form-horizontal">
+            @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+            {
+            if (prop.IsComplexType)
+            {
+            <div class="panel panel-default" data-bind="with: @prop.JsVariable">
+                <div class="panel-heading">
+                    <h4>@prop.DisplayName</h4>
+                </div>
+                <div class="panel-body">
+                <!-- Properties  -->
+                @foreach (var subProp in prop.Object.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+                {
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">@subProp.DisplayName</label>
+                        <div class="col-md-8">
+                            @Display.PropertyHelper(subProp, !subProp.IsReadOnly, Model.AreaName)
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+            }
+            else
+            {
+            <div class="form-group">
+                <label class="col-md-4 control-label">@prop.DisplayName</label>
+                <div class="col-md-8">
+                    @Display.PropertyHelper(prop, !prop.IsReadOnly, Model.AreaName)
+                </div>
+            </div>
+            }
+            }
+        </div>
+    </div>
+
+    <div class="panel-body">
+
+        @if (model.Methods.Any(f => !f.IsStatic && !f.IsInternalUse))
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Actions</h4>
+                </div>
+                <table class="table">
+                    <tr>
+                        <th style="width:20%;">Action</th>
+                        <th style="width:50%;">Result</th>
+                        <th style="width:20%;">Successful</th>
+                        <th style="width:10%;"></th>
+                    </tr>
+                    @foreach (MethodViewModel method in model.Methods.Where(f => !f.IsStatic && !f.IsInternalUse))
+                    {
+                    <tr>
+                        <td>
+                            <button class="btn btn-default btn-xs" data-bind="click: @method.JsVariableUi">@method.DisplayName</button>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: @method.JsVariableResult"></span>
+                        </td>
+                        <td>
+                            <span class="" data-bind="text: @method.JsVariableWasSuccessful"></span>
+                            <span class="" data-bind="visible: @(method.JsVariableWasSuccessful)(), text: @method.JsVariableMessage"></span>
+                        </td>
+                        <td>
+                            <span class="label label-info" data-bind="fadeVisible: @(method.JsVariableIsLoading)()">Loading</span>
+                        </td>
+                    </tr>
+                    }
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@{
+@:@@section Scripts
+@:{
+    <script>
+        var a@(model.ViewModelObjectName) = new @viewModelsNamespace.@(@model.ViewModelClassName)();
+        a@(model.ViewModelObjectName).includes = "Editor";
+
+        @{
+        @:@@if (ViewBag.Id != null)
+        @:{
+            @:@@:a@(model.ViewModelObjectName).load('@@ViewBag.Id');
+        @:}
+        @:@@if (ViewBag.ParentIdName != null)
+        @:{
+        @:@@:a@(model.ViewModelObjectName).@@(((string)(@@ViewBag.ParentIdName)))(@@ViewBag.ParentId);
+        @:}
+        }
+
+        a@(model.ViewModelObjectName).isSavingAutomatically = false;
+        a@(model.ViewModelObjectName).loadChildren(function() {
+            ko.applyBindings(a@(model.ViewModelObjectName));
+            a@(model.ViewModelObjectName).isSavingAutomatically = true;
+        });
+    </script>
+@:}
+}

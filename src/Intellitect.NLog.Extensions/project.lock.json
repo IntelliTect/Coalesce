@@ -1,0 +1,74 @@
+{
+  "locked": false,
+  "version": 2,
+  "targets": {
+    ".NETFramework,Version=v4.5.1": {
+      "NLog/4.3.0-beta2": {
+        "type": "package",
+        "compile": {
+          "lib/net45/NLog.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NLog.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5.1/win7-x86": {
+      "NLog/4.3.0-beta2": {
+        "type": "package",
+        "compile": {
+          "lib/net45/NLog.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NLog.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5.1/win7-x64": {
+      "NLog/4.3.0-beta2": {
+        "type": "package",
+        "compile": {
+          "lib/net45/NLog.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NLog.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "NLog/4.3.0-beta2": {
+      "type": "package",
+      "sha512": "H42b/icCNubjgEH2f18DkG8B8V2q4DEravSd0RpqoBqZ2AHQYShSFoMY3tN8FuALbV5I5MaPjrAGyHZgNO65DA==",
+      "files": [
+        "lib/MonoAndroid10/NLog.dll",
+        "lib/MonoAndroid10/NLog.xml",
+        "lib/net35/NLog.dll",
+        "lib/net35/NLog.xml",
+        "lib/net40/NLog.dll",
+        "lib/net40/NLog.xml",
+        "lib/net45/NLog.dll",
+        "lib/net45/NLog.xml",
+        "lib/sl4/NLog.dll",
+        "lib/sl4/NLog.xml",
+        "lib/sl5/NLog.dll",
+        "lib/sl5/NLog.xml",
+        "lib/wp8/NLog.dll",
+        "lib/wp8/NLog.xml",
+        "lib/Xamarin.iOS10/NLog.dll",
+        "lib/Xamarin.iOS10/NLog.xml",
+        "NLog.4.3.0-beta2.nupkg",
+        "NLog.4.3.0-beta2.nupkg.sha512",
+        "NLog.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "NLog >= 4.3.0-beta2"
+    ],
+    ".NETFramework,Version=v4.5.1": [
+      "fx/System.Xml >= 4.0.0"
+    ]
+  }
+}

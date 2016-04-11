@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.Title = "Demo";
+}
+<div class="row">
+    <div class="col-md-6">
+        <h3>Total Cases</h3>
+        <a asp-controller="Cases" asp-action="Index"><h4 data-bind="text:totalCases.count"></h4></a>
+    </div>
+    <div class="col-md-6">
+        <h3>Cases with Status of Open</h3>
+        <a asp-controller="Cases" asp-action="Index" asp-route-status="open"><h4 data-bind="text:openStatusCases.count"></h4></a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h3>Cases with Status of Open or In Process</h3>
+        <a asp-controller="Cases" asp-action="Index" asp-route-status="allOpen"><h4 data-bind="text:allOpenCases.count"></h4></a>
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/demo.index.js"></script>
+}

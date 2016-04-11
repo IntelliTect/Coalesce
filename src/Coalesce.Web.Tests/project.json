@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0-*",
+  "description": "Coalesce.Web.Tests Class Library",
+  "authors": [ "IntelliTect" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-rc2-*",
+    "Intellitect.ComponentModel": "",
+    "Coalesce.Web": "",
+    "EntityFramework.InMemory": "7.0.0-rc1-final",
+    "System.Linq": "4.0.1-beta-23516",
+    "System.Linq.Queryable": "4.0.1-beta-23516",
+    "Selenium.WebDriver": "2.50.1",
+    "Selenium.WebDriver.ChromeDriver": "2.21.0",
+    "Selenium.Support": "2.50.1",
+    "Selenium.WebDriver.PhantomJS.Xplatform":  "2.45.0.1"
+  },
+
+  "commands": {
+    "test": "xunit.runner.dnx",
+    "vsotest": "xunit.runner.dnx -xml ..\\..\\..\\TestResults\\Ipc.Fuse.Web.Tests.Results.xml",
+    "web": "Microsoft.AspNet.Server.Kestrel --server.urls=http://*:5000/"
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  }
+}

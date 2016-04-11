@@ -1,0 +1,50 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+        </div>
+        <h1 class="clearfix" style="display:inline-block;">Product</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    </div>
+
+    <div class="panel-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-4 control-label">Name</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Product>(p => p.Name))
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        var aproduct = new TestArea.ViewModels.Product();
+        aproduct.includes = "Editor";
+
+        @if (ViewBag.Id != null)
+        {
+            @:aproduct.load('@ViewBag.Id');
+        }
+        @if (ViewBag.ParentIdName != null)
+        {
+        @:aproduct.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+        }
+
+        aproduct.isSavingAutomatically = false;
+        aproduct.loadChildren(function() {
+            ko.applyBindings(aproduct);
+            aproduct.isSavingAutomatically = true;
+        });
+    </script>
+}

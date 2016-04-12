@@ -23,7 +23,8 @@ var paths = {
     bower: "./bower_components/",
     scripts: "Scripts/",
     styles: "Styles/",
-    wwwroot: "./wwwroot/"
+    wwwroot: "./wwwroot/",
+    images: "Images/"
 };
 // Destination Directory Paths
 paths.css = paths.wwwroot + "/css/";
@@ -38,6 +39,19 @@ function getFolders(dir) {
 		    return fs.statSync(path.join(dir, file)).isDirectory();
 		});
 }
+
+gulp.task('clean-images', function (cb) {
+    rimraf(paths.img, cb);
+});
+
+gulp.task("copy-images", ['clean-images'], function () {
+    gulp.src(paths.images + '**/*.{png,jpg,ico}')
+        .pipe(gulp.dest(paths.img));
+});
+
+gulp.task('img:watch', function () {
+    gulp.watch(paths.images + '**/*.{png,jpg,ico}', ['copy-images']);
+});
 
 gulp.task("clean-lib", function (cb) {
     rimraf(paths.lib, cb);
@@ -191,7 +205,7 @@ gulp.task('ts:watch', function () {
     gulp.watch([paths.scripts + '*.ts', 'Areas/**/Scripts/*.ts'], ['ts']);
 });
 
-gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch'], function () {
+gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
 });
 
 gulp.task('default', ['copy-lib', 'sass', 'ts', 'watch'], function () {

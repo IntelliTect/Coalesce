@@ -92,7 +92,7 @@
     </thead>
     <tbody>
         <!-- ko foreach: items -->
-        <tr>
+        <tr data-bind="css: {'btn-warning': errorMessage()}">
             @{
             @:@@if (@@ViewBag.Editable)
             @:{
@@ -114,7 +114,7 @@
             @:}
             }
             <td>
-
+                
                 <!-- Editor buttons -->
                 <div class="btn-group pull-right" role="group">
                     @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
@@ -142,6 +142,7 @@
                     }
 
                 </div>
+                <div class="form-control-static" data-bind="text: errorMessage"></div>
             </td>
         </tr>
         <!-- /ko -->

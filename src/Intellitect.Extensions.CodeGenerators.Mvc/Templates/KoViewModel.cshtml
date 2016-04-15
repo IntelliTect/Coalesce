@@ -35,6 +35,7 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 
 module @moduleName {
     export var areaUrl = areaUrl || ((@string.IsNullOrWhiteSpace(Model.AreaName).ToString().ToLower()) ? baseUrl : baseUrl + '@Model.AreaName/');
+
 	export class @(model.ViewModelClassName)
     {
         private loadingCount: number = 0;  // Stack for number of times loading has been called.
@@ -221,7 +222,7 @@ module @moduleName {
 
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
         {
-        @:public @(prop.JsVariable)Values: any[] = [ 
+        @:public @(prop.JsVariable)Values: EnumValue[] = [ 
         @foreach (var kvp in prop.Type.EnumValues)
         {
             @:{ id: @kvp.Key, value: '@kvp.Value.ToProperCase()' },
@@ -940,4 +941,16 @@ module @moduleName {
 
 		}
 	}
+
+    export namespace @(model.ViewModelClassName) {
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        {
+        @:export enum @(prop.Name)Enum {
+        @foreach (var kvp in prop.Type.EnumValues)
+        {
+            @:@kvp.Value = @kvp.Key,
+        }
+        @:};
+        }
+    }
 }

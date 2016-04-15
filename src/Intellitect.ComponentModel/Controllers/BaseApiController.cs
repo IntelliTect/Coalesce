@@ -438,53 +438,63 @@ namespace Intellitect.ComponentModel.Controllers
             var origItem = item.Copy();
 
             // Allow the user to stop things from saving.
-            if (BeforeSave(dto, item))
+            try
             {
-
-                MapDtoToObj(dto, item);
-                try
+                if (BeforeSave(dto, item))
                 {
-                    SetFingerprint(item);
 
-                    Db.SaveChanges();
-                    // Pull the object to get any changes.
-                    item = DataSource.Includes(includes).FindItem(IdValue(item));
-                    // Call the method to support special cases.
-                    if (AfterSave(dto, item, origItem, Db))
+                    MapDtoToObj(dto, item);
+                    try
                     {
-                        if (returnObject)
+                        SetFingerprint(item);
+
+                        Db.SaveChanges();
+                        // Pull the object to get any changes.
+                        item = DataSource.Includes(includes).FindItem(IdValue(item));
+                        // Call the method to support special cases.
+                        if (AfterSave(dto, item, origItem, Db))
                         {
-                            item = DataSource.Includes(includes).FindItem(IdValue(item));
+                            if (returnObject)
+                            {
+                                item = DataSource.Includes(includes).FindItem(IdValue(item));
+                            }
+                        }
+
+                        result.WasSuccessful = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        //Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+                        result = new SaveResult<TDto>(ex);
+                        //Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                    }
+                    // Get the key back.
+                    if (item != null)
+                    {
+                        if (typeof(T) == typeof(TDto))
+                        {
+                            result.Object = item as TDto;
+                        }
+                        else
+                        {
+                            result.Object = MapObjToDto(item);
                         }
                     }
-
-                    result.WasSuccessful = true;
                 }
-                catch (Exception ex)
+                else
                 {
-                    //Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
-                    result = new SaveResult<TDto>(ex);
+                    result.WasSuccessful = false;
+                    result.Message = "Canceled";
                     //Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
                 }
-                // Get the key back.
-                if (item != null)
-                {
-                    if (typeof(T) == typeof(TDto))
-                    {
-                        result.Object = item as TDto;
-                    }
-                    else
-                    {
-                        result.Object = MapObjToDto(item);
-                    }
-                }
             }
-            else
+            catch (Exception ex)
             {
+
                 result.WasSuccessful = false;
-                result.Message = "Canceled";
-                //Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                result.Message = ex.Message;
             }
+            
             return result;
         }
 

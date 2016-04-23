@@ -162,7 +162,7 @@ module @moduleName {
         // Reloads the object from the server.
         public reload: (callback?: any) => void;
         // Deletes the object after a user confirmation. Bind this to delete buttons.
-        public deleteItemWithConfirmation: (callback?: any) => void;
+        public deleteItemWithConfirmation: (callback?: any, message?: string) => void;
         // Deletes the object without confirmation.
         public deleteItem: (callback?: any) => void;
         
@@ -172,7 +172,7 @@ module @moduleName {
         {
         @:// Add object to @(prop.JsVariable)
         }
-        @:public addTo@(prop.Name): () => void;
+        @:public addTo@(prop.Name): () => @prop.PureType.ClassViewModel.Name;
         @:// List Object model for @(prop.Name). Allows for loading subsets of data.
         @:public @(prop.JsVariable)List: () => @(listModuleName).@(prop.Object.ListViewModelClassName);
         }
@@ -519,8 +519,9 @@ module @moduleName {
 			};
 
 			// Deletes the object after a confirmation box.
-			self.deleteItemWithConfirmation = function(callback) {
-				if (confirm("Delete this item?")) {
+			self.deleteItemWithConfirmation = function(callback, message) {
+                message = message || "Delete this item?";
+                if (confirm(message)) {
 					self.deleteItem(callback);
 				}
 			};

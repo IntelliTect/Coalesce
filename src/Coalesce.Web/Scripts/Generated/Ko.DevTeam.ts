@@ -11,6 +11,7 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 
 module ViewModels {
     export var areaUrl = areaUrl || ((true) ? baseUrl : baseUrl + '/');
+
 	export class DevTeam
     {
         private loadingCount: number = 0;  // Stack for number of times loading has been called.
@@ -106,7 +107,7 @@ module ViewModels {
         // Reloads the object from the server.
         public reload: (callback?: any) => void;
         // Deletes the object after a user confirmation. Bind this to delete buttons.
-        public deleteItemWithConfirmation: (callback?: any) => void;
+        public deleteItemWithConfirmation: (callback?: any, message?: string) => void;
         // Deletes the object without confirmation.
         public deleteItem: (callback?: any) => void;
         
@@ -285,8 +286,9 @@ module ViewModels {
 			};
 
 			// Deletes the object after a confirmation box.
-			self.deleteItemWithConfirmation = function(callback) {
-				if (confirm("Delete this item?")) {
+			self.deleteItemWithConfirmation = function(callback, message) {
+                message = message || "Delete this item?";
+                if (confirm(message)) {
 					self.deleteItem(callback);
 				}
 			};
@@ -520,4 +522,7 @@ module ViewModels {
 
 		}
 	}
+
+    export namespace DevTeam {
+    }
 }

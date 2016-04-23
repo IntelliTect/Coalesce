@@ -63,7 +63,7 @@
     </thead>
     <tbody>
         <!-- ko foreach: items -->
-        <tr>
+        <tr data-bind="css: {'btn-warning': errorMessage()}">
             @if (@ViewBag.Editable)
             {
             <td>
@@ -131,7 +131,7 @@
             </td>
             }
             <td>
-
+                
                 <!-- Editor buttons -->
                 <div class="btn-group pull-right" role="group">
                     <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
@@ -142,6 +142,7 @@
                     </button>
 
                 </div>
+                <div class="form-control-static" data-bind="text: errorMessage"></div>
             </td>
         </tr>
         <!-- /ko -->
@@ -170,7 +171,7 @@
                         </td>
                         <td>
                             <span class="" data-bind="text: getAllOpenCasesCountWasSuccessful"></span>
-                            <span class="" data-bind="visible: getAllOpenCasesCountWasSuccessful(), text: getAllOpenCasesCountMessage"></span>
+                            <span class="" data-bind="text: getAllOpenCasesCountMessage"></span>
                         </td>
                         <td>
                             <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesCountIsLoading()">Loading</span>
@@ -185,7 +186,7 @@
                         </td>
                         <td>
                             <span class="" data-bind="text: getAllOpenCasesWasSuccessful"></span>
-                            <span class="" data-bind="visible: getAllOpenCasesWasSuccessful(), text: getAllOpenCasesMessage"></span>
+                            <span class="" data-bind="text: getAllOpenCasesMessage"></span>
                         </td>
                         <td>
                             <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesIsLoading()">Loading</span>

@@ -54,7 +54,7 @@
     </thead>
     <tbody>
         <!-- ko foreach: items -->
-        <tr>
+        <tr data-bind="css: {'btn-warning': errorMessage()}">
             @if (@ViewBag.Editable)
             {
             <td>
@@ -68,7 +68,7 @@
             </td>
             }
             <td>
-
+                
                 <!-- Editor buttons -->
                 <div class="btn-group pull-right" role="group">
                     <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
@@ -79,6 +79,7 @@
                     </button>
 
                 </div>
+                <div class="form-control-static" data-bind="text: errorMessage"></div>
             </td>
         </tr>
         <!-- /ko -->

@@ -12,6 +12,12 @@
 
     <div class="panel-body">
         <div class="form-horizontal">
+            <div class="form-group btn-warning" data-bind="if: errorMessage()">
+                <label class="col-md-4 control-label">Error</label>
+                <div class="col-md-8">
+                    <div class="form-control-static" data-bind="text: errorMessage"></div>
+                </div>
+            </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Title</label>
                 <div class="col-md-8">
@@ -121,7 +127,7 @@
                         </td>
                         <td>
                             <span class="" data-bind="text: renameWasSuccessful"></span>
-                            <span class="" data-bind="visible: renameWasSuccessful(), text: renameMessage"></span>
+                            <span class="" data-bind="text: renameMessage"></span>
                         </td>
                         <td>
                             <span class="label label-info" data-bind="fadeVisible: renameIsLoading()">Loading</span>
@@ -136,7 +142,7 @@
                         </td>
                         <td>
                             <span class="" data-bind="text: fixNameWasSuccessful"></span>
-                            <span class="" data-bind="visible: fixNameWasSuccessful(), text: fixNameMessage"></span>
+                            <span class="" data-bind="text: fixNameMessage"></span>
                         </td>
                         <td>
                             <span class="label label-info" data-bind="fadeVisible: fixNameIsLoading()">Loading</span>

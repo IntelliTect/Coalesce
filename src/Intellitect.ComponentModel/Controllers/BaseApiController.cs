@@ -387,6 +387,11 @@ namespace Intellitect.ComponentModel.Controllers
                 if (BeforeDelete(item))
                 {
                     DataSource.Remove(item);
+                    // Allow for other cascade deletes.
+                    if (item is IDeletable<TContext>)
+                    {
+                        (item as IDeletable<TContext>).BeforeDeleteCommit(Db);
+                    }
                     Db.SaveChanges();
                     return AfterDelete(item, Db);
                 }

@@ -11,6 +11,7 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 
 module ViewModels {
     export var areaUrl = areaUrl || ((true) ? baseUrl : baseUrl + '/');
+
 	export class Case
     {
         private loadingCount: number = 0;  // Stack for number of times loading has been called.
@@ -125,7 +126,7 @@ module ViewModels {
         // Reloads the object from the server.
         public reload: (callback?: any) => void;
         // Deletes the object after a user confirmation. Bind this to delete buttons.
-        public deleteItemWithConfirmation: (callback?: any) => void;
+        public deleteItemWithConfirmation: (callback?: any, message?: string) => void;
         // Deletes the object without confirmation.
         public deleteItem: (callback?: any) => void;
         
@@ -164,7 +165,7 @@ module ViewModels {
         public isSelectedToggle: () => boolean;
 
 
-        public statusValues: any[] = [ 
+        public statusValues: EnumValue[] = [ 
             { id: 0, value: 'Open' },
             { id: 1, value: 'In Progress' },
             { id: 2, value: 'Resolved' },
@@ -429,8 +430,9 @@ module ViewModels {
 			};
 
 			// Deletes the object after a confirmation box.
-			self.deleteItemWithConfirmation = function(callback) {
-				if (confirm("Delete this item?")) {
+			self.deleteItemWithConfirmation = function(callback, message) {
+                message = message || "Delete this item?";
+                if (confirm(message)) {
 					self.deleteItem(callback);
 				}
 			};
@@ -822,4 +824,14 @@ module ViewModels {
 
 		}
 	}
+
+    export namespace Case {
+        export enum StatusEnum {
+            Open = 0,
+            InProgress = 1,
+            Resolved = 2,
+            ClosedNoSolution = 3,
+            Cancelled = 4,
+        };
+    }
 }

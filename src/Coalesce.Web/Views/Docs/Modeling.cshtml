@@ -85,6 +85,23 @@
     }
 </code></pre>
 <p>The Include method takes a string parameter called include. This can be specified in the client-side view model to specify which data to include. The admin pages will use the string 'Editor' when they call to the API layer.</p>
+<p>Additionally there is an IExcludable interface that allows for doing object trimming before the object is serialized. EF will fill out your object graph with objects that were loaded via a different Include. For example is you have an object for who modified an object. If user with ID 1 is loaded on one place, that user object will appear on all objects that reference it even though it is not loaded explicitly.</p>
+<br />
+
+<h4>Controlling Object Deletion</h4>
+<p>There are times when you will need to manually remove related objects when deleting an object. You can specify what to delete by using the IDeletable interface. The method is called right before the delete is executed. The instance object has already been removed from the context's collection. This gives you a chance to remove any additional objects. To stop the delete at this point, an exception must be thrown. </p>
+
+<pre><code class="language-html">
+    public class Person : IDeletable&lt;AppContext&gt;
+    {
+        ...
+        public void BeforeDeleteCommit(AppContext db)
+        {
+            // Remove related history
+            db.PersonHistories.RemoveRange(db.PersonHistories.Where(f => f.PersonId == this.PersonId));
+        }
+    }
+</code></pre>
 <br />
 
 <h4>Validation</h4>

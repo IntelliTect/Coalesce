@@ -11,6 +11,7 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 
 module ViewModels {
     export var areaUrl = areaUrl || ((true) ? baseUrl : baseUrl + '/');
+
 	export class Person
     {
         private loadingCount: number = 0;  // Stack for number of times loading has been called.
@@ -141,16 +142,16 @@ module ViewModels {
         // Reloads the object from the server.
         public reload: (callback?: any) => void;
         // Deletes the object after a user confirmation. Bind this to delete buttons.
-        public deleteItemWithConfirmation: (callback?: any) => void;
+        public deleteItemWithConfirmation: (callback?: any, message?: string) => void;
         // Deletes the object without confirmation.
         public deleteItem: (callback?: any) => void;
         
         // Add object to casesAssigned
-        public addToCasesAssigned: () => void;
+        public addToCasesAssigned: () => Case;
         // List Object model for CasesAssigned. Allows for loading subsets of data.
         public casesAssignedList: () => ListViewModels.CaseList;
         // Add object to casesReported
-        public addToCasesReported: () => void;
+        public addToCasesReported: () => Case;
         // List Object model for CasesReported. Allows for loading subsets of data.
         public casesReportedList: () => ListViewModels.CaseList;
         
@@ -187,13 +188,13 @@ module ViewModels {
         public isSelectedToggle: () => boolean;
 
 
-        public titleValues: any[] = [ 
+        public titleValues: EnumValue[] = [ 
             { id: 0, value: 'Mr' },
             { id: 1, value: 'Ms' },
             { id: 2, value: 'Mrs' },
             { id: 4, value: 'Miss' },
         ];
-        public genderValues: any[] = [ 
+        public genderValues: EnumValue[] = [ 
             { id: 0, value: 'Non Specified' },
             { id: 1, value: 'Male' },
             { id: 2, value: 'Female' },
@@ -479,8 +480,9 @@ module ViewModels {
 			};
 
 			// Deletes the object after a confirmation box.
-			self.deleteItemWithConfirmation = function(callback) {
-				if (confirm("Delete this item?")) {
+			self.deleteItemWithConfirmation = function(callback, message) {
+                message = message || "Delete this item?";
+                if (confirm(message)) {
 					self.deleteItem(callback);
 				}
 			};
@@ -949,4 +951,18 @@ module ViewModels {
 
 		}
 	}
+
+    export namespace Person {
+        export enum TitleEnum {
+            Mr = 0,
+            Ms = 1,
+            Mrs = 2,
+            Miss = 4,
+        };
+        export enum GenderEnum {
+            NonSpecified = 0,
+            Male = 1,
+            Female = 2,
+        };
+    }
 }

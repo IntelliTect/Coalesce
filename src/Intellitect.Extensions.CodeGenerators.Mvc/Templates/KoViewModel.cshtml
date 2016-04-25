@@ -520,7 +520,9 @@ module @moduleName {
 
 			// Deletes the object after a confirmation box.
 			self.deleteItemWithConfirmation = function(callback, message) {
-                message = message || "Delete this item?";
+                if (typeof message != 'string') {
+                    message = "Delete this item?";
+                }
                 if (confirm(message)) {
 					self.deleteItem(callback);
 				}

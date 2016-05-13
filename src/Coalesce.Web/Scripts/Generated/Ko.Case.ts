@@ -1,6 +1,9 @@
 /// <reference path="../../typings/tsd.d.ts" />
 /// <reference path="../Intellitect/intellitect.utilities.ts" />
 /// <reference path="../Intellitect/intellitect.ko.utilities.ts" />
+/// <reference path="../Intellitect/intellitect.ko.base.ts" />
+
+
 
 // Knockout View Model for: Case
 // Auto Generated Knockout Object Bindings
@@ -431,7 +434,9 @@ module ViewModels {
 
 			// Deletes the object after a confirmation box.
 			self.deleteItemWithConfirmation = function(callback, message) {
-                message = message || "Delete this item?";
+                if (typeof message != 'string') {
+                    message = "Delete this item?";
+                }
                 if (confirm(message)) {
 					self.deleteItem(callback);
 				}

@@ -175,6 +175,24 @@ namespace Intellitect.ComponentModel.Helpers
 
         #endregion
 
+        #region TextArea
+        public static HtmlString TextArea(
+            string bindingValue, string bindingName = "value", int? rows = 4)
+        {
+            string result = string.Format(@"
+                <textarea class=""form-control"" data-bind=""{1}: {0}"" rows=""{2}""></textarea>", bindingValue, bindingName, rows.ToString());
+            return new HtmlString(result);
+        }
+
+        public static HtmlString TextAreaWithLabel(
+            string label, string bindingValue, string bindingName = "value", int? rows = null,
+            int? labelCols = null, int? textCols = null)
+        {
+            return TextArea(bindingValue, bindingName, rows).AddLabel(label, labelCols, textCols);
+        }
+
+        #endregion
+
         #region TextInput
 
         public static HtmlString TextInput(

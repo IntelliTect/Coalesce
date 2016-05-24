@@ -117,10 +117,12 @@ module @moduleName {
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         @:// Presents a series of input boxes to call the server method (@method.Name)
         @:public @method.JsVariableUi: () => void;
+        @:// Presents a modal with input boxes to call the server method (@method.Name)
+        @:public @method.JsVariableModal: () => void;
         // Variable for method arguments to allow for easy binding
         @if (method.ClientParameters.Any())
         {
-        @:public @method.JsVariableWithArgs: (args: @(model.ListViewModelClassName).@(method.ArgsName)) => void;
+        @:public @method.JsVariableWithArgs: (args?: @(model.ListViewModelClassName).@(method.ArgsName)) => void;
         @:
         @:public @(method.JsVariableArgs) = new @(model.ListViewModelClassName).@(method.ArgsName)(); 
         }
@@ -288,9 +290,26 @@ module @moduleName {
                 }
                 self.@(method.JsVariable)(@(method.JsArguments()));
             }
+
+            self.@method.JsVariableModal = function() {
+                @if (method.ClientParameters.Any()) { 
+                @:$('#method-@method.Name').modal();
+                @:$('#method-@method.Name').on('shown.bs.modal', function() {
+                    @:$('#method-@method.Name .btn-ok').click(function()
+                    @:{
+                        @:self.@(method.JsVariableWithArgs)();
+                        @:$('#method-@method.Name').modal('hide');
+                    @:});
+                @:});
+                }
+                else
+                {
+                    @:self.@(method.JsVariableUi)();
+                }
+            }
             
             @if (method.ClientParameters.Any()) { 
-            @:self.@(method.JsVariableWithArgs) = function(args: @(model.ListViewModelClassName).@(method.ArgsName)) {
+            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ListViewModelClassName).@(method.ArgsName)) {
                 @:if (!args) args = self.@(method.JsVariableArgs);
                 @foreach (var param in method.ClientParameters)
                 {

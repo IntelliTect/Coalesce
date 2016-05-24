@@ -79,7 +79,9 @@ module ListViewModels {
         public addWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Add)
         public addUi: () => void;
-        public addWithArgs: (args: PersonList.AddArgs) => void;
+        // Presents a modal with input boxes to call the server method (Add)
+        public addModal: () => void;
+        public addWithArgs: (args?: PersonList.AddArgs) => void;
         
         public addArgs = new PersonList.AddArgs(); 
         
@@ -96,6 +98,8 @@ module ListViewModels {
         public getUserWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetUser)
         public getUserUi: () => void;
+        // Presents a modal with input boxes to call the server method (GetUser)
+        public getUserModal: () => void;
         
         // Call server method (GetUserPublic)
         // Returns the user name
@@ -110,6 +114,8 @@ module ListViewModels {
         public getUserPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetUserPublic)
         public getUserPublicUi: () => void;
+        // Presents a modal with input boxes to call the server method (GetUserPublic)
+        public getUserPublicModal: () => void;
         
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
@@ -124,7 +130,9 @@ module ListViewModels {
         public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWith)
         public namesStartingWithUi: () => void;
-        public namesStartingWithWithArgs: (args: PersonList.NamesStartingWithArgs) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWith)
+        public namesStartingWithModal: () => void;
+        public namesStartingWithWithArgs: (args?: PersonList.NamesStartingWithArgs) => void;
         
         public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
         
@@ -141,7 +149,9 @@ module ListViewModels {
         public namesStartingWithPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWithPublic)
         public namesStartingWithPublicUi: () => void;
-        public namesStartingWithPublicWithArgs: (args: PersonList.NamesStartingWithPublicArgs) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWithPublic)
+        public namesStartingWithPublicModal: () => void;
+        public namesStartingWithPublicWithArgs: (args?: PersonList.NamesStartingWithPublicArgs) => void;
         
         public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
         
@@ -158,6 +168,8 @@ module ListViewModels {
         public borCPeopleWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (BorCPeople)
         public borCPeopleUi: () => void;
+        // Presents a modal with input boxes to call the server method (BorCPeople)
+        public borCPeopleModal: () => void;
         
         constructor() {
             var self = this; 
@@ -310,8 +322,19 @@ module ListViewModels {
                 var numberTwo: number = parseFloat(prompt('Number Two'));
                 self.add(numberOne, numberTwo);
             }
+
+            self.addModal = function() {
+                $('#method-Add').modal();
+                $('#method-Add').on('shown.bs.modal', function() {
+                    $('#method-Add .btn-ok').click(function()
+                    {
+                        self.addWithArgs();
+                        $('#method-Add').modal('hide');
+                    });
+                });
+            }
             
-            self.addWithArgs = function(args: PersonList.AddArgs) {
+            self.addWithArgs = function(args?: PersonList.AddArgs) {
                 if (!args) args = self.addArgs;
                 self.add(args.numberOne(), args.numberTwo());
                 self.add(args.numberOne(), args.numberTwo());
@@ -349,6 +372,10 @@ module ListViewModels {
             self.getUserUi = function() {
                 self.getUser();
             }
+
+            self.getUserModal = function() {
+                    self.getUserUi();
+            }
             
 
             
@@ -382,6 +409,10 @@ module ListViewModels {
 
             self.getUserPublicUi = function() {
                 self.getUserPublic();
+            }
+
+            self.getUserPublicModal = function() {
+                    self.getUserPublicUi();
             }
             
 
@@ -418,8 +449,19 @@ module ListViewModels {
                 var characters: String = prompt('Characters');
                 self.namesStartingWith(characters);
             }
+
+            self.namesStartingWithModal = function() {
+                $('#method-NamesStartingWith').modal();
+                $('#method-NamesStartingWith').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWith .btn-ok').click(function()
+                    {
+                        self.namesStartingWithWithArgs();
+                        $('#method-NamesStartingWith').modal('hide');
+                    });
+                });
+            }
             
-            self.namesStartingWithWithArgs = function(args: PersonList.NamesStartingWithArgs) {
+            self.namesStartingWithWithArgs = function(args?: PersonList.NamesStartingWithArgs) {
                 if (!args) args = self.namesStartingWithArgs;
                 self.namesStartingWith(args.characters());
             }
@@ -457,8 +499,19 @@ module ListViewModels {
                 var characters: String = prompt('Characters');
                 self.namesStartingWithPublic(characters);
             }
+
+            self.namesStartingWithPublicModal = function() {
+                $('#method-NamesStartingWithPublic').modal();
+                $('#method-NamesStartingWithPublic').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWithPublic .btn-ok').click(function()
+                    {
+                        self.namesStartingWithPublicWithArgs();
+                        $('#method-NamesStartingWithPublic').modal('hide');
+                    });
+                });
+            }
             
-            self.namesStartingWithPublicWithArgs = function(args: PersonList.NamesStartingWithPublicArgs) {
+            self.namesStartingWithPublicWithArgs = function(args?: PersonList.NamesStartingWithPublicArgs) {
                 if (!args) args = self.namesStartingWithPublicArgs;
                 self.namesStartingWithPublic(args.characters());
             }
@@ -494,6 +547,10 @@ module ListViewModels {
 
             self.borCPeopleUi = function() {
                 self.borCPeople();
+            }
+
+            self.borCPeopleModal = function() {
+                    self.borCPeopleUi();
             }
             
 

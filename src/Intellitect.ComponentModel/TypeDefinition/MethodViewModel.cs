@@ -46,6 +46,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         public string JsVariableMessage { get { return Name.ToCamelCase() + "Message"; } }
         public string JsVariableWasSuccessful { get { return Name.ToCamelCase() + "WasSuccessful"; } }
         public string JsVariableUi { get { return Name.ToCamelCase() + "Ui"; } }
+        public string JsVariableModal { get { return Name.ToCamelCase() + "Modal"; } }
         public string JsVariableArgs { get { return Name.ToCamelCase() + "Args"; } }
         public string JsVariableWithArgs { get { return Name.ToCamelCase() + "WithArgs"; } }
 

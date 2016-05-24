@@ -79,6 +79,9 @@ module ListViewModels {
         public addWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Add)
         public addUi: () => void;
+        public addWithArgs: (args: PersonList.AddArgs) => void;
+        
+        public addArgs = new PersonList.AddArgs(); 
         
         // Call server method (GetUser)
         // Returns the user name
@@ -121,6 +124,9 @@ module ListViewModels {
         public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWith)
         public namesStartingWithUi: () => void;
+        public namesStartingWithWithArgs: (args: PersonList.NamesStartingWithArgs) => void;
+        
+        public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
         
         // Call server method (NamesStartingWithPublic)
         // Gets all the first names starting with the characters.
@@ -135,6 +141,9 @@ module ListViewModels {
         public namesStartingWithPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWithPublic)
         public namesStartingWithPublicUi: () => void;
+        public namesStartingWithPublicWithArgs: (args: PersonList.NamesStartingWithPublicArgs) => void;
+        
+        public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
         
         // Call server method (BorCPeople)
         // People whose last name starts with B or c
@@ -302,6 +311,13 @@ module ListViewModels {
                 self.add(numberOne, numberTwo);
             }
             
+            self.addWithArgs = function(args: PersonList.AddArgs) {
+                if (!args) args = self.addArgs;
+                self.add(args.numberOne(), args.numberTwo());
+                self.add(args.numberOne(), args.numberTwo());
+            }
+
+            
 
             self.getUser = function(callback?: any){
                 self.getUserIsLoading(true);
@@ -333,6 +349,8 @@ module ListViewModels {
             self.getUserUi = function() {
                 self.getUser();
             }
+            
+
             
 
             self.getUserPublic = function(callback?: any){
@@ -367,6 +385,8 @@ module ListViewModels {
             }
             
 
+            
+
             self.namesStartingWith = function(characters: String, callback?: any){
                 self.namesStartingWithIsLoading(true);
                 $.ajax({ method: "POST",
@@ -398,6 +418,12 @@ module ListViewModels {
                 var characters: String = prompt('Characters');
                 self.namesStartingWith(characters);
             }
+            
+            self.namesStartingWithWithArgs = function(args: PersonList.NamesStartingWithArgs) {
+                if (!args) args = self.namesStartingWithArgs;
+                self.namesStartingWith(args.characters());
+            }
+
             
 
             self.namesStartingWithPublic = function(characters: String, callback?: any){
@@ -432,6 +458,12 @@ module ListViewModels {
                 self.namesStartingWithPublic(characters);
             }
             
+            self.namesStartingWithPublicWithArgs = function(args: PersonList.NamesStartingWithPublicArgs) {
+                if (!args) args = self.namesStartingWithPublicArgs;
+                self.namesStartingWithPublic(args.characters());
+            }
+
+            
 
             self.borCPeople = function(callback?: any){
                 self.borCPeopleIsLoading(true);
@@ -464,6 +496,22 @@ module ListViewModels {
                 self.borCPeople();
             }
             
+
+            
+        }
+    }
+
+    export namespace PersonList {
+        // Classes for use in method calls to support data binding for input for arguments
+        export class AddArgs {
+            public numberOne = ko.observable(null);
+            public numberTwo = ko.observable(null);
+        }
+        export class NamesStartingWithArgs {
+            public characters = ko.observable(null);
+        }
+        export class NamesStartingWithPublicArgs {
+            public characters = ko.observable(null);
         }
     }
 }

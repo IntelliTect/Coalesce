@@ -95,6 +95,9 @@ module ListViewModels {
         public getAllOpenCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCases)
         public getAllOpenCasesUi: () => void;
+        public getAllOpenCasesWithArgs: (args: CaseList.GetAllOpenCasesArgs) => void;
+        
+        public getAllOpenCasesArgs = new CaseList.GetAllOpenCasesArgs(); 
         
         constructor() {
             var self = this; 
@@ -246,6 +249,8 @@ module ListViewModels {
             }
             
 
+            
+
             self.getAllOpenCases = function(x: number, y: number, callback?: any){
                 self.getAllOpenCasesIsLoading(true);
                 $.ajax({ method: "POST",
@@ -280,6 +285,21 @@ module ListViewModels {
                 self.getAllOpenCases(x, y);
             }
             
+            self.getAllOpenCasesWithArgs = function(args: CaseList.GetAllOpenCasesArgs) {
+                if (!args) args = self.getAllOpenCasesArgs;
+                self.getAllOpenCases(args.x(), args.y());
+                self.getAllOpenCases(args.x(), args.y());
+            }
+
+            
+        }
+    }
+
+    export namespace CaseList {
+        // Classes for use in method calls to support data binding for input for arguments
+        export class GetAllOpenCasesArgs {
+            public x = ko.observable(null);
+            public y = ko.observable(null);
         }
     }
 }

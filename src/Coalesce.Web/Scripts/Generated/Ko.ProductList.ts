@@ -180,4 +180,8 @@ module ListViewModels {
     // Method Implementations
         }
     }
+
+    export namespace ProductList {
+        // Classes for use in method calls to support data binding for input for arguments
+    }
 }

@@ -138,7 +138,8 @@ module @moduleName {
         @:public @(prop.ManyToManyCollectionName.ToCamelCase()): KnockoutObservableArray<ViewModels.@(prop.ManyToManyCollectionProperty.Object.ViewModelClassName)> = ko.observableArray([]);  // Many to Many Collection
         }
         }
-        
+
+       
         // True if the object is loading.
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
         // URL to a stock editor for this object.
@@ -251,7 +252,14 @@ module @moduleName {
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         @:// Presents a series of input boxes to call the server method (@method.Name)
         @:public @method.JsVariableUi: () => void;
+        // Variable for method arguments to allow for easy binding
+        @if (method.ClientParameters.Any())
+        {
+        @:public @method.JsVariableWithArgs: (args: @(model.Name).@(method.ArgsName)) => void;
         @:
+        @:public @(method.JsVariableArgs) = new @(model.Name).@(method.ArgsName)(); 
+        }
+
         }
 
 
@@ -902,7 +910,9 @@ module @moduleName {
                         @:if ($.isFunction(callback)) {
                             @:callback();
                         @:}
-                        } else { 
+                        }
+                        else
+                        {
                         @:self.reload(callback);
                         }
 					} else {
@@ -917,21 +927,30 @@ module @moduleName {
                     self.@(method.JsVariableIsLoading)(false);
 				});
             }
+            </text>
 
-            self.@method.JsVariableUi = function() {
-                @foreach(var param in method.ClientParameters)
+            @:self.@method.JsVariableUi = function() {
+                @foreach (var param in method.ClientParameters)
                 {
                 @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
                 }
-                self.@(method.JsVariable)(@(method.JsArguments));
+                @:self.@(method.JsVariable)(@(method.JsArguments()));
+            @:}
+
+            @if (method.ClientParameters.Any()) {
+            @:self.@(method.JsVariableWithArgs) = function(args: @(model.ViewModelClassName).@(method.ArgsName)) {
+                @:if (!args) args = self.@(method.JsVariableArgs);
+                @foreach (var param in method.ClientParameters)
+                {
+                @:self.@(method.JsVariable)(@(method.JsArguments("args")));
+                }
+            @:}
             }
-            </text>
             }
 
 
-
-			// This stuff needs to be done after everything else is set up.
-			// Complex Type Observables
+            // This stuff needs to be done after everything else is set up.
+            // Complex Type Observables
             @foreach (PropertyViewModel prop in model.Properties.Where(f=>f.IsComplexType && !f.IsInternalUse))
             {
 		    @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(self));
@@ -940,13 +959,19 @@ module @moduleName {
 			// Make sure everything is defined before we call this.
 			setupSubscriptions();
 
-			if (newItem) {
+		    if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem);
 			}
 
+
+
 		}
 	}
+
+
+
+
 
     export namespace @(model.ViewModelClassName) {
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
@@ -957,6 +982,16 @@ module @moduleName {
             @:@kvp.Value = @kvp.Key,
         }
         @:};
+        }
+
+        // Classes for use in method calls to support data binding for input for arguments
+        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && !f.IsStatic && !f.IsInternalUse)){
+        @:export class @(method.ArgsName) {
+            @foreach (var arg in method.ClientParameters)
+            {
+            @:public @(arg.CsArgumentName) = @(arg.Type.JsKnockoutType);
+            }
+        @:}
         }
     }
 }

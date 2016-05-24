@@ -123,7 +123,8 @@ module ViewModels {
         public companyId: KnockoutObservable<number> = ko.observable(null);
         // Company loaded from the Company ID
         public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
-        
+
+       
         // True if the object is loading.
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
         // URL to a stock editor for this object.
@@ -216,7 +217,9 @@ module ViewModels {
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Rename)
         public renameUi: () => void;
+        public renameWithArgs: (args: Person.RenameArgs) => void;
         
+        public renameArgs = new Person.RenameArgs(); 
         // Call server method (FixName)
         // Removes spaces from the name and puts in dashes
         public fixName: (addition: String, callback?: any) => void;
@@ -230,7 +233,9 @@ module ViewModels {
         public fixNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (FixName)
         public fixNameUi: () => void;
+        public fixNameWithArgs: (args: Person.FixNameArgs) => void;
         
+        public fixNameArgs = new Person.FixNameArgs(); 
 
 
 
@@ -899,12 +904,15 @@ module ViewModels {
                     self.renameIsLoading(false);
 				});
             }
-
+            
             self.renameUi = function() {
                 var addition: String = prompt('Addition');
                 self.rename(addition);
             }
-            
+            self.renameWithArgs = function(args: Person.RenameArgs) {
+                if (!args) args = self.renameArgs;
+                self.rename(args.addition());
+            }
 
             self.fixName = function(addition: String, callback?: any){
                 self.fixNameIsLoading(true);
@@ -934,28 +942,36 @@ module ViewModels {
                     self.fixNameIsLoading(false);
 				});
             }
-
+            
             self.fixNameUi = function() {
                 var addition: String = prompt('Addition');
                 self.fixName(addition);
             }
-            
+            self.fixNameWithArgs = function(args: Person.FixNameArgs) {
+                if (!args) args = self.fixNameArgs;
+                self.fixName(args.addition());
+            }
 
 
-
-			// This stuff needs to be done after everything else is set up.
-			// Complex Type Observables
+            // This stuff needs to be done after everything else is set up.
+            // Complex Type Observables
 
 			// Make sure everything is defined before we call this.
 			setupSubscriptions();
 
-			if (newItem) {
+		    if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem);
 			}
 
+
+
 		}
 	}
+
+
+
+
 
     export namespace Person {
         export enum TitleEnum {
@@ -969,5 +985,13 @@ module ViewModels {
             Male = 1,
             Female = 2,
         };
+
+        // Classes for use in method calls to support data binding for input for arguments
+        export class RenameArgs {
+            public addition = ko.observable(null);
+        }
+        export class FixNameArgs {
+            public addition = ko.observable(null);
+        }
     }
 }

@@ -217,25 +217,26 @@ module ViewModels {
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Rename)
         public renameUi: () => void;
-        public renameWithArgs: (args: Person.RenameArgs) => void;
+        // Presents a modal with input boxes to call the server method (Rename)
+        public renameModal: () => void;
+        public renameWithArgs: (args?: Person.RenameArgs) => void;
         
         public renameArgs = new Person.RenameArgs(); 
-        // Call server method (FixName)
+        // Call server method (ChangeSpacesToDashesInName)
         // Removes spaces from the name and puts in dashes
-        public fixName: (addition: String, callback?: any) => void;
-        // Result of server method (FixName)
-        public fixNameResult: KnockoutObservable<any> = ko.observable();
-        // True while the server method (FixName) is being called
-        public fixNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (FixName) if it fails.
-        public fixNameMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (FixName) was successful.
-        public fixNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (FixName)
-        public fixNameUi: () => void;
-        public fixNameWithArgs: (args: Person.FixNameArgs) => void;
-        
-        public fixNameArgs = new Person.FixNameArgs(); 
+        public changeSpacesToDashesInName: (callback?: any) => void;
+        // Result of server method (ChangeSpacesToDashesInName)
+        public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable();
+        // True while the server method (ChangeSpacesToDashesInName) is being called
+        public changeSpacesToDashesInNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (ChangeSpacesToDashesInName) if it fails.
+        public changeSpacesToDashesInNameMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (ChangeSpacesToDashesInName) was successful.
+        public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName)
+        public changeSpacesToDashesInNameUi: () => void;
+        // Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName)
+        public changeSpacesToDashesInNameModal: () => void;
 
 
 
@@ -909,47 +910,54 @@ module ViewModels {
                 var addition: String = prompt('Addition');
                 self.rename(addition);
             }
-            self.renameWithArgs = function(args: Person.RenameArgs) {
+            self.renameModal = function() {
+                $('#method-Rename').modal();
+                $('#method-Rename').on('shown.bs.modal', function() {
+                    $('#method-Rename .btn-ok').click(function()
+                    {
+                        self.renameWithArgs();
+                        $('#method-Rename').modal('hide');
+                    });
+                });
+            }
+            self.renameWithArgs = function(args?: Person.RenameArgs) {
                 if (!args) args = self.renameArgs;
                 self.rename(args.addition());
             }
 
-            self.fixName = function(addition: String, callback?: any){
-                self.fixNameIsLoading(true);
+            self.changeSpacesToDashesInName = function(callback?: any){
+                self.changeSpacesToDashesInNameIsLoading(true);
                 $.ajax({ method: "POST",
-                         url: areaUrl + "api/Person/FixName",
+                         url: areaUrl + "api/Person/ChangeSpacesToDashesInName",
                          data: {
-                        id: self.myId, 
-                        addition: addition
+                        id: self.myId
                     }, 
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.isDirty(false);
 					if (data.WasSuccessful) {
-						self.fixNameMessage('');
-						self.fixNameWasSuccessful(true);
-						self.fixNameResult(data.Object);
+						self.changeSpacesToDashesInNameMessage('');
+						self.changeSpacesToDashesInNameWasSuccessful(true);
+						self.changeSpacesToDashesInNameResult(data.Object);
                         self.reload(callback);
 					} else {
-						self.fixNameWasSuccessful(false);
-						self.fixNameMessage(data.Message);
+						self.changeSpacesToDashesInNameWasSuccessful(false);
+						self.changeSpacesToDashesInNameMessage(data.Message);
 					}
 				})
 				.fail(function() {
-					alert("Could not call method fixName");
+					alert("Could not call method changeSpacesToDashesInName");
 				})
 				.always(function() {
-                    self.fixNameIsLoading(false);
+                    self.changeSpacesToDashesInNameIsLoading(false);
 				});
             }
             
-            self.fixNameUi = function() {
-                var addition: String = prompt('Addition');
-                self.fixName(addition);
+            self.changeSpacesToDashesInNameUi = function() {
+                self.changeSpacesToDashesInName();
             }
-            self.fixNameWithArgs = function(args: Person.FixNameArgs) {
-                if (!args) args = self.fixNameArgs;
-                self.fixName(args.addition());
+            self.changeSpacesToDashesInNameModal = function() {
+                    self.changeSpacesToDashesInNameUi();
             }
 
 
@@ -988,10 +996,7 @@ module ViewModels {
 
         // Classes for use in method calls to support data binding for input for arguments
         export class RenameArgs {
-            public addition = ko.observable(null);
-        }
-        export class FixNameArgs {
-            public addition = ko.observable(null);
+            public addition: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

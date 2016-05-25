@@ -204,19 +204,19 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">GetAllOpenCases</h4>
+                <h4 class="modal-title">Get All Open Cases</h4>
             </div>
-            <div class="modal-body form-horizontal">
+            <div class="modal-body form-horizontal" data-bind="with: getAllOpenCasesArgs">
                 <div class="form-group">
                     <label class="col-md-4 control-label">X</label>                
                     <div class="col-md-8">
-                        <input type="text" class="form-control" data-bind="value: getAllOpenCasesArgs.x">
+                        <input type="text" class="form-control" data-bind="value: x">
                     </div>
                 </div>    
                 <div class="form-group">
                     <label class="col-md-4 control-label">Y</label>                
                     <div class="col-md-8">
-                        <input type="text" class="form-control" data-bind="value: getAllOpenCasesArgs.y">
+                        <input type="text" class="form-control" data-bind="value: y">
                     </div>
                 </div>    
             </div>

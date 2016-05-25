@@ -158,12 +158,12 @@ namespace Coalesce.Web.TestArea.Api
         // Method: FixName
         [HttpPost("FixName")]
         
-        public virtual SaveResult<object> FixName (Int32 id, String addition){
+        public virtual SaveResult<object> FixName (Int32 id){
             var result = new SaveResult<object>();
             try{
                 var item = DataSource.Includes().FindItem(id);
                 object objResult = null;
-                item.FixName(addition);
+                item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();
                 result.Object = objResult;
                 result.WasSuccessful = true;

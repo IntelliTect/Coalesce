@@ -337,7 +337,6 @@ module ListViewModels {
             self.addWithArgs = function(args?: PersonList.AddArgs) {
                 if (!args) args = self.addArgs;
                 self.add(args.numberOne(), args.numberTwo());
-                self.add(args.numberOne(), args.numberTwo());
             }
 
             
@@ -561,14 +560,14 @@ module ListViewModels {
     export namespace PersonList {
         // Classes for use in method calls to support data binding for input for arguments
         export class AddArgs {
-            public numberOne = ko.observable(null);
-            public numberTwo = ko.observable(null);
+            public numberOne: KnockoutObservable<number> = ko.observable(null);
+            public numberTwo: KnockoutObservable<number> = ko.observable(null);
         }
         export class NamesStartingWithArgs {
-            public characters = ko.observable(null);
+            public characters: KnockoutObservable<string> = ko.observable(null);
         }
         export class NamesStartingWithPublicArgs {
-            public characters = ko.observable(null);
+            public characters: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

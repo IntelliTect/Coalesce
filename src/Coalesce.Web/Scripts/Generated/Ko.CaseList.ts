@@ -307,7 +307,6 @@ module ListViewModels {
             self.getAllOpenCasesWithArgs = function(args?: CaseList.GetAllOpenCasesArgs) {
                 if (!args) args = self.getAllOpenCasesArgs;
                 self.getAllOpenCases(args.x(), args.y());
-                self.getAllOpenCases(args.x(), args.y());
             }
 
             
@@ -317,8 +316,8 @@ module ListViewModels {
     export namespace CaseList {
         // Classes for use in method calls to support data binding for input for arguments
         export class GetAllOpenCasesArgs {
-            public x = ko.observable(null);
-            public y = ko.observable(null);
+            public x: KnockoutObservable<number> = ko.observable(null);
+            public y: KnockoutObservable<number> = ko.observable(null);
         }
     }
 }

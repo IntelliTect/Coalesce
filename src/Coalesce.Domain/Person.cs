@@ -147,7 +147,7 @@ namespace Coalesce.Domain
         /// </summary>
         /// <param name="addition"></param>
         /// <returns></returns>
-        public void FixName(string addition)
+        public void ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");
         }

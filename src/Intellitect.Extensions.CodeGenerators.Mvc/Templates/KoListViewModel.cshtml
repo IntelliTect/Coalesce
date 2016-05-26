@@ -249,7 +249,7 @@ module @moduleName {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && !m.IsInternalUse))
             {
             <text>
-            self.@method.JsVariable = function(@method.TsParameters){
+            self.@method.JsVariable = function(@method.TsParameters, reload: Boolean = true){
                 self.@(method.JsVariableIsLoading)(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "@(method.ApiUrl)",
@@ -268,7 +268,11 @@ module @moduleName {
                         @:    callback();
                         @:}
                         }else{
-                        @:self.load(callback);
+                        @:if (reload) {
+                        @:  self.load(callback);
+                        @:} else if ($.isFunction(callback)) {
+                        @:  callback(data);
+                        @:}
                         }
 					} else {
 						self.@(method.JsVariableWasSuccessful)(false);

@@ -282,7 +282,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 if (pattern != null) validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
                 if (step.HasValue) validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
                 if (isEmail.HasValue && isEmail.Value) validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
-                if (isPhoneUs.HasValue && isPhoneUs.Value) validations.Add($"isPhoneUs: {KoValidationOptions("true", errorMessage)}");
+                if (isPhoneUs.HasValue && isPhoneUs.Value) validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
                 if (equal != null) validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");
                 if (notEqual != null) validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
                 if (isDate.HasValue && isDate.Value) validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");

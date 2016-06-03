@@ -543,6 +543,8 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             GenerateTSReferenceFile(scriptOutputPath);
 
             //await GenerateTypeScriptDocs(scriptOutputPath);
+
+            Console.WriteLine("-- Generation Complete --");
         }
 
         private async Task GenerateTypeScriptDocs(string path)

@@ -107,7 +107,8 @@ module ViewModels {
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);  // Many to Many Collection
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
         public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam> = ko.observable(null);
-        
+
+       
         // True if the object is loading.
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
         // URL to a stock editor for this object.
@@ -815,20 +816,25 @@ module ViewModels {
             // Method Implementations
 
 
-
-			// This stuff needs to be done after everything else is set up.
-			// Complex Type Observables
+            // This stuff needs to be done after everything else is set up.
+            // Complex Type Observables
 
 			// Make sure everything is defined before we call this.
 			setupSubscriptions();
 
-			if (newItem) {
+		    if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem);
 			}
 
+
+
 		}
 	}
+
+
+
+
 
     export namespace Case {
         export enum StatusEnum {
@@ -838,5 +844,7 @@ module ViewModels {
             ClosedNoSolution = 3,
             Cancelled = 4,
         };
+
+        // Classes for use in method calls to support data binding for input for arguments
     }
 }

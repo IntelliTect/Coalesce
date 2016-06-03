@@ -117,6 +117,16 @@ module @moduleName {
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         @:// Presents a series of input boxes to call the server method (@method.Name)
         @:public @method.JsVariableUi: () => void;
+        @:// Presents a modal with input boxes to call the server method (@method.Name)
+        @:public @method.JsVariableModal: () => void;
+        // Variable for method arguments to allow for easy binding
+        @if (method.ClientParameters.Any())
+        {
+        @:public @method.JsVariableWithArgs: (args?: @(model.ListViewModelClassName).@(method.ArgsName)) => void;
+        @:
+        @:public @(method.JsVariableArgs) = new @(model.ListViewModelClassName).@(method.ArgsName)(); 
+        }
+
         @:
         }
         constructor() {
@@ -239,7 +249,7 @@ module @moduleName {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && !m.IsInternalUse))
             {
             <text>
-            self.@method.JsVariable = function(@method.TsParameters){
+            self.@method.JsVariable = function(@method.TsParameters, reload: Boolean = true){
                 self.@(method.JsVariableIsLoading)(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "@(method.ApiUrl)",
@@ -258,7 +268,11 @@ module @moduleName {
                         @:    callback();
                         @:}
                         }else{
-                        @:self.load(callback);
+                        @:if (reload) {
+                        @:  self.load(callback);
+                        @:} else if ($.isFunction(callback)) {
+                        @:  callback(data);
+                        @:}
                         }
 					} else {
 						self.@(method.JsVariableWasSuccessful)(false);
@@ -278,10 +292,47 @@ module @moduleName {
                 {
                 @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
                 }
-                self.@(method.JsVariable)(@(method.JsArguments));
+                self.@(method.JsVariable)(@(method.JsArguments()));
             }
+
+            self.@method.JsVariableModal = function() {
+                @if (method.ClientParameters.Any()) { 
+                @:$('#method-@method.Name').modal();
+                @:$('#method-@method.Name').on('shown.bs.modal', function() {
+                    @:$('#method-@method.Name .btn-ok').click(function()
+                    @:{
+                        @:self.@(method.JsVariableWithArgs)();
+                        @:$('#method-@method.Name').modal('hide');
+                    @:});
+                @:});
+                }
+                else
+                {
+                    @:self.@(method.JsVariableUi)();
+                }
+            }
+            
+            @if (method.ClientParameters.Any()) { 
+            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ListViewModelClassName).@(method.ArgsName)) {
+                @:if (!args) args = self.@(method.JsVariableArgs);
+                @:self.@(method.JsVariable)(@(method.JsArguments("args")));
+            @:}
+            }
+
             </text>
             }
+        }
+    }
+
+    export namespace @(model.ListViewModelClassName) {
+        // Classes for use in method calls to support data binding for input for arguments
+        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && f.IsStatic && !f.IsInternalUse)){
+        @:export class @(method.ArgsName) {
+            @foreach (var arg in method.ClientParameters)
+            {
+            @:public @(arg.CsArgumentName): @(arg.Type.TsKnockoutType) = @(arg.Type.JsKnockoutType);
+            }
+        @:}
         }
     }
 }

@@ -185,15 +185,19 @@ namespace Intellitect.ComponentModel.Controllers
                     }
                 }
 
+                // Allow for security trimming
+                // TODO: This needs to be adjusted to handle paging correctly.
+                var result3 = result2.Where(f => BeforeGet(f));
+
                 // Select it into the object we want
-                IEnumerable<TDto> result3 = result2.ToList().Select(MapObjToDto).ToList();
+                IEnumerable<TDto> result4 = result3.ToList().Select(MapObjToDto).ToList();
 
                 if (listParameters.FieldList.Any())
                 {
-                    return new ListResult(result3.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
+                    return new ListResult(result4.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
                         page, totalCount, pageSize);
                 }
-                return new ListResult(result3, page, totalCount, pageSize);
+                return new ListResult(result4, page, totalCount, pageSize);
             }
             catch (Exception ex)
             {
@@ -368,6 +372,10 @@ namespace Intellitect.ComponentModel.Controllers
             // Get the item and get external data.
             var item = (await DataSource.Includes(includes).FindItemAsync(id)).IncludeExternal(includes);
 
+            if (!BeforeGet(item))
+            {
+                return null;
+            }
             // Exclude data
             if (item is IExcludable)
             {
@@ -377,6 +385,10 @@ namespace Intellitect.ComponentModel.Controllers
             var dto = MapObjToDto(item);
 
             return dto;
+        }
+
+        protected virtual bool BeforeGet(T obj) {
+            return true;
         }
 
         protected bool DeleteImplementation(string id)

@@ -72,7 +72,6 @@ namespace Coalesce.Domain
         {
             return entities.Include(c => c.ReportedBy)
                 .Include(c => c.AssignedTo)
-                .Include(c => c.CaseProducts)
                 .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product);
             //return entities.Include(c => c.CaseProducts);
         }

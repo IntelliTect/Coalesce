@@ -82,6 +82,8 @@ module ListViewModels {
         public getAllOpenCasesCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCasesCount)
         public getAllOpenCasesCountUi: () => void;
+        // Presents a modal with input boxes to call the server method (GetAllOpenCasesCount)
+        public getAllOpenCasesCountModal: () => void;
         
         // Call server method (GetAllOpenCases)
         public getAllOpenCases: (x: number, y: number, callback?: any) => void;
@@ -95,6 +97,11 @@ module ListViewModels {
         public getAllOpenCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCases)
         public getAllOpenCasesUi: () => void;
+        // Presents a modal with input boxes to call the server method (GetAllOpenCases)
+        public getAllOpenCasesModal: () => void;
+        public getAllOpenCasesWithArgs: (args?: CaseList.GetAllOpenCasesArgs) => void;
+        
+        public getAllOpenCasesArgs = new CaseList.GetAllOpenCasesArgs(); 
         
         constructor() {
             var self = this; 
@@ -244,6 +251,12 @@ module ListViewModels {
             self.getAllOpenCasesCountUi = function() {
                 self.getAllOpenCasesCount();
             }
+
+            self.getAllOpenCasesCountModal = function() {
+                    self.getAllOpenCasesCountUi();
+            }
+            
+
             
 
             self.getAllOpenCases = function(x: number, y: number, callback?: any){
@@ -279,7 +292,32 @@ module ListViewModels {
                 var y: number = parseFloat(prompt('Y'));
                 self.getAllOpenCases(x, y);
             }
+
+            self.getAllOpenCasesModal = function() {
+                $('#method-GetAllOpenCases').modal();
+                $('#method-GetAllOpenCases').on('shown.bs.modal', function() {
+                    $('#method-GetAllOpenCases .btn-ok').click(function()
+                    {
+                        self.getAllOpenCasesWithArgs();
+                        $('#method-GetAllOpenCases').modal('hide');
+                    });
+                });
+            }
             
+            self.getAllOpenCasesWithArgs = function(args?: CaseList.GetAllOpenCasesArgs) {
+                if (!args) args = self.getAllOpenCasesArgs;
+                self.getAllOpenCases(args.x(), args.y());
+            }
+
+            
+        }
+    }
+
+    export namespace CaseList {
+        // Classes for use in method calls to support data binding for input for arguments
+        export class GetAllOpenCasesArgs {
+            public x: KnockoutObservable<number> = ko.observable(null);
+            public y: KnockoutObservable<number> = ko.observable(null);
         }
     }
 }

@@ -168,7 +168,7 @@
                 {
                     <tr>
                         <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: @method.JsVariableUi">@method.DisplayName</button>
+                            <button class="btn btn-default btn-xs" data-bind="click: @method.JsVariableModal" >@method.DisplayName</button>
                         </td>
                         <td>
                             <span class="" data-bind="text: @method.JsVariableResult"></span>
@@ -188,6 +188,37 @@
 </div>
 </div>
 
+
+@foreach (var method in model.Methods.Where(f => f.IsStatic && f.ClientParameters.Any())) { 
+<!-- Modal for method: @method.Name -->
+<div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">@method.Name.ToProperCase()</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: @(method.JsVariableArgs)">
+                @foreach(ParameterViewModel arg in method.ClientParameters)
+                {
+                <div class="form-group">
+                    <label class="col-md-4 control-label">@arg.Name.ToProperCase()</label>                
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" data-bind="value: @(arg.CsArgumentName)">
+                    </div>
+                </div>    
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-ok">OK</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+}
 
 @{
     @:@@section Scripts

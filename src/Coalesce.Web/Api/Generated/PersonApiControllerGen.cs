@@ -155,15 +155,15 @@ namespace Coalesce.Web.Api
         }
         
 
-        // Method: FixName
-        [HttpPost("FixName")]
+        // Method: ChangeSpacesToDashesInName
+        [HttpPost("ChangeSpacesToDashesInName")]
         
-        public virtual SaveResult<object> FixName (Int32 id, String addition){
+        public virtual SaveResult<object> ChangeSpacesToDashesInName (Int32 id){
             var result = new SaveResult<object>();
             try{
                 var item = DataSource.Includes().FindItem(id);
                 object objResult = null;
-                item.FixName(addition);
+                item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();
                 result.Object = objResult;
                 result.WasSuccessful = true;

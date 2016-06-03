@@ -277,12 +277,12 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 if (isRequired.HasValue && isRequired.Value) validations.Add($"required: {KoValidationOptions("true", errorMessage)}");
                 if (minValue.HasValue && minValue.Value != double.MaxValue) validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
                 if (maxValue.HasValue && maxValue.Value != double.MinValue) validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
-                if (minLength.HasValue && minLength.Value != int.MaxValue) validations.Add($"minLength: {KoValidationOptions(MinLength.Value.ToString(), errorMessage)}");
-                if (maxLength.HasValue && maxLength.Value != int.MinValue) validations.Add($"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), errorMessage)}");
+                if (minLength.HasValue && minLength.Value != int.MaxValue) validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
+                if (maxLength.HasValue && maxLength.Value != int.MinValue) validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
                 if (pattern != null) validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
                 if (step.HasValue) validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
                 if (isEmail.HasValue && isEmail.Value) validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
-                if (isPhoneUs.HasValue && isPhoneUs.Value) validations.Add($"isPhoneUs: {KoValidationOptions("true", errorMessage)}");
+                if (isPhoneUs.HasValue && isPhoneUs.Value) validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
                 if (equal != null) validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");
                 if (notEqual != null) validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
                 if (isDate.HasValue && isDate.Value) validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");

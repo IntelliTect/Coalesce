@@ -46,6 +46,9 @@ namespace Intellitect.ComponentModel.TypeDefinition
         public string JsVariableMessage { get { return Name.ToCamelCase() + "Message"; } }
         public string JsVariableWasSuccessful { get { return Name.ToCamelCase() + "WasSuccessful"; } }
         public string JsVariableUi { get { return Name.ToCamelCase() + "Ui"; } }
+        public string JsVariableModal { get { return Name.ToCamelCase() + "Modal"; } }
+        public string JsVariableArgs { get { return Name.ToCamelCase() + "Args"; } }
+        public string JsVariableWithArgs { get { return Name.ToCamelCase() + "WithArgs"; } }
 
         public string Comment { get { return Wrapper.Comment; } }
 
@@ -53,6 +56,12 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// Name of the property
         /// </summary>
         public string Name { get { return Wrapper.Name; } }
+
+        /// <summary>
+        /// Name of the class that is used for storing arguments on the client.
+        /// </summary>
+        public string ArgsName { get { return Wrapper.Name + "Args"; } }
+
 
         /// <summary>
         /// Name of the type
@@ -99,7 +108,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
         /// </summary>
-        public IEnumerable<ParameterViewModel> ClientParameters { get { return Wrapper.Parameters.Where(f=>!f.IsDI); } }
+        public IEnumerable<ParameterViewModel> ClientParameters { get { return Wrapper.Parameters.Where(f => !f.IsDI); } }
 
         /// <summary>
         /// Gets the TypeScript parameters for this method call.
@@ -110,7 +119,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
             {
                 string result = "";
                 result = string.Join(", ", ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
-                if (!string.IsNullOrWhiteSpace(result)) result = result +", " ;
+                if (!string.IsNullOrWhiteSpace(result)) result = result + ", ";
                 result = result + "callback?: any";
                 return result;
             }
@@ -149,14 +158,17 @@ namespace Intellitect.ComponentModel.TypeDefinition
 
 
         /// <summary>
-        /// Gets the js argments passed to this method call.
+        /// Gets the js arguments passed to this method call.
         /// </summary>
-        public string JsArguments
+        public string JsArguments(string obj = "")
         {
-            get
+            if (obj != "")
             {
-                var result = string.Join(", ", ClientParameters.Select(f => f.Name));
-                return result;
+                return string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name}()"));
+            }
+            else
+            {
+                return string.Join(", ", ClientParameters.Select(f => obj + f.Name));
             }
         }
 

@@ -179,7 +179,7 @@ namespace Intellitect.ComponentModel.Controllers
                 // Exclude certain data
                 if (new T() is IExcludable)
                 {
-                    foreach(var obj in result2)
+                    foreach (var obj in result2)
                     {
                         ((IExcludable)obj).Exclude(listParameters.Includes);
                     }
@@ -476,14 +476,11 @@ namespace Intellitect.ComponentModel.Controllers
                     // Get the key back.
                     if (item != null)
                     {
-                        if (typeof(T) == typeof(TDto))
+                        if (item is IExcludable)
                         {
-                            result.Object = item as TDto;
+                            ((IExcludable)item).Exclude(includes);
                         }
-                        else
-                        {
-                            result.Object = MapObjToDto(item);
-                        }
+                        result.Object = MapObjToDto(item);
                     }
                 }
                 else
@@ -499,7 +496,7 @@ namespace Intellitect.ComponentModel.Controllers
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
-            
+
             return result;
         }
 

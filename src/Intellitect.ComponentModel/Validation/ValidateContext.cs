@@ -39,7 +39,7 @@ namespace Intellitect.ComponentModel.Validation
                         assert.IsNotNull(prop.JsVariable, $"JS Variable is: {prop.JsVariable}");
                         assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type is: {prop.Type.TsKnockoutType}");
                         assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type is: {prop.Type.JsKnockoutType}");
-                        if (prop.IsPOCO && !prop.IsComplexType)
+                        if (prop.IsPOCO && !prop.IsComplexType && !prop.IsReadOnly)
                         {
                             assert.IsNotNull(prop.Object, "Has target object");
                             assert.IsNotNull(prop.ObjectIdPropertyName, "Has ID Property Name");

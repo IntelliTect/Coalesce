@@ -216,12 +216,14 @@ module ViewModels {
         // True if the server method (Rename) was successful.
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Rename)
-        public renameUi: () => void;
+        public renameUi: (callback?: any) => void;
         // Presents a modal with input boxes to call the server method (Rename)
-        public renameModal: () => void;
-        public renameWithArgs: (args?: Person.RenameArgs) => void;
-        
+        public renameModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public renameWithArgs: (args?: Person.RenameArgs, callback?: any) => void;
+        // Object that can be easily bound to fields to allow data entry for the method
         public renameArgs = new Person.RenameArgs(); 
+        
         // Call server method (ChangeSpacesToDashesInName)
         // Removes spaces from the name and puts in dashes
         public changeSpacesToDashesInName: (callback?: any) => void;
@@ -234,9 +236,11 @@ module ViewModels {
         // True if the server method (ChangeSpacesToDashesInName) was successful.
         public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameUi: () => void;
+        public changeSpacesToDashesInNameUi: (callback?: any) => void;
         // Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameModal: () => void;
+        public changeSpacesToDashesInNameModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        
 
 
 
@@ -463,84 +467,84 @@ module ViewModels {
 
 			// Loads an item.
 			self.load = function(id: any, callback?) {
-				if (!id) {
-					id = self.personId();
-				}
-				if (id) {
-					self.isLoading(true);
-					intellitect.utilities.showBusy();
+                if (!id) {
+                    id = self.personId();
+                }
+                if (id) {
+                    self.isLoading(true);
+                    intellitect.utilities.showBusy();
                     $.ajax({ method: "GET", url: areaUrl + "api/Person/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
-						.done(function(data) {
-							self.loadFromDto(data);
-							if ($.isFunction(callback)) callback(self);
-						})
-						.fail(function() {
-							alert("Could not get Person with id = " + id);
-						})
-						.always(function() {
-							intellitect.utilities.hideBusy();
-							self.isLoading(false);
-						});
-				}
-			};
+                        .done(function(data) {
+                            self.loadFromDto(data);
+                            if ($.isFunction(callback)) callback(self);
+                        })
+                        .fail(function() {
+                            alert("Could not get Person with id = " + id);
+                        })
+                        .always(function() {
+                            intellitect.utilities.hideBusy();
+                            self.isLoading(false);
+                        });
+                }
+            };
 
-			self.reload = function(callback) {
-				self.load(self.personId(), callback);
-			};
+            self.reload = function(callback) {
+                self.load(self.personId(), callback);
+            };
 
-			// Deletes the object after a confirmation box.
-			self.deleteItemWithConfirmation = function(callback, message) {
+            // Deletes the object after a confirmation box.
+            self.deleteItemWithConfirmation = function(callback, message) {
                 if (typeof message != 'string') {
                     message = "Delete this item?";
                 }
                 if (confirm(message)) {
-					self.deleteItem(callback);
-				}
-			};
+                    self.deleteItem(callback);
+                }
+            };
 
-			// Deletes the object
-			self.deleteItem = function(callback) {
-				var currentId = self.personId();
-				if (currentId){
+            // Deletes the object
+            self.deleteItem = function(callback) {
+                var currentId = self.personId();
+                if (currentId){
                 $.ajax({ method: "POST", url: areaUrl+ "api/Person/Delete/" + currentId, xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					if (data) {
-						self.errorMessage('');
-						// The object is now deleted. Call any callback.
-						for (var i in self.deleteCallbacks) {
-							self.deleteCallbacks[i](self);
-						}
-						// Remove it from the parent collection
-						if (self.parentCollection && self.parent) {
-							self.parent.isLoading(true);
-							self.parentCollection.splice(self.parentCollection().indexOf(self),1);
-							self.parent.isLoading(false);
-						}
-					} else {
-						self.errorMessage(data.Message);
-					}
-				})
-				.fail(function() {
-					alert("Could not delete the item.");
-				})
-				.always(function() {
-					if ($.isFunction(callback)) {
-						callback(callback);
-					}
-				});
-				}else{
-					// No ID has been assigned yet, just remove it.
-					if (self.parentCollection && self.parent) {
-						self.parent.isLoading(true);
-						self.parentCollection.splice(self.parentCollection().indexOf(self),1);
-						self.parent.isLoading(false);
-					}
-					if ($.isFunction(callback)) {
-						callback(callback);
-					}
-				}
-			};
-            
+                .done(function(data) {
+                    if (data) {
+                        self.errorMessage('');
+                        // The object is now deleted. Call any callback.
+                        for (var i in self.deleteCallbacks) {
+                            self.deleteCallbacks[i](self);
+                        }
+                        // Remove it from the parent collection
+                        if (self.parentCollection && self.parent) {
+                            self.parent.isLoading(true);
+                            self.parentCollection.splice(self.parentCollection().indexOf(self),1);
+                            self.parent.isLoading(false);
+                        }
+                    } else {
+                        self.errorMessage(data.Message);
+                    }
+                })
+                .fail(function() {
+                    alert("Could not delete the item.");
+                })
+                .always(function() {
+                    if ($.isFunction(callback)) {
+                        callback(callback);
+                    }
+                });
+                }else{
+                    // No ID has been assigned yet, just remove it.
+                    if (self.parentCollection && self.parent) {
+                        self.parent.isLoading(true);
+                        self.parentCollection.splice(self.parentCollection().indexOf(self),1);
+                        self.parent.isLoading(false);
+                    }
+                    if ($.isFunction(callback)) {
+                        callback(callback);
+                    }
+                }
+            };
+
             // Sets isSelected(true) on this object and clears on the rest of the items in the parentCollection. Returns true to bubble additional click events.
             self.selectSingle = function () {
                 if (self.parentCollection()) {
@@ -557,29 +561,29 @@ module ViewModels {
                 self.isSelected(!self.isSelected());
                 return true;
             }
-	
-			// Methods to add to child collections
+
+            // Methods to add to child collections
 
             self.addToCasesAssigned = function() {
                 var newItem = new Case();
-				newItem.parent = self;
-				newItem.parentCollection = self.casesAssigned;
-				newItem.isExpanded(true);
+                newItem.parent = self;
+                newItem.parentCollection = self.casesAssigned;
+                newItem.isExpanded(true);
                 newItem.assignedToId(self.personId());
                 self.casesAssigned.push(newItem);
                 return newItem;
-			}
+            }
             
 
             self.addToCasesReported = function() {
                 var newItem = new Case();
-				newItem.parent = self;
-				newItem.parentCollection = self.casesReported;
-				newItem.isExpanded(true);
+                newItem.parent = self;
+                newItem.parentCollection = self.casesReported;
+                newItem.isExpanded(true);
                 newItem.reportedById(self.personId());
                 self.casesReported.push(newItem);
                 return newItem;
-			}
+            }
             
 
             // List Object model for CasesAssigned. Allows for loading subsets of data.
@@ -615,101 +619,101 @@ module ViewModels {
                 }
             }
 
-			// Save a many-to-many collection
-			self.saveCollection = function(propertyName, childId, operation) {
-				var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
-				var currentId = self.personId();
+            // Save a many-to-many collection
+            self.saveCollection = function(propertyName, childId, operation) {
+                var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
+                var currentId = self.personId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/Person/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					if (data.WasSuccessful) {
-						self.errorMessage('');
-						self.loadFromDto(data.Object);
-						// The object is now saved. Call any callback.
-						for (var i in self.saveCallbacks) {
-							self.saveCallbacks[i](self);
-						}
-					} else {
-						self.errorMessage(data.Message);
+                .done(function(data) {
+                    if (data.WasSuccessful) {
+                        self.errorMessage('');
+                        self.loadFromDto(data.Object);
+                        // The object is now saved. Call any callback.
+                        for (var i in self.saveCallbacks) {
+                            self.saveCallbacks[i](self);
+                        }
+                    } else {
+                        self.errorMessage(data.Message);
                         self.validationIssues(data.ValidationIssues);
-					}
-				})
-				.fail(function() {
-					alert("Could not save the item.");
-				})
-				.always(function() {
-					// Nothing here yet.
-				});
-			};
+                    }
+                })
+                .fail(function() {
+                    alert("Could not save the item.");
+                })
+                .always(function() {
+                    // Nothing here yet.
+                });
+            };
 
-			// Call this function when the object is deleted.
-			self.onDelete = function(fn) {
-				if ($.isFunction(fn)) self.deleteCallbacks.push(fn);
-			};
-			self.onSave = function(fn) {
-				if ($.isFunction(fn)) self.saveCallbacks.push(fn);
-			};
+            // Call this function when the object is deleted.
+            self.onDelete = function(fn) {
+                if ($.isFunction(fn)) self.deleteCallbacks.push(fn);
+            };
+            self.onSave = function(fn) {
+                if ($.isFunction(fn)) self.saveCallbacks.push(fn);
+            };
 
-			// Saves the object is autoSave is true.
-			self.autoSave = function() {
-				if (!self.isLoading()){
-					self.isDirty(true);
-					if (self.isSavingAutomatically) {
-						// Batch saves.
-						if (!self.saveTimeout) {
-							self.saveTimeout = setTimeout(function() {
-								self.saveTimeout = 0;
-								// If we have a save in progress, wait...
-								if (self.isSaving()) {
-									self.autoSave();
-								}else{
-									self.save();
-								}
-							}, saveTimeoutInMs);
-						}
-					}
-				}
-			}
+            // Saves the object is autoSave is true.
+            self.autoSave = function() {
+                if (!self.isLoading()){
+                    self.isDirty(true);
+                    if (self.isSavingAutomatically) {
+                        // Batch saves.
+                        if (!self.saveTimeout) {
+                            self.saveTimeout = setTimeout(function() {
+                                self.saveTimeout = 0;
+                                // If we have a save in progress, wait...
+                                if (self.isSaving()) {
+                                    self.autoSave();
+                                }else{
+                                    self.save();
+                                }
+                            }, saveTimeoutInMs);
+                        }
+                    }
+                }
+            }
 
-			// Saves the object is autoSave is true.
-			self.autoSaveCollection = function(property, id, changeStatus) {
-				if (!self.isLoading()) {
-					// TODO: Eventually Batch saves for many-to-many collections.
-					if (changeStatus === 'added') {
-						self.saveCollection(property, id, "added");
-					}else if (changeStatus === 'deleted') {
-						self.saveCollection(property, id, "deleted");
-					}
-				}
-			}
+            // Saves the object is autoSave is true.
+            self.autoSaveCollection = function(property, id, changeStatus) {
+                if (!self.isLoading()) {
+                    // TODO: Eventually Batch saves for many-to-many collections.
+                    if (changeStatus === 'added') {
+                        self.saveCollection(property, id, "added");
+                    }else if (changeStatus === 'deleted') {
+                        self.saveCollection(property, id, "deleted");
+                    }
+                }
+            }
 
-			// Save on changes
-			function setupSubscriptions() {
-        	self.title.subscribe(self.autoSave);
-        	self.firstName.subscribe(self.autoSave);
-        	self.lastName.subscribe(self.autoSave);
-        	self.email.subscribe(self.autoSave);
-        	self.gender.subscribe(self.autoSave);
-        	self.casesAssigned.subscribe(self.autoSave);
-        	self.casesReported.subscribe(self.autoSave);
-        	self.birthDate.subscribe(self.autoSave);
-        	self.lastBath.subscribe(self.autoSave);
-        	self.nextUpgrade.subscribe(self.autoSave);
-        	self.personStatsId.subscribe(self.autoSave);
-        	self.timeZone.subscribe(self.autoSave);
-        	self.companyId.subscribe(self.autoSave);
-        	self.company.subscribe(self.autoSave);
-            			}
+            // Save on changes
+            function setupSubscriptions() {
+            self.title.subscribe(self.autoSave);
+            self.firstName.subscribe(self.autoSave);
+            self.lastName.subscribe(self.autoSave);
+            self.email.subscribe(self.autoSave);
+            self.gender.subscribe(self.autoSave);
+            self.casesAssigned.subscribe(self.autoSave);
+            self.casesReported.subscribe(self.autoSave);
+            self.birthDate.subscribe(self.autoSave);
+            self.lastBath.subscribe(self.autoSave);
+            self.nextUpgrade.subscribe(self.autoSave);
+            self.personStatsId.subscribe(self.autoSave);
+            self.timeZone.subscribe(self.autoSave);
+            self.companyId.subscribe(self.autoSave);
+            self.company.subscribe(self.autoSave);
+                        }
 
-			// Create variables for ListEditorApiUrls
-			self.CasesAssignedListUrl = ko.computed(function()
-			{
-				return areaUrl + 'Case/table?AssignedToId=' + self.personId();
-			});
-			self.CasesReportedListUrl = ko.computed(function()
-			{
-				return areaUrl + 'Case/table?ReportedById=' + self.personId();
-			});
-			// Create loading function for Valid Values
+            // Create variables for ListEditorApiUrls
+            self.CasesAssignedListUrl = ko.computed(function()
+            {
+                return areaUrl + 'Case/table?AssignedToId=' + self.personId();
+            });
+            self.CasesReportedListUrl = ko.computed(function()
+            {
+                return areaUrl + 'Case/table?ReportedById=' + self.personId();
+            });
+            // Create loading function for Valid Values
 
             self.loadPersonStatsValidValues = function(callback) {
                 self.loadingValidValues++;
@@ -751,52 +755,40 @@ module ViewModels {
             }
             
 
-			// Supply methods to pop up a model editor
-			self.showEditor = function(){
-				// Close any existing modal
-				$('#modal-dialog').modal('hide');
-				// Get new modal content
-				intellitect.utilities.showBusy();
+            // Supply methods to pop up a model editor
+            self.showEditor = function(){
+                // Close any existing modal
+                $('#modal-dialog').modal('hide');
+                // Get new modal content
+                intellitect.utilities.showBusy();
                 $.ajax({ method: "GET", url: areaUrl + 'Person/EditorHtml', data: {simple: true}, xhrFields: { withCredentials: true } })
-				.done(function(data){
-					// Add to DOM
-					intellitect.webApi.setupModal('Edit Person', data, true, false);
-					// Data bind
-					var lastValue = self.isSavingAutomatically;
-					self.isSavingAutomatically = false;
-					ko.applyBindings(self, document.getElementById("modal-dialog"));
-					self.isSavingAutomatically = lastValue;
-					// Show the dialog
-					$('#modal-dialog').modal('show');
-				})
-				.always(function() {
-					intellitect.utilities.hideBusy();
-				});
-			}
+                .done(function(data){
+                    // Add to DOM
+                    intellitect.webApi.setupModal('Edit Person', data, true, false);
+                    // Data bind
+                    var lastValue = self.isSavingAutomatically;
+                    self.isSavingAutomatically = false;
+                    ko.applyBindings(self, document.getElementById("modal-dialog"));
+                    self.isSavingAutomatically = lastValue;
+                    // Show the dialog
+                    $('#modal-dialog').modal('show');
+                })
+                .always(function() {
+                    intellitect.utilities.hideBusy();
+                });
+            }
 
-			self.showCompanyEditor = function() { 
-				if (!self.company()) {
-					self.company(new Company());
-				}
-				self.company().showEditor() 
-			};
+            self.showCompanyEditor = function() {
+                if (!self.company()) {
+                    self.company(new Company());
+                }
+                self.company().showEditor()
+            };
 
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
-			    var loadingCount = 0;
+                var loadingCount = 0;
                 var obj;
-                // See if self.personStats needs to be loaded.
-                if (self.personStats() == null && self.personStatsId() != null){
-                    loadingCount++;
-                    obj = new PersonStats();
-                    obj.load(self.personStatsId(), function() {
-                        loadingCount--;
-                        self.personStats(obj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
                 // See if self.company needs to be loaded.
                 if (self.company() == null && self.companyId() != null){
                     loadingCount++;
@@ -816,36 +808,36 @@ module ViewModels {
 
 
 
-			// Load all the valid values in parallel.
-			self.loadValidValues = function(callback) {
-			    self.loadingValidValues = 0;
-			    self.loadPersonStatsValidValues(callback);
-			    self.loadCompanyValidValues(callback);
-			};
+            // Load all the valid values in parallel.
+            self.loadValidValues = function(callback) {
+                self.loadingValidValues = 0;
+                self.loadPersonStatsValidValues(callback);
+                self.loadCompanyValidValues(callback);
+            };
 
-			// Enumeration Lookups.
-			self.titleText = ko.computed(function() {
-				for(var i=0;i < self.titleValues.length; i++){
-					if (self.titleValues[i].id == self.title()){
-						return self.titleValues[i].value;
-					}
-				}
-			});
-			self.genderText = ko.computed(function() {
-				for(var i=0;i < self.genderValues.length; i++){
-					if (self.genderValues[i].id == self.gender()){
-						return self.genderValues[i].value;
-					}
-				}
-			});
+            // Enumeration Lookups.
+            self.titleText = ko.computed(function() {
+                for(var i=0;i < self.titleValues.length; i++){
+                    if (self.titleValues[i].id == self.title()){
+                        return self.titleValues[i].value;
+                    }
+                }
+            });
+            self.genderText = ko.computed(function() {
+                for(var i=0;i < self.genderValues.length; i++){
+                    if (self.genderValues[i].id == self.gender()){
+                        return self.genderValues[i].value;
+                    }
+                }
+            });
 
             // Code to handle saving flags.
             // Returns true if this object or any of its children is saving.
             self.isSavingWithChildren = ko.computed(function() {
-				if (self.isSaving()) return true;
+                if (self.isSaving()) return true;
                 if (self.savingChildCount() > 0 ) return true;
                 return false;
-			});
+            });
             // Handles setting the parent savingChildChange
             self.isSaving.subscribe(function(newValue: boolean){
                 if (self.parent && $.isFunction(self.parent.savingChildChange)){
@@ -873,109 +865,113 @@ module ViewModels {
 
             // Method Implementations
 
-            self.rename = function(addition: String, callback?: any){
+            self.rename = function(addition: String, callback?: any, reload: Boolean = true){
                 self.renameIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/Rename",
                          data: {
                         id: self.myId, 
                         addition: addition
-                    }, 
+                    },
                          xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.isDirty(false);
-					if (data.WasSuccessful) {
-						self.renameMessage('');
-						self.renameWasSuccessful(true);
-						self.renameResult(data.Object);
+                .done(function(data) {
+                    self.isDirty(false);
+                    if (data.WasSuccessful) {
+                        self.renameMessage('');
+                        self.renameWasSuccessful(true);
+                        self.renameResult(data.Object);
                         // The return type is the type of the object, load it.
                         self.loadFromDto(data.Object)
                         if ($.isFunction(callback)) {
                             callback();
                         }
-					} else {
-						self.renameWasSuccessful(false);
-						self.renameMessage(data.Message);
-					}
-				})
-				.fail(function() {
-					alert("Could not call method rename");
-				})
-				.always(function() {
+                    } else {
+                        self.renameWasSuccessful(false);
+                        self.renameMessage(data.Message);
+                    }
+                })
+                .fail(function() {
+                    alert("Could not call method rename");
+                })
+                .always(function() {
                     self.renameIsLoading(false);
-				});
+                });
             }
             
-            self.renameUi = function() {
+            self.renameUi = function(callback?: any) {
                 var addition: String = prompt('Addition');
-                self.rename(addition);
+                self.rename(addition, callback);
             }
-            self.renameModal = function() {
+            self.renameModal = function(callback?: any) {
                 $('#method-Rename').modal();
                 $('#method-Rename').on('shown.bs.modal', function() {
                     $('#method-Rename .btn-ok').click(function()
                     {
-                        self.renameWithArgs();
+                        self.renameWithArgs(null, callback);
                         $('#method-Rename').modal('hide');
                     });
                 });
             }
-            self.renameWithArgs = function(args?: Person.RenameArgs) {
+            self.renameWithArgs = function(args?: Person.RenameArgs, callback?: any) {
                 if (!args) args = self.renameArgs;
-                self.rename(args.addition());
+                self.rename(args.addition(), callback);
             }
 
-            self.changeSpacesToDashesInName = function(callback?: any){
+            self.changeSpacesToDashesInName = function(callback?: any, reload: Boolean = true){
                 self.changeSpacesToDashesInNameIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/ChangeSpacesToDashesInName",
                          data: {
                         id: self.myId
-                    }, 
+                    },
                          xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.isDirty(false);
-					if (data.WasSuccessful) {
-						self.changeSpacesToDashesInNameMessage('');
-						self.changeSpacesToDashesInNameWasSuccessful(true);
-						self.changeSpacesToDashesInNameResult(data.Object);
-                        self.reload(callback);
-					} else {
-						self.changeSpacesToDashesInNameWasSuccessful(false);
-						self.changeSpacesToDashesInNameMessage(data.Message);
-					}
-				})
-				.fail(function() {
-					alert("Could not call method changeSpacesToDashesInName");
-				})
-				.always(function() {
+                .done(function(data) {
+                    self.isDirty(false);
+                    if (data.WasSuccessful) {
+                        self.changeSpacesToDashesInNameMessage('');
+                        self.changeSpacesToDashesInNameWasSuccessful(true);
+                        self.changeSpacesToDashesInNameResult(data.Object);
+                        if (reload) {
+                          self.reload(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
+                    } else {
+                        self.changeSpacesToDashesInNameWasSuccessful(false);
+                        self.changeSpacesToDashesInNameMessage(data.Message);
+                    }
+                })
+                .fail(function() {
+                    alert("Could not call method changeSpacesToDashesInName");
+                })
+                .always(function() {
                     self.changeSpacesToDashesInNameIsLoading(false);
-				});
+                });
             }
             
-            self.changeSpacesToDashesInNameUi = function() {
-                self.changeSpacesToDashesInName();
+            self.changeSpacesToDashesInNameUi = function(callback?: any) {
+                self.changeSpacesToDashesInName(callback);
             }
-            self.changeSpacesToDashesInNameModal = function() {
-                    self.changeSpacesToDashesInNameUi();
+            self.changeSpacesToDashesInNameModal = function(callback?: any) {
+                    self.changeSpacesToDashesInNameUi(callback);
             }
 
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-			// Make sure everything is defined before we call this.
-			setupSubscriptions();
+            // Make sure everything is defined before we call this.
+            setupSubscriptions();
 
-		    if (newItem) {
+            if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem);
-			}
+            }
 
 
 
-		}
-	}
+        }
+    }
 
 
 

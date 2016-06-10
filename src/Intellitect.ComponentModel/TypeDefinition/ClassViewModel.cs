@@ -118,7 +118,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                     _Properties = new List<PropertyViewModel>();
                     foreach (var pw in Wrapper.Properties)
                     {
-                        if (_Properties.Any(f=>f.Name == pw.Name))
+                        if (_Properties.Any(f => f.Name == pw.Name))
                         {
                             // This is a duplicate. Keep the one that isn't virtual
                             if (!pw.IsVirtual)
@@ -129,7 +129,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                         }
                         else
                         {
-                        _Properties.Add(new PropertyViewModel(pw, this));
+                            _Properties.Add(new PropertyViewModel(pw, this));
                         }
                     }
 
@@ -230,7 +230,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                         result.Add(
                             new OrderByInformation()
                             {
-                                FieldName = Properties.First(f=>f.IsPrimaryKey).Name,
+                                FieldName = Properties.First(f => f.IsPrimaryKey).Name,
                                 OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                                 FieldOrder = 1
                             });
@@ -246,24 +246,56 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public ICollection<PropertyViewModel> SearchProperties
+        public Dictionary<string, PropertyViewModel> SearchProperties
         {
             get
             {
-                var result = Properties.Where(f => f.IsSearch).ToList();
-                if (!result.Any())
+                var searchProperties = Properties.Where(f => f.IsSearch).ToList();
+                var result = new Dictionary<string, PropertyViewModel>();
+                if (searchProperties.Any())
                 {
-                    result = Properties.Where(
-                        f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped).ToList();
+                    // Process these items to make sure we have things we can search on.
+                    foreach (var prop in searchProperties)
+                    {
+                        if (prop.Type.HasClassViewModel)
+                        {
+                            // Remove this item and add the child's search items with a prepended property name
+                            var childResult = prop.Type.ClassViewModel.Properties.Where(f => f.IsSearch).ToList();
+                            foreach (var childProp in childResult)
+                            {
+                                result.Add($"{prop.Name}.{childProp.Name}", childProp);
+                            }
+                        }else
+                        {
+                            result.Add(prop.Name, prop);
+                        }
+                    }
+                }
+                else
+                {
+                    var prop = Properties.FirstOrDefault(
+                        f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
+                    if (prop != null)
+                    {
+                        result.Add(prop.Name, prop);
+                    }
                 }
                 if (!result.Any())
                 {
-                    result = Properties.Where(
-                        f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped).ToList();
+                    var prop = Properties.FirstOrDefault(
+                        f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
+                    if (prop != null)
+                    {
+                        result.Add(prop.Name, prop);
+                    }
                 }
                 if (!result.Any())
                 {
-                    result = Properties.Where(f => f.IsPrimaryKey).ToList();
+                    var prop = Properties.FirstOrDefault(f=>f.IsPrimaryKey);
+                    if (prop != null)
+                    {
+                        result.Add(prop.Name, prop);
+                    }
                 }
                 return result;
             }
@@ -458,7 +490,9 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// <summary>
         /// Returns true if any of the properties allow for a save when there is a validation issue. (warnings)
         /// </summary>
-        public bool ClientValidationAllowSave { get
+        public bool ClientValidationAllowSave
+        {
+            get
             {
                 return Properties.Any(f => f.ClientValidationAllowSave);
             }

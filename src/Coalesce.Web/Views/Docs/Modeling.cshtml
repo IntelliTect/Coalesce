@@ -135,6 +135,7 @@
 </code></pre>
 <p>The Search attribute has two optional parameters: SearchMethod and IsSplitOnSpaces. SearchMethod specifies whether the search will be a contains or a begins with. The default is begins with. Note that standard indexing can be used to speed up begins with searches. If IsSplitOnSpaces is true, each word will be searched independently. This is useful when searching for a full name across two or more fields. In the above example, using IsSplitOnSpaces: true, would likely provide more intuitive behavior as it will search both first name and last name for each value entered. </p>
 <br />
+<p>Additionally, you can add the Search annotation to a child object. This will search the searchable fields of child. </p>
 
 <h4>Default Text for List Boxes</h4>
 <p>When selecting an object from a drop down list, it is important to be able to specify the text to be displayed for each object in the list. Like the search, this will use a property with the name of 'Name' first and then the ID if one isn't found. You can use the attribute [ListText] to specify which field to use. This is often a calculated field.</p>
@@ -182,6 +183,8 @@
 
 <h3>Methods</h3>
 <p>Any public methods you place on your POCO classes will get built into your view models. There are two main types of methods: instance and static.</p>
+<p>For each method several TypeScript methods will be created. Additionally if there are arguments, an class with the type of [name]Args will be created. The main TypeScript will have a property for each of these classes that can be easily bound to.</p>
+
 
 <h4>Instance Methods</h4>
 <p>Instance methods exist on an instance of an object and should use information contained in the object during the execution of the method. These methods are created as functions on the object's view model on the client side. The client view model will actually have several observable properties created for you. The example below is for a method called Move that takes a single parameter 'int feet' and returns a string.</p>
@@ -193,6 +196,8 @@
 <dl style="margin-left: 20px;">
     <dt>move</dt>
     <dd>Function that takes a number and a callback. This callback function is called when the call is complete.</dd>
+    <dt>moveWithArgs</dt>
+    <dd>Function that takes an object that contains all the parameters. Object is of type [Name]Args which is included as a sub-class on this class. If null, the built in instance of this class will be used. This is named [name]Args</dd>
     <dt>moveResult</dt>
     <dd>Observable with the result of the method call. This can be data bound to show the result.</dd>
     <dt>moveIsLoading</dt>
@@ -202,7 +207,9 @@
     <dt>moveWasSuccessful</dt>
     <dd>Observable boolean with true if the method was successful, or false if an exception occurred.</dd>
     <dt>moveUi</dt>
-    <dd>Simple interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
+    <dd>Simple interface using JavaScript input boxes to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
+    <dt>moveModal</dt>
+    <dd>Simple modal interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
 </dl>
 <p>Additionally, if the method has a parameter of type ClaimsPrincipal, the current user will be added to the method call automatically. This does not appear on the client side. Also, if the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method.</p>
 <br />
@@ -218,6 +225,8 @@
 <dl style="margin-left: 20px;">
     <dt>namesStartingWith</dt>
     <dd>Function that takes a string and a callback. This callback function is called when the call is complete.</dd>
+    <dt>namesStartingWithWithArgs</dt>
+    <dd>Function that takes an object that contains all the parameters. Object is of type [Name]Args which is included as a sub-class on this class. If null, the built in instance of this class will be used. This is named [name]Args</dd>
     <dt>namesStartingWithResult</dt>
     <dd>Observable with the result of the method call. This can be data bound to show the result.</dd>
     <dt>namesStartingWithIsLoading</dt>
@@ -228,6 +237,8 @@
     <dd>Observable boolean with true if the method was successful, or false if an exception occurred.</dd>
     <dt>namesStartingWithUi</dt>
     <dd>Simple interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
+    <dt>namesStartingWithModal</dt>
+    <dd>Simple modal interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
 </dl>
 
 <h4>Static List Methods</h4>

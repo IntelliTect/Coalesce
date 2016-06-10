@@ -297,84 +297,84 @@ module ViewModels {
 
 			// Loads an item.
 			self.load = function(id: any, callback?) {
-				if (!id) {
-					id = self.companyId();
-				}
-				if (id) {
-					self.isLoading(true);
-					intellitect.utilities.showBusy();
+                if (!id) {
+                    id = self.companyId();
+                }
+                if (id) {
+                    self.isLoading(true);
+                    intellitect.utilities.showBusy();
                     $.ajax({ method: "GET", url: areaUrl + "api/Company/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
-						.done(function(data) {
-							self.loadFromDto(data);
-							if ($.isFunction(callback)) callback(self);
-						})
-						.fail(function() {
-							alert("Could not get Company with id = " + id);
-						})
-						.always(function() {
-							intellitect.utilities.hideBusy();
-							self.isLoading(false);
-						});
-				}
-			};
+                        .done(function(data) {
+                            self.loadFromDto(data);
+                            if ($.isFunction(callback)) callback(self);
+                        })
+                        .fail(function() {
+                            alert("Could not get Company with id = " + id);
+                        })
+                        .always(function() {
+                            intellitect.utilities.hideBusy();
+                            self.isLoading(false);
+                        });
+                }
+            };
 
-			self.reload = function(callback) {
-				self.load(self.companyId(), callback);
-			};
+            self.reload = function(callback) {
+                self.load(self.companyId(), callback);
+            };
 
-			// Deletes the object after a confirmation box.
-			self.deleteItemWithConfirmation = function(callback, message) {
+            // Deletes the object after a confirmation box.
+            self.deleteItemWithConfirmation = function(callback, message) {
                 if (typeof message != 'string') {
                     message = "Delete this item?";
                 }
                 if (confirm(message)) {
-					self.deleteItem(callback);
-				}
-			};
+                    self.deleteItem(callback);
+                }
+            };
 
-			// Deletes the object
-			self.deleteItem = function(callback) {
-				var currentId = self.companyId();
-				if (currentId){
+            // Deletes the object
+            self.deleteItem = function(callback) {
+                var currentId = self.companyId();
+                if (currentId){
                 $.ajax({ method: "POST", url: areaUrl+ "api/Company/Delete/" + currentId, xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					if (data) {
-						self.errorMessage('');
-						// The object is now deleted. Call any callback.
-						for (var i in self.deleteCallbacks) {
-							self.deleteCallbacks[i](self);
-						}
-						// Remove it from the parent collection
-						if (self.parentCollection && self.parent) {
-							self.parent.isLoading(true);
-							self.parentCollection.splice(self.parentCollection().indexOf(self),1);
-							self.parent.isLoading(false);
-						}
-					} else {
-						self.errorMessage(data.Message);
-					}
-				})
-				.fail(function() {
-					alert("Could not delete the item.");
-				})
-				.always(function() {
-					if ($.isFunction(callback)) {
-						callback(callback);
-					}
-				});
-				}else{
-					// No ID has been assigned yet, just remove it.
-					if (self.parentCollection && self.parent) {
-						self.parent.isLoading(true);
-						self.parentCollection.splice(self.parentCollection().indexOf(self),1);
-						self.parent.isLoading(false);
-					}
-					if ($.isFunction(callback)) {
-						callback(callback);
-					}
-				}
-			};
-            
+                .done(function(data) {
+                    if (data) {
+                        self.errorMessage('');
+                        // The object is now deleted. Call any callback.
+                        for (var i in self.deleteCallbacks) {
+                            self.deleteCallbacks[i](self);
+                        }
+                        // Remove it from the parent collection
+                        if (self.parentCollection && self.parent) {
+                            self.parent.isLoading(true);
+                            self.parentCollection.splice(self.parentCollection().indexOf(self),1);
+                            self.parent.isLoading(false);
+                        }
+                    } else {
+                        self.errorMessage(data.Message);
+                    }
+                })
+                .fail(function() {
+                    alert("Could not delete the item.");
+                })
+                .always(function() {
+                    if ($.isFunction(callback)) {
+                        callback(callback);
+                    }
+                });
+                }else{
+                    // No ID has been assigned yet, just remove it.
+                    if (self.parentCollection && self.parent) {
+                        self.parent.isLoading(true);
+                        self.parentCollection.splice(self.parentCollection().indexOf(self),1);
+                        self.parent.isLoading(false);
+                    }
+                    if ($.isFunction(callback)) {
+                        callback(callback);
+                    }
+                }
+            };
+
             // Sets isSelected(true) on this object and clears on the rest of the items in the parentCollection. Returns true to bubble additional click events.
             self.selectSingle = function () {
                 if (self.parentCollection()) {
@@ -391,18 +391,18 @@ module ViewModels {
                 self.isSelected(!self.isSelected());
                 return true;
             }
-	
-			// Methods to add to child collections
+
+            // Methods to add to child collections
 
             self.addToEmployees = function() {
                 var newItem = new Person();
-				newItem.parent = self;
-				newItem.parentCollection = self.employees;
-				newItem.isExpanded(true);
+                newItem.parent = self;
+                newItem.parentCollection = self.employees;
+                newItem.isExpanded(true);
                 newItem.companyId(self.companyId());
                 self.employees.push(newItem);
                 return newItem;
-			}
+            }
             
 
             // List Object model for Employees. Allows for loading subsets of data.
@@ -422,118 +422,118 @@ module ViewModels {
                 }
             }
 
-			// Save a many-to-many collection
-			self.saveCollection = function(propertyName, childId, operation) {
-				var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
-				var currentId = self.companyId();
+            // Save a many-to-many collection
+            self.saveCollection = function(propertyName, childId, operation) {
+                var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
+                var currentId = self.companyId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/Company/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					if (data.WasSuccessful) {
-						self.errorMessage('');
-						self.loadFromDto(data.Object);
-						// The object is now saved. Call any callback.
-						for (var i in self.saveCallbacks) {
-							self.saveCallbacks[i](self);
-						}
-					} else {
-						self.errorMessage(data.Message);
+                .done(function(data) {
+                    if (data.WasSuccessful) {
+                        self.errorMessage('');
+                        self.loadFromDto(data.Object);
+                        // The object is now saved. Call any callback.
+                        for (var i in self.saveCallbacks) {
+                            self.saveCallbacks[i](self);
+                        }
+                    } else {
+                        self.errorMessage(data.Message);
                         self.validationIssues(data.ValidationIssues);
-					}
-				})
-				.fail(function() {
-					alert("Could not save the item.");
-				})
-				.always(function() {
-					// Nothing here yet.
-				});
-			};
+                    }
+                })
+                .fail(function() {
+                    alert("Could not save the item.");
+                })
+                .always(function() {
+                    // Nothing here yet.
+                });
+            };
 
-			// Call this function when the object is deleted.
-			self.onDelete = function(fn) {
-				if ($.isFunction(fn)) self.deleteCallbacks.push(fn);
-			};
-			self.onSave = function(fn) {
-				if ($.isFunction(fn)) self.saveCallbacks.push(fn);
-			};
+            // Call this function when the object is deleted.
+            self.onDelete = function(fn) {
+                if ($.isFunction(fn)) self.deleteCallbacks.push(fn);
+            };
+            self.onSave = function(fn) {
+                if ($.isFunction(fn)) self.saveCallbacks.push(fn);
+            };
 
-			// Saves the object is autoSave is true.
-			self.autoSave = function() {
-				if (!self.isLoading()){
-					self.isDirty(true);
-					if (self.isSavingAutomatically) {
-						// Batch saves.
-						if (!self.saveTimeout) {
-							self.saveTimeout = setTimeout(function() {
-								self.saveTimeout = 0;
-								// If we have a save in progress, wait...
-								if (self.isSaving()) {
-									self.autoSave();
-								}else{
-									self.save();
-								}
-							}, saveTimeoutInMs);
-						}
-					}
-				}
-			}
+            // Saves the object is autoSave is true.
+            self.autoSave = function() {
+                if (!self.isLoading()){
+                    self.isDirty(true);
+                    if (self.isSavingAutomatically) {
+                        // Batch saves.
+                        if (!self.saveTimeout) {
+                            self.saveTimeout = setTimeout(function() {
+                                self.saveTimeout = 0;
+                                // If we have a save in progress, wait...
+                                if (self.isSaving()) {
+                                    self.autoSave();
+                                }else{
+                                    self.save();
+                                }
+                            }, saveTimeoutInMs);
+                        }
+                    }
+                }
+            }
 
-			// Saves the object is autoSave is true.
-			self.autoSaveCollection = function(property, id, changeStatus) {
-				if (!self.isLoading()) {
-					// TODO: Eventually Batch saves for many-to-many collections.
-					if (changeStatus === 'added') {
-						self.saveCollection(property, id, "added");
-					}else if (changeStatus === 'deleted') {
-						self.saveCollection(property, id, "deleted");
-					}
-				}
-			}
+            // Saves the object is autoSave is true.
+            self.autoSaveCollection = function(property, id, changeStatus) {
+                if (!self.isLoading()) {
+                    // TODO: Eventually Batch saves for many-to-many collections.
+                    if (changeStatus === 'added') {
+                        self.saveCollection(property, id, "added");
+                    }else if (changeStatus === 'deleted') {
+                        self.saveCollection(property, id, "deleted");
+                    }
+                }
+            }
 
-			// Save on changes
-			function setupSubscriptions() {
-        	self.name.subscribe(self.autoSave);
-        	self.address1.subscribe(self.autoSave);
-        	self.address2.subscribe(self.autoSave);
-        	self.city.subscribe(self.autoSave);
-        	self.state.subscribe(self.autoSave);
-        	self.zipCode.subscribe(self.autoSave);
-        	self.employees.subscribe(self.autoSave);
-            			}
+            // Save on changes
+            function setupSubscriptions() {
+            self.name.subscribe(self.autoSave);
+            self.address1.subscribe(self.autoSave);
+            self.address2.subscribe(self.autoSave);
+            self.city.subscribe(self.autoSave);
+            self.state.subscribe(self.autoSave);
+            self.zipCode.subscribe(self.autoSave);
+            self.employees.subscribe(self.autoSave);
+                        }
 
-			// Create variables for ListEditorApiUrls
-			self.EmployeesListUrl = ko.computed(function()
-			{
-				return areaUrl + 'Nothing' + self.companyId();
-			});
-			// Create loading function for Valid Values
+            // Create variables for ListEditorApiUrls
+            self.EmployeesListUrl = ko.computed(function()
+            {
+                return areaUrl + 'Nothing' + self.companyId();
+            });
+            // Create loading function for Valid Values
 
-			// Supply methods to pop up a model editor
-			self.showEditor = function(){
-				// Close any existing modal
-				$('#modal-dialog').modal('hide');
-				// Get new modal content
-				intellitect.utilities.showBusy();
+            // Supply methods to pop up a model editor
+            self.showEditor = function(){
+                // Close any existing modal
+                $('#modal-dialog').modal('hide');
+                // Get new modal content
+                intellitect.utilities.showBusy();
                 $.ajax({ method: "GET", url: areaUrl + 'Company/EditorHtml', data: {simple: true}, xhrFields: { withCredentials: true } })
-				.done(function(data){
-					// Add to DOM
-					intellitect.webApi.setupModal('Edit Company', data, true, false);
-					// Data bind
-					var lastValue = self.isSavingAutomatically;
-					self.isSavingAutomatically = false;
-					ko.applyBindings(self, document.getElementById("modal-dialog"));
-					self.isSavingAutomatically = lastValue;
-					// Show the dialog
-					$('#modal-dialog').modal('show');
-				})
-				.always(function() {
-					intellitect.utilities.hideBusy();
-				});
-			}
+                .done(function(data){
+                    // Add to DOM
+                    intellitect.webApi.setupModal('Edit Company', data, true, false);
+                    // Data bind
+                    var lastValue = self.isSavingAutomatically;
+                    self.isSavingAutomatically = false;
+                    ko.applyBindings(self, document.getElementById("modal-dialog"));
+                    self.isSavingAutomatically = lastValue;
+                    // Show the dialog
+                    $('#modal-dialog').modal('show');
+                })
+                .always(function() {
+                    intellitect.utilities.hideBusy();
+                });
+            }
 
 
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
-			    var loadingCount = 0;
+                var loadingCount = 0;
                 var obj;
                 if (loadingCount == 0 && $.isFunction(callback)){
                     callback();
@@ -542,20 +542,20 @@ module ViewModels {
 
 
 
-			// Load all the valid values in parallel.
-			self.loadValidValues = function(callback) {
+            // Load all the valid values in parallel.
+            self.loadValidValues = function(callback) {
                 if ($.isFunction(callback)) callback();
-			};
+            };
 
-			// Enumeration Lookups.
+            // Enumeration Lookups.
 
             // Code to handle saving flags.
             // Returns true if this object or any of its children is saving.
             self.isSavingWithChildren = ko.computed(function() {
-				if (self.isSaving()) return true;
+                if (self.isSaving()) return true;
                 if (self.savingChildCount() > 0 ) return true;
                 return false;
-			});
+            });
             // Handles setting the parent savingChildChange
             self.isSaving.subscribe(function(newValue: boolean){
                 if (self.parent && $.isFunction(self.parent.savingChildChange)){
@@ -587,18 +587,18 @@ module ViewModels {
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-			// Make sure everything is defined before we call this.
-			setupSubscriptions();
+            // Make sure everything is defined before we call this.
+            setupSubscriptions();
 
-		    if (newItem) {
+            if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem);
-			}
+            }
 
 
 
-		}
-	}
+        }
+    }
 
 
 

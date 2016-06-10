@@ -81,9 +81,10 @@ module ListViewModels {
         // True if the server method (GetAllOpenCasesCount) was successful.
         public getAllOpenCasesCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountUi: () => void;
+        public getAllOpenCasesCountUi: (callback?: any) => void;
         // Presents a modal with input boxes to call the server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountModal: () => void;
+        public getAllOpenCasesCountModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
         
         // Call server method (GetAllOpenCases)
         public getAllOpenCases: (x: number, y: number, callback?: any) => void;
@@ -96,10 +97,11 @@ module ListViewModels {
         // True if the server method (GetAllOpenCases) was successful.
         public getAllOpenCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCases)
-        public getAllOpenCasesUi: () => void;
+        public getAllOpenCasesUi: (callback?: any) => void;
         // Presents a modal with input boxes to call the server method (GetAllOpenCases)
-        public getAllOpenCasesModal: () => void;
-        public getAllOpenCasesWithArgs: (args?: CaseList.GetAllOpenCasesArgs) => void;
+        public getAllOpenCasesModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public getAllOpenCasesWithArgs: (args?: CaseList.GetAllOpenCasesArgs, callback?: any) => void;
         
         public getAllOpenCasesArgs = new CaseList.GetAllOpenCasesArgs(); 
         
@@ -221,7 +223,7 @@ module ListViewModels {
 
     // Method Implementations
 
-            self.getAllOpenCasesCount = function(callback?: any){
+            self.getAllOpenCasesCount = function(callback?: any, reload: Boolean = true){
                 self.getAllOpenCasesCountIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Case/GetAllOpenCasesCount",
@@ -234,7 +236,11 @@ module ListViewModels {
 						self.getAllOpenCasesCountMessage('');
 						self.getAllOpenCasesCountWasSuccessful(true);
 						self.getAllOpenCasesCountResult(data.Object);
-                        self.load(callback);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.getAllOpenCasesCountWasSuccessful(false);
 						self.getAllOpenCasesCountMessage(data.Message);
@@ -248,18 +254,18 @@ module ListViewModels {
 				});
             }
 
-            self.getAllOpenCasesCountUi = function() {
-                self.getAllOpenCasesCount();
+            self.getAllOpenCasesCountUi = function(callback?: any) {
+                self.getAllOpenCasesCount(callback);
             }
 
-            self.getAllOpenCasesCountModal = function() {
-                    self.getAllOpenCasesCountUi();
+            self.getAllOpenCasesCountModal = function(callback?: any) {
+                    self.getAllOpenCasesCountUi(callback);
             }
             
 
             
 
-            self.getAllOpenCases = function(x: number, y: number, callback?: any){
+            self.getAllOpenCases = function(x: number, y: number, callback?: any, reload: Boolean = true){
                 self.getAllOpenCasesIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Case/GetAllOpenCases",
@@ -273,7 +279,11 @@ module ListViewModels {
 						self.getAllOpenCasesMessage('');
 						self.getAllOpenCasesWasSuccessful(true);
 						self.getAllOpenCasesResult(data.Object);
-                        self.load(callback);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.getAllOpenCasesWasSuccessful(false);
 						self.getAllOpenCasesMessage(data.Message);
@@ -287,26 +297,26 @@ module ListViewModels {
 				});
             }
 
-            self.getAllOpenCasesUi = function() {
+            self.getAllOpenCasesUi = function(callback?: any) {
                 var x: number = parseFloat(prompt('X'));
                 var y: number = parseFloat(prompt('Y'));
-                self.getAllOpenCases(x, y);
+                self.getAllOpenCases(x, y, callback);
             }
 
-            self.getAllOpenCasesModal = function() {
+            self.getAllOpenCasesModal = function(callback?: any) {
                 $('#method-GetAllOpenCases').modal();
                 $('#method-GetAllOpenCases').on('shown.bs.modal', function() {
                     $('#method-GetAllOpenCases .btn-ok').click(function()
                     {
-                        self.getAllOpenCasesWithArgs();
+                        self.getAllOpenCasesWithArgs(null, callback);
                         $('#method-GetAllOpenCases').modal('hide');
                     });
                 });
             }
             
-            self.getAllOpenCasesWithArgs = function(args?: CaseList.GetAllOpenCasesArgs) {
+            self.getAllOpenCasesWithArgs = function(args?: CaseList.GetAllOpenCasesArgs, callback?: any) {
                 if (!args) args = self.getAllOpenCasesArgs;
-                self.getAllOpenCases(args.x(), args.y());
+                self.getAllOpenCases(args.x(), args.y(), callback);
             }
 
             

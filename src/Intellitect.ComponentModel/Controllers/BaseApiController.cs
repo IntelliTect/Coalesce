@@ -267,7 +267,7 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 var completeSearchClauses = new List<string>();
                 // Handle the split on spaces first because it will be done differently with ands and ors.
-                if (ClassViewModel.SearchProperties.Any(f => f.SearchIsSplitOnSpaces))
+                if (ClassViewModel.SearchProperties.Any(f => f.Value.SearchIsSplitOnSpaces))
                 {
                     var splitSearchClauses = new List<string>();
 
@@ -275,15 +275,15 @@ namespace Intellitect.ComponentModel.Controllers
                     foreach (var clause in clauses)
                     {
                         var searchClauses = new List<string>();
-                        foreach (var prop in ClassViewModel.SearchProperties.Where(f => f.SearchIsSplitOnSpaces))
+                        foreach (var prop in ClassViewModel.SearchProperties.Where(f => f.Value.SearchIsSplitOnSpaces))
                         {
-                            if (prop.PureType.IsString)
+                            if (prop.Value.PureType.IsString)
                             {
-                                searchClauses.Add(string.Format("{0}.StartsWith(\"{1}\")", prop.Name, clause));
+                                searchClauses.Add(string.Format("{0}.StartsWith(\"{1}\")", prop.Key, clause));
                             }
                             else
                             {
-                                searchClauses.Add(string.Format("{0}.ToString().StartsWith(\"{1}\")", prop.Name, clause));
+                                searchClauses.Add(string.Format("{0}.ToString().StartsWith(\"{1}\")", prop.Key, clause));
                             }
                         }
                         if (searchClauses.Count > 0)
@@ -295,17 +295,18 @@ namespace Intellitect.ComponentModel.Controllers
                 }
 
                 // Handle not split on spaces with simple ors.
-                if (ClassViewModel.SearchProperties.Any(f => !f.SearchIsSplitOnSpaces))
+                if (ClassViewModel.SearchProperties.Any(f => !f.Value.SearchIsSplitOnSpaces))
                 {
-                    foreach (var prop in ClassViewModel.SearchProperties.Where(f => !f.SearchIsSplitOnSpaces))
+                    foreach (var prop in ClassViewModel.SearchProperties.Where(f => !f.Value.SearchIsSplitOnSpaces))
                     {
-                        if (prop.PureType.IsString)
+                        int temp;
+                        if (prop.Value.PureType.IsString)
                         {
-                            completeSearchClauses.Add(string.Format("{0}.StartsWith(\"{1}\")", prop.Name, listParameters.Search));
+                            completeSearchClauses.Add(string.Format("{0}.StartsWith(\"{1}\")", prop.Key, listParameters.Search));
                         }
-                        else
+                        else if (int.TryParse(listParameters.Search, out temp))
                         {
-                            completeSearchClauses.Add(string.Format("{0} = {1}", prop.Name, listParameters.Search));
+                            completeSearchClauses.Add(string.Format("{0} = {1}", prop.Key, temp));
                         }
                     }
                 }

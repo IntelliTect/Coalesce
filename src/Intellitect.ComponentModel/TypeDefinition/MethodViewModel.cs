@@ -160,16 +160,26 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// <summary>
         /// Gets the js arguments passed to this method call.
         /// </summary>
-        public string JsArguments(string obj = "")
+        public string JsArguments(string obj = "", bool callback = false)
         {
+            string result;
             if (obj != "")
             {
-                return string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name}()"));
+                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name}()"));
             }
             else
             {
-                return string.Join(", ", ClientParameters.Select(f => obj + f.Name));
+                result =  string.Join(", ", ClientParameters.Select(f => obj + f.Name));
             }
+            if (callback)
+            {
+                if (!string.IsNullOrEmpty(result))
+                {
+                    result = result + ", ";
+                }
+                result = result + "callback";
+            }
+            return result;
         }
 
         public string JsPostObject

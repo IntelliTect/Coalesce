@@ -11,7 +11,7 @@ Debugging
 use --debug after dnx to debug. You must then attach the debugger to the process.
 
 IntelliTect Internal Testing
-	dnx gen scripts -dc AppContext
+	dnx gen scripts -dc DbContext
 
 EF Migration commands
-	dnx ef migrations add <MigrationName> -c AppContext -p Coalesce.Domain
+	dnx ef migrations add <MigrationName> -c DbContext -p Coalesce.Domain

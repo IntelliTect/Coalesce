@@ -1,8 +1,8 @@
 
 using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Intellitect.ComponentModel.Models;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ using Intellitect.ComponentModel.Mapping;
 
 // Model Namespaces 
 using Coalesce.Domain;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Intellitect.ComponentModel.DataAnnotations;
 
 namespace Coalesce.Web.Api
@@ -31,7 +31,7 @@ namespace Coalesce.Web.Api
             return true;
         }
 
-        protected override bool AfterSave(Person dto, Person obj, Person orig, AppContext context)
+        protected override bool AfterSave(Person dto, Person obj, Person orig, AppDbContext context)
         {
             // Add the company name to the last name if it changed.
             if (obj.CompanyId != orig.CompanyId && !obj.LastName.Contains(obj.Company.Name))

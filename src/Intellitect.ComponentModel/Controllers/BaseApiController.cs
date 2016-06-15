@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Data.Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Intellitect.ComponentModel.Models;
 using Intellitect.ComponentModel.Data;
 using Intellitect.ComponentModel.DataAnnotations;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Intellitect.ComponentModel.Mapping;
 using Microsoft.Extensions.DependencyInjection;
 using Intellitect.ComponentModel.Helpers;
-using Microsoft.Data.Entity.Query.Internal;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Intellitect.ComponentModel.Controllers
@@ -47,7 +47,7 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 if (_Logger == null)
                 {
-                    _Logger = Resolver.GetService<Logger<BaseApiController<T, TDto, TContext>>>();
+                    _Logger = HttpContext?.RequestServices.GetService<Logger<BaseApiController<T, TDto, TContext>>>();
                 }
 
                 return _Logger;

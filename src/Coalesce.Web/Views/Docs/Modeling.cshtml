@@ -20,7 +20,7 @@
         public string LastName { get; set; }
     }
 
-    public class AppContext: DbContext
+    public class DbContext: DbContext
     {
         public DbSet&lt;Person&gt; People { get; set; }
     }
@@ -48,7 +48,7 @@
         public Company Company { get; set; }
     }
 
-    public class AppContext: DbContext
+    public class DbContext: DbContext
     {
         public DbSet&lt;Person&gt; People { get; set; }
         public DbSet&lt;Company&gt; Company{ get; set; }
@@ -92,10 +92,10 @@
 <p>There are times when you will need to manually remove related objects when deleting an object. You can specify what to delete by using the IDeletable interface. The method is called right before the delete is executed. The instance object has already been removed from the context's collection. This gives you a chance to remove any additional objects. To stop the delete at this point, an exception must be thrown. </p>
 
 <pre><code class="language-html">
-    public class Person : IDeletable&lt;AppContext&gt;
+    public class Person : IDeletable&lt;DbContext&gt;
     {
         ...
-        public void BeforeDeleteCommit(AppContext db)
+        public void BeforeDeleteCommit(DbContext db)
         {
             // Remove related history
             db.PersonHistories.RemoveRange(db.PersonHistories.Where(f => f.PersonId == this.PersonId));
@@ -215,9 +215,9 @@
 <br />
 
 <h4>Static Methods</h4>
-<p>Static methods exist on a class without respect to an instance of that class. These methods are created as functions on the object's <b>list</b> view model on the client side. The example below is for a method called NameStartingWith that takes a single parameter 'string characters' and returns a list of strings. The AppContext parameter is injected automatically by the controller.</p>
+<p>Static methods exist on a class without respect to an instance of that class. These methods are created as functions on the object's <b>list</b> view model on the client side. The example below is for a method called NameStartingWith that takes a single parameter 'string characters' and returns a list of strings. The DbContext parameter is injected automatically by the controller.</p>
 <pre><code class="language-html">
-    public static IEnumerable&lt;string&gt; NamesStartingWith(string characters, AppContext db)
+    public static IEnumerable&lt;string&gt; NamesStartingWith(string characters, DbContext db)
     {
         return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
     }
@@ -244,7 +244,7 @@
 <h4>Static List Methods</h4>
 <p>Static methods that return an IQueryable of the same type as the class are treated specially. These methods can be used to provide the underlying data for the list view models. The list view model has a property called listDataSource which accepts an enumeration with the available list methods. Parameters can be specified an object with name value pairs in the query property on the list view model.</p>
 <pre><code class="language-html">
-    public static IEnumerable&lt;string&gt; NamesStartingWith(string characters, AppContext db)
+    public static IEnumerable&lt;string&gt; NamesStartingWith(string characters, DbContext db)
     {
         return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
     }

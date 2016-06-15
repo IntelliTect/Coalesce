@@ -1,19 +1,15 @@
 ﻿{
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "description": "Coalesce.Domain Class Library",
   "authors": [ "IntelliTect" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
 
   "frameworks": {
-    "net451": { }
+    "net461": { }
   },
   "dependencies": {
-    "EntityFramework.Core": "7.0.0-rc2-16649",
-    "EntityFramework.MicrosoftSqlServer": "7.0.0-rc2-16649",
-    "EntityFramework.Relational": "7.0.0-rc2-16649",
-    "Intellitect.ComponentModel": "",
-    "GenFu": "1.0.4"
+    "Microsoft.EntityFrameworkCore": "1.0.0-rc2-final",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-final",
+    "Intellitect.ComponentModel": "1.0.2-alpha001",
+    "GenFu": "1.1.0"
   }
 }

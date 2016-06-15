@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Entity;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
@@ -8,7 +8,7 @@ namespace Coalesce.Domain
     {
         private static object _lock = new object();
 
-        public static void Initialize(AppContext context, int randomSeed = 1)
+        public static void Initialize(AppDbContext context, int randomSeed = 1)
         {
             // Lock so that parallel unit tests generate the same data.
             lock (_lock)
@@ -20,7 +20,7 @@ namespace Coalesce.Domain
                 {
                     context.Database.Migrate();
                 }
-                catch (InvalidOperationException e) when (e.Message == "No service for type 'Microsoft.Data.Entity.Migrations.IMigrator' has been registered.")
+                catch (InvalidOperationException e) when (e.Message == "No service for type 'Microsoft.EntityFrameworkCore.Migrations.IMigrator' has been registered.")
                 {
                     // this exception is expected when using an InMemory database
                 }

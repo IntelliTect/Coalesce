@@ -1,7 +1,6 @@
 {
   "sdk": {
-    "version": "1.0.0-rc2-16357"
+    "version": "1.0.0-preview1-002702"
   },
-  "projects": [ "src" ],
-  "packages": "packages"
+  "projects": [ "src" ]
 }

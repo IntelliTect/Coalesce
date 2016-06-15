@@ -1,5 +1,5 @@
 ﻿using Intellitect.ComponentModel.TypeDefinition;
-using Microsoft.AspNet.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;

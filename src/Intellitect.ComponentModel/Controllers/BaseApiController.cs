@@ -787,8 +787,12 @@ namespace Intellitect.ComponentModel.Controllers
             }
             else if (prop.Type.IsEnum)
             {
-                value.Split(new string[] { " or ", " and " }, StringSplitOptions.RemoveEmptyEntries);
-                return query.Where($"{prop.Name} = \"{prop.Type.EnumValues.SingleOrDefault(ev => ev.Key == Convert.ToInt32(value)).Value}\"");
+                var expressions = new List<string>();
+                foreach (var valuePart in value.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    expressions.Add($"{prop.Name} = \"{prop.Type.EnumValues.SingleOrDefault(ev => ev.Key == Convert.ToInt32(valuePart)).Value}\"");
+                }
+                return query.Where(string.Join(" || ", expressions));
             }
             else
             {

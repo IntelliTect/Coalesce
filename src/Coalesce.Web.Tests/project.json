@@ -23,7 +23,7 @@
   "commands": {
     "test": "xunit.runner.dnx",
     "vsotest": "xunit.runner.dnx -xml ..\\..\\..\\TestResults\\Ipc.Fuse.Web.Tests.Results.xml",
-    "web": "Microsoft.AspNet.Server.Kestrel --server.urls=http://*:5000/"
+    "web": "Microsoft.AspNetCore.Server.Kestrel --server.urls=http://*:5000/"
   },
 
   "frameworks": {

@@ -1,7 +1,7 @@
 
 using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.PlatformAbstractions;
 // Model Namespaces
 using Coalesce.Domain;
@@ -11,7 +11,7 @@ namespace Coalesce.Web.Controllers
 {
     [Authorize]
     public partial class ProductController 
-        : BaseViewController<Product, AppContext> 
+        : BaseViewController<Product, AppDbContext> 
     { 
         public ProductController() : base() { }
 

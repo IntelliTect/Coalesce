@@ -14,7 +14,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelView()
         {
-            ReflectionRepository.AddContext<AppContext>();
+            ReflectionRepository.AddContext<DbContext>();
 
             var person = ReflectionRepository.GetClassViewModel<Person>();
 
@@ -38,7 +38,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelViewAttributes()
         {
-            ReflectionRepository.AddContext<AppContext>();
+            ReflectionRepository.AddContext<DbContext>();
 
             var caseProduct = ReflectionRepository.GetClassViewModel<CaseProduct>();
             var person = ReflectionRepository.GetClassViewModel<Person>();

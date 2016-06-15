@@ -1,7 +1,7 @@
 
 using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.PlatformAbstractions;
 // Model Namespaces
 using Coalesce.Domain;
@@ -12,7 +12,7 @@ namespace Coalesce.Web.TestArea.Controllers
     [Area("TestArea")]
     [Authorize]
     public partial class PersonController 
-        : BaseViewController<Person, AppContext> 
+        : BaseViewController<Person, AppDbContext> 
     { 
         public PersonController() : base() { }
 

@@ -950,7 +950,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                return !IsComplexType && (!Type.IsClass || Type.IsString) && !Type.IsArray && !Type.IsGeneric;
+                return !IsComplexType && (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
             }
         }
 

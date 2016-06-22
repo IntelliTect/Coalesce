@@ -1,13 +1,9 @@
 ﻿using Intellitect.ComponentModel.DataAnnotations;
-using Intellitect.ComponentModel.Utilities;
 using Intellitect.Extensions.CodeGenerators.Mvc.Common;
-using Intellitect.Extensions.CodeGenerators.Mvc.Utilities;
 using Intellitect.ComponentModel.Models;
 using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,6 +13,8 @@ using System.Threading.Tasks;
 using Intellitect.ComponentModel.TypeDefinition;
 using Intellitect.ComponentModel.Validation;
 using System.Globalization;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 {
@@ -622,7 +620,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
         {
             get
             {
-                return TemplateFoldersUtilities.GetTemplateFolders(
+                return Common.TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: ThisAssemblyName,
                     applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
                     baseFolders: new[] { "" },

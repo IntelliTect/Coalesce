@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGeneration.CommandLine;
+﻿using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;

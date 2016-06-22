@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

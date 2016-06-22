@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGeneration.CommandLine;
+using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts

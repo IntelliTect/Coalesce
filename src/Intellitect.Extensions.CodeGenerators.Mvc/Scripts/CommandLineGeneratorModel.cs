@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.CodeGenerators.Mvc;
-using Microsoft.Extensions.CodeGeneration.CommandLine;
+using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 {

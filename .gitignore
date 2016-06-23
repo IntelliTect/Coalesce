@@ -200,3 +200,4 @@ FakesAssemblies/
 !**/wwwroot/web.config
 artifacts/
 project.lock.json
+/src/Coalesce.Web/Coalesce

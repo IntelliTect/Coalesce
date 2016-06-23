@@ -14,12 +14,12 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc
     /// </summary>
     public abstract class CommonGeneratorBase
     {
-        protected CommonGeneratorBase(IApplicationEnvironment applicationEnvironment)
+        protected CommonGeneratorBase(ApplicationEnvironment applicationEnvironment)
         {
             ApplicationEnvironment = applicationEnvironment;
         }
 
-        protected IApplicationEnvironment ApplicationEnvironment
+        protected ApplicationEnvironment ApplicationEnvironment
         {
             get;
             private set;

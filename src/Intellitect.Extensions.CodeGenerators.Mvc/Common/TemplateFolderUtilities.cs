@@ -26,20 +26,21 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Common
 
             if (dependency != null)
             {
-                string containingProjectPath = "";
+                string containingProjectPath = dependency.Path;
+                //string containingProjectPath = "";
 
-                if (string.Equals("Project", dependency.Type, StringComparison.Ordinal))
-                {
-                    containingProjectPath = Path.GetDirectoryName(dependency.Path);
-                }
-                else if (string.Equals("Package", dependency.Type, StringComparison.Ordinal))
-                {
-                    containingProjectPath = dependency.Path;
-                }
-                else
-                {
-                    Debug.Assert(false, "Unexpected type of library information for template folders");
-                }
+                //if (string.Equals("Project", dependency.Type, StringComparison.Ordinal))
+                //{
+                //    containingProjectPath = Path.GetDirectoryName(dependency.Path);
+                //}
+                //else if (string.Equals("Package", dependency.Type, StringComparison.Ordinal))
+                //{
+                //    containingProjectPath = dependency.Path;
+                //}
+                //else
+                //{
+                //    Debug.Assert(false, "Unexpected type of library information for template folders");
+                //}
 
                 if (Directory.Exists(containingProjectPath))
                 {

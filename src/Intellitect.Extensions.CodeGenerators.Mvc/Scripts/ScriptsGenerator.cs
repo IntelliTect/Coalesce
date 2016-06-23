@@ -15,6 +15,7 @@ using Intellitect.ComponentModel.Validation;
 using System.Globalization;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 {
@@ -31,12 +32,11 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 
         public ScriptsGenerator(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
             IModelTypesLocator modelTypesLocator,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(environment)
+            : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = modelTypesLocator;
             ServiceProvider = serviceProvider;

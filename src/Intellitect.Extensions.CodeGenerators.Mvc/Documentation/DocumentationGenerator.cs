@@ -70,12 +70,11 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Documentation
         }
         public DocumentationGenerator(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
             IModelTypesLocator modelTypesLocator,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(environment)
+            : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = modelTypesLocator;
             ServiceProvider = serviceProvider;

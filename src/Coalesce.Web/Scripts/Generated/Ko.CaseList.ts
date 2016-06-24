@@ -264,7 +264,6 @@ module ListViewModels {
             
 
             
-
             self.getAllOpenCases = function(x: number, y: number, callback?: any, reload: Boolean = true){
                 self.getAllOpenCasesIsLoading(true);
                 $.ajax({ method: "POST",
@@ -319,8 +318,7 @@ module ListViewModels {
                 self.getAllOpenCases(args.x(), args.y(), callback);
             }
 
-            
-        }
+                    }
     }
 
     export namespace CaseList {

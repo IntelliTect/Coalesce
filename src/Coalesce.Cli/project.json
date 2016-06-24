@@ -9,7 +9,9 @@
     "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-final",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-21424",
-    "Intellitect.Extensions.CodeGenerators.Mvc": "1.0.2-*"
+    "Intellitect.Extensions.CodeGenerators.Mvc": "1.0.2-*",
+    "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-final",
+    "Newtonsoft.Json": "8.0.3"
   },
 
   "frameworks": {

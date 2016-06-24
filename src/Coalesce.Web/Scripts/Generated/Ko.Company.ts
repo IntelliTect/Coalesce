@@ -404,7 +404,6 @@ module ViewModels {
                 return newItem;
             }
             
-
             // List Object model for Employees. Allows for loading subsets of data.
             var _employeesList: ListViewModels.PersonList = null;
             self.employeesList = function() {

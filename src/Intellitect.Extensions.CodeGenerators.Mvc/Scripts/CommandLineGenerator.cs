@@ -13,22 +13,20 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
     [Alias("scripts")]
     public class CommandLineGenerator : ICodeGenerator
     {
-        //public IServiceProvider ServiceProvider { get; }
         private ProjectContext _webProject;
         private ProjectContext _dataProject;
+        private ProjectContext _cliProject;
 
-        //public CommandLineGenerator(IServiceProvider serviceProvider)
-        public CommandLineGenerator(ProjectContext webProject, ProjectContext dataProject)
+        public CommandLineGenerator(ProjectContext webProject, ProjectContext dataProject, ProjectContext cliProject)
         {
             _webProject = webProject;
             _dataProject = dataProject;
-            //ServiceProvider = serviceProvider;
+            _cliProject = cliProject;
         }
 
         public async Task GenerateCode(CommandLineGeneratorModel model)
         {
-            //var generator = ActivatorUtilities.CreateInstance<ScriptsGenerator>(ServiceProvider);
-            var generator = new ScriptsGenerator(_webProject, _dataProject);
+            var generator = new ScriptsGenerator(_webProject, _dataProject, _cliProject);
             await generator.Generate(model);
         }
     }

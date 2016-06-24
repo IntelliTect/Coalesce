@@ -10,7 +10,8 @@
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview1-final",
     "Newtonsoft.Json": "8.0.3",
     "Intellitect.ComponentModel": "1.0.2-alpha001",
-    "Microsoft.Extensions.WebEncoders.Core": "1.0.0-rc1-final"
+    "Microsoft.Extensions.WebEncoders.Core": "1.0.0-rc1-final",
+    "Microsoft.AspNetCore.Mvc.Razor": "1.0.0-rc2-final"
   },
 
   "frameworks": {

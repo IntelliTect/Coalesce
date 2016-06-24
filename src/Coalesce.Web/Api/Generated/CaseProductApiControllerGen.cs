@@ -110,7 +110,6 @@ namespace Coalesce.Web.Api
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
-
         protected override IQueryable<CaseProduct> GetListDataSource(ListParameters parameters)
         {
 

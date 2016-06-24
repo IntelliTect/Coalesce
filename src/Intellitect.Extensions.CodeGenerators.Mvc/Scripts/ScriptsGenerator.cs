@@ -16,12 +16,15 @@ using System.Globalization;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Workspaces;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 {
     public class ScriptsGenerator : CommonGeneratorBase
     {
         public IModelTypesLocator ModelTypesLocator { get; }
+        public IModelTypesLocator DataModelTypesLocator { get; }
         protected IServiceProvider ServiceProvider { get; }
         protected ILibraryManager LibraryManager { get; }
 
@@ -44,6 +47,13 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             LibraryManager = libraryManager;
         }
 
+        public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
+            : base(PlatformServices.Default.Application)
+        {
+            ModelTypesLocator = GenerateModelTypesLocator(webProject, "WebProject");
+            DataModelTypesLocator = GenerateModelTypesLocator(dataProject, "DataProject");
+        }
+
         internal Task Generate(CommandLineGeneratorModel model)
         {
             Dictionary<string, Dictionary<int, string>> enumValues = new Dictionary<string, Dictionary<int, string>>();
@@ -54,7 +64,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 var targetNamespace = ValidationUtil.ValidateType("Startup", "", ModelTypesLocator, throwWhenNotFound: false).Namespace;
                 Console.WriteLine($"Namespace: {targetNamespace}");
 
-                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
+                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator ?? ModelTypesLocator, throwWhenNotFound: false);
 
                 if (model.ValidateOnly)
                 {
@@ -369,6 +379,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             {
                 areaLocation = Path.Combine("Areas", controllerGeneratorModel.AreaLocation);
             }
+
             var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
             await layoutDependencyInstaller.Execute();
 
@@ -653,5 +664,19 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             return complexTypes.Values;
         }
 
+        private ModelTypesLocator GenerateModelTypesLocator(ProjectContext project, string appName)
+        {
+            // Generate dependencies for the ModelTypesLocators
+#if RELEASE
+            var applicationInfo = new ApplicationInfo(appName, project.ProjectDirectory, "Release");
+#else
+            var applicationInfo = new ApplicationInfo(appName, project.ProjectDirectory, "Debug");
+#endif
+
+            var exporter = new LibraryExporter(project, applicationInfo);
+            var workspace = new ProjectJsonWorkspace(project);
+
+            return new ModelTypesLocator(exporter, workspace);
+        }
     }
 }

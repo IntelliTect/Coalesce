@@ -2,5 +2,5 @@
   "sdk": {
     "version": "1.0.0-preview1-002702"
   },
-  "projects": [ "src" ]
+  "projects": [ "src", "c:\\git\\cli\\src" ]
 }

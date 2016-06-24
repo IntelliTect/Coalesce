@@ -170,7 +170,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 var models = new List<ClassViewModel>();
                 foreach (var prop in context.Properties)
                 {
-                    if (prop.Type.IsCollection && IsValidViewModelClass(prop.PureType.Name))
+                    if ((prop.Type.IsCollection || prop.IsDbSet) && IsValidViewModelClass(prop.PureType.Name))
                     {
                         var model = ReflectionRepository.GetClassViewModel(classType: prop.PureType, hasDbSet: prop.IsDbSet);
                         if (model != null)

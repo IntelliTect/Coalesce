@@ -574,7 +574,6 @@ module ViewModels {
                 return newItem;
             }
             
-
             self.addToCasesReported = function() {
                 var newItem = new Case();
                 newItem.parent = self;
@@ -585,7 +584,6 @@ module ViewModels {
                 return newItem;
             }
             
-
             // List Object model for CasesAssigned. Allows for loading subsets of data.
             var _casesAssignedList: ListViewModels.CaseList = null;
             self.casesAssignedList = function() {
@@ -734,7 +732,6 @@ module ViewModels {
                 });
             }
             
-
             self.loadCompanyValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: areaUrl + "api/Company/List?Fields=CompanyId,AltName", xhrFields: { withCredentials: true } })
@@ -754,7 +751,6 @@ module ViewModels {
                 });
             }
             
-
             // Supply methods to pop up a model editor
             self.showEditor = function(){
                 // Close any existing modal

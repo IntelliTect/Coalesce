@@ -116,7 +116,6 @@ namespace Coalesce.Web.Api
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
-
         protected override IQueryable<Case> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "GetAllOpenCases")
@@ -156,7 +155,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         
@@ -173,6 +171,5 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
-    }
+            }
 }

@@ -619,7 +619,6 @@ module ViewModels {
                 });
             }
             
-
             self.loadReportedByValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: areaUrl + "api/Person/List?Fields=PersonId,Name", xhrFields: { withCredentials: true } })
@@ -639,7 +638,6 @@ module ViewModels {
                 });
             }
             
-
             self.loadCaseProductsValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: areaUrl + "api/CaseProduct/List?Fields=CaseProductId,CaseProductId", xhrFields: { withCredentials: true } })
@@ -659,7 +657,6 @@ module ViewModels {
                 });
             }
             
-
             self.loadDevTeamAssignedValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: areaUrl + "api/DevTeam/List?Fields=DevTeamId,Name", xhrFields: { withCredentials: true } })
@@ -679,7 +676,6 @@ module ViewModels {
                 });
             }
             
-
             // Supply methods to pop up a model editor
             self.showEditor = function(){
                 // Close any existing modal

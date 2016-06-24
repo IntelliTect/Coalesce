@@ -515,7 +515,6 @@ module ViewModels {
                 });
             }
             
-
             self.loadProductValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: areaUrl + "api/Product/List?Fields=ProductId,Name", xhrFields: { withCredentials: true } })
@@ -535,7 +534,6 @@ module ViewModels {
                 });
             }
             
-
             // Supply methods to pop up a model editor
             self.showEditor = function(){
                 // Close any existing modal

@@ -350,7 +350,6 @@ module ListViewModels {
             }
 
             
-
             self.getUser = function(callback?: any, reload: Boolean = true){
                 self.getUserIsLoading(true);
                 $.ajax({ method: "POST",
@@ -392,7 +391,6 @@ module ListViewModels {
             
 
             
-
             self.getUserPublic = function(callback?: any, reload: Boolean = true){
                 self.getUserPublicIsLoading(true);
                 $.ajax({ method: "POST",
@@ -434,7 +432,6 @@ module ListViewModels {
             
 
             
-
             self.namesStartingWith = function(characters: String, callback?: any, reload: Boolean = true){
                 self.namesStartingWithIsLoading(true);
                 $.ajax({ method: "POST",
@@ -488,7 +485,6 @@ module ListViewModels {
             }
 
             
-
             self.namesStartingWithPublic = function(characters: String, callback?: any, reload: Boolean = true){
                 self.namesStartingWithPublicIsLoading(true);
                 $.ajax({ method: "POST",
@@ -542,7 +538,6 @@ module ListViewModels {
             }
 
             
-
             self.borCPeople = function(callback?: any, reload: Boolean = true){
                 self.borCPeopleIsLoading(true);
                 $.ajax({ method: "POST",
@@ -583,8 +578,7 @@ module ListViewModels {
             }
             
 
-            
-        }
+                    }
     }
 
     export namespace PersonList {

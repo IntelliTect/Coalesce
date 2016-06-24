@@ -2,8 +2,7 @@
   "profiles": {
     "Coalesce.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "-dc AppDbContext -dp ..\\..\\Coalesce.Domain",
-      "workingDirectory": "C:\\git\\Framework\\Coalesce\\src\\Coalesce.Web\\Coalesce"
+      "commandLineArgs": "-dc AppDbContext -dp ..\\Coalesce.Domain -wp ..\\Coalesce.Web"
     }
   }
 }

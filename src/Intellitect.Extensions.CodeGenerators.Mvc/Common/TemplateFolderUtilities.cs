@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.PlatformAbstractions;
+﻿using Intellitect.Extensions.CodeGenerators.Mvc.Scripts;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using System;
 using System.Collections.Generic;
@@ -12,35 +14,27 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Common
     public static class TemplateFoldersUtilities
     {
         public static List<string> GetTemplateFolders(
-            string containingProject,
-            string applicationBasePath,
-            string[] baseFolders,
-            ILibraryManager libraryManager)
+            string codeGenAssembly,
+            ProjectContext cliProject,
+            ProjectContext mvcProject,
+            string[] baseFolders
+        )
         {
+            // rootFolders = projects to search for templates
             var rootFolders = new List<string>();
+
+            // any root folder that contains templates
             var templateFolders = new List<string>();
 
-            rootFolders.Add(applicationBasePath);
+            rootFolders.Add(mvcProject.ProjectDirectory);
 
-            var dependency = libraryManager.GetLibrary(containingProject);
+            var libraryManager = DependencyProvider.LibraryManager(cliProject);
+            var dependency = libraryManager.GetLibrary(codeGenAssembly);
 
             if (dependency != null)
             {
-                string containingProjectPath = dependency.Path;
-                //string containingProjectPath = "";
-
-                //if (string.Equals("Project", dependency.Type, StringComparison.Ordinal))
-                //{
-                //    containingProjectPath = Path.GetDirectoryName(dependency.Path);
-                //}
-                //else if (string.Equals("Package", dependency.Type, StringComparison.Ordinal))
-                //{
-                //    containingProjectPath = dependency.Path;
-                //}
-                //else
-                //{
-                //    Debug.Assert(false, "Unexpected type of library information for template folders");
-                //}
+                string containingProjectPath = dependency.Path.EndsWith("project.json") ?
+                    Path.GetDirectoryName(dependency.Path) : dependency.Path;
 
                 if (Directory.Exists(containingProjectPath))
                 {
@@ -60,6 +54,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Common
                     }
                 }
             }
+
             return templateFolders;
         }
 

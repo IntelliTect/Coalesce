@@ -574,6 +574,7 @@ module ViewModels {
             // Code to handle isDataFromSaveLoaded
             self.isDataFromSaveLoadedComputed = function() {
                 if (self.isDataFromSaveLoaded === false) return false;
+                if (self.isDataFromSaveLoaded === true) return true;
                 if (self.parent && $.isFunction(self.parent.isDataFromSaveLoadedComputed)){
                     return self.parent.isDataFromSaveLoadedComputed();
                 }

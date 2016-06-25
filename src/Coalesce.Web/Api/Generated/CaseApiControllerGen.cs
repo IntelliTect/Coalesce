@@ -36,7 +36,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null, 
             string search = null, 
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string severity = null,string status = null)
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -45,8 +45,11 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("Title", title);
             parameters.AddFilter("Description", description);
             parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
             parameters.AddFilter("Severity", severity);
             parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
         
             return await ListImplementation(parameters);
         }
@@ -59,7 +62,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string severity = null,string status = null)
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search);
 
@@ -68,8 +71,11 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("Title", title);
             parameters.AddFilter("Description", description);
             parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
             parameters.AddFilter("Severity", severity);
             parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
             
             return await CountImplementation(parameters);
         }

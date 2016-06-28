@@ -6,11 +6,11 @@
 
   "dependencies": {
     "Microsoft.CodeAnalysis": "2.0.0-beta1",
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-final",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-21424",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final",
     "Intellitect.Extensions.CodeGenerators.Mvc": "1.0.2-*",
-    "Microsoft.Extensions.DependencyModel": "1.0.0-rc2-final",
+    "Microsoft.Extensions.DependencyModel": "1.0.0",
     "Newtonsoft.Json": "8.0.3"
   },
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}"
 EndProject
@@ -29,14 +29,6 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Intellitect.NLog.Extensions", "src\Intellitect.NLog.Extensions\Intellitect.NLog.Extensions.xproj", "{EAFB9FAA-FD5B-4D7F-B627-D72D4379C28F}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Cli", "src\Coalesce.Cli\Coalesce.Cli.xproj", "{3B393517-9C91-4432-B9D0-F48488767B8F}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Cli.Utils", "..\..\cli\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.xproj", "{61B7C351-C77D-43F7-B56F-BB1440178E10}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.InternalAbstractions", "..\..\cli\src\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.xproj", "{BD4F0750-4E81-4AD2-90B5-E470881792C3}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.ProjectModel", "..\..\cli\src\Microsoft.DotNet.ProjectModel\Microsoft.DotNet.ProjectModel.xproj", "{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.DependencyModel", "..\..\cli\src\Microsoft.Extensions.DependencyModel\Microsoft.Extensions.DependencyModel.xproj", "{688870C8-9843-4F9E-8576-D39290AD0F25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,38 +102,6 @@ Global
 		{3B393517-9C91-4432-B9D0-F48488767B8F}.release_x86|Any CPU.Build.0 = Release|Any CPU
 		{3B393517-9C91-4432-B9D0-F48488767B8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B393517-9C91-4432-B9D0-F48488767B8F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.release_x86|Any CPU.ActiveCfg = Release|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.release_x86|Any CPU.Build.0 = Release|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61B7C351-C77D-43F7-B56F-BB1440178E10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.release_x86|Any CPU.ActiveCfg = Release|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.release_x86|Any CPU.Build.0 = Release|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD4F0750-4E81-4AD2-90B5-E470881792C3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.release_x86|Any CPU.ActiveCfg = Release|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.release_x86|Any CPU.Build.0 = Release|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.release_x86|Any CPU.ActiveCfg = Release|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.release_x86|Any CPU.Build.0 = Release|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{688870C8-9843-4F9E-8576-D39290AD0F25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

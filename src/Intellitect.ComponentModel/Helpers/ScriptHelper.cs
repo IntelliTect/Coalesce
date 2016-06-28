@@ -1,11 +1,6 @@
-﻿using Intellitect.ComponentModel.Models;
-using Intellitect.ComponentModel.TypeDefinition;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Intellitect.ComponentModel.TypeDefinition;
+using Microsoft.AspNetCore.Html;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Intellitect.ComponentModel.Helpers
 {

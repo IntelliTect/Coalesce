@@ -49,4 +49,32 @@ Company  dB:True
  Address2         String           String          False False False False   Address2        True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
  City             String           String          False False False False   City            True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
  State            String           String          False False False False   State           True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
- ZipCode          Stri
+ ZipCode          String           String          False False False False   Zip Code        True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
+ Employees        ICollection      Person          True  False False False   Employees       True  False False    False  False False False False  False False    ko.observableArray([])    KnockoutObservableArray<any>                       Intellitect.ComponentModel.TypeDefinition.TypeViewModel[] False      False     False    PersonId                                      
+ AltName          String           String          False False False False   Alt Name        True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
+Product  dB:True
+ ProductId        Int32            Int32           False False True  False   Product Id      False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      False    Int32Id                                       
+ Name             String           String          False False False False   Name            True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
+CaseProduct  dB:True
+ CaseProductId    Int32            Int32           False False True  False   Case Product Id False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      False    Int32Id                                       
+ CaseId           Int32            Int32           False False False False   Case Id         False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      False    Int32Id                                       
+ Case             Case             Case            False False False False   Case            True  False False    False  False False False False  False False    ko.observable(null)       KnockoutObservable<ViewModels.Case>                Case            False      False     False    CaseId                                        
+ ProductId        Int32            Int32           False False False False   Product Id      False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      False    Int32Id                                       
+ Product          Product          Product         False False False False   Product         True  False False    False  False False False False  False False    ko.observable(null)       KnockoutObservable<ViewModels.Product>             Product         False      False     False    ProductId                                     
+-------- Complex Types --------
+-------- Enumerations --------
+Title
+	0 : Mr
+	1 : Ms
+	2 : Mrs
+	4 : Miss
+Gender
+	0 : NonSpecified
+	1 : Male
+	2 : Female
+Status
+	0 : Open
+	1 : InProgress
+	2 : Resolved
+	3 : ClosedNoSolution
+	4 : Cancelled

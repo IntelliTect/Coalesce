@@ -1,19 +1,8 @@
 ﻿using Intellitect.Extensions.CodeGenerators.Mvc.Scripts;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Workspaces;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
-using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
-using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
-using NuGet.Frameworks;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Coalesce.Cli

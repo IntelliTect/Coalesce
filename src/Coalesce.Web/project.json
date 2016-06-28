@@ -13,7 +13,7 @@
     },
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
-    "Microsoft.AspNetCore.StaticFiles":  "1.0.0",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0",
     "Microsoft.EntityFrameworkCore.Tools": {
       "version": "1.0.0-preview2-final",
@@ -34,8 +34,8 @@
       "version": "1.0.0-preview2-final",
       "type": "build"
     },
-    "Intellitect.ComponentModel": "1.0.2-alpha001",
-    "Coalesce.Domain": "1.0.0"
+    "Intellitect.ComponentModel": "",
+    "Coalesce.Domain": ""
   },
 
   "tools": {
@@ -68,7 +68,7 @@
   },
 
   "frameworks": {
-    "net461": { }
+    "net46": { }
   },
 
   "buildOptions": {

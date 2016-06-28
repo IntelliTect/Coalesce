@@ -23,8 +23,8 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 
         static DependencyProvider()
         {
-#if NET461
-            framework = FrameworkConstants.CommonFrameworks.Net461;
+#if NET46
+            framework = FrameworkConstants.CommonFrameworks.Net46;
 #else
             framework = FrameworkConstants.CommonFrameworks.NetStandard16;
 #endif

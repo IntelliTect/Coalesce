@@ -4,18 +4,17 @@
   "authors": [ "intelliTect" ],
 
   "dependencies": {
-    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview1-final",
-    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview1-final",
-    "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-preview1-final",
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview1-final",
-    "Newtonsoft.Json": "8.0.3",
-    "Intellitect.ComponentModel": "1.0.2-alpha001",
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview2-final",
+    "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview2-final",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-preview2-final",
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-final",
+    "Intellitect.ComponentModel": "",
     "Microsoft.Extensions.WebEncoders.Core": "1.0.0-rc1-final",
-    "Microsoft.AspNetCore.Mvc.Razor": "1.0.0-rc2-final"
+    "Microsoft.AspNetCore.Mvc.Razor": "1.0.0"
   },
 
   "frameworks": {
-    "net461": { }
+    "net46": { }
   },
 
   "publishOptions": {

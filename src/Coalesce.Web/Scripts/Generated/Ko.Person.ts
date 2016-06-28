@@ -335,58 +335,58 @@ module ViewModels {
 				// Set the ID 
 				self.myId = data.PersonId;
 				// Load the lists of other objects
-                if (data.CasesAssigned !== null) {
+                if (data.casesAssigned !== null) {
 					// Merge the incoming array
-					RebuildArray(self.casesAssigned, data.CasesAssigned, 'CaseKey', Case, self);
+					RebuildArray(self.casesAssigned, data.casesAssigned, 'CaseKey', Case, self);
 				} 
-                if (data.CasesReported !== null) {
+                if (data.casesReported !== null) {
 					// Merge the incoming array
-					RebuildArray(self.casesReported, data.CasesReported, 'CaseKey', Case, self);
+					RebuildArray(self.casesReported, data.casesReported, 'CaseKey', Case, self);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.PersonStats) { 
-					if (data.PersonStatsId != self.personStatsId()) {
+				if (!data.personStats) { 
+					if (data.personStatsId != self.personStatsId()) {
                         self.personStats(null);
                     }
                 }else if (!self.personStats()){
-					self.personStats(new PersonStats(data.PersonStats, self));
+					self.personStats(new PersonStats(data.personStats, self));
 				}else{
-					self.personStats().loadFromDto(data.PersonStats);
+					self.personStats().loadFromDto(data.personStats);
 				}
-				if (!data.Company) { 
-					if (data.CompanyId != self.companyId()) {
+				if (!data.company) { 
+					if (data.companyId != self.companyId()) {
                         self.company(null);
                     }
                 }else if (!self.company()){
-					self.company(new Company(data.Company, self));
+					self.company(new Company(data.company, self));
 				}else{
-					self.company().loadFromDto(data.Company);
+					self.company().loadFromDto(data.company);
 				}
 
 				// The rest of the objects are loaded now.
-				self.personId(data.PersonId);
-				self.title(data.Title);
-				self.firstName(data.FirstName);
-				self.lastName(data.LastName);
-				self.email(data.Email);
-				self.gender(data.Gender);
-                if (data.BirthDate == null) self.birthDate(null);
-				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.BirthDate))){
-				    self.birthDate(moment(data.BirthDate));
+				self.personId(data.personId);
+				self.title(data.title);
+				self.firstName(data.firstName);
+				self.lastName(data.lastName);
+				self.email(data.email);
+				self.gender(data.gender);
+                if (data.birthDate == null) self.birthDate(null);
+				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.birthDate))){
+				    self.birthDate(moment(data.birthDate));
 				}
-                if (data.LastBath == null) self.lastBath(null);
-				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.LastBath))){
-				    self.lastBath(moment(data.LastBath));
+                if (data.lastBath == null) self.lastBath(null);
+				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.lastBath))){
+				    self.lastBath(moment(data.lastBath));
 				}
-                if (data.NextUpgrade == null) self.nextUpgrade(null);
-				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.NextUpgrade))){
-				    self.nextUpgrade(moment(data.NextUpgrade));
+                if (data.nextUpgrade == null) self.nextUpgrade(null);
+				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
+				    self.nextUpgrade(moment(data.nextUpgrade));
 				}
-				self.personStatsId(data.PersonStatsId);
-				self.timeZone(data.TimeZone);
-				self.name(data.Name);
-				self.companyId(data.CompanyId);
+				self.personStatsId(data.personStatsId);
+				self.timeZone(data.timeZone);
+				self.name(data.name);
+				self.companyId(data.companyId);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

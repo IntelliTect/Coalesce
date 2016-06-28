@@ -355,14 +355,14 @@ module @moduleName {
 				// Load the lists of other objects
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
                 { 
-                @:if (data.@prop.Name !== null) {
+                @:if (data.@prop.Name.ToCamelCase() !== null) {
 					@:// Merge the incoming array
-					@:RebuildArray(self.@prop.JsVariable, data.@prop.Name, '@prop.Object.PrimaryKey.Name', @prop.Object.ViewModelClassName, self);
+					@:RebuildArray(self.@prop.JsVariable, data.@prop.Name.ToCamelCase(), '@prop.Object.PrimaryKey.Name', @prop.Object.ViewModelClassName, self);
                     if (prop.IsManytoManyCollection)
                     {
                     @:// Add many-to-many collection
                     @:var objs = [];
-                    @:$.each(data.@prop.Name, function(index, item) {
+                    @:$.each(data.@prop.Name.ToCamelCase(), function(index, item) {
                         @:if (item.@prop.ManyToManyCollectionProperty.Name){
                             @:objs.push(item.@prop.ManyToManyCollectionProperty.Name);
                         @:}
@@ -375,18 +375,18 @@ module @moduleName {
 				// This handles the issue with populating select lists with correct data because we now have the object.
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
 	            {
-				@:if (!data.@prop.Name) { 
+				@:if (!data.@prop.Name.ToCamelCase()) { 
                     if (prop.ObjectIdProperty != null) {
-					@:if (data.@prop.ObjectIdProperty.Name != self.@(prop.ObjectIdProperty.JsVariable)()) {
+					@:if (data.@prop.ObjectIdProperty.Name.ToCamelCase() != self.@(prop.ObjectIdProperty.JsVariable)()) {
                         @:self.@(prop.JsVariable)(null);
                     @:}
                     }else{
 					@:self.@(prop.JsVariable)(null);
                     }
                 @:}else if (!self.@(prop.JsVariable)()){
-					@:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.Name, self));
+					@:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.Name.ToCamelCase(), self));
 				@:}else{
-					@:self.@(prop.JsVariable)().loadFromDto(data.@prop.Name);
+					@:self.@(prop.JsVariable)().loadFromDto(data.@prop.Name.ToCamelCase());
 				@:}
                 }
 
@@ -395,17 +395,17 @@ module @moduleName {
                 {
                 if (prop.Type.IsDate)
                 { 
-                @:if (data.@prop.Name == null) self.@(prop.JsVariable)(null);
-				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.Name))){
-				    @:self.@(prop.JsVariable)(moment(data.@prop.Name));
+                @:if (data.@prop.Name.ToCamelCase() == null) self.@(prop.JsVariable)(null);
+				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.Name.ToCamelCase()))){
+				    @:self.@(prop.JsVariable)(moment(data.@prop.Name.ToCamelCase()));
 				@:}
                 } else if (!prop.IsPOCO) {
-				@:self.@(prop.JsVariable)(data.@prop.Name);
+				@:self.@(prop.JsVariable)(data.@prop.Name.ToCamelCase());
                 }else if (prop.IsComplexType) {
 				// Complex Type: @prop.Name
                 @foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
                 {
-				@:self.@(prop.JsVariable)().@(subProp.JsVariable)(data.@(prop.Name).@(subProp.Name));
+				@:self.@(prop.JsVariable)().@(subProp.JsVariable)(data.@(prop.Name.ToCamelCase()).@(subProp.Name.ToCamelCase()));
                 }
             }
          }

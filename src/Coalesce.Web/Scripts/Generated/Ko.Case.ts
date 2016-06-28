@@ -273,12 +273,12 @@ module ViewModels {
 				// Set the ID 
 				self.myId = data.CaseKey;
 				// Load the lists of other objects
-                if (data.CaseProducts !== null) {
+                if (data.caseProducts !== null) {
 					// Merge the incoming array
-					RebuildArray(self.caseProducts, data.CaseProducts, 'CaseProductId', CaseProduct, self);
+					RebuildArray(self.caseProducts, data.caseProducts, 'CaseProductId', CaseProduct, self);
                     // Add many-to-many collection
                     var objs = [];
-                    $.each(data.CaseProducts, function(index, item) {
+                    $.each(data.caseProducts, function(index, item) {
                         if (item.Product){
                             objs.push(item.Product);
                         }
@@ -287,48 +287,48 @@ module ViewModels {
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.AssignedTo) { 
-					if (data.AssignedToId != self.assignedToId()) {
+				if (!data.assignedTo) { 
+					if (data.assignedToId != self.assignedToId()) {
                         self.assignedTo(null);
                     }
                 }else if (!self.assignedTo()){
-					self.assignedTo(new Person(data.AssignedTo, self));
+					self.assignedTo(new Person(data.assignedTo, self));
 				}else{
-					self.assignedTo().loadFromDto(data.AssignedTo);
+					self.assignedTo().loadFromDto(data.assignedTo);
 				}
-				if (!data.ReportedBy) { 
-					if (data.ReportedById != self.reportedById()) {
+				if (!data.reportedBy) { 
+					if (data.reportedById != self.reportedById()) {
                         self.reportedBy(null);
                     }
                 }else if (!self.reportedBy()){
-					self.reportedBy(new Person(data.ReportedBy, self));
+					self.reportedBy(new Person(data.reportedBy, self));
 				}else{
-					self.reportedBy().loadFromDto(data.ReportedBy);
+					self.reportedBy().loadFromDto(data.reportedBy);
 				}
-				if (!data.DevTeamAssigned) { 
-					if (data.DevTeamAssignedId != self.devTeamAssignedId()) {
+				if (!data.devTeamAssigned) { 
+					if (data.devTeamAssignedId != self.devTeamAssignedId()) {
                         self.devTeamAssigned(null);
                     }
                 }else if (!self.devTeamAssigned()){
-					self.devTeamAssigned(new DevTeam(data.DevTeamAssigned, self));
+					self.devTeamAssigned(new DevTeam(data.devTeamAssigned, self));
 				}else{
-					self.devTeamAssigned().loadFromDto(data.DevTeamAssigned);
+					self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
 				}
 
 				// The rest of the objects are loaded now.
-				self.caseKey(data.CaseKey);
-				self.title(data.Title);
-				self.description(data.Description);
-                if (data.OpenedAt == null) self.openedAt(null);
-				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.OpenedAt))){
-				    self.openedAt(moment(data.OpenedAt));
+				self.caseKey(data.caseKey);
+				self.title(data.title);
+				self.description(data.description);
+                if (data.openedAt == null) self.openedAt(null);
+				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.openedAt))){
+				    self.openedAt(moment(data.openedAt));
 				}
-				self.assignedToId(data.AssignedToId);
-				self.reportedById(data.ReportedById);
-				self.attachment(data.Attachment);
-				self.severity(data.Severity);
-				self.status(data.Status);
-				self.devTeamAssignedId(data.DevTeamAssignedId);
+				self.assignedToId(data.assignedToId);
+				self.reportedById(data.reportedById);
+				self.attachment(data.attachment);
+				self.severity(data.severity);
+				self.status(data.status);
+				self.devTeamAssignedId(data.devTeamAssignedId);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

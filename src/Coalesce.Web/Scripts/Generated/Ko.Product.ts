@@ -201,8 +201,8 @@ module ViewModels {
 				// This handles the issue with populating select lists with correct data because we now have the object.
 
 				// The rest of the objects are loaded now.
-				self.productId(data.ProductId);
-				self.name(data.Name);
+				self.productId(data.productId);
+				self.name(data.name);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

@@ -4,12 +4,12 @@
   "authors": [ "IntelliTect" ],
 
   "frameworks": {
-    "net461": { }
+    "net46": { }
   },
   "dependencies": {
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0",
-    "Intellitect.ComponentModel": "1.0.2-alpha001",
+    "Intellitect.ComponentModel": "",
     "GenFu": "1.1.0"
   }
 }

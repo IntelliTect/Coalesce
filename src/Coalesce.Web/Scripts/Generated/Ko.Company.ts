@@ -215,22 +215,22 @@ module ViewModels {
 				// Set the ID 
 				self.myId = data.CompanyId;
 				// Load the lists of other objects
-                if (data.Employees !== null) {
+                if (data.employees !== null) {
 					// Merge the incoming array
-					RebuildArray(self.employees, data.Employees, 'PersonId', Person, self);
+					RebuildArray(self.employees, data.employees, 'PersonId', Person, self);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
 
 				// The rest of the objects are loaded now.
-				self.companyId(data.CompanyId);
-				self.name(data.Name);
-				self.address1(data.Address1);
-				self.address2(data.Address2);
-				self.city(data.City);
-				self.state(data.State);
-				self.zipCode(data.ZipCode);
-				self.altName(data.AltName);
+				self.companyId(data.companyId);
+				self.name(data.name);
+				self.address1(data.address1);
+				self.address2(data.address2);
+				self.city(data.city);
+				self.state(data.state);
+				self.zipCode(data.zipCode);
+				self.altName(data.altName);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

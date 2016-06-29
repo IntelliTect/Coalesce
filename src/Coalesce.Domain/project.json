@@ -3,13 +3,14 @@
   "description": "Coalesce.Domain Class Library",
   "authors": [ "IntelliTect" ],
 
-  "frameworks": {
-    "net46": { }
-  },
   "dependencies": {
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0",
-    "Intellitect.ComponentModel": "",
+    "Intellitect.ComponentModel": "1.0.2-*",
     "GenFu": "1.1.0"
+  },
+
+  "frameworks": {
+    "net46": {}
   }
 }

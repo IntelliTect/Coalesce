@@ -229,29 +229,29 @@ module ViewModels {
 				// Load the lists of other objects
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.case) { 
-					if (data.caseId != self.caseId()) {
+				if (!data.Case) { 
+					if (data.CaseId != self.caseId()) {
                         self.case(null);
                     }
                 }else if (!self.case()){
-					self.case(new Case(data.case, self));
+					self.case(new Case(data.Case, self));
 				}else{
-					self.case().loadFromDto(data.case);
+					self.case().loadFromDto(data.Case);
 				}
-				if (!data.product) { 
-					if (data.productId != self.productId()) {
+				if (!data.Product) { 
+					if (data.ProductId != self.productId()) {
                         self.product(null);
                     }
                 }else if (!self.product()){
-					self.product(new Product(data.product, self));
+					self.product(new Product(data.Product, self));
 				}else{
-					self.product().loadFromDto(data.product);
+					self.product().loadFromDto(data.Product);
 				}
 
 				// The rest of the objects are loaded now.
-				self.caseProductId(data.caseProductId);
-				self.caseId(data.caseId);
-				self.productId(data.productId);
+				self.caseProductId(data.CaseProductId);
+				self.caseId(data.CaseId);
+				self.productId(data.ProductId);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

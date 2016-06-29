@@ -194,23 +194,23 @@ module ListViewModels {
                                 + "&listDataSource=" + PersonDataSources[self.listDataSource] + "&" + self.queryString,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.wasSuccessful){
+                    if (data.WasSuccessful){
                         self.items.removeAll();
-                        for (var i in data.list) {
-                            var model = new ViewModels.Person(data.list[i]);
+                        for (var i in data.List) {
+                            var model = new ViewModels.Person(data.List[i]);
                             model.includes = self.includes;
                             model.onDelete(itemDeleted);
                             self.items.push(model);
                         }
-                        self.count(data.list.length);
-                        self.totalCount(data.totalCount);
-                        self.pageCount(data.pageCount);
-                        self.page(data.page);
-                        self.message(data.message)
+                        self.count(data.List.length);
+                        self.totalCount(data.TotalCount);
+                        self.pageCount(data.PageCount);
+                        self.page(data.Page);
+                        self.message(data.Message)
                         self.isLoaded(true);
                         if ($.isFunction(callback)) callback(self);
                     }else{
-                        self.message(data.message);
+                        self.message(data.Message);
                         self.isLoaded(false);
                     }
                 })
@@ -305,10 +305,10 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
+					if (data.WasSuccessful) {
 						self.addMessage('');
 						self.addWasSuccessful(true);
-						self.addResult(data.object);
+						self.addResult(data.Object);
                         if (reload) {
                           self.load(callback);
                         } else if ($.isFunction(callback)) {
@@ -359,10 +359,10 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
+					if (data.WasSuccessful) {
 						self.getUserMessage('');
 						self.getUserWasSuccessful(true);
-						self.getUserResult(data.object);
+						self.getUserResult(data.Object);
                         if (reload) {
                           self.load(callback);
                         } else if ($.isFunction(callback)) {
@@ -400,10 +400,10 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
+					if (data.WasSuccessful) {
 						self.getUserPublicMessage('');
 						self.getUserPublicWasSuccessful(true);
-						self.getUserPublicResult(data.object);
+						self.getUserPublicResult(data.Object);
                         if (reload) {
                           self.load(callback);
                         } else if ($.isFunction(callback)) {
@@ -441,10 +441,10 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
+					if (data.WasSuccessful) {
 						self.namesStartingWithMessage('');
 						self.namesStartingWithWasSuccessful(true);
-						self.namesStartingWithResult(data.object);
+						self.namesStartingWithResult(data.Object);
                         if (reload) {
                           self.load(callback);
                         } else if ($.isFunction(callback)) {
@@ -494,10 +494,10 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
+					if (data.WasSuccessful) {
 						self.namesStartingWithPublicMessage('');
 						self.namesStartingWithPublicWasSuccessful(true);
-						self.namesStartingWithPublicResult(data.object);
+						self.namesStartingWithPublicResult(data.Object);
                         if (reload) {
                           self.load(callback);
                         } else if ($.isFunction(callback)) {
@@ -547,10 +547,10 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
+					if (data.WasSuccessful) {
 						self.borCPeopleMessage('');
 						self.borCPeopleWasSuccessful(true);
-						self.borCPeopleResult(data.object);
+						self.borCPeopleResult(data.Object);
                         if (reload) {
                           self.load(callback);
                         } else if ($.isFunction(callback)) {

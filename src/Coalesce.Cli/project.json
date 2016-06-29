@@ -9,7 +9,7 @@
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.Extensions.DependencyInjection": "1.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final",
-    "Intellitect.Extensions.CodeGenerators.Mvc": "",
+    "Intellitect.Extensions.CodeGenerators.Mvc": "1.0.2-*",
     "Microsoft.Extensions.DependencyModel": "1.0.0"
   },
 

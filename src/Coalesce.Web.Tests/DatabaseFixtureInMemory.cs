@@ -1,6 +1,6 @@
 ﻿using Coalesce.Domain;
 using Intellitect.ComponentModel.TypeDefinition;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +10,14 @@ namespace Coalesce.Web.Tests
 {
     public class DatabaseFixtureInMemory : IDisposable
     {
-        public AppContext Db { get; private set; }
+        public DbContext Db { get; private set; }
 
         public DatabaseFixtureInMemory()
         {
-            ReflectionRepository.AddContext<AppContext>();
+            ReflectionRepository.AddContext<DbContext>();
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseInMemoryDatabase();
-            Db = new AppContext(dbOptionBuilder.Options);
+            Db = new DbContext(dbOptionBuilder.Options);
             // Wipe the database out first;
             //Db.Database.EnsureDeleted();
             // Add some data to it.

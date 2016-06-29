@@ -1,7 +1,7 @@
 ﻿using Intellitect.ComponentModel.TypeDefinition;
 using Intellitect.ComponentModel.Models;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Data.Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +45,7 @@ namespace Intellitect.ComponentModel.Controllers
             ViewBag.Query = "";
             foreach (var kvp in Request.Query)
             {
-                ViewBag.ParentIdName =  kvp.Key;
+                ViewBag.ParentIdName = kvp.Key;
                 ViewBag.ParentId = kvp.Value;
                 ViewBag.Query = kvp.Key + "=" + kvp.Value;
             }
@@ -95,11 +95,11 @@ namespace Intellitect.ComponentModel.Controllers
         protected ActionResult DocsImplementation()
         {
             // Load TypeScript docs
-            var path = Path.Combine(AppEnv.ApplicationBasePath, "Scripts", "Generated", $"ko.{classViewModel.ViewModelClassName}.ts");
+            var path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ViewModelClassName}.ts");
 
             ViewBag.ObjDoc = GenerateTypeScriptDocs(path);
 
-            path = Path.Combine(AppEnv.ApplicationBasePath, "Scripts", "Generated", $"ko.{classViewModel.ListViewModelClassName}.ts");
+            path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ListViewModelClassName}.ts");
 
             ViewBag.ListDoc = GenerateTypeScriptDocs(path);
 

@@ -1,5 +1,5 @@
 ﻿using Intellitect.ComponentModel.TypeDefinition;
-using Microsoft.Extensions.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using System;
 using System.Collections.Generic;
 using System.Linq;

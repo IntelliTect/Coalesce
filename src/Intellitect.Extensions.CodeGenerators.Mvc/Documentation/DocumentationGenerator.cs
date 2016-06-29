@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Extensions.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.WebEncoders;
 using System;
@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Documentation
 {
@@ -59,7 +61,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Documentation
         {
             get
             {
-                return TemplateFoldersUtilities.GetTemplateFolders(
+                return Common.TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: ThisAssemblyName,
                     applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
                     baseFolders: new[] { "" },
@@ -68,12 +70,11 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Documentation
         }
         public DocumentationGenerator(
             ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
             IModelTypesLocator modelTypesLocator,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
             ILogger logger)
-            : base(environment)
+            : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = modelTypesLocator;
             ServiceProvider = serviceProvider;
@@ -83,8 +84,8 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Documentation
 
         internal async Task Generate(CommandLineGeneratorModel model)
         {
-            Library componentModel = LibraryManager.GetLibrary("Intellitect.ComponentModel");
-            Library codeGenerator = LibraryManager.GetLibrary("Intellitect.Extensions.CodeGenerators.Mvc");
+            LibraryDescription componentModel = LibraryManager.GetLibrary("Intellitect.ComponentModel");
+            LibraryDescription codeGenerator = LibraryManager.GetLibrary("Intellitect.Extensions.CodeGenerators.Mvc");
             DocumentationViewModel viewModel = new DocumentationViewModel();
 
             viewModel.Attributes = new List<AttributeInfo>();

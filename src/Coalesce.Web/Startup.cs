@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using Coalesce.Domain;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Intellitect.ComponentModel.TypeDefinition;
 using Intellitect.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System;
+using System.IO;
+using Newtonsoft.Json.Serialization;
 
 namespace Coalesce.Web
 {
@@ -18,12 +20,12 @@ namespace Coalesce.Web
     {
         public IConfigurationRoot Configuration { get; set; }
 
-        public Startup(IHostingEnvironment env, IApplicationEnvironment appEnv)
+        public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(appEnv.ApplicationBasePath)
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
@@ -33,18 +35,20 @@ namespace Coalesce.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Add Entity Framework services to the services container.
-            services.AddEntityFramework()
-                .AddSqlServer()
-                .AddDbContext<AppContext>(options =>
-                    options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
+                var resolver = options.SerializerSettings.ContractResolver;
+                if (resolver != null) (resolver as DefaultContractResolver).NamingStrategy = null;
+
                 //options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
 
-            ReflectionRepository.AddContext<AppContext>();
+            ReflectionRepository.AddContext<AppDbContext>();
 
             RoleMapping.Add("Admin", "S-1-5-4");  // Interactive user.
             RoleMapping.Add("Admin", "S-1-1-0");  // Everyone who has logged on.
@@ -58,17 +62,16 @@ namespace Coalesce.Web
             loggerFactory.AddDebug();
 
             // Add the platform handler to the request pipeline.
-            app.UseIISPlatformHandler();
             app.UseStaticFiles();
 
             app.UseDeveloperExceptionPage();
 
-            app.UseCookieAuthentication(options =>
-            {
-                options.AutomaticAuthenticate = true;
-            });
+            //app.UseCookieAuthentication(options =>
+            //{
+            //    options.AutomaticAuthenticate = true;
+            //});
 
-            app.UseAzureAuthMiddleware();
+            //app.UseAzureAuthMiddleware();
 
             app.UseMvc(routes =>
             {
@@ -83,19 +86,8 @@ namespace Coalesce.Web
 
             });
 
-            SampleData.Initialize(app.ApplicationServices.GetService<AppContext>());
+            SampleData.Initialize(app.ApplicationServices.GetService<AppDbContext>());
         }
 
-        // Entry point for the application.
-        //public static void Main(string[] args) => WebApplication.Run<Startup>(args);
-        public static void Main(string[] args)
-        {
-            var application = new WebApplicationBuilder()
-                .UseConfiguration(WebApplicationConfiguration.GetDefault(args))
-                .UseStartup("Coalesce.Web")
-                .Build();
-
-            application.Run();
-        }
     }
 }

@@ -1,8 +1,8 @@
 
 using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Intellitect.ComponentModel.Models;
 using System.Threading.Tasks;
@@ -110,7 +110,6 @@ namespace Coalesce.Web.Api
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
-
         protected override IQueryable<CaseProduct> GetListDataSource(ListParameters parameters)
         {
 

@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNet.Mvc;
-using Microsoft.Data.Entity;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using System;
@@ -21,7 +22,7 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 if (_Db == null)
                 {
-                    _Db = Resolver.GetRequiredService<TContext>();
+                    _Db = HttpContext?.RequestServices.GetRequiredService<TContext>();
                 }
                 return _Db;
             }
@@ -31,14 +32,14 @@ namespace Intellitect.ComponentModel.Controllers
             }
         }
 
-        private IApplicationEnvironment _AppEnv;
-        protected IApplicationEnvironment AppEnv
+        private IHostingEnvironment _AppEnv;
+        protected IHostingEnvironment AppEnv
         {
             get
             {
                 if (_AppEnv == null)
                 {
-                    _AppEnv = Resolver.GetRequiredService<IApplicationEnvironment>();
+                    _AppEnv = HttpContext?.RequestServices.GetRequiredService<IHostingEnvironment>();
                 }
                 return _AppEnv;
             }

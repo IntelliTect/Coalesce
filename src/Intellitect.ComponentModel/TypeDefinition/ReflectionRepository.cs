@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Intellitect.ComponentModel.TypeDefinition.Wrappers;
@@ -155,10 +155,10 @@ namespace Intellitect.ComponentModel.TypeDefinition
             return AddContext(context, area);
         }
 
-        public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol, string area = "") // where T: DbContext
+        public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol, string area = "") // where T: AppDbContext
         {
             var context = new ClassViewModel(contextSymbol, null, null, false);
-            // Reflect on the appContext
+            // Reflect on the AppDbContext
             return AddContext(context, area);
         }
 
@@ -170,7 +170,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 var models = new List<ClassViewModel>();
                 foreach (var prop in context.Properties)
                 {
-                    if (prop.Type.IsCollection && IsValidViewModelClass(prop.PureType.Name))
+                    if ((prop.Type.IsCollection || prop.IsDbSet) && IsValidViewModelClass(prop.PureType.Name))
                     {
                         var model = ReflectionRepository.GetClassViewModel(classType: prop.PureType, hasDbSet: prop.IsDbSet);
                         if (model != null)

@@ -241,19 +241,19 @@ gulp.task('nuget:publish:NLogExtensions',
 );
 
 gulp.task('scaffold:mvc',
-    shell.task(['dnx gen scripts -dc AppContext -filesOnly'])
+    shell.task(['dnx gen scripts -dc DbContext -filesOnly'])
 );
 
 gulp.task('scaffold:mvc:area',
-    shell.task(['dnx gen scripts -dc AppContext -filesOnly -a TestArea'])
+    shell.task(['dnx gen scripts -dc DbContext -filesOnly -a TestArea'])
 );
 
 gulp.task('scaffold:mvc:all',
-    shell.task(['dnx gen scripts -dc AppContext'])
+    shell.task(['dnx gen scripts -dc DbContext'])
 );
 
 gulp.task('scaffold:mvc.debug',
-    shell.task(['dnx --debug gen scripts -dc AppContext -filesOnly'])
+    shell.task(['dnx --debug gen scripts -dc DbContext -filesOnly'])
 );
 
 gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);

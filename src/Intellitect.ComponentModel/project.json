@@ -2,26 +2,20 @@
   "version": "1.0.2-alpha001",
   "description": "Intellitect.ComponentModel Class Library",
   "authors": [ "intelliTect" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
 
-  "frameworks": {
-    "net451": {
-      "frameworkAssemblies": {
-        "System.Threading.Tasks": "4.0.0.0",
-        "System.Globalization": "4.0.0.0"
-      }
-    }
-  },
   "dependencies": {
     "AutoMapper": "4.2.1",
-    "EntityFramework.Core": "7.0.0-rc2-16649",
-    "EntityFramework.Relational": "7.0.0-rc2-16649",
-    "Microsoft.AspNet.Identity": "3.0.0-rc2-16304",
-    "Microsoft.AspNet.Mvc.ViewFeatures": "6.0.0-rc2-16770",
-    "Microsoft.CodeAnalysis.Common": "1.1.0-rc1",
-    "System.Collections.Concurrent": "4.0.11-rc2-23621",
-    "System.Linq.Dynamic": "1.0.4"
+    "Remotion.Linq": "2.1.1",
+    "Microsoft.EntityFrameworkCore": "1.0.0",
+    "Microsoft.EntityFrameworkCore.Relational": "1.0.0",
+    "Microsoft.AspNetCore.Identity": "1.0.0",
+    "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.0",
+    "System.Linq.Dynamic": "1.0.4",
+    "Microsoft.CodeAnalysis.Common": "1.3.0"
+  },
+
+  "frameworks": {
+    "net46": {
+    }
   }
 }

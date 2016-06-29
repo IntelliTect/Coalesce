@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Entity.Query;
+﻿using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;

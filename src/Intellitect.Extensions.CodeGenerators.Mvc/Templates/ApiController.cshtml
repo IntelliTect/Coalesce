@@ -1,7 +1,7 @@
-﻿@inherits Microsoft.Extensions.CodeGeneration.Templating.RazorTemplateBase
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using Intellitect.ComponentModel.TypeDefinition
 @using Intellitect.Extensions.CodeGenerators.Mvc.Utilities
-@using Microsoft.Extensions.CodeGeneration
+@using Microsoft.VisualStudio.Web.CodeGeneration
 @{
     ModelType contextInfo = Model.ContextInfo;
     ClassViewModel model = Model.Model;
@@ -13,9 +13,9 @@
 }
 
 using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Intellitect.ComponentModel.Models;
 using System.Threading.Tasks;

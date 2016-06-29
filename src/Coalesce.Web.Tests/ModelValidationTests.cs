@@ -13,7 +13,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelValidation()
         {
-            var result = ValidateContext.Validate<AppContext>();
+            var result = ValidateContext.Validate<DbContext>();
 
             foreach (var test in result)
             {

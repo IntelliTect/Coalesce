@@ -1,13 +1,8 @@
 ﻿using Intellitect.ComponentModel.DataAnnotations;
-using Intellitect.ComponentModel.Utilities;
 using Intellitect.Extensions.CodeGenerators.Mvc.Common;
-using Intellitect.Extensions.CodeGenerators.Mvc.Utilities;
 using Intellitect.ComponentModel.Models;
 using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.CodeGeneration;
-using Microsoft.Extensions.CodeGenerators.Mvc.Dependency;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,33 +12,32 @@ using System.Threading.Tasks;
 using Intellitect.ComponentModel.TypeDefinition;
 using Intellitect.ComponentModel.Validation;
 using System.Globalization;
+using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 {
     public class ScriptsGenerator : CommonGeneratorBase
     {
         public IModelTypesLocator ModelTypesLocator { get; }
-        protected IServiceProvider ServiceProvider { get; }
-        protected ILibraryManager LibraryManager { get; }
-
+        public IModelTypesLocator DataModelTypesLocator { get; }
         protected ICodeGeneratorActionsService CodeGeneratorActionsService { get; }
 
         public const string ScriptsFolderName = "Scripts";
         public const string ThisAssemblyName = "Intellitect.Extensions.CodeGenerators.Mvc";
 
-        public ScriptsGenerator(
-            ILibraryManager libraryManager,
-            IApplicationEnvironment environment,
-            IModelTypesLocator modelTypesLocator,
-            ICodeGeneratorActionsService codeGeneratorActionsService,
-            IServiceProvider serviceProvider,
-            ILogger logger)
-            : base(environment)
+        private ProjectContext _webProject;
+        private ProjectContext _cliProject;
+
+        public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject, ProjectContext cliProject)
+            : base(PlatformServices.Default.Application)
         {
-            ModelTypesLocator = modelTypesLocator;
-            ServiceProvider = serviceProvider;
-            CodeGeneratorActionsService = codeGeneratorActionsService;
-            LibraryManager = libraryManager;
+            ModelTypesLocator = DependencyProvider.ModelTypesLocator(webProject);
+            DataModelTypesLocator = DependencyProvider.ModelTypesLocator(dataProject);
+            CodeGeneratorActionsService = DependencyProvider.CodeGeneratorActionsService(cliProject);
+
+            _webProject = webProject;
+            _cliProject = cliProject;
         }
 
         internal Task Generate(CommandLineGeneratorModel model)
@@ -56,7 +50,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 var targetNamespace = ValidationUtil.ValidateType("Startup", "", ModelTypesLocator, throwWhenNotFound: false).Namespace;
                 Console.WriteLine($"Namespace: {targetNamespace}");
 
-                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", ModelTypesLocator, throwWhenNotFound: false);
+                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator ?? ModelTypesLocator, throwWhenNotFound: false);
 
                 if (model.ValidateOnly)
                 {
@@ -153,7 +147,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 
             // Directory location for all "original" files from intellitect
             var intelliTectTemplatePath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _webProject.ProjectDirectory,
                 areaLocation,
                 "intelliTect");
 
@@ -164,7 +158,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 
             // Copy over Api Folder and Files
             var apiViewOutputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _webProject.ProjectDirectory,
                 areaLocation,
                 "Views", "Api");
 
@@ -179,7 +173,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 
             // Copy over Shared Folder (_EditorHtml, _Master - always, _Layout only if it doesn't exist)
             var sharedViewOutputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _webProject.ProjectDirectory,
                 areaLocation,
                 "Views", "Shared");
 
@@ -194,14 +188,14 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             {
                 CopyFileWithoutOverwritingOriginal(TemplateLocation("_Layout.cshtml"), intelliTectTemplatePath, sharedViewOutputPath, "_Layout.cshtml");
             }
-            CopyFileWithoutOverwritingOriginal(TemplateLocation("_ViewStart.cshtml"), intelliTectTemplatePath, Path.Combine(ApplicationEnvironment.ApplicationBasePath, areaLocation, "Views"), "_ViewStart.cshtml");
+            CopyFileWithoutOverwritingOriginal(TemplateLocation("_ViewStart.cshtml"), intelliTectTemplatePath, Path.Combine(_webProject.ProjectDirectory, areaLocation, "Views"), "_ViewStart.cshtml");
 
             // only copy the intellitect scripts when generating the root site, this isn't needed for areas since it will already exist at the root
             if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
             {
                 // Copy files for the scripts folder
                 var scriptsOutputPath = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     "Scripts", "Intellitect");
 
@@ -216,7 +210,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             }
 
             var stylesOutputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _webProject.ProjectDirectory,
                 areaLocation,
                 "Styles");
 
@@ -230,12 +224,12 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
             {
                 // Copy files from ProjectConfig if they don't already exist
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("bower.json"), intelliTectTemplatePath, ApplicationEnvironment.ApplicationBasePath, "bower.json");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation(".bowerrc"), intelliTectTemplatePath, ApplicationEnvironment.ApplicationBasePath, ".bowerrc");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("gulpfile.js"), intelliTectTemplatePath, ApplicationEnvironment.ApplicationBasePath, "gulpfile.js");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("package.json"), intelliTectTemplatePath, ApplicationEnvironment.ApplicationBasePath, "package.json");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("tsconfig.json"), intelliTectTemplatePath, ApplicationEnvironment.ApplicationBasePath, "tsconfig.json");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("tsd.json"), intelliTectTemplatePath, ApplicationEnvironment.ApplicationBasePath, "tsd.json");
+                CopyFileWithoutOverwritingOriginal(TemplateLocation("bower.json"), intelliTectTemplatePath, _webProject.ProjectDirectory, "bower.json");
+                CopyFileWithoutOverwritingOriginal(TemplateLocation(".bowerrc"), intelliTectTemplatePath, _webProject.ProjectDirectory, ".bowerrc");
+                CopyFileWithoutOverwritingOriginal(TemplateLocation("gulpfile.js"), intelliTectTemplatePath, _webProject.ProjectDirectory, "gulpfile.js");
+                CopyFileWithoutOverwritingOriginal(TemplateLocation("package.json"), intelliTectTemplatePath, _webProject.ProjectDirectory, "package.json");
+                CopyFileWithoutOverwritingOriginal(TemplateLocation("tsconfig.json"), intelliTectTemplatePath, _webProject.ProjectDirectory, "tsconfig.json");
+                CopyFileWithoutOverwritingOriginal(TemplateLocation("tsd.json"), intelliTectTemplatePath, _webProject.ProjectDirectory, "tsd.json");
 
                 if (!commandLineGeneratorModel.OnlyGenerateFiles)
                 {
@@ -259,16 +253,16 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                     }
                     // only run the init command if the tsd.json file does not already exist. We most likely will never have this run since we copy our own version earlier, but putting it here for completeness
                     Console.WriteLine("Installing TypeScript Definitions");
-                    if (!File.Exists(Path.Combine(ApplicationEnvironment.ApplicationBasePath, "tsd.json")))
+                    if (!File.Exists(Path.Combine(_webProject.ProjectDirectory, "tsd.json")))
                     {
                         Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "init").WaitForExit();
                     }
                     Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "reinstall").WaitForExit();
                 }
                 // Copy readme to root as IntelliTectScaffoldingReadme.txt
-                File.Copy(TemplateLocation("Readme.txt"), Path.Combine(ApplicationEnvironment.ApplicationBasePath, "IntelliTectScaffoldingReadme.txt"), true);
+                File.Copy(TemplateLocation("Readme.txt"), Path.Combine(_webProject.ProjectDirectory, "IntelliTectScaffoldingReadme.txt"), true);
             }
-            await CodeGeneratorActionsService.AddFileFromTemplateAsync(Path.Combine(ApplicationEnvironment.ApplicationBasePath, areaLocation, "Views", "_ViewImports.cshtml"),
+            await CodeGeneratorActionsService.AddFileFromTemplateAsync(Path.Combine(_webProject.ProjectDirectory, areaLocation, "Views", "_ViewImports.cshtml"),
                 "_ViewImports.cshtml", TemplateFolders, null);
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(Path.Combine(sharedViewOutputPath, "_AdminLayout.cshtml"), "_AdminLayout.cshtml", TemplateFolders, commandLineGeneratorModel.AreaLocation);
         }
@@ -371,8 +365,10 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             {
                 areaLocation = Path.Combine("Areas", controllerGeneratorModel.AreaLocation);
             }
-            var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
-            await layoutDependencyInstaller.Execute();
+
+            // TODO: do we need this anymore?
+            //var layoutDependencyInstaller = ActivatorUtilities.CreateInstance<MvcLayoutDependencyInstaller>(ServiceProvider);
+            //await layoutDependencyInstaller.Execute();
 
             ViewModelForTemplates apiModels = new ViewModelForTemplates
             {
@@ -384,10 +380,11 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             };
 
             // Copy over the static files
-            await CopyStaticFiles(controllerGeneratorModel);
+            // TODO: fix this
+            //await CopyStaticFiles(controllerGeneratorModel);
 
             var apiViewOutputPath = Path.Combine(
-                ApplicationEnvironment.ApplicationBasePath,
+                _webProject.ProjectDirectory,
                 areaLocation,
                 "Views", "Api");
 
@@ -405,7 +402,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 var fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.Name}.ts" : $"Ko.{model.ModulePrefix}.{model.Model.Name}.ts";
                 // Todo: Need logic for areas
                 var viewOutputPath = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Generated",
                     fileName);
@@ -417,7 +414,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
 
                 fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.ListViewModelClassName}.ts" : $"Ko.{model.ModulePrefix}.{model.Model.ListViewModelClassName}.ts";
                 viewOutputPath = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Generated",
                     fileName);
@@ -437,7 +434,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 var fileName = (string.IsNullOrWhiteSpace(externalType.ModulePrefix)) ? $"Ko.{externalType.Model.Name}.ts" : $"Ko.{externalType.ModulePrefix}.{externalType.Model.Name}.ts";
                 // Todo: Need logic for areas
                 var viewOutputPath = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Generated",
                     fileName);
@@ -462,7 +459,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 var fileName = (string.IsNullOrWhiteSpace(complexType.ModulePrefix)) ? $"Ko.{complexType.Model.Name}.ts" : $"Ko.{complexType.ModulePrefix}.{complexType.Model.Name}.ts";
                 // Todo: Need logic for areas
                 var viewOutputPath = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Generated",
                     fileName);
@@ -478,7 +475,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             // Generate base api controller if it doesn't already exist
             {
                 var filename = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     "Api", "Generated",
                     "LocalBaseApiController.cs");
@@ -492,7 +489,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
                 var filename = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     "Api", "Generated",
                     model.Model.Name + "ApiControllerGen.cs");
@@ -506,7 +503,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
                 var filename = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     "Controllers", "Generated",
                     model.Model.Name + "ControllerGen.cs");
@@ -518,7 +515,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
                 var filename = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     "Views", "Generated",
                     model.Model.Name,
@@ -527,7 +524,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                     "TableView.cshtml", TemplateFolders, model);
 
                 filename = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
+                    _webProject.ProjectDirectory,
                     areaLocation,
                     "Views", "Generated",
                     model.Model.Name,
@@ -537,9 +534,9 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             }
 
 
-            await layoutDependencyInstaller.InstallDependencies();
+            //await layoutDependencyInstaller.InstallDependencies();
 
-            var scriptOutputPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath, ScriptsFolderName);
+            var scriptOutputPath = Path.Combine(_webProject.ProjectDirectory, ScriptsFolderName);
             GenerateTSReferenceFile(scriptOutputPath);
 
             //await GenerateTypeScriptDocs(scriptOutputPath);
@@ -622,12 +619,12 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
         {
             get
             {
-                return TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: ThisAssemblyName,
-                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
-                    baseFolders: new[] { "" },
-                    libraryManager: LibraryManager);
-
+                return Common.TemplateFoldersUtilities.GetTemplateFolders(
+                    codeGenAssembly: ThisAssemblyName,
+                    cliProject: _cliProject,
+                    mvcProject: _webProject,
+                    baseFolders: new[] { "" }
+                );
             }
         }
 

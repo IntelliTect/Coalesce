@@ -1,7 +1,7 @@
 ﻿using Coalesce.Domain.External;
 using Intellitect.ComponentModel.Data;
 using Intellitect.ComponentModel.DataAnnotations;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,6 +10,7 @@ using System.Linq;
 
 namespace Coalesce.Domain
 {
+    [Table("Case")]
     public class Case : IIncludable<Case>, IIncludeExternal<Case>
     {
         public enum Statuses
@@ -58,12 +59,12 @@ namespace Coalesce.Domain
         public DevTeam DevTeamAssigned { get; set; }
 
 
-        public static int GetAllOpenCasesCount(AppContext db)
+        public static int GetAllOpenCasesCount(AppDbContext db)
         {
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
         }
 
-        public static IQueryable<Case> GetAllOpenCases(int x, int y, AppContext db)
+        public static IQueryable<Case> GetAllOpenCases(int x, int y, AppDbContext db)
         {
             return db.Cases.Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress).Include(c => c.AssignedTo).Include(c => c.ReportedBy);
         }

@@ -1,8 +1,8 @@
 
 using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Intellitect.ComponentModel.Models;
 using System.Threading.Tasks;
@@ -122,7 +122,6 @@ namespace Coalesce.Web.Api
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
-
         protected override IQueryable<Person> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "BorCPeople")
@@ -154,7 +153,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: ChangeSpacesToDashesInName
         [HttpPost("ChangeSpacesToDashesInName")]
         
@@ -175,7 +173,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: Add
         [HttpPost("Add")]
         
@@ -193,7 +190,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: GetUser
         [HttpPost("GetUser")]
         [Authorize]
@@ -212,7 +208,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: GetUserPublic
         [HttpPost("GetUserPublic")]
         
@@ -230,7 +225,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: NamesStartingWith
         [HttpPost("NamesStartingWith")]
         [Authorize]
@@ -249,7 +243,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: NamesStartingWithPublic
         [HttpPost("NamesStartingWithPublic")]
         
@@ -267,7 +260,6 @@ namespace Coalesce.Web.Api
             return result;
         }
         
-
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
         
@@ -284,6 +276,5 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
-    }
+            }
 }

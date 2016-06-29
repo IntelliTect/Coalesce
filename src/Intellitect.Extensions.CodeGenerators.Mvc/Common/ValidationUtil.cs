@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc
 {

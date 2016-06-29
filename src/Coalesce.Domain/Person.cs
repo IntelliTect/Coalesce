@@ -1,6 +1,6 @@
 ﻿using Intellitect.ComponentModel.Data;
 using Intellitect.ComponentModel.DataAnnotations;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace Coalesce.Domain
 {
     [Edit(AllowAnonymous = true)]
+    [Table("Person")]
     public class Person : IIncludable<Person>
     {
         public enum Genders
@@ -194,7 +195,7 @@ namespace Coalesce.Domain
         /// <param name="db"></param>
         /// <returns></returns>
         [Execute]
-        public static IEnumerable<string> NamesStartingWith(string characters, AppContext db)
+        public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
         }
@@ -206,7 +207,7 @@ namespace Coalesce.Domain
         /// <param name="characters"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static IEnumerable<string> NamesStartingWithPublic(string characters, AppContext db)
+        public static IEnumerable<string> NamesStartingWithPublic(string characters, AppDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
         }
@@ -216,7 +217,7 @@ namespace Coalesce.Domain
         /// </summary>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static IQueryable<Person> BorCPeople(AppContext db)
+        public static IQueryable<Person> BorCPeople(AppDbContext db)
         {
             return db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
         }

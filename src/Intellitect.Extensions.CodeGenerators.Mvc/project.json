@@ -8,7 +8,7 @@
     "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Templating": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-final",
-    "Intellitect.ComponentModel": "",
+    "Intellitect.ComponentModel": "1.0.2-*",
     "Microsoft.Extensions.WebEncoders.Core": "1.0.0-rc1-final",
     "Microsoft.AspNetCore.Mvc.Razor": "1.0.0"
   },

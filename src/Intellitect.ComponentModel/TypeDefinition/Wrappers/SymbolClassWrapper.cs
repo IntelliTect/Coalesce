@@ -66,7 +66,7 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
                 if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
                 {
                     var parentSymbol = new SymbolClassWrapper(Symbol.BaseType);
-                    result.AddRange(parentSymbol.Properties);
+                    if (parentSymbol.Name != "IdentityDbContext") result.AddRange(parentSymbol.Properties);
                 }
                 return result;
             }
@@ -83,10 +83,10 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
                     result.Add(new SymbolMethodWrapper(methodInfo));
                 }
                 // Add methods from the base class
-                if (Symbol.BaseType.Name != "Object")
+                if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
                 {
                     var parentSymbol = new SymbolClassWrapper(Symbol.BaseType);
-                    result.AddRange(parentSymbol.Methods);
+                    if (parentSymbol.Name != "IdentityDbContext") result.AddRange(parentSymbol.Methods);
                 }
                 return result;
             }

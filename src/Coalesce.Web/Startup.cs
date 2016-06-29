@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System;
 using System.IO;
+using Newtonsoft.Json.Serialization;
 
 namespace Coalesce.Web
 {
@@ -40,6 +41,10 @@ namespace Coalesce.Web
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
+                var resolver = options.SerializerSettings.ContractResolver;
+                if (resolver != null) (resolver as DefaultContractResolver).NamingStrategy = null;
+
                 //options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
 

@@ -2,7 +2,7 @@
   "profiles": {
     "Coalesce.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "-dc AppContext -dp ..\\Coalesce.Domain -wp ..\\Coalesce.Web"
+      "commandLineArgs": "-dc AppDbContext -dp ..\\Coalesce.Domain -wp ..\\Coalesce.Web"
     }
   }
 }

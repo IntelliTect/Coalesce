@@ -15,7 +15,8 @@ var gulp = require('gulp'),
     shell = require('gulp-shell'),
     gutil = require('gulp-util'),
     rename = require('gulp-rename'),
-    fs = require('fs');
+    fs = require('fs'),
+    exec = require('child_process').exec;
 
 // Initialize directory paths.
 var paths = {
@@ -240,20 +241,35 @@ gulp.task('nuget:publish:NLogExtensions',
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
 
-gulp.task('scaffold:mvc',
-    shell.task(['dnx gen scripts -dc DbContext -filesOnly'])
-);
+gulp.task('scaffold:mvc:build', function (cb) {
+    exec('dotnet build "../Coalesce.Cli/project.json" -o ./CoalesceExe -f net46', function(err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        cb(err);
+    });
+});
 
-gulp.task('scaffold:mvc:area',
-    shell.task(['dnx gen scripts -dc DbContext -filesOnly -a TestArea'])
-);
+gulp.task('scaffold:mvc:scaffold', ['scaffold:mvc:build'], function (cb) {
+    exec('"./CoalesceExe/Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        console.log(err);
+        cb(err);
+    });
+});
 
-gulp.task('scaffold:mvc:all',
-    shell.task(['dnx gen scripts -dc DbContext'])
-);
+gulp.task('scaffold:mvc', ['scaffold:mvc:scaffold']);
 
-gulp.task('scaffold:mvc.debug',
-    shell.task(['dnx --debug gen scripts -dc DbContext -filesOnly'])
-);
+//gulp.task('scaffold:mvc:area',
+//    shell.task(['dnx gen scripts -dc DbContext -filesOnly -a TestArea'])
+//);
+
+//gulp.task('scaffold:mvc:all',
+//    shell.task(['dnx gen scripts -dc DbContext'])
+//);
+
+//gulp.task('scaffold:mvc.debug',
+//    shell.task(['dnx --debug gen scripts -dc DbContext -filesOnly'])
+//);
 
 gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);

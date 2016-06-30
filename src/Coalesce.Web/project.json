@@ -35,6 +35,7 @@
       "type": "build"
     },
     "Intellitect.ComponentModel": "1.0.2-*",
+    "Intellitect.Extensions.CodeGenerators.Mvc": "1.0.2-*",
     "Coalesce.Domain": "1.0.0"
   },
 

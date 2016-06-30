@@ -48,10 +48,7 @@ namespace Coalesce.Cli
                 ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
-                // And our current 
-                ProjectContext cliContext = DependencyProvider.ProjectContext(Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase));
-                
-                CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext, cliContext);
+                CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);
 
                 await generator.GenerateCode(model);
 
@@ -65,6 +62,12 @@ namespace Coalesce.Cli
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine(ex.InnerException.Message);
+                    Console.WriteLine(ex.InnerException.StackTrace);
+                }
             }
         }
     }

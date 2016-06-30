@@ -27,17 +27,15 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
         public const string ThisAssemblyName = "Intellitect.Extensions.CodeGenerators.Mvc";
 
         private ProjectContext _webProject;
-        private ProjectContext _cliProject;
 
-        public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject, ProjectContext cliProject)
+        public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
             : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = DependencyProvider.ModelTypesLocator(webProject);
             DataModelTypesLocator = DependencyProvider.ModelTypesLocator(dataProject);
-            CodeGeneratorActionsService = DependencyProvider.CodeGeneratorActionsService(cliProject);
+            CodeGeneratorActionsService = DependencyProvider.CodeGeneratorActionsService(webProject);
 
             _webProject = webProject;
-            _cliProject = cliProject;
         }
 
         internal Task Generate(CommandLineGeneratorModel model)
@@ -65,7 +63,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                                 .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
                                 .Where(m => m.PrimaryKey != null)
                                 .ToList();
-                
+
                 var validationResult = ValidateContext.Validate(models);
 
                 bool foundIssues = false;
@@ -87,7 +85,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                     //Console.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
                     streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
 
-                    foreach (var prop in obj.Properties.Where(f=>!f.IsInternalUse))
+                    foreach (var prop in obj.Properties.Where(f => !f.IsInternalUse))
                     {
                         streamWriter.WriteLine($@" {prop.Name,-15}  {prop.TypeName,-15}  {prop.PureType.Name,-15} {prop.Type.IsCollection,-5} {prop.Type.IsArray,-5} {prop.IsPrimaryKey,-5} {prop.IsComplexType,-7} {prop.DisplayName,-15} {prop.Type.IsNullable,-5} {prop.IsManytoManyCollection,-5} {prop.IsInternalUse,-5}    {prop.IsFileDownload,-5}  {prop.Type.IsNumber,-5} {prop.Type.IsDateTime,-5} {prop.Type.IsDateTimeOffset,-5} {prop.Type.IsBool,-5}  {prop.Type.IsString,-5} {prop.Type.IsEnum,-8} {prop.Type.JsKnockoutType,-25} {prop.Type.TsKnockoutType,-50} {prop.Type.TsType,-15} {prop.IsDateOnly,-10} {prop.IsHidden(HiddenAttribute.Areas.Edit),-8}  {prop.IsRequired,-8} {prop.ObjectIdPropertyName,-15} {prop.MinLength,-8} {prop.MaxLength,-10} {prop.Range?.Item1 + " " + prop.Range?.Item2,-10}");
                         if (prop.Type.IsEnum && !enumValues.ContainsKey(prop.Name))
@@ -624,7 +622,6 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             {
                 return Common.TemplateFoldersUtilities.GetTemplateFolders(
                     codeGenAssembly: ThisAssemblyName,
-                    cliProject: _cliProject,
                     mvcProject: _webProject,
                     baseFolders: new[] { "" }
                 );

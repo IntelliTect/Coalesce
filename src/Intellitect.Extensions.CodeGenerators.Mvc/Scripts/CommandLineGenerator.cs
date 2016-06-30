@@ -15,18 +15,16 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
     {
         private ProjectContext _webProject;
         private ProjectContext _dataProject;
-        private ProjectContext _cliProject;
 
-        public CommandLineGenerator(ProjectContext webProject, ProjectContext dataProject, ProjectContext cliProject)
+        public CommandLineGenerator(ProjectContext webProject, ProjectContext dataProject)
         {
             _webProject = webProject;
             _dataProject = dataProject;
-            _cliProject = cliProject;
         }
 
         public async Task GenerateCode(CommandLineGeneratorModel model)
         {
-            var generator = new ScriptsGenerator(_webProject, _dataProject, _cliProject);
+            var generator = new ScriptsGenerator(_webProject, _dataProject);
             await generator.Generate(model);
         }
     }

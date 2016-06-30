@@ -10,14 +10,14 @@ namespace Coalesce.Web.Tests
 {
     public class DatabaseFixtureInMemory : IDisposable
     {
-        public DbContext Db { get; private set; }
+        public AppDbContext Db { get; private set; }
 
         public DatabaseFixtureInMemory()
         {
             ReflectionRepository.AddContext<DbContext>();
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseInMemoryDatabase();
-            Db = new DbContext(dbOptionBuilder.Options);
+            Db = new AppDbContext(dbOptionBuilder.Options);
             // Wipe the database out first;
             //Db.Database.EnsureDeleted();
             // Add some data to it.

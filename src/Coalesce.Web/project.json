@@ -74,6 +74,12 @@
   "buildOptions": {
     "emitEntryPoint": true,
     "preserveCompilationContext": true
+    // This doesn't work
+    //"compile": {
+    //  "exclude": [
+    //    "node_modules"
+    //  ]
+    //}
   },
 
   "publishOptions": {
@@ -88,5 +94,10 @@
   "scripts": {
     "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min" ],
     "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
-  }
+  },
+
+  // Exclude in the buildOptions doesn't work to exclude from Roslyn 'reflection'
+  "exclude": [
+    "node_modules"
+  ]
 }

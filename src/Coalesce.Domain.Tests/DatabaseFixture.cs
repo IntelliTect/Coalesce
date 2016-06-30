@@ -1,6 +1,5 @@
 ﻿using Coalesce.Domain;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +8,7 @@ namespace Coalesce.Domain.Tests
 {
     public class DatabaseFixture
     {
-        public AppContext Db { get; private set; }
+        public AppDbContext Db { get; private set; }
 
         public DatabaseFixture()
         {
@@ -17,7 +16,7 @@ namespace Coalesce.Domain.Tests
             dbOptionBuilder.UseSqlServer(
                 "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDomainTest;Trusted_Connection=True;"
             );
-            Db = new AppContext(dbOptionBuilder.Options);
+            Db = new AppDbContext(dbOptionBuilder.Options);
             // Wipe the database out first;
             Db.Database.EnsureDeleted();
             // Add some data to it.

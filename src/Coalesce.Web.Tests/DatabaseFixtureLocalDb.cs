@@ -13,7 +13,7 @@ namespace Coalesce.Web.Tests
         private static object _lock = new object();
         public static bool IsInitialized = false;
 
-        public DbContext Db { get; private set; }
+        public AppDbContext Db { get; private set; }
 
         public const string ConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceWebTest;Trusted_Connection=True;";
 
@@ -22,7 +22,7 @@ namespace Coalesce.Web.Tests
             ReflectionRepository.AddContext<DbContext>();
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseSqlServer(ConnectionString);
-            Db = new DbContext(dbOptionBuilder.Options);
+            Db = new AppDbContext(dbOptionBuilder.Options);
 
             // Only set the database up once for all the tests.
             // Make sure we don't try to set it up at the same time.
@@ -43,11 +43,11 @@ namespace Coalesce.Web.Tests
         /// Get a new context.
         /// </summary>
         /// <returns></returns>
-        public DbContext FreshDb()
+        public AppDbContext FreshDb()
         {
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseSqlServer(ConnectionString);
-            return new DbContext(dbOptionBuilder.Options);
+            return new AppDbContext(dbOptionBuilder.Options);
         }
     }
 }

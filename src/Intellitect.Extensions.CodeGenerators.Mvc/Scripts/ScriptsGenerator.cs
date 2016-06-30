@@ -61,8 +61,11 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                     Console.WriteLine($"Building scripts for: {dataContext.FullName}");
                 }
 
-                var models = ReflectionRepository.AddContext((INamedTypeSymbol)dataContext.TypeSymbol);
-
+                var models = ReflectionRepository
+                                .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
+                                .Where(m => m.PrimaryKey != null)
+                                .ToList();
+                
                 var validationResult = ValidateContext.Validate(models);
 
                 bool foundIssues = false;

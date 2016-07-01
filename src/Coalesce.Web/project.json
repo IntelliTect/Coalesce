@@ -34,7 +34,7 @@
       "version": "1.0.0-preview2-final",
       "type": "build"
     },
-    "Intellitect.ComponentModel": "1.0.2-*",
+    "Intellitect.ComponentModel": "1.1.0",
     "Coalesce.Domain": "1.0.0"
   },
 

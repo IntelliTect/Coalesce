@@ -1,12 +1,12 @@
 ﻿{
-  "version": "1.0.0",
+  "version": "1.1.0,
   "description": "Coalesce.Domain Class Library",
   "authors": [ "IntelliTect" ],
 
   "dependencies": {
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0",
-    "Intellitect.ComponentModel": "1.0.2-*",
+    "Intellitect.ComponentModel": "1.1.0",
     "GenFu": "1.1.0"
   },
 

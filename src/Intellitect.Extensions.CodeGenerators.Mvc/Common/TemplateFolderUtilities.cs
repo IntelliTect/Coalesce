@@ -15,7 +15,6 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Common
     {
         public static List<string> GetTemplateFolders(
             string codeGenAssembly,
-            ProjectContext cliProject,
             ProjectContext mvcProject,
             string[] baseFolders
         )
@@ -28,14 +27,13 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Common
 
             rootFolders.Add(mvcProject.ProjectDirectory);
 
-            var libraryManager = DependencyProvider.LibraryManager(cliProject);
+            var libraryManager = DependencyProvider.LibraryManager(mvcProject);
             var dependency = libraryManager.GetLibrary(codeGenAssembly);
 
             if (dependency != null)
             {
                 string containingProjectPath = dependency.Path.EndsWith("project.json") ?
                     Path.GetDirectoryName(dependency.Path) : dependency.Path;
-
                 if (Directory.Exists(containingProjectPath))
                 {
                     rootFolders.Add(containingProjectPath);

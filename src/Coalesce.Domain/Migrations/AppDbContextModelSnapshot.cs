@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -44,6 +44,8 @@ namespace Coalesce.Domain.Migrations
                     b.HasIndex("AssignedToId");
 
                     b.HasIndex("ReportedById");
+
+                    b.ToTable("Coalesce.Domain.Case");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
@@ -60,6 +62,8 @@ namespace Coalesce.Domain.Migrations
                     b.HasIndex("CaseId");
 
                     b.HasIndex("ProductId");
+
+                    b.ToTable("Coalesce.Domain.CaseProduct");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Company", b =>
@@ -80,6 +84,8 @@ namespace Coalesce.Domain.Migrations
                     b.Property<string>("ZipCode");
 
                     b.HasKey("CompanyId");
+
+                    b.ToTable("Coalesce.Domain.Company");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Person", b =>
@@ -114,6 +120,8 @@ namespace Coalesce.Domain.Migrations
                     b.HasKey("PersonId");
 
                     b.HasIndex("CompanyId");
+
+                    b.ToTable("Coalesce.Domain.Person");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Product", b =>
@@ -124,6 +132,8 @@ namespace Coalesce.Domain.Migrations
                     b.Property<string>("Name");
 
                     b.HasKey("ProductId");
+
+                    b.ToTable("Coalesce.Domain.Product");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>

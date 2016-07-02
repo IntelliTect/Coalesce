@@ -6,7 +6,7 @@
   "dependencies": {
     "xunit": "2.2.0-beta2-build3300",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "Intellitect.ComponentModel": "1.0.2-alpha001"
+    "Intellitect.ComponentModel": "1.1.0"
   },
 
   "testRunner": "xunit",

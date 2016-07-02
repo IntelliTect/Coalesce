@@ -9,7 +9,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>3b393517-9c91-4432-b9d0-f48488767b8f</ProjectGuid>
     <RootNamespace>Coalesce.Cli</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj\</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
   </PropertyGroup>

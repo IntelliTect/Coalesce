@@ -6,8 +6,8 @@
   "dependencies": {
     "xunit": "2.2.0-beta2-build3300",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "Intellitect.ComponentModel": "1.0.2-alpha001",
-    "Coalesce.Web": "1.0.0",
+    "Intellitect.ComponentModel": "1.1.0",
+    "Coalesce.Web": "1.1.0",
     "Microsoft.EntityFrameworkCore.InMemory": "1.0.0",
     "System.Linq": "4.0.0",
     "System.Linq.Queryable":"4.0.0",

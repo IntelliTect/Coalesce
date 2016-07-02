@@ -8,7 +8,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>70a4dc17-0f5d-4ff0-8d9c-ecdcbb565203</ProjectGuid>
     <RootNamespace>Intellitect.ComponentModel</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj\</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <SccProjectName>SAK</SccProjectName>
     <SccProvider>SAK</SccProvider>

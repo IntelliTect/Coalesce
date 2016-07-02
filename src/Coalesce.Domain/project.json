@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.1.0,
+  "version": "1.1.0",
   "description": "Coalesce.Domain Class Library",
   "authors": [ "IntelliTect" ],
 
@@ -9,7 +9,7 @@
 
   "dependencies": {
     "GenFu": "1.1.1",
-    "Intellitect.ComponentModel": "1.0.2-*",
+    "Intellitect.ComponentModel": "1.1.0",
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final", // ***
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0"

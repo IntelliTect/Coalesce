@@ -213,9 +213,9 @@ gulp.task('default', ['copy-lib', 'sass', 'ts', 'watch'], function () {
 });
 
 
-var componentModelVersion = "1.0.1-alpha021";
+var componentModelVersion = "1.1.0";
 var codeGeneratorsMvcVersion = componentModelVersion;
-var nlogExtensionsVersion = "1.0.0-alpha001";
+var nlogExtensionsVersion = "1.1.0";
 
 gulp.task('nuget:publish:ComponentModel',
     shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +

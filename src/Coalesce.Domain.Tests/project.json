@@ -1,18 +1,15 @@
 ﻿{
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "description": "Coalesce.Domain.Tests Class Library",
   "authors": [ "grant" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
 
   "dependencies": {
     "xunit": "2.2.0-beta2-build3300",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
     "Intellitect.ComponentModel": "1.1.0",
     "Coalesce.Domain": "1.1.0",
-    "System.Linq": "4.1.0",
-    "System.Linq.Queryable": "4.0.1"
+    "System.Linq": "4.0.0",
+    "System.Linq.Queryable": "4.0.0"
   },
 
   "commands": {

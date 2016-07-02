@@ -8,7 +8,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>20095df9-5dc4-4b74-80f8-92b71eb3a921</ProjectGuid>
     <RootNamespace>Intellitect.Extensions.CodeGenerators.Mvc</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj\</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <SccProjectName>SAK</SccProjectName>
     <SccProvider>SAK</SccProvider>

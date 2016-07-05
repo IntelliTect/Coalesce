@@ -511,7 +511,7 @@ namespace Intellitect.ComponentModel.Helpers
         public static HtmlString DisplayCheckbox(string bindingValue)
         {
             string result = string.Format(@"
-                <input type = ""checkbox"" readonly data-bind=""checked: {0}"" />",
+                <input type = ""checkbox"" disabled data-bind=""checked: {0}"" />",
                 bindingValue);
 
             return new HtmlString(result);

@@ -110,7 +110,7 @@
 </div>
 
 
-@foreach (var method in model.Methods.Where(f => !f.IsStatic && f.ClientParameters.Any()))
+@foreach (var method in model.Methods.Where(f => !f.IsStatic && f.ClientParameters.Any() && !f.IsInternalUse))
 {
     <!-- Modal for method: @method.Name -->
     <div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog">

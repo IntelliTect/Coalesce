@@ -92,34 +92,27 @@ namespace Coalesce.Web.Api
             return await GetImplementation(id, includes);
         }
 
-
         [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual bool Delete(string id)
+[Authorize]        public virtual bool Delete(string id)
         {
             return DeleteImplementation(id);
         }
-
         [HttpPost("save")]
-        [Authorize]
-        public virtual SaveResult<Company> Save(Company dto, string includes = null, bool returnObject = true)
+[Authorize]        public virtual SaveResult<Company> Save(Company dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
-
         [HttpPost("AddToCollection")]
-        [Authorize]
-        public virtual SaveResult<Company> AddToCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<Company> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-        [Authorize]
-        public virtual SaveResult<Company> RemoveFromCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<Company> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
+
         protected override IQueryable<Company> GetListDataSource(ListParameters parameters)
         {
 

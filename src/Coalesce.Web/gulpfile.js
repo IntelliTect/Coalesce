@@ -241,7 +241,7 @@ gulp.task('nuget:publish:NLogExtensions',
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
 
-gulp.task('scaffold:mvc:build', function (cb) {
+gulp.task('coalesce:build', function (cb) {
     exec('dotnet build "../Coalesce.Cli/project.json" -o ./CoalesceExe -f net46', function(err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
@@ -249,7 +249,7 @@ gulp.task('scaffold:mvc:build', function (cb) {
     });
 });
 
-gulp.task('scaffold:mvc:scaffold', ['scaffold:mvc:build'], function (cb) {
+gulp.task('coalesce', ['coalesce:build'], function (cb) {
     exec('"./CoalesceExe/Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
@@ -257,8 +257,6 @@ gulp.task('scaffold:mvc:scaffold', ['scaffold:mvc:build'], function (cb) {
         cb(err);
     });
 });
-
-gulp.task('scaffold:mvc', ['scaffold:mvc:scaffold']);
 
 //gulp.task('scaffold:mvc:area',
 //    shell.task(['dnx gen scripts -dc DbContext -filesOnly -a TestArea'])

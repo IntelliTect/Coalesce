@@ -20,6 +20,7 @@ namespace Coalesce.Web.Controllers
             return IndexImplementation(false, @"~/Views/Generated/Person/Table.cshtml");
         }
 
+
         [AllowAnonymous]
         public ActionResult TableEdit(){
             return IndexImplementation(true, @"~/Views/Generated/Person/Table.cshtml");
@@ -35,7 +36,7 @@ namespace Coalesce.Web.Controllers
         {
             return EditorHtmlImplementation(simple);
         }
-                      
+                              
         [AllowAnonymous]
         public ActionResult Docs()
         {

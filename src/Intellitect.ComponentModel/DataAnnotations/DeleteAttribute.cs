@@ -12,9 +12,9 @@ namespace Intellitect.ComponentModel.DataAnnotations
     public class DeleteAttribute: System.Attribute
     {
         public bool Allow { get; set; } = true;
-        // TODO: Add security to delete
-        //public string Roles { get; set; }
-        //public bool AllowAnonymous { get; set; }
+        // Add security to delete
+        public string Roles { get; set; }
+        public bool AllowAnonymous { get; set; }
 
     }
 }

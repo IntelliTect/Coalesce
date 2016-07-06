@@ -41,6 +41,8 @@ namespace @(namespaceName).Controllers
             return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Table.cshtml");
         }
 
+        @if (model.IsEditAllowed) { 
+        <text>
         @(model.SecurityInfo.EditAnnotation)
         public ActionResult TableEdit(){
             return IndexImplementation(true, @@"@viewLocation/Generated/@(model.Name)/Table.cshtml");
@@ -55,6 +57,8 @@ namespace @(namespaceName).Controllers
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
+        }
+        </text>
         }
                       
         @(model.SecurityInfo.EditAnnotation)

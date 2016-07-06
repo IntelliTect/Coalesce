@@ -381,8 +381,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             };
 
             // Copy over the static files
-            // TODO: fix this
-            //await CopyStaticFiles(controllerGeneratorModel);
+            await CopyStaticFiles(controllerGeneratorModel);
 
             var apiViewOutputPath = Path.Combine(
                 _webProject.ProjectDirectory,

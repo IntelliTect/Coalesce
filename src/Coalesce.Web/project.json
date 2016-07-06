@@ -31,10 +31,7 @@
       "version": "1.0.0-preview2-final",
       "type": "build"
     },
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": {
-      "version": "1.0.0-preview2-final",
-      "type": "build"
-    },
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-final",
     "Intellitect.ComponentModel": "1.1.0",
     "Intellitect.Extensions.CodeGenerators.Mvc": "1.1.0",
     "Coalesce.Domain": "1.1.0"

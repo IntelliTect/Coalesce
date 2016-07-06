@@ -4,23 +4,17 @@
   "authors": [ "IntelliTect" ],
 
   "dependencies": {
-    "xunit": "2.2.0-beta2-build3300",
+    "Coalesce.Web": "1.1.0",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
     "Intellitect.ComponentModel": "1.1.0",
-    "Coalesce.Web": "1.1.0",
     "Microsoft.EntityFrameworkCore.InMemory": "1.0.0",
-    "System.Linq": "4.0.0",
-    "System.Linq.Queryable":"4.0.0",
-    "Selenium.WebDriver": "2.50.1",
-    "Selenium.WebDriver.ChromeDriver": "2.21.0",
-    "Selenium.Support": "2.50.1",
-    "Selenium.WebDriver.PhantomJS.Xplatform": "2.45.0.1"
+    "System.Linq": "4.1.0",
+    "System.Linq.Queryable": "4.0.1",
+    "xunit": "2.2.0-beta2-build3300",
+    "Selenium.WebDriver": "2.53.1"
   },
 
-  "commands": {
-    "vsotest": "xunit.runner.dnx -xml ..\\..\\..\\TestResults\\Ipc.Fuse.Web.Tests.Results.xml",
-    "web": "Microsoft.AspNetCore.Server.Kestrel --server.urls=http://*:5000/"
-  },
+  "testRunner": "xunit",
 
   "frameworks": {
     "net46": { }

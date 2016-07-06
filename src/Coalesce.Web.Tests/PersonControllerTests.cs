@@ -32,7 +32,7 @@ namespace Coalesce.Web.Tests
             Assert.Equal(100, result.TotalCount);
             Assert.Equal(4, result.PageCount);
             var person = result.List.Cast<Person>().First();
-            Assert.Equal(person.FirstName, "Caroline");
+            Assert.Equal(person.FirstName, "Joseph");
 
             var first = await _pc.Get(result.List.Cast<Person>().First().PersonId.ToString());
             Assert.Equal(1, first.CompanyId);
@@ -113,7 +113,7 @@ namespace Coalesce.Web.Tests
             var result = await _pc.List(personId: "1");
             Assert.Equal(1, result.List.Count());
             var person = result.List.Cast<Person>().First();
-            Assert.Equal("Caroline", person.FirstName);
+            Assert.Equal("Joseph", person.FirstName);
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace Coalesce.Web.Tests
         public async void GetById()
         {
             var person = await _pc.Get(1.ToString());
-            Assert.Equal("Caroline", person.FirstName);
+            Assert.Equal("Joseph", person.FirstName);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace Coalesce.Web.Tests
         {
             // Get the item
             var person = await _pc.Get(1.ToString());
-            Assert.Equal("Caroline", person.FirstName);
+            Assert.Equal("Joseph", person.FirstName);
             // Change the item and save it.
             person.FirstName = "Sweet";
             var result = _pc.Save(person);
@@ -153,14 +153,14 @@ namespace Coalesce.Web.Tests
             person = await _pc.Get(1.ToString());
             Assert.Equal("Sweet", person.FirstName);
             // Set it back and save it.
-            person.FirstName = "Caroline";
+            person.FirstName = "Joseph";
             result = _pc.Save(person);
             // Make sure it saved.
             Assert.True(result.WasSuccessful);
-            Assert.Equal("Caroline", result.Object.FirstName);
+            Assert.Equal("Joseph", result.Object.FirstName);
             // Get it again and make sure it stayed saved.
             person = await _pc.Get(1.ToString());
-            Assert.Equal("Caroline", person.FirstName);
+            Assert.Equal("Joseph", person.FirstName);
         }
 
         [Fact]
@@ -169,7 +169,7 @@ namespace Coalesce.Web.Tests
             var result = await _pc.List(where: "personId = 1 || personid = 2");
             Assert.Equal(2, result.List.Count());
             var person = result.List.Cast<Person>().First();
-            Assert.Equal("Caroline", person.FirstName);
+            Assert.Equal("Joseph", person.FirstName);
         }
 
 
@@ -212,16 +212,16 @@ namespace Coalesce.Web.Tests
         public async void InstanceFunction()
         {
             var result = _pc.Rename(1,"-test");
-            Assert.Equal("Caroline-test", ((Person)result.Object).FirstName);
+            Assert.Equal("Joseph-test", ((Person)result.Object).FirstName);
             // Get the new item.
             var person = await _pc.Get(1.ToString());
-            Assert.Equal("Caroline-test", person.FirstName);
+            Assert.Equal("Joseph-test", person.FirstName);
             // Set it back and save it.
-            person.FirstName = "Caroline";
+            person.FirstName = "Joseph";
             var result2 = _pc.Save(person);
             // Make sure it saved.
             Assert.True(result2.WasSuccessful);
-            Assert.Equal("Caroline", ((Person)result2.Object).FirstName);
+            Assert.Equal("Joseph", ((Person)result2.Object).FirstName);
         }
 
 

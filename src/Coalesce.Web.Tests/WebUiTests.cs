@@ -16,31 +16,32 @@ namespace Coalesce.Web.Tests
 {
     public class WebUiTests : IDisposable
     {
-        public const int Port = 5005;
+        public const int Port = 5000;
 
         private Process _process;
         public WebUiTests()
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.Arguments = $@"-p ..\Coalesce.Web\ web --server.urls=http://*:{Port}/";
-            startInfo.FileName = "dnx";
+            startInfo.Arguments = $@"run -p ..\..\..\..\..\Coalesce.Web\";
+            startInfo.FileName = "dotnet";
+            startInfo.WorkingDirectory = @"..\..\..\..\..\Coalesce.Web";
             _process = Process.Start(startInfo);
             // Give it a few seconds to start up.
             System.Threading.Thread.Sleep(7000);
         }
 
-        [Fact]
+        //[Fact]
         public void BasicUiChrome()
         {
-            IWebDriver driver = new ChromeDriver(@"..\..\bin");
+            IWebDriver driver = new ChromeDriver(@"..\..\..\");
 
             RunUiTest(driver);
         }
 
-        [Fact]
+        //[Fact]
         public void BasicUiHeadless()
         {
-            IWebDriver driver = new PhantomJSDriver(@"..\..\bin");
+            IWebDriver driver = new PhantomJSDriver(@"..\..\..\");
 
             RunUiTest(driver);
         }

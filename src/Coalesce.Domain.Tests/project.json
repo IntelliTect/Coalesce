@@ -12,10 +12,7 @@
     "System.Linq.Queryable": "4.0.0"
   },
 
-  "commands": {
-    "test": "dotnet-test-xunit",
-    "vsotest": "xunit.runner.dnx -xml ..\\..\\..\\TestResults\\Ipc.Fuse.Web.Tests.Results.xml"
-  },
+  "testRunner": "xunit",
 
   "frameworks": {
     "net46": { }

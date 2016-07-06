@@ -20,6 +20,7 @@ namespace Coalesce.Web.Controllers
             return IndexImplementation(false, @"~/Views/Generated/DevTeam/Table.cshtml");
         }
 
+
         [Authorize]
         public ActionResult TableEdit(){
             return IndexImplementation(true, @"~/Views/Generated/DevTeam/Table.cshtml");
@@ -35,7 +36,7 @@ namespace Coalesce.Web.Controllers
         {
             return EditorHtmlImplementation(simple);
         }
-                      
+                              
         [Authorize]
         public ActionResult Docs()
         {

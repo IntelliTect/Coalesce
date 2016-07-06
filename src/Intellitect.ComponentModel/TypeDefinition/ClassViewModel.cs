@@ -530,6 +530,18 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
         }
 
+        public bool IsEditAllowed
+        {
+            get
+            {
+                if (Wrapper.HasAttribute<EditAttribute>())
+                {
+                    var allowEdit = Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Allow)) as bool?;
+                    return !allowEdit.HasValue || allowEdit.Value;
+                }
+                return true;
+            }
+        }
 
     }
 }

@@ -88,11 +88,13 @@ module intellitect {
         }
 
         export function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
+            if (string) return string.charAt(0).toUpperCase() + string.slice(1);
+            else return string;
         }
 
         export function lowerFirstLetter(string) {
-            return string.charAt(0).toLowerCase() + string.slice(1);
+            if (string) return string.charAt(0).toLowerCase() + string.slice(1);
+            else return string;
         }
 
         export function warning(question: string, callback: (() => void), myThis: any): (() => void) {

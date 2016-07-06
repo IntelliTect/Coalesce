@@ -34,10 +34,13 @@
                 @:{
                 @:<a href="~/@(model.ControllerName)/Table?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Read-only</a>
                 @:}
+                if (model.IsEditAllowed)
+                {
                 @:else
                 @:{
                 @:<a href="~/@(model.ControllerName)/TableEdit?@@ViewBag.Query" role="button" class="btn btn-sm btn-default ">Editable</a>
                 @:}
+                }
             }
         </div>
         <h1 style="display:inline-block">
@@ -132,9 +135,11 @@
                         </ul>
                     </div>
                     }
+                    @if (model.IsEditAllowed) {
                     <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
                         <i class="fa fa-pencil"></i>
                     </a>
+                    }
                     @if (model.IsDeleteAllowed) { 
                     <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
                         <i class="fa fa-remove"></i>

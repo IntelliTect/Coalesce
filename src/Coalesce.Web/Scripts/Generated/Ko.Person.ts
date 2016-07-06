@@ -333,60 +333,60 @@ module ViewModels {
 				if (!data) return;
 				self.isLoading(true);
 				// Set the ID 
-				self.myId = data.PersonId;
+				self.myId = data.personId;
 				// Load the lists of other objects
                 if (data.CasesAssigned !== null) {
 					// Merge the incoming array
-					RebuildArray(self.casesAssigned, data.CasesAssigned, 'CaseKey', Case, self);
+					RebuildArray(self.casesAssigned, data.casesAssigned, 'caseKey', Case, self);
 				} 
                 if (data.CasesReported !== null) {
 					// Merge the incoming array
-					RebuildArray(self.casesReported, data.CasesReported, 'CaseKey', Case, self);
+					RebuildArray(self.casesReported, data.casesReported, 'caseKey', Case, self);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.PersonStats) { 
-					if (data.PersonStatsId != self.personStatsId()) {
+				if (!data.personStats) { 
+					if (data.personStatsId != self.personStatsId()) {
                         self.personStats(null);
                     }
                 }else if (!self.personStats()){
-					self.personStats(new PersonStats(data.PersonStats, self));
+					self.personStats(new PersonStats(data.personStats, self));
 				}else{
-					self.personStats().loadFromDto(data.PersonStats);
+					self.personStats().loadFromDto(data.personStats);
 				}
-				if (!data.Company) { 
-					if (data.CompanyId != self.companyId()) {
+				if (!data.company) { 
+					if (data.companyId != self.companyId()) {
                         self.company(null);
                     }
                 }else if (!self.company()){
-					self.company(new Company(data.Company, self));
+					self.company(new Company(data.company, self));
 				}else{
-					self.company().loadFromDto(data.Company);
+					self.company().loadFromDto(data.company);
 				}
 
 				// The rest of the objects are loaded now.
-				self.personId(data.PersonId);
-				self.title(data.Title);
-				self.firstName(data.FirstName);
-				self.lastName(data.LastName);
-				self.email(data.Email);
-				self.gender(data.Gender);
-                if (data.BirthDate == null) self.birthDate(null);
-				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.BirthDate))){
-				    self.birthDate(moment(data.BirthDate));
+				self.personId(data.personId);
+				self.title(data.title);
+				self.firstName(data.firstName);
+				self.lastName(data.lastName);
+				self.email(data.email);
+				self.gender(data.gender);
+                if (data.birthDate == null) self.birthDate(null);
+				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.birthDate))){
+				    self.birthDate(moment(data.birthDate));
 				}
-                if (data.LastBath == null) self.lastBath(null);
-				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.LastBath))){
-				    self.lastBath(moment(data.LastBath));
+                if (data.lastBath == null) self.lastBath(null);
+				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.lastBath))){
+				    self.lastBath(moment(data.lastBath));
 				}
-                if (data.NextUpgrade == null) self.nextUpgrade(null);
-				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.NextUpgrade))){
-				    self.nextUpgrade(moment(data.NextUpgrade));
+                if (data.nextUpgrade == null) self.nextUpgrade(null);
+				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
+				    self.nextUpgrade(moment(data.nextUpgrade));
 				}
-				self.personStatsId(data.PersonStatsId);
-				self.timeZone(data.TimeZone);
-				self.name(data.Name);
-				self.companyId(data.CompanyId);
+				self.personStatsId(data.personStatsId);
+				self.timeZone(data.timeZone);
+				self.name(data.name);
+				self.companyId(data.companyId);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();
@@ -395,27 +395,27 @@ module ViewModels {
     	    // Save the object into a DTO
 			self.saveToDto = function() {
 				var dto: any = {};
-				dto.PersonId = self.personId();
+				dto.personId = self.personId();
 
-    	        dto.Title = self.title();
-    	        dto.FirstName = self.firstName();
-    	        dto.LastName = self.lastName();
-    	        dto.Email = self.email();
-    	        dto.Gender = self.gender();
+    	        dto.title = self.title();
+    	        dto.firstName = self.firstName();
+    	        dto.lastName = self.lastName();
+    	        dto.email = self.email();
+    	        dto.gender = self.gender();
                 if (!self.birthDate()) dto.BirthDate = null;
-				else dto.BirthDate = self.birthDate().format('YYYY-MM-DDTHH:mm:ss');
+				else dto.birthDate = self.birthDate().format('YYYY-MM-DDTHH:mm:ss');
                 if (!self.lastBath()) dto.LastBath = null;
-				else dto.LastBath = self.lastBath().format('YYYY-MM-DDTHH:mm:ss');
+				else dto.lastBath = self.lastBath().format('YYYY-MM-DDTHH:mm:ss');
 				if (!self.nextUpgrade()) dto.NextUpgrade = null;
-				else dto.NextUpgrade = self.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
-				dto.PersonStatsId = self.personStatsId();
-				if (!dto.PersonStatsId && self.personStats()) {
-				    dto.PersonStatsId = self.personStats().personStatsId();
+				else dto.nextUpgrade = self.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
+				dto.personStatsId = self.personStatsId();
+				if (!dto.personStatsId && self.personStats()) {
+				    dto.personStatsId = self.personStats().personStatsId();
 				}
-    	        dto.TimeZone = self.timeZone();
-				dto.CompanyId = self.companyId();
-				if (!dto.CompanyId && self.company()) {
-				    dto.CompanyId = self.company().companyId();
+    	        dto.timeZone = self.timeZone();
+				dto.companyId = self.companyId();
+				if (!dto.companyId && self.company()) {
+				    dto.companyId = self.company().companyId();
 				}
 
 				return dto;
@@ -429,18 +429,18 @@ module ViewModels {
                         $.ajax({ method: "POST", url: areaUrl + "api/Person/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.WasSuccessful) {
+							if (data.wasSuccessful) {
 								self.errorMessage('');
                                 if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.Object);
+								    self.loadFromDto(data.object);
                                 }
 								// The object is now saved. Call any callback.
 								for (var i in self.saveCallbacks) {
 									self.saveCallbacks[i](self);
 								}
 							} else {
-								self.errorMessage(data.Message);
-                                self.validationIssues(data.ValidationIssues);
+								self.errorMessage(data.message);
+                                self.validationIssues(data.validationIssues);
 							}
 						})
 						.fail(function() {
@@ -521,7 +521,7 @@ module ViewModels {
                             self.parent.isLoading(false);
                         }
                     } else {
-                        self.errorMessage(data.Message);
+                        self.errorMessage(data.message);
                     }
                 })
                 .fail(function() {
@@ -623,16 +623,16 @@ module ViewModels {
                 var currentId = self.personId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/Person/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.errorMessage('');
-                        self.loadFromDto(data.Object);
+                        self.loadFromDto(data.object);
                         // The object is now saved. Call any callback.
                         for (var i in self.saveCallbacks) {
                             self.saveCallbacks[i](self);
                         }
                     } else {
-                        self.errorMessage(data.Message);
-                        self.validationIssues(data.ValidationIssues);
+                        self.errorMessage(data.message);
+                        self.validationIssues(data.validationIssues);
                     }
                 })
                 .fail(function() {
@@ -718,7 +718,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/PersonStats/List?Fields=PersonStatsId,PersonStatsId", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.personStatsValidValues(data.List);
+                    self.personStatsValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -737,7 +737,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/Company/List?Fields=CompanyId,AltName", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.companyValidValues(data.List);
+                    self.companyValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -873,18 +873,18 @@ module ViewModels {
                          xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isDirty(false);
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.renameMessage('');
                         self.renameWasSuccessful(true);
-                        self.renameResult(data.Object);
+                        self.renameResult(data.object);
                         // The return type is the type of the object, load it.
-                        self.loadFromDto(data.Object)
+                        self.loadFromDto(data.object)
                         if ($.isFunction(callback)) {
                             callback();
                         }
                     } else {
                         self.renameWasSuccessful(false);
-                        self.renameMessage(data.Message);
+                        self.renameMessage(data.message);
                     }
                 })
                 .fail(function() {
@@ -924,10 +924,10 @@ module ViewModels {
                          xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isDirty(false);
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.changeSpacesToDashesInNameMessage('');
                         self.changeSpacesToDashesInNameWasSuccessful(true);
-                        self.changeSpacesToDashesInNameResult(data.Object);
+                        self.changeSpacesToDashesInNameResult(data.object);
                         if (reload) {
                           self.reload(callback);
                         } else if ($.isFunction(callback)) {
@@ -935,7 +935,7 @@ module ViewModels {
                         }
                     } else {
                         self.changeSpacesToDashesInNameWasSuccessful(false);
-                        self.changeSpacesToDashesInNameMessage(data.Message);
+                        self.changeSpacesToDashesInNameMessage(data.message);
                     }
                 })
                 .fail(function() {

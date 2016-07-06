@@ -103,9 +103,18 @@ namespace Intellitect.ComponentModel.DataAnnotations
             if (!IsSecuredProperty) return true;
             if (!string.IsNullOrEmpty(ReadRoles))
             {
-                if (user == null || !ReadRolesList.Any(f => user.IsInRole(f)))
+                try
                 {
-                    return false;
+                    if (user == null || !ReadRolesList.Any(f => user.IsInRole(f)))
+                    {
+                        return false;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    // This happens when the trust is lost between the client and the domain.
+                    if (ex.Message.Contains("trust")) return false;
+                    throw new Exception("Could not authenticate with roles list", ex);
                 }
             }
             return true;

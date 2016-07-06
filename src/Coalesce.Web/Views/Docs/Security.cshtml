@@ -6,10 +6,10 @@
 <h2>Security</h2>
 <h3>Overview</h3>
 <p>
-    Security is primarily handled through model annotations. These annotations can be added to classes, properties, and methods. 
+    Security is primarily handled through model annotations. These annotations can be added to classes, properties, and methods.
 </p>
 <p>
-    Coalesce uses the built in Microsoft framework for security and supports both Active Directory and Identity 3. 
+    Coalesce uses the built in Microsoft framework for security and supports both Active Directory and Identity 3.
 </p>
 <p>
     By default all views and APIs are marked with the [Authorize] attribute by default. To make them available to anonymous users, they must be annotated as such.
@@ -39,10 +39,14 @@
     }
 </code>
 </pre>
+<p>
+    Additionally the Edit attribute has an Allow property that can be set to false to disallow all edits. In fact this removes the API controller method for editing.
+</p>
 
 
 <h3>Properties</h3>
-<p>Properties can be secured in the same way that classes are secured. An individual property can be secured for read and edit access by role. AllowAnonymous must be applied to the class. This opens all methods and must be secured if limited access to certain properties is desired.
+<p>
+    Properties can be secured in the same way that classes are secured. An individual property can be secured for read and edit access by role. AllowAnonymous must be applied to the class. This opens all methods and must be secured if limited access to certain properties is desired.
 </p>
 <p>
     The example below allows only admins to edit the last name. Additionally, only admins can read and consequently edit the gender.
@@ -84,7 +88,6 @@
         public string LastName { get; set; }
         [Read(Roles="Admin")]
         public string Gender { get; set; }
-
         [Execute(Roles="Admin")]
         public string Hello() {
             return "Hello";

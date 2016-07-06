@@ -225,33 +225,33 @@ module ViewModels {
 				if (!data) return;
 				self.isLoading(true);
 				// Set the ID 
-				self.myId = data.CaseProductId;
+				self.myId = data.caseProductId;
 				// Load the lists of other objects
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.Case) { 
-					if (data.CaseId != self.caseId()) {
+				if (!data.case) { 
+					if (data.caseId != self.caseId()) {
                         self.case(null);
                     }
                 }else if (!self.case()){
-					self.case(new Case(data.Case, self));
+					self.case(new Case(data.case, self));
 				}else{
-					self.case().loadFromDto(data.Case);
+					self.case().loadFromDto(data.case);
 				}
-				if (!data.Product) { 
-					if (data.ProductId != self.productId()) {
+				if (!data.product) { 
+					if (data.productId != self.productId()) {
                         self.product(null);
                     }
                 }else if (!self.product()){
-					self.product(new Product(data.Product, self));
+					self.product(new Product(data.product, self));
 				}else{
-					self.product().loadFromDto(data.Product);
+					self.product().loadFromDto(data.product);
 				}
 
 				// The rest of the objects are loaded now.
-				self.caseProductId(data.CaseProductId);
-				self.caseId(data.CaseId);
-				self.productId(data.ProductId);
+				self.caseProductId(data.caseProductId);
+				self.caseId(data.caseId);
+				self.productId(data.productId);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();
@@ -260,15 +260,15 @@ module ViewModels {
     	    // Save the object into a DTO
 			self.saveToDto = function() {
 				var dto: any = {};
-				dto.CaseProductId = self.caseProductId();
+				dto.caseProductId = self.caseProductId();
 
-				dto.CaseId = self.caseId();
-				if (!dto.CaseId && self.case()) {
-				    dto.CaseId = self.case().caseKey();
+				dto.caseId = self.caseId();
+				if (!dto.caseId && self.case()) {
+				    dto.caseId = self.case().caseKey();
 				}
-				dto.ProductId = self.productId();
-				if (!dto.ProductId && self.product()) {
-				    dto.ProductId = self.product().productId();
+				dto.productId = self.productId();
+				if (!dto.productId && self.product()) {
+				    dto.productId = self.product().productId();
 				}
 
 				return dto;
@@ -282,18 +282,18 @@ module ViewModels {
                         $.ajax({ method: "POST", url: areaUrl + "api/CaseProduct/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.WasSuccessful) {
+							if (data.wasSuccessful) {
 								self.errorMessage('');
                                 if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.Object);
+								    self.loadFromDto(data.object);
                                 }
 								// The object is now saved. Call any callback.
 								for (var i in self.saveCallbacks) {
 									self.saveCallbacks[i](self);
 								}
 							} else {
-								self.errorMessage(data.Message);
-                                self.validationIssues(data.ValidationIssues);
+								self.errorMessage(data.message);
+                                self.validationIssues(data.validationIssues);
 							}
 						})
 						.fail(function() {
@@ -374,7 +374,7 @@ module ViewModels {
                             self.parent.isLoading(false);
                         }
                     } else {
-                        self.errorMessage(data.Message);
+                        self.errorMessage(data.message);
                     }
                 })
                 .fail(function() {
@@ -424,16 +424,16 @@ module ViewModels {
                 var currentId = self.caseProductId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/CaseProduct/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.errorMessage('');
-                        self.loadFromDto(data.Object);
+                        self.loadFromDto(data.object);
                         // The object is now saved. Call any callback.
                         for (var i in self.saveCallbacks) {
                             self.saveCallbacks[i](self);
                         }
                     } else {
-                        self.errorMessage(data.Message);
-                        self.validationIssues(data.ValidationIssues);
+                        self.errorMessage(data.message);
+                        self.validationIssues(data.validationIssues);
                     }
                 })
                 .fail(function() {
@@ -501,7 +501,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/Case/List?Fields=CaseKey,CaseKey", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.caseValidValues(data.List);
+                    self.caseValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -520,7 +520,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/Product/List?Fields=ProductId,Name", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.productValidValues(data.List);
+                    self.productValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {

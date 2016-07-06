@@ -13,6 +13,10 @@ namespace Intellitect.ComponentModel.DataAnnotations
     {
         public string Roles { get; set; }
         public bool AllowAnonymous { get; set; }
+        /// <summary>
+        /// If true, editing is possible. If false, no one can edit.
+        /// </summary>
+        public bool Allow { get; set; } = true;
 
     }
 }

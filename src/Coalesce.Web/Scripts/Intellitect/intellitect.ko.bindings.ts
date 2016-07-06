@@ -1,5 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
 /// <reference path="intellitect.ko.base.ts" />
+/// <reference path="intellitect.utilities.ts" />
 
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {
@@ -43,8 +44,8 @@ ko.bindingHandlers.select2Ajax = {
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : true;
         var allowClear = allBindings.get('allowClear') || true;
         var placeholder = $(element).attr('placeholder') || "select";
-        var textField = allBindings.get('textField');
-        var idField = allBindings.get('idField');
+        var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
+        var idField = intellitect.utilities.lowerFirstLetter(allBindings.get('idField'));
         var pageSize = allBindings.get('pageSize') || 25;
 
         // Create the Select2
@@ -70,16 +71,16 @@ ko.bindingHandlers.select2Ajax = {
                                 var blank = {};
                                 blank[idField] = 0;
                                 blank[textField] = 'No Selection';
-                                data.List.unshift(blank);
+                                data.list.unshift(blank);
                             }
-                            for (var i in data.List) {
-                                data.List[i].id = data.List[i][idField];
+                            for (var i in data.list) {
+                                data.list[i].id = data.list[i][idField];
                             }
                         }
                         return {
-                            results: data.List,
+                            results: data.list,
                             pagination: {
-                                more: data.Page < data.PageCount
+                                more: data.page < data.pageCount
                             }
                         };
                     },
@@ -152,8 +153,7 @@ ko.bindingHandlers.select2Ajax = {
                 // Unless we make it all the way through this section, don't set the value.
                 setValue = false;
                 // Add it based on the object.
-                var textField = allBindings.get('textField');
-                textField = textField.charAt(0).toLowerCase() + textField.slice(1);
+                var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
                 if (allBindings.has('object')) {
                     var object = allBindings.get('object')();
                     if (object != null && object.hasOwnProperty(textField)) {
@@ -183,8 +183,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
         var saveImmediately = allBindings.get('saveImmediately') || false;
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = allBindings.get('idFieldName');
-        var textFieldName = allBindings.get('textFieldName');
+        var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('idFieldName'));
+        var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('textFieldName'));
         var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
@@ -206,10 +206,10 @@ ko.bindingHandlers.select2AjaxMultiple = {
                         };
                     },
                     processResults: function (data, page) {
-                        for (var i in data.List) {
-                            data.List[i].id = data.List[i][idFieldName];
+                        for (var i in data.list) {
+                            data.list[i].id = data.list[i][idFieldName];
                         }
-                        return { results: data.List };
+                        return { results: data.list };
                     },
                     cache: "true" //(allBindings.get('cache') || false).toString(),
                 },
@@ -300,8 +300,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var saveImmediately = allBindings.get('saveImmediately') || false;
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null;
-        var textFieldName = allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null;
+        var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
+        var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
 
         // See if the value exists. If not, we haven't loaded it from the server yet.
         var value = valueAccessor()();

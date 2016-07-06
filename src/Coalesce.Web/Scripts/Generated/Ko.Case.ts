@@ -271,64 +271,64 @@ module ViewModels {
 				if (!data) return;
 				self.isLoading(true);
 				// Set the ID 
-				self.myId = data.CaseKey;
+				self.myId = data.caseKey;
 				// Load the lists of other objects
                 if (data.CaseProducts !== null) {
 					// Merge the incoming array
-					RebuildArray(self.caseProducts, data.CaseProducts, 'CaseProductId', CaseProduct, self);
+					RebuildArray(self.caseProducts, data.caseProducts, 'caseProductId', CaseProduct, self);
                     // Add many-to-many collection
                     var objs = [];
-                    $.each(data.CaseProducts, function(index, item) {
-                        if (item.Product){
-                            objs.push(item.Product);
+                    $.each(data.caseProducts, function(index, item) {
+                        if (item.product){
+                            objs.push(item.product);
                         }
                     });
 					RebuildArray(self.products, objs, 'ProductId', Product, self);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.AssignedTo) { 
-					if (data.AssignedToId != self.assignedToId()) {
+				if (!data.assignedTo) { 
+					if (data.assignedToId != self.assignedToId()) {
                         self.assignedTo(null);
                     }
                 }else if (!self.assignedTo()){
-					self.assignedTo(new Person(data.AssignedTo, self));
+					self.assignedTo(new Person(data.assignedTo, self));
 				}else{
-					self.assignedTo().loadFromDto(data.AssignedTo);
+					self.assignedTo().loadFromDto(data.assignedTo);
 				}
-				if (!data.ReportedBy) { 
-					if (data.ReportedById != self.reportedById()) {
+				if (!data.reportedBy) { 
+					if (data.reportedById != self.reportedById()) {
                         self.reportedBy(null);
                     }
                 }else if (!self.reportedBy()){
-					self.reportedBy(new Person(data.ReportedBy, self));
+					self.reportedBy(new Person(data.reportedBy, self));
 				}else{
-					self.reportedBy().loadFromDto(data.ReportedBy);
+					self.reportedBy().loadFromDto(data.reportedBy);
 				}
-				if (!data.DevTeamAssigned) { 
-					if (data.DevTeamAssignedId != self.devTeamAssignedId()) {
+				if (!data.devTeamAssigned) { 
+					if (data.devTeamAssignedId != self.devTeamAssignedId()) {
                         self.devTeamAssigned(null);
                     }
                 }else if (!self.devTeamAssigned()){
-					self.devTeamAssigned(new DevTeam(data.DevTeamAssigned, self));
+					self.devTeamAssigned(new DevTeam(data.devTeamAssigned, self));
 				}else{
-					self.devTeamAssigned().loadFromDto(data.DevTeamAssigned);
+					self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
 				}
 
 				// The rest of the objects are loaded now.
-				self.caseKey(data.CaseKey);
-				self.title(data.Title);
-				self.description(data.Description);
-                if (data.OpenedAt == null) self.openedAt(null);
-				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.OpenedAt))){
-				    self.openedAt(moment(data.OpenedAt));
+				self.caseKey(data.caseKey);
+				self.title(data.title);
+				self.description(data.description);
+                if (data.openedAt == null) self.openedAt(null);
+				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.openedAt))){
+				    self.openedAt(moment(data.openedAt));
 				}
-				self.assignedToId(data.AssignedToId);
-				self.reportedById(data.ReportedById);
-				self.attachment(data.Attachment);
-				self.severity(data.Severity);
-				self.status(data.Status);
-				self.devTeamAssignedId(data.DevTeamAssignedId);
+				self.assignedToId(data.assignedToId);
+				self.reportedById(data.reportedById);
+				self.attachment(data.attachment);
+				self.severity(data.severity);
+				self.status(data.status);
+				self.devTeamAssignedId(data.devTeamAssignedId);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();
@@ -337,26 +337,26 @@ module ViewModels {
     	    // Save the object into a DTO
 			self.saveToDto = function() {
 				var dto: any = {};
-				dto.CaseKey = self.caseKey();
+				dto.caseKey = self.caseKey();
 
-    	        dto.Title = self.title();
-    	        dto.Description = self.description();
+    	        dto.title = self.title();
+    	        dto.description = self.description();
 				if (!self.openedAt()) dto.OpenedAt = null;
-				else dto.OpenedAt = self.openedAt().format('YYYY-MM-DDTHH:mm:ssZZ');
-				dto.AssignedToId = self.assignedToId();
-				if (!dto.AssignedToId && self.assignedTo()) {
-				    dto.AssignedToId = self.assignedTo().personId();
+				else dto.openedAt = self.openedAt().format('YYYY-MM-DDTHH:mm:ssZZ');
+				dto.assignedToId = self.assignedToId();
+				if (!dto.assignedToId && self.assignedTo()) {
+				    dto.assignedToId = self.assignedTo().personId();
 				}
-				dto.ReportedById = self.reportedById();
-				if (!dto.ReportedById && self.reportedBy()) {
-				    dto.ReportedById = self.reportedBy().personId();
+				dto.reportedById = self.reportedById();
+				if (!dto.reportedById && self.reportedBy()) {
+				    dto.reportedById = self.reportedBy().personId();
 				}
-    	        dto.Attachment = self.attachment();
-    	        dto.Severity = self.severity();
-    	        dto.Status = self.status();
-				dto.DevTeamAssignedId = self.devTeamAssignedId();
-				if (!dto.DevTeamAssignedId && self.devTeamAssigned()) {
-				    dto.DevTeamAssignedId = self.devTeamAssigned().devTeamId();
+    	        dto.attachment = self.attachment();
+    	        dto.severity = self.severity();
+    	        dto.status = self.status();
+				dto.devTeamAssignedId = self.devTeamAssignedId();
+				if (!dto.devTeamAssignedId && self.devTeamAssigned()) {
+				    dto.devTeamAssignedId = self.devTeamAssigned().devTeamId();
 				}
 
 				return dto;
@@ -370,18 +370,18 @@ module ViewModels {
                         $.ajax({ method: "POST", url: areaUrl + "api/Case/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.WasSuccessful) {
+							if (data.wasSuccessful) {
 								self.errorMessage('');
                                 if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.Object);
+								    self.loadFromDto(data.object);
                                 }
 								// The object is now saved. Call any callback.
 								for (var i in self.saveCallbacks) {
 									self.saveCallbacks[i](self);
 								}
 							} else {
-								self.errorMessage(data.Message);
-                                self.validationIssues(data.ValidationIssues);
+								self.errorMessage(data.message);
+                                self.validationIssues(data.validationIssues);
 							}
 						})
 						.fail(function() {
@@ -462,7 +462,7 @@ module ViewModels {
                             self.parent.isLoading(false);
                         }
                     } else {
-                        self.errorMessage(data.Message);
+                        self.errorMessage(data.message);
                     }
                 })
                 .fail(function() {
@@ -512,16 +512,16 @@ module ViewModels {
                 var currentId = self.caseKey();
                 $.ajax({ method: "POST", url: areaUrl + 'api/Case/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.errorMessage('');
-                        self.loadFromDto(data.Object);
+                        self.loadFromDto(data.object);
                         // The object is now saved. Call any callback.
                         for (var i in self.saveCallbacks) {
                             self.saveCallbacks[i](self);
                         }
                     } else {
-                        self.errorMessage(data.Message);
-                        self.validationIssues(data.ValidationIssues);
+                        self.errorMessage(data.message);
+                        self.validationIssues(data.validationIssues);
                     }
                 })
                 .fail(function() {
@@ -605,7 +605,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/Person/List?Fields=PersonId,Name", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.assignedToValidValues(data.List);
+                    self.assignedToValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -624,7 +624,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/Person/List?Fields=PersonId,Name", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.reportedByValidValues(data.List);
+                    self.reportedByValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -643,7 +643,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/CaseProduct/List?Fields=CaseProductId,CaseProductId", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.caseProductsValidValues(data.List);
+                    self.caseProductsValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -662,7 +662,7 @@ module ViewModels {
                 $.ajax({ method: "GET", url: areaUrl + "api/DevTeam/List?Fields=DevTeamId,Name", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.devTeamAssignedValidValues(data.List);
+                    self.devTeamAssignedValidValues(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {

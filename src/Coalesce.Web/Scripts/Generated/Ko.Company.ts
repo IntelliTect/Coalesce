@@ -213,24 +213,24 @@ module ViewModels {
 				if (!data) return;
 				self.isLoading(true);
 				// Set the ID 
-				self.myId = data.CompanyId;
+				self.myId = data.companyId;
 				// Load the lists of other objects
                 if (data.Employees !== null) {
 					// Merge the incoming array
-					RebuildArray(self.employees, data.Employees, 'PersonId', Person, self);
+					RebuildArray(self.employees, data.employees, 'personId', Person, self);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
 
 				// The rest of the objects are loaded now.
-				self.companyId(data.CompanyId);
-				self.name(data.Name);
-				self.address1(data.Address1);
-				self.address2(data.Address2);
-				self.city(data.City);
-				self.state(data.State);
-				self.zipCode(data.ZipCode);
-				self.altName(data.AltName);
+				self.companyId(data.companyId);
+				self.name(data.name);
+				self.address1(data.address1);
+				self.address2(data.address2);
+				self.city(data.city);
+				self.state(data.state);
+				self.zipCode(data.zipCode);
+				self.altName(data.altName);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();
@@ -239,14 +239,14 @@ module ViewModels {
     	    // Save the object into a DTO
 			self.saveToDto = function() {
 				var dto: any = {};
-				dto.CompanyId = self.companyId();
+				dto.companyId = self.companyId();
 
-    	        dto.Name = self.name();
-    	        dto.Address1 = self.address1();
-    	        dto.Address2 = self.address2();
-    	        dto.City = self.city();
-    	        dto.State = self.state();
-    	        dto.ZipCode = self.zipCode();
+    	        dto.name = self.name();
+    	        dto.address1 = self.address1();
+    	        dto.address2 = self.address2();
+    	        dto.city = self.city();
+    	        dto.state = self.state();
+    	        dto.zipCode = self.zipCode();
 
 				return dto;
 			}
@@ -259,18 +259,18 @@ module ViewModels {
                         $.ajax({ method: "POST", url: areaUrl + "api/Company/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.WasSuccessful) {
+							if (data.wasSuccessful) {
 								self.errorMessage('');
                                 if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.Object);
+								    self.loadFromDto(data.object);
                                 }
 								// The object is now saved. Call any callback.
 								for (var i in self.saveCallbacks) {
 									self.saveCallbacks[i](self);
 								}
 							} else {
-								self.errorMessage(data.Message);
-                                self.validationIssues(data.ValidationIssues);
+								self.errorMessage(data.message);
+                                self.validationIssues(data.validationIssues);
 							}
 						})
 						.fail(function() {
@@ -351,7 +351,7 @@ module ViewModels {
                             self.parent.isLoading(false);
                         }
                     } else {
-                        self.errorMessage(data.Message);
+                        self.errorMessage(data.message);
                     }
                 })
                 .fail(function() {
@@ -427,16 +427,16 @@ module ViewModels {
                 var currentId = self.companyId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/Company/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.errorMessage('');
-                        self.loadFromDto(data.Object);
+                        self.loadFromDto(data.object);
                         // The object is now saved. Call any callback.
                         for (var i in self.saveCallbacks) {
                             self.saveCallbacks[i](self);
                         }
                     } else {
-                        self.errorMessage(data.Message);
-                        self.validationIssues(data.ValidationIssues);
+                        self.errorMessage(data.message);
+                        self.validationIssues(data.validationIssues);
                     }
                 })
                 .fail(function() {

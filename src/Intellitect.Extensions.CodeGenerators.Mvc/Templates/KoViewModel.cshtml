@@ -351,20 +351,20 @@ module @moduleName {
 				if (!data) return;
 				self.isLoading(true);
 				// Set the ID 
-				self.myId = data.@(model.PrimaryKey.Name);
+				self.myId = data.@(model.PrimaryKey.JsonName);
 				// Load the lists of other objects
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
                 { 
                 @:if (data.@prop.Name !== null) {
 					@:// Merge the incoming array
-					@:RebuildArray(self.@prop.JsVariable, data.@prop.Name, '@prop.Object.PrimaryKey.Name', @prop.Object.ViewModelClassName, self);
+					@:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self);
                     if (prop.IsManytoManyCollection)
                     {
                     @:// Add many-to-many collection
                     @:var objs = [];
-                    @:$.each(data.@prop.Name, function(index, item) {
-                        @:if (item.@prop.ManyToManyCollectionProperty.Name){
-                            @:objs.push(item.@prop.ManyToManyCollectionProperty.Name);
+                    @:$.each(data.@prop.JsonName, function(index, item) {
+                        @:if (item.@prop.ManyToManyCollectionProperty.JsonName){
+                            @:objs.push(item.@prop.ManyToManyCollectionProperty.JsonName);
                         @:}
                     @:});
 					@:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdPropertyName', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self);
@@ -375,18 +375,18 @@ module @moduleName {
 				// This handles the issue with populating select lists with correct data because we now have the object.
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
 	            {
-				@:if (!data.@prop.Name) { 
+				@:if (!data.@prop.JsonName) { 
                     if (prop.ObjectIdProperty != null) {
-					@:if (data.@prop.ObjectIdProperty.Name != self.@(prop.ObjectIdProperty.JsVariable)()) {
+					@:if (data.@prop.ObjectIdProperty.JsonName != self.@(prop.ObjectIdProperty.JsVariable)()) {
                         @:self.@(prop.JsVariable)(null);
                     @:}
                     }else{
 					@:self.@(prop.JsVariable)(null);
                     }
                 @:}else if (!self.@(prop.JsVariable)()){
-					@:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.Name, self));
+					@:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
 				@:}else{
-					@:self.@(prop.JsVariable)().loadFromDto(data.@prop.Name);
+					@:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
 				@:}
                 }
 
@@ -395,17 +395,17 @@ module @moduleName {
                 {
                 if (prop.Type.IsDate)
                 { 
-                @:if (data.@prop.Name == null) self.@(prop.JsVariable)(null);
-				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.Name))){
-				    @:self.@(prop.JsVariable)(moment(data.@prop.Name));
+                @:if (data.@prop.JsonName == null) self.@(prop.JsVariable)(null);
+				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsonName))){
+				    @:self.@(prop.JsVariable)(moment(data.@prop.JsonName));
 				@:}
                 } else if (!prop.IsPOCO) {
-				@:self.@(prop.JsVariable)(data.@prop.Name);
+				@:self.@(prop.JsVariable)(data.@prop.JsonName);
                 }else if (prop.IsComplexType) {
-				// Complex Type: @prop.Name
+                // Complex Type: @prop.JsonName
                 @foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
                 {
-				@:self.@(prop.JsVariable)().@(subProp.JsVariable)(data.@(prop.Name).@(subProp.Name));
+				@:self.@(prop.JsVariable)().@(subProp.JsVariable)(data.@(prop.JsonName).@(subProp.JsonName));
                 }
             }
          }
@@ -417,43 +417,43 @@ module @moduleName {
     	    // Save the object into a DTO
 			self.saveToDto = function() {
 				var dto: any = {};
-				dto.@(model.Properties.First(f=>f.IsPrimaryKey).Name) = self.@(model.Properties.First(f=>f.IsPrimaryKey).JsVariable)();
+				dto.@(model.Properties.First(f=>f.IsPrimaryKey).JsonName) = self.@(model.Properties.First(f=>f.IsPrimaryKey).JsVariable)();
 
                 @foreach (PropertyViewModel prop in model.Properties.Where(f => f.CanWrite && !f.IsPOCO && !f.HasReadOnlyAttribute && !f.HasReadOnlyApiAttribute && f.HasViewModelProperty || f.IsComplexType))
                 {
                 if (prop.Type.IsDateTimeOffset)
                 {
 				@:if (!self.@(prop.JsVariable)()) dto.@prop.Name = null;
-				@:else dto.@prop.Name = self.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ssZZ');
+				@:else dto.@prop.JsonName = self.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ssZZ');
                 }
                 else if (prop.Type.IsDateTime)
                 { 
                 @:if (!self.@(prop.JsVariable)()) dto.@prop.Name = null;
-				@:else dto.@prop.Name = self.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss');
+				@:else dto.@prop.JsonName = self.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss');
                 }
                 else if (prop.IsComplexType) 
                 {
                 @:// Complex Type: @prop.Name>
-				@:dto.@(prop.Name)={};
+				@:dto.@(prop.JsonName)={};
                     foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
                     {
-				@:dto.@(prop.Name).@(subProp.Name) = self.@(prop.JsVariable)().@(subProp.JsVariable)();
+				@:dto.@(prop.JsonName).@(subProp.JsonName) = self.@(prop.JsVariable)().@(subProp.JsVariable)();
                     }
                 }
                 else if (prop.IsForeignKey)
                 {
-				@:dto.@prop.Name = self.@(prop.JsVariable)();
+				@:dto.@prop.JsonName = self.@(prop.JsVariable)();
                     if (prop.IdPropertyObjectProperty != null && !prop.IsPrimaryKey)
                     {
 				// If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact. 
-				@:if (!dto.@prop.Name && self.@(prop.IdPropertyObjectProperty.JsVariable)()) {
-				    @:dto.@prop.Name = self.@(prop.IdPropertyObjectProperty.JsVariable)().@(prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable)();
+				@:if (!dto.@prop.JsonName && self.@(prop.IdPropertyObjectProperty.JsVariable)()) {
+				    @:dto.@prop.JsonName = self.@(prop.IdPropertyObjectProperty.JsVariable)().@(prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable)();
 				@:}
                 }
                 }
                 else if (!prop.Type.IsCollection)
                 {
-    	        @:dto.@prop.Name = self.@(prop.JsVariable)();
+    	        @:dto.@prop.JsonName = self.@(prop.JsVariable)();
                 }
                 }
 
@@ -468,18 +468,18 @@ module @moduleName {
                         $.ajax({ method: "POST", url: areaUrl + "@(model.ApiUrl)/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.WasSuccessful) {
+							if (data.wasSuccessful) {
 								self.errorMessage('');
                                 if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.Object);
+								    self.loadFromDto(data.object);
                                 }
 								// The object is now saved. Call any callback.
 								for (var i in self.saveCallbacks) {
 									self.saveCallbacks[i](self);
 								}
 							} else {
-								self.errorMessage(data.Message);
-                                self.validationIssues(data.ValidationIssues);
+								self.errorMessage(data.message);
+                                self.validationIssues(data.validationIssues);
 							}
 						})
 						.fail(function() {
@@ -560,7 +560,7 @@ module @moduleName {
                             self.parent.isLoading(false);
                         }
                     } else {
-                        self.errorMessage(data.Message);
+                        self.errorMessage(data.message);
                     }
                 })
                 .fail(function() {
@@ -657,16 +657,16 @@ module @moduleName {
                 var currentId = self.@(model.PrimaryKey.JsVariable)();
                 $.ajax({ method: "POST", url: areaUrl + '@(model.ApiUrl)/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.errorMessage('');
-                        self.loadFromDto(data.Object);
+                        self.loadFromDto(data.object);
                         // The object is now saved. Call any callback.
                         for (var i in self.saveCallbacks) {
                             self.saveCallbacks[i](self);
                         }
                     } else {
-                        self.errorMessage(data.Message);
-                        self.validationIssues(data.ValidationIssues);
+                        self.errorMessage(data.message);
+                        self.validationIssues(data.validationIssues);
                     }
                 })
                 .fail(function() {
@@ -754,7 +754,7 @@ module @moduleName {
                 $.ajax({ method: "GET", url: areaUrl + "@(prop.Object.ApiUrl)/List?Fields=@(prop.Object.PrimaryKey.Name),@(prop.Object.ListTextProperty.Name)", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
-                    self.@(prop.ValidValueListName.ToCamelCase())(data.List);
+                    self.@(prop.ValidValueListName.ToCamelCase())(data.list);
                     self.isLoading(false);
                 })
                 .fail(function() {
@@ -902,14 +902,14 @@ module @moduleName {
                          xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isDirty(false);
-                    if (data.WasSuccessful) {
+                    if (data.wasSuccessful) {
                         self.@(method.JsVariableMessage)('');
                         self.@(method.JsVariableWasSuccessful)(true);
-                        self.@(method.JsVariableResult)(data.Object);
+                        self.@(method.JsVariableResult)(data.object);
                         @if (method.ReturnType.Name == method.Parent.Name)
                         {
                         @:// The return type is the type of the object, load it.
-                        @:self.loadFromDto(data.Object)
+                        @:self.loadFromDto(data.object)
                         @:if ($.isFunction(callback)) {
                             @:callback();
                         @:}
@@ -924,7 +924,7 @@ module @moduleName {
                         }
                     } else {
                         self.@(method.JsVariableWasSuccessful)(false);
-                        self.@(method.JsVariableMessage)(data.Message);
+                        self.@(method.JsVariableMessage)(data.message);
                     }
                 })
                 .fail(function() {

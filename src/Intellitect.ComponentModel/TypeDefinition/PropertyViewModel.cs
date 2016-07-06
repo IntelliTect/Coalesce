@@ -51,6 +51,14 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// </summary>
         public string Name { get { return Wrapper.Name; } }
 
+        /// <summary>
+        /// Name of the property sent by Json over the wire. Camel Cased Name
+        /// </summary>
+        public string JsonName { get {
+                return Wrapper.Name.ToCamelCase();
+            }
+        }
+
         public string Comment { get { return Wrapper.Comment; } }
 
         /// <summary>

@@ -82,26 +82,26 @@ module ListViewModels {
                                 + "&listDataSource=" + CaseProductDataSources[self.listDataSource] + "&" + self.queryString,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful){
+                    if (data.wasSuccessful){
                         self.items.removeAll();
-                        for (var i in data.List) {
-                            var model = new ViewModels.CaseProduct(data.List[i]);
+                        for (var i in data.list) {
+                            var model = new ViewModels.CaseProduct(data.list[i]);
                             model.includes = self.includes;
                             model.onDelete(itemDeleted);
                             self.items.push(model);
                         }
-                        self.count(data.List.length);
-                        self.totalCount(data.TotalCount);
-                        self.pageCount(data.PageCount);
-                        self.page(data.Page);
-                        self.message(data.Message)
+                        self.count(data.list.length);
+                        self.totalCount(data.totalCount);
+                        self.pageCount(data.pageCount);
+                self.page(data.page);
+                self.message(data.message)
                         self.isLoaded(true);
-                        if ($.isFunction(callback)) callback(self);
-                    }else{
-                        self.message(data.Message);
+                if ($.isFunction(callback)) callback(self);
+            }else{
+                        self.message(data.message);
                         self.isLoaded(false);
                     }
-                })
+    })
                 .fail(function() {
                     alert("Could not get list of CaseProduct items.");
                 })

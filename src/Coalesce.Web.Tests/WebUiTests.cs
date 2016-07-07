@@ -1,16 +1,11 @@
-﻿using Coalesce.Domain;
-using Intellitect.ComponentModel.Validation;
-using Microsoft.Extensions.Logging;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.PhantomJS;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
+using System.Management;
 
 namespace Coalesce.Web.Tests
 {
@@ -22,26 +17,31 @@ namespace Coalesce.Web.Tests
         public WebUiTests()
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.Arguments = $@"run -p ..\..\..\..\..\Coalesce.Web\";
+            startInfo.Arguments = $@"run";
             startInfo.FileName = "dotnet";
             startInfo.WorkingDirectory = @"..\..\..\..\..\Coalesce.Web";
-            _process = Process.Start(startInfo);
+            startInfo.UseShellExecute = false;
+
+            _process = new Process();
+            _process.StartInfo = startInfo;
+            _process.Start();
+
             // Give it a few seconds to start up.
-            System.Threading.Thread.Sleep(7000);
+            Thread.Sleep(7000);
         }
 
-        //[Fact]
+        [Fact]
         public void BasicUiChrome()
         {
-            IWebDriver driver = new ChromeDriver(@"..\..\..\");
+            IWebDriver driver = new ChromeDriver();
 
             RunUiTest(driver);
         }
 
-        //[Fact]
+        [Fact]
         public void BasicUiHeadless()
         {
-            IWebDriver driver = new PhantomJSDriver(@"..\..\..\");
+            IWebDriver driver = new PhantomJSDriver();
 
             RunUiTest(driver);
         }
@@ -62,7 +62,7 @@ namespace Coalesce.Web.Tests
             IWebElement editLink = driver.FindElement(By.CssSelector(@"table tr:nth-child(1) td:nth-child(15) > div > a"));
             editLink.Click();
 
-            IWebElement nameInput = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-body > div > div:nth-child(2) > div > input"));
+            IWebElement nameInput = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-body > div > div:nth-child(3) > div > input"));
             nameInput.Click();
             // This is only required for the chrome driver
             for (var i = 0; i < 20; i++) nameInput.SendKeys(Keys.Backspace);
@@ -70,7 +70,7 @@ namespace Coalesce.Web.Tests
             nameInput.Clear();
             nameInput.SendKeys("AdamTest");
 
-            IWebElement nextInput = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-body > div > div:nth-child(3) > div > input"));
+            IWebElement nextInput = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-body > div > div:nth-child(4) > div > input"));
             nextInput.Click();
 
             IWebElement loading = driver.FindElement(By.ClassName("label-info"));
@@ -78,6 +78,8 @@ namespace Coalesce.Web.Tests
 
             IWebElement backButton = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-heading > div > button:nth-child(1)"));
             backButton.Click();
+
+            Thread.Sleep(3000);
 
             driver.Navigate().Refresh();
 

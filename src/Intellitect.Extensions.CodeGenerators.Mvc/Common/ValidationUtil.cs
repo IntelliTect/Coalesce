@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 
 namespace Intellitect.Extensions.CodeGenerators.Mvc
 {
-    internal class ValidationUtil
+    public class ValidationUtil
     {
         public static ModelType ValidateType(string typeName,
             string argumentName,

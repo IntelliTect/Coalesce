@@ -67,13 +67,13 @@ namespace Coalesce.Web
 
             app.UseDeveloperExceptionPage();
 
-            // Only included for security testing ... should only be part of a demo install
+            // *** DEMO ONLY ***
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
-                AuthenticationScheme = "SecurityTestMiddleware",
-                AutomaticAuthenticate = true
+                AuthenticationScheme = DemoMiddleware.AuthenticationScheme,
+                AutomaticAuthenticate = false
             });
-            app.UseSecurityTestMiddleware();
+            app.UseDemoMiddleware();
 
             app.UseMvc(routes =>
             {

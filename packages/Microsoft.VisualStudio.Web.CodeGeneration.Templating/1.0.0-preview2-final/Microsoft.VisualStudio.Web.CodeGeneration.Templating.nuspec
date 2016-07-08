@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.VisualStudio.Web.CodeGeneration.Templating</id>
+    <version>1.0.0-preview2-final</version>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <authors>Microsoft.VisualStudio.Web.CodeGeneration.Templating</authors>
+    <owners>Microsoft.VisualStudio.Web.CodeGeneration.Templating</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://www.asp.net/</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <description>Contains Razor based templating host used by ASP.NET Core Code Generators.</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>aspnetcore,codegenerator,scaffolding,visualstudioweb</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.1">
+        <dependency id="Microsoft.AspNetCore.Razor" version="1.0.0" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="1.3.0" />
+        <dependency id="Microsoft.VisualStudio.Web.CodeGeneration.Utils" version="1.0.0-preview2-final" />
+      </group>
+      <group targetFramework="Unsupported0.0">
+        <dependency id="Microsoft.AspNetCore.Razor" version="1.0.0" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="1.3.0" />
+        <dependency id="Microsoft.VisualStudio.Web.CodeGeneration.Utils" version="1.0.0-preview2-final" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

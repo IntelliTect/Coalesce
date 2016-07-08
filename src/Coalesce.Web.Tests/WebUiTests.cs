@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using Xunit;
 using System.Management;
+using Coalesce.Web.Tests.Helpers;
 
 namespace Coalesce.Web.Tests
 {
@@ -16,18 +17,7 @@ namespace Coalesce.Web.Tests
         private Process _process;
         public WebUiTests()
         {
-            var startInfo = new ProcessStartInfo();
-            startInfo.Arguments = $@"run";
-            startInfo.FileName = "dotnet";
-            startInfo.WorkingDirectory = @"..\..\..\..\..\Coalesce.Web";
-            startInfo.UseShellExecute = false;
-
-            _process = new Process();
-            _process.StartInfo = startInfo;
-            _process.Start();
-
-            // Give it a few seconds to start up.
-            Thread.Sleep(7000);
+            _process = Processes.StartDotNet();
         }
 
         [Fact]

@@ -8,9 +8,9 @@ namespace Coalesce.Web
 {
     public static class AzureAuthExtensions
     {
-        public static IApplicationBuilder UseAzureAuthMiddleware(this IApplicationBuilder app)
+        public static IApplicationBuilder UseSecurityTestMiddleware(this IApplicationBuilder app)
         {
-            return app.UseMiddleware<AzureAuthMiddleware>();
+            return app.UseMiddleware<SecurityTestMiddleware>();
         }
     }
 }

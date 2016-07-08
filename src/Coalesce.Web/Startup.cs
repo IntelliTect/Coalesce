@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System;
 using System.IO;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Http;
 
 namespace Coalesce.Web
 {
@@ -51,7 +52,7 @@ namespace Coalesce.Web
             ReflectionRepository.AddContext<AppDbContext>();
 
             RoleMapping.Add("Admin", "S-1-5-4");  // Interactive user.
-            RoleMapping.Add("Admin", "S-1-1-0");  // Everyone who has logged on.
+            RoleMapping.Add("User", "S-1-1-0");  // Everyone who has logged on.
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,12 +67,13 @@ namespace Coalesce.Web
 
             app.UseDeveloperExceptionPage();
 
-            //app.UseCookieAuthentication(options =>
-            //{
-            //    options.AutomaticAuthenticate = true;
-            //});
-
-            //app.UseAzureAuthMiddleware();
+            // Only included for security testing ... should only be part of a demo install
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationScheme = "SecurityTestMiddleware",
+                AutomaticAuthenticate = true
+            });
+            app.UseSecurityTestMiddleware();
 
             app.UseMvc(routes =>
             {

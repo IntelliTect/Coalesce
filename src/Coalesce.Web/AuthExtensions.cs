@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Web
 {
-    public static class AzureAuthExtensions
+    public static class AuthExtensions
     {
         public static IApplicationBuilder UseSecurityTestMiddleware(this IApplicationBuilder app)
         {

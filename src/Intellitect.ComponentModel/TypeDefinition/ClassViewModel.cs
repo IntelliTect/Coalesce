@@ -116,6 +116,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 if (_Properties == null)
                 {
                     _Properties = new List<PropertyViewModel>();
+                    int count = 1;
                     foreach (var pw in Wrapper.Properties)
                     {
                         if (_Properties.Any(f => f.Name == pw.Name))
@@ -124,13 +125,16 @@ namespace Intellitect.ComponentModel.TypeDefinition
                             if (!pw.IsVirtual)
                             {
                                 _Properties.Remove(_Properties.First(f => f.Name == pw.Name));
-                                _Properties.Add(new PropertyViewModel(pw, this));
+                                var prop = new PropertyViewModel(pw, this, count);
+                                _Properties.Add(prop);
                             }
                         }
                         else
                         {
-                            _Properties.Add(new PropertyViewModel(pw, this));
+                            var prop = new PropertyViewModel(pw, this, count);
+                            _Properties.Add(prop);
                         }
+                        count++;
                     }
 
                 }
@@ -148,9 +152,11 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 if (_Methods == null)
                 {
                     _Methods = new List<MethodViewModel>();
+                    int count = 1;
                     foreach (var mw in Wrapper.Methods)
                     {
-                        _Methods.Add(new MethodViewModel(mw, this));
+                        _Methods.Add(new MethodViewModel(mw, this, count));
+                        count++;
                     }
                 }
 

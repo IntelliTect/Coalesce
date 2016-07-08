@@ -48,17 +48,17 @@
                 <th>Title</th>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th>Birth Date</th>
-                <th>Cases Assigned</th>
-                <th>Cases Reported</th>
-                <th>Company</th>
                 <th>Email</th>
                 <th>Gender</th>
+                <th>Cases Assigned</th>
+                <th>Cases Reported</th>
+                <th>Birth Date</th>
                 <th>Last Bath</th>
-                <th>Name</th>
                 <th>Next Upgrade</th>
                 <th>Person Stats</th>
                 <th>Time Zone</th>
+                <th>Name</th>
+                <th>Company</th>
             <th 
                                     style="width: 150px;"
                 >
@@ -80,7 +80,10 @@
                 @(Knockout.InputFor<Person>(p => p.LastName))
             </td>
             <td>
-                @(Knockout.InputFor<Person>(p => p.BirthDate))
+                @(Knockout.InputFor<Person>(p => p.Email))
+            </td>
+            <td>
+                @(Knockout.SelectFor<Person>(p => p.Gender))
             </td>
             <td>
                 <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
@@ -89,19 +92,10 @@
                 <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
             </td>
             <td>
-                @(Knockout.SelectForObject<Person>(p => p.Company))
-            </td>
-            <td>
-                @(Knockout.InputFor<Person>(p => p.Email))
-            </td>
-            <td>
-                @(Knockout.SelectFor<Person>(p => p.Gender))
+                @(Knockout.InputFor<Person>(p => p.BirthDate))
             </td>
             <td>
                 @(Knockout.InputFor<Person>(p => p.LastBath))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Person>(p => p.Name))
             </td>
             <td>
                 @(Knockout.InputFor<Person>(p => p.NextUpgrade))
@@ -111,6 +105,12 @@
             </td>
             <td>
                 @(Knockout.InputFor<Person>(p => p.TimeZone))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Name))
+            </td>
+            <td>
+                @(Knockout.SelectForObject<Person>(p => p.Company))
             </td>
             }
             else
@@ -125,7 +125,10 @@
                 @(Knockout.DisplayFor<Person>(p => p.LastName))
             </td>
             <td>
-                @(Knockout.DisplayFor<Person>(p => p.BirthDate))
+                @(Knockout.DisplayFor<Person>(p => p.Email))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Gender))
             </td>
             <td>
                 <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
@@ -134,19 +137,10 @@
                 <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
             </td>
             <td>
-                @(Knockout.DisplayFor<Person>(p => p.Company))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Person>(p => p.Email))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Person>(p => p.Gender))
+                @(Knockout.DisplayFor<Person>(p => p.BirthDate))
             </td>
             <td>
                 @(Knockout.DisplayFor<Person>(p => p.LastBath))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Person>(p => p.Name))
             </td>
             <td>
                 @(Knockout.DisplayFor<Person>(p => p.NextUpgrade))
@@ -156,6 +150,12 @@
             </td>
             <td>
                 @(Knockout.DisplayFor<Person>(p => p.TimeZone))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Name))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Person>(p => p.Company))
             </td>
             }
             <td>

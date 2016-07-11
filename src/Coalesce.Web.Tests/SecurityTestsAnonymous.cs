@@ -19,7 +19,7 @@ namespace Coalesce.Web.Tests
     public class SecurityTestsAnonymous : SecurityTestsCommon
     {
         public SecurityTestsAnonymous(TestModel model, StreamWriter output)
-            : base (model, output, "", "Anonymous User") { }
+            : base (model, output, "None", "Anonymous User") { }
 
         public override Task<bool> RunTests()
         {

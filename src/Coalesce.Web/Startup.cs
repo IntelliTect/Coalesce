@@ -71,7 +71,7 @@ namespace Coalesce.Web
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
                 AuthenticationScheme = DemoMiddleware.AuthenticationScheme,
-                AutomaticAuthenticate = false
+                AutomaticAuthenticate = true
             });
             app.UseDemoMiddleware();
 

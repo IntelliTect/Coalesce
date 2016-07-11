@@ -33,7 +33,7 @@ namespace Coalesce.Web.Tests
             if (!string.IsNullOrEmpty(userRole))
             {
                 var securityCookieContainer = new CookieContainer();
-                securityCookieContainer.Add(Model.ApiUrl, new Cookie("SecurityTestRole", "Admin"));
+                securityCookieContainer.Add(Model.ApiUrl, new Cookie("SecurityTestRole", userRole));
                 _handler.CookieContainer = securityCookieContainer;
             }
 

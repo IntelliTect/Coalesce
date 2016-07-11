@@ -35,8 +35,8 @@ namespace Coalesce.Web.Tests
                             .ToList();
         }
 
-        //[Fact(Skip = "Run Explicitly By Removing Skip", DisplayName = "Security Tests: Remove Skip To Run")]
-        [Fact]
+        [Fact(Skip = "Run Explicitly By Removing Skip", DisplayName = "Security Tests: Remove Skip To Run")]
+        //[Fact]
         public async Task AllTests()
         {
             using (var output = new StreamWriter("output.txt"))

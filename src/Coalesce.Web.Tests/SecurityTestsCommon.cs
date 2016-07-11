@@ -33,7 +33,7 @@ namespace Coalesce.Web.Tests
             if (!string.IsNullOrEmpty(userRole))
             {
                 var securityCookieContainer = new CookieContainer();
-                securityCookieContainer.Add(Model.ApiUrl, new Cookie("SecurityTestRole", "Admin"));
+                securityCookieContainer.Add(Model.ApiUrl, new Cookie("SecurityTestRole", userRole));
                 _handler.CookieContainer = securityCookieContainer;
             }
 
@@ -61,7 +61,6 @@ namespace Coalesce.Web.Tests
             var results = new List<bool>();
 
             results.Add(await RestrictedReadPropertiesViaPropertyValues());
-            //results.Add(await RestrictedReadPropertiesViaListFields(client));
             results.Add(await RestrictedEditProperties());
 
             return results.All(b => b);
@@ -98,7 +97,23 @@ namespace Coalesce.Web.Tests
             var results = await Task.WhenAll(tasks);
             return results.All(b => b);
         }
-        
+
+        //public async Task<bool> RestrictedEditProperties()
+        //{
+        //    // Get a list of properties on anonmymous models that have edit restrictions
+        //    var models = Model.Models
+        //                    .Where(m => m.SecurityInfo.AllowAnonymousEdit)
+        //                    .SelectMany(m => m.Properties
+        //                                        .Where(p => !p.SecurityInfo.IsEditable(User) && p.SecurityInfo.IsReadable(User))
+        //                                        .Select(p => new { Model = m, Property = p }))
+        //                    .ToList();
+
+        //    var tasks = models
+        //                .Select(async m => await AttemptToChangeRestrictedProperty(m.Model, m.Property));
+        //    var results = await Task.WhenAll(tasks);
+        //    return results.All(b => b);
+        //}
+
 
         private async Task<bool> AttemptToGetRestrictedPropertyValues(ClassViewModel model, PropertyViewModel property)
         {

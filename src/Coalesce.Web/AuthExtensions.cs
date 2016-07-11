@@ -8,9 +8,9 @@ namespace Coalesce.Web
 {
     public static class AuthExtensions
     {
-        public static IApplicationBuilder UseSecurityTestMiddleware(this IApplicationBuilder app)
+        public static IApplicationBuilder UseDemoMiddleware(this IApplicationBuilder app)
         {
-            return app.UseMiddleware<SecurityTestMiddleware>();
+            return app.UseMiddleware<DemoMiddleware>();
         }
     }
 }

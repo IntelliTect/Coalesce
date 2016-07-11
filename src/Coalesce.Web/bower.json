@@ -9,6 +9,7 @@
     "Knockout-Validation": "~1.0.2",
     "moment": "2.10.6",
     "select2": "~4.0.2",
-    "eonasdan-bootstrap-datetimepicker": "4.17.37"
+    "eonasdan-bootstrap-datetimepicker": "4.17.37",
+    "bootstrap-sass": "3.3.6"
   }
 }

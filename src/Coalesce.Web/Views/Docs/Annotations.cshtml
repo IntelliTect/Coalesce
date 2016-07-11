@@ -1,0 +1,400 @@
+﻿@{
+    ViewBag.Title = "Coalesce";
+    Layout = "_DocsLayout";
+}
+
+<h2>Annotations</h2>
+<h3>Annotations Overview</h3>
+<p>
+    Annotations are simple attributes called DataAnnotations
+</p>
+
+<h3>Annotation List</h3>
+<ul>
+    <li><a href="#ClientValidation">Client Validation</a></li>
+    <li><a href="#Create">Create</a></li>
+    <li><a href="#DateType">Date Type</a></li>
+    <li><a href="#DefaultOrderBy">Default Order By</a></li>
+    <li><a href="#Delete">Delete</a></li>
+    <li><a href="#Detail">Detail</a></li>
+    <li><a href="#Edit">Edit</a></li>
+    <li><a href="#Execute">Execute</a></li>
+    <li><a href="#FileDownload">File Download</a></li>
+    <li><a href="#Hidden">Hidden</a></li>
+    <li><a href="#InternalUse">Internal Use</a></li>
+    <li><a href="#ListGroup">List Group</a></li>
+    <li><a href="#ListText">List Text</a></li>
+    <li><a href="#ManytoMany">Many to Many</a></li>
+    <li><a href="#Read">Read</a></li>
+    <li><a href="#ReadOnlyApi">Read Only Api</a></li>
+    <li><a href="#Search">Search</a></li>
+</ul>
+<a name="ClientValidation"></a>
+<h3>Client Validation</h3>
+<h4>Options</h4>
+    <ul>
+        <li><span class="text-info">bool</span> AllowSave = <span class="text-info">false</span></li>
+        <li><span class="text-info">bool</span> IsRequired</li>
+        <li><span class="text-info">double</span> MinValue =<span class="text-info">double</span>.MaxValue</li>
+        <li><span class="text-info">double</span> MaxValue =<span class="text-info">double</span>.MinValue</li>
+        <li><span class="text-info">double</span> MinLength =<span class="text-info">double</span>.MaxValue</li>
+        <li><span class="text-info">double</span> MaxLength =<span class="text-info">double</span>.MinValue</li>
+        <li><span class="text-info">string</span> Pattern</li>
+        <li><span class="text-info">double</span> Step</li>
+        <li><span class="text-info">bool</span> IsEmail</li>
+        <li><span class="text-info">bool</span> IsPhoneUs</li>
+        <li><span class="text-info">string</span> Equal - This is an unquoted string when converted to JS. Use '' to specify strings.</li>
+        <li><span class="text-info">string</span> NotEqual - This is an unquoted string when converted to JS. Use '' to specify strings.</li>
+        <li><span class="text-info">bool</span> IsDate</li>
+        <li><span class="text-info">bool</span> IsDateIso</li>
+        <li><span class="text-info">bool</span> IsNumber</li>
+        <li><span class="text-info">bool</span> IsDigit</li>
+        <li><span class="text-info">string</span> CustomName - Allows specifying a name used in a custom validation. .extend({ CustomName: CustomValue })</li>
+        <li><span class="text-info">string</span> CustomValue - Allows specifying a value used in a custom validation. .extend({ CustomName: CustomValue })</li>
+        <li><span class="text-info">string</span> ErrorMessage - Gets or sets an error message to associate with a validation control if validation fails.</li>
+    </ul>
+
+<h4>Example</h4>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+
+        [<span class="text-success">ClientValidation</span>(IsRequired = <span class="text-info">true</span>, AllowSave = <span class="text-info">false</span>)]
+        public string FirstName { get; set; }
+
+        [<span class="text-success">ClientValidation</span>(IsRequired = <span class="text-info">true</span>, AllowSave = <span class="text-info">false</span>, MinValue =  1, MaxValue = 50)]
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="Create"></a>
+<h3>Create</h3>
+    <ul>
+        <li><span class="text-info">bool</span> Allow = <span class="text-info">true</span></li>
+    </ul>
+<pre>
+<code class="language-html">
+    [Create(Allow = false)]
+    [Delete(Allow = false)]
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="CreateController"></a>
+<h3>Create Controller</h3>
+<p></p>
+<ul>
+    <li><span class="text-info">bool</span> WillCreateView</li>
+    <li><span class="text-info">bool</span> WillCreateApi</li>
+</ul>
+<pre>
+<code class="language-html">
+    [CreateController(view: false)]
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="DateType"></a>
+<h3>Date Type</h3>
+<p>Class defaults to DateTypes.DateTime<br />Date Types:</p>
+<ul>
+    <li>DateTime = 0</li>
+    <li>DateOnly = 1</li>
+</ul>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        [DateType(DateTypeAttribute.DateTypes.DateOnly)]
+        public DateTime? LastWellCheck { get; set; }
+    }
+</code>
+</pre>
+<a name="DefaultOrderBy"></a>
+<h3>Default Order By</h3>
+<p>Order By Directions</p>
+<ul>
+    <li>Ascending = 0</li>
+    <li>Descending = 1</li>
+</ul>
+<h4>Options</h4>
+<ul>
+    <li><span class="text-success">OrderByDirections</span> OrderByDirection</li>
+    <li><span class="text-info">int</span> FieldOrder</li>
+</ul>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+
+        [DefaultOrderBy(2)]    
+        public string FirstName { get; set; }
+        
+        [DefaultOrderBy(1)]
+        public string LastName { get; set; }
+    }
+
+    public class LoginHistory
+    {
+        public int LoginHistoryId {get; set;}
+        
+        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending)]
+        public DateTime Date {get; set;}
+    }
+</code>
+</pre>
+<a name="Delete"></a>
+<h3>Delete</h3>
+<ul>
+    <li><span class="text-info">bool</span> Allow = <span class="text-info">true</span></li>
+</ul>
+<pre>
+<code class="language-html">
+    [Delete(Allow = false)]
+    [Create(Allow = false)]
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="Detail"></a>
+<h3>Detail</h3>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        [Detail("i.e., asthma, reflux, eczema")]
+        public string ChronicHealthProblems { get; set; }
+    }
+</code>
+</pre>
+<a name="Edit"></a>
+<h3>Edit</h3>
+<p>Controls what permissions are needed to edit a model</p>
+<pre>
+<code class="language-html">
+    [Edit(Roles = AppRoles.Admin)]
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="Execute"></a>
+<h3>Execute</h3>
+<p>Specifies what permissions are needed to execute static or instance methods</p>
+<pre>
+<code class="language-html">
+    [Execute(Roles = AppRoles.Admin)]
+    public Person CreatePerson(string firstName, string lastName)
+    {
+        var newPerson = new Person() {FirstName = firstName, LastName = lastName}
+        return newPerson;
+    }
+</code>
+</pre>
+<a name="FileDownload"></a>
+<h3>File Download</h3>
+<p></p>
+<pre>
+<code class="language-html">
+        public class Signature: TrackingBase
+    {
+        public int SignatureId { get; set; }
+        public byte[] Content { get; set; }
+        
+        [NotMapped] [FileDownload]
+        public Image Image
+        {
+            get
+            {
+                MemoryStream ms = new MemoryStream(Content);
+                Image returnImage = Image.FromStream(ms);
+                return returnImage;
+            }
+            set
+            {
+                MemoryStream ms = new MemoryStream();
+                value.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
+                Content = ms.ToArray();
+            }
+        }
+    }
+</code>
+</pre>
+<a name="Hidden"></a>
+<h3>Hidden</h3>
+<p>Mark an property as hidden from the edit, List or All areas.</p>
+<h4>Areas</h4>
+<ul>
+    <li>All = 0</li>
+    <li>List = 1</li>
+    <li>Edit = 2</li>
+</ul>
+<h4>Options</h4>
+<ul>
+    <li><span class="text-success">Areas</span> Area</li>
+</ul>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        [Hidden(HiddenAttribute.Areas.All)]
+        public int? IncomeLevelId { get; set; }
+    }
+</code>
+</pre>
+<a name="Internal Use"></a>
+<h3>Internal Use</h3>
+<p>Used to mark a property or method for internal use.</p>
+<pre>
+<code class="language-html">
+    public class Picture
+    {
+        public int PictureId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public byte[] Original { get; set; }
+        public byte[] Thumbnail { get; set; }
+        [InternalUse]
+        public Image OriginalImage()
+        {
+            var ms = new MemoryStream(Original);
+            return new Bitmap(ms);
+        }
+        [InternalUse]
+        public Image ThumbnailImage()
+        {
+            var ms = new MemoryStream(Original);
+            return new Bitmap(ms);
+        }
+    }
+</code>
+</pre>
+<a name="ListGroup"></a>
+<h3>List Group</h3>
+<p></p>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        
+        [ListGroup("School")]
+        public string Education2School { get; set; }
+    }
+</code>
+</pre>
+<a name="ListText"></a>
+<h3>List Text</h3>
+<p>Used to specify which property is used in lists.</p>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        [ListText]
+        [Hidden]
+        [NotMapped]
+        public string Name
+        {
+            get { return $"{FirstName} {LastName}"; }
+        }
+    }
+</code>
+</pre>
+<a name="ManytoMany"></a>
+<h3>Many to Many</h3>
+<p>Used to specify a Many to Many relationship.</p>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        [ManyToMany("Appointments")]
+        public ICollection<PersonAppointment> PersonAppointments { get; set; }
+    }
+</code>
+</pre>
+<a name="Read"></a>
+<h3>Read</h3>
+<p>Specify the role needed for read access</p>
+<pre>
+<code class="language-html">
+    [Read(Roles = AppRoles.Admin)]
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="ReadOnlyApi"></a>
+<h3>Read Only Api</h3>
+<p>Specify a property is not able to be modified through the Api.</p>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+
+        [ReadOnlyApi]
+        public string FirstName { get; set; }
+
+        [ReadOnlyApi]
+        public string LastName { get; set; }
+    }
+</code>
+</pre>
+<a name="Search"></a>
+<h3>Search</h3>
+<p>Specify the field that used in the list search</p>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+
+        [Search]
+        public string LastName { get; set; }
+    }
+</code>
+</pre>

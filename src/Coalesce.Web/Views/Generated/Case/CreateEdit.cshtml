@@ -19,21 +19,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Assigned To</label>
+                <label class="col-md-4 control-label">Title</label>
                 <div class="col-md-8">
-                    @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Attachment</label>
-                <div class="col-md-8">
-                    @(Knockout.InputFor<Case>(p => p.Attachment))
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Case Products</label>
-                <div class="col-md-8">
-                    @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
+                    @(Knockout.InputFor<Case>(p => p.Title))
                 </div>
             </div>
             <div class="form-group">
@@ -43,21 +31,27 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Dev Team Assigned</label>
-                <div class="col-md-8">
-                    @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
-                </div>
-            </div>
-            <div class="form-group">
                 <label class="col-md-4 control-label">Opened At</label>
                 <div class="col-md-8">
                     @(Knockout.InputFor<Case>(p => p.OpenedAt))
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Assigned To</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Reported By</label>
                 <div class="col-md-8">
                     @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Attachment</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<Case>(p => p.Attachment))
                 </div>
             </div>
             <div class="form-group">
@@ -73,9 +67,15 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Title</label>
+                <label class="col-md-4 control-label">Case Products</label>
                 <div class="col-md-8">
-                    @(Knockout.InputFor<Case>(p => p.Title))
+                    @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Dev Team Assigned</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
                 </div>
             </div>
         </div>

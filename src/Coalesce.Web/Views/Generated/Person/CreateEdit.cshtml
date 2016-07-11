@@ -37,9 +37,15 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Birth Date</label>
+                <label class="col-md-4 control-label">Email</label>
                 <div class="col-md-8">
-                    @(Knockout.InputFor<Person>(p => p.BirthDate))
+                    @(Knockout.InputFor<Person>(p => p.Email))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Gender</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectFor<Person>(p => p.Gender))
                 </div>
             </div>
             <div class="form-group">
@@ -55,33 +61,15 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Company</label>
+                <label class="col-md-4 control-label">Birth Date</label>
                 <div class="col-md-8">
-                    @(Knockout.SelectForObject<Person>(p => p.Company))
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Email</label>
-                <div class="col-md-8">
-                    @(Knockout.InputFor<Person>(p => p.Email))
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Gender</label>
-                <div class="col-md-8">
-                    @(Knockout.SelectFor<Person>(p => p.Gender))
+                    @(Knockout.InputFor<Person>(p => p.BirthDate))
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Last Bath</label>
                 <div class="col-md-8">
                     @(Knockout.InputFor<Person>(p => p.LastBath))
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Name</label>
-                <div class="col-md-8">
-                    @(Knockout.DisplayFor<Person>(p => p.Name))
                 </div>
             </div>
             <div class="form-group">
@@ -100,6 +88,18 @@
                 <label class="col-md-4 control-label">Time Zone</label>
                 <div class="col-md-8">
                     @(Knockout.InputFor<Person>(p => p.TimeZone))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Name</label>
+                <div class="col-md-8">
+                    @(Knockout.DisplayFor<Person>(p => p.Name))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Company</label>
+                <div class="col-md-8">
+                    @(Knockout.SelectForObject<Person>(p => p.Company))
                 </div>
             </div>
         </div>

@@ -21,21 +21,24 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// </summary>
         internal PropertyWrapper Wrapper { get; }
 
-        internal PropertyViewModel(PropertyWrapper propertyWrapper, ClassViewModel parent)
+        internal PropertyViewModel(PropertyWrapper propertyWrapper, ClassViewModel parent, int classFieldOrder)
         {
             Wrapper = propertyWrapper;
             Parent = parent;
+            ClassFieldOrder = classFieldOrder;
         }
-        public PropertyViewModel(PropertyInfo propertyInfo, ClassViewModel parent)
+        public PropertyViewModel(PropertyInfo propertyInfo, ClassViewModel parent, int classFieldOrder)
         {
             Wrapper = new ReflectionPropertyWrapper(propertyInfo);
             Parent = parent;
+            ClassFieldOrder = classFieldOrder;
         }
 
-        public PropertyViewModel(IPropertySymbol propertySymbol, ClassViewModel parent)
+        public PropertyViewModel(IPropertySymbol propertySymbol, ClassViewModel parent, int classFieldOrder)
         {
             Wrapper = new SymbolPropertyWrapper(propertySymbol);
             Parent = parent;
+            ClassFieldOrder = classFieldOrder;
         }
 
         public TypeViewModel Type
@@ -45,6 +48,12 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 return new TypeViewModel(Wrapper.Type);
             }
         }
+
+        /// <summary>
+        /// Order rank of the field in the model.
+        /// </summary>
+        public int ClassFieldOrder { get; }
+
 
         /// <summary>
         /// Name of the property
@@ -789,7 +798,8 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 var value = (int?)Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Order));
                 if (value != null) order = value.Value;
                 // Format them to be sorted.
-                return string.Format("{0:D7}:{1}", order, Name);
+                return string.Format($"{order:D7}:{ClassFieldOrder:D3}");
+                //return string.Format("{0:D7}:{1}", order, Name);
             }
         }
 

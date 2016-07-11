@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.AspNetCore.Mvc.Abstractions</id>
+    <version>1.0.0</version>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <authors>Microsoft.AspNetCore.Mvc.Abstractions</authors>
+    <owners>Microsoft.AspNetCore.Mvc.Abstractions</owners>
+    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm</licenseUrl>
+    <projectUrl>http://www.asp.net/</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <description>ASP.NET Core MVC abstractions and interfaces for action invocation and dispatching, authorization, action filters, formatters, model binding, routing, validation, and more.
+Commonly used types:
+Microsoft.AspNetCore.Mvc.IActionResult</description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <tags>aspnetcore,aspnetcoremvc</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.1">
+        <dependency id="Microsoft.AspNetCore.Routing.Abstractions" version="1.0.0" />
+        <dependency id="Microsoft.Net.Http.Headers" version="1.0.0" />
+      </group>
+      <group targetFramework="Unsupported0.0">
+        <dependency id="Microsoft.CSharp" version="4.0.1" />
+        <dependency id="System.ComponentModel.TypeConverter" version="4.1.0" />
+        <dependency id="System.Reflection.Extensions" version="4.0.1" />
+        <dependency id="System.Text.Encoding.Extensions" version="4.0.11" />
+        <dependency id="Microsoft.AspNetCore.Routing.Abstractions" version="1.0.0" />
+        <dependency id="Microsoft.Net.Http.Headers" version="1.0.0" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

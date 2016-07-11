@@ -26,6 +26,11 @@ namespace Coalesce.Web.Controllers
             return View();
         }
 
+        public IActionResult Annotations()
+        {
+            return View();
+        }
+
         public IActionResult CodeGeneration()
         {
             return View();

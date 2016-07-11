@@ -1,6 +1,6 @@
 {
   "iisSettings": {
-    "windowsAuthentication": true,
+    "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:11202/",
@@ -11,12 +11,6 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "environmentVariables": {
-        "Hosting:Environment": "Development"
-      }
-    },
-    "web": {
-      "commandName": "web",
       "environmentVariables": {
         "Hosting:Environment": "Development"
       }

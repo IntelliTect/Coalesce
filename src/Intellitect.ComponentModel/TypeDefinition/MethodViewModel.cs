@@ -17,12 +17,19 @@ namespace Intellitect.ComponentModel.TypeDefinition
     {
         internal MethodWrapper Wrapper { get; }
 
-        internal MethodViewModel(MethodWrapper wrapper, ClassViewModel parent)
+        internal MethodViewModel(MethodWrapper wrapper, ClassViewModel parent, int classMethodOrder)
         {
             Wrapper = wrapper;
             Parent = parent;
-
+            ClassMethodOrder = classMethodOrder;
         }
+
+        /// <summary>
+        /// Order rank of the method in the model.
+        /// </summary>
+        public int ClassMethodOrder { get; }
+
+
 
         public bool IsStatic
         {

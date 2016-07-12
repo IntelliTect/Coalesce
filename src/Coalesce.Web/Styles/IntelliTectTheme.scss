@@ -61,6 +61,7 @@ body.home {
         color: white;
         border-radius: 0 !important;
         padding: 80px 0px;
+        margin-bottom: 0px;
         
         .btn {
             background-color: transparent;
@@ -102,8 +103,8 @@ body.home {
 
     .item {
         display: table;
-        margin-top: 44px;
-        margin-bottom: 70px;
+        margin-top: 40px;
+        margin-bottom: 40px;
         padding: 0px;
         text-align: center;
         color: #666666;
@@ -116,16 +117,7 @@ body.home {
             font-size: 15px;
             line-height: 150%;
         }
-        a {
-            display: table-row;
-            color: #666666;
-            text-decoration: none;
 
-            img {
-                margin-bottom: 12px;
-            }
-        }
-        /* End a */
         &:hover {
             a {
                 color: #04c0f3;

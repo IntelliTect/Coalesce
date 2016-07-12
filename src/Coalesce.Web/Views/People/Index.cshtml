@@ -1,10 +1,46 @@
-﻿<div class="row">
-    <div class="col-md-12" data-bind="with: person">
-        <div>First Name: <span data-bind="text: firstName"></span></div>
-        <div>Last Name: <span data-bind="text: lastName"></span></div>
-        <div>Email Address: <span data-bind="text: email"></span></div>
-    </div>
+﻿
+<h1>Person Details</h1>
+
+<div data-bind="with: person">
+    <dl class="dl-horizontal">
+        <dt>First Name </dt>
+        <dd data-bind="text: firstName"></dd>
+
+        <dt>Last Name </dt>
+        <dd data-bind="text: lastName"></dd>
+
+        <dt>Email Address </dt>
+        <dd data-bind="text: email"></dd>
+
+        <dt>Gender </dt>
+        <dd data-bind="text: genderText"></dd>
+    </dl>
+
+    <h2>Stats</h2>
+    <dl class="dl-horizontal" data-bind="with: personStats">
+        <dt>Height </dt>
+        <dd data-bind="text: height"></dd>
+
+        <dt>Weight </dt>
+        <dd data-bind="text: weight"></dd>
+    </dl>
+
+    <h2>Company</h2>
+    <dl class="dl-horizontal" data-bind="with: company">
+        <dt>Name</dt>
+        <dd data-bind="text: name"></dd>
+
+        <dt>Address </dt>
+        <dd>
+            <span data-bind="text: address1"></span>
+            <br />
+            <span data-bind="text: city"></span>,
+            <span data-bind="text: state"></span>
+            <span data-bind="text: zipCode"></span>
+        </dd>
+    </dl>
 </div>
+
 @section Scripts
 {
 <script src="~/js/people.index.js"></script>

@@ -53,19 +53,19 @@ module @moduleName {
                 {
                     if (prop.Type.IsDate)
                     {
-                @:if (data.@prop.Name == null) self.@(prop.JsVariable)(null);
-                @:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.Name))){
-                @:self.@(prop.JsVariable)(moment(data.@prop.Name));
+                @:if (data.@prop.JsVariable == null) self.@(prop.JsVariable)(null);
+                @:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsVariable))){
+                @:self.@(prop.JsVariable)(moment(data.@prop.JsVariable));
                 @:}
                     }
                     else if (prop.IsPOCO)
                     {
                 @:self.@(prop.JsVariable)(new @(prop.PureType.Name)());
-                @:self.@(prop.JsVariable)().loadFromDto(data.@prop.Name);
+                @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsVariable);
                     }
                     else
                     {
-                @:self.@(prop.JsVariable)(data.@prop.Name);
+                @:self.@(prop.JsVariable)(data.@prop.JsVariable);
                     }
                 
 

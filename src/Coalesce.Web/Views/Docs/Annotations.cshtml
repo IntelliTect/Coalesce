@@ -17,6 +17,7 @@
     <li><a href="#DefaultOrderBy">Default Order By</a></li>
     <li><a href="#Delete">Delete</a></li>
     <li><a href="#Detail">Detail</a></li>
+    <li><a href="#Display">Display</a></li>
     <li><a href="#Edit">Edit</a></li>
     <li><a href="#Execute">Execute</a></li>
     <li><a href="#FileDownload">File Download</a></li>
@@ -187,6 +188,19 @@
 
         [Detail("i.e., asthma, reflux, eczema")]
         public string ChronicHealthProblems { get; set; }
+    }
+</code>
+</pre>
+<a name="Display"></a>
+<h3>Display</h3>
+<pre>
+<code class="language-html">
+    public class Person
+    {
+        public int PersonId { get; set; }
+        [Display(Name = "Name", Order = 1)]
+        public string TheFullName { get; set; }
+        
     }
 </code>
 </pre>
@@ -385,7 +399,21 @@
 </pre>
 <a name="Search"></a>
 <h3>Search</h3>
-<p>Specify the field that used in the list search</p>
+<p>Coalesce supports searching in various contexts. First is for a list of items in a table. Second is in a drop down selection list. In both these cases, it is important to know which fields to search. By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used. Additionally the [Search] attribute can be used on any fields to be searched.</p>
+<pre>
+<code>
+    public enum SearchMethods
+    {
+        BeginsWith = 1,
+        Contains = 2
+    };
+</code>
+</pre>
+<p>Options</p>
+<ul>
+    <li><span class="text-info">bool</span> IsSplitOnSpaces = <span class="text-info">true</span></li>
+    <li><span class="text-success">SearchMethods</span> SearchMethod = <span class="text-success">SearchMethods</span>.BeginsWith</li>
+</ul>
 <pre>
 <code class="language-html">
     public class Person
@@ -398,3 +426,5 @@
     }
 </code>
 </pre>
+<p>The Search attribute has two optional parameters: SearchMethod and IsSplitOnSpaces. SearchMethod specifies whether the search will be a contains or a begins with. The default is begins with. Note that standard indexing can be used to speed up begins with searches. If IsSplitOnSpaces is true, each word will be searched independently. This is useful when searching for a full name across two or more fields. In the above example, using IsSplitOnSpaces: true, would likely provide more intuitive behavior as it will search both first name and last name for each value entered.</p>
+<p>Additionally, you can add the Search annotation to a child object. This will search the searchable fields of child. </p>

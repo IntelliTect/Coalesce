@@ -105,7 +105,7 @@
 <br />
 
 <h4>Validation</h4>
-<p>Validation is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. </p>
+<p><a href="/Docs/Annotations#ClientValidation">Validation</a> is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. </p>
 <p>The following validations are currently supported on the client side.</p>
 <ul>
     <li>Required</li>
@@ -116,7 +116,7 @@
 <br />
 
 <h4>Display and Order</h4>
-<p>The display name of a field can be set via the DisplayName attribute. The display name and field order can be set via the Display attribute using the Name and Order properties. This only impacts the order of fields in the admin pages and pop-up editors. By default, the fields will be in the order they are found in the class.</p>
+<p>The <a href="/Docs/Annotations#Display">display</a> name of a field can be set via the DisplayName attribute. The display name and field order can be set via the Display attribute using the Name and Order properties. This only impacts the order of fields in the admin pages and pop-up editors. By default, the fields will be in the order they are found in the class.</p>
 <pre>
 <code class="language-html">
     [Display(Name = "Name", Order = 1)]
@@ -126,7 +126,7 @@
 <br />
 
 <h4>Searching</h4>
-<p>Coalesce supports searching in various contexts. First is for a list of items in a table. Second is in a drop down selection list. In both these cases, it is important to know which fields to search. By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used. Additionally the [Search] attribute can be used on any fields to be searched. The following example searches both first and last name.</p>
+<p>Coalesce supports <a href="/Docs/Annotations#Search">searching</a> in various contexts. First is for a list of items in a table. Second is in a drop down selection list. In both these cases, it is important to know which fields to search. By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used. Additionally the [Search] attribute can be used on any fields to be searched. The following example searches both first and last name.</p>
 <pre><code class="language-html">
     [Search]
     public string FirstName { get; set; }
@@ -134,11 +134,10 @@
     public string LastName { get; set; }
 </code></pre>
 <p>The Search attribute has two optional parameters: SearchMethod and IsSplitOnSpaces. SearchMethod specifies whether the search will be a contains or a begins with. The default is begins with. Note that standard indexing can be used to speed up begins with searches. If IsSplitOnSpaces is true, each word will be searched independently. This is useful when searching for a full name across two or more fields. In the above example, using IsSplitOnSpaces: true, would likely provide more intuitive behavior as it will search both first name and last name for each value entered. </p>
-<br />
 <p>Additionally, you can add the Search annotation to a child object. This will search the searchable fields of child. </p>
 
 <h4>Default Text for List Boxes</h4>
-<p>When selecting an object from a drop down list, it is important to be able to specify the text to be displayed for each object in the list. Like the search, this will use a property with the name of 'Name' first and then the ID if one isn't found. You can use the attribute [ListText] to specify which field to use. This is often a calculated field.</p>
+<p>When selecting an object from a drop down list, it is important to be able to specify <a href="/Docs/Annotations#ListText">the text to be displayed</a> for each object in the list. Like the search, this will use a property with the name of 'Name' first and then the ID if one isn't found. You can use the attribute [ListText] to specify which field to use. This is often a calculated field.</p>
 <pre><code class="language-html">
     [Search]
     public string FirstName { get; set; }
@@ -152,7 +151,7 @@
 <br />
 
 <h4>Hiding and Ignoring Fields</h4>
-<p>You will often want to hide fields on the admin pages and pop-up editors. This can be done by using the [Hidden] attribute and specifying which view you want to hide the data on. Choices are the List or the Editor or both. The following example hides the FullName field from both the list and the editor</p>
+<p>You will often want to <a href="/Docs/Annotations#Hidden">hide fields</a> on the admin pages and pop-up editors. This can be done by using the [Hidden] attribute and specifying which view you want to hide the data on. Choices are the List or the Editor or both. The following example hides the FullName field from both the list and the editor</p>
 <pre><code class="language-html">
     [Search]
     public string FirstName { get; set; }
@@ -170,11 +169,11 @@
 <br />
 
 <h4>Ignoring Fields</h4>
-<p>Some properties you want to only handle internally to the application, never sending them to the client. Use the [InternalUse] attribute to prevent a property from being sent to the client or saved by the server.</p>
+<p>Some properties you want to only handle internally to the application, never sending them to the client. Use the <a href="/Docs/Annotations#InternalUse">[InternalUse]</a> attribute to prevent a property from being sent to the client or saved by the server.</p>
 <br />
 
 <h4>Read-only Fields</h4>
-<p>Some properties you want to expose to the client for viewing but not changing regardless of permissions. This would include items like last modified date, etc. Use the [ReadOnlyApi] attribute to make items read only via the API.</p>
+<p>Some properties you want to expose to the client for viewing but not changing regardless of permissions. This would include items like last modified date, etc. Use the <a href="/Docs/Annotations#ReadOnlyApi">[ReadOnlyApi]</a> attribute to make items read only via the API.</p>
 <br />
 
 <h4>Security</h4>

@@ -107,10 +107,11 @@ namespace @(namespaceName).Api
         }
 
         @if (model.HasDbSet && model.IsDeleteAllowed) { 
-        @:[HttpPost("delete/{id}")]
+        <text>
+        [HttpPost("delete/{id}")]
         @(model.SecurityInfo.EditAnnotation)
-        @:public virtual bool Delete(string id)
-        @:{
+        public virtual bool Delete(string id)
+        {
             @if (!model.IsDeleteAllowed)
             {
             @:// Deletes are not allowed.
@@ -118,13 +119,16 @@ namespace @(namespaceName).Api
             }else{
             @:return DeleteImplementation(id);
             }
-        @:}
+        }
+        </text>
+        }
 
-        @:[HttpPost("save")]
-        @if (model.IsEditAllowed) { 
+        @if (model.IsEditAllowed) {
+        <text>
+        [HttpPost("save")]
         @(model.SecurityInfo.EditAnnotation)
-        @:public virtual SaveResult<@(model.Name)> Save(@(model.Name) dto, string includes = null, bool returnObject = true)
-        @:{
+        public virtual SaveResult<@(model.Name)> Save(@(model.Name) dto, string includes = null, bool returnObject = true)
+        {
             @if (!model.IsCreateAllowed)
             {
             @:// Creates are not allowed, so check the ID first.
@@ -137,24 +141,25 @@ namespace @(namespaceName).Api
                 @:throw new InvalidOperationException("Create not allowed");
             @:}
             }
-            @:return SaveImplementation(dto, includes, returnObject);
-        @:}
-
-        @:[HttpPost("AddToCollection")]
-        @(model.SecurityInfo.EditAnnotation)
-        @:public virtual SaveResult<@(model.Name)> AddToCollection(int id, string propertyName, int childId)
-        @:{
-            @:return ChangeCollection(id, propertyName, childId, "Add");
-        @:}
-        @:[HttpPost("RemoveFromCollection")]
-        @(model.SecurityInfo.EditAnnotation)
-        @:public virtual SaveResult<@(model.Name)> RemoveFromCollection(int id, string propertyName, int childId)
-        @:{
-            @:return ChangeCollection(id, propertyName, childId, "Remove");
-        @:}
+            return SaveImplementation(dto, includes, returnObject);
         }
+        
+        [HttpPost("AddToCollection")]
+        @(model.SecurityInfo.EditAnnotation)
+        public virtual SaveResult<@(model.Name)> AddToCollection(int id, string propertyName, int childId)
+        {
+            return ChangeCollection(id, propertyName, childId, "Add");
+        }
+        [HttpPost("RemoveFromCollection")]
+        @(model.SecurityInfo.EditAnnotation)
+        public virtual SaveResult<@(model.Name)> RemoveFromCollection(int id, string propertyName, int childId)
+        {
+            return ChangeCollection(id, propertyName, childId, "Remove");
+        }
+        </text>
         }
 
+        @(model.SecurityInfo.ReadAnnotation)
         protected override IQueryable<@(model.Name)> GetListDataSource(ListParameters parameters)
         {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && !m.IsInternalUse))

@@ -354,74 +354,7 @@ header {
             /* End ul */
         }
         /* End .site-nav */
-        .header-search {
-            display: inline-block;
-            margin-right: 30px;
 
-            .search-field {
-                background: transparent;
-                border-color: $header-main-color;
-                border-right: 0px;
-                padding-left: 0px;
-                padding-right: 50px;
-                color: $header-main-color !important;
-                height: 36px;
-                width: 101%;
-                padding-left: 10px;
-
-                &:-ms-input-placeholder { /* Internet Explorer 10-11 */
-                    color: $header-main-color;
-                    font-weight: lighter;
-                    font-size: 14px;
-                }
-
-                &::-moz-placeholder { /* Mozilla Firefox 19+ */
-                    color: $header-main-color;
-                    opacity: 1;
-                    font-weight: lighter;
-                    font-size: 14px;
-                }
-
-                &::-webkit-input-placeholder { /* WebKit, Blink, Edge */
-                    color: $header-main-color;
-                    font-weight: lighter;
-                    font-size: 14px;
-                }
-            }
-            /* End .search-field */
-            .btn-search {
-                height: 36px;
-                background: transparent;
-                border-left: 0px;
-                border-color: $header-main-color;
-
-                &:active {
-                    background: transparent;
-                    border-color: $header-main-color;
-                    cursor: default;
-                }
-
-                &:hover {
-                    background: transparent;
-                    border-color: $header-main-color;
-                    cursor: default;
-                }
-            }
-            /* End .btn-search */
-            .btn-active {
-                &.active.focus,
-                &.active:focus,
-                &.active:hover,
-                &:active:focus,
-                &:active:hover {
-                    background: transparent;
-                    border-color: $header-main-color;
-                    cursor: default;
-                }
-            }
-            /* End .btn-active */
-        }
-        /* End .header-search */
     }
     /* End .navbar */
     hr {
@@ -455,14 +388,7 @@ header {
                 /* End ul */
             }
             /* End .site-nav */
-            .header-search {
-                margin-right: 0px;
 
-                .search-field {
-                    padding-right: 0px;
-                }
-            }
-            /* End .header-search */
         }
         /* End .navbar */
         
@@ -521,17 +447,7 @@ header {
                     }
                 }
                 /* End .menu-top-menu-container */
-                .header-search {
-                    margin-top: -1px;
-                    display: inherit;
-                    background: $menu-main-color;
-                    padding: 12px 10px;
 
-                    &:hover {
-                        background: $menu-secondary-color;
-                    }
-                }
-                /* End .header-search */
             }
             /* End .site-nav */
             .navbar-collapse {

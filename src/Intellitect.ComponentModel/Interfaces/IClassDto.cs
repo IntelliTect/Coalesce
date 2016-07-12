@@ -1,4 +1,4 @@
-﻿namespace Intellitect.ComponentModel.Mapping
+﻿namespace Intellitect.ComponentModel.Interfaces
 {
     public interface IClassDto
     {

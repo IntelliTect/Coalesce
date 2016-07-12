@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Intellitect.ComponentModel.Models;
 using Intellitect.ComponentModel.Data;
@@ -10,7 +9,7 @@ using Intellitect.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic;
 using Intellitect.ComponentModel.TypeDefinition;
 using System.Threading.Tasks;
-using Intellitect.ComponentModel.Mapping;
+using Intellitect.ComponentModel.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Intellitect.ComponentModel.Helpers;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -18,13 +17,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Intellitect.ComponentModel.Controllers
 {
-    //public abstract class BaseApiController<T, TContext> : BaseApiController<T, T, TContext>
-    //    where T : class, new()
-    //    where TContext : DbContext
-    //{
-    //    protected BaseApiController() : base()
-    //    { }
-    //}
     public abstract class BaseApiController<T, TDto, TContext> : BaseControllerWithDb<TContext>
     where T : class, new()
     where TDto : class, IClassDto, new()
@@ -524,7 +516,7 @@ namespace Intellitect.ComponentModel.Controllers
         /// <returns></returns>
         protected virtual TDto MapObjToDto(T obj)
         {
-            return Activator.CreateInstance(typeof(TDto), new object[] { obj }) as TDto;
+            return Activator.CreateInstance(typeof(TDto), new object[] { User, obj }) as TDto;
             //return Mapper.ObjToDtoMapper(User).Map<TDto>(obj);
         }
         /// <summary>

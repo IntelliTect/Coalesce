@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
+using System.Security.Claims;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -106,8 +107,10 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CaseDto> Save(ClaimsPrincipal user, CaseDto dto, string includes = null, bool returnObject = true)
         {
+            dto.User = user;
+
             return SaveImplementation(dto, includes, returnObject);
         }
         
@@ -167,11 +170,11 @@ namespace Coalesce.Web.TestArea.Api
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         
-        public virtual SaveResult<IEnumerable<CaseDto>> GetAllOpenCases (Int32 x, Int32 y){
+        public virtual SaveResult<IEnumerable<CaseDto>> GetAllOpenCases (ClaimsPrincipal user, Int32 x, Int32 y){
             var result = new SaveResult<IEnumerable<CaseDto>>();
             try{
                 var objResult = Case.GetAllOpenCases(x, y, Db);
-                result.Object = objResult.ToList().Select(o => new CaseDto(o));
+                result.Object = objResult.ToList().Select(o => new CaseDto(user, o));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

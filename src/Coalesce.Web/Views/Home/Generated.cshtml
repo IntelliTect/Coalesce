@@ -12,4 +12,17 @@
             <li><a asp-action="Table" asp-controller="@vm.Name">@vm.DisplayName</a></li>
         }
     </ul>
+
+    <p>
+        Your current role is: @ViewBag.CurrentRole
+        <br />
+        @if (ViewBag.CurrentRole == "User")
+        {
+            <span>View the site as an <a href="/Home/Generated/?demoUserRole=Admin">Admin</a></span>
+        }
+        else
+        {             
+            <span>View the site as a <a href="/Home/Generated/?demoUserRole=User">User</a></span>
+        }
+    </p>
 </div>

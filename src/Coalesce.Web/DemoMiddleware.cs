@@ -22,32 +22,39 @@ namespace Coalesce.Web
         public async Task Invoke(HttpContext context)
         {
             var validRoles = new List<string> { "Admin", "User", "None" };
-            var cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "SecurityTestRole");
 
+            var cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "SecurityTestRole");
             if (!cookie.Equals(default(KeyValuePair<string, string>))
                 && validRoles.Contains(cookie.Value)
                 && context.Request.Host.Value.ToLower().Contains("localhost"))
             {
-                if (cookie.Value != "None")
-                {
-                    var claims = new[] {
-                        new Claim(ClaimTypes.Name, "SecurityTestUser"),
-                        new Claim(ClaimTypes.Role, cookie.Value)
-                    };
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await context.Authentication.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
-                }
+                if (cookie.Value != "None") await SignInUser(context, "SecurityTestUser", cookie.Value);
             }
             else
             {
-                var claims = new[] {
-                    new Claim(ClaimTypes.Name, "DemoUser"),
-                    new Claim(ClaimTypes.Role, "User")
-                };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await context.Authentication.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
+                cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "DemoUserRole");
+                if (!cookie.Equals(default(KeyValuePair<string, string>))
+                    && validRoles.Contains(cookie.Value)
+                    && context.Request.Host.Value.ToLower().Contains("localhost"))
+                {
+                    if (cookie.Value != "None") await SignInUser(context, "DemoUser", cookie.Value);
+                }
+                else
+                {
+                    await SignInUser(context, "DemoUser", "User");
+                }
             }
             await _next(context);
+        }
+
+        private async Task SignInUser(HttpContext context, string name, string role)
+        {
+            var claims = new[] {
+                    new Claim(ClaimTypes.Name, name),
+                    new Claim(ClaimTypes.Role, role)
+                };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await context.Authentication.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
         }
     }
 }

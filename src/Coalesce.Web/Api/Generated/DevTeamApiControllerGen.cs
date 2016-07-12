@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
+using System.Security.Claims;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -85,8 +86,10 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<DevTeamDto> Save(DevTeamDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<DevTeamDto> Save(ClaimsPrincipal user, DevTeamDto dto, string includes = null, bool returnObject = true)
         {
+            dto.User = user;
+
             return SaveImplementation(dto, includes, returnObject);
         }
         

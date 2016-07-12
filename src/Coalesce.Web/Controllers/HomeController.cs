@@ -16,8 +16,17 @@ namespace Coalesce.Web.Controllers
             return View();
         }
 
-        public IActionResult Generated()
+        public IActionResult Generated(string demoUserRole = "", bool triggerReload = false)
         {
+            if (!string.IsNullOrEmpty(demoUserRole) && (demoUserRole == "Admin" || demoUserRole == "User"))
+            {
+                HttpContext.Response.Cookies.Append("DemoUserRole", demoUserRole);
+                // triggerReload is needed to force the user change to take effect in the current page context
+                return new RedirectToActionResult("Generated", "Home", new { triggerReload = true });
+            }
+            if (triggerReload) return new RedirectToActionResult("Generated", "Home", null);
+
+            ViewBag.CurrentRole = User.IsInRole("User") ? "User" : (User.IsInRole("Admin") ? "Admin" : "None");
             return View();
         }
 

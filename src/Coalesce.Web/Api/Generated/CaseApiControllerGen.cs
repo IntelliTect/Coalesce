@@ -106,21 +106,33 @@ namespace Coalesce.Web.Api
         
 
         [HttpPost("save")]
+<<<<<<< HEAD
         [Authorize]
         public virtual SaveResult<Case> Save(Case dto, string includes = null, bool returnObject = true)
+=======
+[Authorize]        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
+>>>>>>> 173b4b43234e5eafef28cd873cdb71e5bd8295ff
         {
             return SaveImplementation(dto, includes, returnObject);
         }
         
         [HttpPost("AddToCollection")]
+<<<<<<< HEAD
         [Authorize]
         public virtual SaveResult<Case> AddToCollection(int id, string propertyName, int childId)
+=======
+[Authorize]        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
+>>>>>>> 173b4b43234e5eafef28cd873cdb71e5bd8295ff
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
+<<<<<<< HEAD
         [Authorize]
         public virtual SaveResult<Case> RemoveFromCollection(int id, string propertyName, int childId)
+=======
+[Authorize]        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
+>>>>>>> 173b4b43234e5eafef28cd873cdb71e5bd8295ff
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }

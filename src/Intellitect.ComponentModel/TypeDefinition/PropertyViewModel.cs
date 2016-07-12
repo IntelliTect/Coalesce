@@ -1017,7 +1017,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                return Wrapper.HasAttribute<IncludesAttribute>();
+                return Wrapper.HasAttribute<DtoIncludesAttribute>();
             }
         }
 
@@ -1028,7 +1028,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                var includes = (Wrapper.GetAttributeValue<IncludesAttribute>(nameof(IncludesAttribute.ContentViews)) as string).Trim();
+                var includes = (Wrapper.GetAttributeValue<DtoIncludesAttribute>(nameof(DtoIncludesAttribute.ContentViews)) as string).Trim();
                 return includes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
             }
         }
@@ -1040,7 +1040,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                return Wrapper.HasAttribute<ExcludesAttribute>();
+                return Wrapper.HasAttribute<DtoExcludesAttribute>();
             }
         }
 
@@ -1051,7 +1051,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                var excludes = (Wrapper.GetAttributeValue<ExcludesAttribute>(nameof(ExcludesAttribute.ContentViews)) as string).Trim();
+                var excludes = (Wrapper.GetAttributeValue<DtoExcludesAttribute>(nameof(DtoExcludesAttribute.ContentViews)) as string).Trim();
                 return excludes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
             }
         }

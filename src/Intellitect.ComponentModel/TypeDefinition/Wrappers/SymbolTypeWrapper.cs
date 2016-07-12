@@ -45,11 +45,12 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
 
         }
 
-        public override string Name { get { return Symbol.Name; ; } }
+        public override string Name { get { return Symbol.Name; } }
         public override string NameWithTypeParams
         {
             get
             {
+                if (IsArray) return $"{PureType.Name}[]";
                 if (IsGeneric) return $"{Name}<{PureType.Name}>";
                 return Symbol.Name;
             }
@@ -74,8 +75,16 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
         {
             get
             {
-                if (!IsArray) return Symbol.IsReferenceType || (Symbol.Name.Contains(nameof(Nullable)));
+                if (!IsArray) return Symbol.IsReferenceType || IsNullableType;
                 return false;
+            }
+        }
+
+        public override bool IsNullableType
+        {
+            get
+            {
+                return Symbol.Name.Contains(nameof(Nullable));
             }
         }
 

@@ -13,13 +13,15 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.TestArea.Models;
 
 namespace Coalesce.Web.TestArea.Api
 {
     [Route("TestArea/api/[controller]")]
     [Authorize]
     public partial class CaseController 
-         : LocalBaseApiController<Case> 
+         : LocalBaseApiController<Case, CaseDto> 
     {
         public CaseController() { }
         
@@ -36,7 +38,7 @@ namespace Coalesce.Web.TestArea.Api
             string listDataSource = null, 
             string search = null, 
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string severity = null,string status = null)
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -45,8 +47,11 @@ namespace Coalesce.Web.TestArea.Api
             parameters.AddFilter("Title", title);
             parameters.AddFilter("Description", description);
             parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
             parameters.AddFilter("Severity", severity);
             parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
         
             return await ListImplementation(parameters);
         }
@@ -59,7 +64,7 @@ namespace Coalesce.Web.TestArea.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string severity = null,string status = null)
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search);
 
@@ -68,8 +73,11 @@ namespace Coalesce.Web.TestArea.Api
             parameters.AddFilter("Title", title);
             parameters.AddFilter("Description", description);
             parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
             parameters.AddFilter("Severity", severity);
             parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
             
             return await CountImplementation(parameters);
         }
@@ -83,39 +91,31 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<Case> Get(string id, string includes = null)
+        public virtual async Task<CaseDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
 
-
         [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual bool Delete(string id)
+[Authorize]        public virtual bool Delete(string id)
         {
             return DeleteImplementation(id);
         }
-
         [HttpPost("save")]
-        [Authorize]
-        public virtual SaveResult<Case> Save(Case dto, string includes = null, bool returnObject = true)
+[Authorize]        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
-
         [HttpPost("AddToCollection")]
-        [Authorize]
-        public virtual SaveResult<Case> AddToCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-        [Authorize]
-        public virtual SaveResult<Case> RemoveFromCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
 
         protected override IQueryable<Case> GetListDataSource(ListParameters parameters)
         {
@@ -156,7 +156,6 @@ namespace Coalesce.Web.TestArea.Api
             return result;
         }
         
-
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         
@@ -173,6 +172,5 @@ namespace Coalesce.Web.TestArea.Api
             }
             return result;
         }
-        
-    }
+            }
 }

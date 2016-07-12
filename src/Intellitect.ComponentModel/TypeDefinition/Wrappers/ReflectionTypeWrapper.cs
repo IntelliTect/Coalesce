@@ -16,6 +16,7 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
         public override string NameWithTypeParams
         { get
             {
+                if (IsArray) return $"{PureType.Name}[]";
                 if (IsGeneric) return $"{Name}<{PureType.Name}>";
                 return Name;
             }
@@ -41,7 +42,9 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
 
         public override bool IsArray { get { return Info.IsArray; } }
 
-        public override bool IsNullable { get { return Info.IsClass || Info.Name.Contains("Nullable"); } }
+        public override bool IsNullable { get { return Info.IsClass || IsNullableType; } }
+
+        public override bool IsNullableType { get { return Info.Name.Contains("Nullable"); } }
 
         public override bool IsClass { get { return Info.IsClass; } }
 

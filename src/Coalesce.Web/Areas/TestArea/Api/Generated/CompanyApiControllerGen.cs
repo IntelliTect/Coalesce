@@ -13,13 +13,15 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.TestArea.Models;
 
 namespace Coalesce.Web.TestArea.Api
 {
     [Route("TestArea/api/[controller]")]
     [Authorize]
     public partial class CompanyController 
-         : LocalBaseApiController<Company> 
+         : LocalBaseApiController<Company, CompanyDto> 
     {
         public CompanyController() { }
         
@@ -87,39 +89,31 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<Company> Get(string id, string includes = null)
+        public virtual async Task<CompanyDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
 
-
         [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual bool Delete(string id)
+[Authorize]        public virtual bool Delete(string id)
         {
             return DeleteImplementation(id);
         }
-
         [HttpPost("save")]
-        [Authorize]
-        public virtual SaveResult<Company> Save(Company dto, string includes = null, bool returnObject = true)
+[Authorize]        public virtual SaveResult<CompanyDto> Save(CompanyDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
-
         [HttpPost("AddToCollection")]
-        [Authorize]
-        public virtual SaveResult<Company> AddToCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CompanyDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-        [Authorize]
-        public virtual SaveResult<Company> RemoveFromCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CompanyDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
 
         protected override IQueryable<Company> GetListDataSource(ListParameters parameters)
         {

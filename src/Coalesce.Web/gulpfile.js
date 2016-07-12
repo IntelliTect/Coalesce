@@ -258,6 +258,15 @@ gulp.task('coalesce', ['coalesce:build'], function (cb) {
     });
 });
 
+gulp.task('coalesce:area', ['coalesce:build'], function (cb) {
+    exec('"./CoalesceExe/Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        console.log(err);
+        cb(err);
+    });
+});
+
 //gulp.task('scaffold:mvc:area',
 //    shell.task(['dnx gen scripts -dc DbContext -filesOnly -a TestArea'])
 //);

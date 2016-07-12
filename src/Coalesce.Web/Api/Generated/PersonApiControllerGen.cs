@@ -13,13 +13,15 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.Models;
 
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
     [Authorize]
     public partial class PersonController 
-         : LocalBaseApiController<Person> 
+         : LocalBaseApiController<Person, PersonDto> 
     {
         public PersonController() { }
         
@@ -89,7 +91,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual async Task<Person> Get(string id, string includes = null)
+        public virtual async Task<PersonDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }

@@ -991,7 +991,51 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 return Name.ToCamelCase();
             }
         }
+
+        /// <summary>
+        /// True if this property has the Includes Attribute
+        /// </summary>
+        public bool HasIncludes
+        {
+            get
+            {
+                return Wrapper.HasAttribute<IncludesAttribute>();
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of content views from the Includes attribute
+        /// </summary>
+        public List<string> IncludesContentViews
+        {
+            get
+            {
+                var includes = (Wrapper.GetAttributeValue<IncludesAttribute>(nameof(IncludesAttribute.ContentViews)) as string).Trim();
+                return includes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
+            }
+        }
+        
+        /// <summary>
+        /// True if this property has the Excludes Attribute
+        /// </summary>
+        public bool HasExcludes
+        {
+            get
+            {
+                return Wrapper.HasAttribute<ExcludesAttribute>();
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of content views from the Includes attribute
+        /// </summary>
+        public List<string> ExcludesContentViews
+        {
+            get
+            {
+                var excludes = (Wrapper.GetAttributeValue<ExcludesAttribute>(nameof(ExcludesAttribute.ContentViews)) as string).Trim();
+                return excludes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
+            }
+        }
     }
-
-
 }

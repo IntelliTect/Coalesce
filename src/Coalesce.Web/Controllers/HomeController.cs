@@ -16,7 +16,7 @@ namespace Coalesce.Web.Controllers
             return View();
         }
 
-        public IActionResult Generated()
+        public IActionResult Get()
         {
             return View();
         }

@@ -1,4 +1,6 @@
-﻿@model Case
+﻿@using Coalesce.Domain
+@using Intellitect.ComponentModel.Helpers
+@model Case
 
 <div class="form-horizontal" data-bind="with: newCase">
     <div class="form-group">
@@ -16,9 +18,9 @@
     <div class="form-group">
         @(Knockout.InputWithLabelFor<Case>(c => c.OpenedAt, labelCols: 3, inputCols: 9, label: "Reported At"))
     </div>
-    <div class="btn-group">
-        <a class="btn btn-primary" data-bind="click: save">Create</a>
-    </div>
+</div>
+<div class="btn-group">
+    <a class="btn btn-primary" data-bind="click: save">Create</a>
 </div>
 
 @section Scripts {

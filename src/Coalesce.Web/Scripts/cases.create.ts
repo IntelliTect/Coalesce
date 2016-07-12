@@ -14,7 +14,9 @@ module Cases {
         newCase = new ViewModels.Case;
 
         save() {
-            this.newCase.save();
+            this.newCase.save(function() {
+                window.location.href = "/cases";
+            });
         }
     }
 }

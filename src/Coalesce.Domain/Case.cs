@@ -64,7 +64,7 @@ namespace Coalesce.Domain
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
         }
 
-        public static IQueryable<Case> GetAllOpenCases(int x, int y, AppDbContext db)
+        public static IQueryable<Case> GetAllOpenCases(AppDbContext db)
         {
             return db.Cases.Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress).Include(c => c.AssignedTo).Include(c => c.ReportedBy);
         }

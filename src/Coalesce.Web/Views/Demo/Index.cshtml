@@ -1,22 +1,112 @@
-﻿@{
+﻿@using Intellitect.ComponentModel.TypeDefinition
+@{
     ViewBag.Title = "Demo";
 }
+
 <div class="row">
     <div class="col-md-6">
-        <h3>Total Cases</h3>
-        <a asp-controller="Cases" asp-action="Index"><h4 data-bind="text:totalCases.count"></h4></a>
+        <h2>Below: Custom View with Coalese</h2>
+        <p>The <a href="~/js/demo.index.js">typescript that drives this page</a> is just 20 lines:</p>
+       
     </div>
     <div class="col-md-6">
-        <h3>Cases with Status of Open</h3>
-        <a asp-controller="Cases" asp-action="Index" asp-route-status="open"><h4 data-bind="text:openStatusCases.count"></h4></a>
+        <h3>See also: Auto-generated Administrative Views</h3>
+        <p>These pages are create by Coalesce based on your models and data annotations:</p>
+        <div >
+            @foreach (var vm in ReflectionRepository.Models.Where(f => f.HasDbSet))
+            {
+                <span>• <a asp-action="Table" asp-controller="@vm.Name" style="padding-right: 15px">@vm.DisplayName</a></span>
+            }
+        </div>
     </div>
 </div>
+<hr/>
+<h1>Open Cases</h1>
 <div class="row">
-    <div class="col-md-6">
-        <h3>Cases with Status of Open or In Process</h3>
-        <a asp-controller="Cases" asp-action="Index" asp-route-status="allOpen"><h4 data-bind="text:allOpenCases.count"></h4></a>
+    <div class="col-md-3">
+        <a asp-controller="Cases" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Log a New Case</a>
     </div>
+    <span class="label label-info" style="float:right" data-bind="fadeVisible: allOpenCases.isLoading(), text: 'Loading...'"></span>
 </div>
+<hr />
+<div class="flex-panel-container" data-bind="foreach: allOpenCases.items, visible: allOpenCases.isLoaded" style="display: none">
+        <div class="flex-panel ">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <span data-bind="text: title"></span>
+                    <i class="pull-right fa fa-times-circle" style="color: red" data-bind="visible: severity() == 'Critical'"></i>
+                    <i class="pull-right fa fa-exclamation-triangle" style="color: orangered" data-bind="visible: severity() == 'High'"></i>
+                    <i class="pull-right fa fa-exclamation-circle" style="color: orange" data-bind="visible: severity() == 'Medium'"></i>
+                    <i class="pull-right fa fa-exclamation" style="color: darkcyan" data-bind="visible: severity() == 'Low'"></i>
+                </h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Opened at</dt>
+                            <dd data-bind="moment: openedAt, format: 'MM/DD/YYYY hh:mm a'"></dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <a data-bind="click: showEditor" style="cursor: pointer" title="Edit"> <i class="fa fa-pencil"></i> Edit </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Reported by</dt>
+                            <dd data-bind="with: reportedBy"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Assigned to</dt>
+                            <dd data-bind="with: assignedTo"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Severity</dt>
+
+                            <dd>
+                                <span data-bind="text: severity"></span>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl>
+                            <dt>Status</dt>
+                            <dd data-bind="text: statusText"></dd>
+                        </dl>
+                    </div>
+                </div>
+                <hr/>
+                <span data-bind="text: description"></span>
+            </div>
+        </div>
+</div>
+
+
+@*<div class="row">
+        <div class="col-md-6">
+            <h3>Total Cases</h3>
+            <a asp-controller="Cases" asp-action="Index"><h4 data-bind="text:totalCases.count"></h4></a>
+        </div>
+        <div class="col-md-6">
+            <h3>Cases with Status of Open</h3>
+            <a asp-controller="Cases" asp-action="Index" asp-route-status="open"><h4 data-bind="text:openStatusCases.count"></h4></a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Cases with Status of Open or In Process</h3>
+            <a asp-controller="Cases" asp-action="Index" asp-route-status="allOpen"><h4 data-bind="text:allOpenCases.count"></h4></a>
+        </div>
+    </div>*@
 @section Scripts{
     <script src="~/js/demo.index.js"></script>
 }

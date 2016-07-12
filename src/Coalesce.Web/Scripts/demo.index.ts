@@ -2,28 +2,20 @@
 /// <reference path="intellitect.references.d.ts" />
 
 module Demo {
-    var viewModel: DemoModel;
-
     $(function () {
-        viewModel = new DemoModel();
+        var viewModel = new DemoModel();
         ko.applyBindings(viewModel);
 
         viewModel.load();
     });
 
     class DemoModel {
-        totalCases = new ListViewModels.CaseList();
-        openStatusCases = new ListViewModels.CaseList();
         allOpenCases = new ListViewModels.CaseList();
 
         load() {
-            this.totalCases.getCount();
-
-            this.openStatusCases.query = { status: new ViewModels.Case().statusValues[0].id };
-            this.openStatusCases.getCount();
-
+            this.allOpenCases.pageSize(20);
             this.allOpenCases.listDataSource = ListViewModels.CaseDataSources.GetAllOpenCases;
-            this.allOpenCases.getCount();
+            this.allOpenCases.load();
         }
     }
 }

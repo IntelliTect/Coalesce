@@ -1,5 +1,6 @@
 ﻿body {
     padding-bottom: 20px;
+    background-color: #F8F8F8 !important;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -50,5 +51,76 @@ span.select2-container--default .select2-selection--single .select2-selection__r
 span.select2-container--default .select2-selection--single .select2-selection__arrow {
     height: 30px;
 }
+
+.select2-container {
+    width: 100% !important;
+}
+
+
+
+.flex-panel-container {
+     display: flex;
+     flex-flow: row wrap;
+     justify-content: space-between;
+     align-items: stretch
+}
+
+.flex-panel {
+    flex-grow: 1;
+    width: 300px;
+    margin: 10px;
+    background-color: #ffffff;
+    -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+    
+    .panel-body {
+        padding: 15px;
+    }
+
+    .panel-body:before,
+    .panel-body:after {
+        display: table;
+        content: " ";
+    }
+
+    .panel-body:after {
+        clear: both;
+    }
+
+    > .table {
+        margin-bottom: 0;
+    }
+
+    > .panel-body + .table {
+        border-top: 1px solid #dddddd;
+    }
+
+    &.panel-default > .panel-heading {
+        color: #333333;
+        background-color: white;
+        border-color: #dddddd;
+    }
+
+    .panel-heading {
+        padding: 10px 15px;
+        border-bottom: 1px solid #dddddd;
+        border-top-right-radius: 3px;
+        border-top-left-radius: 3px;
+    }
+
+    .panel-title {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: 20px;
+    }
+
+    .panel-title > a {
+        color: inherit;
+    }
+}
+
+
+
+
 
 @import "IntelliTectTheme.scss";

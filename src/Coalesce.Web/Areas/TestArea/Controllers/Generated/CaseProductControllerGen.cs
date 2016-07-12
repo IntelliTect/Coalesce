@@ -21,6 +21,7 @@ namespace Coalesce.Web.TestArea.Controllers
             return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/CaseProduct/Table.cshtml");
         }
 
+
         [Authorize]
         public ActionResult TableEdit(){
             return IndexImplementation(true, @"~/Areas/TestArea/Views/Generated/CaseProduct/Table.cshtml");
@@ -36,7 +37,7 @@ namespace Coalesce.Web.TestArea.Controllers
         {
             return EditorHtmlImplementation(simple);
         }
-                      
+                              
         [Authorize]
         public ActionResult Docs()
         {

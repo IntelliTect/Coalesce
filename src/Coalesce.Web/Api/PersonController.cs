@@ -16,13 +16,14 @@ using Intellitect.ComponentModel.Mapping;
 using Coalesce.Domain;
 using Microsoft.EntityFrameworkCore;
 using Intellitect.ComponentModel.DataAnnotations;
+using Coalesce.Web.Models;
 
 namespace Coalesce.Web.Api
 {
     public partial class PersonController
-         : LocalBaseApiController<Person>
+         : LocalBaseApiController<Person, PersonDto>
     {
-        protected override bool BeforeSave(Person dto, Person obj)
+        protected override bool BeforeSave(PersonDto dto, Person obj)
         {
             if (dto.FirstName.Contains("[user]"))
             {
@@ -31,7 +32,7 @@ namespace Coalesce.Web.Api
             return true;
         }
 
-        protected override bool AfterSave(Person dto, Person obj, Person orig, AppDbContext context)
+        protected override bool AfterSave(PersonDto dto, Person obj, Person orig, AppDbContext context)
         {
             // Add the company name to the last name if it changed.
             if (obj.CompanyId != orig.CompanyId && !obj.LastName.Contains(obj.Company.Name))

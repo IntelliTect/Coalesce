@@ -13,13 +13,15 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.Models;
 
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
     [Authorize]
     public partial class PersonController 
-         : LocalBaseApiController<Person> 
+         : LocalBaseApiController<Person, PersonDto> 
     {
         public PersonController() { }
         
@@ -89,7 +91,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual async Task<Person> Get(string id, string includes = null)
+        public virtual async Task<PersonDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -100,17 +102,17 @@ namespace Coalesce.Web.Api
             return DeleteImplementation(id);
         }
         [HttpPost("save")]
-[AllowAnonymous]        public virtual SaveResult<Person> Save(Person dto, string includes = null, bool returnObject = true)
+[AllowAnonymous]        public virtual SaveResult<PersonDto> Save(PersonDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
         [HttpPost("AddToCollection")]
-[AllowAnonymous]        public virtual SaveResult<Person> AddToCollection(int id, string propertyName, int childId)
+[AllowAnonymous]        public virtual SaveResult<PersonDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-[AllowAnonymous]        public virtual SaveResult<Person> RemoveFromCollection(int id, string propertyName, int childId)
+[AllowAnonymous]        public virtual SaveResult<PersonDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }

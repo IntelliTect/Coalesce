@@ -343,10 +343,20 @@ namespace Intellitect.ComponentModel.TypeDefinition
         //}
 
         public string NullableType
-        { get
+        {
+            get
             {
-                if (IsNullable) return Wrapper.NameWithTypeParams;
+                if (Wrapper.IsNullable || Wrapper.IsArray) return Wrapper.NameWithTypeParams;
                 else return Wrapper.Name + "?";
+            }
+        }
+
+        public string ExplicitConversionType
+        {
+            get
+            {
+                if (Wrapper.IsNullable || Wrapper.IsArray) return "";
+                else return $"({Wrapper.Name})";
             }
         }
     }

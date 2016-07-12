@@ -13,13 +13,15 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.Models;
 
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
     [Authorize]
     public partial class CaseController 
-         : LocalBaseApiController<Case> 
+         : LocalBaseApiController<Case, CaseDto> 
     {
         public CaseController() { }
         
@@ -89,7 +91,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<Case> Get(string id, string includes = null)
+        public virtual async Task<CaseDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -100,17 +102,17 @@ namespace Coalesce.Web.Api
             return DeleteImplementation(id);
         }
         [HttpPost("save")]
-[Authorize]        public virtual SaveResult<Case> Save(Case dto, string includes = null, bool returnObject = true)
+[Authorize]        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
         [HttpPost("AddToCollection")]
-[Authorize]        public virtual SaveResult<Case> AddToCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-[Authorize]        public virtual SaveResult<Case> RemoveFromCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }

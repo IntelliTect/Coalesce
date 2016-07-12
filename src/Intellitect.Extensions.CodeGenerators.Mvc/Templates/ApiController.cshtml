@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
@@ -219,11 +218,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-@:result.Object = Mapper.ObjToDtoMapper(User).Map<@(model.Name)>(objResult);
+@:result.Object = new @(model.Name)Dto(objResult);
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-@:result.Object = objResult.ToList().Select(Mapper.ObjToDtoMapper(User).Map<@(model.Name)>);
+@:result.Object = objResult.ToList().Select(o => new @(model.Name)Dto(o));
                 }
                 else
                 {

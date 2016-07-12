@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -96,27 +95,36 @@ namespace Coalesce.Web.TestArea.Api
             return await GetImplementation(id, includes);
         }
 
+
         [HttpPost("delete/{id}")]
-[AllowAnonymous]        public virtual bool Delete(string id)
+        [AllowAnonymous]
+        public virtual bool Delete(string id)
         {
             return DeleteImplementation(id);
         }
+        
+
         [HttpPost("save")]
-[AllowAnonymous]        public virtual SaveResult<PersonDto> Save(PersonDto dto, string includes = null, bool returnObject = true)
+        [AllowAnonymous]
+        public virtual SaveResult<PersonDto> Save(PersonDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
+        
         [HttpPost("AddToCollection")]
-[AllowAnonymous]        public virtual SaveResult<PersonDto> AddToCollection(int id, string propertyName, int childId)
+        [AllowAnonymous]
+        public virtual SaveResult<PersonDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-[AllowAnonymous]        public virtual SaveResult<PersonDto> RemoveFromCollection(int id, string propertyName, int childId)
+        [AllowAnonymous]
+        public virtual SaveResult<PersonDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-
+        
+        [AllowAnonymous]
         protected override IQueryable<Person> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "BorCPeople")
@@ -132,13 +140,13 @@ namespace Coalesce.Web.TestArea.Api
         // Method: Rename
         [HttpPost("Rename")]
         
-        public virtual SaveResult<Person> Rename (Int32 id, String addition){
-            var result = new SaveResult<Person>();
+        public virtual SaveResult<PersonDto> Rename (Int32 id, String addition){
+            var result = new SaveResult<PersonDto>();
             try{
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                result.Object = Mapper.ObjToDtoMapper(User).Map<Person>(objResult);
+                result.Object = new PersonDto(objResult);
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -258,11 +266,11 @@ namespace Coalesce.Web.TestArea.Api
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
         
-        public virtual SaveResult<IEnumerable<Person>> BorCPeople (){
-            var result = new SaveResult<IEnumerable<Person>>();
+        public virtual SaveResult<IEnumerable<PersonDto>> BorCPeople (){
+            var result = new SaveResult<IEnumerable<PersonDto>>();
             try{
                 var objResult = Person.BorCPeople(Db);
-                result.Object = objResult.ToList().Select(Mapper.ObjToDtoMapper(User).Map<Person>);
+                result.Object = objResult.ToList().Select(o => new PersonDto(o));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

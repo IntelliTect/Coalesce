@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -106,33 +105,21 @@ namespace Coalesce.Web.Api
         
 
         [HttpPost("save")]
-<<<<<<< HEAD
         [Authorize]
-        public virtual SaveResult<Case> Save(Case dto, string includes = null, bool returnObject = true)
-=======
-[Authorize]        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
->>>>>>> 173b4b43234e5eafef28cd873cdb71e5bd8295ff
+        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
         
         [HttpPost("AddToCollection")]
-<<<<<<< HEAD
         [Authorize]
-        public virtual SaveResult<Case> AddToCollection(int id, string propertyName, int childId)
-=======
-[Authorize]        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
->>>>>>> 173b4b43234e5eafef28cd873cdb71e5bd8295ff
+        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-<<<<<<< HEAD
         [Authorize]
-        public virtual SaveResult<Case> RemoveFromCollection(int id, string propertyName, int childId)
-=======
-[Authorize]        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
->>>>>>> 173b4b43234e5eafef28cd873cdb71e5bd8295ff
+        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -180,11 +167,11 @@ namespace Coalesce.Web.Api
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         
-        public virtual SaveResult<IEnumerable<Case>> GetAllOpenCases (Int32 x, Int32 y){
-            var result = new SaveResult<IEnumerable<Case>>();
+        public virtual SaveResult<IEnumerable<CaseDto>> GetAllOpenCases (Int32 x, Int32 y){
+            var result = new SaveResult<IEnumerable<CaseDto>>();
             try{
                 var objResult = Case.GetAllOpenCases(x, y, Db);
-                result.Object = objResult.ToList().Select(Mapper.ObjToDtoMapper(User).Map<Case>);
+                result.Object = objResult.ToList().Select(o => new CaseDto(o));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

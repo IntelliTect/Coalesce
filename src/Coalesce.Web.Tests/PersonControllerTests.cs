@@ -213,7 +213,7 @@ namespace Coalesce.Web.Tests
         public async void InstanceFunction()
         {
             var result = _pc.Rename(1,"-test");
-            Assert.Equal("Joseph-test", ((Person)result.Object).FirstName);
+            Assert.Equal("Joseph-test", result.Object.FirstName);
             // Get the new item.
             var person = await _pc.Get(1.ToString());
             Assert.Equal("Joseph-test", person.FirstName);
@@ -222,7 +222,7 @@ namespace Coalesce.Web.Tests
             var result2 = _pc.Save(person);
             // Make sure it saved.
             Assert.True(result2.WasSuccessful);
-            Assert.Equal("Joseph", ((PersonDto)result2.Object).FirstName);
+            Assert.Equal("Joseph", result2.Object.FirstName);
         }
 
 

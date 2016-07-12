@@ -54,7 +54,7 @@
     </thead>
     <tbody>
         <!-- ko foreach: items -->
-        <tr>
+        <tr data-bind="css: {'btn-warning': errorMessage()}">
             @if (@ViewBag.Editable)
             {
             <td>
@@ -68,17 +68,18 @@
             </td>
             }
             <td>
-
+                
                 <!-- Editor buttons -->
                 <div class="btn-group pull-right" role="group">
-                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                        <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
                         <i class="fa fa-pencil"></i>
                     </a>
-                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                        <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
                         <i class="fa fa-remove"></i>
                     </button>
 
                 </div>
+                <div class="form-control-static" data-bind="text: errorMessage"></div>
             </td>
         </tr>
         <!-- /ko -->
@@ -89,6 +90,7 @@
 
 </div>
 </div>
+
 
 
     @section Scripts

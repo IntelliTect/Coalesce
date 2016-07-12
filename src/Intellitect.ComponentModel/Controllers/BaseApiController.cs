@@ -18,18 +18,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Intellitect.ComponentModel.Controllers
 {
-    public abstract class BaseApiController<T, TContext> : BaseApiController<T, T, TContext>
-        where T : class, new()
-        where TContext : DbContext
-    {
-        protected BaseApiController() : base()
-        { }
-    }
-
-
+    //public abstract class BaseApiController<T, TContext> : BaseApiController<T, T, TContext>
+    //    where T : class, new()
+    //    where TContext : DbContext
+    //{
+    //    protected BaseApiController() : base()
+    //    { }
+    //}
     public abstract class BaseApiController<T, TDto, TContext> : BaseControllerWithDb<TContext>
     where T : class, new()
-    where TDto : class, new()
+    where TDto : class, IClassDto, new()
     where TContext : DbContext
     {
         protected BaseApiController()
@@ -454,6 +452,7 @@ namespace Intellitect.ComponentModel.Controllers
         protected SaveResult<TDto> SaveImplementation(TDto dto, string includes = null, bool returnObject = true)
         {
             var result = new SaveResult<TDto>();
+
             // See if this is new or an update using the key.
             T item = null;
 
@@ -563,7 +562,8 @@ namespace Intellitect.ComponentModel.Controllers
         /// <returns></returns>
         protected virtual TDto MapObjToDto(T obj)
         {
-            return Mapper.ObjToDtoMapper(User).Map<TDto>(obj);
+            return Activator.CreateInstance(typeof(TDto), new object[] { obj }) as TDto;
+            //return Mapper.ObjToDtoMapper(User).Map<TDto>(obj);
         }
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj
@@ -572,7 +572,8 @@ namespace Intellitect.ComponentModel.Controllers
         /// <returns></returns>        
         protected virtual void MapDtoToObj(TDto dto, T obj)
         {
-            Mapper.DtoToObjMapper(User).Map(dto, obj);
+            dto.Update(obj);
+            //Mapper.DtoToObjMapper(User).Map(dto, obj);
         }
 
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
@@ -693,7 +694,8 @@ namespace Intellitect.ComponentModel.Controllers
         /// <returns></returns>
         protected object IdValue(TDto dto)
         {
-            object id = PrimaryKey.PropertyInfo.GetValue(dto);
+            var propInfo = dto.GetType().GetProperty(PrimaryKey.Name);
+            object id = propInfo.GetValue(dto);
             return id;
         }
 

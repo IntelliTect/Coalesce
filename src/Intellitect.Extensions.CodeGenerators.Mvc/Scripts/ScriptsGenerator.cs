@@ -242,23 +242,25 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                     {
                         Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\bower.cmd", "install").WaitForExit();
                     }
-                    if (!File.Exists(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd"))
-                    {
-                        Console.WriteLine("Installing TSD");
-                        // install it
-                        ProcessStartInfo info = new ProcessStartInfo(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd");
-                        info.UseShellExecute = true;
-                        info.Verb = "runas";
-                        info.Arguments = "install tsd -g";
-                        Process.Start(info).WaitForExit();
-                    }
+
+                    // TODO
+                    //if (!File.Exists(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd"))
+                    //{
+                    //    Console.WriteLine("Installing TSD");
+                    //    // install it
+                    //    ProcessStartInfo info = new ProcessStartInfo(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd");
+                    //    info.UseShellExecute = true;
+                    //    info.Verb = "runas";
+                    //    info.Arguments = "install tsd -g";
+                    //    Process.Start(info).WaitForExit();
+                    //}
                     // only run the init command if the tsd.json file does not already exist. We most likely will never have this run since we copy our own version earlier, but putting it here for completeness
-                    Console.WriteLine("Installing TypeScript Definitions");
-                    if (!File.Exists(Path.Combine(_webProject.ProjectDirectory, "tsd.json")))
-                    {
-                        Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "init").WaitForExit();
-                    }
-                    Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "reinstall").WaitForExit();
+                    //Console.WriteLine("Installing TypeScript Definitions");
+                    //if (!File.Exists(Path.Combine(_webProject.ProjectDirectory, "tsd.json")))
+                    //{
+                    //    Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "init").WaitForExit();
+                    //}
+                    //Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "reinstall").WaitForExit();
                 }
                 // Copy readme to root as IntelliTectScaffoldingReadme.txt
                 File.Copy(TemplateLocation("Readme.txt"), Path.Combine(_webProject.ProjectDirectory, "IntelliTectScaffoldingReadme.txt"), true);
@@ -394,6 +396,23 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             }
 
             Console.WriteLine("Generating Code");
+            Console.WriteLine("-- Generating DTOs");
+            Console.Write("   ");
+            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
+            {
+                Console.Write($"{model.Model.Name}  ");
+
+                var filename = Path.Combine(
+                    _webProject.ProjectDirectory,
+                    areaLocation,
+                    "Models", "Generated",
+                    model.Model.Name + "DtoGen.cs");
+
+                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename, "ClassDto.cshtml", TemplateFolders, model);
+            }
+            Console.WriteLine();
+
+
             Console.WriteLine("-- Generating Models");
             Console.Write("   ");
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))

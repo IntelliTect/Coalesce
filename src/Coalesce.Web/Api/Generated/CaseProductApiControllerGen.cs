@@ -13,13 +13,15 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.Models;
 
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
     [Authorize]
     public partial class CaseProductController 
-         : LocalBaseApiController<CaseProduct> 
+         : LocalBaseApiController<CaseProduct, CaseProductDto> 
     {
         public CaseProductController() { }
         
@@ -77,41 +79,32 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<CaseProduct> Get(string id, string includes = null)
+        public virtual async Task<CaseProductDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
 
-
         [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual bool Delete(string id)
+[Authorize]        public virtual bool Delete(string id)
         {
             return DeleteImplementation(id);
         }
-        
-
         [HttpPost("save")]
-        [Authorize]
-        public virtual SaveResult<CaseProduct> Save(CaseProduct dto, string includes = null, bool returnObject = true)
+[Authorize]        public virtual SaveResult<CaseProductDto> Save(CaseProductDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
-        
         [HttpPost("AddToCollection")]
-        [Authorize]
-        public virtual SaveResult<CaseProduct> AddToCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CaseProductDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-        [Authorize]
-        public virtual SaveResult<CaseProduct> RemoveFromCollection(int id, string propertyName, int childId)
+[Authorize]        public virtual SaveResult<CaseProductDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
-        [Authorize]
+
         protected override IQueryable<CaseProduct> GetListDataSource(ListParameters parameters)
         {
 

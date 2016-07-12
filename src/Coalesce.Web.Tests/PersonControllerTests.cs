@@ -1,5 +1,6 @@
 ﻿using Coalesce.Domain;
 using Coalesce.Web.Api;
+using Coalesce.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -221,7 +222,7 @@ namespace Coalesce.Web.Tests
             var result2 = _pc.Save(person);
             // Make sure it saved.
             Assert.True(result2.WasSuccessful);
-            Assert.Equal("Joseph", ((Person)result2.Object).FirstName);
+            Assert.Equal("Joseph", ((PersonDto)result2.Object).FirstName);
         }
 
 

@@ -1,0 +1,54 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Intellitect.ComponentModel.TypeDefinition
+@using Intellitect.Extensions.CodeGenerators.Mvc.Utilities
+@using Microsoft.VisualStudio.Web.CodeGeneration
+@{
+    ModelType contextInfo = Model.ContextInfo;
+    ClassViewModel model = Model.Model;
+    string namespaceName = Model.Namespace;
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        namespaceName += "." + Model.AreaName;
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using Intellitect.ComponentModel.Mapping;
+// Model Namespaces
+@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+{
+@:using @ns;
+}
+using static @(model.Namespace).@(model.Name);
+
+namespace @(namespaceName).Models
+{
+    public partial class @(model.Name)Dto : IClassDto
+    {
+        public @(model.Name)Dto() { }
+
+        public @(model.Name)Dto(@(model.Name) entity)
+        {
+            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
+            {
+                @:@prop.Name = entity.@prop.Name;
+            }
+        }
+        
+        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
+        {
+        @: public @prop.Type.NullableType @prop.Name { get; set; }
+        }
+
+        public void Update(object obj)
+        {
+            @(model.Name) entity = (@(model.Name))obj;
+
+            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanWrite))
+            {
+                @:entity.@prop.Name = @prop.Type.ExplicitConversionType@prop.Name;
+            }
+        }
+    }
+}

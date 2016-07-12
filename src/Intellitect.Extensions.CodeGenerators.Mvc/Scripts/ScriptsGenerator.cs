@@ -83,7 +83,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 foreach (var obj in models.Where(p => p.HasDbSet))
                 {
                     //Console.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
-                    streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
+                    streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}    Edit:{obj.IsEditAllowed}   Create:{obj.IsCreateAllowed}    Delete:{obj.IsDeleteAllowed}");
 
                     foreach (var prop in obj.Properties.Where(f => !f.IsInternalUse))
                     {

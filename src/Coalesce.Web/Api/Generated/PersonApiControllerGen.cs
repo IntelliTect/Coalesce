@@ -94,27 +94,36 @@ namespace Coalesce.Web.Api
             return await GetImplementation(id, includes);
         }
 
+
         [HttpPost("delete/{id}")]
-[AllowAnonymous]        public virtual bool Delete(string id)
+        [AllowAnonymous]
+        public virtual bool Delete(string id)
         {
             return DeleteImplementation(id);
         }
+        
+
         [HttpPost("save")]
-[AllowAnonymous]        public virtual SaveResult<Person> Save(Person dto, string includes = null, bool returnObject = true)
+        [AllowAnonymous]
+        public virtual SaveResult<Person> Save(Person dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
+        
         [HttpPost("AddToCollection")]
-[AllowAnonymous]        public virtual SaveResult<Person> AddToCollection(int id, string propertyName, int childId)
+        [AllowAnonymous]
+        public virtual SaveResult<Person> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
-[AllowAnonymous]        public virtual SaveResult<Person> RemoveFromCollection(int id, string propertyName, int childId)
+        [AllowAnonymous]
+        public virtual SaveResult<Person> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-
+        
+        [AllowAnonymous]
         protected override IQueryable<Person> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "BorCPeople")

@@ -1,0 +1,28 @@
+﻿@using Intellitect.ComponentModel.TypeDefinition
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Generated Views";
+}
+<div class="container">
+    <h2>Sample models that have automatic View and Edit/Create pages.</h2>
+    <p>These pages are create by Coalesce based on your models and data annotations.</p>
+    <ul>
+        @foreach (var vm in ReflectionRepository.Models.Where(f=>f.HasDbSet))
+        {
+            <li><a asp-action="Table" asp-controller="@vm.Name">@vm.DisplayName</a></li>
+        }
+    </ul>
+
+    <p>
+        Your current role is: @ViewBag.CurrentRole
+        <br />
+        @if (ViewBag.CurrentRole == "User")
+        {
+            <span>View the site as an <a href="/Home/Generated/?demoUserRole=Admin">Admin</a></span>
+        }
+        else
+        {             
+            <span>View the site as a <a href="/Home/Generated/?demoUserRole=User">User</a></span>
+        }
+    </p>
+</div>

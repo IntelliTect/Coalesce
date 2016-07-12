@@ -1,7 +1,9 @@
 
 using System;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Mapping;
+using System.Security.Claims;
+using Intellitect.ComponentModel.Interfaces;
+using System.Linq;
 // Model Namespaces
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -13,19 +15,23 @@ namespace Coalesce.Web.TestArea.Models
     {
         public CompanyDto() { }
 
-        public CompanyDto(Company entity)
+        public CompanyDto(ClaimsPrincipal user, Company entity)
         {
-                CompanyId = entity.CompanyId;
-                Name = entity.Name;
-                Address1 = entity.Address1;
-                Address2 = entity.Address2;
-                City = entity.City;
-                State = entity.State;
-                ZipCode = entity.ZipCode;
-                Employees = entity.Employees;
-                AltName = entity.AltName;
+            User = user;
+            List<string> roles;
+                    CompanyId = entity.CompanyId;
+                    Name = entity.Name;
+                    Address1 = entity.Address1;
+                    Address2 = entity.Address2;
+                    City = entity.City;
+                    State = entity.State;
+                    ZipCode = entity.ZipCode;
+                    Employees = entity.Employees;
+                    AltName = entity.AltName;
         }
-        
+
+        public ClaimsPrincipal User { get; set; }
+            
          public Int32? CompanyId { get; set; }
          public String Name { get; set; }
          public String Address1 { get; set; }
@@ -37,16 +43,19 @@ namespace Coalesce.Web.TestArea.Models
          public String AltName { get; set; }
 
         public void Update(object obj)
-        {
+        {   
+            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
             Company entity = (Company)obj;
 
-                entity.Name = Name;
-                entity.Address1 = Address1;
-                entity.Address2 = Address2;
-                entity.City = City;
-                entity.State = State;
-                entity.ZipCode = ZipCode;
-                entity.Employees = Employees;
+            List<string> roles;
+                    entity.Name = Name;
+                    entity.Address1 = Address1;
+                    entity.Address2 = Address2;
+                    entity.City = City;
+                    entity.State = State;
+                    entity.ZipCode = ZipCode;
+                    entity.Employees = Employees;
         }
     }
 }

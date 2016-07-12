@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
+using System.Security.Claims;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -106,8 +107,10 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDto> Save(PersonDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<PersonDto> Save(ClaimsPrincipal user, PersonDto dto, string includes = null, bool returnObject = true)
         {
+            dto.User = user;
+
             return SaveImplementation(dto, includes, returnObject);
         }
         
@@ -140,13 +143,13 @@ namespace Coalesce.Web.TestArea.Api
         // Method: Rename
         [HttpPost("Rename")]
         
-        public virtual SaveResult<PersonDto> Rename (Int32 id, String addition){
+        public virtual SaveResult<PersonDto> Rename (ClaimsPrincipal user, Int32 id, String addition){
             var result = new SaveResult<PersonDto>();
             try{
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                result.Object = new PersonDto(objResult);
+                result.Object = new PersonDto(user, objResult);
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -266,11 +269,11 @@ namespace Coalesce.Web.TestArea.Api
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
         
-        public virtual SaveResult<IEnumerable<PersonDto>> BorCPeople (){
+        public virtual SaveResult<IEnumerable<PersonDto>> BorCPeople (ClaimsPrincipal user){
             var result = new SaveResult<IEnumerable<PersonDto>>();
             try{
                 var objResult = Person.BorCPeople(Db);
-                result.Object = objResult.ToList().Select(o => new PersonDto(o));
+                result.Object = objResult.ToList().Select(o => new PersonDto(user, o));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

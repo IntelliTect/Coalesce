@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
+using System.Security.Claims;
 // Model Namespaces 
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
@@ -128,8 +129,10 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)Dto> Save(@(model.Name)Dto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<@(model.Name)Dto> Save(ClaimsPrincipal user, @(model.Name)Dto dto, string includes = null, bool returnObject = true)
         {
+            dto.User = user;
+
             @if (!model.IsCreateAllowed)
             {
             @:// Creates are not allowed, so check the ID first.
@@ -218,11 +221,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-@:result.Object = new @(model.Name)Dto(objResult);
+@:result.Object = new @(model.Name)Dto(user, objResult);
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-@:result.Object = objResult.ToList().Select(o => new @(model.Name)Dto(o));
+@:result.Object = objResult.ToList().Select(o => new @(model.Name)Dto(user, o));
                 }
                 else
                 {

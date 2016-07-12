@@ -1,7 +1,9 @@
 
 using System;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Mapping;
+using System.Security.Claims;
+using Intellitect.ComponentModel.Interfaces;
+using System.Linq;
 // Model Namespaces
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -13,20 +15,27 @@ namespace Coalesce.Web.TestArea.Models
     {
         public ProductDto() { }
 
-        public ProductDto(Product entity)
+        public ProductDto(ClaimsPrincipal user, Product entity)
         {
-                ProductId = entity.ProductId;
-                Name = entity.Name;
+            User = user;
+            List<string> roles;
+                    ProductId = entity.ProductId;
+                    Name = entity.Name;
         }
-        
+
+        public ClaimsPrincipal User { get; set; }
+            
          public Int32? ProductId { get; set; }
          public String Name { get; set; }
 
         public void Update(object obj)
-        {
+        {   
+            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
             Product entity = (Product)obj;
 
-                entity.Name = Name;
+            List<string> roles;
+                    entity.Name = Name;
         }
     }
 }

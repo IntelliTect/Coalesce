@@ -2,7 +2,7 @@ using Intellitect.ComponentModel.Controllers;
 // Model Namespaces
     using Coalesce.Domain;
     using Coalesce.Domain.External;
-using Intellitect.ComponentModel.Mapping;
+using Intellitect.ComponentModel.Interfaces;
 
 namespace Coalesce.Web.TestArea.Api
 {

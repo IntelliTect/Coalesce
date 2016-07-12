@@ -14,7 +14,9 @@
 
 using System;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Mapping;
+using System.Security.Claims;
+using Intellitect.ComponentModel.Interfaces;
+using System.Linq;
 // Model Namespaces
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
@@ -28,26 +30,72 @@ namespace @(namespaceName).Models
     {
         public @(model.Name)Dto() { }
 
-        public @(model.Name)Dto(@(model.Name) entity)
+        public @(model.Name)Dto(ClaimsPrincipal user, @(model.Name) entity)
         {
-            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
+            User = user;
+            List<string> roles;
+            @foreach (var rolesGroup in model.Properties.Where(p => p.CanRead).GroupBy(p => p.SecurityInfo.ReadRoles))
             {
-                @:@prop.Name = entity.@prop.Name;
+                var secured = rolesGroup.Where(p => p.SecurityInfo.IsSecuredProperty);
+                var notSecured = rolesGroup.Where(p => !p.SecurityInfo.IsSecuredProperty);
+                foreach (var prop in notSecured)
+                {
+                    @:@prop.Name = entity.@prop.Name;
+                }
+                if (string.IsNullOrEmpty(rolesGroup.Key))
+                {
+                    foreach (var prop in secured)
+                    {
+                        @:@prop.Name = entity.@prop.Name;
+                    }
+                }
+                else
+                {
+                    @:roles = "@rolesGroup.Key".Split(new char[] { ',' }).ToList();
+                    @:if (User != null && roles.Any(r => User.IsInRole(r)))
+                    @:{
+                    foreach (PropertyViewModel prop in secured)
+                    {
+                        @:@prop.Name = entity.@prop.Name;
+                    }
+                    @:}
+                }
             }
         }
-        
+
+        public ClaimsPrincipal User { get; set; }
+            
         @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
         {
         @: public @prop.Type.NullableType @prop.Name { get; set; }
         }
 
         public void Update(object obj)
-        {
+        {   
+            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
             @(model.Name) entity = (@(model.Name))obj;
 
-            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanWrite))
+            List<string> roles;
+            @foreach (var rolesGroup in model.Properties.Where(p => p.CanWrite).GroupBy(p => p.SecurityInfo.EditRoles))
             {
-                @:entity.@prop.Name = @prop.Type.ExplicitConversionType@prop.Name;
+                var secured = rolesGroup.Where(p => p.SecurityInfo.IsSecuredProperty);
+                var notSecured = rolesGroup.Where(p => !p.SecurityInfo.IsSecuredProperty);
+                foreach (var prop in notSecured)
+                {
+                    @:entity.@prop.Name = @prop.Type.ExplicitConversionType@prop.Name;
+                }
+                if (!string.IsNullOrEmpty(rolesGroup.Key))
+                {
+                    @:roles = "@rolesGroup.Key".Split(new char[] { ',' }).ToList();
+                    @:if (User != null && roles.Any(r => User.IsInRole(r)))
+                    @:{
+                    foreach (PropertyViewModel prop in secured)
+                    {
+                        @:entity.@prop.Name = @prop.Type.ExplicitConversionType@prop.Name;
+                    }
+                    @:}
+                }
             }
         }
     }

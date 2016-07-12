@@ -1,7 +1,9 @@
 
 using System;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Mapping;
+using System.Security.Claims;
+using Intellitect.ComponentModel.Interfaces;
+using System.Linq;
 // Model Namespaces
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -13,28 +15,36 @@ namespace Coalesce.Web.Models
     {
         public PersonDto() { }
 
-        public PersonDto(Person entity)
+        public PersonDto(ClaimsPrincipal user, Person entity)
         {
-                PersonId = entity.PersonId;
-                Title = entity.Title;
-                FirstName = entity.FirstName;
-                LastName = entity.LastName;
-                Email = entity.Email;
-                Gender = entity.Gender;
-                CasesAssigned = entity.CasesAssigned;
-                CasesReported = entity.CasesReported;
-                BirthDate = entity.BirthDate;
-                LastBath = entity.LastBath;
-                NextUpgrade = entity.NextUpgrade;
-                PersonStatsId = entity.PersonStatsId;
-                PersonStats = entity.PersonStats;
-                TimeZone = entity.TimeZone;
-                ProfilePic = entity.ProfilePic;
-                Name = entity.Name;
-                CompanyId = entity.CompanyId;
-                Company = entity.Company;
+            User = user;
+            List<string> roles;
+                    PersonId = entity.PersonId;
+                    Title = entity.Title;
+                    FirstName = entity.FirstName;
+                    Email = entity.Email;
+                    CasesAssigned = entity.CasesAssigned;
+                    CasesReported = entity.CasesReported;
+                    BirthDate = entity.BirthDate;
+                    LastBath = entity.LastBath;
+                    NextUpgrade = entity.NextUpgrade;
+                    PersonStatsId = entity.PersonStatsId;
+                    PersonStats = entity.PersonStats;
+                    TimeZone = entity.TimeZone;
+                    ProfilePic = entity.ProfilePic;
+                    Name = entity.Name;
+                    CompanyId = entity.CompanyId;
+                    Company = entity.Company;
+                        LastName = entity.LastName;
+                    roles = "Admin".Split(new char[] { ',' }).ToList();
+                    if (User != null && roles.Any(r => User.IsInRole(r)))
+                    {
+                        Gender = entity.Gender;
+                    }
         }
-        
+
+        public ClaimsPrincipal User { get; set; }
+            
          public Int32? PersonId { get; set; }
          public Titles? Title { get; set; }
          public String FirstName { get; set; }
@@ -55,24 +65,30 @@ namespace Coalesce.Web.Models
          public Company Company { get; set; }
 
         public void Update(object obj)
-        {
+        {   
+            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
             Person entity = (Person)obj;
 
-                entity.Title = (Titles)Title;
-                entity.FirstName = FirstName;
-                entity.LastName = LastName;
-                entity.Email = Email;
-                entity.Gender = (Genders)Gender;
-                entity.CasesAssigned = CasesAssigned;
-                entity.CasesReported = CasesReported;
-                entity.BirthDate = BirthDate;
-                entity.LastBath = LastBath;
-                entity.NextUpgrade = NextUpgrade;
-                entity.PersonStatsId = (Int32)PersonStatsId;
-                entity.TimeZone = TimeZone;
-                entity.ProfilePic = ProfilePic;
-                entity.CompanyId = (Int32)CompanyId;
-                entity.Company = Company;
+            List<string> roles;
+                    entity.Title = (Titles)Title;
+                    entity.FirstName = FirstName;
+                    entity.Email = Email;
+                    entity.CasesAssigned = CasesAssigned;
+                    entity.CasesReported = CasesReported;
+                    entity.BirthDate = BirthDate;
+                    entity.LastBath = LastBath;
+                    entity.NextUpgrade = NextUpgrade;
+                    entity.PersonStatsId = (Int32)PersonStatsId;
+                    entity.TimeZone = TimeZone;
+                    entity.ProfilePic = ProfilePic;
+                    entity.CompanyId = (Int32)CompanyId;
+                    entity.Company = Company;
+                    roles = "Admin".Split(new char[] { ',' }).ToList();
+                    if (User != null && roles.Any(r => User.IsInRole(r)))
+                    {
+                        entity.LastName = LastName;
+                    }
         }
     }
 }

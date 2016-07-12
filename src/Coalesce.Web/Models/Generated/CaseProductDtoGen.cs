@@ -1,7 +1,9 @@
 
 using System;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Mapping;
+using System.Security.Claims;
+using Intellitect.ComponentModel.Interfaces;
+using System.Linq;
 // Model Namespaces
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -13,15 +15,19 @@ namespace Coalesce.Web.Models
     {
         public CaseProductDto() { }
 
-        public CaseProductDto(CaseProduct entity)
+        public CaseProductDto(ClaimsPrincipal user, CaseProduct entity)
         {
-                CaseProductId = entity.CaseProductId;
-                CaseId = entity.CaseId;
-                Case = entity.Case;
-                ProductId = entity.ProductId;
-                Product = entity.Product;
+            User = user;
+            List<string> roles;
+                    CaseProductId = entity.CaseProductId;
+                    CaseId = entity.CaseId;
+                    Case = entity.Case;
+                    ProductId = entity.ProductId;
+                    Product = entity.Product;
         }
-        
+
+        public ClaimsPrincipal User { get; set; }
+            
          public Int32? CaseProductId { get; set; }
          public Int32? CaseId { get; set; }
          public Case Case { get; set; }
@@ -29,13 +35,16 @@ namespace Coalesce.Web.Models
          public Product Product { get; set; }
 
         public void Update(object obj)
-        {
+        {   
+            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
             CaseProduct entity = (CaseProduct)obj;
 
-                entity.CaseId = (Int32)CaseId;
-                entity.Case = Case;
-                entity.ProductId = (Int32)ProductId;
-                entity.Product = Product;
+            List<string> roles;
+                    entity.CaseId = (Int32)CaseId;
+                    entity.Case = Case;
+                    entity.ProductId = (Int32)ProductId;
+                    entity.Product = Product;
         }
     }
 }

@@ -1,21 +1,6 @@
 
-using Intellitect.ComponentModel.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using Intellitect.ComponentModel.Models;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
-using Intellitect.ComponentModel.Data;
-using System.Linq.Dynamic;
-using Intellitect.ComponentModel.Mapping;
-
 // Model Namespaces 
 using Coalesce.Domain;
-using Microsoft.EntityFrameworkCore;
-using Intellitect.ComponentModel.DataAnnotations;
 using Coalesce.Web.Models;
 
 namespace Coalesce.Web.Api

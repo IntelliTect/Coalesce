@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -105,20 +104,20 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<Company> Save(Company dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CompanyDto> Save(CompanyDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
         
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<Company> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CompanyDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<Company> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CompanyDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }

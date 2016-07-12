@@ -103,6 +103,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 string result = ReturnType.NameWithTypeParams;
                 if (result == "Void") return "object";
                 result = result.Replace("IQueryable", "IEnumerable");
+                result = (new Regex($"({Parent.Name}(?!(Dto)))")).Replace(result, $"{Parent.Name}Dto");
                 return result;
             }
         }

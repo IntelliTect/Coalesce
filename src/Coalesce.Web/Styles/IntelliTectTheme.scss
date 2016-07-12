@@ -109,6 +109,7 @@ body.home {
         color: #666666;
         font-weight: lighter;
         font-size: 30px;
+        height: 150px;
 
         small {
             display:block;
@@ -164,7 +165,10 @@ body.home {
 }
 
 .home-panel:nth-of-type(2n) {
-    background-color: #eef4ff
+    background-color: white
+}
+.home-panel:nth-of-type(2n+1) {
+    background-color: transparent
 }
 
 

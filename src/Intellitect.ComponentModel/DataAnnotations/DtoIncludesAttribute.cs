@@ -6,7 +6,7 @@ namespace Intellitect.ComponentModel.DataAnnotations
     /// Specify that this property is only used on specific views of the content.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class IncludesAttribute : Attribute
+    public class DtoIncludesAttribute : Attribute
     {
         /// <summary>
         /// Comma-delimited list of content views this property should be included on.

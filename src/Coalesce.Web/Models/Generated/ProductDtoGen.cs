@@ -15,15 +15,28 @@ namespace Coalesce.Web.Models
     {
         public ProductDto() { }
 
-        public ProductDto(ClaimsPrincipal user, Product entity)
+        public ProductDto(Product entity, ClaimsPrincipal user = null, string includes = null)
         {
             User = user;
-            List<string> roles;
-                    ProductId = entity.ProductId;
-                    Name = entity.Name;
+            Includes = includes ?? "";
+
+            // Applicable includes for Product
+            
+
+            // Applicable excludes for Product
+            
+
+            // Applicable roles for Product
+            if (User != null)
+			{
+			}
+
+			ProductId = entity.ProductId;
+			Name = entity.Name;
         }
 
         public ClaimsPrincipal User { get; set; }
+        public string Includes { get; set; }
             
          public Int32? ProductId { get; set; }
          public String Name { get; set; }
@@ -32,10 +45,21 @@ namespace Coalesce.Web.Models
         {   
             if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
+            // Applicable includes for Product
+            
+
+            // Applicable excludes for Product
+            
+
+            // Applicable roles for Product
+            if (User != null)
+			{
+			}
+
+
             Product entity = (Product)obj;
 
-            List<string> roles;
-                    entity.Name = Name;
+			entity.Name = Name;
         }
     }
 }

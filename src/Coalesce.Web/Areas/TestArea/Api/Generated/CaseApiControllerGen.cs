@@ -30,7 +30,6 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -40,7 +39,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -174,7 +173,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<IEnumerable<CaseDto>>();
             try{
                 var objResult = Case.GetAllOpenCases(x, y, Db);
-                result.Object = objResult.ToList().Select(o => new CaseDto(user, o));
+                result.Object = objResult.ToList().Select(o => new CaseDto(o, user));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

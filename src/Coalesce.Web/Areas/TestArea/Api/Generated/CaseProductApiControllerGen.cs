@@ -30,7 +30,6 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -40,7 +39,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseProductId", caseProductId);

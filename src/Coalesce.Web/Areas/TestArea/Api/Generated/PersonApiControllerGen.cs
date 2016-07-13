@@ -30,7 +30,6 @@ namespace Coalesce.Web.TestArea.Api
         [AllowAnonymous]
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -40,7 +39,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -149,7 +148,7 @@ namespace Coalesce.Web.TestArea.Api
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                result.Object = new PersonDto(user, objResult);
+                result.Object = new PersonDto(objResult, user);
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -273,7 +272,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<IEnumerable<PersonDto>>();
             try{
                 var objResult = Person.BorCPeople(Db);
-                result.Object = objResult.ToList().Select(o => new PersonDto(user, o));
+                result.Object = objResult.ToList().Select(o => new PersonDto(o, user));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

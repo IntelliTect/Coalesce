@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using System.Security.Claims;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -30,7 +29,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -40,7 +38,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -107,9 +105,9 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<CaseDto> Save(ClaimsPrincipal user, CaseDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
         {
-            dto.User = user;
+            dto.User = User;
 
             return SaveImplementation(dto, includes, returnObject);
         }
@@ -170,11 +168,11 @@ namespace Coalesce.Web.Api
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         
-        public virtual SaveResult<IEnumerable<CaseDto>> GetAllOpenCases (ClaimsPrincipal user, Int32 x, Int32 y){
+        public virtual SaveResult<IEnumerable<CaseDto>> GetAllOpenCases (Int32 x, Int32 y){
             var result = new SaveResult<IEnumerable<CaseDto>>();
             try{
                 var objResult = Case.GetAllOpenCases(x, y, Db);
-                result.Object = objResult.ToList().Select(o => new CaseDto(user, o));
+                result.Object = objResult.ToList().Select(o => new CaseDto(o, User));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

@@ -15,15 +15,28 @@ namespace Coalesce.Web.Models
     {
         public DevTeamDto() { }
 
-        public DevTeamDto(ClaimsPrincipal user, DevTeam entity)
+        public DevTeamDto(DevTeam entity, ClaimsPrincipal user = null, string includes = null)
         {
             User = user;
-            List<string> roles;
-                    DevTeamId = entity.DevTeamId;
-                    Name = entity.Name;
+            Includes = includes ?? "";
+
+            // Applicable includes for DevTeam
+            
+
+            // Applicable excludes for DevTeam
+            
+
+            // Applicable roles for DevTeam
+            if (User != null)
+			{
+			}
+
+			DevTeamId = entity.DevTeamId;
+			Name = entity.Name;
         }
 
         public ClaimsPrincipal User { get; set; }
+        public string Includes { get; set; }
             
          public Int32? DevTeamId { get; set; }
          public String Name { get; set; }
@@ -32,10 +45,21 @@ namespace Coalesce.Web.Models
         {   
             if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
+            // Applicable includes for DevTeam
+            
+
+            // Applicable excludes for DevTeam
+            
+
+            // Applicable roles for DevTeam
+            if (User != null)
+			{
+			}
+
+
             DevTeam entity = (DevTeam)obj;
 
-            List<string> roles;
-                    entity.Name = Name;
+			entity.Name = Name;
         }
     }
 }

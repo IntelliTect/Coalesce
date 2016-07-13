@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using System.Security.Claims;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -30,7 +29,6 @@ namespace Coalesce.Web.Api
         [AllowAnonymous]
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -40,7 +38,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -107,9 +105,9 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDto> Save(ClaimsPrincipal user, PersonDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<PersonDto> Save(PersonDto dto, string includes = null, bool returnObject = true)
         {
-            dto.User = user;
+            dto.User = User;
 
             return SaveImplementation(dto, includes, returnObject);
         }
@@ -143,13 +141,13 @@ namespace Coalesce.Web.Api
         // Method: Rename
         [HttpPost("Rename")]
         
-        public virtual SaveResult<PersonDto> Rename (ClaimsPrincipal user, Int32 id, String addition){
+        public virtual SaveResult<PersonDto> Rename (Int32 id, String addition){
             var result = new SaveResult<PersonDto>();
             try{
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                result.Object = new PersonDto(user, objResult);
+                result.Object = new PersonDto(objResult, User);
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -269,11 +267,11 @@ namespace Coalesce.Web.Api
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
         
-        public virtual SaveResult<IEnumerable<PersonDto>> BorCPeople (ClaimsPrincipal user){
+        public virtual SaveResult<IEnumerable<PersonDto>> BorCPeople (){
             var result = new SaveResult<IEnumerable<PersonDto>>();
             try{
                 var objResult = Person.BorCPeople(Db);
-                result.Object = objResult.ToList().Select(o => new PersonDto(user, o));
+                result.Object = objResult.ToList().Select(o => new PersonDto(o, User));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

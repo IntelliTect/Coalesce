@@ -78,15 +78,8 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 IQueryable<T> result = GetListDataSource(listParameters);
 
-                // Add 
-                foreach (var clause in listParameters.IncludeList)
-                {
-                    result = result.IncludeString(clause);
-                }
-
                 // Add the Include statements to the result to grab the right object graph. Passing "" gets the standard set.
-                if (string.Compare(listParameters.Includes, "none",
-                            StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     result = result.Includes(listParameters.Includes);
                 }
@@ -167,20 +160,20 @@ namespace Intellitect.ComponentModel.Controllers
                 result2.IncludesExternal(listParameters.Includes);
 
                 // Exclude certain data
-                if (new T() is IExcludable)
-                {
-                    foreach (var obj in result2)
-                    {
-                        ((IExcludable)obj).Exclude(listParameters.Includes);
-                    }
-                }
+                //if (new T() is IExcludable)
+                //{
+                //    foreach (var obj in result2)
+                //    {
+                //        ((IExcludable)obj).Exclude(listParameters.Includes);
+                //    }
+                //}
 
                 // Allow for security trimming
                 // TODO: This needs to be adjusted to handle paging correctly.
                 var result3 = result2.Where(f => BeforeGet(f));
 
                 // Select it into the object we want
-                IEnumerable<TDto> result4 = result3.ToList().Select(MapObjToDto).ToList();
+                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
 
                 if (listParameters.FieldList.Any())
                 {
@@ -367,13 +360,13 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 return null;
             }
-            // Exclude data
-            if (item is IExcludable)
-            {
-                ((IExcludable)item).Exclude(includes);
-            }
+            //// Exclude data
+            //if (item is IExcludable)
+            //{
+            //    ((IExcludable)item).Exclude(includes);
+            //}
             // Map to DTO
-            var dto = MapObjToDto(item);
+            var dto = MapObjToDto(item, includes);
 
             return dto;
         }
@@ -480,11 +473,11 @@ namespace Intellitect.ComponentModel.Controllers
                     // Get the key back.
                     if (item != null)
                     {
-                        if (item is IExcludable)
-                        {
-                            ((IExcludable)item).Exclude(includes);
-                        }
-                        result.Object = MapObjToDto(item);
+                        //if (item is IExcludable)
+                        //{
+                        //    ((IExcludable)item).Exclude(includes);
+                        //}
+                        result.Object = MapObjToDto(item, includes);
                     }
                 }
                 else
@@ -514,9 +507,9 @@ namespace Intellitect.ComponentModel.Controllers
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        protected virtual TDto MapObjToDto(T obj)
+        protected virtual TDto MapObjToDto(T obj, string includes)
         {
-            return Activator.CreateInstance(typeof(TDto), new object[] { User, obj }) as TDto;
+            return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
             //return Mapper.ObjToDtoMapper(User).Map<TDto>(obj);
         }
         /// <summary>

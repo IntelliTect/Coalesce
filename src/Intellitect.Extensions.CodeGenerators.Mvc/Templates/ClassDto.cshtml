@@ -30,40 +30,28 @@ namespace @(namespaceName).Models
     {
         public @(model.Name)Dto() { }
 
-        public @(model.Name)Dto(ClaimsPrincipal user, @(model.Name) entity)
+        public @(model.Name)Dto(@(model.Name) entity, ClaimsPrincipal user = null, string includes = null)
         {
             User = user;
-            List<string> roles;
-            @foreach (var rolesGroup in model.Properties.Where(p => p.CanRead).GroupBy(p => p.SecurityInfo.ReadRoles))
+            Includes = includes ?? "";
+
+            // Applicable includes for @(model.Name)
+            @(model.DtoIncludesForConstructor())
+
+            // Applicable excludes for @(model.Name)
+            @(model.DtoExcludesForConstructor())
+
+            // Applicable roles for @(model.Name)
+            @(model.PropertyRolesForConstructor())
+
+            @foreach (var prop in model.Properties.Where(p => p.CanRead))
             {
-                var secured = rolesGroup.Where(p => p.SecurityInfo.IsSecuredProperty);
-                var notSecured = rolesGroup.Where(p => !p.SecurityInfo.IsSecuredProperty);
-                foreach (var prop in notSecured)
-                {
-                    @:@prop.Name = entity.@prop.Name;
-                }
-                if (string.IsNullOrEmpty(rolesGroup.Key))
-                {
-                    foreach (var prop in secured)
-                    {
-                        @:@prop.Name = entity.@prop.Name;
-                    }
-                }
-                else
-                {
-                    @:roles = "@rolesGroup.Key".Split(new char[] { ',' }).ToList();
-                    @:if (User != null && roles.Any(r => User.IsInRole(r)))
-                    @:{
-                    foreach (PropertyViewModel prop in secured)
-                    {
-                        @:@prop.Name = entity.@prop.Name;
-                    }
-                    @:}
-                }
+                @prop.ObjToDtoPropertySetter()
             }
         }
 
         public ClaimsPrincipal User { get; set; }
+        public string Includes { get; set; }
             
         @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
         {
@@ -74,28 +62,21 @@ namespace @(namespaceName).Models
         {   
             if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
+            // Applicable includes for @(model.Name)
+            @(model.DtoIncludesForConstructor())
+
+            // Applicable excludes for @(model.Name)
+            @(model.DtoExcludesForConstructor())
+
+            // Applicable roles for @(model.Name)
+            @(model.PropertyRolesForConstructor())
+
+
             @(model.Name) entity = (@(model.Name))obj;
 
-            List<string> roles;
-            @foreach (var rolesGroup in model.Properties.Where(p => p.CanWrite).GroupBy(p => p.SecurityInfo.EditRoles))
+            @foreach (var prop in model.Properties.Where(p => p.CanWrite))
             {
-                var secured = rolesGroup.Where(p => p.SecurityInfo.IsSecuredProperty);
-                var notSecured = rolesGroup.Where(p => !p.SecurityInfo.IsSecuredProperty);
-                foreach (var prop in notSecured)
-                {
-                    @:entity.@prop.Name = @prop.Type.ExplicitConversionType@prop.Name;
-                }
-                if (!string.IsNullOrEmpty(rolesGroup.Key))
-                {
-                    @:roles = "@rolesGroup.Key".Split(new char[] { ',' }).ToList();
-                    @:if (User != null && roles.Any(r => User.IsInRole(r)))
-                    @:{
-                    foreach (PropertyViewModel prop in secured)
-                    {
-                        @:entity.@prop.Name = @prop.Type.ExplicitConversionType@prop.Name;
-                    }
-                    @:}
-                }
+                @prop.DtoToObjPropertySetter()
             }
         }
     }

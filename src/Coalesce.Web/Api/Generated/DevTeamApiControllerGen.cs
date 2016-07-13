@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using System.Security.Claims;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -30,7 +29,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -40,7 +38,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string devTeamId = null,string name = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("DevTeamId", devTeamId);
@@ -86,9 +84,9 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<DevTeamDto> Save(ClaimsPrincipal user, DevTeamDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<DevTeamDto> Save(DevTeamDto dto, string includes = null, bool returnObject = true)
         {
-            dto.User = user;
+            dto.User = User;
 
             return SaveImplementation(dto, includes, returnObject);
         }

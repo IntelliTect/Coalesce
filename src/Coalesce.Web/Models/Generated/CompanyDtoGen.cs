@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Intellitect.ComponentModel.Interfaces;
+using Intellitect.ComponentModel.Models;
+using Intellitect.ComponentModel.Mapping;
 using System.Linq;
+using Newtonsoft.Json;
 // Model Namespaces
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -11,40 +14,10 @@ using static Coalesce.Domain.Company;
 
 namespace Coalesce.Web.Models
 {
-    public partial class CompanyDto : IClassDto
+    public partial class CompanyDtoGen : GeneratedDto<Company, CompanyDtoGen>, IClassDto
     {
-        public CompanyDto() { }
+        public CompanyDtoGen() { }
 
-        public CompanyDto(Company entity, ClaimsPrincipal user = null, string includes = null)
-        {
-            User = user;
-            Includes = includes ?? "";
-
-            // Applicable includes for Company
-            
-
-            // Applicable excludes for Company
-            
-
-            // Applicable roles for Company
-            if (User != null)
-			{
-			}
-
-			CompanyId = entity.CompanyId;
-			Name = entity.Name;
-			Address1 = entity.Address1;
-			Address2 = entity.Address2;
-			City = entity.City;
-			State = entity.State;
-			ZipCode = entity.ZipCode;
-			Employees = entity.Employees;
-			AltName = entity.AltName;
-        }
-
-        public ClaimsPrincipal User { get; set; }
-        public string Includes { get; set; }
-            
          public Int32? CompanyId { get; set; }
          public String Name { get; set; }
          public String Address1 { get; set; }
@@ -52,12 +25,18 @@ namespace Coalesce.Web.Models
          public String City { get; set; }
          public String State { get; set; }
          public String ZipCode { get; set; }
-         public ICollection<Person> Employees { get; set; }
+         public ICollection<PersonDtoGen> Employees { get; set; }
          public String AltName { get; set; }
 
-        public void Update(object obj)
-        {   
-            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+        public void Update(object obj, ClaimsPrincipal user = null, string includes = null)
+        {
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
+            includes = includes ?? "";
+
+            Company entity = (Company)obj;
+
+            if (OnUpdate(entity, user, includes)) return;
 
             // Applicable includes for Company
             
@@ -66,19 +45,33 @@ namespace Coalesce.Web.Models
             
 
             // Applicable roles for Company
-            if (User != null)
+            if (user != null)
 			{
 			}
-
-
-            Company entity = (Company)obj;
-
+    
 			entity.Name = Name;
 			entity.Address1 = Address1;
 			entity.Address2 = Address2;
 			entity.City = City;
 			entity.State = State;
 			entity.ZipCode = ZipCode;
+        }
+
+        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
+        {
+            if (OnSecurityTrim(user, includes)) return;
+
+            // Applicable includes for Company
+            
+
+            // Applicable excludes for Company
+            
+
+            // Applicable roles for Company
+            if (user != null)
+			{
+			}
+
         }
     }
 }

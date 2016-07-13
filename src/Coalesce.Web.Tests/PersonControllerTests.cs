@@ -79,7 +79,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public async void ListIncludesDefault()
         {
-            var result = await _pc.List(personId: "1");
+            var result = await _pc.CustomList(personId: "1");
             var person = result.List.Cast<Person>().First();
             Assert.NotNull(person.Company);
             // GenFu's company names change.

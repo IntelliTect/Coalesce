@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Intellitect.ComponentModel.Helpers;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
+using Intellitect.ComponentModel.Mapping;
 
 namespace Intellitect.ComponentModel.Controllers
 {
@@ -44,6 +45,10 @@ namespace Intellitect.ComponentModel.Controllers
             }
         }
         private ILogger _Logger = null;
+
+        public Func<string, string> CodeToCall = null;
+
+        
 
         public static int DefaultPageSizeAll { get; set; } = 25;
         private int? _defaultPageSize = null;
@@ -483,7 +488,7 @@ namespace Intellitect.ComponentModel.Controllers
                 if (BeforeSave(dto, item))
                 {
 
-                    MapDtoToObj(dto, item);
+                    MapDtoToObj(dto, item, includes);
                     try
                     {
                         SetFingerprint(item);
@@ -547,18 +552,18 @@ namespace Intellitect.ComponentModel.Controllers
         /// <returns></returns>
         protected virtual TDto MapObjToDto(T obj, string includes)
         {
-            return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
-            //return Mapper.ObjToDtoMapper(User).Map<TDto>(obj);
+            //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
+            return Mapper.ObjToDtoMapper<T, TDto>(obj, User, includes);
         }
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>        
-        protected virtual void MapDtoToObj(TDto dto, T obj)
+        protected virtual void MapDtoToObj(TDto dto, T obj, string includes)
         {
-            dto.Update(obj);
-            //Mapper.DtoToObjMapper(User).Map(dto, obj);
+            //dto.Update(obj);
+            Mapper.DtoToObjMapper(dto, obj, User, includes);
         }
 
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)

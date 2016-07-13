@@ -6,9 +6,9 @@ using Coalesce.Web.Models;
 namespace Coalesce.Web.Api
 {
     public partial class PersonController
-         : LocalBaseApiController<Person, PersonDto>
+         : LocalBaseApiController<Person, PersonDtoGen>
     {
-        protected override bool BeforeSave(PersonDto dto, Person obj)
+        protected override bool BeforeSave(PersonDtoGen dto, Person obj)
         {
             if (dto.FirstName.Contains("[user]"))
             {
@@ -17,7 +17,7 @@ namespace Coalesce.Web.Api
             return true;
         }
 
-        protected override bool AfterSave(PersonDto dto, Person obj, Person orig, AppDbContext context)
+        protected override bool AfterSave(PersonDtoGen dto, Person obj, Person orig, AppDbContext context)
         {
             // Add the company name to the last name if it changed.
             if (obj.CompanyId != orig.CompanyId && !obj.LastName.Contains(obj.Company.Name))

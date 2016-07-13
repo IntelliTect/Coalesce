@@ -1056,10 +1056,9 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
         }
 
-        public string ObjToDtoPropertySetter()
+        public string ObjToDtoSecurityTrimmer()
         {
-            var setter = $"{Name} = entity.{Name};";
-
+            var setter = $"{Name} = null;";
             var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
             {
@@ -1069,11 +1068,11 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
 
                 var statement = new List<string>();
-                if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
-                if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
-                if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
+                if (!string.IsNullOrEmpty(roles)) statement.Add($"!({roles})");
+                if (!string.IsNullOrEmpty(includes)) statement.Add($"!({includes})");
+                if (!string.IsNullOrEmpty(excludes)) statement.Add($"({excludes})");
 
-                return $@"          if ({string.Join(" && ", statement)})
+                return $@"          if ({string.Join(" || ", statement)})
             {{
                 {setter}
             }}
@@ -1081,7 +1080,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
             else
             {
-                return $"\t\t\t{setter}{Environment.NewLine}";
+                return "";
             }
         }
 

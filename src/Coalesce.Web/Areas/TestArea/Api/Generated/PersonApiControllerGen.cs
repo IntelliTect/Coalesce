@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using System.Security.Claims;
+using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -21,14 +21,49 @@ namespace Coalesce.Web.TestArea.Api
     [Route("TestArea/api/[controller]")]
     [Authorize]
     public partial class PersonController 
-         : LocalBaseApiController<Person, PersonDto> 
+         : LocalBaseApiController<Person, PersonDtoGen> 
     {
         public PersonController() { }
-        
-        
+      
+        /// <summary>
+        /// Returns PersonDtoGen
+        /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
         public virtual async Task<ListResult> List(
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            // Custom fields for this object.
+            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
+        {
+            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            parameters.AddFilter("PersonId", personId);
+            parameters.AddFilter("Title", title);
+            parameters.AddFilter("FirstName", firstName);
+            parameters.AddFilter("LastName", lastName);
+            parameters.AddFilter("Email", email);
+            parameters.AddFilter("Gender", gender);
+            parameters.AddFilter("PersonStatsId", personStatsId);
+            parameters.AddFilter("Name", name);
+            parameters.AddFilter("CompanyId", companyId);
+        
+            var listResult = await ListImplementation(parameters);
+            return new GenericListResult<PersonDtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns custom object based on supplied fields
+        /// </summary>
+        [HttpGet("customlist")]
+        [AllowAnonymous]
+        public virtual async Task<ListResult> CustomList(
             string fields = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
@@ -65,7 +100,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
         {
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search);
+            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -90,7 +125,7 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual async Task<PersonDto> Get(string id, string includes = null)
+        public virtual async Task<PersonDtoGen> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -106,22 +141,20 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDto> Save(ClaimsPrincipal user, PersonDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<PersonDtoGen> Save(PersonDtoGen dto, string includes = null, bool returnObject = true)
         {
-            dto.User = user;
-
             return SaveImplementation(dto, includes, returnObject);
         }
         
         [HttpPost("AddToCollection")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDto> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<PersonDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDto> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<PersonDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -142,13 +175,13 @@ namespace Coalesce.Web.TestArea.Api
         // Method: Rename
         [HttpPost("Rename")]
         
-        public virtual SaveResult<PersonDto> Rename (ClaimsPrincipal user, Int32 id, String addition){
-            var result = new SaveResult<PersonDto>();
+        public virtual SaveResult<PersonDtoGen> Rename (Int32 id, String addition){
+            var result = new SaveResult<PersonDtoGen>();
             try{
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                result.Object = new PersonDto(objResult, user);
+                                result.Object = Mapper.ObjToDtoMapper<Person, PersonDtoGen>(objResult, User, "");
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -168,7 +201,7 @@ namespace Coalesce.Web.TestArea.Api
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -185,7 +218,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<Int32>();
             try{
                 var objResult = Person.Add(numberOne, numberTwo);
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -203,7 +236,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<String>();
             try{
                 var objResult = Person.GetUser(User);
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -220,7 +253,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<String>();
             try{
                 var objResult = Person.GetUserPublic(User);
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -238,7 +271,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<IEnumerable<String>>();
             try{
                 var objResult = Person.NamesStartingWith(characters, Db);
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -255,7 +288,7 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<IEnumerable<String>>();
             try{
                 var objResult = Person.NamesStartingWithPublic(characters, Db);
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -268,11 +301,11 @@ namespace Coalesce.Web.TestArea.Api
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
         
-        public virtual SaveResult<IEnumerable<PersonDto>> BorCPeople (ClaimsPrincipal user){
-            var result = new SaveResult<IEnumerable<PersonDto>>();
+        public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople (){
+            var result = new SaveResult<IEnumerable<PersonDtoGen>>();
             try{
                 var objResult = Person.BorCPeople(Db);
-                result.Object = objResult.ToList().Select(o => new PersonDto(o, user));
+                                result.Object = objResult.ToList().Select(o => Mapper.ObjToDtoMapper<Person, PersonDtoGen>(o, User, ""));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

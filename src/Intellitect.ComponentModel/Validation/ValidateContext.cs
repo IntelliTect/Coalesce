@@ -27,7 +27,7 @@ namespace Intellitect.ComponentModel.Validation
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Has name");
                 assert.IsNotNull(model.PrimaryKey, "Has primary key");
-                assert.IsTrue(model.SearchProperties.Any(), "Has search properties");
+                assert.IsTrue(model.SearchProperties().Any(), "Has search properties");
                 assert.IsNotNull(model.ListTextProperty, "Has list text");
                 assert.IsTrue(model.DefaultOrderBy.Any(), "Has order by");
                 // Check object references to see if they all have keys and remote keys

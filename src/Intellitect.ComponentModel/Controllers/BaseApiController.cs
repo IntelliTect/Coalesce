@@ -267,7 +267,7 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 var completeSearchClauses = new List<string>();
                 // Handle the split on spaces first because it will be done differently with ands and ors.
-                if (ClassViewModel.SearchProperties.Any(f => f.Value.SearchIsSplitOnSpaces))
+                if (ClassViewModel.SearchProperties().Any(f => f.Value.SearchIsSplitOnSpaces))
                 {
                     var splitSearchClauses = new List<string>();
 
@@ -275,16 +275,34 @@ namespace Intellitect.ComponentModel.Controllers
                     foreach (var clause in clauses)
                     {
                         var searchClauses = new List<string>();
-                        foreach (var prop in ClassViewModel.SearchProperties.Where(f => f.Value.SearchIsSplitOnSpaces))
+                        foreach (var prop in ClassViewModel.SearchProperties().Where(f => f.Value.SearchIsSplitOnSpaces))
                         {
+                            string expr;
                             if (prop.Value.PureType.IsString)
                             {
-                                searchClauses.Add(string.Format("{0}.StartsWith(\"{1}\")", prop.Key, clause));
+                                if (prop.Key.Contains("[]."))
+                                {
+                                    var parts = prop.Key.Split(new [] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                    expr = $@"{parts[0]}.Count({parts[1]}.StartsWith(""{clause}"")) > 0";
+                                }
+                                else
+                                {
+                                    expr = string.Format("{0}.StartsWith(\"{1}\")", prop.Key, clause);
+                                }
                             }
                             else
                             {
-                                searchClauses.Add(string.Format("{0}.ToString().StartsWith(\"{1}\")", prop.Key, clause));
+                                if (prop.Key.Contains("[]."))
+                                {
+                                    var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                    expr = $@"{parts[0]}.Count({parts[1]}.ToString().StartsWith(""{clause}"")) > 0";
+                                }
+                                else
+                                {
+                                    expr = $@"{prop.Key}.ToString().StartsWith(""{clause}"")";
+                                }
                             }
+                            searchClauses.Add(expr);
                         }
                         if (searchClauses.Count > 0)
                         {
@@ -295,18 +313,38 @@ namespace Intellitect.ComponentModel.Controllers
                 }
 
                 // Handle not split on spaces with simple ors.
-                if (ClassViewModel.SearchProperties.Any(f => !f.Value.SearchIsSplitOnSpaces))
+                if (ClassViewModel.SearchProperties().Any(f => !f.Value.SearchIsSplitOnSpaces))
                 {
-                    foreach (var prop in ClassViewModel.SearchProperties.Where(f => !f.Value.SearchIsSplitOnSpaces))
+                    foreach (var prop in ClassViewModel.SearchProperties().Where(f => !f.Value.SearchIsSplitOnSpaces))
                     {
                         int temp;
                         if (prop.Value.PureType.IsString)
                         {
-                            completeSearchClauses.Add(string.Format("{0}.StartsWith(\"{1}\")", prop.Key, listParameters.Search));
+                            string expr;
+                            if (prop.Key.Contains("[]."))
+                            {
+                                var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                expr = $@"{parts[0]}.Count({parts[1]}.StartsWith(""{listParameters.Search}"")) > 0";
+                            }
+                            else
+                            {
+                                expr = string.Format("{0}.StartsWith(\"{1}\")", prop.Key, listParameters.Search);
+                            }
+                            completeSearchClauses.Add(expr);
                         }
                         else if (int.TryParse(listParameters.Search, out temp))
                         {
-                            completeSearchClauses.Add(string.Format("{0} = {1}", prop.Key, temp));
+                            string expr;
+                            if (prop.Key.Contains("[]."))
+                            {
+                                var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                expr = $@"{parts[0]}.Count({prop.Key} = {listParameters.Search}) > 0";
+                            }
+                            else
+                            {
+                                expr = string.Format("{prop.Key} = {listParameters.Search}");
+                            }
+                            completeSearchClauses.Add(expr);
                         }
                     }
                 }

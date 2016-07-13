@@ -252,59 +252,71 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public Dictionary<string, PropertyViewModel> SearchProperties
+        public Dictionary<string, PropertyViewModel> SearchProperties(int depth = 0)
         {
-            get
+            // Only go down three levels.
+            if (depth == 3) return new Dictionary<string, PropertyViewModel>();
+
+            var searchProperties = Properties.Where(f => f.IsSearch).ToList();
+            var result = new Dictionary<string, PropertyViewModel>();
+            if (searchProperties.Any())
             {
-                var searchProperties = Properties.Where(f => f.IsSearch).ToList();
-                var result = new Dictionary<string, PropertyViewModel>();
-                if (searchProperties.Any())
+                // Process these items to make sure we have things we can search on.
+                foreach (var prop in searchProperties)
                 {
-                    // Process these items to make sure we have things we can search on.
-                    foreach (var prop in searchProperties)
+                    if (prop.Type.PureType.HasClassViewModel )
                     {
-                        if (prop.Type.HasClassViewModel)
+                        // If we will exceed the depth don't try to query on an object.
+                        if (depth < 2)
                         {
                             // Remove this item and add the child's search items with a prepended property name
-                            var childResult = prop.Type.ClassViewModel.Properties.Where(f => f.IsSearch).ToList();
+                            var childResult = prop.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
                             foreach (var childProp in childResult)
                             {
-                                result.Add($"{prop.Name}.{childProp.Name}", childProp);
+                                if (prop.Type.IsCollection)
+                                {
+                                    result.Add($"{prop.Name}[].{childProp.Key}", childProp.Value);
+                                }
+                                else
+                                {
+                                    result.Add($"{prop.Name}.{childProp.Key}", childProp.Value);
+                                }
                             }
-                        }else
-                        {
-                            result.Add(prop.Name, prop);
                         }
                     }
-                }
-                else
-                {
-                    var prop = Properties.FirstOrDefault(
-                        f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
-                    if (prop != null)
+                    else
                     {
                         result.Add(prop.Name, prop);
                     }
                 }
-                if (!result.Any())
-                {
-                    var prop = Properties.FirstOrDefault(
-                        f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
-                    if (prop != null)
-                    {
-                        result.Add(prop.Name, prop);
-                    }
-                }
-                if (!result.Any())
-                {
-                    var prop = Properties.FirstOrDefault(f=>f.IsPrimaryKey);
-                    if (prop != null)
-                    {
-                        result.Add(prop.Name, prop);
-                    }
-                }
-                return result;
             }
+            else
+            {
+                var prop = Properties.FirstOrDefault(
+                    f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
+                if (prop != null)
+                {
+                    result.Add(prop.Name, prop);
+                }
+            }
+            if (!result.Any())
+            {
+                var prop = Properties.FirstOrDefault(
+                    f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
+                if (prop != null)
+                {
+                    result.Add(prop.Name, prop);
+                }
+            }
+            if (!result.Any())
+            {
+                var prop = Properties.FirstOrDefault(f => f.IsPrimaryKey);
+                if (prop != null)
+                {
+                    result.Add(prop.Name, prop);
+                }
+            }
+            return result;
         }
 
         /// <summary>

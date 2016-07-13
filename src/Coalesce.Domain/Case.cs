@@ -29,7 +29,9 @@ namespace Coalesce.Domain
         [Key]
         public int CaseKey { get; set; }
         [ClientValidation(IsRequired = true, ErrorMessage = "You must enter a title for the case.")]
+        [Search]
         public string Title { get; set; }
+        [Search]
         public string Description { get; set; }
         [DateType()]
         public DateTimeOffset OpenedAt { get; set; }
@@ -50,6 +52,7 @@ namespace Coalesce.Domain
         public string Severity { get; set; }
         public Statuses Status { get; set; }
         [ManyToMany("Products")]
+        [Search]
         public ICollection<CaseProduct> CaseProducts { get; set; }
 
 

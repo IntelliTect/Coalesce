@@ -9,6 +9,9 @@ using Intellitect.ComponentModel.TypeDefinition;
 using Intellitect.ComponentModel.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
+using System;
+using System.Linq;
+using Intellitect.ComponentModel.Mapping;
 
 namespace Coalesce.Web
 {
@@ -82,8 +85,14 @@ namespace Coalesce.Web
                     name: "Default Route",
                     template: "{controller}/{action}/{id?}",
                     defaults: new { controller = "Home", action = "Index" });
-
             });
+
+            var classNameParts = GetType().FullName.Split(new char[] { '.' });
+            var ns = string.Join(".", classNameParts.Take(classNameParts.Length - 1));
+            foreach (var model in ReflectionRepository.Models.Where(m => m.PrimaryKey != null && m.OnContext))
+            {
+                Mapper.AddMap(model.Type, Type.GetType($"{ns}.Models.{model.Type.Name}DtoGen"));
+            }
 
             SampleData.Initialize(app.ApplicationServices.GetService<AppDbContext>());
         }

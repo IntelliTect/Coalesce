@@ -16,7 +16,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Intellitect.ComponentModel.Interfaces;
+using Intellitect.ComponentModel.Models;
+using Intellitect.ComponentModel.Mapping;
 using System.Linq;
+using Newtonsoft.Json;
 // Model Namespaces
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
@@ -26,57 +29,56 @@ using static @(model.Namespace).@(model.Name);
 
 namespace @(namespaceName).Models
 {
-    public partial class @(model.Name)Dto : IClassDto
+    public partial class @(model.Name)DtoGen : GeneratedDto<@(model.Name), @(model.Name)DtoGen>, IClassDto
     {
-        public @(model.Name)Dto() { }
+        public @(model.Name)DtoGen() { }
 
-        public @(model.Name)Dto(@(model.Name) entity, ClaimsPrincipal user = null, string includes = null)
-        {
-            User = user;
-            Includes = includes ?? "";
-
-            // Applicable includes for @(model.Name)
-            @(model.DtoIncludesForConstructor())
-
-            // Applicable excludes for @(model.Name)
-            @(model.DtoExcludesForConstructor())
-
-            // Applicable roles for @(model.Name)
-            @(model.PropertyRolesForConstructor())
-
-            @foreach (var prop in model.Properties.Where(p => p.CanRead))
-            {
-                @prop.ObjToDtoPropertySetter()
-            }
-        }
-
-        public ClaimsPrincipal User { get; set; }
-        public string Includes { get; set; }
-            
         @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
         {
-        @: public @prop.Type.NullableType @prop.Name { get; set; }
+        @: public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
         }
 
-        public void Update(object obj)
-        {   
-            if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+        public void Update(object obj, ClaimsPrincipal user = null, string includes = null)
+        {
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-            // Applicable includes for @(model.Name)
-            @(model.DtoIncludesForConstructor())
-
-            // Applicable excludes for @(model.Name)
-            @(model.DtoExcludesForConstructor())
-
-            // Applicable roles for @(model.Name)
-            @(model.PropertyRolesForConstructor())
-
+            includes = includes ?? "";
 
             @(model.Name) entity = (@(model.Name))obj;
 
+            if (OnUpdate(entity, user, includes)) return;
+
+            // Applicable includes for @(model.Name)
+            @(model.DtoIncludesAsCS())
+
+            // Applicable excludes for @(model.Name)
+            @(model.DtoExcludesAsCS())
+
+            // Applicable roles for @(model.Name)
+            @(model.PropertyRolesAsCS())
+    
             @foreach (var prop in model.Properties.Where(p => p.CanWrite))
             {
-                @prop.DtoToObjPropertySetter()
+            @prop.DtoToObjPropertySetter()
+            }
+        }
+
+        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
+        {
+            if (OnSecurityTrim(user, includes)) return;
+
+            // Applicable includes for @(model.Name)
+            @(model.DtoIncludesAsCS())
+
+            // Applicable excludes for @(model.Name)
+            @(model.DtoExcludesAsCS())
+
+            // Applicable roles for @(model.Name)
+            @(model.PropertyRolesAsCS())
+
+            @foreach (var prop in model.Properties.Where(p => p.CanRead))
+            {
+                @prop.ObjToDtoSecurityTrimmer()
             }
         }
     }

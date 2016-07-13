@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using System.Security.Claims;
+using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -21,14 +21,43 @@ namespace Coalesce.Web.TestArea.Api
     [Route("TestArea/api/[controller]")]
     [Authorize]
     public partial class CaseProductController 
-         : LocalBaseApiController<CaseProduct, CaseProductDto> 
+         : LocalBaseApiController<CaseProduct, CaseProductDtoGen> 
     {
         public CaseProductController() { }
-        
-        
+      
+        /// <summary>
+        /// Returns CaseProductDtoGen
+        /// </summary>
         [HttpGet("list")]
         [Authorize]
         public virtual async Task<ListResult> List(
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            // Custom fields for this object.
+            string caseProductId = null,string caseId = null,string productId = null)
+        {
+            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            parameters.AddFilter("CaseProductId", caseProductId);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("ProductId", productId);
+        
+            var listResult = await ListImplementation(parameters);
+            return new GenericListResult<CaseProductDtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns custom object based on supplied fields
+        /// </summary>
+        [HttpGet("customlist")]
+        [Authorize]
+        public virtual async Task<ListResult> CustomList(
             string fields = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
@@ -59,7 +88,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search);
+            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
             parameters.AddFilter("CaseProductId", caseProductId);
@@ -78,7 +107,7 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<CaseProductDto> Get(string id, string includes = null)
+        public virtual async Task<CaseProductDtoGen> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -94,22 +123,20 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<CaseProductDto> Save(ClaimsPrincipal user, CaseProductDto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CaseProductDtoGen> Save(CaseProductDtoGen dto, string includes = null, bool returnObject = true)
         {
-            dto.User = user;
-
             return SaveImplementation(dto, includes, returnObject);
         }
         
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<CaseProductDto> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CaseProductDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<CaseProductDto> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CaseProductDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }

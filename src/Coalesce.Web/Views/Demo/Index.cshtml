@@ -38,10 +38,10 @@
     <span class="label label-info" style="float: right; font-size: 14px" data-bind="fadeVisible: isLoading(), text: 'Loading...'"></span>
 </div>
 <hr />
-<div class="flex-panel-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
-    <div class="flex-panel ">
-        <div class="panel-heading">
-            <h3 class="panel-title">
+<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+    <div class="flex-card ">
+        <div class="card-heading">
+            <h3 class="card-title">
                 <span data-bind="text: title"></span>
                 <i class="pull-right fa fa-times-circle" style="color: red" data-bind="visible: severity() == 'Critical'"></i>
                 <i class="pull-right fa fa-exclamation-triangle" style="color: orangered" data-bind="visible: severity() == 'High'"></i>
@@ -49,7 +49,7 @@
                 <i class="pull-right fa fa-exclamation" style="color: darkcyan" data-bind="visible: severity() == 'Low'"></i>
             </h3>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
                     <dl>

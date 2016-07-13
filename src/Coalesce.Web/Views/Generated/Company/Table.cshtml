@@ -1,144 +1,148 @@
 @using Intellitect.ComponentModel.Helpers
 @{ ViewBag.Fluid = true; }
 
-<div class="panel panel-default">
-    <div class="panel-heading">
+
+<div style="padding: 0px 15px">
+    <h1 style="display:inline-block">
+        Company List
+            <span style="font-size: .5em; padding-left: 20px;"><a href="~/Company/Docs">API Docs</a></span>
+    </h1>
+    <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    <div class="clearfix">
+        <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+            Page
+            <input data-bind="textInput: page" style="width: 35px">
+            of
+            <span data-bind="text: pageCount"></span>
+            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+        </div>
+        <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+            <option value="10000">10000</option>
+        </select>
+
+        <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+
         <div class="btn-group pull-right">
-                <a href="~/Company/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Create</a>
-                <button data-bind="click:load" class="btn btn-sm btn-default ">Refresh</button>
+                    <a href="~/Company/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
+                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
                 @if (ViewBag.Editable)
                 {
-                <a href="~/Company/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Read-only</a>
+                <a href="~/Company/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
                 }
-                else
-                {
-                <a href="~/Company/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default ">Editable</a>
-                }
-        </div>
-        <h1 style="display:inline-block">
-            Company List
-                <span style="font-size: .5em;"><a href="~/Company/Docs">Docs</a></span>
-        </h1>
-        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-        <div>
-            <div style="display:inline-block; font-size: 1.1em; margin-right: 10px;">
-                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
-                Page
-                <span data-bind="text: page"></span>
-                of
-                <span data-bind="text: pageCount"></span>
-                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
-            </div>
-            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display:inline-block">
-                <option value="1">1</option>
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="500">500</option>
-                <option value="1000">1000</option>
-                <option value="10000">10000</option>
-            </select>
-            <input class="form-control pull-right" style="width: 200px;" data-bind="textInput: search" placeholder="Search" />
+                    else
+                    {
+                    <a href="~/Company/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
+                    }
         </div>
     </div>
-        <table class="table table-striped @(ViewBag.Editable ? " editable" : "" )">
-    <thead>
-        <tr>
-                <th>Name</th>
-                <th>Address1</th>
-                <th>Address2</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Zip Code</th>
-                <th>Employees</th>
-                <th>Alt Name</th>
-            <th 
-                                    style="width: 80px;"
-                >
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- ko foreach: items -->
-        <tr data-bind="css: {'btn-warning': errorMessage()}">
-            @if (@ViewBag.Editable)
-            {
-            <td>
-                @(Knockout.InputFor<Company>(p => p.Name))
-            </td>
-            <td>
-                @(Knockout.InputFor<Company>(p => p.Address1))
-            </td>
-            <td>
-                @(Knockout.InputFor<Company>(p => p.Address2))
-            </td>
-            <td>
-                @(Knockout.InputFor<Company>(p => p.City))
-            </td>
-            <td>
-                @(Knockout.InputFor<Company>(p => p.State))
-            </td>
-            <td>
-                @(Knockout.InputFor<Company>(p => p.ZipCode))
-            </td>
-            <td>
-                <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.AltName))
-            </td>
-            }
-            else
-            {
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.Name))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.Address1))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.Address2))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.City))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.State))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.ZipCode))
-            </td>
-            <td>
-                <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.AltName))
-            </td>
-            }
-            <td>
-                
-                <!-- Editor buttons -->
-                <div class="btn-group pull-right" role="group">
-                                        <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                        <i class="fa fa-pencil"></i>
-                    </a>
-                                        <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                        <i class="fa fa-remove"></i>
-                    </button>
+</div>
+<hr />
+<div class="card">
+    <div class="card-body">
+            <table class="table @(ViewBag.Editable ? " editable" : "" )">
+        <thead>
+            <tr>
+                    <th>Name</th>
+                    <th>Address1</th>
+                    <th>Address2</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Zip Code</th>
+                    <th>Employees</th>
+                    <th>Alt Name</th>
+                <th                     style="width: 80px;">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ko foreach: items -->
+            <tr data-bind="css: {'btn-warning': errorMessage()}">
+                    @if (@ViewBag.Editable)
+                    {
+                    <td>
+                        @(Knockout.InputFor<Company>(p => p.Name))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Company>(p => p.Address1))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Company>(p => p.Address2))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Company>(p => p.City))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Company>(p => p.State))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Company>(p => p.ZipCode))
+                    </td>
+                    <td>
+                        <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.AltName))
+                    </td>
+                    }
+                    else
+                    {
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.Name))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.Address1))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.Address2))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.City))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.State))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.ZipCode))
+                    </td>
+                    <td>
+                        <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Company>(p => p.AltName))
+                    </td>
+                    }
+                <td>
 
-                </div>
-                <div class="form-control-static" data-bind="text: errorMessage"></div>
-            </td>
-        </tr>
-        <!-- /ko -->
-    </tbody>
-</table>
-    
-<div class="panel-body">
+                    <!-- Editor buttons -->
+                    <div class="btn-group pull-right" role="group">
+                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                <i class="fa fa-remove"></i>
+                            </button>
 
+                    </div>
+                    <div class="form-control-static" data-bind="text: errorMessage"></div>
+                </td>
+            </tr>
+            <!-- /ko -->
+        </tbody>
+    </table>
 </div>
 </div>
+
+
+
 
 
 
@@ -147,9 +151,9 @@
     <script>
         var companyList = new ListViewModels.CompanyList();
         @if (ViewBag.ParentIdName != null)
-        {
-            @:companyList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-        }
+                    {
+                        @:companyList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+                    }
 
         companyList.isSavingAutomatically = false;
         ko.applyBindings(companyList);

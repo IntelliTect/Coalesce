@@ -208,6 +208,11 @@ module ListViewModels {
                     self.load();
                 }
             });
+            self.page.subscribe(function () {
+                if (self.isLoaded() && !self.isLoading()){
+                    self.load();
+                }
+            });
             self.search.subscribe(function () {
                 if (searchTimeout) {
                     clearTimeout(searchTimeout);

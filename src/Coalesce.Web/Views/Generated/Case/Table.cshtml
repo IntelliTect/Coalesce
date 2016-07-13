@@ -1,201 +1,211 @@
 @using Intellitect.ComponentModel.Helpers
 @{ ViewBag.Fluid = true; }
 
-<div class="panel panel-default">
-    <div class="panel-heading">
+
+<div style="padding: 0px 15px">
+    <h1 style="display:inline-block">
+        Case List
+            <span style="font-size: .5em; padding-left: 20px;"><a href="~/Case/Docs">API Docs</a></span>
+    </h1>
+    <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    <div class="clearfix">
+        <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+            Page
+            <input data-bind="textInput: page" style="width: 35px">
+            of
+            <span data-bind="text: pageCount"></span>
+            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+        </div>
+        <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+            <option value="10000">10000</option>
+        </select>
+
+        <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+
         <div class="btn-group pull-right">
-                <a href="~/Case/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Create</a>
-                <button data-bind="click:load" class="btn btn-sm btn-default ">Refresh</button>
+                    <a href="~/Case/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
+                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
                 @if (ViewBag.Editable)
                 {
-                <a href="~/Case/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default ">Read-only</a>
+                <a href="~/Case/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
                 }
-                else
-                {
-                <a href="~/Case/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default ">Editable</a>
-                }
-        </div>
-        <h1 style="display:inline-block">
-            Case List
-                <span style="font-size: .5em;"><a href="~/Case/Docs">Docs</a></span>
-        </h1>
-        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-        <div>
-            <div style="display:inline-block; font-size: 1.1em; margin-right: 10px;">
-                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
-                Page
-                <span data-bind="text: page"></span>
-                of
-                <span data-bind="text: pageCount"></span>
-                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
-            </div>
-            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display:inline-block">
-                <option value="1">1</option>
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="500">500</option>
-                <option value="1000">1000</option>
-                <option value="10000">10000</option>
-            </select>
-            <input class="form-control pull-right" style="width: 200px;" data-bind="textInput: search" placeholder="Search" />
+                    else
+                    {
+                    <a href="~/Case/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
+                    }
         </div>
     </div>
-        <table class="table table-striped @(ViewBag.Editable ? " editable" : "" )">
-    <thead>
-        <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Opened At</th>
-                <th>Assigned To</th>
-                <th>Reported By</th>
-                <th>Attachment</th>
-                <th>Severity</th>
-                <th>Status</th>
-                <th>Case Products</th>
-                <th>Dev Team Assigned</th>
-            <th 
-                                    style="width: 150px;"
-                >
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- ko foreach: items -->
-        <tr data-bind="css: {'btn-warning': errorMessage()}">
-            @if (@ViewBag.Editable)
-            {
-            <td>
-                @(Knockout.InputFor<Case>(p => p.Title))
-            </td>
-            <td>
-                @(Knockout.InputFor<Case>(p => p.Description))
-            </td>
-            <td>
-                @(Knockout.InputFor<Case>(p => p.OpenedAt))
-            </td>
-            <td>
-                @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
-            </td>
-            <td>
-                @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
-            </td>
-            <td>
-                @(Knockout.InputFor<Case>(p => p.Attachment))
-            </td>
-            <td>
-                @(Knockout.SelectFor<Case>(p => p.Severity))
-            </td>
-            <td>
-                @(Knockout.SelectFor<Case>(p => p.Status))
-            </td>
-            <td>
-                @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
-            </td>
-            <td>
-                @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
-            </td>
-            }
-            else
-            {
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.Title))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.Description))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.OpenedAt))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.AssignedTo))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.ReportedBy))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.Attachment))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.Severity))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.Status))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.CaseProducts))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))
-            </td>
-            }
-            <td>
-                
-                <!-- Editor buttons -->
-                <div class="btn-group pull-right" role="group">
-                                        <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                        <i class="fa fa-pencil"></i>
-                    </a>
-                                        <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                        <i class="fa fa-remove"></i>
-                    </button>
+</div>
+<hr />
+<div class="card">
+    <div class="card-body">
+            <table class="table @(ViewBag.Editable ? " editable" : "" )">
+        <thead>
+            <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Opened At</th>
+                    <th>Assigned To</th>
+                    <th>Reported By</th>
+                    <th>Attachment</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Case Products</th>
+                    <th>Dev Team Assigned</th>
+                <th                     style="width: 80px;">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ko foreach: items -->
+            <tr data-bind="css: {'btn-warning': errorMessage()}">
+                    @if (@ViewBag.Editable)
+                    {
+                    <td>
+                        @(Knockout.InputFor<Case>(p => p.Title))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Case>(p => p.Description))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Case>(p => p.OpenedAt))
+                    </td>
+                    <td>
+                        @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
+                    </td>
+                    <td>
+                        @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
+                    </td>
+                    <td>
+                        @(Knockout.InputFor<Case>(p => p.Attachment))
+                    </td>
+                    <td>
+                        @(Knockout.SelectFor<Case>(p => p.Severity))
+                    </td>
+                    <td>
+                        @(Knockout.SelectFor<Case>(p => p.Status))
+                    </td>
+                    <td>
+                        @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
+                    </td>
+                    <td>
+                        @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
+                    </td>
+                    }
+                    else
+                    {
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.Title))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.Description))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.OpenedAt))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.AssignedTo))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.ReportedBy))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.Attachment))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.Severity))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.Status))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.CaseProducts))
+                    </td>
+                    <td>
+                        @(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))
+                    </td>
+                    }
+                <td>
 
-                </div>
-                <div class="form-control-static" data-bind="text: errorMessage"></div>
-            </td>
-        </tr>
-        <!-- /ko -->
-    </tbody>
-</table>
-    
-<div class="panel-body">
+                    <!-- Editor buttons -->
+                    <div class="btn-group pull-right" role="group">
+                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                <i class="fa fa-remove"></i>
+                            </button>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>Actions</h4>
-            </div>
+                    </div>
+                    <div class="form-control-static" data-bind="text: errorMessage"></div>
+                </td>
+            </tr>
+            <!-- /ko -->
+        </tbody>
+    </table>
+</div>
+</div>
+
+
+
+    <div class="card">
+        <div class="card-heading">
+            <h3 class="card-title">Actions</h3>
+        </div>
+        <div class="card-body">
             <table class="table">
-                <tr>
-                    <th style="width:20%;">Action</th>
-                    <th style="width:50%;">Result</th>
-                    <th style="width:20%;">Successful</th>
-                    <th style="width:10%;"></th>
-                </tr>
+                <thead>
                     <tr>
-                        <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesCountModal" >Get All Open Cases Count</button>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: getAllOpenCasesCountResult"></span>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: getAllOpenCasesCountWasSuccessful"></span>
-                            <span class="" data-bind="text: getAllOpenCasesCountMessage"></span>
-                        </td>
-                        <td>
-                            <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesCountIsLoading()">Loading</span>
-                        </td>
+                        <th style="width: 20%;">Action</th>
+                        <th style="width: 50%;">Result</th>
+                        <th style="width: 20%;">Successful</th>
+                        <th style="width: 10%;"></th>
                     </tr>
-                    <tr>
-                        <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesModal" >Get All Open Cases</button>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: getAllOpenCasesResult"></span>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: getAllOpenCasesWasSuccessful"></span>
-                            <span class="" data-bind="text: getAllOpenCasesMessage"></span>
-                        </td>
-                        <td>
-                            <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesIsLoading()">Loading</span>
-                        </td>
-                    </tr>
+                </thead>
+                <tbody>
+                        <tr>
+                            <td>
+                                <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesCountModal">Get All Open Cases Count</button>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: getAllOpenCasesCountResult"></span>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: getAllOpenCasesCountWasSuccessful"></span>
+                                <span class="" data-bind="text: getAllOpenCasesCountMessage"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesCountIsLoading()">Loading</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesModal">Get All Open Cases</button>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: getAllOpenCasesResult"></span>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: getAllOpenCasesWasSuccessful"></span>
+                                <span class="" data-bind="text: getAllOpenCasesMessage"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesIsLoading()">Loading</span>
+                            </td>
+                        </tr>
+                </tbody>
             </table>
         </div>
-</div>
-</div>
+    </div>
 
 
 
@@ -204,9 +214,9 @@
     <script>
         var caseList = new ListViewModels.CaseList();
         @if (ViewBag.ParentIdName != null)
-        {
-            @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-        }
+                    {
+                        @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+                    }
 
         caseList.isSavingAutomatically = false;
         ko.applyBindings(caseList);

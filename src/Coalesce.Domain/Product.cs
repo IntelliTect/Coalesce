@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using Intellitect.ComponentModel.DataAnnotations;
 
 namespace Coalesce.Domain
 {
@@ -10,6 +11,8 @@ namespace Coalesce.Domain
     public class Product
     {
         public int ProductId { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains)]
         public string Name { get; set; }
     }
 }

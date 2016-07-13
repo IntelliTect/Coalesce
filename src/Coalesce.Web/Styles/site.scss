@@ -57,6 +57,18 @@ span.select2-container--default .select2-selection--single .select2-selection__a
 }
 
 
+.comma-list {
+    list-style: none;
+    padding-left: 0;
+
+    li {
+        display: inline;
+
+        &:not(:last-of-type)::after {
+            content: ', '
+        }
+    }
+}
 
 .flex-panel-container {
      display: flex;

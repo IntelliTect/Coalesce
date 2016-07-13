@@ -370,6 +370,17 @@ header {
 }
 /* End header */
 
+@media (max-width: 420px) {
+    #logo {
+        .coalesce-logo-text {
+            font-size: 28.5px !important;
+        }
+
+        .intellitect-logo-text {
+            font-size: 18px !important;
+        }
+    }
+}
 
 
 @media (max-width: $screen-md-max) {

@@ -622,6 +622,24 @@ namespace Intellitect.ComponentModel.TypeDefinition
         }
 
         /// <summary>
+        /// Returns the actual name of the method to use for searching.
+        /// </summary>
+        public string SearchMethodName
+        {
+            get
+            {
+                switch ( SearchMethod )
+                {
+                    case SearchAttribute.SearchMethods.Contains:
+                        return "Contains";
+                    case SearchAttribute.SearchMethods.BeginsWith:
+                    default:
+                        return "StartsWith";
+                }
+            }
+        }
+
+        /// <summary>
         /// True if the search term should be split on spaces and evaluated individually with or.
         /// </summary>
         public bool SearchIsSplitOnSpaces

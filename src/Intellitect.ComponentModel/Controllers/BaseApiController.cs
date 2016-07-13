@@ -283,11 +283,11 @@ namespace Intellitect.ComponentModel.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new [] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.StartsWith(""{clause}"")) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{clause}"")) > 0";
                                 }
                                 else
                                 {
-                                    expr = string.Format("{0}.StartsWith(\"{1}\")", prop.Key, clause);
+                                    expr = $"{prop.Key}.{prop.Value.SearchMethodName}(\"{clause}\")";
                                 }
                             }
                             else
@@ -295,11 +295,11 @@ namespace Intellitect.ComponentModel.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.ToString().StartsWith(""{clause}"")) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]}.ToString().{prop.Value.SearchMethodName}(""{clause}"")) > 0";
                                 }
                                 else
                                 {
-                                    expr = $@"{prop.Key}.ToString().StartsWith(""{clause}"")";
+                                    expr = $@"{prop.Key}.ToString().{prop.Value.SearchMethodName}(""{clause}"")";
                                 }
                             }
                             searchClauses.Add(expr);
@@ -324,11 +324,11 @@ namespace Intellitect.ComponentModel.Controllers
                             if (prop.Key.Contains("[]."))
                             {
                                 var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                expr = $@"{parts[0]}.Count({parts[1]}.StartsWith(""{listParameters.Search}"")) > 0";
+                                expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{listParameters.Search}"")) > 0";
                             }
                             else
                             {
-                                expr = string.Format("{0}.StartsWith(\"{1}\")", prop.Key, listParameters.Search);
+                                expr = $"{prop.Key}.{prop.Value.SearchMethodName}(\"{listParameters.Search}\")";
                             }
                             completeSearchClauses.Add(expr);
                         }
@@ -342,7 +342,7 @@ namespace Intellitect.ComponentModel.Controllers
                             }
                             else
                             {
-                                expr = string.Format("{prop.Key} = {listParameters.Search}");
+                                expr = $"{prop.Key} = {listParameters.Search}";
                             }
                             completeSearchClauses.Add(expr);
                         }

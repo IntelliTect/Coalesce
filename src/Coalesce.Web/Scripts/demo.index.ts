@@ -3,19 +3,12 @@
 
 module Demo {
     $(function () {
-        var viewModel = new DemoModel();
-        ko.applyBindings(viewModel);
+        var allOpenCases = new ListViewModels.CaseList();
 
-        viewModel.load();
+        allOpenCases.pageSize(20);
+        allOpenCases.listDataSource = ListViewModels.CaseDataSources.GetAllOpenCases;
+        allOpenCases.load();
+
+        ko.applyBindings(allOpenCases);
     });
-
-    class DemoModel {
-        allOpenCases = new ListViewModels.CaseList();
-
-        load() {
-            this.allOpenCases.pageSize(20);
-            this.allOpenCases.listDataSource = ListViewModels.CaseDataSources.GetAllOpenCases;
-            this.allOpenCases.load();
-        }
-    }
 }

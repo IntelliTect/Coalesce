@@ -15,18 +15,31 @@ namespace Coalesce.Web.TestArea.Models
     {
         public CaseProductDto() { }
 
-        public CaseProductDto(ClaimsPrincipal user, CaseProduct entity)
+        public CaseProductDto(CaseProduct entity, ClaimsPrincipal user = null, string includes = null)
         {
             User = user;
-            List<string> roles;
-                    CaseProductId = entity.CaseProductId;
-                    CaseId = entity.CaseId;
-                    Case = entity.Case;
-                    ProductId = entity.ProductId;
-                    Product = entity.Product;
+            Includes = includes ?? "";
+
+            // Applicable includes for CaseProduct
+            
+
+            // Applicable excludes for CaseProduct
+            
+
+            // Applicable roles for CaseProduct
+            if (User != null)
+			{
+			}
+
+			CaseProductId = entity.CaseProductId;
+			CaseId = entity.CaseId;
+			Case = entity.Case;
+			ProductId = entity.ProductId;
+			Product = entity.Product;
         }
 
         public ClaimsPrincipal User { get; set; }
+        public string Includes { get; set; }
             
          public Int32? CaseProductId { get; set; }
          public Int32? CaseId { get; set; }
@@ -38,13 +51,22 @@ namespace Coalesce.Web.TestArea.Models
         {   
             if (User == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
+            // Applicable includes for CaseProduct
+            
+
+            // Applicable excludes for CaseProduct
+            
+
+            // Applicable roles for CaseProduct
+            if (User != null)
+			{
+			}
+
+
             CaseProduct entity = (CaseProduct)obj;
 
-            List<string> roles;
-                    entity.CaseId = (Int32)CaseId;
-                    entity.Case = Case;
-                    entity.ProductId = (Int32)ProductId;
-                    entity.Product = Product;
+			entity.CaseId = (Int32)CaseId;
+			entity.ProductId = (Int32)ProductId;
         }
     }
 }

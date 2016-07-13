@@ -9,7 +9,6 @@ namespace Intellitect.ComponentModel.Models
     public class ListParameters
     {
         public string Where { get; set; }
-        public string Include { get; set; }
         public string Includes { get; set; }
         public string OrderBy { get; set; }
         public string OrderByDescending { get; set; }
@@ -43,25 +42,13 @@ namespace Intellitect.ComponentModel.Models
         /// List of filters added from the controller based on property=value on the URL.
         /// </summary>
         public Dictionary<string, string> Filters { get; }
-        /// <summary>
-        /// Calculated list from Include CSV
-        /// </summary>
-        public List<string> IncludeList {
-            get
-            {
-                if (Include == null) return new List<string>();
-                return Include.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            }
-        }
 
-
-        public ListParameters(string fields = null, string include = null,
+        public ListParameters(string fields = null,
             string includes = null, string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, string where = null,
             string listDataSource = null, string search = null)
         {
             Fields = fields;
-            Include = include;
             Includes = includes;
             OrderBy = orderBy;
             OrderByDescending = orderByDescending;

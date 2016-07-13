@@ -142,15 +142,9 @@ namespace Intellitect.ComponentModel.TypeDefinition
             {
                 // When static add an id that specifies the object to work on.
                 string result = "";
-                if (ReturnType.Name == Parent.Name ||
-                    (ReturnType.PureType.Name == Parent.Name && ReturnType.IsCollection))
-                {
-                    result = "ClaimsPrincipal user";
-                    if (!IsStatic || ClientParameters.Any()) result += ", ";
-                }
                 if (!IsStatic)
                 {
-                    result += $"{Parent.PrimaryKey.PureType.Name} id";
+                    result = $"{Parent.PrimaryKey.PureType.Name} id";
                     if (ClientParameters.Any()) result += ", ";
                 }
                 result += string.Join(", ", ClientParameters.Select(f => f.Type.CsDeclaration(f.Name)));

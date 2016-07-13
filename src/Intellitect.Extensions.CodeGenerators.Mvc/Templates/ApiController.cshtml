@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Intellitect.ComponentModel.Data;
-using System.Security.Claims;
 // Model Namespaces 
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
@@ -52,7 +51,6 @@ namespace @(namespaceName).Api
         @(model.SecurityInfo.ReadAnnotation)
         public virtual async Task<ListResult> List(
             string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -62,7 +60,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
@@ -129,9 +127,9 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)Dto> Save(ClaimsPrincipal user, @(model.Name)Dto dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<@(model.Name)Dto> Save(@(model.Name)Dto dto, string includes = null, bool returnObject = true)
         {
-            dto.User = user;
+            dto.User = User;
 
             @if (!model.IsCreateAllowed)
             {
@@ -221,11 +219,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-@:result.Object = new @(model.Name)Dto(user, objResult);
+@:result.Object = new @(model.Name)Dto(objResult, User);
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-@:result.Object = objResult.ToList().Select(o => new @(model.Name)Dto(user, o));
+@:result.Object = objResult.ToList().Select(o => new @(model.Name)Dto(o, User));
                 }
                 else
                 {

@@ -561,5 +561,75 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
         }
 
+        public string DtoIncludesForConstructor()
+        {
+            var includeList = Properties
+                                .Where(p => p.HasDtoIncludes)
+                                .SelectMany(p => p.DtoIncludes)
+                                .ToList();
+
+            return string.Join($"{Environment.NewLine}\t\t\t", includeList.Select(include => $"bool include{include} = Includes == \"{include}\";"));
+        }
+
+        public string DtoExcludesForConstructor()
+        {
+            var excludeList = Properties
+                                .Where(p => p.HasDtoExcludes)
+                                .SelectMany(p => p.DtoExcludes)
+                                .ToList();
+            return string.Join($"{Environment.NewLine}\t\t\t", excludeList.Select(exclude => $"bool exclude{exclude} = Includes == \"{exclude}\";"));
+        }
+
+        public string PropertyRolesForConstructor()
+        {
+            var allPropertyRoles = Properties.Aggregate(new List<string>(), (p, c) => p.Union(c.SecurityInfo.EditRolesList.Union(c.SecurityInfo.ReadRolesList)).ToList());
+
+            var output = allPropertyRoles.Select(role => $"bool is{role} = false;").ToList();
+            output.Add("if (User != null)");
+            output.Add("{");
+            output.AddRange(allPropertyRoles.Select(role => $"\tis{role} = User.IsInRole(\"{role}\");"));
+            output.Add("}");
+
+            return string.Join($"{Environment.NewLine}\t\t\t", output);
+        }
+
+//                    @foreach(var rolesGroup in model.Properties.Where(p => p.CanRead).GroupBy(p => p.SecurityInfo.ReadRoles))
+//            {
+//                var secured = rolesGroup.Where(p => p.SecurityInfo.IsSecuredProperty);
+//        var notSecured = rolesGroup.Where(p => !p.SecurityInfo.IsSecuredProperty);
+//                foreach (var prop in notSecured)
+//                {
+//                    if (prop.HasDtoIncludes)
+//                    {
+//                        @:if (includeList.Intersect("@string.Join(",", prop.DtoIncludes)".Split(new char[] { ',' })).Count() > 0)
+//                        {
+//                            @:@prop.Name = entity.@prop.Name;
+//                        }
+//}
+//                    else
+//                    {
+//                        @:@prop.Name = entity.@prop.Name;   
+//                    }                    
+//                }
+//                if (string.IsNullOrEmpty(rolesGroup.Key))
+//                {
+//                    foreach (var prop in secured)
+//                    {
+//                        @:@prop.Name = entity.@prop.Name;
+//                    }
+//                }
+//                else
+//                {
+//                    @:roles = "@rolesGroup.Key".Split(new char[] { ',' }).ToList();
+//                    @:if (User != null && roles.Any(r => User.IsInRole(r)))
+//                    @:{
+//                    foreach (PropertyViewModel prop in secured)
+//                    {
+//                        @:@prop.Name = entity.@prop.Name;
+//                    }
+//                    @:}
+//                }
+//            }
+
     }
 }

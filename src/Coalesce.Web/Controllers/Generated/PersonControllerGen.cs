@@ -16,6 +16,11 @@ namespace Coalesce.Web.Controllers
         public PersonController() : base() { }
 
         [AllowAnonymous]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Views/Generated/Person/Cards.cshtml");
+        }
+
+        [AllowAnonymous]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Views/Generated/Person/Table.cshtml");
         }

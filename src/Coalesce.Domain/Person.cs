@@ -89,10 +89,13 @@ namespace Coalesce.Domain
 
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTime? BirthDate { get; set; }
+        [Hidden]
         public DateTime? LastBath { get; set; }
+        [Hidden]
         public DateTimeOffset? NextUpgrade { get; set; }
 
         public int PersonStatsId { get; set; }
+        [Hidden]
         public PersonStats PersonStats {get
             {
                 return new PersonStats { Height = 10, Weight = 20, PersonStatsId = 1 };
@@ -100,6 +103,7 @@ namespace Coalesce.Domain
         }
 
         [NotMapped]
+        [Hidden]
         public TimeZoneInfo TimeZone { get; set; }
 
 

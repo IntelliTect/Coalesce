@@ -16,6 +16,11 @@ namespace Coalesce.Web.Controllers
         public CaseController() : base() { }
 
         [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Views/Generated/Case/Cards.cshtml");
+        }
+
+        [Authorize]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Views/Generated/Case/Table.cshtml");
         }

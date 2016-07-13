@@ -528,6 +528,15 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                     areaLocation,
                     "Views", "Generated",
                     model.Model.Name,
+                    "Cards.cshtml");
+                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
+                    "CardView.cshtml", TemplateFolders, model);
+
+                filename = Path.Combine(
+                    _webProject.ProjectDirectory,
+                    areaLocation,
+                    "Views", "Generated",
+                    model.Model.Name,
                     "CreateEdit.cshtml");
                 await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
                     "CreateEditView.cshtml", TemplateFolders, model);

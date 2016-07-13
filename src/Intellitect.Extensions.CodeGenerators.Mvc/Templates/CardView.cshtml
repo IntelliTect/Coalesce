@@ -76,93 +76,95 @@
     </div>
 </div>
 <hr />
-<div class="card">
-    <div class="card-body">
-        @{
-            @:<table class="table @@(ViewBag.Editable ? " editable" : "" )">
+
+
+<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+    @{
+        var properties = model.Properties
+            .Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse)
+            .OrderBy(f => f.EditorOrder)
+            .ToList();
+
+        // I did this because "title" on a Person shouldn't be the title of the card - their name should.
+        var titleProp = properties.Where(f => f.Name == "Name").FirstOrDefault();
+        if (titleProp == null)
+        {
+            titleProp = properties.Where(f => f.Name == "Title").FirstOrDefault();
         }
-        <thead>
-            <tr>
-                @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+    }
+    <div class="flex-card ">
+        @if (titleProp != null)
+        {
+            <div class="card-heading">
+                <h3 class="card-title">
+                    <span data-bind="text: @titleProp.JsVariable"></span>
+                </h3>
+            </div>
+        }
+        else
+        {
+            // Make it easy for someone to add in the title with some other property if they want when they've copypasted this page.
+            <!-- You can add a title to the card here by uncommenting and changing the binding below
+            <div class="card-heading">
+                <h3 class="card-title">
+                    <span data-bind="text: TITLEVAR"></span>
+                </h3>
+            </div>
+            -->
+        }
+        <div class="card-body flex">
+
+            <dl>
+                @foreach (var prop in properties)
                 {
-                    <th>@prop.DisplayName</th>
-                }
-                <th @{
-                    int width = 0;
-                    bool actionButtons = model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic);
-                    if (actionButtons) { width += 73; }
-                    if (model.IsEditAllowed) { width += 40; }
-                    if (model.IsDeleteAllowed) { width += 40; }
-                    string widthString = $"{width}px";
-                }
-                    style="width: @widthString;">
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
-                @{
-                    @:@@if (@@ViewBag.Editable)
-                    @:{
-                    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
-                        {
-                    <td>
-                        @Display.PropertyHelper(prop, !prop.IsReadOnly)
-                    </td>
-                        }
-                    @:}
-                    @:else
-                    @:{
-                    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
-                        {
-                    <td>
+                    <dt>@prop.DisplayName</dt>
+                    <dd>
                         @Display.PropertyHelper(prop, false)
-                    </td>
-                        }
-                    @:}
+                    </dd>
                 }
-                <td>
 
-                    <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group">
-                        @if (actionButtons)
-                            {
+            </dl>
+
+
+            <div style="margin-top: auto">
+                <!-- Editor buttons -->
+                <div class="pull-right" role="group">
+                    @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
+                    {
                         <!-- Action buttons -->
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Actions <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    @foreach (var method in model.Methods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
-                                        {
-                                        <li>@Display.MethodHelper(method)</li>
-                                        }
-                                </ul>
-                            </div>
-                            }
-                        @if (model.IsEditAllowed)
-                            {
-                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                            }
-                        @if (model.IsDeleteAllowed)
-                            {
-                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions <span class="caret"></span>
                             </button>
-                            }
+                            <ul class="dropdown-menu">
+                                @foreach (var method in model.Methods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
+                                {
+                                    <li>@Display.MethodHelper(method)</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (model.IsEditAllowed)
+                    {
+                        <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                    }
+                    @if (model.IsDeleteAllowed)
+                    {
+                        <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                            <i class="fa fa-remove"></i>
+                        </button>
+                    }
 
-                    </div>
-                    <div class="form-control-static" data-bind="text: errorMessage"></div>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </tbody>
-    </table>
+                </div>
+                <span class="form-control-static" data-bind="text: errorMessage"></span>
+            </div>
+
+        </div>
+    </div>
 </div>
-</div>
+
 
 
 
@@ -205,6 +207,9 @@
             </table>
         </div>
     </div>
+
+
+
 }
 
 
@@ -248,10 +253,10 @@
         var @(model.ListViewModelObjectName) = new @listViewModelsNamespace.@(model.ListViewModelClassName)();
         @{
         @:@@if (ViewBag.ParentIdName != null)
-                    @:{
-                        @:@@:@(model.ListViewModelObjectName).queryString = "@@(ViewBag.ParentIdName) = @@(ViewBag.ParentId)";
-                    @:}
-                }
+                                                                                            @:{
+                                                                                                @:@@:@(model.ListViewModelObjectName).queryString = "@@(ViewBag.ParentIdName) = @@(ViewBag.ParentId)";
+                                                                                            @:}
+                                                                }
 
         @(model.ListViewModelObjectName).isSavingAutomatically = false;
         ko.applyBindings(@(model.ListViewModelObjectName));

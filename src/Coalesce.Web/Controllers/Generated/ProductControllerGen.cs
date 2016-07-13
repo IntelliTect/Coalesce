@@ -16,6 +16,11 @@ namespace Coalesce.Web.Controllers
         public ProductController() : base() { }
 
         [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Views/Generated/Product/Cards.cshtml");
+        }
+
+        [Authorize]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Views/Generated/Product/Table.cshtml");
         }

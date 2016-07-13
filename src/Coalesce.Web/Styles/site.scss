@@ -56,6 +56,15 @@ span.select2-container--default .select2-selection--single .select2-selection__a
     width: 100% !important;
 }
 
+dd:not(:last-of-type) {
+    padding-bottom: 10px;
+}
+dd > .form-control-static,
+dd > div > .form-control-static {
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 15px;
+}
 
 .comma-list {
     list-style: none;
@@ -85,6 +94,7 @@ span.select2-container--default .select2-selection--single .select2-selection__a
         
     .card-body {
         padding: 15px;
+        flex-grow: 1;
     }
 
     .card-body:before,
@@ -129,6 +139,13 @@ span.select2-container--default .select2-selection--single .select2-selection__a
 
     flex-grow: 1;
     width: 300px;
+    display: flex;
+    flex-direction: column;
+
+    .card-body.flex {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 

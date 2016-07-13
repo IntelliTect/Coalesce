@@ -16,6 +16,11 @@ namespace Coalesce.Web.Controllers
         public DevTeamController() : base() { }
 
         [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Views/Generated/DevTeam/Cards.cshtml");
+        }
+
+        [Authorize]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Views/Generated/DevTeam/Table.cshtml");
         }

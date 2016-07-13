@@ -16,6 +16,11 @@ namespace Coalesce.Web.Controllers
         public CompanyController() : base() { }
 
         [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Views/Generated/Company/Cards.cshtml");
+        }
+
+        [Authorize]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Views/Generated/Company/Table.cshtml");
         }

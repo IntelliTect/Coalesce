@@ -46,124 +46,90 @@
     </div>
 </div>
 <hr />
-<div class="card">
-    <div class="card-body">
-            <table class="table @(ViewBag.Editable ? " editable" : "" )">
-        <thead>
-            <tr>
-                    <th>Title</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Gender</th>
-                    <th>Cases Assigned</th>
-                    <th>Cases Reported</th>
-                    <th>Birth Date</th>
-                    <th>Name</th>
-                    <th>Company</th>
-                <th                     style="width: 153px;">
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
-                    @if (@ViewBag.Editable)
-                    {
-                    <td>
-                        @(Knockout.SelectFor<Person>(p => p.Title))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Person>(p => p.FirstName))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Person>(p => p.LastName))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Person>(p => p.Email))
-                    </td>
-                    <td>
-                        @(Knockout.SelectFor<Person>(p => p.Gender))
-                    </td>
-                    <td>
-                        <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </td>
-                    <td>
-                        <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Person>(p => p.BirthDate))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Person>(p => p.Name))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Person>(p => p.Company))
-                    </td>
-                    }
-                    else
-                    {
-                    <td>
+
+
+<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+    <div class="flex-card ">
+            <div class="card-heading">
+                <h3 class="card-title">
+                    <span data-bind="text: name"></span>
+                </h3>
+            </div>
+        <div class="card-body flex">
+
+            <dl>
+                    <dt>Title</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.Title))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>First Name</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.FirstName))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Last Name</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.LastName))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Email</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.Email))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Gender</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.Gender))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Cases Assigned</dt>
+                    <dd>
                         <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Cases Reported</dt>
+                    <dd>
                         <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Birth Date</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.BirthDate))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Name</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.Name))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Company</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Person>(p => p.Company))
-                    </td>
-                    }
-                <td>
+                    </dd>
 
-                    <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group">
+            </dl>
+
+
+            <div style="margin-top: auto">
+                <!-- Editor buttons -->
+                <div class="pull-right" role="group">
                         <!-- Action buttons -->
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Actions <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                        <li><a href="#" data-bind = 'click: renameUi'>Rename</a></li>
-                                        <li><a href="#" data-bind = 'click: changeSpacesToDashesInNameUi'>Change Spaces To Dashes In Name</a></li>
-                                </ul>
-                            </div>
-                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions <span class="caret"></span>
                             </button>
+                            <ul class="dropdown-menu">
+                                    <li><a href="#" data-bind = 'click: renameUi'>Rename</a></li>
+                                    <li><a href="#" data-bind = 'click: changeSpacesToDashesInNameUi'>Change Spaces To Dashes In Name</a></li>
+                            </ul>
+                        </div>
+                                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                            <i class="fa fa-remove"></i>
+                        </button>
 
-                    </div>
-                    <div class="form-control-static" data-bind="text: errorMessage"></div>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </tbody>
-    </table>
+                </div>
+                <span class="form-control-static" data-bind="text: errorMessage"></span>
+            </div>
+
+        </div>
+    </div>
 </div>
-</div>
+
 
 
 
@@ -359,9 +325,9 @@
     <script>
         var personList = new ListViewModels.PersonList();
         @if (ViewBag.ParentIdName != null)
-                    {
-                        @:personList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                    }
+                                                                                            {
+                                                                                                @:personList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+                                                                                            }
 
         personList.isSavingAutomatically = false;
         ko.applyBindings(personList);

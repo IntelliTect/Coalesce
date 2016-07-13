@@ -37,6 +37,11 @@ namespace @(namespaceName).Controllers
         public @(model.ControllerName)Controller() : base() { }
 
         @(model.SecurityInfo.ReadAnnotation)
+        public ActionResult Cards(){
+            return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Cards.cshtml");
+        }
+
+        @(model.SecurityInfo.ReadAnnotation)
         public ActionResult Table(){
             return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Table.cshtml");
         }

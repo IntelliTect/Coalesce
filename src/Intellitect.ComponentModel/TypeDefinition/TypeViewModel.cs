@@ -113,7 +113,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
             {
                 if (Wrapper.IsTimeZoneInfo) return "any";
                 if (IsBool) return "boolean";
-                if (IsDate) return "moment.Moment";
+                if (IsDate) return "any"; // "moment.Moment";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType + "[]";
                 if (IsClass) return PureType.Name;

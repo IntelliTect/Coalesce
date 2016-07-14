@@ -111,9 +111,9 @@ module ViewModels {
         public casesAssigned: KnockoutObservableArray<any> = ko.observableArray([]);
         // List of cases reported by the person.
         public casesReported: KnockoutObservableArray<any> = ko.observableArray([]);
-        public birthDate: KnockoutObservable<moment.Moment> = ko.observable(null);
-        public lastBath: KnockoutObservable<moment.Moment> = ko.observable(null);
-        public nextUpgrade: KnockoutObservable<moment.Moment> = ko.observable(null);
+        public birthDate: KnockoutObservable<any> = ko.observable(null);
+        public lastBath: KnockoutObservable<any> = ko.observable(null);
+        public nextUpgrade: KnockoutObservable<any> = ko.observable(null);
         public personStatsId: KnockoutObservable<number> = ko.observable(null);
         public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
         public timeZone: KnockoutObservable<any> = ko.observable(null);

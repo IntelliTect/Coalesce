@@ -320,7 +320,7 @@ module ViewModels {
 				self.title(data.title);
 				self.description(data.description);
                 if (data.openedAt == null) self.openedAt(null);
-				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.openedAt))){
+				else if (self.openedAt() == null || self.openedAt() == false || !self.openedAt().isSame(moment(data.openedAt))){
 				    self.openedAt(moment(data.openedAt));
 				}
 				self.assignedToId(data.assignedToId);

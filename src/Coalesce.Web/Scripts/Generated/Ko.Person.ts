@@ -372,15 +372,15 @@ module ViewModels {
 				self.email(data.email);
 				self.gender(data.gender);
                 if (data.birthDate == null) self.birthDate(null);
-				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.birthDate))){
+				else if (self.birthDate() == null || self.birthDate() == false || !self.birthDate().isSame(moment(data.birthDate))){
 				    self.birthDate(moment(data.birthDate));
 				}
                 if (data.lastBath == null) self.lastBath(null);
-				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.lastBath))){
+				else if (self.lastBath() == null || self.lastBath() == false || !self.lastBath().isSame(moment(data.lastBath))){
 				    self.lastBath(moment(data.lastBath));
 				}
                 if (data.nextUpgrade == null) self.nextUpgrade(null);
-				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
+				else if (self.nextUpgrade() == null || self.nextUpgrade() == false || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
 				    self.nextUpgrade(moment(data.nextUpgrade));
 				}
 				self.personStatsId(data.personStatsId);

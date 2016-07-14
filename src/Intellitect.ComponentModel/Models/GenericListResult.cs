@@ -6,16 +6,16 @@ using System.Linq;
 
 namespace Intellitect.ComponentModel.Models
 {
-    public class GenericListResult<T> : ListResult
-        where T : IClassDto
+    public class GenericListResult<T, TDto> : ListResult
+        where TDto : IClassDto<T, TDto>
     {
-        public new IEnumerable<T> List { get; set; }
+        public new IEnumerable<TDto> List { get; set; }
 
         public GenericListResult() : base() { }
 
-        public GenericListResult(IEnumerable<T> objs) : base(objs) { }
+        public GenericListResult(IEnumerable<TDto> objs) : base(objs) { }
 
-        public GenericListResult(IEnumerable<T> objs, int page, int totalCount, int pageSize)
+        public GenericListResult(IEnumerable<TDto> objs, int page, int totalCount, int pageSize)
             : base (objs, page, totalCount, pageSize) { }
 
         public GenericListResult(Exception ex): base(ex) { }
@@ -23,7 +23,7 @@ namespace Intellitect.ComponentModel.Models
         public GenericListResult(ListResult result)
         {
             WasSuccessful = true;
-            List = (IEnumerable<T>)result.List;
+            List = (IEnumerable<TDto>)result.List;
             Page = result.Page;
             TotalCount = result.TotalCount;
             PageSize = result.PageSize;

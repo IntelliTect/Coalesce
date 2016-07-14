@@ -20,7 +20,7 @@ namespace Intellitect.ComponentModel.Controllers
 {
     public abstract class BaseApiController<T, TDto, TContext> : BaseControllerWithDb<TContext>
     where T : class, new()
-    where TDto : class, IClassDto, new()
+    where TDto : class, IClassDto<T, TDto>, new()
     where TContext : DbContext
     {
         protected BaseApiController()
@@ -553,7 +553,7 @@ namespace Intellitect.ComponentModel.Controllers
         protected virtual TDto MapObjToDto(T obj, string includes)
         {
             //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
-            return Mapper.ObjToDtoMapper<T, TDto>(obj, User, includes);
+            return Mapper<T, TDto>.ObjToDtoMapper(obj, User, includes);
         }
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj
@@ -563,7 +563,7 @@ namespace Intellitect.ComponentModel.Controllers
         protected virtual void MapDtoToObj(TDto dto, T obj, string includes)
         {
             //dto.Update(obj);
-            Mapper.DtoToObjMapper(dto, obj, User, includes);
+            Mapper<T, TDto>.DtoToObjMapper(dto, obj, User, includes);
         }
 
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)

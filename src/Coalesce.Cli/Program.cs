@@ -26,6 +26,7 @@ namespace Coalesce.Cli
             var module = app.Option("-m|--module", "The prefix to apply to the module name of the generated typescript files", CommandOptionType.SingleValue);
             var webProject = app.Option("-wp|--webproject", "Relative path to the web project; if empty will search up from current folder for first project.json", CommandOptionType.SingleValue);
             var dataProject = app.Option("-dp|--dataproject", "Relative path to the data project", CommandOptionType.SingleValue);
+            var targetNamespace = app.Option("-ns|--namespace", "Target Namespace for the generated code", CommandOptionType.SingleValue);
 
             app.OnExecute(async () =>
             {
@@ -37,12 +38,17 @@ namespace Coalesce.Cli
                     OnlyGenerateFiles = onlyGenerateFiles.Value() != null && onlyGenerateFiles.Value().ToLower() == "true",
                     ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
                     AreaLocation = area.Value() ?? "",
-                    TypescriptModulePrefix = module.Value() ?? ""
+                    TypescriptModulePrefix = module.Value() ?? "",
+                    TargetNamespace = targetNamespace.Value() ?? ""
                 };
 
-                // Find the web project
-                ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
-                if (webContext == null) throw new ArgumentException("Web project was not found.");
+                // Find the web project or target namespace (this allows for not compiling the web project when it is broken because of changes to Coalesce)
+                ProjectContext webContext = null;
+                if (model.TargetNamespace != "")
+                {
+                    webContext = DependencyProvider.ProjectContext(webProject.Value());
+                    if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
+                }
 
                 // Find the data project
                 ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());

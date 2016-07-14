@@ -54,7 +54,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("CompanyId", companyId);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<PersonDtoGen>(listResult);
+            return new GenericListResult<Person, PersonDtoGen>(listResult);
         }
 
 
@@ -181,7 +181,7 @@ namespace Coalesce.Web.Api
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                                result.Object = Mapper.ObjToDtoMapper<Person, PersonDtoGen>(objResult, User, "");
+                                result.Object = Mapper<Person, PersonDtoGen>.ObjToDtoMapper(objResult, User, "");
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -305,7 +305,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
             try{
                 var objResult = Person.BorCPeople(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper.ObjToDtoMapper<Person, PersonDtoGen>(o, User, ""));
+                                result.Object = objResult.ToList().Select(o => Mapper<Person, PersonDtoGen>.ObjToDtoMapper(o, User, ""));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

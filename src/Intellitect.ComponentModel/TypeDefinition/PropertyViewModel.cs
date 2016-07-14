@@ -1084,6 +1084,44 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
         }
 
+        public string ObjToDtoPropertySetter(string objectName)
+        {
+            string setter;
+            if (Type.IsCollection)
+            {
+                setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
+            }else if (Type.HasClassViewModel)
+            {
+                setter = $"{objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects);";
+            }else
+            {
+                setter = $"{objectName}.{Name} = obj.{Name};";
+            }
+            var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+            {
+                var roles = (SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) ?
+                    string.Join(" || ", readRolesList.Select(s => $"is{s}")) : "";
+                var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
+                var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+
+                var statement = new List<string>();
+                if (!string.IsNullOrEmpty(roles)) statement.Add($"!({roles})");
+                if (!string.IsNullOrEmpty(includes)) statement.Add($"!({includes})");
+                if (!string.IsNullOrEmpty(excludes)) statement.Add($"({excludes})");
+
+                return $@"          if ({string.Join(" || ", statement)})
+            {{
+                {setter}
+            }}  
+            ";
+            }
+            else
+            {
+                return $"            {setter}\n";
+            }
+        }
+
         public string DtoToObjPropertySetter()
         {
             if (IgnorePropertyInUpdates)

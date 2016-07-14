@@ -23,31 +23,34 @@ using Newtonsoft.Json;
 // Model Namespaces
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
-@:using @ns;
+    @:using @ns;
 }
 using static @(model.Namespace).@(model.Name);
 
 namespace @(namespaceName).Models
 {
-    public partial class @(model.Name)DtoGen : GeneratedDto<@(model.Name), @(model.Name)DtoGen>, IClassDto
-    {
+    public partial class @(model.Name)DtoGen : GeneratedDto<@(model.Name), @(model.Name)DtoGen>
+        , IClassDto<@(model.Name), @(model.Name)DtoGen>
+        {
         public @(model.Name)DtoGen() { }
 
-        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead))
+        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
         {
-        @: public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
+            @: public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
         }
 
-        public void Update(object obj, ClaimsPrincipal user = null, string includes = null)
-        {
+        // Create a new version of this object or use it from the lookup.
+        public static @(model.Name)DtoGen Create(@(model.Name) obj, ClaimsPrincipal user = null, string includes = null,
+                                   @("Dictionary<string, object>") objects = null) {
+            // Return null of the object is null;
+            if (obj == null) return null;
+                        
+            if (objects == null) objects = new @("Dictionary<string, object>")();
+
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
             includes = includes ?? "";
 
-            @(model.Name) entity = (@(model.Name))obj;
-
-            if (OnUpdate(entity, user, includes)) return;
-
             // Applicable includes for @(model.Name)
             @(model.DtoIncludesAsCS())
 
@@ -56,30 +59,71 @@ namespace @(namespaceName).Models
 
             // Applicable roles for @(model.Name)
             @(model.PropertyRolesAsCS())
-    
-            @foreach (var prop in model.Properties.Where(p => p.CanWrite))
+
+
+
+            // See if the object is already created.
+            string key = $"@(model.Name){obj.@(model.PrimaryKey.Name)}";
+            if (objects.ContainsKey(key)) 
+                return (@(model.Name)DtoGen)objects[key];
+
+            var newObject = new @(model.Name)DtoGen();
+            objects.Add(key, newObject);
+            // Fill the properties of the object.
+            @foreach (var prop in model.Properties.Where(p => p.CanWrite && p.HasViewModelProperty))
+            {
+                @prop.ObjToDtoPropertySetter("newObject")
+            }            
+            return newObject;
+        }
+
+        // Instance constructor because there is no way to implement a static interface in C#.
+        public @(model.Name)DtoGen CreateInstance(@(model.Name) obj, ClaimsPrincipal user = null, string includes = null,
+                                @("Dictionary<string, object>") objects = null) {
+            return Create(obj, user, includes, objects);
+        }
+
+        // Updates an object from the database to the state handed in by the DTO.
+        public void Update(@(model.Name) entity, ClaimsPrincipal user = null, string includes = null)
+        {
+        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+
+        includes = includes ?? "";
+
+        if (OnUpdate(entity, user, includes)) return;
+
+        // Applicable includes for @(model.Name)
+        @(model.DtoIncludesAsCS())
+
+        // Applicable excludes for @(model.Name)
+        @(model.DtoExcludesAsCS())
+
+        // Applicable roles for @(model.Name)
+        @(model.PropertyRolesAsCS())
+
+        @foreach (var prop in model.Properties.Where(p => p.CanWrite && p.HasViewModelProperty))
             {
             @prop.DtoToObjPropertySetter()
-            }
+        }
         }
 
         public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
         {
-            if (OnSecurityTrim(user, includes)) return;
+        if (OnSecurityTrim(user, includes)) return;
 
-            // Applicable includes for @(model.Name)
-            @(model.DtoIncludesAsCS())
+        // Applicable includes for @(model.Name)
+        @(model.DtoIncludesAsCS())
 
-            // Applicable excludes for @(model.Name)
-            @(model.DtoExcludesAsCS())
+        // Applicable excludes for @(model.Name)
+        @(model.DtoExcludesAsCS())
 
-            // Applicable roles for @(model.Name)
-            @(model.PropertyRolesAsCS())
+        // Applicable roles for @(model.Name)
+        @(model.PropertyRolesAsCS())
 
-            @foreach (var prop in model.Properties.Where(p => p.CanRead))
+        @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
             {
-                @prop.ObjToDtoSecurityTrimmer()
-            }
+            @prop.ObjToDtoSecurityTrimmer()
         }
-    }
-}
+        }
+        }
+        }

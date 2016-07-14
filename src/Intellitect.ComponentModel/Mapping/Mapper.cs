@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Intellitect.ComponentModel.Mapping
 {
-    public static class Mapper
+    public static class Mapper<T, TDto> where TDto : IClassDto<T, TDto>, new()
     {
         private static MethodInfo _createMap = typeof(AutoMapper.Mapper)
                                     .GetMethods()
@@ -20,16 +20,17 @@ namespace Intellitect.ComponentModel.Mapping
                                                     m.IsGenericMethod == true &&
                                                     m.GetParameters().Count() == 0);
 
-        public static TDto ObjToDtoMapper<T, TDto>(T obj, ClaimsPrincipal user, string includes)
-            where TDto : IClassDto
+        public static TDto ObjToDtoMapper(T obj, ClaimsPrincipal user, string includes)
         {
-            TDto dto = AutoMapper.Mapper.Map<TDto>(obj);
-            dto.SecurityTrim(user, includes);
+            var creator = new TDto();
+            var dto = creator.CreateInstance(obj, user, includes);
+            
+            //TDto dto = AutoMapper.Mapper.Map<TDto>(obj);
+            //dto.SecurityTrim(user, includes);
             return dto;
         }
 
-        public static void DtoToObjMapper<TDto, T>(TDto dto, T entity, ClaimsPrincipal user, string includes)
-            where TDto : IClassDto
+        public static void DtoToObjMapper(TDto dto, T entity, ClaimsPrincipal user, string includes)
         {
             dto.Update(entity, user, includes);
         }

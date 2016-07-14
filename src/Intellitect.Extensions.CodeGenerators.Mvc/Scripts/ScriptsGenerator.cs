@@ -45,7 +45,15 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             using (StreamWriter streamWriter = new StreamWriter("output.txt", false))
             {
                 Console.WriteLine($"Starting Generator");
-                var targetNamespace = ValidationUtil.ValidateType("Startup", "", ModelTypesLocator, throwWhenNotFound: false).Namespace;
+                string targetNamespace;
+                if (!string.IsNullOrEmpty(model.TargetNamespace))
+                {
+                    targetNamespace = model.TargetNamespace;
+                }
+                else
+                {
+                    targetNamespace = ValidationUtil.ValidateType("Startup", "", ModelTypesLocator, throwWhenNotFound: false).Namespace;
+                }
                 Console.WriteLine($"Namespace: {targetNamespace}");
 
                 ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator ?? ModelTypesLocator, throwWhenNotFound: false);

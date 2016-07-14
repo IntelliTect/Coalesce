@@ -53,7 +53,7 @@ namespace Coalesce.Web.TestArea.Api
             parameters.AddFilter("AltName", altName);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<CompanyDtoGen>(listResult);
+            return new GenericListResult<Company, CompanyDtoGen>(listResult);
         }
 
 

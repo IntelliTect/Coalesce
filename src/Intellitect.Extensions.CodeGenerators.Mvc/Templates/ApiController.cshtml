@@ -71,7 +71,7 @@ namespace @(namespaceName).Api
             }
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<@(model.Name)DtoGen>(listResult);
+            return new GenericListResult<@(model.Name), @(model.Name)DtoGen>(listResult);
         }
 
 
@@ -248,11 +248,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-                @:result.Object = Mapper.ObjToDtoMapper<@(model.Name), @(model.Name)DtoGen>(objResult, User, "");
+                @:result.Object = Mapper<@(model.Name), @(model.Name)DtoGen>.ObjToDtoMapper(objResult, User, "");
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper.ObjToDtoMapper<@(model.Name), @(model.Name)DtoGen>(o, User, ""));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.Name), @(model.Name)DtoGen>.ObjToDtoMapper(o, User, ""));
                 }
                 else
                 {

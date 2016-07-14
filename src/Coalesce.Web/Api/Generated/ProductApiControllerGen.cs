@@ -47,7 +47,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("Name", name);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<ProductDtoGen>(listResult);
+            return new GenericListResult<Product, ProductDtoGen>(listResult);
         }
 
 

@@ -54,7 +54,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<CaseDtoGen>(listResult);
+            return new GenericListResult<Case, CaseDtoGen>(listResult);
         }
 
 
@@ -196,7 +196,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<IEnumerable<CaseDtoGen>>();
             try{
                 var objResult = Case.GetAllOpenCases(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper.ObjToDtoMapper<Case, CaseDtoGen>(o, User, ""));
+                                result.Object = objResult.ToList().Select(o => Mapper<Case, CaseDtoGen>.ObjToDtoMapper(o, User, ""));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

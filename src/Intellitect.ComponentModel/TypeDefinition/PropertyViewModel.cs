@@ -1090,7 +1090,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
             if (Type.IsCollection)
             {
                 setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
-            }else if (Type.HasClassViewModel)
+            }else if (Type.HasClassViewModel && Type.ClassViewModel.OnContext)
             {
                 setter = $"{objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects);";
             }else

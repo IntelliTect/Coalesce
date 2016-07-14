@@ -58,6 +58,7 @@ namespace Coalesce.Web.Models
             var newObject = new CaseProductDtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.CaseProductId = obj.CaseProductId;
             newObject.CaseId = obj.CaseId;
             newObject.Case = CaseDtoGen.Create(obj.Case, user, includes, objects);
             newObject.ProductId = obj.ProductId;

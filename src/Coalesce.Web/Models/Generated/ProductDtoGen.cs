@@ -55,6 +55,7 @@ namespace Coalesce.Web.Models
             var newObject = new ProductDtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.ProductId = obj.ProductId;
             newObject.Name = obj.Name;
             return newObject;
         }

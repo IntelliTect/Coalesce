@@ -67,6 +67,7 @@ namespace Coalesce.Web.Models
             var newObject = new CaseDtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.CaseKey = obj.CaseKey;
             newObject.Title = obj.Title;
             newObject.Description = obj.Description;
             newObject.OpenedAt = obj.OpenedAt;

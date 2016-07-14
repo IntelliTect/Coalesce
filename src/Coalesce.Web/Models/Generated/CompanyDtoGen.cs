@@ -62,6 +62,7 @@ namespace Coalesce.Web.Models
             var newObject = new CompanyDtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.CompanyId = obj.CompanyId;
             newObject.Name = obj.Name;
             newObject.Address1 = obj.Address1;
             newObject.Address2 = obj.Address2;
@@ -69,6 +70,7 @@ namespace Coalesce.Web.Models
             newObject.State = obj.State;
             newObject.ZipCode = obj.ZipCode;
             if (obj.Employees != null) newObject.Employees = obj.Employees.Select(f => PersonDtoGen.Create(f, user, includes, objects)).ToList();
+            newObject.AltName = obj.AltName;
             return newObject;
         }
 

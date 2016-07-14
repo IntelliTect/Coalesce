@@ -72,6 +72,7 @@ namespace Coalesce.Web.Models
             var newObject = new PersonDtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.PersonId = obj.PersonId;
             newObject.Title = obj.Title;
             newObject.FirstName = obj.FirstName;
             newObject.LastName = obj.LastName;
@@ -86,7 +87,9 @@ namespace Coalesce.Web.Models
             newObject.LastBath = obj.LastBath;
             newObject.NextUpgrade = obj.NextUpgrade;
             newObject.PersonStatsId = obj.PersonStatsId;
+            newObject.PersonStats = obj.PersonStats;
             newObject.TimeZone = obj.TimeZone;
+            newObject.Name = obj.Name;
             newObject.CompanyId = obj.CompanyId;
             newObject.Company = CompanyDtoGen.Create(obj.Company, user, includes, objects);
             return newObject;

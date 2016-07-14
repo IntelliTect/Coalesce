@@ -406,7 +406,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
             Console.WriteLine("Generating Code");
             Console.WriteLine("-- Generating DTOs");
             Console.Write("   ");
-            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
+            foreach (var model in apiModels.ViewModelsForTemplates)
             {
                 Console.Write($"{model.Model.Name}  ");
 

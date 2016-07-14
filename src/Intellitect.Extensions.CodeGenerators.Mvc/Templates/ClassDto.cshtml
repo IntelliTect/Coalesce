@@ -70,7 +70,7 @@ namespace @(namespaceName).Models
             var newObject = new @(model.Name)DtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
-            @foreach (var prop in model.Properties.Where(p => p.CanWrite && p.HasViewModelProperty))
+            @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
             {
                 @prop.ObjToDtoPropertySetter("newObject")
             }            

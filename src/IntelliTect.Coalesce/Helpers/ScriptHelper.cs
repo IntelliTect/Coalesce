@@ -8,7 +8,11 @@ namespace IntelliTect.Coalesce.Helpers
     {
         public static HtmlString StandardBinding<T>()
         {
-            var model = ReflectionRepository.GetClassViewModel<T>();
+            return StandardBinding(ReflectionRepository.GetClassViewModel<T>());
+        }
+
+        public static HtmlString StandardBinding(ClassViewModel model)
+        {
             var html = new StringBuilder();
 
             html.AppendLine($@"
@@ -16,9 +20,28 @@ namespace IntelliTect.Coalesce.Helpers
         var {model.ListViewModelObjectName} = new ListViewModels.{model.ListViewModelClassName}();
         
         // Set up parent info based on the URL.
-        {model.ListViewModelObjectName}.queryString = """";  // TODO: Finish this
+        @if (ViewBag.ParentIdName != null)
+        {{
+            @:{model.ListViewModelObjectName}.queryString = ""@(ViewBag.ParentIdName) = @(ViewBag.ParentId)"";
+        }}
 
-        {model.ListViewModelObjectName}.isSavingAutomatically = false;
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){{
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {{{model.ListViewModelObjectName}[this](param);}}
+        }})
+        { model.ListViewModelObjectName}.isLoading.subscribe(function(){{
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){{
+                var param = {model.ListViewModelObjectName}[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            }})
+            history.replaceState(null, document.title, newUrl);
+        }});
+
+        { model.ListViewModelObjectName}.isSavingAutomatically = false;
         ko.applyBindings({model.ListViewModelObjectName});
         {model.ListViewModelObjectName}.isSavingAutomatically = true;
 

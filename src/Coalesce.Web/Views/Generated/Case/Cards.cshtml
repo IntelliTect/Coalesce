@@ -192,12 +192,31 @@
 
     @section Scripts
     {
+
     <script>
         var caseList = new ListViewModels.CaseList();
+        
+        // Set up parent info based on the URL.
         @if (ViewBag.ParentIdName != null)
-                                                                                            {
-                                                                                                @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                                                                                            }
+        {
+            @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {caseList[this](param);}
+        })
+        caseList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){
+                var param = caseList[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
 
         caseList.isSavingAutomatically = false;
         ko.applyBindings(caseList);
@@ -205,5 +224,6 @@
 
         caseList.includes = "Editor";
         caseList.load();
+
     </script>
     }

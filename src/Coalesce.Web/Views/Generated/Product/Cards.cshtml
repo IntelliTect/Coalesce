@@ -92,12 +92,31 @@
 
     @section Scripts
     {
+
     <script>
         var productList = new ListViewModels.ProductList();
+        
+        // Set up parent info based on the URL.
         @if (ViewBag.ParentIdName != null)
-                                                                                            {
-                                                                                                @:productList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                                                                                            }
+        {
+            @:productList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {productList[this](param);}
+        })
+        productList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){
+                var param = productList[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
 
         productList.isSavingAutomatically = false;
         ko.applyBindings(productList);
@@ -105,5 +124,6 @@
 
         productList.includes = "Editor";
         productList.load();
+
     </script>
     }

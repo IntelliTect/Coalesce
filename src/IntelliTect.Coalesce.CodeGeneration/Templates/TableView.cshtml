@@ -243,22 +243,6 @@
 @{
     @:@@section Scripts
     @:{
-
-    <script>
-        var @(model.ListViewModelObjectName) = new @listViewModelsNamespace.@(model.ListViewModelClassName)();
-        @{
-        @:@@if (ViewBag.ParentIdName != null)
-                    @:{
-                        @:@@:@(model.ListViewModelObjectName).queryString = "@@(ViewBag.ParentIdName) = @@(ViewBag.ParentId)";
-                    @:}
-                }
-
-        @(model.ListViewModelObjectName).isSavingAutomatically = false;
-        ko.applyBindings(@(model.ListViewModelObjectName));
-        @(model.ListViewModelObjectName).isSavingAutomatically = true;
-
-        @(model.ListViewModelObjectName).includes = "Editor";
-        @(model.ListViewModelObjectName).load();
-    </script>
+        @ScriptHelper.StandardBinding(model)
     @:}
 }

@@ -98,12 +98,31 @@
 
     @section Scripts
     {
+
     <script>
         var caseProductList = new ListViewModels.CaseProductList();
+        
+        // Set up parent info based on the URL.
         @if (ViewBag.ParentIdName != null)
-                                                                                            {
-                                                                                                @:caseProductList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                                                                                            }
+        {
+            @:caseProductList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {caseProductList[this](param);}
+        })
+        caseProductList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){
+                var param = caseProductList[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
 
         caseProductList.isSavingAutomatically = false;
         ko.applyBindings(caseProductList);
@@ -111,5 +130,6 @@
 
         caseProductList.includes = "Editor";
         caseProductList.load();
+
     </script>
     }

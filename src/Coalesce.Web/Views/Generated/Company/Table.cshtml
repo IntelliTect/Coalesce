@@ -148,12 +148,31 @@
 
     @section Scripts
     {
+
     <script>
         var companyList = new ListViewModels.CompanyList();
+        
+        // Set up parent info based on the URL.
         @if (ViewBag.ParentIdName != null)
-                    {
-                        @:companyList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                    }
+        {
+            @:companyList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {companyList[this](param);}
+        })
+        companyList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){
+                var param = companyList[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
 
         companyList.isSavingAutomatically = false;
         ko.applyBindings(companyList);
@@ -161,5 +180,6 @@
 
         companyList.includes = "Editor";
         companyList.load();
+
     </script>
     }

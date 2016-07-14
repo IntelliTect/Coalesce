@@ -87,6 +87,25 @@ module intellitect {
             return null;
         }
 
+        export function SetUrlParameter(url: string, paramName: string, paramValue: string) {
+            var hash = location.hash;
+            url = url.replace(hash, '');
+            if (url.indexOf(paramName + "=") >= 0) {
+                var prefix = url.substring(0, url.indexOf(paramName));
+                var suffix = url.substring(url.indexOf(paramName));
+                suffix = suffix.substring(suffix.indexOf("=") + 1);
+                suffix = (suffix.indexOf("&") >= 0) ? suffix.substring(suffix.indexOf("&")) : "";
+                url = prefix + paramName + "=" + paramValue + suffix;
+            }
+            else {
+                if (url.indexOf("?") < 0)
+                    url += "?" + paramName + "=" + paramValue;
+                else
+                    url += "&" + paramName + "=" + paramValue;
+            }
+            return url + hash;
+        }
+
         export function capitalizeFirstLetter(string) {
             if (string) return string.charAt(0).toUpperCase() + string.slice(1);
             else return string;

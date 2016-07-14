@@ -17,6 +17,11 @@ namespace Coalesce.Web.TestArea.Controllers
         public PersonController() : base() { }
 
         [AllowAnonymous]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Person/Cards.cshtml");
+        }
+
+        [AllowAnonymous]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Person/Table.cshtml");
         }

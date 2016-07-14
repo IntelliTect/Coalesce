@@ -25,6 +25,9 @@ namespace Coalesce.Web.TestArea.Models
         // Create a new version of this object or use it from the lookup.
         public static ProductDtoGen Create(Product obj, ClaimsPrincipal user = null, string includes = null,
                                    Dictionary<string, object> objects = null) {
+            // Return null of the object is null;
+            if (obj == null) return null;
+                        
             if (objects == null) objects = new Dictionary<string, object>();
 
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
@@ -45,11 +48,14 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            if (objects.ContainsKey($"Product{obj.ProductId}" )) 
-                return (ProductDtoGen)objects[$"Product{obj.ProductId}"];
+            string key = $"Product{obj.ProductId}";
+            if (objects.ContainsKey(key)) 
+                return (ProductDtoGen)objects[key];
 
             var newObject = new ProductDtoGen();
+            objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.ProductId = obj.ProductId;
             newObject.Name = obj.Name;
             return newObject;
         }
@@ -63,20 +69,20 @@ namespace Coalesce.Web.TestArea.Models
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(Product entity, ClaimsPrincipal user = null, string includes = null)
         {
-        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-        includes = includes ?? "";
+            includes = includes ?? "";
 
-        if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, user, includes)) return;
 
-        // Applicable includes for Product
-        
+            // Applicable includes for Product
+            
 
-        // Applicable excludes for Product
-        
+            // Applicable excludes for Product
+            
 
-        // Applicable roles for Product
-        if (user != null)
+            // Applicable roles for Product
+            if (user != null)
 			{
 			}
 

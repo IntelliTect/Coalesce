@@ -93,7 +93,7 @@ module TestArea.ViewModels {
         public caseKey: KnockoutObservable<number> = ko.observable(null);
         public title: KnockoutObservable<string> = ko.observable(null);
         public description: KnockoutObservable<string> = ko.observable(null);
-        public openedAt: KnockoutObservable<moment.Moment> = ko.observable(moment());
+        public openedAt: KnockoutObservable<any> = ko.observable(moment());
         public assignedToId: KnockoutObservable<number> = ko.observable(null);
         public assignedTo: KnockoutObservable<ViewModels.Person> = ko.observable(null);
         public reportedById: KnockoutObservable<number> = ko.observable(null);
@@ -102,7 +102,7 @@ module TestArea.ViewModels {
         public severity: KnockoutObservable<string> = ko.observable(null);
         public status: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Status
-        public statusText = ko.observable(null);
+        public statusText: KnockoutComputed<string> = ko.computed<string>(() => "");
         public caseProducts: KnockoutObservableArray<any> = ko.observableArray([]);
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);  // Many to Many Collection
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
@@ -320,7 +320,7 @@ module TestArea.ViewModels {
 				self.title(data.title);
 				self.description(data.description);
                 if (data.openedAt == null) self.openedAt(null);
-				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.openedAt))){
+				else if (self.openedAt() == null || self.openedAt() == false || !self.openedAt().isSame(moment(data.openedAt))){
 				    self.openedAt(moment(data.openedAt));
 				}
 				self.assignedToId(data.assignedToId);

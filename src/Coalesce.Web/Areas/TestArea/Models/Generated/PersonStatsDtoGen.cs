@@ -10,23 +10,22 @@ using Newtonsoft.Json;
 // Model Namespaces
     using Coalesce.Domain;
     using Coalesce.Domain.External;
-using static Coalesce.Domain.CaseProduct;
+using static Coalesce.Domain.PersonStats;
 
 namespace Coalesce.Web.TestArea.Models
 {
-    public partial class CaseProductDtoGen : GeneratedDto<CaseProduct, CaseProductDtoGen>
-        , IClassDto<CaseProduct, CaseProductDtoGen>
+    public partial class PersonStatsDtoGen : GeneratedDto<PersonStats, PersonStatsDtoGen>
+        , IClassDto<PersonStats, PersonStatsDtoGen>
         {
-        public CaseProductDtoGen() { }
+        public PersonStatsDtoGen() { }
 
-             public Int32? CaseProductId { get; set; }
-             public Int32? CaseId { get; set; }
-             public CaseDtoGen Case { get; set; }
-             public Int32? ProductId { get; set; }
-             public ProductDtoGen Product { get; set; }
+             public Int32? PersonStatsId { get; set; }
+             public Double? Height { get; set; }
+             public Double? Weight { get; set; }
+             public PersonLocation PersonLocation { get; set; }
 
         // Create a new version of this object or use it from the lookup.
-        public static CaseProductDtoGen Create(CaseProduct obj, ClaimsPrincipal user = null, string includes = null,
+        public static PersonStatsDtoGen Create(PersonStats obj, ClaimsPrincipal user = null, string includes = null,
                                    Dictionary<string, object> objects = null) {
             // Return null of the object is null;
             if (obj == null) return null;
@@ -37,13 +36,13 @@ namespace Coalesce.Web.TestArea.Models
 
             includes = includes ?? "";
 
-            // Applicable includes for CaseProduct
+            // Applicable includes for PersonStats
             
 
-            // Applicable excludes for CaseProduct
+            // Applicable excludes for PersonStats
             
 
-            // Applicable roles for CaseProduct
+            // Applicable roles for PersonStats
             if (user != null)
 			{
 			}
@@ -51,29 +50,28 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            string key = $"CaseProduct{obj.CaseProductId}";
+            string key = $"PersonStats{obj.PersonStatsId}";
             if (objects.ContainsKey(key)) 
-                return (CaseProductDtoGen)objects[key];
+                return (PersonStatsDtoGen)objects[key];
 
-            var newObject = new CaseProductDtoGen();
+            var newObject = new PersonStatsDtoGen();
             objects.Add(key, newObject);
             // Fill the properties of the object.
-            newObject.CaseProductId = obj.CaseProductId;
-            newObject.CaseId = obj.CaseId;
-            newObject.Case = CaseDtoGen.Create(obj.Case, user, includes, objects);
-            newObject.ProductId = obj.ProductId;
-            newObject.Product = ProductDtoGen.Create(obj.Product, user, includes, objects);
+            newObject.PersonStatsId = obj.PersonStatsId;
+            newObject.Height = obj.Height;
+            newObject.Weight = obj.Weight;
+            newObject.PersonLocation = obj.PersonLocation;
             return newObject;
         }
 
         // Instance constructor because there is no way to implement a static interface in C#.
-        public CaseProductDtoGen CreateInstance(CaseProduct obj, ClaimsPrincipal user = null, string includes = null,
+        public PersonStatsDtoGen CreateInstance(PersonStats obj, ClaimsPrincipal user = null, string includes = null,
                                 Dictionary<string, object> objects = null) {
             return Create(obj, user, includes, objects);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(CaseProduct entity, ClaimsPrincipal user = null, string includes = null)
+        public void Update(PersonStats entity, ClaimsPrincipal user = null, string includes = null)
         {
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
@@ -81,32 +79,32 @@ namespace Coalesce.Web.TestArea.Models
 
             if (OnUpdate(entity, user, includes)) return;
 
-            // Applicable includes for CaseProduct
+            // Applicable includes for PersonStats
             
 
-            // Applicable excludes for CaseProduct
+            // Applicable excludes for PersonStats
             
 
-            // Applicable roles for CaseProduct
+            // Applicable roles for PersonStats
             if (user != null)
 			{
 			}
 
-			entity.CaseId = (Int32)(CaseId ?? 0);
-			entity.ProductId = (Int32)(ProductId ?? 0);
+			entity.Height = (Double)(Height ?? 0);
+			entity.Weight = (Double)(Weight ?? 0);
         }
 
         public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
         {
         if (OnSecurityTrim(user, includes)) return;
 
-        // Applicable includes for CaseProduct
+        // Applicable includes for PersonStats
         
 
-        // Applicable excludes for CaseProduct
+        // Applicable excludes for PersonStats
         
 
-        // Applicable roles for CaseProduct
+        // Applicable roles for PersonStats
         if (user != null)
 			{
 			}

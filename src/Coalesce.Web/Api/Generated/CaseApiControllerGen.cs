@@ -197,7 +197,7 @@ namespace Coalesce.Web.Api
             try{
                 object objResult = null;
                 Case.RandomizeDatesAndStatus(Db);
-                result.Object = objResult;
+                                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

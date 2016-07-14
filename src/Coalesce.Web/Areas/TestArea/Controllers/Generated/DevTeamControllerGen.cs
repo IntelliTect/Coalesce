@@ -17,6 +17,11 @@ namespace Coalesce.Web.TestArea.Controllers
         public DevTeamController() : base() { }
 
         [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/DevTeam/Cards.cshtml");
+        }
+
+        [Authorize]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/DevTeam/Table.cshtml");
         }

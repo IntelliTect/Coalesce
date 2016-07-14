@@ -86,6 +86,22 @@ module TestArea.ListViewModels {
         public getAllOpenCasesCountModal: (callback?: any) => void;
         // Variable for method arguments to allow for easy binding
         
+        // Call server method (RandomizeDatesAndStatus)
+        public randomizeDatesAndStatus: (callback?: any) => void;
+        // Result of server method (RandomizeDatesAndStatus)
+        public randomizeDatesAndStatusResult: KnockoutObservable<any> = ko.observable();
+        // True while the server method (RandomizeDatesAndStatus) is being called
+        public randomizeDatesAndStatusIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (RandomizeDatesAndStatus) if it fails.
+        public randomizeDatesAndStatusMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (RandomizeDatesAndStatus) was successful.
+        public randomizeDatesAndStatusWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (RandomizeDatesAndStatus)
+        public randomizeDatesAndStatusUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (RandomizeDatesAndStatus)
+        public randomizeDatesAndStatusModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        
         // Call server method (GetAllOpenCases)
         public getAllOpenCases: (callback?: any) => void;
         // Result of server method (GetAllOpenCases)
@@ -208,6 +224,11 @@ module TestArea.ListViewModels {
                     self.load();
                 }
             });
+            self.page.subscribe(function () {
+                if (self.isLoaded() && !self.isLoading()){
+                    self.load();
+                }
+            });
             self.search.subscribe(function () {
                 if (searchTimeout) {
                     clearTimeout(searchTimeout);
@@ -257,6 +278,47 @@ module TestArea.ListViewModels {
 
             self.getAllOpenCasesCountModal = function(callback?: any) {
                     self.getAllOpenCasesCountUi(callback);
+            }
+            
+
+            
+            self.randomizeDatesAndStatus = function(callback?: any, reload: Boolean = true){
+                self.randomizeDatesAndStatusIsLoading(true);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Case/RandomizeDatesAndStatus",
+                         data: {
+
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					if (data.wasSuccessful) {
+						self.randomizeDatesAndStatusMessage('');
+						self.randomizeDatesAndStatusWasSuccessful(true);
+						self.randomizeDatesAndStatusResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
+					} else {
+						self.randomizeDatesAndStatusWasSuccessful(false);
+						self.randomizeDatesAndStatusMessage(data.Message);
+					}
+				})
+				.fail(function() {
+					alert("Could not call method randomizeDatesAndStatus");
+				})
+				.always(function() {
+                    self.randomizeDatesAndStatusIsLoading(false);
+				});
+            }
+
+            self.randomizeDatesAndStatusUi = function(callback?: any) {
+                self.randomizeDatesAndStatus(callback);
+            }
+
+            self.randomizeDatesAndStatusModal = function(callback?: any) {
+                    self.randomizeDatesAndStatusUi(callback);
             }
             
 

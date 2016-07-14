@@ -40,6 +40,9 @@ namespace Coalesce.Web.TestArea.Models
         // Create a new version of this object or use it from the lookup.
         public static PersonDtoGen Create(Person obj, ClaimsPrincipal user = null, string includes = null,
                                    Dictionary<string, object> objects = null) {
+            // Return null of the object is null;
+            if (obj == null) return null;
+                        
             if (objects == null) objects = new Dictionary<string, object>();
 
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
@@ -62,11 +65,14 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            if (objects.ContainsKey($"Person{obj.PersonId}" )) 
-                return (PersonDtoGen)objects[$"Person{obj.PersonId}"];
+            string key = $"Person{obj.PersonId}";
+            if (objects.ContainsKey(key)) 
+                return (PersonDtoGen)objects[key];
 
             var newObject = new PersonDtoGen();
+            objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.PersonId = obj.PersonId;
             newObject.Title = obj.Title;
             newObject.FirstName = obj.FirstName;
             newObject.LastName = obj.LastName;
@@ -75,13 +81,15 @@ namespace Coalesce.Web.TestArea.Models
             {
                 newObject.Gender = obj.Gender;
             }  
-                        newObject.CasesAssigned = obj.CasesAssigned.Select(f => CaseDtoGen.Create(f, user, includes, objects)).ToList();
-            newObject.CasesReported = obj.CasesReported.Select(f => CaseDtoGen.Create(f, user, includes, objects)).ToList();
+                        if (obj.CasesAssigned != null) newObject.CasesAssigned = obj.CasesAssigned.Select(f => CaseDtoGen.Create(f, user, includes, objects)).ToList();
+            if (obj.CasesReported != null) newObject.CasesReported = obj.CasesReported.Select(f => CaseDtoGen.Create(f, user, includes, objects)).ToList();
             newObject.BirthDate = obj.BirthDate;
             newObject.LastBath = obj.LastBath;
             newObject.NextUpgrade = obj.NextUpgrade;
             newObject.PersonStatsId = obj.PersonStatsId;
+            newObject.PersonStats = obj.PersonStats;
             newObject.TimeZone = obj.TimeZone;
+            newObject.Name = obj.Name;
             newObject.CompanyId = obj.CompanyId;
             newObject.Company = CompanyDtoGen.Create(obj.Company, user, includes, objects);
             return newObject;
@@ -96,26 +104,26 @@ namespace Coalesce.Web.TestArea.Models
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(Person entity, ClaimsPrincipal user = null, string includes = null)
         {
-        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-        includes = includes ?? "";
+            includes = includes ?? "";
 
-        if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, user, includes)) return;
 
-        // Applicable includes for Person
-        
+            // Applicable includes for Person
+            
 
-        // Applicable excludes for Person
-        
+            // Applicable excludes for Person
+            
 
-        // Applicable roles for Person
-        bool isAdmin = false;
+            // Applicable roles for Person
+            bool isAdmin = false;
 			if (user != null)
 			{
 				isAdmin = user.IsInRole("Admin");
 			}
 
-			entity.Title = (Titles)Title;
+			entity.Title = (Titles)(Title ?? 0);
 			entity.FirstName = FirstName;
           if ((isAdmin))
             {
@@ -125,9 +133,9 @@ namespace Coalesce.Web.TestArea.Models
 			entity.BirthDate = BirthDate;
 			entity.LastBath = LastBath;
 			entity.NextUpgrade = NextUpgrade;
-			entity.PersonStatsId = (Int32)PersonStatsId;
+			entity.PersonStatsId = (Int32)(PersonStatsId ?? 0);
 			entity.TimeZone = TimeZone;
-			entity.CompanyId = (Int32)CompanyId;
+			entity.CompanyId = (Int32)(CompanyId ?? 0);
         }
 
         public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)

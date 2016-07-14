@@ -46,114 +46,80 @@
     </div>
 </div>
 <hr />
-<div class="card">
-    <div class="card-body">
-            <table class="table @(ViewBag.Editable ? " editable" : "" )">
-        <thead>
-            <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Opened At</th>
-                    <th>Assigned To</th>
-                    <th>Reported By</th>
-                    <th>Attachment</th>
-                    <th>Severity</th>
-                    <th>Status</th>
-                    <th>Case Products</th>
-                    <th>Dev Team Assigned</th>
-                <th                     style="width: 80px;">
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
-                    @if (@ViewBag.Editable)
-                    {
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.Title))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.Description))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.OpenedAt))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.Attachment))
-                    </td>
-                    <td>
-                        @(Knockout.SelectFor<Case>(p => p.Severity))
-                    </td>
-                    <td>
-                        @(Knockout.SelectFor<Case>(p => p.Status))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
-                    </td>
-                    }
-                    else
-                    {
-                    <td>
+
+
+<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+    <div class="flex-card ">
+            <div class="card-heading">
+                <h3 class="card-title">
+                    <span data-bind="text: title"></span>
+                </h3>
+            </div>
+        <div class="card-body flex">
+
+            <dl>
+                    <dt>Title</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.Title))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Description</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.Description))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Opened At</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.OpenedAt))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Assigned To</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.AssignedTo))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Reported By</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.ReportedBy))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Attachment</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.Attachment))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Severity</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.Severity))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Status</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.Status))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Case Products</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.CaseProducts))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Dev Team Assigned</dt>
+                    <dd>
                         @(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))
-                    </td>
-                    }
-                <td>
+                    </dd>
 
-                    <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group">
-                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
-                            </button>
+            </dl>
 
-                    </div>
-                    <div class="form-control-static" data-bind="text: errorMessage"></div>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </tbody>
-    </table>
+
+            <div style="margin-top: auto">
+                <!-- Editor buttons -->
+                <div class="pull-right" role="group">
+                                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                            <i class="fa fa-remove"></i>
+                        </button>
+
+                </div>
+                <span class="form-control-static" data-bind="text: errorMessage"></span>
+            </div>
+
+        </div>
+    </div>
 </div>
-</div>
+
 
 
 
@@ -229,9 +195,9 @@
     <script>
         var caseList = new TestArea.ListViewModels.CaseList();
         @if (ViewBag.ParentIdName != null)
-                    {
-                        @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                    }
+                                                                                            {
+                                                                                                @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+                                                                                            }
 
         caseList.isSavingAutomatically = false;
         ko.applyBindings(caseList);

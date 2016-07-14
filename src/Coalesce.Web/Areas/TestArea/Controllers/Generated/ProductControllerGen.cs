@@ -17,6 +17,11 @@ namespace Coalesce.Web.TestArea.Controllers
         public ProductController() : base() { }
 
         [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Product/Cards.cshtml");
+        }
+
+        [Authorize]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Product/Table.cshtml");
         }

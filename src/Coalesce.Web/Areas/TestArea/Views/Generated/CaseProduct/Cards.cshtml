@@ -46,58 +46,50 @@
     </div>
 </div>
 <hr />
-<div class="card">
-    <div class="card-body">
-            <table class="table @(ViewBag.Editable ? " editable" : "" )">
-        <thead>
-            <tr>
-                    <th>Case</th>
-                    <th>Product</th>
-                <th                     style="width: 80px;">
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
-                    @if (@ViewBag.Editable)
-                    {
-                    <td>
-                        @(Knockout.SelectForObject<CaseProduct>(p => p.Case))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<CaseProduct>(p => p.Product))
-                    </td>
-                    }
-                    else
-                    {
-                    <td>
+
+
+<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+    <div class="flex-card ">
+            <!-- You can add a title to the card here by uncommenting and changing the binding below
+            <div class="card-heading">
+                <h3 class="card-title">
+                    <span data-bind="text: TITLEVAR"></span>
+                </h3>
+            </div>
+            -->
+        <div class="card-body flex">
+
+            <dl>
+                    <dt>Case</dt>
+                    <dd>
                         @(Knockout.DisplayFor<CaseProduct>(p => p.Case))
-                    </td>
-                    <td>
+                    </dd>
+                    <dt>Product</dt>
+                    <dd>
                         @(Knockout.DisplayFor<CaseProduct>(p => p.Product))
-                    </td>
-                    }
-                <td>
+                    </dd>
 
-                    <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group">
-                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
-                            </button>
+            </dl>
 
-                    </div>
-                    <div class="form-control-static" data-bind="text: errorMessage"></div>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </tbody>
-    </table>
+
+            <div style="margin-top: auto">
+                <!-- Editor buttons -->
+                <div class="pull-right" role="group">
+                                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                            <i class="fa fa-remove"></i>
+                        </button>
+
+                </div>
+                <span class="form-control-static" data-bind="text: errorMessage"></span>
+            </div>
+
+        </div>
+    </div>
 </div>
-</div>
+
 
 
 
@@ -109,9 +101,9 @@
     <script>
         var caseProductList = new TestArea.ListViewModels.CaseProductList();
         @if (ViewBag.ParentIdName != null)
-                    {
-                        @:caseProductList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                    }
+                                                                                            {
+                                                                                                @:caseProductList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+                                                                                            }
 
         caseProductList.isSavingAutomatically = false;
         ko.applyBindings(caseProductList);

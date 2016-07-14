@@ -37,6 +37,9 @@ namespace Coalesce.Web.TestArea.Models
         // Create a new version of this object or use it from the lookup.
         public static CaseDtoGen Create(Case obj, ClaimsPrincipal user = null, string includes = null,
                                    Dictionary<string, object> objects = null) {
+            // Return null of the object is null;
+            if (obj == null) return null;
+                        
             if (objects == null) objects = new Dictionary<string, object>();
 
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
@@ -57,11 +60,14 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            if (objects.ContainsKey($"Case{obj.CaseKey}" )) 
-                return (CaseDtoGen)objects[$"Case{obj.CaseKey}"];
+            string key = $"Case{obj.CaseKey}";
+            if (objects.ContainsKey(key)) 
+                return (CaseDtoGen)objects[key];
 
             var newObject = new CaseDtoGen();
+            objects.Add(key, newObject);
             // Fill the properties of the object.
+            newObject.CaseKey = obj.CaseKey;
             newObject.Title = obj.Title;
             newObject.Description = obj.Description;
             newObject.OpenedAt = obj.OpenedAt;
@@ -72,7 +78,7 @@ namespace Coalesce.Web.TestArea.Models
             newObject.Attachment = obj.Attachment;
             newObject.Severity = obj.Severity;
             newObject.Status = obj.Status;
-            newObject.CaseProducts = obj.CaseProducts.Select(f => CaseProductDtoGen.Create(f, user, includes, objects)).ToList();
+            if (obj.CaseProducts != null) newObject.CaseProducts = obj.CaseProducts.Select(f => CaseProductDtoGen.Create(f, user, includes, objects)).ToList();
             newObject.DevTeamAssignedId = obj.DevTeamAssignedId;
             newObject.DevTeamAssigned = DevTeamDtoGen.Create(obj.DevTeamAssigned, user, includes, objects);
             return newObject;
@@ -87,31 +93,31 @@ namespace Coalesce.Web.TestArea.Models
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(Case entity, ClaimsPrincipal user = null, string includes = null)
         {
-        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-        includes = includes ?? "";
+            includes = includes ?? "";
 
-        if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, user, includes)) return;
 
-        // Applicable includes for Case
-        
+            // Applicable includes for Case
+            
 
-        // Applicable excludes for Case
-        
+            // Applicable excludes for Case
+            
 
-        // Applicable roles for Case
-        if (user != null)
+            // Applicable roles for Case
+            if (user != null)
 			{
 			}
 
 			entity.Title = Title;
 			entity.Description = Description;
-			entity.OpenedAt = (DateTimeOffset)OpenedAt;
+			entity.OpenedAt = (DateTimeOffset)(OpenedAt ?? DateTime.Today);
 			entity.AssignedToId = AssignedToId;
 			entity.ReportedById = ReportedById;
 			entity.Attachment = Attachment;
 			entity.Severity = Severity;
-			entity.Status = (Statuses)Status;
+			entity.Status = (Statuses)(Status ?? 0);
 			entity.DevTeamAssignedId = DevTeamAssignedId;
         }
 

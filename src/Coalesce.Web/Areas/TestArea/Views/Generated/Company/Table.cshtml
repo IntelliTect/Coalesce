@@ -45,14 +45,14 @@
         <table class="table table-striped @(ViewBag.Editable ? " editable" : "" )">
     <thead>
         <tr>
+                <th>Name</th>
                 <th>Address1</th>
                 <th>Address2</th>
-                <th>Alt Name</th>
                 <th>City</th>
-                <th>Employees</th>
-                <th>Name</th>
                 <th>State</th>
                 <th>Zip Code</th>
+                <th>Employees</th>
+                <th>Alt Name</th>
             <th 
                                     style="width: 80px;"
                 >
@@ -61,9 +61,12 @@
     </thead>
     <tbody>
         <!-- ko foreach: items -->
-        <tr>
+        <tr data-bind="css: {'btn-warning': errorMessage()}">
             @if (@ViewBag.Editable)
             {
+            <td>
+                @(Knockout.InputFor<Company>(p => p.Name))
+            </td>
             <td>
                 @(Knockout.InputFor<Company>(p => p.Address1))
             </td>
@@ -71,16 +74,7 @@
                 @(Knockout.InputFor<Company>(p => p.Address2))
             </td>
             <td>
-                @(Knockout.DisplayFor<Company>(p => p.AltName))
-            </td>
-            <td>
                 @(Knockout.InputFor<Company>(p => p.City))
-            </td>
-            <td>
-                <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
-            </td>
-            <td>
-                @(Knockout.InputFor<Company>(p => p.Name))
             </td>
             <td>
                 @(Knockout.InputFor<Company>(p => p.State))
@@ -88,9 +82,18 @@
             <td>
                 @(Knockout.InputFor<Company>(p => p.ZipCode))
             </td>
+            <td>
+                <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Company>(p => p.AltName))
+            </td>
             }
             else
             {
+            <td>
+                @(Knockout.DisplayFor<Company>(p => p.Name))
+            </td>
             <td>
                 @(Knockout.DisplayFor<Company>(p => p.Address1))
             </td>
@@ -98,16 +101,7 @@
                 @(Knockout.DisplayFor<Company>(p => p.Address2))
             </td>
             <td>
-                @(Knockout.DisplayFor<Company>(p => p.AltName))
-            </td>
-            <td>
                 @(Knockout.DisplayFor<Company>(p => p.City))
-            </td>
-            <td>
-                <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Company>(p => p.Name))
             </td>
             <td>
                 @(Knockout.DisplayFor<Company>(p => p.State))
@@ -115,19 +109,26 @@
             <td>
                 @(Knockout.DisplayFor<Company>(p => p.ZipCode))
             </td>
+            <td>
+                <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Company>(p => p.AltName))
+            </td>
             }
             <td>
-
+                
                 <!-- Editor buttons -->
                 <div class="btn-group pull-right" role="group">
-                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                        <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
                         <i class="fa fa-pencil"></i>
                     </a>
-                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                        <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
                         <i class="fa fa-remove"></i>
                     </button>
 
                 </div>
+                <div class="form-control-static" data-bind="text: errorMessage"></div>
             </td>
         </tr>
         <!-- /ko -->
@@ -138,6 +139,7 @@
 
 </div>
 </div>
+
 
 
     @section Scripts

@@ -78,7 +78,13 @@ module TestArea.ListViewModels {
         // True if the server method (Add) was successful.
         public addWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Add)
-        public addUi: () => void;
+        public addUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (Add)
+        public addModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public addWithArgs: (args?: PersonList.AddArgs, callback?: any) => void;
+        
+        public addArgs = new PersonList.AddArgs(); 
         
         // Call server method (GetUser)
         // Returns the user name
@@ -92,7 +98,10 @@ module TestArea.ListViewModels {
         // True if the server method (GetUser) was successful.
         public getUserWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetUser)
-        public getUserUi: () => void;
+        public getUserUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (GetUser)
+        public getUserModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
         
         // Call server method (GetUserPublic)
         // Returns the user name
@@ -106,7 +115,10 @@ module TestArea.ListViewModels {
         // True if the server method (GetUserPublic) was successful.
         public getUserPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetUserPublic)
-        public getUserPublicUi: () => void;
+        public getUserPublicUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (GetUserPublic)
+        public getUserPublicModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
         
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
@@ -120,7 +132,13 @@ module TestArea.ListViewModels {
         // True if the server method (NamesStartingWith) was successful.
         public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWith)
-        public namesStartingWithUi: () => void;
+        public namesStartingWithUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWith)
+        public namesStartingWithModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public namesStartingWithWithArgs: (args?: PersonList.NamesStartingWithArgs, callback?: any) => void;
+        
+        public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
         
         // Call server method (NamesStartingWithPublic)
         // Gets all the first names starting with the characters.
@@ -134,7 +152,13 @@ module TestArea.ListViewModels {
         // True if the server method (NamesStartingWithPublic) was successful.
         public namesStartingWithPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWithPublic)
-        public namesStartingWithPublicUi: () => void;
+        public namesStartingWithPublicUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWithPublic)
+        public namesStartingWithPublicModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public namesStartingWithPublicWithArgs: (args?: PersonList.NamesStartingWithPublicArgs, callback?: any) => void;
+        
+        public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
         
         // Call server method (BorCPeople)
         // People whose last name starts with B or c
@@ -148,7 +172,10 @@ module TestArea.ListViewModels {
         // True if the server method (BorCPeople) was successful.
         public borCPeopleWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (BorCPeople)
-        public borCPeopleUi: () => void;
+        public borCPeopleUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (BorCPeople)
+        public borCPeopleModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
         
         constructor() {
             var self = this; 
@@ -167,26 +194,26 @@ module TestArea.ListViewModels {
                                 + "&listDataSource=" + PersonDataSources[self.listDataSource] + "&" + self.queryString,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.WasSuccessful){
+                    if (data.wasSuccessful){
                         self.items.removeAll();
-                        for (var i in data.List) {
-                            var model = new TestArea.ViewModels.Person(data.List[i]);
+                        for (var i in data.list) {
+                            var model = new TestArea.ViewModels.Person(data.list[i]);
                             model.includes = self.includes;
                             model.onDelete(itemDeleted);
                             self.items.push(model);
                         }
-                        self.count(data.List.length);
-                        self.totalCount(data.TotalCount);
-                        self.pageCount(data.PageCount);
-                        self.page(data.Page);
-                        self.message(data.Message)
+                        self.count(data.list.length);
+                        self.totalCount(data.totalCount);
+                        self.pageCount(data.pageCount);
+                self.page(data.page);
+                self.message(data.message)
                         self.isLoaded(true);
-                        if ($.isFunction(callback)) callback(self);
-                    }else{
-                        self.message(data.Message);
+                if ($.isFunction(callback)) callback(self);
+            }else{
+                        self.message(data.message);
                         self.isLoaded(false);
                     }
-                })
+    })
                 .fail(function() {
                     alert("Could not get list of Person items.");
                 })
@@ -268,7 +295,7 @@ module TestArea.ListViewModels {
 
     // Method Implementations
 
-            self.add = function(numberOne: number, numberTwo: number, callback?: any){
+            self.add = function(numberOne: number, numberTwo: number, callback?: any, reload: Boolean = true){
                 self.addIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/Add",
@@ -278,11 +305,15 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.WasSuccessful) {
+					if (data.wasSuccessful) {
 						self.addMessage('');
 						self.addWasSuccessful(true);
-						self.addResult(data.Object);
-                        self.load(callback);
+						self.addResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.addWasSuccessful(false);
 						self.addMessage(data.Message);
@@ -296,14 +327,30 @@ module TestArea.ListViewModels {
 				});
             }
 
-            self.addUi = function() {
+            self.addUi = function(callback?: any) {
                 var numberOne: number = parseFloat(prompt('Number One'));
                 var numberTwo: number = parseFloat(prompt('Number Two'));
-                self.add(numberOne, numberTwo);
+                self.add(numberOne, numberTwo, callback);
+            }
+
+            self.addModal = function(callback?: any) {
+                $('#method-Add').modal();
+                $('#method-Add').on('shown.bs.modal', function() {
+                    $('#method-Add .btn-ok').click(function()
+                    {
+                        self.addWithArgs(null, callback);
+                        $('#method-Add').modal('hide');
+                    });
+                });
             }
             
+            self.addWithArgs = function(args?: PersonList.AddArgs, callback?: any) {
+                if (!args) args = self.addArgs;
+                self.add(args.numberOne(), args.numberTwo(), callback);
+            }
 
-            self.getUser = function(callback?: any){
+            
+            self.getUser = function(callback?: any, reload: Boolean = true){
                 self.getUserIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/GetUser",
@@ -312,11 +359,15 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.WasSuccessful) {
+					if (data.wasSuccessful) {
 						self.getUserMessage('');
 						self.getUserWasSuccessful(true);
-						self.getUserResult(data.Object);
-                        self.load(callback);
+						self.getUserResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.getUserWasSuccessful(false);
 						self.getUserMessage(data.Message);
@@ -330,12 +381,17 @@ module TestArea.ListViewModels {
 				});
             }
 
-            self.getUserUi = function() {
-                self.getUser();
+            self.getUserUi = function(callback?: any) {
+                self.getUser(callback);
+            }
+
+            self.getUserModal = function(callback?: any) {
+                    self.getUserUi(callback);
             }
             
 
-            self.getUserPublic = function(callback?: any){
+            
+            self.getUserPublic = function(callback?: any, reload: Boolean = true){
                 self.getUserPublicIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/GetUserPublic",
@@ -344,11 +400,15 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.WasSuccessful) {
+					if (data.wasSuccessful) {
 						self.getUserPublicMessage('');
 						self.getUserPublicWasSuccessful(true);
-						self.getUserPublicResult(data.Object);
-                        self.load(callback);
+						self.getUserPublicResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.getUserPublicWasSuccessful(false);
 						self.getUserPublicMessage(data.Message);
@@ -362,12 +422,17 @@ module TestArea.ListViewModels {
 				});
             }
 
-            self.getUserPublicUi = function() {
-                self.getUserPublic();
+            self.getUserPublicUi = function(callback?: any) {
+                self.getUserPublic(callback);
+            }
+
+            self.getUserPublicModal = function(callback?: any) {
+                    self.getUserPublicUi(callback);
             }
             
 
-            self.namesStartingWith = function(characters: String, callback?: any){
+            
+            self.namesStartingWith = function(characters: String, callback?: any, reload: Boolean = true){
                 self.namesStartingWithIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/NamesStartingWith",
@@ -376,11 +441,15 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.WasSuccessful) {
+					if (data.wasSuccessful) {
 						self.namesStartingWithMessage('');
 						self.namesStartingWithWasSuccessful(true);
-						self.namesStartingWithResult(data.Object);
-                        self.load(callback);
+						self.namesStartingWithResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.namesStartingWithWasSuccessful(false);
 						self.namesStartingWithMessage(data.Message);
@@ -394,13 +463,29 @@ module TestArea.ListViewModels {
 				});
             }
 
-            self.namesStartingWithUi = function() {
+            self.namesStartingWithUi = function(callback?: any) {
                 var characters: String = prompt('Characters');
-                self.namesStartingWith(characters);
+                self.namesStartingWith(characters, callback);
+            }
+
+            self.namesStartingWithModal = function(callback?: any) {
+                $('#method-NamesStartingWith').modal();
+                $('#method-NamesStartingWith').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWith .btn-ok').click(function()
+                    {
+                        self.namesStartingWithWithArgs(null, callback);
+                        $('#method-NamesStartingWith').modal('hide');
+                    });
+                });
             }
             
+            self.namesStartingWithWithArgs = function(args?: PersonList.NamesStartingWithArgs, callback?: any) {
+                if (!args) args = self.namesStartingWithArgs;
+                self.namesStartingWith(args.characters(), callback);
+            }
 
-            self.namesStartingWithPublic = function(characters: String, callback?: any){
+            
+            self.namesStartingWithPublic = function(characters: String, callback?: any, reload: Boolean = true){
                 self.namesStartingWithPublicIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/NamesStartingWithPublic",
@@ -409,11 +494,15 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.WasSuccessful) {
+					if (data.wasSuccessful) {
 						self.namesStartingWithPublicMessage('');
 						self.namesStartingWithPublicWasSuccessful(true);
-						self.namesStartingWithPublicResult(data.Object);
-                        self.load(callback);
+						self.namesStartingWithPublicResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.namesStartingWithPublicWasSuccessful(false);
 						self.namesStartingWithPublicMessage(data.Message);
@@ -427,13 +516,29 @@ module TestArea.ListViewModels {
 				});
             }
 
-            self.namesStartingWithPublicUi = function() {
+            self.namesStartingWithPublicUi = function(callback?: any) {
                 var characters: String = prompt('Characters');
-                self.namesStartingWithPublic(characters);
+                self.namesStartingWithPublic(characters, callback);
+            }
+
+            self.namesStartingWithPublicModal = function(callback?: any) {
+                $('#method-NamesStartingWithPublic').modal();
+                $('#method-NamesStartingWithPublic').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWithPublic .btn-ok').click(function()
+                    {
+                        self.namesStartingWithPublicWithArgs(null, callback);
+                        $('#method-NamesStartingWithPublic').modal('hide');
+                    });
+                });
             }
             
+            self.namesStartingWithPublicWithArgs = function(args?: PersonList.NamesStartingWithPublicArgs, callback?: any) {
+                if (!args) args = self.namesStartingWithPublicArgs;
+                self.namesStartingWithPublic(args.characters(), callback);
+            }
 
-            self.borCPeople = function(callback?: any){
+            
+            self.borCPeople = function(callback?: any, reload: Boolean = true){
                 self.borCPeopleIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/BorCPeople",
@@ -442,11 +547,15 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.WasSuccessful) {
+					if (data.wasSuccessful) {
 						self.borCPeopleMessage('');
 						self.borCPeopleWasSuccessful(true);
-						self.borCPeopleResult(data.Object);
-                        self.load(callback);
+						self.borCPeopleResult(data.object);
+                        if (reload) {
+                          self.load(callback);
+                        } else if ($.isFunction(callback)) {
+                          callback(data);
+                        }
 					} else {
 						self.borCPeopleWasSuccessful(false);
 						self.borCPeopleMessage(data.Message);
@@ -460,10 +569,29 @@ module TestArea.ListViewModels {
 				});
             }
 
-            self.borCPeopleUi = function() {
-                self.borCPeople();
+            self.borCPeopleUi = function(callback?: any) {
+                self.borCPeople(callback);
+            }
+
+            self.borCPeopleModal = function(callback?: any) {
+                    self.borCPeopleUi(callback);
             }
             
+
+                    }
+    }
+
+    export namespace PersonList {
+        // Classes for use in method calls to support data binding for input for arguments
+        export class AddArgs {
+            public numberOne: KnockoutObservable<number> = ko.observable(null);
+            public numberTwo: KnockoutObservable<number> = ko.observable(null);
+        }
+        export class NamesStartingWithArgs {
+            public characters: KnockoutObservable<string> = ko.observable(null);
+        }
+        export class NamesStartingWithPublicArgs {
+            public characters: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

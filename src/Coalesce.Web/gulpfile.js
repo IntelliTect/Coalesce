@@ -258,16 +258,13 @@ gulp.task('coalesce', ['coalesce:build'], function (cb) {
     });
 });
 
-//gulp.task('scaffold:mvc:area',
-//    shell.task(['dnx gen scripts -dc DbContext -filesOnly -a TestArea'])
-//);
-
-//gulp.task('scaffold:mvc:all',
-//    shell.task(['dnx gen scripts -dc DbContext'])
-//);
-
-//gulp.task('scaffold:mvc.debug',
-//    shell.task(['dnx --debug gen scripts -dc DbContext -filesOnly'])
-//);
+gulp.task('coalesce:area-all', ['coalesce'], function (cb) {
+    exec('"./CoalesceExe/Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        console.log(err);
+        cb(err);
+    });
+});
 
 gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);

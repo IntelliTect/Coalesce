@@ -45,7 +45,7 @@
         }
     }
 
-    @if (model.Methods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic))
+    @if (model.Methods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic && !f.IsInternalUse))
     {
     <div class="row">
         <div class="col-lg-offset-2 col-lg-10">

@@ -24,5 +24,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
         public string AreaLocation { get; set; }
         [Option(Name = "module", ShortName = "module", Description = "The prefix to apply to the module name of the generated typescript files.")]
         public string TypescriptModulePrefix { get; set; }
+        [Option(Name = "namespace", ShortName = "namespace", Description = "Target Namespace for the generated code.")]
+        public string TargetNamespace { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Intellitect.ComponentModel.TypeDefinition
@@ -112,7 +113,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
             {
                 if (Wrapper.IsTimeZoneInfo) return "any";
                 if (IsBool) return "boolean";
-                if (IsDate) return "moment.Moment";
+                if (IsDate) return "any"; // "moment.Moment";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType + "[]";
                 if (IsClass) return PureType.Name;
@@ -177,7 +178,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                if ((IsArray || IsCollection) && IsNumber) return "KnockoutObservableArray<number>";
+                if ((IsArray || IsCollection) && (IsNumber)) return "KnockoutObservableArray<number>";
                 if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
                 else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
                 else if (IsCollection) return "KnockoutObservableArray<any>";
@@ -252,6 +253,17 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
         public bool IsDateTimeOffset { get { return Wrapper.IsDateTimeOffset; } }
+
+        /// <summary>
+        /// Returns true if class is a Byte
+        /// </summary>
+        public bool IsByteArray
+        {
+            get
+            {
+                return PureType.Name == "Byte" && IsArray;
+            }
+        }
 
         /// <summary>
         /// Returns true if the class is an enum.
@@ -342,11 +354,31 @@ namespace Intellitect.ComponentModel.TypeDefinition
         //    }
         //}
 
-        public string NullableType
-        { get
+        public string NullableTypeForDto
+        {
+            get
             {
-                if (IsNullable) return Wrapper.NameWithTypeParams;
-                else return Wrapper.Name + "?";
+                string typeName = "";
+                if (Wrapper.IsNullable || Wrapper.IsArray) typeName = Wrapper.NameWithTypeParams;
+                else typeName = Wrapper.Name + "?";
+
+                //var model = ReflectionRepository.Models.Where(m => m.OnContext && m.Name == typeName).FirstOrDefault();
+                var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
+                if (model != null && model.OnContext)
+                {
+                    typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+                }
+
+                return typeName;
+            }
+        }
+
+        public string ExplicitConversionType
+        {
+            get
+            {
+                if (Wrapper.IsNullable || Wrapper.IsArray) return "";
+                else return $"({Wrapper.Name})";
             }
         }
     }

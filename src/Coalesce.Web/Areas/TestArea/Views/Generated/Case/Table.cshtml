@@ -45,16 +45,16 @@
         <table class="table table-striped @(ViewBag.Editable ? " editable" : "" )">
     <thead>
         <tr>
-                <th>Assigned To</th>
-                <th>Attachment</th>
-                <th>Case Products</th>
+                <th>Title</th>
                 <th>Description</th>
-                <th>Dev Team Assigned</th>
                 <th>Opened At</th>
+                <th>Assigned To</th>
                 <th>Reported By</th>
+                <th>Attachment</th>
                 <th>Severity</th>
                 <th>Status</th>
-                <th>Title</th>
+                <th>Case Products</th>
+                <th>Dev Team Assigned</th>
             <th 
                                     style="width: 150px;"
                 >
@@ -63,29 +63,26 @@
     </thead>
     <tbody>
         <!-- ko foreach: items -->
-        <tr>
+        <tr data-bind="css: {'btn-warning': errorMessage()}">
             @if (@ViewBag.Editable)
             {
             <td>
-                @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
-            </td>
-            <td>
-                @(Knockout.InputFor<Case>(p => p.Attachment))
-            </td>
-            <td>
-                @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
+                @(Knockout.InputFor<Case>(p => p.Title))
             </td>
             <td>
                 @(Knockout.InputFor<Case>(p => p.Description))
             </td>
             <td>
-                @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
-            </td>
-            <td>
                 @(Knockout.InputFor<Case>(p => p.OpenedAt))
             </td>
             <td>
+                @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
+            </td>
+            <td>
                 @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
+            </td>
+            <td>
+                @(Knockout.InputFor<Case>(p => p.Attachment))
             </td>
             <td>
                 @(Knockout.SelectFor<Case>(p => p.Severity))
@@ -94,31 +91,31 @@
                 @(Knockout.SelectFor<Case>(p => p.Status))
             </td>
             <td>
-                @(Knockout.InputFor<Case>(p => p.Title))
+                @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
+            </td>
+            <td>
+                @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
             </td>
             }
             else
             {
             <td>
-                @(Knockout.DisplayFor<Case>(p => p.AssignedTo))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.Attachment))
-            </td>
-            <td>
-                @(Knockout.DisplayFor<Case>(p => p.CaseProducts))
+                @(Knockout.DisplayFor<Case>(p => p.Title))
             </td>
             <td>
                 @(Knockout.DisplayFor<Case>(p => p.Description))
             </td>
             <td>
-                @(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))
-            </td>
-            <td>
                 @(Knockout.DisplayFor<Case>(p => p.OpenedAt))
             </td>
             <td>
+                @(Knockout.DisplayFor<Case>(p => p.AssignedTo))
+            </td>
+            <td>
                 @(Knockout.DisplayFor<Case>(p => p.ReportedBy))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Case>(p => p.Attachment))
             </td>
             <td>
                 @(Knockout.DisplayFor<Case>(p => p.Severity))
@@ -127,21 +124,25 @@
                 @(Knockout.DisplayFor<Case>(p => p.Status))
             </td>
             <td>
-                @(Knockout.DisplayFor<Case>(p => p.Title))
+                @(Knockout.DisplayFor<Case>(p => p.CaseProducts))
+            </td>
+            <td>
+                @(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))
             </td>
             }
             <td>
-
+                
                 <!-- Editor buttons -->
                 <div class="btn-group pull-right" role="group">
-                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                        <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
                         <i class="fa fa-pencil"></i>
                     </a>
-                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                        <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
                         <i class="fa fa-remove"></i>
                     </button>
 
                 </div>
+                <div class="form-control-static" data-bind="text: errorMessage"></div>
             </td>
         </tr>
         <!-- /ko -->
@@ -163,14 +164,14 @@
                 </tr>
                     <tr>
                         <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesCountUi">Get All Open Cases Count</button>
+                            <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesCountModal" >Get All Open Cases Count</button>
                         </td>
                         <td>
                             <span class="" data-bind="text: getAllOpenCasesCountResult"></span>
                         </td>
                         <td>
                             <span class="" data-bind="text: getAllOpenCasesCountWasSuccessful"></span>
-                            <span class="" data-bind="visible: getAllOpenCasesCountWasSuccessful(), text: getAllOpenCasesCountMessage"></span>
+                            <span class="" data-bind="text: getAllOpenCasesCountMessage"></span>
                         </td>
                         <td>
                             <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesCountIsLoading()">Loading</span>
@@ -178,14 +179,14 @@
                     </tr>
                     <tr>
                         <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesUi">Get All Open Cases</button>
+                            <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesModal" >Get All Open Cases</button>
                         </td>
                         <td>
                             <span class="" data-bind="text: getAllOpenCasesResult"></span>
                         </td>
                         <td>
                             <span class="" data-bind="text: getAllOpenCasesWasSuccessful"></span>
-                            <span class="" data-bind="visible: getAllOpenCasesWasSuccessful(), text: getAllOpenCasesMessage"></span>
+                            <span class="" data-bind="text: getAllOpenCasesMessage"></span>
                         </td>
                         <td>
                             <span class="label label-info" data-bind="fadeVisible: getAllOpenCasesIsLoading()">Loading</span>
@@ -195,6 +196,7 @@
         </div>
 </div>
 </div>
+
 
 
     @section Scripts

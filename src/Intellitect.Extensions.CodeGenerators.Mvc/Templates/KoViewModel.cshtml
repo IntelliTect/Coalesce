@@ -396,7 +396,7 @@ module @moduleName {
                 if (prop.Type.IsDate)
                 { 
                 @:if (data.@prop.JsonName == null) self.@(prop.JsVariable)(null);
-				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsonName))){
+				@:else if (self.@(prop.JsVariable)() == null || self.@(prop.JsVariable)() == false || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsonName))){
 				    @:self.@(prop.JsVariable)(moment(data.@prop.JsonName));
 				@:}
                 } else if (!prop.IsPOCO) {

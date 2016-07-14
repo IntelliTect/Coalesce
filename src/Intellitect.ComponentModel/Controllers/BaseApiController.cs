@@ -111,9 +111,10 @@ namespace Intellitect.ComponentModel.Controllers
                 // Above was removed because IEnumerable uses different extension methods than iQueryable causing very inefficient SQL to be used.
 
                 // Add sorting.
-                if (listParameters.OrderByList.Any())
+                var orderByParams = listParameters.OrderByList;
+                if (orderByParams.Any())
                 {
-                    result = result.OrderBy(string.Join(", ", listParameters.OrderByList.Select(f => $"{f.Key} {f.Value}")));
+                    result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{f.Key} {f.Value}")));
                 }
                 else
                 {

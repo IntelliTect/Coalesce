@@ -84,9 +84,9 @@ namespace Intellitect.ComponentModel.Models
                 // Add order by
                 if (OrderBy != null)
                 {
-                    foreach (var orderBy in OrderBy.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                    foreach (var orderBy in OrderBy.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                     {
-                        var parts = orderBy.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                        var parts = orderBy.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length == 2 && parts[1].ToUpper().StartsWith("D"))
                         {
                             result.Add(parts[0], "Desc");
@@ -99,7 +99,7 @@ namespace Intellitect.ComponentModel.Models
                 // Add order by descending
                 if (OrderByDescending != null)
                 {
-                    foreach (var orderBy in OrderBy.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                    foreach (var orderBy in OrderByDescending.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         result.Add(orderBy, "Desc");
                     }

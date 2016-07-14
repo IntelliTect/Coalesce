@@ -67,7 +67,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Email address of the person
         /// </summary>
-        [DtoIncludes(ContentViews = "EmailList,DocumentList")]
         public string Email { get; set; }
 
         /// <summary>

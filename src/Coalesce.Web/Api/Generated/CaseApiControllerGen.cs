@@ -164,17 +164,7 @@ namespace Coalesce.Web.Api
         {
             if (parameters.ListDataSource == "GetAllOpenCases")
             {
-                Int32 x = 0;
-                if (parameters.Filters.ContainsKey("x"))
-                {
-                    x = Convert.ToInt32(parameters.Filters["x"]);
-                }
-                Int32 y = 0;
-                if (parameters.Filters.ContainsKey("y"))
-                {
-                    y = Convert.ToInt32(parameters.Filters["y"]);
-                }
-                return Coalesce.Domain.Case.GetAllOpenCases(x, y, Db);
+                return Coalesce.Domain.Case.GetAllOpenCases(Db);
             }
 
             return base.GetListDataSource(parameters);
@@ -202,10 +192,10 @@ namespace Coalesce.Web.Api
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         
-        public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases (Int32 x, Int32 y){
+        public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases (){
             var result = new SaveResult<IEnumerable<CaseDtoGen>>();
             try{
-                var objResult = Case.GetAllOpenCases(x, y, Db);
+                var objResult = Case.GetAllOpenCases(Db);
                                 result.Object = objResult.ToList().Select(o => Mapper.ObjToDtoMapper<Case, CaseDtoGen>(o, User, ""));
                 result.WasSuccessful = true;
                 result.Message = null;

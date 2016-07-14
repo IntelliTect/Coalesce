@@ -20,6 +20,18 @@
             {
                 <span>• <a asp-action="Table" asp-controller="@vm.Name" style="padding-right: 15px">@vm.DisplayName</a></span>
             }
+            <div style="margin-top:15px;">
+                Your current role is: @ViewBag.CurrentRole
+                <br />
+                @if (ViewBag.CurrentRole == "User")
+                {
+                    <span>View the site as an <a href="/Demo/?demoUserRole=Admin">Admin</a></span>
+                }
+                else
+                {
+                    <span>View the site as a <a href="/Demo/?demoUserRole=User">User</a></span>
+                }
+            </div>
         </div>
     </div>
 </div>

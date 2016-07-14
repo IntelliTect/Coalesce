@@ -24,11 +24,11 @@ module TestArea.ViewModels {
 				if (!data) return;
 
                 // Load the properties.
-                self.personStatsId(data.PersonStatsId);
-                self.height(data.Height);
-                self.weight(data.Weight);
+                self.personStatsId(data.personStatsId);
+                self.height(data.height);
+                self.weight(data.weight);
                 self.personLocation(new PersonLocation());
-                self.personLocation().loadFromDto(data.PersonLocation);
+                self.personLocation().loadFromDto(data.personLocation);
                 
             };
 

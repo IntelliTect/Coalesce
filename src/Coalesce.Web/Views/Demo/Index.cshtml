@@ -37,11 +37,17 @@
         <h1 style="margin-top: 0">Open Cases</h1>
         <a asp-controller="Cases" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Log a New Case</a>
     </div>
-    <div class="col-md-6" style="margin-top: 24px">
+    <div class="col-md-4" style="margin-top: 24px">
         <label>
             Search
         </label>
         <input type="text" value="" data-bind="textInput: search" class="form-control" placeholder="Search" />
+    </div>
+    <div class="col-md-2" style="margin-top: 24px">
+        <label>
+            Call Server Methods:
+        </label>
+        <button class="btn btn-primary" data-bind="click: randomizeDatesAndStatus">Randomize Dates & Status</button>
     </div>
     <span class="label label-info" style="float: right; font-size: 14px" data-bind="fadeVisible: isLoading(), text: 'Loading...'"></span>
 </div>

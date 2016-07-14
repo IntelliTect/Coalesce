@@ -155,6 +155,21 @@
                         </tr>
                         <tr>
                             <td>
+                                <button class="btn btn-default btn-xs" data-bind="click: randomizeDatesAndStatusModal">Randomize Dates And Status</button>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: randomizeDatesAndStatusResult"></span>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: randomizeDatesAndStatusWasSuccessful"></span>
+                                <span class="" data-bind="text: randomizeDatesAndStatusMessage"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: randomizeDatesAndStatusIsLoading()">Loading</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
                                 <button class="btn btn-default btn-xs" data-bind="click: getAllOpenCasesModal">Get All Open Cases</button>
                             </td>
                             <td>

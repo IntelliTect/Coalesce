@@ -67,6 +67,18 @@ namespace Coalesce.Domain
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
         }
 
+        public static void RandomizeDatesAndStatus( AppDbContext db )
+        {
+            Random random = new Random();
+            foreach ( var c in db.Cases )
+            {
+                c.OpenedAt = DateTimeOffset.Now.AddSeconds( -random.Next( 10, 50000000 ) );
+                c.Status = (Statuses)random.Next(0, (int)Statuses.Cancelled + 1);
+            }
+
+            db.SaveChanges();
+        }
+
         public static IQueryable<Case> GetAllOpenCases(AppDbContext db)
         {
             return db.Cases.Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress).Include(c => c.AssignedTo).Include(c => c.ReportedBy);

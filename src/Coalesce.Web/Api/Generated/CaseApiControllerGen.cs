@@ -153,6 +153,24 @@ namespace Coalesce.Web.Api
             return result;
         }
         
+        // Method: RandomizeDatesAndStatus
+        [HttpPost("RandomizeDatesAndStatus")]
+        
+        public virtual SaveResult<object> RandomizeDatesAndStatus (){
+            var result = new SaveResult<object>();
+            try{
+                object objResult = null;
+                Case.RandomizeDatesAndStatus(Db);
+                result.Object = objResult;
+                result.WasSuccessful = true;
+                result.Message = null;
+            }catch(Exception ex){
+                result.WasSuccessful = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+        
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
         

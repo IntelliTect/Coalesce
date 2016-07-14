@@ -369,14 +369,22 @@ header {
 }
 /* End header */
 
-@media (max-width: 420px) {
+@media (max-width: 468px) {
     #logo {
         .coalesce-logo-text {
-            font-size: 28.5px !important;
+            font-size: 28px !important;
         }
 
         .intellitect-logo-text {
-            font-size: 18px !important;
+            margin-left: 5px !important;
+            font-size: 16px !important;
+        }
+    }
+}
+@media (max-width: 315px) {
+    #logo {
+        .intellitect-logo-text {
+            display: none;
         }
     }
 }

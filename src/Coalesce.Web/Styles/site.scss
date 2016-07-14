@@ -80,6 +80,7 @@ dd > div > .form-control-static {
 }
 
 .flex-card-container {
+     margin: 0 -10px ; // negate the margins on the cards along the outside edges so that things stay lined up
      display: flex;
      flex-flow: row wrap;
      justify-content: space-between;

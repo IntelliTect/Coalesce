@@ -9,7 +9,7 @@
 
   "dependencies": {
     "GenFu": "1.1.1",
-    "Intellitect.ComponentModel": "1.1.0",
+    "IntelliTect.Coalesce": "1.1.0",
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final", // ***
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0"

@@ -1,4 +1,4 @@
-﻿using Intellitect.ComponentModel.Data;
+﻿using IntelliTect.Coalesce.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;

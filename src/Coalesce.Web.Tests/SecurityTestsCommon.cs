@@ -1,5 +1,5 @@
 ﻿using Coalesce.Web.Tests.Helpers;
-using Intellitect.ComponentModel.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

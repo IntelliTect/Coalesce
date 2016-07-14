@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Intellitect.ComponentModel.DataAnnotations;
+using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coalesce.Domain

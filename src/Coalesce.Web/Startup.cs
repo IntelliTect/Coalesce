@@ -5,13 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Coalesce.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Intellitect.ComponentModel.TypeDefinition;
-using Intellitect.ComponentModel.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using Intellitect.ComponentModel.Mapping;
+using IntelliTect.Coalesce.Mapping;
 
 namespace Coalesce.Web
 {

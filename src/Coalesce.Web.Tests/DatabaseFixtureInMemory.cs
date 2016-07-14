@@ -1,5 +1,5 @@
 ﻿using Coalesce.Domain;
-using Intellitect.ComponentModel.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

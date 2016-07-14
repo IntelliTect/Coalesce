@@ -23,6 +23,8 @@ namespace Intellitect.ComponentModel.TypeDefinition.Wrappers
 
         public abstract bool IsNullable { get; }
 
+        public abstract bool IsNullableType { get; }
+
         public abstract bool IsClass { get; }
 
         public abstract Dictionary<int, string> EnumValues { get; }

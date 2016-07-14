@@ -28,6 +28,8 @@ using Intellitect.ComponentModel.Mapping;
 {
 @:using @ns;
 }
+// DTO namespace
+using @(namespaceName).Models;
 
 namespace @(namespaceName).Api
 {
@@ -41,16 +43,16 @@ namespace @(namespaceName).Api
     }
     @(model.SecurityInfo.ClassAnnotation)
     public partial class @(model.ControllerName)Controller 
-         : LocalBaseApiController<@(model.Name)> 
+         : LocalBaseApiController<@(model.Name), @(model.Name)DtoGen> 
     {
         public @(model.ControllerName)Controller() { }
-        
-        
+      
+        /// <summary>
+        /// Returns @(model.Name)DtoGen
+        /// </summary>
         [HttpGet("list")]
         @(model.SecurityInfo.ReadAnnotation)
         public virtual async Task<ListResult> List(
-            string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -60,7 +62,36 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+        
+            var listResult = await ListImplementation(parameters);
+            return new GenericListResult<@(model.Name)DtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns custom object based on supplied fields
+        /// </summary>
+        [HttpGet("customlist")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual async Task<ListResult> CustomList(
+            string fields = null, 
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            // Custom fields for this object.
+            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
@@ -81,7 +112,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search);
+            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
             @foreach(PropertyViewModel prop in model.Properties.Where(f=>f.IsUrlParameter))
@@ -101,7 +132,7 @@ namespace @(namespaceName).Api
 
         [HttpGet("get/{id}")]
         @(model.SecurityInfo.ReadAnnotation)
-        public virtual async Task<@(model.Name)> Get(string id, string includes = null)
+        public virtual async Task<@(model.Name)DtoGen> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -127,7 +158,7 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)> Save(@(model.Name) dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<@(model.Name)DtoGen> Save(@(model.Name)DtoGen dto, string includes = null, bool returnObject = true)
         {
             @if (!model.IsCreateAllowed)
             {
@@ -146,13 +177,13 @@ namespace @(namespaceName).Api
         
         [HttpPost("AddToCollection")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<@(model.Name)DtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<@(model.Name)DtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -217,15 +248,15 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-@:result.Object = Mapper.ObjToDtoMapper(User).Map<@(model.Name)>(objResult);
+                @:result.Object = Mapper.ObjToDtoMapper<@(model.Name), @(model.Name)DtoGen>(objResult, User, "");
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-@:result.Object = objResult.ToList().Select(Mapper.ObjToDtoMapper(User).Map<@(model.Name)>);
+                @:result.Object = objResult.ToList().Select(o => Mapper.ObjToDtoMapper<@(model.Name), @(model.Name)DtoGen>(o, User, ""));
                 }
                 else
                 {
-@:result.Object = objResult;
+                @:result.Object = objResult;
                 }
                 result.WasSuccessful = true;
                 result.Message = null;

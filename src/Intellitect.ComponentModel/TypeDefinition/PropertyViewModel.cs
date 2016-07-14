@@ -1009,7 +1009,160 @@ namespace Intellitect.ComponentModel.TypeDefinition
                 return Name.ToCamelCase();
             }
         }
+
+        /// <summary>
+        /// True if this property has the Includes Attribute
+        /// </summary>
+        public bool HasDtoIncludes
+        {
+            get
+            {
+                return Wrapper.HasAttribute<DtoIncludesAttribute>();
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of content views from the Includes attribute
+        /// </summary>
+        public List<string> DtoIncludes
+        {
+            get
+            {
+                var includes = (Wrapper.GetAttributeValue<DtoIncludesAttribute>(nameof(DtoIncludesAttribute.ContentViews)) as string).Trim();
+                return includes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
+            }
+        }
+        
+        /// <summary>
+        /// True if this property has the Excludes Attribute
+        /// </summary>
+        public bool HasDtoExcludes
+        {
+            get
+            {
+                return Wrapper.HasAttribute<DtoExcludesAttribute>();
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of content views from the Includes attribute
+        /// </summary>
+        public List<string> DtoExcludes
+        {
+            get
+            {
+                var excludes = (Wrapper.GetAttributeValue<DtoExcludesAttribute>(nameof(DtoExcludesAttribute.ContentViews)) as string).Trim();
+                return excludes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
+            }
+        }
+
+        public string ObjToDtoSecurityTrimmer()
+        {
+            var setter = $"{Name} = null;";
+            var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+            {
+                var roles = (SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) ?
+                    string.Join(" || ", readRolesList.Select(s => $"is{s}")) : "";
+                var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";            
+                var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+
+                var statement = new List<string>();
+                if (!string.IsNullOrEmpty(roles)) statement.Add($"!({roles})");
+                if (!string.IsNullOrEmpty(includes)) statement.Add($"!({includes})");
+                if (!string.IsNullOrEmpty(excludes)) statement.Add($"({excludes})");
+
+                return $@"          if ({string.Join(" || ", statement)})
+            {{
+                {setter}
+            }}
+";
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public string DtoToObjPropertySetter()
+        {
+            if (IgnorePropertyInUpdates)
+            {
+                return "";
+            }
+            else
+            {
+                var setter = $"entity.{Name} = {Type.ExplicitConversionType}{Name};";
+
+                var editRolesList = SecurityInfo.EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if ((SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+                {
+                    var roles = (SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) ?
+                        string.Join(" || ", editRolesList.Select(s => $"is{s}")) : "";
+                    var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
+                    var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+
+                    var statement = new List<string>();
+                    if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
+                    if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
+                    if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
+
+                    return $@"          if ({string.Join(" && ", statement)})
+            {{
+                {setter}
+            }}
+";
+                }
+                else
+                {
+                    return $"\t\t\t{setter}{Environment.NewLine}";
+                }
+            }
+        }
+
+        private bool IgnorePropertyInUpdates
+        {
+            get
+            {
+                return (SecurityInfo.IsSecuredProperty && string.IsNullOrEmpty(SecurityInfo.EditRoles)) ||
+                    IsReadOnly ||
+                    (IsPOCO && !IsComplexType) ||
+                    IsManytoManyCollection ||
+                    Type.IsCollection ||
+                    IsInternalUse;
+            }
+        }
+
+        //foreach (var prop in _sourceVm.Properties.Where(f => f.IsReadOnly))
+        //    {
+        //        dtoToObjMap = dtoToObjMap.ForSourceMember(prop.Name, opt => opt.Ignore());
+        //    }
+        //    // Don't assign objects, only their IDs.
+        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsPOCO && !f.IsComplexType))
+        //    {
+        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
+        //    }
+        //    // Remove many to many relationships.
+        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsManytoManyCollection))
+        //    {
+        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
+        //    }
+        //    // Remove collections.
+        //    foreach (var prop in _sourceVm.Properties.Where(f => f.Type.IsCollection))
+        //    {
+        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
+        //    }
+        //    // Remove internal use
+        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsInternalUse))
+        //    {
+        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
+        //        //objToDtoMap = objToDtoMap.ForMember(prop.Name, opt => opt.Ignore());
+        //    }
+
+        //    // Set up incoming security
+        //    foreach (var prop in _sourceVm.Properties.Where(f => !f.SecurityInfo.IsEditable(_user)))
+        //    {
+        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
+        //    }
     }
-
-
 }

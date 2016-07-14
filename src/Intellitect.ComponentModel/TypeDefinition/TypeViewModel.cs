@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Intellitect.ComponentModel.TypeDefinition
@@ -342,11 +343,31 @@ namespace Intellitect.ComponentModel.TypeDefinition
         //    }
         //}
 
-        public string NullableType
-        { get
+        public string NullableTypeForDto
+        {
+            get
             {
-                if (IsNullable) return Wrapper.NameWithTypeParams;
-                else return Wrapper.Name + "?";
+                string typeName = "";
+                if (Wrapper.IsNullable || Wrapper.IsArray) typeName = Wrapper.NameWithTypeParams;
+                else typeName = Wrapper.Name + "?";
+
+                //var model = ReflectionRepository.Models.Where(m => m.OnContext && m.Name == typeName).FirstOrDefault();
+                var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
+                if (model != null && model.OnContext)
+                {
+                    typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+                }
+
+                return typeName;
+            }
+        }
+
+        public string ExplicitConversionType
+        {
+            get
+            {
+                if (Wrapper.IsNullable || Wrapper.IsArray) return "";
+                else return $"({Wrapper.Name})";
             }
         }
     }

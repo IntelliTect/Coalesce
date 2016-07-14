@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Intellitect.ComponentModel.Models;
 using Intellitect.ComponentModel.Data;
@@ -10,26 +9,18 @@ using Intellitect.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic;
 using Intellitect.ComponentModel.TypeDefinition;
 using System.Threading.Tasks;
-using Intellitect.ComponentModel.Mapping;
+using Intellitect.ComponentModel.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Intellitect.ComponentModel.Helpers;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
+using Intellitect.ComponentModel.Mapping;
 
 namespace Intellitect.ComponentModel.Controllers
 {
-    public abstract class BaseApiController<T, TContext> : BaseApiController<T, T, TContext>
-        where T : class, new()
-        where TContext : DbContext
-    {
-        protected BaseApiController() : base()
-        { }
-    }
-
-
     public abstract class BaseApiController<T, TDto, TContext> : BaseControllerWithDb<TContext>
     where T : class, new()
-    where TDto : class, new()
+    where TDto : class, IClassDto, new()
     where TContext : DbContext
     {
         protected BaseApiController()
@@ -54,6 +45,10 @@ namespace Intellitect.ComponentModel.Controllers
             }
         }
         private ILogger _Logger = null;
+
+        public Func<string, string> CodeToCall = null;
+
+        
 
         public static int DefaultPageSizeAll { get; set; } = 25;
         private int? _defaultPageSize = null;
@@ -88,15 +83,8 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 IQueryable<T> result = GetListDataSource(listParameters);
 
-                // Add 
-                foreach (var clause in listParameters.IncludeList)
-                {
-                    result = result.IncludeString(clause);
-                }
-
                 // Add the Include statements to the result to grab the right object graph. Passing "" gets the standard set.
-                if (string.Compare(listParameters.Includes, "none",
-                            StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     result = result.Includes(listParameters.Includes);
                 }
@@ -177,20 +165,20 @@ namespace Intellitect.ComponentModel.Controllers
                 result2.IncludesExternal(listParameters.Includes);
 
                 // Exclude certain data
-                if (new T() is IExcludable)
-                {
-                    foreach (var obj in result2)
-                    {
-                        ((IExcludable)obj).Exclude(listParameters.Includes);
-                    }
-                }
+                //if (new T() is IExcludable)
+                //{
+                //    foreach (var obj in result2)
+                //    {
+                //        ((IExcludable)obj).Exclude(listParameters.Includes);
+                //    }
+                //}
 
                 // Allow for security trimming
                 // TODO: This needs to be adjusted to handle paging correctly.
                 var result3 = result2.Where(f => BeforeGet(f));
 
                 // Select it into the object we want
-                IEnumerable<TDto> result4 = result3.ToList().Select(MapObjToDto).ToList();
+                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
 
                 if (listParameters.FieldList.Any())
                 {
@@ -415,13 +403,13 @@ namespace Intellitect.ComponentModel.Controllers
             {
                 return null;
             }
-            // Exclude data
-            if (item is IExcludable)
-            {
-                ((IExcludable)item).Exclude(includes);
-            }
+            //// Exclude data
+            //if (item is IExcludable)
+            //{
+            //    ((IExcludable)item).Exclude(includes);
+            //}
             // Map to DTO
-            var dto = MapObjToDto(item);
+            var dto = MapObjToDto(item, includes);
 
             return dto;
         }
@@ -454,6 +442,7 @@ namespace Intellitect.ComponentModel.Controllers
         protected SaveResult<TDto> SaveImplementation(TDto dto, string includes = null, bool returnObject = true)
         {
             var result = new SaveResult<TDto>();
+
             // See if this is new or an update using the key.
             T item = null;
 
@@ -499,7 +488,7 @@ namespace Intellitect.ComponentModel.Controllers
                 if (BeforeSave(dto, item))
                 {
 
-                    MapDtoToObj(dto, item);
+                    MapDtoToObj(dto, item, includes);
                     try
                     {
                         SetFingerprint(item);
@@ -527,11 +516,11 @@ namespace Intellitect.ComponentModel.Controllers
                     // Get the key back.
                     if (item != null)
                     {
-                        if (item is IExcludable)
-                        {
-                            ((IExcludable)item).Exclude(includes);
-                        }
-                        result.Object = MapObjToDto(item);
+                        //if (item is IExcludable)
+                        //{
+                        //    ((IExcludable)item).Exclude(includes);
+                        //}
+                        result.Object = MapObjToDto(item, includes);
                     }
                 }
                 else
@@ -561,18 +550,20 @@ namespace Intellitect.ComponentModel.Controllers
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        protected virtual TDto MapObjToDto(T obj)
+        protected virtual TDto MapObjToDto(T obj, string includes)
         {
-            return Mapper.ObjToDtoMapper(User).Map<TDto>(obj);
+            //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
+            return Mapper.ObjToDtoMapper<T, TDto>(obj, User, includes);
         }
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>        
-        protected virtual void MapDtoToObj(TDto dto, T obj)
+        protected virtual void MapDtoToObj(TDto dto, T obj, string includes)
         {
-            Mapper.DtoToObjMapper(User).Map(dto, obj);
+            //dto.Update(obj);
+            Mapper.DtoToObjMapper(dto, obj, User, includes);
         }
 
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
@@ -693,7 +684,8 @@ namespace Intellitect.ComponentModel.Controllers
         /// <returns></returns>
         protected object IdValue(TDto dto)
         {
-            object id = PrimaryKey.PropertyInfo.GetValue(dto);
+            var propInfo = dto.GetType().GetProperty(PrimaryKey.Name);
+            object id = propInfo.GetValue(dto);
             return id;
         }
 

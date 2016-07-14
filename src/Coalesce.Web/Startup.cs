@@ -2,18 +2,16 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
 using Coalesce.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Intellitect.ComponentModel.TypeDefinition;
 using Intellitect.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Security.Claims;
-using System;
-using System.IO;
 using Newtonsoft.Json.Serialization;
-using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using Intellitect.ComponentModel.Mapping;
 
 namespace Coalesce.Web
 {
@@ -41,12 +39,14 @@ namespace Coalesce.Web
 
             services.AddMvc().AddJsonOptions(options =>
             {
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
                 var resolver = options.SerializerSettings.ContractResolver;
                 if (resolver != null) (resolver as DefaultContractResolver).NamingStrategy = null;
 
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
 
             ReflectionRepository.AddContext<AppDbContext>();
@@ -85,8 +85,14 @@ namespace Coalesce.Web
                     name: "Default Route",
                     template: "{controller}/{action}/{id?}",
                     defaults: new { controller = "Home", action = "Index" });
-
             });
+
+            var classNameParts = GetType().FullName.Split(new char[] { '.' });
+            var ns = string.Join(".", classNameParts.Take(classNameParts.Length - 1));
+            foreach (var model in ReflectionRepository.Models.Where(m => m.PrimaryKey != null && m.OnContext))
+            {
+                Mapper.AddMap(model.Type, Type.GetType($"{ns}.Models.{model.Type.Name}DtoGen"));
+            }
 
             SampleData.Initialize(app.ApplicationServices.GetService<AppDbContext>());
         }

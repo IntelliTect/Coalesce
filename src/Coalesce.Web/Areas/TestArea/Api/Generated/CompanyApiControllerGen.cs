@@ -13,22 +13,24 @@ using Intellitect.ComponentModel.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
+// DTO namespace
+using Coalesce.Web.TestArea.Models;
 
 namespace Coalesce.Web.TestArea.Api
 {
     [Route("TestArea/api/[controller]")]
     [Authorize]
     public partial class CompanyController 
-         : LocalBaseApiController<Company> 
+         : LocalBaseApiController<Company, CompanyDtoGen> 
     {
         public CompanyController() { }
-        
-        
+      
+        /// <summary>
+        /// Returns CompanyDtoGen
+        /// </summary>
         [HttpGet("list")]
         [Authorize]
         public virtual async Task<ListResult> List(
-            string fields = null, 
-            string include = null, 
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -38,7 +40,40 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
         {
-            ListParameters parameters = new ListParameters(fields, include, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            parameters.AddFilter("CompanyId", companyId);
+            parameters.AddFilter("Name", name);
+            parameters.AddFilter("Address1", address1);
+            parameters.AddFilter("Address2", address2);
+            parameters.AddFilter("City", city);
+            parameters.AddFilter("State", state);
+            parameters.AddFilter("ZipCode", zipCode);
+            parameters.AddFilter("AltName", altName);
+        
+            var listResult = await ListImplementation(parameters);
+            return new GenericListResult<CompanyDtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns custom object based on supplied fields
+        /// </summary>
+        [HttpGet("customlist")]
+        [Authorize]
+        public virtual async Task<ListResult> CustomList(
+            string fields = null, 
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            // Custom fields for this object.
+            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+        {
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CompanyId", companyId);
@@ -63,7 +98,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
         {
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search);
+            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
             parameters.AddFilter("CompanyId", companyId);
@@ -87,7 +122,7 @@ namespace Coalesce.Web.TestArea.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<Company> Get(string id, string includes = null)
+        public virtual async Task<CompanyDtoGen> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -99,28 +134,29 @@ namespace Coalesce.Web.TestArea.Api
         {
             return DeleteImplementation(id);
         }
+        
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<Company> Save(Company dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CompanyDtoGen> Save(CompanyDtoGen dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
-
+        
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<Company> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CompanyDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<Company> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CompanyDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
-
+        [Authorize]
         protected override IQueryable<Company> GetListDataSource(ListParameters parameters)
         {
 

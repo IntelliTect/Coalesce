@@ -42,8 +42,5 @@ namespace Intellitect.ComponentModel.Models
             Message = ex.Message;
             WasSuccessful = false;
         }
-
-
     }
-
 }

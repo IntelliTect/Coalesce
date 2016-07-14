@@ -561,5 +561,44 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
         }
 
+        public string DtoIncludesAsCS()
+        {
+            var includeList = Properties
+                                .Where(p => p.HasDtoIncludes)
+                                .SelectMany(p => p.DtoIncludes)
+                                .ToList();
+
+            return string.Join($"{Environment.NewLine}\t\t\t", includeList.Select(include => $"bool include{include} = includes == \"{include}\";"));
+        }
+
+        public string DtoExcludesAsCS()
+        {
+            var excludeList = Properties
+                                .Where(p => p.HasDtoExcludes)
+                                .SelectMany(p => p.DtoExcludes)
+                                .ToList();
+            return string.Join($"{Environment.NewLine}\t\t\t", excludeList.Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";"));
+        }
+
+        public string PropertyRolesAsCS()
+        {
+            var allPropertyRoles = Properties.Aggregate(new List<string>(), (p, c) => p.Union(c.SecurityInfo.EditRolesList.Union(c.SecurityInfo.ReadRolesList)).ToList());
+
+            var output = allPropertyRoles.Select(role => $"bool is{role} = false;").ToList();
+            output.Add("if (user != null)");
+            output.Add("{");
+            output.AddRange(allPropertyRoles.Select(role => $"\tis{role} = user.IsInRole(\"{role}\");"));
+            output.Add("}");
+
+            return string.Join($"{Environment.NewLine}\t\t\t", output);
+        }
+
+        public Type Type
+        {
+            get
+            {
+                return Wrapper.Info;
+            }
+        }
     }
 }

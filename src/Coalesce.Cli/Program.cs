@@ -42,13 +42,9 @@ namespace Coalesce.Cli
                     TargetNamespace = targetNamespace.Value() ?? ""
                 };
 
-                // Find the web project or target namespace (this allows for not compiling the web project when it is broken because of changes to Coalesce)
-                ProjectContext webContext = null;
-                if (model.TargetNamespace != "")
-                {
-                    webContext = DependencyProvider.ProjectContext(webProject.Value());
-                    if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
-                }
+                // Find the web project
+                ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
+                if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
 
                 // Find the data project
                 ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());

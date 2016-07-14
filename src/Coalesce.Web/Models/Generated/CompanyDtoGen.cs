@@ -83,20 +83,20 @@ namespace Coalesce.Web.Models
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(Company entity, ClaimsPrincipal user = null, string includes = null)
         {
-        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-        includes = includes ?? "";
+            includes = includes ?? "";
 
-        if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, user, includes)) return;
 
-        // Applicable includes for Company
-        
+            // Applicable includes for Company
+            
 
-        // Applicable excludes for Company
-        
+            // Applicable excludes for Company
+            
 
-        // Applicable roles for Company
-        if (user != null)
+            // Applicable roles for Company
+            if (user != null)
 			{
 			}
 

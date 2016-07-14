@@ -1130,7 +1130,13 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
             else
             {
-                var setter = $"entity.{Name} = {Type.ExplicitConversionType}{Name};";
+                var name = Name;
+                if (!Type.IsNullable && Type.CsDefaultValue != "null" && !Type.IsByteArray)
+                {
+                    if (Type.IsDate) name = $"({name} ?? DateTime.Today)";
+                    else name = $"({name} ?? {Type.CsDefaultValue})";
+                }
+                var setter = $"entity.{Name} = {Type.ExplicitConversionType}{name};";
 
                 var editRolesList = SecurityInfo.EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if ((SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)

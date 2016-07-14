@@ -178,7 +178,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
         {
             get
             {
-                if ((IsArray || IsCollection) && IsNumber) return "KnockoutObservableArray<number>";
+                if ((IsArray || IsCollection) && (IsNumber)) return "KnockoutObservableArray<number>";
                 if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
                 else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
                 else if (IsCollection) return "KnockoutObservableArray<any>";
@@ -253,6 +253,17 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
         public bool IsDateTimeOffset { get { return Wrapper.IsDateTimeOffset; } }
+
+        /// <summary>
+        /// Returns true if class is a Byte
+        /// </summary>
+        public bool IsByteArray
+        {
+            get
+            {
+                return PureType.Name == "Byte" && IsArray;
+            }
+        }
 
         /// <summary>
         /// Returns true if the class is an enum.

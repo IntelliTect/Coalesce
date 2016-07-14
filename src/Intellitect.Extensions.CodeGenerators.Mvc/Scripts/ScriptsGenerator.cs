@@ -56,7 +56,7 @@ namespace Intellitect.Extensions.CodeGenerators.Mvc.Scripts
                 }
                 Console.WriteLine($"Namespace: {targetNamespace}");
 
-                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator ?? ModelTypesLocator, throwWhenNotFound: false);
+                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator, throwWhenNotFound: false);
 
                 if (model.ValidateOnly)
                 {

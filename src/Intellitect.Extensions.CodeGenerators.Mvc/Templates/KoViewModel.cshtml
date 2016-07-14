@@ -127,7 +127,7 @@ module @moduleName {
         {
         @:// @(prop.Comment)
         }
-        @:public @prop.JsTextPropertyName = @prop.Type.JsKnockoutType;
+        @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.computed<string>(() => "");
         }
         if (prop.IsManytoManyCollection)
         {

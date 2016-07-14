@@ -41,13 +41,7 @@ namespace Intellitect.ComponentModel.TypeDefinition
             ClassFieldOrder = classFieldOrder;
         }
 
-        public TypeViewModel Type
-        {
-            get
-            {
-                return new TypeViewModel(Wrapper.Type);
-            }
-        }
+        public TypeViewModel Type => new TypeViewModel(Wrapper.Type);
 
         /// <summary>
         /// Order rank of the field in the model.
@@ -58,28 +52,26 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// <summary>
         /// Name of the property
         /// </summary>
-        public string Name { get { return Wrapper.Name; } }
+        public string Name => Wrapper.Name;
 
         /// <summary>
         /// Name of the property sent by Json over the wire. Camel Cased Name
         /// </summary>
-        public string JsonName { get {
-                return Wrapper.Name.ToCamelCase();
-            }
-        }
+        public string JsonName => Wrapper.Name.ToCamelCase();
 
-        public string Comment { get { return Wrapper.Comment; } }
+        public string Comment => Wrapper.Comment;
 
         /// <summary>
         /// Name of the type
         /// </summary>
-        public string TypeName { get { return Wrapper.Type.Name; } }
+        public string TypeName => Wrapper.Type.Name;
+
         public ClassViewModel Parent { get; }
 
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
-        public TypeViewModel PureType { get { return new TypeViewModel(Wrapper.Type.PureType); } }
+        public TypeViewModel PureType => new TypeViewModel(Wrapper.Type.PureType);
 
         /// <summary>
         /// Gets the name for the API call.
@@ -99,34 +91,36 @@ namespace Intellitect.ComponentModel.TypeDefinition
             }
         }
 
-        public string JsVariable
-        {
-            get
-            {
-                return Name.ToCamelCase();
-            }
-        }
+        public string JsVariable => Name.ToCamelCase();
+
+        private static readonly Regex JsKeywordRegex = new Regex(
+                "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$");
+
+        /// <summary>
+        /// Returns true if the value if JsVariable is a reserved keyword in JavaScript.
+        /// </summary>
+        public bool JsVariableIsReserved => JsKeywordRegex.IsMatch(JsVariable);
+
+        /// <summary>
+        /// Returns the correctly-prefixed version of the value of JsVariable for use in Knockout bindings
+        /// </summary>
+        public string JsVariableForBinding => JsVariableIsReserved ? $"$data.{JsVariable}" : JsVariable;
 
         /// <summary>
         /// Name of the Valid Value list object in JS in Pascal case.
         /// </summary>
-        public string ValidValueListName
-        {
-            get
-            {
-                return Name + "ValidValues";
-            }
-        }
-
+        public string ValidValueListName => Name + "ValidValues";
 
 
         /// <summary>
         /// Text property name for knockout, for things like enums. PureType+'Text'
         /// </summary>
-        public string JsTextPropertyName
-        {
-            get { return Name.ToCamelCase() + "Text"; }
-        }
+        public string JsTextPropertyName => JsVariable + "Text";
+
+        /// <summary>
+        /// Text property name for knockout bindings, for things like enums. PureType+'Text'
+        /// </summary>
+        public string JsTextPropertyNameForBinding => JsVariableForBinding + "Text";
 
 
         /// <summary>
@@ -148,69 +142,31 @@ namespace Intellitect.ComponentModel.TypeDefinition
         /// <summary>
         /// Returns true if this property is a complex type.
         /// </summary>
-        public bool IsComplexType
-        {
-            get
-            {
-                if (IsPOCO)
-                {
-                    return Object.IsComplexType;
-                }
-                return false;
-            }
-        }
+        public bool IsComplexType => IsPOCO && Object.IsComplexType;
 
 
         /// <summary>
         /// True if this property has a ViewModel.
         /// </summary>
-        public bool HasViewModel { get { return Object != null && Object.HasDbSet && !IsInternalUse; } }
+        public bool HasViewModel => Object != null && Object.HasDbSet && !IsInternalUse;
 
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
-        public ClassViewModel Object
-        {
-            get
-            {
-                return Wrapper.Type.PureType.ClassViewModel;
-            }
-        }
+        public ClassViewModel Object => Wrapper.Type.PureType.ClassViewModel;
 
-        public bool IsDbSet
-        {
-            get
-            {
-                return Type.Name.Contains("DbSet");
-            }
-        }
+        public bool IsDbSet => Type.Name.Contains("DbSet");
 
 
         /// <summary>
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
         /// </summary>
-        public bool IsManytoManyCollection
-        {
-            get
-            {
-                if (Wrapper.Type.IsCollection)
-                {
-                    if (Wrapper.HasAttribute<ManyToManyAttribute>()) return true;
-                }
-                return false;
-            }
-        }
+        public bool IsManytoManyCollection => Wrapper.Type.IsCollection && Wrapper.HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
         /// True if this property has the ClientValidation Attribute
         /// </summary>
-        public bool HasClientValidation
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ClientValidationAttribute>();
-            }
-        }
+        public bool HasClientValidation => Wrapper.HasAttribute<ClientValidationAttribute>();
 
         /// <summary>
         /// True if the client should save data when there is a ClientValidation error. False is default.

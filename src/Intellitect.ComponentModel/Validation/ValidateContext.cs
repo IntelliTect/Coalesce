@@ -37,6 +37,7 @@ namespace Intellitect.ComponentModel.Validation
                     try
                     {
                         assert.IsNotNull(prop.JsVariable, $"JS Variable is: {prop.JsVariable}");
+                        assert.IsNotNull(prop.JsVariableForBinding, $"JS Variable for binding is: {prop.JsVariableForBinding}");
                         assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type is: {prop.Type.TsKnockoutType}");
                         assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type is: {prop.Type.JsKnockoutType}");
                         if (prop.IsPOCO && !prop.IsComplexType && !prop.IsReadOnly)
@@ -66,7 +67,8 @@ namespace Intellitect.ComponentModel.Validation
                         }
                         if (prop.Type.IsEnum)
                         {
-                            assert.IsNotNull(prop.JsVariable, $"Enum JS Text Variable is: {prop.JsTextPropertyName}");
+                            assert.IsNotNull(prop.JsTextPropertyName, $"Enum JS Text Variable is: {prop.JsTextPropertyName}");
+                            assert.IsNotNull(prop.JsTextPropertyNameForBinding, $"Enum KO Text Binding is: {prop.JsTextPropertyNameForBinding}");
                         }
                         // See if we are using an invalid name
                         assert.AreNotEqual("active", prop.Name.ToLower(), "Property name cannot be 'Active' because it conflicts with standard API parameters");

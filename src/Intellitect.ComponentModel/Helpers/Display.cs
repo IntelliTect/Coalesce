@@ -17,14 +17,14 @@ namespace Intellitect.ComponentModel.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                var result = @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariable + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                var result = @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 return new HtmlString(result);
             }
             else if (editable && prop.CanWrite && !prop.IsInternalUse)
             {
                 if (prop.Type.IsDate)
                 {
-                    return Knockout.DateTime(prop.JsVariable, prop.DateFormat);
+                    return Knockout.DateTime(prop.JsVariableForBinding, prop.DateFormat);
                 }
                 else if (prop.Type.IsEnum)
                 {
@@ -32,7 +32,7 @@ namespace Intellitect.ComponentModel.Helpers
                 }
                 else if (prop.Type.IsBool)
                 {
-                    return Knockout.Checkbox(prop.JsVariable);
+                    return Knockout.Checkbox(prop.JsVariableForBinding);
                 }
                 else if (prop.HasValidValues)
                 {
@@ -52,18 +52,18 @@ namespace Intellitect.ComponentModel.Helpers
                 }
                 else
                 {
-                    return Knockout.TextInput(prop.JsVariable);
+                    return Knockout.TextInput(prop.JsVariableForBinding);
                 }
             }
             else
             {
                 if (prop.IsDateOnly)
                 {
-                    return Knockout.DisplayDate(prop.JsVariable);
+                    return Knockout.DisplayDate(prop.JsVariableForBinding);
                 }
                 else if (prop.Type.IsDate)
                 {
-                    return Knockout.DisplayDateTime(prop.JsVariable);
+                    return Knockout.DisplayDateTime(prop.JsVariableForBinding);
                 }
                 else if (prop.IsManytoManyCollection)
                 {
@@ -71,7 +71,7 @@ namespace Intellitect.ComponentModel.Helpers
                 }
                 else if (prop.Type.IsBool)
                 {
-                    return Knockout.DisplayCheckbox(prop.JsVariable);
+                    return Knockout.DisplayCheckbox(prop.JsVariableForBinding);
                 }
                 else if (prop.IsPOCO && !prop.IsComplexType)
                 {
@@ -83,7 +83,7 @@ namespace Intellitect.ComponentModel.Helpers
                 }
                 else
                 {
-                    return Knockout.DisplayText(prop.JsVariable);
+                    return Knockout.DisplayText(prop.JsVariableForBinding);
                 }
             }
             // If in doubt do nothing. But put a comment in
@@ -94,7 +94,7 @@ namespace Intellitect.ComponentModel.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                return @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariable + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                return @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
             }
             else
             {

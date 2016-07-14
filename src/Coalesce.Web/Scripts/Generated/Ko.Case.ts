@@ -102,7 +102,7 @@ module ViewModels {
         public severity: KnockoutObservable<string> = ko.observable(null);
         public status: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Status
-        public statusText = ko.observable(null);
+        public statusText: KnockoutComputed<string> = ko.computed<string>(() => "");
         public caseProducts: KnockoutObservableArray<any> = ko.observableArray([]);
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);  // Many to Many Collection
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);

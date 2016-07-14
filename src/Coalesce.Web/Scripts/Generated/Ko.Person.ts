@@ -95,7 +95,7 @@ module ViewModels {
         public title: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Title
         // Title of the person, Mr. Mrs, etc.
-        public titleText = ko.observable(null);
+        public titleText: KnockoutComputed<string> = ko.computed<string>(() => "");
         // First name of the person.
         public firstName: KnockoutObservable<string> = ko.observable(null);
         // Last name of the person
@@ -106,7 +106,7 @@ module ViewModels {
         public gender: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Gender
         // Genetic Gender of the person.
-        public genderText = ko.observable(null);
+        public genderText: KnockoutComputed<string> = ko.computed<string>(() => "");
         // List of cases assigned to the person
         public casesAssigned: KnockoutObservableArray<any> = ko.observableArray([]);
         // List of cases reported by the person.

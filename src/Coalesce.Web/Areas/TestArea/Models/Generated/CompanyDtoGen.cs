@@ -31,8 +31,11 @@ namespace Coalesce.Web.TestArea.Models
 
         // Create a new version of this object or use it from the lookup.
         public static CompanyDtoGen Create(Company obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<string, object> objects = null) {
-            if (objects == null) objects = new Dictionary<string, object>();
+                                   Dictionary<object, object> objects = null) {
+            // Return null of the object is null;
+            if (obj == null) return null;
+                        
+            if (objects == null) objects = new Dictionary<object, object>();
 
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
@@ -52,44 +55,47 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            if (objects.ContainsKey($"Company{obj.CompanyId}" )) 
-                return (CompanyDtoGen)objects[$"Company{obj.CompanyId}"];
+            if (objects.ContainsKey(obj)) 
+                return (CompanyDtoGen)objects[obj];
 
             var newObject = new CompanyDtoGen();
+            objects.Add(obj, newObject);
             // Fill the properties of the object.
+            newObject.CompanyId = obj.CompanyId;
             newObject.Name = obj.Name;
             newObject.Address1 = obj.Address1;
             newObject.Address2 = obj.Address2;
             newObject.City = obj.City;
             newObject.State = obj.State;
             newObject.ZipCode = obj.ZipCode;
-            newObject.Employees = obj.Employees.Select(f => PersonDtoGen.Create(f, user, includes, objects)).ToList();
+            if (obj.Employees != null) newObject.Employees = obj.Employees.Select(f => PersonDtoGen.Create(f, user, includes, objects)).ToList();
+            newObject.AltName = obj.AltName;
             return newObject;
         }
 
-        // Instance constructor because there is no way to implement a static interface in C#.
+        // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
         public CompanyDtoGen CreateInstance(Company obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<string, object> objects = null) {
+                                Dictionary<object, object> objects = null) {
             return Create(obj, user, includes, objects);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(Company entity, ClaimsPrincipal user = null, string includes = null)
         {
-        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-        includes = includes ?? "";
+            includes = includes ?? "";
 
-        if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, user, includes)) return;
 
-        // Applicable includes for Company
-        
+            // Applicable includes for Company
+            
 
-        // Applicable excludes for Company
-        
+            // Applicable excludes for Company
+            
 
-        // Applicable roles for Company
-        if (user != null)
+            // Applicable roles for Company
+            if (user != null)
 			{
 			}
 

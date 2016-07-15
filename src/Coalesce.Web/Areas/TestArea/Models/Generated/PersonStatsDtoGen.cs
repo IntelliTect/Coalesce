@@ -10,20 +10,22 @@ using Newtonsoft.Json;
 // Model Namespaces
     using Coalesce.Domain;
     using Coalesce.Domain.External;
-using static Coalesce.Domain.External.DevTeam;
+using static Coalesce.Domain.PersonStats;
 
 namespace Coalesce.Web.TestArea.Models
 {
-    public partial class DevTeamDtoGen : GeneratedDto<DevTeam, DevTeamDtoGen>
-        , IClassDto<DevTeam, DevTeamDtoGen>
+    public partial class PersonStatsDtoGen : GeneratedDto<PersonStats, PersonStatsDtoGen>
+        , IClassDto<PersonStats, PersonStatsDtoGen>
         {
-        public DevTeamDtoGen() { }
+        public PersonStatsDtoGen() { }
 
-             public Int32? DevTeamId { get; set; }
-             public String Name { get; set; }
+             public Int32? PersonStatsId { get; set; }
+             public Double? Height { get; set; }
+             public Double? Weight { get; set; }
+             public PersonLocation PersonLocation { get; set; }
 
         // Create a new version of this object or use it from the lookup.
-        public static DevTeamDtoGen Create(DevTeam obj, ClaimsPrincipal user = null, string includes = null,
+        public static PersonStatsDtoGen Create(PersonStats obj, ClaimsPrincipal user = null, string includes = null,
                                    Dictionary<object, object> objects = null) {
             // Return null of the object is null;
             if (obj == null) return null;
@@ -34,13 +36,13 @@ namespace Coalesce.Web.TestArea.Models
 
             includes = includes ?? "";
 
-            // Applicable includes for DevTeam
+            // Applicable includes for PersonStats
             
 
-            // Applicable excludes for DevTeam
+            // Applicable excludes for PersonStats
             
 
-            // Applicable roles for DevTeam
+            // Applicable roles for PersonStats
             if (user != null)
 			{
 			}
@@ -49,24 +51,26 @@ namespace Coalesce.Web.TestArea.Models
 
             // See if the object is already created.
             if (objects.ContainsKey(obj)) 
-                return (DevTeamDtoGen)objects[obj];
+                return (PersonStatsDtoGen)objects[obj];
 
-            var newObject = new DevTeamDtoGen();
+            var newObject = new PersonStatsDtoGen();
             objects.Add(obj, newObject);
             // Fill the properties of the object.
-            newObject.DevTeamId = obj.DevTeamId;
-            newObject.Name = obj.Name;
+            newObject.PersonStatsId = obj.PersonStatsId;
+            newObject.Height = obj.Height;
+            newObject.Weight = obj.Weight;
+            newObject.PersonLocation = obj.PersonLocation;
             return newObject;
         }
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public DevTeamDtoGen CreateInstance(DevTeam obj, ClaimsPrincipal user = null, string includes = null,
+        public PersonStatsDtoGen CreateInstance(PersonStats obj, ClaimsPrincipal user = null, string includes = null,
                                 Dictionary<object, object> objects = null) {
             return Create(obj, user, includes, objects);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(DevTeam entity, ClaimsPrincipal user = null, string includes = null)
+        public void Update(PersonStats entity, ClaimsPrincipal user = null, string includes = null)
         {
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
@@ -74,31 +78,32 @@ namespace Coalesce.Web.TestArea.Models
 
             if (OnUpdate(entity, user, includes)) return;
 
-            // Applicable includes for DevTeam
+            // Applicable includes for PersonStats
             
 
-            // Applicable excludes for DevTeam
+            // Applicable excludes for PersonStats
             
 
-            // Applicable roles for DevTeam
+            // Applicable roles for PersonStats
             if (user != null)
 			{
 			}
 
-			entity.Name = Name;
+			entity.Height = (Double)(Height ?? 0);
+			entity.Weight = (Double)(Weight ?? 0);
         }
 
         public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
         {
         if (OnSecurityTrim(user, includes)) return;
 
-        // Applicable includes for DevTeam
+        // Applicable includes for PersonStats
         
 
-        // Applicable excludes for DevTeam
+        // Applicable excludes for PersonStats
         
 
-        // Applicable roles for DevTeam
+        // Applicable roles for PersonStats
         if (user != null)
 			{
 			}

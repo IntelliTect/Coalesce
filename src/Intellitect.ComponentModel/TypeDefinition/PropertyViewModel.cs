@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using AutoMapper.Internal;
 using System.ComponentModel;
 using Intellitect.ComponentModel.DataAnnotations;
 using Intellitect.ComponentModel.Utilities;

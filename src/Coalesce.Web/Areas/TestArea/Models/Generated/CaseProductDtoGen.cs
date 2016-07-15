@@ -27,8 +27,11 @@ namespace Coalesce.Web.TestArea.Models
 
         // Create a new version of this object or use it from the lookup.
         public static CaseProductDtoGen Create(CaseProduct obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<string, object> objects = null) {
-            if (objects == null) objects = new Dictionary<string, object>();
+                                   Dictionary<object, object> objects = null) {
+            // Return null of the object is null;
+            if (obj == null) return null;
+                        
+            if (objects == null) objects = new Dictionary<object, object>();
 
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
@@ -48,11 +51,13 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            if (objects.ContainsKey($"CaseProduct{obj.CaseProductId}" )) 
-                return (CaseProductDtoGen)objects[$"CaseProduct{obj.CaseProductId}"];
+            if (objects.ContainsKey(obj)) 
+                return (CaseProductDtoGen)objects[obj];
 
             var newObject = new CaseProductDtoGen();
+            objects.Add(obj, newObject);
             // Fill the properties of the object.
+            newObject.CaseProductId = obj.CaseProductId;
             newObject.CaseId = obj.CaseId;
             newObject.Case = CaseDtoGen.Create(obj.Case, user, includes, objects);
             newObject.ProductId = obj.ProductId;
@@ -60,34 +65,34 @@ namespace Coalesce.Web.TestArea.Models
             return newObject;
         }
 
-        // Instance constructor because there is no way to implement a static interface in C#.
+        // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
         public CaseProductDtoGen CreateInstance(CaseProduct obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<string, object> objects = null) {
+                                Dictionary<object, object> objects = null) {
             return Create(obj, user, includes, objects);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(CaseProduct entity, ClaimsPrincipal user = null, string includes = null)
         {
-        if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
+            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
-        includes = includes ?? "";
+            includes = includes ?? "";
 
-        if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, user, includes)) return;
 
-        // Applicable includes for CaseProduct
-        
+            // Applicable includes for CaseProduct
+            
 
-        // Applicable excludes for CaseProduct
-        
+            // Applicable excludes for CaseProduct
+            
 
-        // Applicable roles for CaseProduct
-        if (user != null)
+            // Applicable roles for CaseProduct
+            if (user != null)
 			{
 			}
 
-			entity.CaseId = (Int32)CaseId;
-			entity.ProductId = (Int32)ProductId;
+			entity.CaseId = (Int32)(CaseId ?? 0);
+			entity.ProductId = (Int32)(ProductId ?? 0);
         }
 
         public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)

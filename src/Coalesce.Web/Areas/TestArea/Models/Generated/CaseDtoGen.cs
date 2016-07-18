@@ -36,11 +36,11 @@ namespace Coalesce.Web.TestArea.Models
 
         // Create a new version of this object or use it from the lookup.
         public static CaseDtoGen Create(Case obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<string, object> objects = null) {
+                                   Dictionary<object, object> objects = null) {
             // Return null of the object is null;
             if (obj == null) return null;
                         
-            if (objects == null) objects = new Dictionary<string, object>();
+            if (objects == null) objects = new Dictionary<object, object>();
 
             if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
 
@@ -60,12 +60,11 @@ namespace Coalesce.Web.TestArea.Models
 
 
             // See if the object is already created.
-            string key = $"Case{obj.CaseKey}";
-            if (objects.ContainsKey(key)) 
-                return (CaseDtoGen)objects[key];
+            if (objects.ContainsKey(obj)) 
+                return (CaseDtoGen)objects[obj];
 
             var newObject = new CaseDtoGen();
-            objects.Add(key, newObject);
+            objects.Add(obj, newObject);
             // Fill the properties of the object.
             newObject.CaseKey = obj.CaseKey;
             newObject.Title = obj.Title;
@@ -84,9 +83,9 @@ namespace Coalesce.Web.TestArea.Models
             return newObject;
         }
 
-        // Instance constructor because there is no way to implement a static interface in C#.
+        // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
         public CaseDtoGen CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<string, object> objects = null) {
+                                Dictionary<object, object> objects = null) {
             return Create(obj, user, includes, objects);
         }
 

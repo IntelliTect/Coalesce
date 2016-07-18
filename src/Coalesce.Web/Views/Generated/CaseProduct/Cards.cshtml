@@ -34,14 +34,6 @@
         <div class="btn-group pull-right">
                     <a href="~/CaseProduct/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
-                @if (ViewBag.Editable)
-                {
-                <a href="~/CaseProduct/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
-                }
-                    else
-                    {
-                    <a href="~/CaseProduct/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
-                    }
         </div>
     </div>
 </div>

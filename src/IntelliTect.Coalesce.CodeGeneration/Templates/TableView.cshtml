@@ -87,15 +87,7 @@
                 {
                     <th>@prop.DisplayName</th>
                 }
-                <th @{
-                    int width = 0;
-                    bool actionButtons = model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic);
-                    if (actionButtons) { width += 73; }
-                    if (model.IsEditAllowed) { width += 40; }
-                    if (model.IsDeleteAllowed) { width += 40; }
-                    string widthString = $"{width}px";
-                }
-                    style="width: @widthString;">
+                <th style="width: 1%">
                 </th>
             </tr>
         </thead>
@@ -125,8 +117,8 @@
                 <td>
 
                     <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group">
-                        @if (actionButtons)
+                    <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                        @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
                             {
                         <!-- Action buttons -->
                             <div class="btn-group" role="group">

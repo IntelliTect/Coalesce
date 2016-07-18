@@ -1,15 +1,15 @@
 
-using Intellitect.ComponentModel.Controllers;
+using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Models;
+using IntelliTect.Coalesce.Models;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
-using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.Mapping;
+using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;
@@ -179,6 +179,24 @@ namespace Coalesce.Web.TestArea.Api
             var result = new SaveResult<Int32>();
             try{
                 var objResult = Case.GetAllOpenCasesCount(Db);
+                                result.Object = objResult;
+                result.WasSuccessful = true;
+                result.Message = null;
+            }catch(Exception ex){
+                result.WasSuccessful = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+        
+        // Method: RandomizeDatesAndStatus
+        [HttpPost("RandomizeDatesAndStatus")]
+        
+        public virtual SaveResult<object> RandomizeDatesAndStatus (){
+            var result = new SaveResult<object>();
+            try{
+                object objResult = null;
+                Case.RandomizeDatesAndStatus(Db);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;

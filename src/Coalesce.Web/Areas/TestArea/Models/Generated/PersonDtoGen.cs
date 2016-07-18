@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Intellitect.ComponentModel.Interfaces;
-using Intellitect.ComponentModel.Models;
-using Intellitect.ComponentModel.Mapping;
+using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Mapping;
 using System.Linq;
 using Newtonsoft.Json;
 // Model Namespaces

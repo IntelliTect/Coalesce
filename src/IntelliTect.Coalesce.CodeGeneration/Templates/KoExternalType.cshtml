@@ -1,0 +1,81 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.CodeGeneration.Utilities
+@{
+    ClassViewModel model = Model.Model;
+    string typingReferencePath = "../..";
+    string intellitectUtilitiesPath = "..";
+    string moduleName = "ViewModels";
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        typingReferencePath = "../../../..";
+        intellitectUtilitiesPath = "../../../../scripts";
+        moduleName = Model.AreaName + "." + moduleName;
+    }
+    if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
+    {
+        moduleName = Model.ModulePrefix + "." + moduleName;
+    }
+}
+@{
+@:/// <reference path="@typingReferencePath/typings/tsd.d.ts" />
+@:/// <reference path="@intellitectUtilitiesPath/Intellitect/intellitect.utilities.ts" />
+@:/// <reference path="@intellitectUtilitiesPath/Intellitect/intellitect.ko.utilities.ts" />
+}
+
+module @moduleName {
+    // *** External Type @(model.Name)
+    export class @(model.ViewModelClassName)
+    {
+        // Observables
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))
+        {
+		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType) = @(prop.Type.JsKnockoutType);
+        if (prop.Type.IsEnum)
+        { 
+        @:public @(prop.JsTextPropertyName) = @(prop.Type.JsKnockoutType);  // Enum Text Value
+        }
+        }
+        // Loads this object from a data transfer object received from the server.
+        public loadFromDto: (data: any) => void;
+        public parent: any;
+
+
+        constructor(newItem?: any, parent?: any){
+            var self = this;
+            self.parent = parent;
+            // Load the object
+			self.loadFromDto = function(data: any) {
+				if (!data) return;
+
+                // Load the properties.
+                @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))
+                {
+                    if (prop.Type.IsDate)
+                    {
+                @:if (data.@prop.JsVariable == null) self.@(prop.JsVariable)(null);
+                @:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsVariable))){
+                @:self.@(prop.JsVariable)(moment(data.@prop.JsVariable));
+                @:}
+                    }
+                    else if (prop.IsPOCO)
+                    {
+                @:self.@(prop.JsVariable)(new @(prop.PureType.Name)());
+                @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsVariable);
+                    }
+                    else
+                    {
+                @:self.@(prop.JsVariable)(data.@prop.JsVariable);
+                    }
+                
+
+                }
+                
+            };
+
+            if (newItem) {
+                self.loadFromDto(newItem);
+            }
+        }
+    }
+}

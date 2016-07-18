@@ -1,6 +1,6 @@
 ﻿using Coalesce.Domain;
-using Intellitect.ComponentModel.TypeDefinition;
-using Intellitect.ComponentModel.Validation;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;

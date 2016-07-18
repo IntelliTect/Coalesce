@@ -1,5 +1,5 @@
 ﻿using Coalesce.Domain;
-using Intellitect.ComponentModel.Validation;
+using IntelliTect.Coalesce.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;

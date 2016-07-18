@@ -1,5 +1,5 @@
 
-using Intellitect.ComponentModel.Controllers;
+using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -15,6 +15,11 @@ namespace Coalesce.Web.TestArea.Controllers
         : BaseViewController<Person, AppDbContext> 
     { 
         public PersonController() : base() { }
+
+        [AllowAnonymous]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Person/Cards.cshtml");
+        }
 
         [AllowAnonymous]
         public ActionResult Table(){

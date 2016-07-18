@@ -12,7 +12,7 @@
   "dependencies": {
     "Coalesce.Web": "1.1.0",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "Intellitect.ComponentModel": "1.1.0",
+    "IntelliTect.Coalesce": "1.1.0",
     "Microsoft.EntityFrameworkCore.InMemory": "1.0.0",
     "Selenium.WebDriver": "2.53.1",
     "System.Linq": "4.0.0",

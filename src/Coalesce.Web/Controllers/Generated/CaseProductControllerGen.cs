@@ -1,5 +1,5 @@
 
-using Intellitect.ComponentModel.Controllers;
+using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -14,6 +14,11 @@ namespace Coalesce.Web.Controllers
         : BaseViewController<CaseProduct, AppDbContext> 
     { 
         public CaseProductController() : base() { }
+
+        [Authorize]
+        public ActionResult Cards(){
+            return IndexImplementation(false, @"~/Views/Generated/CaseProduct/Cards.cshtml");
+        }
 
         [Authorize]
         public ActionResult Table(){

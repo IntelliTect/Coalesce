@@ -1,6 +1,6 @@
 ﻿using Coalesce.Domain.External;
-using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.DataAnnotations;
+using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -65,6 +65,18 @@ namespace Coalesce.Domain
         public static int GetAllOpenCasesCount(AppDbContext db)
         {
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
+        }
+
+        public static void RandomizeDatesAndStatus( AppDbContext db )
+        {
+            Random random = new Random();
+            foreach ( var c in db.Cases )
+            {
+                c.OpenedAt = DateTimeOffset.Now.AddSeconds( -random.Next( 10, 50000000 ) );
+                c.Status = (Statuses)random.Next(0, (int)Statuses.Cancelled + 1);
+            }
+
+            db.SaveChanges();
         }
 
         public static IQueryable<Case> GetAllOpenCases(AppDbContext db)

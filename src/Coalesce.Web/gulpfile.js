@@ -220,7 +220,7 @@ var nlogExtensionsVersion = "1.1.0";
 gulp.task('nuget:publish:ComponentModel',
     shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
         'push ' +
-        '..\\..\\artifacts\\bin\\Intellitect.ComponentModel\\debug\\Intellitect.ComponentModel.' + componentModelVersion + '.nupkg ' +
+        '..\\..\\artifacts\\bin\\IntelliTect.Coalesce\\debug\\IntelliTect.Coalesce.' + componentModelVersion + '.nupkg ' +
         '536300da-5e23-433c-8f45-f84e9a225b4b ' +
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
@@ -228,7 +228,7 @@ gulp.task('nuget:publish:ComponentModel',
 gulp.task('nuget:publish:CodeGeneratorsMvc',
     shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
         'push ' +
-        '..\\..\\artifacts\\bin\\Intellitect.Extensions.CodeGenerators.Mvc\\debug\\Intellitect.Extensions.CodeGenerators.Mvc.' + codeGeneratorsMvcVersion + '.nupkg ' +
+        '..\\..\\artifacts\\bin\\IntelliTect.Coalesce.CodeGeneration\\debug\\IntelliTect.Coalesce.CodeGeneration.' + codeGeneratorsMvcVersion + '.nupkg ' +
         '536300da-5e23-433c-8f45-f84e9a225b4b ' +
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
@@ -242,7 +242,7 @@ gulp.task('nuget:publish:NLogExtensions',
 );
 
 gulp.task('coalesce:build', function (cb) {
-    exec('dotnet build "../Coalesce.Cli/project.json" -o ./CoalesceExe -f net46', function(err, stdout, stderr) {
+    exec('dotnet build "../IntelliTect.Coalesce.Cli/project.json" -o ./CoalesceExe -f net46', function(err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
         cb(err);
@@ -250,7 +250,7 @@ gulp.task('coalesce:build', function (cb) {
 });
 
 gulp.task('coalesce', ['coalesce:build'], function (cb) {
-    exec('"./CoalesceExe/Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true', function (err, stdout, stderr) {
+    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
         console.log(err);
@@ -268,7 +268,7 @@ gulp.task('coalesce:area', ['coalesce:build'], function (cb) {
 });
 
 gulp.task('coalesce:area-all', ['coalesce'], function (cb) {
-    exec('"./CoalesceExe/Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
+    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
         console.log(err);

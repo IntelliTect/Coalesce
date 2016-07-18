@@ -1,8 +1,0 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
-@using Intellitect.ComponentModel.TypeDefinition
-@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
-{
-@:@@using @ns;
-}
-@@using Intellitect.ComponentModel.Helpers
-@@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

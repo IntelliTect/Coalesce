@@ -1,7 +1,7 @@
 ﻿using Coalesce.Web.Tests.Helpers;
-using Intellitect.ComponentModel.TypeDefinition;
-using Intellitect.Extensions.CodeGenerators.Mvc;
-using Intellitect.Extensions.CodeGenerators.Mvc.Scripts;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.CodeGeneration;
+using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;

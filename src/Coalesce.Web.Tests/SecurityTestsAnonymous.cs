@@ -1,6 +1,6 @@
 ﻿using Coalesce.Web.Tests.Helpers;
-using Intellitect.ComponentModel.DataAnnotations;
-using Intellitect.ComponentModel.TypeDefinition;
+using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Dynamic;

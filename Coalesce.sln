@@ -5,9 +5,9 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Intellitect.ComponentModel", "src\Intellitect.ComponentModel\Intellitect.ComponentModel.xproj", "{70A4DC17-0F5D-4FF0-8D9C-ECDCBB565203}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.Coalesce", "src\IntelliTect.Coalesce\IntelliTect.Coalesce.xproj", "{70A4DC17-0F5D-4FF0-8D9C-ECDCBB565203}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Intellitect.Extensions.CodeGenerators.Mvc", "src\Intellitect.Extensions.CodeGenerators.Mvc\Intellitect.Extensions.CodeGenerators.Mvc.xproj", "{20095DF9-5DC4-4B74-80F8-92B71EB3A921}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.Coalesce.CodeGeneration", "src\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.xproj", "{20095DF9-5DC4-4B74-80F8-92B71EB3A921}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Domain", "src\Coalesce.Domain\Coalesce.Domain.xproj", "{951E4FE5-E4AA-4D62-B93A-77C428FEB84C}"
 EndProject
@@ -15,7 +15,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Web", "src\Coalesc
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Web.Tests", "src\Coalesce.Web.Tests\Coalesce.Web.Tests.xproj", "{2EA48EAF-7101-4762-BE6A-AA76FCF2B7FC}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Intellitect.ComponentModel.Tests", "src\Intellitect.ComponentModel.Tests\Intellitect.ComponentModel.Tests.xproj", "{1E015AC9-1537-4078-9167-B5C49A1C7DEE}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.Coalesce.Tests", "src\IntelliTect.Coalesce.Tests\IntelliTect.Coalesce.Tests.xproj", "{1E015AC9-1537-4078-9167-B5C49A1C7DEE}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Domain.Tests", "src\Coalesce.Domain.Tests\Coalesce.Domain.Tests.xproj", "{06AD3635-FFFE-4254-80EB-F3F3424A8460}"
 EndProject
@@ -25,9 +25,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Coalesce.Cli", "src\Coalesce.Cli\Coalesce.Cli.xproj", "{3B393517-9C91-4432-B9D0-F48488767B8F}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.Coalesce.Cli", "src\IntelliTect.Coalesce.Cli\IntelliTect.Coalesce.Cli.xproj", "{3B393517-9C91-4432-B9D0-F48488767B8F}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Intellitect.NLog.Extensions", "src\Intellitect.NLog.Extensions\Intellitect.NLog.Extensions.xproj", "{EAFB9FAA-FD5B-4D7F-B627-D72D4379C28F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -112,9 +114,9 @@ Global
 		{20095DF9-5DC4-4B74-80F8-92B71EB3A921} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{951E4FE5-E4AA-4D62-B93A-77C428FEB84C} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{3BE66D5E-C724-4BD2-B18A-125435016717} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
-		{2EA48EAF-7101-4762-BE6A-AA76FCF2B7FC} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
-		{1E015AC9-1537-4078-9167-B5C49A1C7DEE} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
-		{06AD3635-FFFE-4254-80EB-F3F3424A8460} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
+		{2EA48EAF-7101-4762-BE6A-AA76FCF2B7FC} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
+		{1E015AC9-1537-4078-9167-B5C49A1C7DEE} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
+		{06AD3635-FFFE-4254-80EB-F3F3424A8460} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
 		{3B393517-9C91-4432-B9D0-F48488767B8F} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 	EndGlobalSection
 EndGlobal

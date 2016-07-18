@@ -1,15 +1,15 @@
 
-using Intellitect.ComponentModel.Controllers;
+using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
-using Intellitect.ComponentModel.Models;
+using IntelliTect.Coalesce.Models;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
-using Intellitect.ComponentModel.Data;
-using Intellitect.ComponentModel.Mapping;
+using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Mapping;
 // Model Namespaces 
 using Coalesce.Domain;
 using Coalesce.Domain.External;

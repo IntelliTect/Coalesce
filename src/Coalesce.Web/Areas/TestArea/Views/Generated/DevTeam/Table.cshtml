@@ -99,12 +99,31 @@
 
     @section Scripts
     {
+
     <script>
-        var devTeamList = new TestArea.ListViewModels.DevTeamList();
+        var devTeamList = new ListViewModels.DevTeamList();
+        
+        // Set up parent info based on the URL.
         @if (ViewBag.ParentIdName != null)
-                    {
-                        @:devTeamList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                    }
+        {
+            @:devTeamList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {devTeamList[this](param);}
+        })
+        devTeamList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){
+                var param = devTeamList[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
 
         devTeamList.isSavingAutomatically = false;
         ko.applyBindings(devTeamList);
@@ -112,5 +131,6 @@
 
         devTeamList.includes = "Editor";
         devTeamList.load();
+
     </script>
     }

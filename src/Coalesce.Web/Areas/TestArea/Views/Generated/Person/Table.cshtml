@@ -356,12 +356,31 @@
 
     @section Scripts
     {
+
     <script>
-        var personList = new TestArea.ListViewModels.PersonList();
+        var personList = new ListViewModels.PersonList();
+        
+        // Set up parent info based on the URL.
         @if (ViewBag.ParentIdName != null)
-                    {
-                        @:personList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
-                    }
+        {
+            @:personList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+        }
+
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search'];
+        $.each(urlVariables, function(){
+            var param = intellitect.utilities.GetUrlParameter(this);
+            if (param) {personList[this](param);}
+        })
+        personList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+            
+            $.each(urlVariables, function(){
+                var param = personList[this]();
+                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
 
         personList.isSavingAutomatically = false;
         ko.applyBindings(personList);
@@ -369,5 +388,6 @@
 
         personList.includes = "Editor";
         personList.load();
+
     </script>
     }

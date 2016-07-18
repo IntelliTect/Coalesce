@@ -4,7 +4,6 @@
   "authors": [ "intelliTect" ],
 
   "dependencies": {
-    "AutoMapper": "4.2.1",
     "Remotion.Linq": "2.1.1",
     "Microsoft.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.Relational": "1.0.0",

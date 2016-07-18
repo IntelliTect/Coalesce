@@ -46,10 +46,6 @@ namespace IntelliTect.Coalesce.Controllers
         }
         private ILogger _Logger = null;
 
-        public Func<string, string> CodeToCall = null;
-
-        
-
         public static int DefaultPageSizeAll { get; set; } = 25;
         private int? _defaultPageSize = null;
         public int DefaultPageSize { get { return _defaultPageSize ?? DefaultPageSizeAll; } set { _defaultPageSize = value; } }

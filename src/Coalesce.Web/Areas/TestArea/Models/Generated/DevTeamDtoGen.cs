@@ -30,8 +30,6 @@ namespace Coalesce.Web.TestArea.Models
                         
             if (objects == null) objects = new Dictionary<object, object>();
 
-            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
-
             includes = includes ?? "";
 
             // Applicable includes for DevTeam
@@ -68,8 +66,6 @@ namespace Coalesce.Web.TestArea.Models
         // Updates an object from the database to the state handed in by the DTO.
         public void Update(DevTeam entity, ClaimsPrincipal user = null, string includes = null)
         {
-            if (user == null) throw new InvalidOperationException("Updating an entity requires the User property to be populated.");
-
             includes = includes ?? "";
 
             if (OnUpdate(entity, user, includes)) return;

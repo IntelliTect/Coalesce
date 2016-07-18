@@ -49,10 +49,13 @@ namespace Coalesce.Web
 
         private async Task SignInUser(HttpContext context, string name, string role)
         {
-            var claims = new[] {
+            Claim[] claims;
+            if (string.IsNullOrEmpty(role)) claims = new[] { new Claim(ClaimTypes.Name, name) };
+            else claims = new[] {
                     new Claim(ClaimTypes.Name, name),
                     new Claim(ClaimTypes.Role, role)
                 };
+
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await context.Authentication.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
         }

@@ -138,32 +138,31 @@ namespace Coalesce.Web.Tests
             Assert.Equal("Joseph", person.FirstName);
         }
 
-        // TODO: Pass expected parameters to Save
-        //[Fact]
-        //public async void Update()
-        //{
-        //    // Get the item
-        //    var person = await _pc.Get(1.ToString());
-        //    Assert.Equal("Joseph", person.FirstName);
-        //    // Change the item and save it.
-        //    person.FirstName = "Sweet";
-        //    var result = _pc.Save(person);
-        //    // Make sure it saved.
-        //    Assert.True(result.WasSuccessful);
-        //    Assert.Equal("Sweet", result.Object.FirstName);
-        //    // Get the new item.
-        //    person = await _pc.Get(1.ToString());
-        //    Assert.Equal("Sweet", person.FirstName);
-        //    // Set it back and save it.
-        //    person.FirstName = "Joseph";
-        //    result = _pc.Save(person);
-        //    // Make sure it saved.
-        //    Assert.True(result.WasSuccessful);
-        //    Assert.Equal("Joseph", result.Object.FirstName);
-        //    // Get it again and make sure it stayed saved.
-        //    person = await _pc.Get(1.ToString());
-        //    Assert.Equal("Joseph", person.FirstName);
-        //}
+        [Fact]
+        public async void Update()
+        {
+            // Get the item
+            var person = await _pc.Get(1.ToString());
+            Assert.Equal("Joseph", person.FirstName);
+            // Change the item and save it.
+            person.FirstName = "Sweet";
+            var result = _pc.Save(person);
+            // Make sure it saved.
+            Assert.True(result.WasSuccessful);
+            Assert.Equal("Sweet", result.Object.FirstName);
+            // Get the new item.
+            person = await _pc.Get(1.ToString());
+            Assert.Equal("Sweet", person.FirstName);
+            // Set it back and save it.
+            person.FirstName = "Joseph";
+            result = _pc.Save(person);
+            // Make sure it saved.
+            Assert.True(result.WasSuccessful);
+            Assert.Equal("Joseph", result.Object.FirstName);
+            // Get it again and make sure it stayed saved.
+            person = await _pc.Get(1.ToString());
+            Assert.Equal("Joseph", person.FirstName);
+        }
 
         [Fact]
         public async void ListByWhere()
@@ -210,22 +209,21 @@ namespace Coalesce.Web.Tests
         }
 
 
-        // TODO: how do we get ClaimsPrincipal in the test
-        //[Fact]
-        //public async void InstanceFunction()
-        //{
-        //    var result = _pc.Rename(1,"-test");
-        //    Assert.Equal("Joseph-test", result.Object.FirstName);
-        //    // Get the new item.
-        //    var person = await _pc.Get(1.ToString());
-        //    Assert.Equal("Joseph-test", person.FirstName);
-        //    // Set it back and save it.
-        //    person.FirstName = "Joseph";
-        //    var result2 = _pc.Save(person);
-        //    // Make sure it saved.
-        //    Assert.True(result2.WasSuccessful);
-        //    Assert.Equal("Joseph", result2.Object.FirstName);
-        //}
+       [Fact]
+        public async void InstanceFunction()
+        {
+            var result = _pc.Rename(1, "-test");
+            Assert.Equal("Joseph-test", result.Object.FirstName);
+            // Get the new item.
+            var person = await _pc.Get(1.ToString());
+            Assert.Equal("Joseph-test", person.FirstName);
+            // Set it back and save it.
+            person.FirstName = "Joseph";
+            var result2 = _pc.Save(person);
+            // Make sure it saved.
+            Assert.True(result2.WasSuccessful);
+            Assert.Equal("Joseph", result2.Object.FirstName);
+        }
 
 
         [Fact]
@@ -236,13 +234,12 @@ namespace Coalesce.Web.Tests
         }
 
 
-        // TODO: how do we get ClaimsPrincipal in the test
-        //[Fact]
-        //public void Collection()
-        //{
-        //    var result = _pc.BorCPeople();
-        //    Assert.Equal(14, result.Object.Count());
-        //}
+       [Fact]
+        public void Collection()
+        {
+            var result = _pc.BorCPeople();
+            Assert.Equal(14, result.Object.Count());
+        }
 
         [Fact]
         public async void ListOfBorC()

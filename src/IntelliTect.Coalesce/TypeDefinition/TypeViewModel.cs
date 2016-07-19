@@ -70,6 +70,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string FullName { get { return $"{Wrapper.Namespace}.{Name}"; } }
 
+        public string FullNamespace { get { return Wrapper.FullNamespace; } }
+
         public string NameWithTypeParams { get { return $"{Wrapper.NameWithTypeParams}"; } }
 
         /// <summary>

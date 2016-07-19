@@ -139,6 +139,21 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
+        public override string FullNamespace
+        {
+            get
+            {
+                INamespaceSymbol currentNamespace = Symbol.ContainingNamespace ?? Symbol.BaseType.ContainingNamespace;
+                var fullNamespace = currentNamespace.Name;
+                while (currentNamespace != null)
+                {
+                    currentNamespace = currentNamespace.ContainingNamespace;
+                    if (currentNamespace != null && !string.IsNullOrEmpty(currentNamespace.Name)) fullNamespace = currentNamespace.Name + "." + fullNamespace;
+                }
+
+                return fullNamespace;
+            }
+        }
 
         public override TypeWrapper PureType
         {

@@ -34,7 +34,7 @@ namespace IntelliTect.Coalesce.Data
             else
             {
                 var model = ReflectionRepository.GetClassViewModel<T>();
-                foreach (var prop in model.Properties.Where(f => !f.IsInternalUse && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet))
+                foreach (var prop in model.Properties.Where(f => !f.IsStatic && !f.IsInternalUse && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet && !f.HasNotMapped))
                 {
                     query = query.IncludeString(prop.Name);
                 }

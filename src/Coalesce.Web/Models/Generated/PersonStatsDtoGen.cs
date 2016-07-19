@@ -89,21 +89,5 @@ namespace Coalesce.Web.Models
 			entity.Weight = (Double)(Weight ?? 0);
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for PersonStats
-        
-
-        // Applicable excludes for PersonStats
-        
-
-        // Applicable roles for PersonStats
-        if (user != null)
-			{
-			}
-
-        }
-        }
-        }
+    }
+}

@@ -91,21 +91,5 @@ namespace Coalesce.Web.Models
 			entity.ProductId = (Int32)(ProductId ?? 0);
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for CaseProduct
-        
-
-        // Applicable excludes for CaseProduct
-        
-
-        // Applicable roles for CaseProduct
-        if (user != null)
-			{
-			}
-
-        }
-        }
-        }
+    }
+}

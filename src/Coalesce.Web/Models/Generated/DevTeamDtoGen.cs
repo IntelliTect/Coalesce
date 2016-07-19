@@ -84,21 +84,5 @@ namespace Coalesce.Web.Models
 			entity.Name = Name;
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for DevTeam
-        
-
-        // Applicable excludes for DevTeam
-        
-
-        // Applicable roles for DevTeam
-        if (user != null)
-			{
-			}
-
-        }
-        }
-        }
+    }
+}

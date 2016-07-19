@@ -38,10 +38,12 @@ namespace Coalesce.Domain
 
         public int? AssignedToId { get; set; }
         [ForeignKey("AssignedToId")]
+        [DtoExcludes("PersonListGen")]
         public Person AssignedTo { get; set; }
 
         public int? ReportedById { get; set; }
         [ForeignKey("ReportedById")]
+        [DtoExcludes("PersonListGen")]
         [Display(Name = "Reported By")]
         public Person ReportedBy { get; set; }
 

@@ -231,9 +231,9 @@
         var caseList = new ListViewModels.CaseList();
         
         // Set up parent info based on the URL.
-        @if (ViewBag.ParentIdName != null)
+        @if (ViewBag.Query != null)
         {
-            @:caseList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+            @:caseList.queryString = "@(ViewBag.Query)";
         }
 
         // Save and restore values from the URL:
@@ -256,7 +256,7 @@
         ko.applyBindings(caseList);
         caseList.isSavingAutomatically = true;
 
-        caseList.includes = "Editor";
+        caseList.includes = "CaseListGen";
         caseList.load();
 
     </script>

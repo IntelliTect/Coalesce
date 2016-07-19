@@ -117,9 +117,9 @@
         var companyList = new ListViewModels.CompanyList();
         
         // Set up parent info based on the URL.
-        @if (ViewBag.ParentIdName != null)
+        @if (ViewBag.Query != null)
         {
-            @:companyList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+            @:companyList.queryString = "@(ViewBag.Query)";
         }
 
         // Save and restore values from the URL:
@@ -142,7 +142,7 @@
         ko.applyBindings(companyList);
         companyList.isSavingAutomatically = true;
 
-        companyList.includes = "Editor";
+        companyList.includes = "CompanyListGen";
         companyList.load();
 
     </script>

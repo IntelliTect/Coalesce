@@ -103,21 +103,5 @@ namespace Coalesce.Web.Models
 			entity.ZipCode = ZipCode;
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for Company
-        
-
-        // Applicable excludes for Company
-        
-
-        // Applicable roles for Company
-        if (user != null)
-			{
-			}
-
-        }
-        }
-        }
+    }
+}

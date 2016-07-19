@@ -89,9 +89,9 @@
         var productList = new ListViewModels.ProductList();
         
         // Set up parent info based on the URL.
-        @if (ViewBag.ParentIdName != null)
+        @if (ViewBag.Query != null)
         {
-            @:productList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+            @:productList.queryString = "@(ViewBag.Query)";
         }
 
         // Save and restore values from the URL:
@@ -114,7 +114,7 @@
         ko.applyBindings(productList);
         productList.isSavingAutomatically = true;
 
-        productList.includes = "Editor";
+        productList.includes = "ProductListGen";
         productList.load();
 
     </script>

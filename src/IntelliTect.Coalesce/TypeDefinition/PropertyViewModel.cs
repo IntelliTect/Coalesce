@@ -794,14 +794,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         /// <summary>
         /// Returns the URL for the List Editor with the ???Id= query string.
-        /// Ex: Adult/index?AdultId=
+        /// Ex: Adult/table?adultId=
         /// </summary>
         public string ListEditorUrl
         {
             get
             {
                 if (InverseIdProperty == null) { return "Nothing"; }
-                return string.Format("{0}/table?{1}=", Object.ApiUrl.Replace("api/", ""), InverseIdProperty.Name);
+                return string.Format("{0}/table?{1}=", Object.ApiUrl.Replace("api/", ""), InverseIdProperty.JsonName);
             }
         }
         /// <summary>
@@ -1000,7 +1000,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns a list of content views from the Includes attribute
+        /// Returns a list of content views from the Excludes attribute
         /// </summary>
         public List<string> DtoExcludes
         {
@@ -1011,32 +1011,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string ObjToDtoSecurityTrimmer()
+        private string GetPropertySetterConditional(List<string> rolesList )
         {
-            var setter = $"{Name} = null;";
-            var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
-            {
-                var roles = (SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) ?
-                    string.Join(" || ", readRolesList.Select(s => $"is{s}")) : "";
-                var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";            
-                var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+            var roles = (SecurityInfo.IsSecuredProperty && rolesList.Count() > 0) ?
+                string.Join(" || ", rolesList.Select(s => $"is{s}")) : "";
+            var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
+            var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
 
-                var statement = new List<string>();
-                if (!string.IsNullOrEmpty(roles)) statement.Add($"!({roles})");
-                if (!string.IsNullOrEmpty(includes)) statement.Add($"!({includes})");
-                if (!string.IsNullOrEmpty(excludes)) statement.Add($"({excludes})");
+            var statement = new List<string>();
+            if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
+            if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
+            if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
 
-                return $@"          if ({string.Join(" || ", statement)})
-            {{
-                {setter}
-            }}
-";
-            }
-            else
-            {
-                return "";
-            }
+            return string.Join( " && ", statement );
         }
 
         public string ObjToDtoPropertySetter(string objectName)
@@ -1055,17 +1042,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
             {
-                var roles = (SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) ?
-                    string.Join(" || ", readRolesList.Select(s => $"is{s}")) : "";
-                var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
-                var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+                var statement = GetPropertySetterConditional( readRolesList );
 
-                var statement = new List<string>();
-                if (!string.IsNullOrEmpty(roles)) statement.Add($"!({roles})");
-                if (!string.IsNullOrEmpty(includes)) statement.Add($"!({includes})");
-                if (!string.IsNullOrEmpty(excludes)) statement.Add($"({excludes})");
-
-                return $@"          if ({string.Join(" || ", statement)})
+                return $@"          if ({statement})
             {{
                 {setter}
             }}  
@@ -1096,17 +1075,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var editRolesList = SecurityInfo.EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if ((SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
                 {
-                    var roles = (SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) ?
-                        string.Join(" || ", editRolesList.Select(s => $"is{s}")) : "";
-                    var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
-                    var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+                    var statement = GetPropertySetterConditional(editRolesList);
 
-                    var statement = new List<string>();
-                    if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
-                    if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
-                    if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
-
-                    return $@"          if ({string.Join(" && ", statement)})
+                    return $@"          if ({statement})
             {{
                 {setter}
             }}

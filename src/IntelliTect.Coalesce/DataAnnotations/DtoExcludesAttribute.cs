@@ -12,5 +12,15 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// Comma-delimited list of content views this property should be excluded from.
         /// </summary>
         public string ContentViews { get; set; } = "";
+
+        public DtoExcludesAttribute(  )
+        {
+            
+        }
+
+        public DtoExcludesAttribute(string contentViews)
+        {
+            ContentViews = contentViews;
+        }
     }
 }

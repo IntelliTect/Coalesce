@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
+using System.Linq;
+using System.Net;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntelliTect.Coalesce.Controllers
@@ -43,12 +47,15 @@ namespace IntelliTect.Coalesce.Controllers
             ViewBag.ParentId = null;
             ViewBag.Editable = editable;
             ViewBag.Query = "";
-            foreach (var kvp in Request.Query)
+            string[] pageParams = { "page", "pageSize", "search" };
+            foreach (var kvp in Request.Query.Where( kvp => !pageParams.Contains(kvp.Key, StringComparer.InvariantCultureIgnoreCase) ))
             {
                 ViewBag.ParentIdName = kvp.Key;
                 ViewBag.ParentId = kvp.Value;
-                ViewBag.Query = kvp.Key + "=" + kvp.Value;
+                ViewBag.Query = ViewBag.Query + WebUtility.UrlEncode(kvp.Key) + "=" + WebUtility.UrlEncode(kvp.Value) + "&";
             }
+            ViewBag.Query = ViewBag.Query == "" ? null : new HtmlString( ViewBag.Query );
+
             @ViewBag.Title = typeof(T).Name + " List";
             var model = ReflectionRepository.GetClassViewModel(typeof(T), this.GetType().Name, ApiName);
             return View(viewName, model);

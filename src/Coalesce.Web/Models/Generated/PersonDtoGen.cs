@@ -74,7 +74,7 @@ namespace Coalesce.Web.Models
             newObject.FirstName = obj.FirstName;
             newObject.LastName = obj.LastName;
             newObject.Email = obj.Email;
-          if (!(isAdmin))
+          if ((isAdmin))
             {
                 newObject.Gender = obj.Gender;
             }  
@@ -133,27 +133,5 @@ namespace Coalesce.Web.Models
 			entity.CompanyId = (Int32)(CompanyId ?? 0);
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for Person
-        
-
-        // Applicable excludes for Person
-        
-
-        // Applicable roles for Person
-        bool isAdmin = false;
-			if (user != null)
-			{
-				isAdmin = user.IsInRole("Admin");
-			}
-
-          if (!(isAdmin))
-            {
-                Gender = null;
-            }
-        }
-        }
-        }
+    }
+}

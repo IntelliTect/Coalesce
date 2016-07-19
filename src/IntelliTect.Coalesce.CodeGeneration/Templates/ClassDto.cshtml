@@ -102,23 +102,5 @@ namespace @(namespaceName).Models
             }
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for @(model.Name)
-        @(model.DtoIncludesAsCS())
-
-        // Applicable excludes for @(model.Name)
-        @(model.DtoExcludesAsCS())
-
-        // Applicable roles for @(model.Name)
-        @(model.PropertyRolesAsCS())
-
-        @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
-            {
-            @prop.ObjToDtoSecurityTrimmer()
-        }
-        }
-        }
-        }
+    }
+}

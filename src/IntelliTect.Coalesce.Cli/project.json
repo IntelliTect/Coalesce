@@ -10,6 +10,7 @@
       "type": "build",
       "version": "1.1.0"
     },
+    "IntelliTect.Coalesce": "1.1.0",
     "Microsoft.CodeAnalysis": "2.0.0-beta1",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.Extensions.DependencyInjection": "1.0.0",

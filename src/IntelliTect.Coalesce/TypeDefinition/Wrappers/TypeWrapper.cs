@@ -15,6 +15,8 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public abstract string Namespace { get; }
 
+        public abstract string FullNamespace { get; }
+        
         public abstract bool IsGeneric { get; }
 
         public abstract bool IsCollection { get; }

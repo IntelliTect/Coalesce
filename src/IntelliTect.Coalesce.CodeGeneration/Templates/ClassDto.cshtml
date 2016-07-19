@@ -10,21 +10,35 @@
     {
         namespaceName += "." + Model.AreaName;
     }
-}
 
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping;
-using System.Linq;
-using Newtonsoft.Json;
-// Model Namespaces
+    var namespaces = new List<string>();
+    namespaces.Add("IntelliTect.Coalesce.Interfaces");
+    namespaces.Add("IntelliTect.Coalesce.Mapping");
+    namespaces.Add("IntelliTect.Coalesce.Models");
+    namespaces.Add("Newtonsoft.Json");
+    namespaces.Add("System");
+    namespaces.Add("System.Linq");
+    namespaces.Add("System.Collections.Generic");
+    namespaces.Add("System.Security.Claims");
+    namespaces.Add($"{namespaceName}.Models");
+}
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+{
+    if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
+}
+@foreach (var prop in model.Properties)
+{
+    var ns = prop.Type.PureType.FullNamespace;
+    if (!ns.StartsWith("System"))
+    {
+        if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
+    }
+}
+@foreach (var ns in namespaces)
 {
     @:using @ns;
 }
+
 using static @(model.Namespace).@(model.Name);
 
 namespace @(namespaceName).Models
@@ -102,5 +116,5 @@ namespace @(namespaceName).Models
             }
         }
 
-    }
+	}
 }

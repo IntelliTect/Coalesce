@@ -138,6 +138,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public bool IsStatic
+        {
+            get
+            {
+                return Wrapper.IsStatic;
+            }
+        }
+
         /// <summary>
         /// Returns true if this property is a complex type.
         /// </summary>

@@ -10,26 +10,29 @@
     {
         namespaceName += "." + Model.AreaName;
     }
-}
 
-using IntelliTect.Coalesce.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using IntelliTect.Coalesce.Models;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
-using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.Mapping;
-// Model Namespaces 
+    var namespaces = new List<string>();
+    namespaces.Add("IntelliTect.Coalesce.Controllers");
+    namespaces.Add("IntelliTect.Coalesce.Data");
+    namespaces.Add("IntelliTect.Coalesce.Mapping");
+    namespaces.Add("IntelliTect.Coalesce.Models");
+    namespaces.Add("Microsoft.AspNetCore.Authorization");
+    namespaces.Add("Microsoft.AspNetCore.Mvc");
+    namespaces.Add("System");
+    namespaces.Add("System.Linq");
+    namespaces.Add("System.Collections.Generic");
+    namespaces.Add("System.ComponentModel.DataAnnotations");
+    namespaces.Add("System.Threading.Tasks");
+    namespaces.Add($"{namespaceName}.Models");
+}
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+{
+    if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
+}
+@foreach (var ns in namespaces)
 {
 @:using @ns;
 }
-// DTO namespace
-using @(namespaceName).Models;
 
 namespace @(namespaceName).Api
 {

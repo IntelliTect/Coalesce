@@ -18,6 +18,8 @@
     <li><a href="#Delete">Delete</a></li>
     <li><a href="#Detail">Detail</a></li>
     <li><a href="#Display">Display</a></li>
+    <li><a href="#DtoExcludes">DtoExcludes</a></li>
+    <li><a href="#DtoIncludes">DtoIncludes</a></li>
     <li><a href="#Edit">Edit</a></li>
     <li><a href="#Execute">Execute</a></li>
     <li><a href="#FileDownload">File Download</a></li>
@@ -202,6 +204,69 @@
         public string TheFullName { get; set; }
         
     }
+</code>
+</pre>
+<a name="DtoExcludes"></a>
+<h3>DtoExcludes</h3>
+<p>
+    When requesting data from the generated client-side list view models you can specify an "Includes" property.  
+    This property controls two areas:
+    <ul>
+        <li>If your underlying class implements IIncludable then the Include method will be called before querying the database, and
+        you can choose which properties to include based on the passed view.</li>
+        <li>When the database entries are returned to the client they will be trimmed based on the requested view and the values in
+        DtoExcludes and DtoIncludes.</li>
+    </ul>
+</p>
+<ul>
+    <li><span class="text-info">string</span> ContentViews = comma-separated list of views this property will not be included on.</li>
+</ul>
+<pre>
+    <code>
+    &lt;script&gt;
+    [... additional code ...]
+
+    personList.includes = "Editor";
+    personList.load();
+    &lt;/script&gt;
+    </code>
+</pre>
+<pre>
+<code class="language-html">
+    // Don't include CreatedBy when editing - will be included for all other views
+    [DtoExcludes("Editor")]
+    public AppUser CreatedBy { get; set; }
+
+    // LastName will be included in all views
+    public string LastName { get; set; }
+</code>
+</pre>
+<a name="DtoIncludes"></a>
+<h3>DtoIncludes</h3>
+<p>
+    See <a href="#DtoExcludes">DtoExcludes</a> for more information.<br />
+    Controls when a property is visible on the client.
+</p>
+<ul>
+    <li><span class="text-info">string</span> ContentViews = comma-separated list of views this property will not be included on.</li>
+</ul>
+<pre>
+<code>
+    &lt;script&gt;
+    [... additional code ...]
+    personList.includes = "AllInfo";
+    personList.load();
+    &lt;/script&gt;
+    </code>
+</pre>
+<pre>
+<code class="language-html">
+    // Include Title only when all information is being displayed
+    [DtoIncludes("AllInfo")]
+    public string Title { get; set; }
+
+    // LastName will be included in all views
+    public string LastName { get; set; }
 </code>
 </pre>
 <a name="Edit"></a>

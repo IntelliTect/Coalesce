@@ -429,22 +429,24 @@ module TestArea.ViewModels {
                         $.ajax({ method: "POST", url: areaUrl + "api/Person/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.wasSuccessful) {
-								self.errorMessage('');
-                                if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.object);
-                                }
-								// The object is now saved. Call any callback.
-								for (var i in self.saveCallbacks) {
-									self.saveCallbacks[i](self);
-								}
-							} else {
-								self.errorMessage(data.message);
-                                self.validationIssues(data.validationIssues);
+							self.errorMessage('');
+                            if (self.isDataFromSaveLoadedComputed()) {
+								self.loadFromDto(data.object);
+                            }
+							// The object is now saved. Call any callback.
+							for (var i in self.saveCallbacks) {
+								self.saveCallbacks[i](self);
 							}
 						})
-						.fail(function() {
-							alert("Could not save the item.");
+						.fail(function(xhr) {
+                            var errorMsg = "Unknown Error";
+                            var validationIssues = [];
+                            if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                            if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
+                            self.errorMessage(errorMsg);
+                            self.validationIssues(validationIssues);
+
+							alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -623,20 +625,22 @@ module TestArea.ViewModels {
                 var currentId = self.personId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/Person/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.wasSuccessful) {
-                        self.errorMessage('');
-                        self.loadFromDto(data.object);
-                        // The object is now saved. Call any callback.
-                        for (var i in self.saveCallbacks) {
-                            self.saveCallbacks[i](self);
-                        }
-                    } else {
-                        self.errorMessage(data.message);
-                        self.validationIssues(data.validationIssues);
+                    self.errorMessage('');
+                    self.loadFromDto(data.object);
+                    // The object is now saved. Call any callback.
+                    for (var i in self.saveCallbacks) {
+                        self.saveCallbacks[i](self);
                     }
                 })
-                .fail(function() {
-                    alert("Could not save the item.");
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    var validationIssues = [];
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    if (xhr.responseJSON && xhr.responseJSON.validationIssues) errorMsg = xhr.responseJSON.validationIssues;
+                    self.errorMessage(errorMsg);
+                    self.validationIssues(validationIssues);
+
+                    alert("Could not save the item: " + errorMsg);
                 })
                 .always(function() {
                     // Nothing here yet.
@@ -715,14 +719,18 @@ module TestArea.ViewModels {
 
             self.loadPersonStatsValidValues = function(callback) {
                 self.loadingValidValues++;
-                $.ajax({ method: "GET", url: areaUrl + "api/PersonStats/List?Fields=PersonStatsId,PersonStatsId", xhrFields: { withCredentials: true } })
+                $.ajax({ method: "GET", url: areaUrl + "api/PersonStats/CustomList?Fields=PersonStatsId,PersonStatsId", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
                     self.personStatsValidValues(data.list);
                     self.isLoading(false);
                 })
-                .fail(function() {
-                    alert("Could not get Valid Values for PersonStats");
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.isLoading(false);
+
+                    alert("Could not get Valid Values for PersonStats: " + errorMsg);
                 })
                 .always(function(){
                     self.loadingValidValues--;
@@ -734,14 +742,18 @@ module TestArea.ViewModels {
             
             self.loadCompanyValidValues = function(callback) {
                 self.loadingValidValues++;
-                $.ajax({ method: "GET", url: areaUrl + "api/Company/List?Fields=CompanyId,AltName", xhrFields: { withCredentials: true } })
+                $.ajax({ method: "GET", url: areaUrl + "api/Company/CustomList?Fields=CompanyId,AltName", xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isLoading(true);
                     self.companyValidValues(data.list);
                     self.isLoading(false);
                 })
-                .fail(function() {
-                    alert("Could not get Valid Values for Company");
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.isLoading(false);
+
+                    alert("Could not get Valid Values for Company: " + errorMsg);
                 })
                 .always(function(){
                     self.loadingValidValues--;
@@ -873,22 +885,22 @@ module TestArea.ViewModels {
                          xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isDirty(false);
-                    if (data.wasSuccessful) {
-                        self.renameMessage('');
-                        self.renameWasSuccessful(true);
-                        self.renameResult(data.object);
-                        // The return type is the type of the object, load it.
-                        self.loadFromDto(data.object)
-                        if ($.isFunction(callback)) {
-                            callback();
-                        }
-                    } else {
-                        self.renameWasSuccessful(false);
-                        self.renameMessage(data.message);
+                    self.renameMessage('');
+                    self.renameWasSuccessful(true);
+                    self.renameResult(data.object);
+                    // The return type is the type of the object, load it.
+                    self.loadFromDto(data.object)
+                    if ($.isFunction(callback)) {
+                        callback();
                     }
                 })
-                .fail(function() {
-                    alert("Could not call method rename");
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.renameWasSuccessful(false);
+                    self.renameMessage(errorMsg);
+
+                    alert("Could not call method rename: " + errorMsg);
                 })
                 .always(function() {
                     self.renameIsLoading(false);
@@ -924,22 +936,22 @@ module TestArea.ViewModels {
                          xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.isDirty(false);
-                    if (data.wasSuccessful) {
-                        self.changeSpacesToDashesInNameMessage('');
-                        self.changeSpacesToDashesInNameWasSuccessful(true);
-                        self.changeSpacesToDashesInNameResult(data.object);
-                        if (reload) {
-                          self.reload(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-                    } else {
-                        self.changeSpacesToDashesInNameWasSuccessful(false);
-                        self.changeSpacesToDashesInNameMessage(data.message);
+                    self.changeSpacesToDashesInNameMessage('');
+                    self.changeSpacesToDashesInNameWasSuccessful(true);
+                    self.changeSpacesToDashesInNameResult(data.object);
+                    if (reload) {
+                      self.reload(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
                     }
                 })
-                .fail(function() {
-                    alert("Could not call method changeSpacesToDashesInName");
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.changeSpacesToDashesInNameWasSuccessful(false);
+                    self.changeSpacesToDashesInNameMessage(errorMsg);
+
+                    alert("Could not call method changeSpacesToDashesInName: " + errorMsg);
                 })
                 .always(function() {
                     self.changeSpacesToDashesInNameIsLoading(false);

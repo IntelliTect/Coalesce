@@ -194,28 +194,28 @@ module ListViewModels {
                                 + "&listDataSource=" + PersonDataSources[self.listDataSource] + "&" + self.queryString,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.wasSuccessful){
-                        self.items.removeAll();
-                        for (var i in data.list) {
-                            var model = new ViewModels.Person(data.list[i]);
-                            model.includes = self.includes;
-                            model.onDelete(itemDeleted);
-                            self.items.push(model);
-                        }
-                        self.count(data.list.length);
-                        self.totalCount(data.totalCount);
-                        self.pageCount(data.pageCount);
-                self.page(data.page);
-                self.message(data.message)
-                        self.isLoaded(true);
-                if ($.isFunction(callback)) callback(self);
-            }else{
-                        self.message(data.message);
-                        self.isLoaded(false);
+                    self.items.removeAll();
+                    for (var i in data.list) {
+                        var model = new ViewModels.Person(data.list[i]);
+                        model.includes = self.includes;
+                        model.onDelete(itemDeleted);
+                        self.items.push(model);
                     }
-    })
-                .fail(function() {
-                    alert("Could not get list of Person items.");
+                    self.count(data.list.length);
+                    self.totalCount(data.totalCount);
+                    self.pageCount(data.pageCount);
+                    self.page(data.page);
+                    self.message(data.message)
+                    self.isLoaded(true);
+                    if ($.isFunction(callback)) callback(self);
+                })
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.message(errorMsg);
+                    self.isLoaded(false);
+                    
+                    alert("Could not get list of Person items: " + errorMsg);
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -310,22 +310,22 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.addMessage('');
-						self.addWasSuccessful(true);
-						self.addResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.addWasSuccessful(false);
-						self.addMessage(data.Message);
-					}
+					self.addMessage('');
+					self.addWasSuccessful(true);
+					self.addResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method add");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.addWasSuccessful(false);
+                    self.addMessage(errorMsg);
+
+					alert("Could not call method add: " + errorMsg);
 				})
 				.always(function() {
                     self.addIsLoading(false);
@@ -364,22 +364,22 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.getUserMessage('');
-						self.getUserWasSuccessful(true);
-						self.getUserResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.getUserWasSuccessful(false);
-						self.getUserMessage(data.Message);
-					}
+					self.getUserMessage('');
+					self.getUserWasSuccessful(true);
+					self.getUserResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method getUser");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.getUserWasSuccessful(false);
+                    self.getUserMessage(errorMsg);
+
+					alert("Could not call method getUser: " + errorMsg);
 				})
 				.always(function() {
                     self.getUserIsLoading(false);
@@ -405,22 +405,22 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.getUserPublicMessage('');
-						self.getUserPublicWasSuccessful(true);
-						self.getUserPublicResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.getUserPublicWasSuccessful(false);
-						self.getUserPublicMessage(data.Message);
-					}
+					self.getUserPublicMessage('');
+					self.getUserPublicWasSuccessful(true);
+					self.getUserPublicResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method getUserPublic");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.getUserPublicWasSuccessful(false);
+                    self.getUserPublicMessage(errorMsg);
+
+					alert("Could not call method getUserPublic: " + errorMsg);
 				})
 				.always(function() {
                     self.getUserPublicIsLoading(false);
@@ -446,22 +446,22 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.namesStartingWithMessage('');
-						self.namesStartingWithWasSuccessful(true);
-						self.namesStartingWithResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.namesStartingWithWasSuccessful(false);
-						self.namesStartingWithMessage(data.Message);
-					}
+					self.namesStartingWithMessage('');
+					self.namesStartingWithWasSuccessful(true);
+					self.namesStartingWithResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method namesStartingWith");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.namesStartingWithWasSuccessful(false);
+                    self.namesStartingWithMessage(errorMsg);
+
+					alert("Could not call method namesStartingWith: " + errorMsg);
 				})
 				.always(function() {
                     self.namesStartingWithIsLoading(false);
@@ -499,22 +499,22 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.namesStartingWithPublicMessage('');
-						self.namesStartingWithPublicWasSuccessful(true);
-						self.namesStartingWithPublicResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.namesStartingWithPublicWasSuccessful(false);
-						self.namesStartingWithPublicMessage(data.Message);
-					}
+					self.namesStartingWithPublicMessage('');
+					self.namesStartingWithPublicWasSuccessful(true);
+					self.namesStartingWithPublicResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method namesStartingWithPublic");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.namesStartingWithPublicWasSuccessful(false);
+                    self.namesStartingWithPublicMessage(errorMsg);
+
+					alert("Could not call method namesStartingWithPublic: " + errorMsg);
 				})
 				.always(function() {
                     self.namesStartingWithPublicIsLoading(false);
@@ -552,22 +552,22 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.borCPeopleMessage('');
-						self.borCPeopleWasSuccessful(true);
-						self.borCPeopleResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.borCPeopleWasSuccessful(false);
-						self.borCPeopleMessage(data.Message);
-					}
+					self.borCPeopleMessage('');
+					self.borCPeopleWasSuccessful(true);
+					self.borCPeopleResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method borCPeople");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.borCPeopleWasSuccessful(false);
+                    self.borCPeopleMessage(errorMsg);
+
+					alert("Could not call method borCPeople: " + errorMsg);
 				})
 				.always(function() {
                     self.borCPeopleIsLoading(false);

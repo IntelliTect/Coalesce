@@ -226,22 +226,24 @@ module TestArea.ViewModels {
                         $.ajax({ method: "POST", url: areaUrl + "api/DevTeam/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
-							if (data.wasSuccessful) {
-								self.errorMessage('');
-                                if (self.isDataFromSaveLoadedComputed()) {
-								    self.loadFromDto(data.object);
-                                }
-								// The object is now saved. Call any callback.
-								for (var i in self.saveCallbacks) {
-									self.saveCallbacks[i](self);
-								}
-							} else {
-								self.errorMessage(data.message);
-                                self.validationIssues(data.validationIssues);
+							self.errorMessage('');
+                            if (self.isDataFromSaveLoadedComputed()) {
+								self.loadFromDto(data.object);
+                            }
+							// The object is now saved. Call any callback.
+							for (var i in self.saveCallbacks) {
+								self.saveCallbacks[i](self);
 							}
 						})
-						.fail(function() {
-							alert("Could not save the item.");
+						.fail(function(xhr) {
+                            var errorMsg = "Unknown Error";
+                            var validationIssues = [];
+                            if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                            if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
+                            self.errorMessage(errorMsg);
+                            self.validationIssues(validationIssues);
+
+							alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -368,20 +370,22 @@ module TestArea.ViewModels {
                 var currentId = self.devTeamId();
                 $.ajax({ method: "POST", url: areaUrl + 'api/DevTeam/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.wasSuccessful) {
-                        self.errorMessage('');
-                        self.loadFromDto(data.object);
-                        // The object is now saved. Call any callback.
-                        for (var i in self.saveCallbacks) {
-                            self.saveCallbacks[i](self);
-                        }
-                    } else {
-                        self.errorMessage(data.message);
-                        self.validationIssues(data.validationIssues);
+                    self.errorMessage('');
+                    self.loadFromDto(data.object);
+                    // The object is now saved. Call any callback.
+                    for (var i in self.saveCallbacks) {
+                        self.saveCallbacks[i](self);
                     }
                 })
-                .fail(function() {
-                    alert("Could not save the item.");
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    var validationIssues = [];
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    if (xhr.responseJSON && xhr.responseJSON.validationIssues) errorMsg = xhr.responseJSON.validationIssues;
+                    self.errorMessage(errorMsg);
+                    self.validationIssues(validationIssues);
+
+                    alert("Could not save the item: " + errorMsg);
                 })
                 .always(function() {
                     // Nothing here yet.

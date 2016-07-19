@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using IntelliTect.Coalesce.Helpers;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IntelliTect.Coalesce.Controllers
 {
@@ -878,6 +880,26 @@ namespace IntelliTect.Coalesce.Controllers
         protected virtual bool AfterDelete(T obj, TContext context)
         {
             return true;
+        }
+
+        public override void OnActionExecuted(ActionExecutedContext context)
+        {
+            var response = context.HttpContext.Response;
+
+            if (response.StatusCode == 200)
+            {
+                var contents = context.Result as ObjectResult;
+                if (contents != null)
+                {
+                    var listResult = contents.Value as ListResult;
+                    var saveResult = contents.Value as SaveResult;
+                    if ((listResult != null && !listResult.WasSuccessful) || (saveResult != null && !saveResult.WasSuccessful))
+                    {
+                        context.HttpContext.Response.StatusCode = 500;
+                    }
+                }
+            }
+            base.OnActionExecuted(context);
         }
     }
 }

@@ -135,28 +135,28 @@ module TestArea.ListViewModels {
                                 + "&listDataSource=" + CaseDataSources[self.listDataSource] + "&" + self.queryString,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.wasSuccessful){
-                        self.items.removeAll();
-                        for (var i in data.list) {
-                            var model = new TestArea.ViewModels.Case(data.list[i]);
-                            model.includes = self.includes;
-                            model.onDelete(itemDeleted);
-                            self.items.push(model);
-                        }
-                        self.count(data.list.length);
-                        self.totalCount(data.totalCount);
-                        self.pageCount(data.pageCount);
-                self.page(data.page);
-                self.message(data.message)
-                        self.isLoaded(true);
-                if ($.isFunction(callback)) callback(self);
-            }else{
-                        self.message(data.message);
-                        self.isLoaded(false);
+                    self.items.removeAll();
+                    for (var i in data.list) {
+                        var model = new TestArea.ViewModels.Case(data.list[i]);
+                        model.includes = self.includes;
+                        model.onDelete(itemDeleted);
+                        self.items.push(model);
                     }
-    })
-                .fail(function() {
-                    alert("Could not get list of Case items.");
+                    self.count(data.list.length);
+                    self.totalCount(data.totalCount);
+                    self.pageCount(data.pageCount);
+                    self.page(data.page);
+                    self.message(data.message)
+                    self.isLoaded(true);
+                    if ($.isFunction(callback)) callback(self);
+                })
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.message(errorMsg);
+                    self.isLoaded(false);
+                    
+                    alert("Could not get list of Case items: " + errorMsg);
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -250,22 +250,22 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.getAllOpenCasesCountMessage('');
-						self.getAllOpenCasesCountWasSuccessful(true);
-						self.getAllOpenCasesCountResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.getAllOpenCasesCountWasSuccessful(false);
-						self.getAllOpenCasesCountMessage(data.Message);
-					}
+					self.getAllOpenCasesCountMessage('');
+					self.getAllOpenCasesCountWasSuccessful(true);
+					self.getAllOpenCasesCountResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method getAllOpenCasesCount");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.getAllOpenCasesCountWasSuccessful(false);
+                    self.getAllOpenCasesCountMessage(errorMsg);
+
+					alert("Could not call method getAllOpenCasesCount: " + errorMsg);
 				})
 				.always(function() {
                     self.getAllOpenCasesCountIsLoading(false);
@@ -291,22 +291,22 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.randomizeDatesAndStatusMessage('');
-						self.randomizeDatesAndStatusWasSuccessful(true);
-						self.randomizeDatesAndStatusResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.randomizeDatesAndStatusWasSuccessful(false);
-						self.randomizeDatesAndStatusMessage(data.Message);
-					}
+					self.randomizeDatesAndStatusMessage('');
+					self.randomizeDatesAndStatusWasSuccessful(true);
+					self.randomizeDatesAndStatusResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method randomizeDatesAndStatus");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.randomizeDatesAndStatusWasSuccessful(false);
+                    self.randomizeDatesAndStatusMessage(errorMsg);
+
+					alert("Could not call method randomizeDatesAndStatus: " + errorMsg);
 				})
 				.always(function() {
                     self.randomizeDatesAndStatusIsLoading(false);
@@ -332,22 +332,22 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					if (data.wasSuccessful) {
-						self.getAllOpenCasesMessage('');
-						self.getAllOpenCasesWasSuccessful(true);
-						self.getAllOpenCasesResult(data.object);
-                        if (reload) {
-                          self.load(callback);
-                        } else if ($.isFunction(callback)) {
-                          callback(data);
-                        }
-					} else {
-						self.getAllOpenCasesWasSuccessful(false);
-						self.getAllOpenCasesMessage(data.Message);
-					}
+					self.getAllOpenCasesMessage('');
+					self.getAllOpenCasesWasSuccessful(true);
+					self.getAllOpenCasesResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
 				})
-				.fail(function() {
-					alert("Could not call method getAllOpenCases");
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.getAllOpenCasesWasSuccessful(false);
+                    self.getAllOpenCasesMessage(errorMsg);
+
+					alert("Could not call method getAllOpenCases: " + errorMsg);
 				})
 				.always(function() {
                     self.getAllOpenCasesIsLoading(false);

@@ -78,28 +78,28 @@ module ListViewModels {
                                 + "&listDataSource=" + ProductDataSources[self.listDataSource] + "&" + self.queryString,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
-                    if (data.wasSuccessful){
-                        self.items.removeAll();
-                        for (var i in data.list) {
-                            var model = new ViewModels.Product(data.list[i]);
-                            model.includes = self.includes;
-                            model.onDelete(itemDeleted);
-                            self.items.push(model);
-                        }
-                        self.count(data.list.length);
-                        self.totalCount(data.totalCount);
-                        self.pageCount(data.pageCount);
-                self.page(data.page);
-                self.message(data.message)
-                        self.isLoaded(true);
-                if ($.isFunction(callback)) callback(self);
-            }else{
-                        self.message(data.message);
-                        self.isLoaded(false);
+                    self.items.removeAll();
+                    for (var i in data.list) {
+                        var model = new ViewModels.Product(data.list[i]);
+                        model.includes = self.includes;
+                        model.onDelete(itemDeleted);
+                        self.items.push(model);
                     }
-    })
-                .fail(function() {
-                    alert("Could not get list of Product items.");
+                    self.count(data.list.length);
+                    self.totalCount(data.totalCount);
+                    self.pageCount(data.pageCount);
+                    self.page(data.page);
+                    self.message(data.message)
+                    self.isLoaded(true);
+                    if ($.isFunction(callback)) callback(self);
+                })
+                .fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.message(errorMsg);
+                    self.isLoaded(false);
+                    
+                    alert("Could not get list of Product items: " + errorMsg);
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();

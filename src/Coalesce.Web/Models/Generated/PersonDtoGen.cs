@@ -1,41 +1,41 @@
-
+using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping;
-using System.Linq;
-using Newtonsoft.Json;
-// Model Namespaces
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+
 using static Coalesce.Domain.Person;
 
 namespace Coalesce.Web.Models
 {
     public partial class PersonDtoGen : GeneratedDto<Person, PersonDtoGen>
         , IClassDto<Person, PersonDtoGen>
-        {
+    {
         public PersonDtoGen() { }
 
-             public Int32? PersonId { get; set; }
-             public Titles? Title { get; set; }
-             public String FirstName { get; set; }
-             public String LastName { get; set; }
-             public String Email { get; set; }
-             public Genders? Gender { get; set; }
-             public ICollection<CaseDtoGen> CasesAssigned { get; set; }
-             public ICollection<CaseDtoGen> CasesReported { get; set; }
-             public Nullable<DateTime> BirthDate { get; set; }
-             public Nullable<DateTime> LastBath { get; set; }
-             public Nullable<DateTimeOffset> NextUpgrade { get; set; }
-             public Int32? PersonStatsId { get; set; }
-             public PersonStats PersonStats { get; set; }
-             public TimeZoneInfo TimeZone { get; set; }
-             public String Name { get; set; }
-             public Int32? CompanyId { get; set; }
-             public CompanyDtoGen Company { get; set; }
+        public Int32? PersonId { get; set; }
+        public Titles? Title { get; set; }
+        public String FirstName { get; set; }
+        public String LastName { get; set; }
+        public String Email { get; set; }
+        public Genders? Gender { get; set; }
+        public ICollection<CaseDtoGen> CasesAssigned { get; set; }
+        public ICollection<CaseDtoGen> CasesReported { get; set; }
+        public Nullable<DateTime> BirthDate { get; set; }
+        public Nullable<DateTime> LastBath { get; set; }
+        public Nullable<DateTimeOffset> NextUpgrade { get; set; }
+        public Int32? PersonStatsId { get; set; }
+        public PersonStats PersonStats { get; set; }
+        public TimeZoneInfo TimeZone { get; set; }
+        public String Name { get; set; }
+        public Int32? CompanyId { get; set; }
+        public CompanyDtoGen Company { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static PersonDtoGen Create(Person obj, ClaimsPrincipal user = null, string includes = null,
@@ -135,16 +135,16 @@ namespace Coalesce.Web.Models
 
         public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
         {
-        if (OnSecurityTrim(user, includes)) return;
+            if (OnSecurityTrim(user, includes)) return;
 
-        // Applicable includes for Person
-        
+            // Applicable includes for Person
+            
 
-        // Applicable excludes for Person
-        
+            // Applicable excludes for Person
+            
 
-        // Applicable roles for Person
-        bool isAdmin = false;
+            // Applicable roles for Person
+            bool isAdmin = false;
 			if (user != null)
 			{
 				isAdmin = user.IsInRole("Admin");
@@ -155,5 +155,5 @@ namespace Coalesce.Web.Models
                 Gender = null;
             }
         }
-        }
-        }
+    }
+}

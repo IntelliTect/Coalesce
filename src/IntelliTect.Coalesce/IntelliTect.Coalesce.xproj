@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>3539e1e7-0da6-4b02-83f9-fb40fbf5879f</ProjectGuid>
+    <ProjectGuid>70a4dc17-0f5d-4ff0-8d9c-ecdcbb565203</ProjectGuid>
     <RootNamespace>IntelliTect.Coalesce</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj\</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>

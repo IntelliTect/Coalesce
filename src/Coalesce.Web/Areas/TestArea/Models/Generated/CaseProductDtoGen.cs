@@ -1,15 +1,15 @@
-
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping;
-using System.Linq;
-using Newtonsoft.Json;
-// Model Namespaces
+    using IntelliTect.Coalesce.Interfaces;
+    using IntelliTect.Coalesce.Mapping;
+    using IntelliTect.Coalesce.Models;
+    using Newtonsoft.Json;
+    using System;
+    using System.Linq;
+    using System.Collections.Generic;
+    using System.Security.Claims;
+    using Coalesce.Web.TestArea.Models;
     using Coalesce.Domain;
     using Coalesce.Domain.External;
+
 using static Coalesce.Domain.CaseProduct;
 
 namespace Coalesce.Web.TestArea.Models
@@ -91,21 +91,5 @@ namespace Coalesce.Web.TestArea.Models
 			entity.ProductId = (Int32)(ProductId ?? 0);
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for CaseProduct
-        
-
-        // Applicable excludes for CaseProduct
-        
-
-        // Applicable roles for CaseProduct
-        if (user != null)
-			{
-			}
-
-        }
-        }
-        }
+	}
+}

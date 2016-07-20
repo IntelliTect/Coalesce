@@ -5,7 +5,7 @@
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Case Product List
-            <span style="font-size: .5em; padding-left: 20px;"><a href="~/CaseProduct/Docs">API Docs</a></span>
+            <span style="font-size: .5em; padding-left: 20px;@(User.IsInRole("Admin") ? "" : " visibility:hidden;")"><a href="~/CaseProduct/Docs">API Docs</a></span>
     </h1>
     <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
 
@@ -111,9 +111,9 @@
         var caseProductList = new ListViewModels.CaseProductList();
         
         // Set up parent info based on the URL.
-        @if (ViewBag.ParentIdName != null)
+        @if (ViewBag.Query != null)
         {
-            @:caseProductList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+            @:caseProductList.queryString = "@(ViewBag.Query)";
         }
 
         // Save and restore values from the URL:
@@ -136,7 +136,7 @@
         ko.applyBindings(caseProductList);
         caseProductList.isSavingAutomatically = true;
 
-        caseProductList.includes = "Editor";
+        caseProductList.includes = "CaseProductListGen";
         caseProductList.load();
 
     </script>

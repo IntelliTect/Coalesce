@@ -1,0 +1,75 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.CodeGeneration.Utilities
+@using Microsoft.VisualStudio.Web.CodeGeneration
+@{
+    ModelType contextInfo = Model.ContextInfo;
+    ClassViewModel model = Model.Model;
+    string namespaceName = Model.Namespace;
+    string viewLocation = "~/Views";
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        namespaceName += "." + Model.AreaName;
+        viewLocation = "~/Areas/" + Model.AreaName + "/Views";
+    }
+}
+
+using IntelliTect.Coalesce.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.PlatformAbstractions;
+// Model Namespaces
+@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+{
+@:using @ns;
+}
+
+namespace @(namespaceName).Controllers
+{
+    @if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+    @:[Area("@Model.AreaName")]
+    }
+    @(model.SecurityInfo.ClassAnnotation)
+    public partial class @(model.ControllerName)Controller 
+        : BaseViewController<@(model.Name), @contextInfo.Name> 
+    { 
+        public @(model.ControllerName)Controller() : base() { }
+
+        @(model.SecurityInfo.ReadAnnotation)
+        public ActionResult Cards(){
+            return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Cards.cshtml");
+        }
+
+        @(model.SecurityInfo.ReadAnnotation)
+        public ActionResult Table(){
+            return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Table.cshtml");
+        }
+
+        @if (model.IsEditAllowed) { 
+        <text>
+        @(model.SecurityInfo.EditAnnotation)
+        public ActionResult TableEdit(){
+            return IndexImplementation(true, @@"@viewLocation/Generated/@(model.Name)/Table.cshtml");
+        }
+
+        @(model.SecurityInfo.EditAnnotation)
+        public ActionResult CreateEdit(){
+            return CreateEditImplementation(@@"@viewLocation/Generated/@(model.Name)/CreateEdit.cshtml");
+        }
+                      
+        @(model.SecurityInfo.EditAnnotation)
+        public ActionResult EditorHtml(bool simple = false)
+        {
+            return EditorHtmlImplementation(simple);
+        }
+        </text>
+        }
+                      
+        @(model.SecurityInfo.EditAnnotation)
+        public ActionResult Docs()
+        {
+            return DocsImplementation();
+        }    
+    }
+}

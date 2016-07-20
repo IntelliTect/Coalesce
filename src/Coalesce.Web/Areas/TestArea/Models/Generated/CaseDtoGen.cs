@@ -1,15 +1,15 @@
-
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping;
-using System.Linq;
-using Newtonsoft.Json;
-// Model Namespaces
+    using IntelliTect.Coalesce.Interfaces;
+    using IntelliTect.Coalesce.Mapping;
+    using IntelliTect.Coalesce.Models;
+    using Newtonsoft.Json;
+    using System;
+    using System.Linq;
+    using System.Collections.Generic;
+    using System.Security.Claims;
+    using Coalesce.Web.TestArea.Models;
     using Coalesce.Domain;
     using Coalesce.Domain.External;
+
 using static Coalesce.Domain.Case;
 
 namespace Coalesce.Web.TestArea.Models
@@ -48,7 +48,7 @@ namespace Coalesce.Web.TestArea.Models
             
 
             // Applicable excludes for Case
-            
+            bool excludePersonListGen = includes == "PersonListGen";
 
             // Applicable roles for Case
             if (user != null)
@@ -69,10 +69,16 @@ namespace Coalesce.Web.TestArea.Models
             newObject.Description = obj.Description;
             newObject.OpenedAt = obj.OpenedAt;
             newObject.AssignedToId = obj.AssignedToId;
-            newObject.AssignedTo = PersonDtoGen.Create(obj.AssignedTo, user, includes, objects);
-            newObject.ReportedById = obj.ReportedById;
-            newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, user, includes, objects);
-            newObject.Attachment = obj.Attachment;
+          if (!(excludePersonListGen))
+            {
+                newObject.AssignedTo = PersonDtoGen.Create(obj.AssignedTo, user, includes, objects);
+            }  
+                        newObject.ReportedById = obj.ReportedById;
+          if (!(excludePersonListGen))
+            {
+                newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, user, includes, objects);
+            }  
+                        newObject.Attachment = obj.Attachment;
             newObject.Severity = obj.Severity;
             newObject.Status = obj.Status;
             if (obj.CaseProducts != null) newObject.CaseProducts = obj.CaseProducts.Select(f => CaseProductDtoGen.Create(f, user, includes, objects)).ToList();
@@ -98,7 +104,7 @@ namespace Coalesce.Web.TestArea.Models
             
 
             // Applicable excludes for Case
-            
+            bool excludePersonListGen = includes == "PersonListGen";
 
             // Applicable roles for Case
             if (user != null)
@@ -116,21 +122,5 @@ namespace Coalesce.Web.TestArea.Models
 			entity.DevTeamAssignedId = DevTeamAssignedId;
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-        if (OnSecurityTrim(user, includes)) return;
-
-        // Applicable includes for Case
-        
-
-        // Applicable excludes for Case
-        
-
-        // Applicable roles for Case
-        if (user != null)
-			{
-			}
-
-        }
-        }
-        }
+	}
+}

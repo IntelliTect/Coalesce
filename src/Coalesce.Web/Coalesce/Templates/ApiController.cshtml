@@ -1,0 +1,275 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.CodeGeneration.Utilities
+@using Microsoft.VisualStudio.Web.CodeGeneration
+@{
+    ModelType contextInfo = Model.ContextInfo;
+    ClassViewModel model = Model.Model;
+    string namespaceName = Model.Namespace;
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        namespaceName += "." + Model.AreaName;
+    }
+
+    var namespaces = new List<string>();
+    namespaces.Add("IntelliTect.Coalesce.Controllers");
+    namespaces.Add("IntelliTect.Coalesce.Data");
+    namespaces.Add("IntelliTect.Coalesce.Mapping");
+    namespaces.Add("IntelliTect.Coalesce.Models");
+    namespaces.Add("Microsoft.AspNetCore.Authorization");
+    namespaces.Add("Microsoft.AspNetCore.Mvc");
+    namespaces.Add("System");
+    namespaces.Add("System.Linq");
+    namespaces.Add("System.Collections.Generic");
+    namespaces.Add("System.ComponentModel.DataAnnotations");
+    namespaces.Add("System.Threading.Tasks");
+    namespaces.Add($"{namespaceName}.Models");
+}
+@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+{
+    if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
+}
+@foreach (var ns in namespaces)
+{
+@:using @ns;
+}
+
+namespace @(namespaceName).Api
+{
+    @if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+    @:[Route("@Model.AreaName/api/[controller]")]
+    }
+    else
+    {
+    @:[Route("api/[controller]")]
+    }
+    @(model.SecurityInfo.ClassAnnotation)
+    public partial class @(model.ControllerName)Controller 
+         : LocalBaseApiController<@(model.Name), @(model.Name)DtoGen> 
+    {
+        public @(model.ControllerName)Controller() { }
+      
+        /// <summary>
+        /// Returns @(model.Name)DtoGen
+        /// </summary>
+        [HttpGet("list")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual async Task<ListResult> List(
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            // Custom fields for this object.
+            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+        
+            var listResult = await ListImplementation(parameters);
+            return new GenericListResult<@(model.Name), @(model.Name)DtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns custom object based on supplied fields
+        /// </summary>
+        [HttpGet("customlist")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual async Task<ListResult> CustomList(
+            string fields = null, 
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            // Custom fields for this object.
+            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+        
+            return await ListImplementation(parameters);
+        }
+
+
+        [HttpGet("count")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual async Task<int> Count(
+            string where = null, 
+            string listDataSource = null,
+            string search = null,
+            // Custom fields for this object.
+            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
+
+            // Add custom filters
+            @foreach(PropertyViewModel prop in model.Properties.Where(f=>f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+            
+            return await CountImplementation(parameters);
+        }
+
+        [HttpGet("propertyValues")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
+        {
+            return PropertyValuesImplementation(property, page, search);
+        }
+
+        [HttpGet("get/{id}")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual async Task<@(model.Name)DtoGen> Get(string id, string includes = null)
+        {
+            return await GetImplementation(id, includes);
+        }
+
+        @if (model.HasDbSet && model.IsDeleteAllowed) { 
+        <text>
+        [HttpPost("delete/{id}")]
+        @(model.SecurityInfo.EditAnnotation)
+        public virtual bool Delete(string id)
+        {
+            @if (!model.IsDeleteAllowed)
+            {
+            @:// Deletes are not allowed.
+            @:throw new InvalidOperationException("Delete not allowed");
+            }else{
+            @:return DeleteImplementation(id);
+            }
+        }
+        </text>
+        }
+
+        @if (model.IsEditAllowed) {
+        <text>
+        [HttpPost("save")]
+        @(model.SecurityInfo.EditAnnotation)
+        public virtual SaveResult<@(model.Name)DtoGen> Save(@(model.Name)DtoGen dto, string includes = null, bool returnObject = true)
+        {
+            @if (!model.IsCreateAllowed)
+            {
+            @:// Creates are not allowed, so check the ID first.
+            if (model.PrimaryKey.Type.IsString)
+            {
+            @:if(string.IsNullOrWhiteSpace(dto.@(model.PrimaryKey.Name))){ 
+            }else{
+            @:if(dto.@(model.PrimaryKey.Name) == 0){ 
+            }
+                @:throw new InvalidOperationException("Create not allowed");
+            @:}
+            }
+            return SaveImplementation(dto, includes, returnObject);
+        }
+        
+        [HttpPost("AddToCollection")]
+        @(model.SecurityInfo.EditAnnotation)
+        public virtual SaveResult<@(model.Name)DtoGen> AddToCollection(int id, string propertyName, int childId)
+        {
+            return ChangeCollection(id, propertyName, childId, "Add");
+        }
+        [HttpPost("RemoveFromCollection")]
+        @(model.SecurityInfo.EditAnnotation)
+        public virtual SaveResult<@(model.Name)DtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        {
+            return ChangeCollection(id, propertyName, childId, "Remove");
+        }
+        </text>
+        }
+
+        @(model.SecurityInfo.ReadAnnotation)
+        protected override IQueryable<@(model.Name)> GetListDataSource(ListParameters parameters)
+        {
+            @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && !m.IsInternalUse))
+            {
+            @:if (parameters.ListDataSource == "@(method.Name)")
+            @:{
+            foreach(var parameter in method.Parameters.Where(p => !p.IsDI))
+            {
+            @:    @parameter.Type.Name @parameter.CsArgumentName = @parameter.Type.CsDefaultValue;
+            @:    if (parameters.Filters.ContainsKey("@parameter.CsArgumentName"))
+                @:{
+                    @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.CsArgumentName"]);
+                @:}
+            }
+            @:    return @(method.Parent.Namespace).@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+            @:}
+            }
+
+            return base.GetListDataSource(parameters);
+        }
+
+        // Methods
+        @foreach (var method in model.Methods.Where(m=>!m.IsInternalUse))
+        {
+        <text>
+        // Method: @method.Name
+        [HttpPost("@(method.Name)")]
+        @(method.SecurityInfo.ExecuteAnnotation)
+        public virtual SaveResult<@method.ReturnTypeNameForApi> @method.Name (@method.CsParameters){
+            @if (method.SecurityInfo.IsExecute) {
+            @:if (!ClassViewModel.MethodByName("@method.Name").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
+            }
+            var result = new SaveResult<@method.ReturnTypeNameForApi>();
+            try{
+                @if (method.IsStatic)
+                {
+                if(method.ReturnType.IsVoid){
+                @:object objResult = null;
+                @:@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+                }else{
+                @:var objResult = @(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+                }
+                }
+                else
+                {
+                @:var item = DataSource.Includes().FindItem(id);
+                if (method.ReturnType.IsVoid)
+                {
+                @:object objResult = null;
+                @:item.@(method.Name)(@(method.CsArguments));
+                }else{
+                @:var objResult = item.@(method.Name)(@(method.CsArguments));
+                }
+                @:Db.SaveChanges();
+                }
+                @if (method.ReturnType.Name == method.Parent.Name)
+                {
+                @:result.Object = Mapper<@(model.Name), @(model.Name)DtoGen>.ObjToDtoMapper(objResult, User, "");
+                }
+                else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
+                {
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.Name), @(model.Name)DtoGen>.ObjToDtoMapper(o, User, ""));
+                }
+                else
+                {
+                @:result.Object = objResult;
+                }
+                result.WasSuccessful = true;
+                result.Message = null;
+            }catch(Exception ex){
+                result.WasSuccessful = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+        </text>
+        }    
+    }
+}

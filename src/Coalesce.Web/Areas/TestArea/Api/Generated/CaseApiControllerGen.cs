@@ -1,20 +1,17 @@
-
 using IntelliTect.Coalesce.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using IntelliTect.Coalesce.Models;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
-// Model Namespaces 
+using IntelliTect.Coalesce.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
+using Coalesce.Web.TestArea.Models;
 using Coalesce.Domain;
 using Coalesce.Domain.External;
-// DTO namespace
-using Coalesce.Web.TestArea.Models;
 
 namespace Coalesce.Web.TestArea.Api
 {

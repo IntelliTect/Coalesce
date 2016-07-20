@@ -17,8 +17,14 @@
     "Microsoft.AspNetCore.Mvc.Razor": "1.0.0"
   },
 
+  "buildOptions": {
+    "embed": [
+      "Templates/**"
+    ]
+  },
+
   "frameworks": {
-    "net46": { }
+    "net46": {}
   },
 
   "publishOptions": {

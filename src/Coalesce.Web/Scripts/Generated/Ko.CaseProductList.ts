@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="../Intellitect/intellitect.utilities.ts" />
-/// <reference path="../Intellitect/intellitect.ko.utilities.ts" />
+/// <reference path="../Coalesce/intellitect.utilities.ts" />
+/// <reference path="../Coalesce/intellitect.ko.utilities.ts" />
 /// <reference path="./Ko.CaseProduct.ts" />
 
 // Knockout List View Model for: CaseProduct

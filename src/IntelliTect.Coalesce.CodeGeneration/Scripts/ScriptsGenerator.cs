@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Validation;
 using System.Globalization;
+using System.Reflection;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel;
 
@@ -110,7 +111,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
 
                 streamWriter.WriteLine("-------- Complex Types --------");
-                //Console.WriteLine(TemplateFolders.First());
                 foreach (var ct in ComplexTypes(models))
                 {
                     streamWriter.WriteLine(ct.Name);
@@ -121,7 +121,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
 
                 streamWriter.WriteLine("-------- Enumerations --------");
-                //Console.WriteLine(TemplateFolders.First());
                 foreach (string propertyKey in enumValues.Keys)
                 {
                     streamWriter.WriteLine(propertyKey);
@@ -149,15 +148,49 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 "Coalesce",
                 "Templates")};
 
-        private void CopyToOriginalsAndDestinationIfNeeded(string sourceFile, string originalsFile, string destinationFile)
+        private void CopyToOriginalsAndDestinationIfNeeded(string fileName, string sourcePath, string originalsPath, string destinationPath)
         {
+            string sourceFile = ThisAssemblyName + "." + Path.Combine(sourcePath, fileName).Replace('/', '.').Replace('\\', '.');
+
+            Directory.CreateDirectory(originalsPath);
+            Directory.CreateDirectory(destinationPath);
+
+            string originalsFile = Path.Combine( originalsPath, fileName );
+            string destinationFile = Path.Combine(destinationPath, fileName );
+
+            var inputStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(sourceFile);
+            // Console.WriteLine($"Copying {sourceFile}");
+
+            FileStream fileStream;
             if (FileCompare(originalsFile, destinationFile))
             {
                 // The original file and the active file are the same. Overwrite the active file with the new template.
-                File.Copy(sourceFile, destinationFile, true);
+                fileStream = File.Create(destinationFile);
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(fileStream);
+                fileStream.Close();
             }
 
-            File.Copy(sourceFile, originalsFile, true);
+            fileStream = File.Create(originalsFile);
+            inputStream.Seek(0, SeekOrigin.Begin);
+            inputStream.CopyTo(fileStream);
+            fileStream.Close();
+        }
+
+        private void CopyToDestination(string fileName, string sourcePath, string destinationPath)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            string sourceFile = assembly.GetName().Name + "." + Path.Combine(sourcePath, fileName).Replace('/', '.').Replace('\\', '.');
+
+            Directory.CreateDirectory(destinationPath);
+
+            string destinationFile = Path.Combine(destinationPath, fileName );
+            var inputStream = assembly.GetManifestResourceStream(sourceFile);
+
+            var fileStream = File.Create(destinationFile);
+            inputStream.Seek(0, SeekOrigin.Begin);
+            inputStream.CopyTo(fileStream);
+            fileStream.Close();
         }
 
         private async Task CopyStaticFiles(CommandLineGeneratorModel commandLineGeneratorModel)
@@ -190,8 +223,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                  _webProject.ProjectDirectory,
                  areaLocation,
                  "intelliTect");
-            if (Directory.Exists(oldOriginalsPath))
-                Directory.Move(oldOriginalsPath, originalsPath);
+            if (Directory.Exists(oldOriginalsPath)) 
+                Directory.Move(oldOriginalsPath, originalsPath);// TODO: remove this at some point after all projects are upgraded.
 
             Directory.CreateDirectory(originalsPath);
             Directory.CreateDirectory(originalTemplatesPath);
@@ -203,11 +236,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 areaLocation,
                 "Views", "Api");
 
-            Directory.CreateDirectory(apiViewOutputPath);
-
-            //File.Copy(TemplateLocation("Index.cshtml"), Path.Combine(apiViewOutputPath, "Index.cshtml"), true);
-            //File.Copy(TemplateLocation("CreateEdit.cshtml"), Path.Combine(apiViewOutputPath, "CreateEdit.cshtml"), true);
-            File.Copy(TemplateLocation("Docs.cshtml"), Path.Combine(apiViewOutputPath, "Docs.cshtml"), true);
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "Docs.cshtml",
+                    sourcePath: "Templates/Views/Api",
+                    originalsPath: originalsPath,
+                    destinationPath: apiViewOutputPath);
 
             // Copy over Shared Folder (_EditorHtml, _Master - always, _Layout only if it doesn't exist)
             var sharedViewOutputPath = Path.Combine(
@@ -215,29 +248,46 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 areaLocation,
                 "Views", "Shared");
 
-            if (!Directory.Exists(sharedViewOutputPath))
-            {
-                Directory.CreateDirectory(sharedViewOutputPath);
-            }
-            File.Copy(TemplateLocation("_EditorHtml.cshtml"), Path.Combine(sharedViewOutputPath, "_EditorHtml.cshtml"), true);
-            File.Copy(TemplateLocation("_Master.cshtml"), Path.Combine(sharedViewOutputPath, "_Master.cshtml"), true);
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "_EditorHtml.cshtml",
+                    sourcePath: "Templates/Views/Shared",
+                    originalsPath: originalsPath,
+                    destinationPath: sharedViewOutputPath);
+
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "_Master.cshtml",
+                    sourcePath: "Templates/Views/Shared",
+                    originalsPath: originalsPath,
+                    destinationPath: sharedViewOutputPath);
+
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "_ViewStart.cshtml",
+                    sourcePath: "Templates/Views",
+                    originalsPath: originalsPath,
+                    destinationPath: Path.Combine(_webProject.ProjectDirectory, areaLocation, "Views"));
 
             if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
             {
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("_Layout.cshtml"), originalsPath, sharedViewOutputPath, "_Layout.cshtml");
-            }
-            CopyFileWithoutOverwritingOriginal(TemplateLocation("_ViewStart.cshtml"), originalsPath, Path.Combine(_webProject.ProjectDirectory, areaLocation, "Views"), "_ViewStart.cshtml");
+                CopyToOriginalsAndDestinationIfNeeded(
+                        fileName: "_Layout.cshtml",
+                        sourcePath: "Templates/Views/Shared",
+                        originalsPath: originalsPath,
+                        destinationPath: sharedViewOutputPath);
+            
 
-            // only copy the intellitect scripts when generating the root site, this isn't needed for areas since it will already exist at the root
-            if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
-            {
+
+                // only copy the intellitect scripts when generating the root site, this isn't needed for areas since it will already exist at the root
                 // Copy files for the scripts folder
                 var scriptsOutputPath = Path.Combine(
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Scripts", "Coalesce");
 
-                Directory.CreateDirectory(scriptsOutputPath);
+                var oldScriptsOutputPath = Path.Combine(
+                  _webProject.ProjectDirectory,
+                  areaLocation,
+                    "Scripts", "Intellitect");
+                if (Directory.Exists(oldScriptsOutputPath)) Directory.Delete(oldScriptsOutputPath, true); // TODO: remove this at some point after all projects are upgraded.
 
                 string[] intellitectScripts =
                 {
@@ -247,10 +297,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "intellitect.ko.utilities.ts",
                     "intellitect.utilities.ts",
                 };
-
                 foreach ( var fileName in intellitectScripts)
                 {
-                    File.Copy(TemplateLocation(fileName), Path.Combine(scriptsOutputPath, fileName), true);
+                    CopyToDestination(
+                            fileName: fileName,
+                            sourcePath: "Templates",
+                            destinationPath: scriptsOutputPath);
                 }
 
 
@@ -270,20 +322,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "TableView.cshtml",
                     "ViewController.cshtml",
                 };
-
                 foreach (var fileName in generationTemplates)
                 {
-                    string embeddedFile = TemplateLocation( fileName );
-                    string originalFile = Path.Combine( originalTemplatesPath, fileName );
-                    string activeFile = Path.Combine( activeTemplatesPath, fileName );
-
-                    if (FileCompare(originalFile, activeFile))
-                    {
-                        // The original file and the active file are the same. Overwrite the active file with the new template.
-                        File.Copy(embeddedFile, activeFile, true);
-                    }
-
-                    File.Copy(embeddedFile, originalFile, true);
+                    CopyToOriginalsAndDestinationIfNeeded(
+                            fileName: fileName,
+                            sourcePath: "Templates",
+                            originalsPath: originalTemplatesPath,
+                            destinationPath: activeTemplatesPath);
                 }
             }
 
@@ -291,23 +336,33 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 _webProject.ProjectDirectory,
                 areaLocation,
                 "Styles");
-
-            if (!Directory.Exists(stylesOutputPath))
-            {
-                Directory.CreateDirectory(stylesOutputPath);
-            }
-            CopyFileWithoutOverwritingOriginal(TemplateLocation("site.scss"), originalsPath, stylesOutputPath, "site.scss");
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "site.scss",
+                    sourcePath: "Templates/Styles",
+                    originalsPath: originalsPath,
+                    destinationPath: stylesOutputPath);
 
             // if generating an area, assume the root site already has all "plumbing" needed
             if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
             {
                 // Copy files from ProjectConfig if they don't already exist
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("bower.json"), originalsPath, _webProject.ProjectDirectory, "bower.json");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation(".bowerrc"), originalsPath, _webProject.ProjectDirectory, ".bowerrc");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("gulpfile.js"), originalsPath, _webProject.ProjectDirectory, "gulpfile.js");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("package.json"), originalsPath, _webProject.ProjectDirectory, "package.json");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("tsconfig.json"), originalsPath, _webProject.ProjectDirectory, "tsconfig.json");
-                CopyFileWithoutOverwritingOriginal(TemplateLocation("tsd.json"), originalsPath, _webProject.ProjectDirectory, "tsd.json");
+                string[] configFiles =
+                {
+                    "bower.json",
+                    ".bowerrc",
+                    "gulpfile.js",
+                    "package.json",
+                    "tsconfig.json",
+                    "tsd.json",
+                };
+                foreach (var fileName in configFiles)
+                {
+                    CopyToOriginalsAndDestinationIfNeeded(
+                            fileName: fileName,
+                            sourcePath: "Templates/ProjectConfig",
+                            originalsPath: originalsPath,
+                            destinationPath: _webProject.ProjectDirectory);
+                }
 
                 if (!commandLineGeneratorModel.OnlyGenerateFiles)
                 {
@@ -339,37 +394,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     //}
                     //Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "reinstall").WaitForExit();
                 }
-                // Copy readme to root as IntelliTectScaffoldingReadme.txt
-                File.Copy(TemplateLocation("Readme.txt"), Path.Combine(_webProject.ProjectDirectory, "IntelliTectScaffoldingReadme.txt"), true);
-            }
-            await CodeGeneratorActionsService.AddFileFromTemplateAsync(Path.Combine(_webProject.ProjectDirectory, areaLocation, "Views", "_ViewImports.cshtml"),
-                "_ViewImports.cshtml", TemplateFolders, null);
-            await CodeGeneratorActionsService.AddFileFromTemplateAsync(Path.Combine(sharedViewOutputPath, "_AdminLayout.cshtml"), "_AdminLayout.cshtml", TemplateFolders, commandLineGeneratorModel.AreaLocation);
-        }
 
-        private string TemplateLocation(string templateName = null)
-        {
-            FilesLocator locator = new FilesLocator();
-            string filePath = locator.GetFilePath(templateName, TemplateFolders);
-
-            return filePath;
-        }
-
-        private void CopyFileWithoutOverwritingOriginal(string inputPath, string intelliTectTemplatePath, string outputPath, string fileToCopy)
-        {
-            if (!Directory.Exists(intelliTectTemplatePath))
-            {
-                Directory.CreateDirectory(intelliTectTemplatePath);
-            }
-            // if the file in the source matches the current IntelliTect original file
-            if (FileCompare(Path.Combine(intelliTectTemplatePath, fileToCopy), Path.Combine(outputPath, fileToCopy)))
-            {
-                // override the file
-                //Console.WriteLine($"Writing {fileToCopy}");
-                File.Copy(inputPath, Path.Combine(outputPath, fileToCopy), true);
+                CopyToDestination(
+                        fileName: "CoalesceScaffoldingReadme.txt",
+                        sourcePath: "Templates",
+                        destinationPath: _webProject.ProjectDirectory);
             }
 
-            File.Copy(inputPath, Path.Combine(intelliTectTemplatePath, fileToCopy), true);
+
+
+            CopyToDestination(
+                    fileName: "CoalesceScaffoldingReadme.txt",
+                    sourcePath: "Templates",
+                    destinationPath: _webProject.ProjectDirectory);
+
+
+
+            string destPath = Path.Combine( _webProject.ProjectDirectory, areaLocation, "Views", "_ViewImports.cshtml" );
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "_ViewImports.cshtml",
+                    sourcePath: "Templates/Views",
+                    originalsPath: originalTemplatesPath,
+                    destinationPath: activeTemplatesPath);
+            await Generate("_ViewImports.cshtml", destPath, null);
+
+
+
+            destPath = Path.Combine(sharedViewOutputPath, "_AdminLayout.cshtml");
+            CopyToOriginalsAndDestinationIfNeeded(
+                    fileName: "_AdminLayout.cshtml",
+                    sourcePath: "Templates/Views/Shared",
+                    originalsPath: originalTemplatesPath,
+                    destinationPath: activeTemplatesPath);
+            await Generate("_AdminLayout.cshtml", destPath, commandLineGeneratorModel.AreaLocation);
         }
 
         private bool FileCompare(string file1, string file2)
@@ -433,6 +490,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             return ((file1byte - file2byte) == 0);
         }
 
+        private Task Generate(string templateName, string outputPath, object model)
+        {
+            return CodeGeneratorActionsService.AddFileFromTemplateAsync(outputPath,
+                templateName, ActiveTemplatesPaths, model);
+        }
+
         private async Task GenerateScripts(
             CommandLineGeneratorModel controllerGeneratorModel,
             List<ClassViewModel> models,
@@ -485,7 +548,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "Models", "Generated",
                     model.Model.Name + "DtoGen.cs");
 
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename, "ClassDto.cshtml", ActiveTemplatesPaths, model);
+                await Generate( "ClassDto.cshtml", filename, model );
             }
             Console.WriteLine();
 
@@ -503,8 +566,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     ScriptsFolderName, "Generated",
                     fileName);
 
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                    "KoViewModel.cshtml", ActiveTemplatesPaths, model);
+                await Generate("KoViewModel.cshtml", viewOutputPath, model);
 
                 //Console.WriteLine("   Added Script: " + viewOutputPath);
 
@@ -515,8 +577,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     ScriptsFolderName, "Generated",
                     fileName);
 
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                    "KoListViewModel.cshtml", ActiveTemplatesPaths, model);
+                await Generate("KoListViewModel.cshtml", viewOutputPath, model);
 
                 //Console.WriteLine("   Added Script: " + viewOutputPath);
             }
@@ -535,8 +596,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     ScriptsFolderName, "Generated",
                     fileName);
 
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                    "KoExternalType.cshtml", ActiveTemplatesPaths, externalType);
+                await Generate("KoExternalType.cshtml", viewOutputPath, externalType);
 
                 Console.Write(externalType.Model.Name + "  ");
             }
@@ -560,8 +620,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     ScriptsFolderName, "Generated",
                     fileName);
 
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                    "KoComplexType.cshtml", ActiveTemplatesPaths, complexType);
+                await Generate("KoComplexType.cshtml", viewOutputPath, complexType);
 
                 Console.WriteLine("   Added: " + viewOutputPath);
             }
@@ -578,7 +637,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 var model = apiModels.ViewModelsForTemplates.First(f => f.Model.OnContext);
 
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename, "LocalBaseApiController.cshtml", ActiveTemplatesPaths, model);
+                await Generate("LocalBaseApiController.cshtml", filename, model);
             }
 
             // Generate model api controllers
@@ -589,8 +648,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     areaLocation,
                     "Api", "Generated",
                     model.Model.Name + "ApiControllerGen.cs");
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
-                    "ApiController.cshtml", ActiveTemplatesPaths, model);
+                await Generate("ApiController.cshtml", filename, model);
             }
 
 
@@ -603,8 +661,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     areaLocation,
                     "Controllers", "Generated",
                     model.Model.Name + "ControllerGen.cs");
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
-                    "ViewController.cshtml", ActiveTemplatesPaths, model);
+                await Generate("ViewController.cshtml", filename, model);
             }
 
             Console.WriteLine("-- Generating Views");
@@ -616,8 +673,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "Views", "Generated",
                     model.Model.Name,
                     "Table.cshtml");
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
-                    "TableView.cshtml", ActiveTemplatesPaths, model);
+                await Generate("TableView.cshtml", filename, model);
 
                 filename = Path.Combine(
                     _webProject.ProjectDirectory,
@@ -625,8 +681,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "Views", "Generated",
                     model.Model.Name,
                     "Cards.cshtml");
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
-                    "CardView.cshtml", ActiveTemplatesPaths, model);
+                await Generate("CardView.cshtml", filename, model);
 
                 filename = Path.Combine(
                     _webProject.ProjectDirectory,
@@ -634,8 +689,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "Views", "Generated",
                     model.Model.Name,
                     "CreateEdit.cshtml");
-                await CodeGeneratorActionsService.AddFileFromTemplateAsync(filename,
-                    "CreateEditView.cshtml", ActiveTemplatesPaths, model);
+                await Generate("CreateEditView.cshtml", filename, model);
             }
 
 
@@ -718,18 +772,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             // Write the file with the array list of content.
             File.WriteAllLines(Path.Combine(path, "intellitect.references.d.ts"), fileContents);
-        }
-
-        public IEnumerable<string> TemplateFolders
-        {
-            get
-            {
-                return Common.TemplateFoldersUtilities.GetTemplateFolders(
-                    codeGenAssembly: ThisAssemblyName,
-                    mvcProject: _webProject,
-                    baseFolders: new[] { "" }
-                );
-            }
         }
 
         /// <summary>

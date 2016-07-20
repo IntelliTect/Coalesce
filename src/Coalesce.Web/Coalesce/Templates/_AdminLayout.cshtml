@@ -1,0 +1,18 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@{ 
+    string appJsLocation = "~/js/app.js";
+    if (!string.IsNullOrWhiteSpace(Model))
+    {
+        appJsLocation = "~/" + Model + "/js/app.js";
+    }
+}
+@@{
+    Layout = "_Layout";
+}
+@@RenderBody()
+@@section Scripts {
+@{ 
+    @:<script src="@appJsLocation"></script>
+}
+    @@RenderSection("Scripts", required: false)
+}

@@ -1,7 +1,7 @@
 /// <reference path="../../../../typings/tsd.d.ts" />
-/// <reference path="../../../../scripts/Intellitect/intellitect.utilities.ts" />
-/// <reference path="../../../../scripts/Intellitect/intellitect.ko.utilities.ts" />
-/// <reference path="../../../../scripts/Intellitect/intellitect.ko.base.ts" />
+/// <reference path="../../../../scripts/Coalesce/intellitect.utilities.ts" />
+/// <reference path="../../../../scripts/Coalesce/intellitect.ko.utilities.ts" />
+/// <reference path="../../../../scripts/Coalesce/intellitect.ko.base.ts" />
 
 
 
@@ -709,11 +709,11 @@ module TestArea.ViewModels {
             // Create variables for ListEditorApiUrls
             self.CasesAssignedListUrl = ko.computed(function()
             {
-                return areaUrl + 'Case/table?AssignedToId=' + self.personId();
+                return areaUrl + 'Case/table?assignedToId=' + self.personId();
             });
             self.CasesReportedListUrl = ko.computed(function()
             {
-                return areaUrl + 'Case/table?ReportedById=' + self.personId();
+                return areaUrl + 'Case/table?reportedById=' + self.personId();
             });
             // Create loading function for Valid Values
 

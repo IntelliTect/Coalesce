@@ -20,9 +20,9 @@ namespace IntelliTect.Coalesce.Helpers
         var {model.ListViewModelObjectName} = new ListViewModels.{model.ListViewModelClassName}();
         
         // Set up parent info based on the URL.
-        @if (ViewBag.ParentIdName != null)
+        @if (ViewBag.Query != null)
         {{
-            @:{model.ListViewModelObjectName}.queryString = ""@(ViewBag.ParentIdName) = @(ViewBag.ParentId)"";
+            @:{model.ListViewModelObjectName}.queryString = ""@(ViewBag.Query)"";
         }}
 
         // Save and restore values from the URL:
@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce.Helpers
         ko.applyBindings({model.ListViewModelObjectName});
         {model.ListViewModelObjectName}.isSavingAutomatically = true;
 
-        {model.ListViewModelObjectName}.includes = ""Editor"";
+        {model.ListViewModelObjectName}.includes = ""{model.ListViewModelClassName}Gen"";
         { model.ListViewModelObjectName}.load();
 
     </script>");

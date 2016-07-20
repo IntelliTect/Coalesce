@@ -36,7 +36,7 @@
 }
 @foreach (var ns in namespaces)
 {
-@:using @ns;
+    @:using @ns;
 }
 
 using static @(model.Namespace).@(model.Name);
@@ -45,12 +45,12 @@ namespace @(namespaceName).Models
 {
     public partial class @(model.Name)DtoGen : GeneratedDto<@(model.Name), @(model.Name)DtoGen>
         , IClassDto<@(model.Name), @(model.Name)DtoGen>
-    {
+        {
         public @(model.Name)DtoGen() { }
 
         @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
         {
-        @:public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
+            @: public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
         }
 
         // Create a new version of this object or use it from the lookup.
@@ -116,23 +116,5 @@ namespace @(namespaceName).Models
             }
         }
 
-        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
-        {
-            if (OnSecurityTrim(user, includes)) return;
-
-            // Applicable includes for @(model.Name)
-            @(model.DtoIncludesAsCS())
-
-            // Applicable excludes for @(model.Name)
-            @(model.DtoExcludesAsCS())
-
-            // Applicable roles for @(model.Name)
-            @(model.PropertyRolesAsCS())
-
-            @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
-                {
-                @prop.ObjToDtoSecurityTrimmer()
-            }
-        }
-    }
+	}
 }

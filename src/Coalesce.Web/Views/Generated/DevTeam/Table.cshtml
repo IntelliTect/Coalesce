@@ -104,9 +104,9 @@
         var devTeamList = new ListViewModels.DevTeamList();
         
         // Set up parent info based on the URL.
-        @if (ViewBag.ParentIdName != null)
+        @if (ViewBag.Query != null)
         {
-            @:devTeamList.queryString = "@(ViewBag.ParentIdName) = @(ViewBag.ParentId)";
+            @:devTeamList.queryString = "@(ViewBag.Query)";
         }
 
         // Save and restore values from the URL:
@@ -129,7 +129,7 @@
         ko.applyBindings(devTeamList);
         devTeamList.isSavingAutomatically = true;
 
-        devTeamList.includes = "Editor";
+        devTeamList.includes = "DevTeamListGen";
         devTeamList.load();
 
     </script>

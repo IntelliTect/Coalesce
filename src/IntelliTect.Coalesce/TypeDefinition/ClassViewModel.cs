@@ -566,9 +566,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var includeList = Properties
                                 .Where(p => p.HasDtoIncludes)
                                 .SelectMany(p => p.DtoIncludes)
+                                .Distinct()
+                                .Select(include => $"bool include{include} = includes == \"{include}\";")
                                 .ToList();
 
-            return string.Join($"{Environment.NewLine}\t\t\t", includeList.Select(include => $"bool include{include} = includes == \"{include}\";"));
+            return string.Join($"{Environment.NewLine}\t\t\t", includeList);
         }
 
         public string DtoExcludesAsCS()
@@ -576,8 +578,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var excludeList = Properties
                                 .Where(p => p.HasDtoExcludes)
                                 .SelectMany(p => p.DtoExcludes)
+                                .Distinct()
+                                .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
                                 .ToList();
-            return string.Join($"{Environment.NewLine}\t\t\t", excludeList.Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";"));
+            return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
         }
 
         public string PropertyRolesAsCS()

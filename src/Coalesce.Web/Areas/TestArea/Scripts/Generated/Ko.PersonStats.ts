@@ -10,7 +10,6 @@ module TestArea.ViewModels {
 		public personStatsId: KnockoutObservable<number> = ko.observable(null);
 		public height: KnockoutObservable<number> = ko.observable(null);
 		public weight: KnockoutObservable<number> = ko.observable(null);
-		public personLocation: KnockoutObservable<ViewModels.PersonLocation> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
         public loadFromDto: (data: any) => void;
         public parent: any;
@@ -27,8 +26,6 @@ module TestArea.ViewModels {
                 self.personStatsId(data.personStatsId);
                 self.height(data.height);
                 self.weight(data.weight);
-                self.personLocation(new PersonLocation());
-                self.personLocation().loadFromDto(data.personLocation);
                 
             };
 

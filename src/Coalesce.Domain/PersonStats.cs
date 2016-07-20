@@ -13,7 +13,7 @@ namespace Coalesce.Domain
         public double Height { get; set; }
         public double Weight { get; set; }
 
-        public PersonLocation PersonLocation { get; set; }
+        // public PersonLocation PersonLocation { get; set; }
     }
 
 

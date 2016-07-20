@@ -96,7 +96,7 @@ gulp.task('sass:watch', function () {
 gulp.task('ts', function () {
     // compile the intellitect code into an intellitect.js file
     var intellitectTypescriptProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'intellitect.js' });
-    var intellitectResult = gulp.src([paths.scripts + '/intellitect/intellitect*.ts', '!' + paths.scripts + '/*.d.ts'])
+    var intellitectResult = gulp.src([paths.scripts + '/Coalesce/intellitect*.ts', '!' + paths.scripts + '/*.d.ts'])
     .pipe(sourcemaps.init())
     .pipe(typescriptCompiler(intellitectTypescriptProject));
 

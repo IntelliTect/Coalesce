@@ -1,29 +1,29 @@
-
+using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping;
-using System.Linq;
-using Newtonsoft.Json;
-// Model Namespaces
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+
 using static Coalesce.Domain.CaseProduct;
 
 namespace Coalesce.Web.Models
 {
     public partial class CaseProductDtoGen : GeneratedDto<CaseProduct, CaseProductDtoGen>
         , IClassDto<CaseProduct, CaseProductDtoGen>
-        {
+    {
         public CaseProductDtoGen() { }
 
-             public Int32? CaseProductId { get; set; }
-             public Int32? CaseId { get; set; }
-             public CaseDtoGen Case { get; set; }
-             public Int32? ProductId { get; set; }
-             public ProductDtoGen Product { get; set; }
+        public Int32? CaseProductId { get; set; }
+        public Int32? CaseId { get; set; }
+        public CaseDtoGen Case { get; set; }
+        public Int32? ProductId { get; set; }
+        public ProductDtoGen Product { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static CaseProductDtoGen Create(CaseProduct obj, ClaimsPrincipal user = null, string includes = null,
@@ -91,5 +91,21 @@ namespace Coalesce.Web.Models
 			entity.ProductId = (Int32)(ProductId ?? 0);
         }
 
+        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
+        {
+            if (OnSecurityTrim(user, includes)) return;
+
+            // Applicable includes for CaseProduct
+            
+
+            // Applicable excludes for CaseProduct
+            
+
+            // Applicable roles for CaseProduct
+            if (user != null)
+			{
+			}
+
+        }
     }
 }

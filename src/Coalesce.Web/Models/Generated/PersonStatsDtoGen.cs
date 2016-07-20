@@ -1,28 +1,28 @@
-
+using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping;
-using System.Linq;
-using Newtonsoft.Json;
-// Model Namespaces
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+
 using static Coalesce.Domain.PersonStats;
 
 namespace Coalesce.Web.Models
 {
     public partial class PersonStatsDtoGen : GeneratedDto<PersonStats, PersonStatsDtoGen>
         , IClassDto<PersonStats, PersonStatsDtoGen>
-        {
+    {
         public PersonStatsDtoGen() { }
 
-             public Int32? PersonStatsId { get; set; }
-             public Double? Height { get; set; }
-             public Double? Weight { get; set; }
-             public PersonLocation PersonLocation { get; set; }
+        public Int32? PersonStatsId { get; set; }
+        public Double? Height { get; set; }
+        public Double? Weight { get; set; }
+        public PersonLocation PersonLocation { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static PersonStatsDtoGen Create(PersonStats obj, ClaimsPrincipal user = null, string includes = null,
@@ -89,5 +89,21 @@ namespace Coalesce.Web.Models
 			entity.Weight = (Double)(Weight ?? 0);
         }
 
+        public void SecurityTrim(ClaimsPrincipal user = null, string includes = null)
+        {
+            if (OnSecurityTrim(user, includes)) return;
+
+            // Applicable includes for PersonStats
+            
+
+            // Applicable excludes for PersonStats
+            
+
+            // Applicable roles for PersonStats
+            if (user != null)
+			{
+			}
+
+        }
     }
 }

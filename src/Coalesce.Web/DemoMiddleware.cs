@@ -37,11 +37,11 @@ namespace Coalesce.Web
                     && validRoles.Contains(cookie.Value)
                     && context.Request.Host.Value.ToLower().Contains("localhost"))
                 {
-                    if (cookie.Value != "None") await SignInUser(context, "DemoUser", cookie.Value);
+                    await SignInUser(context, "DemoUser", cookie.Value);
                 }
                 else
                 {
-                    await SignInUser(context, "DemoUser", "User");
+                    await SignInUser(context, "DemoUser", "Admin");
                 }
             }
             await _next(context);

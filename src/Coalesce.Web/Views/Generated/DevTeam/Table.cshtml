@@ -5,7 +5,7 @@
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Dev Team List
-            <span style="font-size: .5em; padding-left: 20px;"><a href="~/DevTeam/Docs">API Docs</a></span>
+            <span style="font-size: .5em; padding-left: 20px;@(User.IsInRole("Admin") ? "" : " visibility:hidden;")"><a href="~/DevTeam/Docs">API Docs</a></span>
     </h1>
     <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
 

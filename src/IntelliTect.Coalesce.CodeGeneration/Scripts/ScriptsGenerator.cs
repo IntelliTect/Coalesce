@@ -538,46 +538,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             Console.WriteLine("Generating Code");
             Console.WriteLine("-- Generating DTOs");
             Console.Write("   ");
+            string modelOutputPath = Path.Combine(
+                    _webProject.ProjectDirectory,
+                    areaLocation,
+                    "Models", "Generated");
+            Directory.Delete(modelOutputPath, true);
             foreach (var model in apiModels.ViewModelsForTemplates)
             {
                 Console.Write($"{model.Model.Name}  ");
 
-                var filename = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    "Models", "Generated",
-                    model.Model.Name + "DtoGen.cs");
-
-                await Generate( "ClassDto.cshtml", filename, model );
+                await Generate( "ClassDto.cshtml", Path.Combine(modelOutputPath, model.Model.Name + "DtoGen.cs"), model );
             }
             Console.WriteLine();
 
+
+            string scriptOutputPath = Path.Combine(
+                    _webProject.ProjectDirectory,
+                    areaLocation,
+                    ScriptsFolderName, "Generated");
+            Directory.Delete(scriptOutputPath, true);
 
             Console.WriteLine("-- Generating Models");
             Console.Write("   ");
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
                 Console.Write($"{model.Model.Name}  ");
-                var fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.Name}.ts" : $"Ko.{model.ModulePrefix}.{model.Model.Name}.ts";
-                // Todo: Need logic for areas
-                var viewOutputPath = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    ScriptsFolderName, "Generated",
-                    fileName);
 
-                await Generate("KoViewModel.cshtml", viewOutputPath, model);
+                var fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.Name}.ts" : $"Ko.{model.ModulePrefix}.{model.Model.Name}.ts";
+                await Generate("KoViewModel.cshtml", Path.Combine(scriptOutputPath, fileName), model);
 
                 //Console.WriteLine("   Added Script: " + viewOutputPath);
 
                 fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.ListViewModelClassName}.ts" : $"Ko.{model.ModulePrefix}.{model.Model.ListViewModelClassName}.ts";
-                viewOutputPath = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    ScriptsFolderName, "Generated",
-                    fileName);
-
-                await Generate("KoListViewModel.cshtml", viewOutputPath, model);
+                await Generate("KoListViewModel.cshtml", Path.Combine(scriptOutputPath, fileName), model);
 
                 //Console.WriteLine("   Added Script: " + viewOutputPath);
             }
@@ -589,14 +582,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             foreach (var externalType in apiModels.ViewModelsForTemplates.Where(f => !f.Model.OnContext))
             {
                 var fileName = (string.IsNullOrWhiteSpace(externalType.ModulePrefix)) ? $"Ko.{externalType.Model.Name}.ts" : $"Ko.{externalType.ModulePrefix}.{externalType.Model.Name}.ts";
-                // Todo: Need logic for areas
-                var viewOutputPath = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    ScriptsFolderName, "Generated",
-                    fileName);
-
-                await Generate("KoExternalType.cshtml", viewOutputPath, externalType);
+                await Generate("KoExternalType.cshtml", Path.Combine(scriptOutputPath, fileName), externalType);
 
                 Console.Write(externalType.Model.Name + "  ");
             }
@@ -613,90 +599,71 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             foreach (var complexType in complexTypes.ViewModelsForTemplates)
             {
                 var fileName = (string.IsNullOrWhiteSpace(complexType.ModulePrefix)) ? $"Ko.{complexType.Model.Name}.ts" : $"Ko.{complexType.ModulePrefix}.{complexType.Model.Name}.ts";
-                // Todo: Need logic for areas
-                var viewOutputPath = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    ScriptsFolderName, "Generated",
-                    fileName);
 
-                await Generate("KoComplexType.cshtml", viewOutputPath, complexType);
+                var path = Path.Combine( scriptOutputPath, fileName );
+                await Generate("KoComplexType.cshtml", path, complexType);
 
-                Console.WriteLine("   Added: " + viewOutputPath);
+                Console.WriteLine("   Added: " + path);
             }
 
 
             Console.WriteLine("-- Generating API Controllers");
-            // Generate base api controller if it doesn't already exist
-            {
-                var filename = Path.Combine(
+            string apiOutputPath = Path.Combine(
                     _webProject.ProjectDirectory,
                     areaLocation,
-                    "Api", "Generated",
-                    "LocalBaseApiController.cs");
-
+                    "Api", "Generated");
+            Directory.Delete(apiOutputPath, true);
+            // Generate base api controller if it doesn't already exist
+            {
                 var model = apiModels.ViewModelsForTemplates.First(f => f.Model.OnContext);
 
-                await Generate("LocalBaseApiController.cshtml", filename, model);
+                await Generate("LocalBaseApiController.cshtml", Path.Combine(apiOutputPath, "LocalBaseApiController.cs"), model);
             }
 
             // Generate model api controllers
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
-                var filename = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    "Api", "Generated",
-                    model.Model.Name + "ApiControllerGen.cs");
-                await Generate("ApiController.cshtml", filename, model);
+                await Generate("ApiController.cshtml", Path.Combine(apiOutputPath, model.Model.Name + "ApiControllerGen.cs"), model);
             }
 
 
             Console.WriteLine("-- Generating View Controllers");
 
-            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
-            {
-                var filename = Path.Combine(
+            string controllerOutputPath = Path.Combine(
                     _webProject.ProjectDirectory,
                     areaLocation,
-                    "Controllers", "Generated",
-                    model.Model.Name + "ControllerGen.cs");
-                await Generate("ViewController.cshtml", filename, model);
+                    "Controllers", "Generated");
+            Directory.Delete(controllerOutputPath, true);
+            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
+            {
+                await Generate("ViewController.cshtml", Path.Combine(controllerOutputPath, model.Model.Name + "ControllerGen.cs"), model);
             }
 
             Console.WriteLine("-- Generating Views");
+            string viewOutputPath = Path.Combine(
+                    _webProject.ProjectDirectory,
+                    areaLocation,
+                    "Views", "Generated");
+            Directory.Delete(viewOutputPath, true);
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
-                var filename = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    "Views", "Generated",
-                    model.Model.Name,
-                    "Table.cshtml");
+                var modelViewsPath = Path.Combine( viewOutputPath, model.Model.Name);
+
+                var filename = Path.Combine(modelViewsPath, "Table.cshtml");
                 await Generate("TableView.cshtml", filename, model);
 
-                filename = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    "Views", "Generated",
-                    model.Model.Name,
-                    "Cards.cshtml");
+                filename = Path.Combine(modelViewsPath, "Cards.cshtml");
                 await Generate("CardView.cshtml", filename, model);
 
-                filename = Path.Combine(
-                    _webProject.ProjectDirectory,
-                    areaLocation,
-                    "Views", "Generated",
-                    model.Model.Name,
-                    "CreateEdit.cshtml");
+                filename = Path.Combine(modelViewsPath, "CreateEdit.cshtml");
                 await Generate("CreateEditView.cshtml", filename, model);
             }
 
 
             //await layoutDependencyInstaller.InstallDependencies();
 
-            var scriptOutputPath = Path.Combine(_webProject.ProjectDirectory, ScriptsFolderName);
-            GenerateTSReferenceFile(scriptOutputPath);
+            var tsReferenceOutputPath = Path.Combine(_webProject.ProjectDirectory, ScriptsFolderName);
+            GenerateTSReferenceFile(tsReferenceOutputPath);
 
             //await GenerateTypeScriptDocs(scriptOutputPath);
 

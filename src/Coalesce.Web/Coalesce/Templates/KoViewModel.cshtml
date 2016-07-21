@@ -746,7 +746,14 @@ module @moduleName {
             {
             @:self.@prop.ListEditorUrlName = ko.computed(function()
             @:{
-                @:return areaUrl + '@(prop.ListEditorUrl)' + self.@(model.PrimaryKey.JsVariable)();
+                if ( prop.ListEditorUrl == null )
+                {
+                    @: throw "Inverse property not set on @(model.Name) for property @(prop.Name)" 
+                }
+                else
+                {
+                    @: return areaUrl + '@(prop.ListEditorUrl)' + self.@(model.PrimaryKey.JsVariable)();
+                }
             @:});
             }
             // Create loading function for Valid Values

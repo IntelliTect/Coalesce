@@ -709,11 +709,11 @@ module ViewModels {
             // Create variables for ListEditorApiUrls
             self.CasesAssignedListUrl = ko.computed(function()
             {
-                return areaUrl + 'Case/table?assignedToId=' + self.personId();
+                     return areaUrl + 'Case/table?assignedToId=' + self.personId();
             });
             self.CasesReportedListUrl = ko.computed(function()
             {
-                return areaUrl + 'Case/table?reportedById=' + self.personId();
+                     return areaUrl + 'Case/table?reportedById=' + self.personId();
             });
             // Create loading function for Valid Values
 

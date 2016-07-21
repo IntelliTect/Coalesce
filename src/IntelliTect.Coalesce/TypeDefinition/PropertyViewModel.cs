@@ -808,7 +808,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (InverseIdProperty == null) { return "Nothing"; }
+                if (InverseIdProperty == null) { return null; }
                 return string.Format("{0}/table?{1}=", Object.ApiUrl.Replace("api/", ""), InverseIdProperty.JsonName);
             }
         }

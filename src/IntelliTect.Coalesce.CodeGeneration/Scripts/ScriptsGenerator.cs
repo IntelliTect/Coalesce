@@ -13,6 +13,7 @@ using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Validation;
 using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel;
 
@@ -151,25 +152,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         private bool _hasExplainedCopying = false;
         private void CopyToOriginalsAndDestinationIfNeeded(string fileName, string sourcePath, string originalsPath, string destinationPath, bool alertIfNoCopy = true)
         {
-            string sourceFile = ThisAssemblyName + "." + Path.Combine(sourcePath, fileName).Replace('/', '.').Replace('\\', '.');
-
-            Directory.CreateDirectory(originalsPath);
-            Directory.CreateDirectory(destinationPath);
-
             string originalsFile = Path.Combine( originalsPath, fileName );
             string destinationFile = Path.Combine(destinationPath, fileName );
 
-            var inputStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(sourceFile);
-            // Console.WriteLine($"Copying {sourceFile}");
-
-            FileStream fileStream;
             if ( FileCompare( originalsFile, destinationFile ) )
             {
                 // The original file and the active file are the same. Overwrite the active file with the new template.
-                fileStream = File.Create( destinationFile );
-                inputStream.Seek( 0, SeekOrigin.Begin );
-                inputStream.CopyTo( fileStream );
-                fileStream.Close();
+                CopyToDestination(fileName, sourcePath, destinationPath);
             }
             else if (alertIfNoCopy)
             {
@@ -183,10 +172,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 Console.WriteLine($"Skipping copy to {destinationFile.Replace(_webProject.RootDirectory, "")} because it has been modified from the original.");
             }
 
-            fileStream = File.Create(originalsFile);
-            inputStream.Seek(0, SeekOrigin.Begin);
-            inputStream.CopyTo(fileStream);
-            fileStream.Close();
+            string originalFile = Path.Combine( originalsPath, fileName );
+
+            // unset read-only
+            var attr = File.GetAttributes(originalFile);
+            attr = attr & ~FileAttributes.ReadOnly;
+            File.SetAttributes(originalFile, attr);
+
+            CopyToDestination( fileName, sourcePath, originalsPath );
+
+            // set read-only
+            attr = attr | FileAttributes.ReadOnly;
+            File.SetAttributes(originalFile, attr);
         }
 
         private void CopyToDestination(string fileName, string sourcePath, string destinationPath)
@@ -198,11 +195,37 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             string destinationFile = Path.Combine(destinationPath, fileName );
             var inputStream = assembly.GetManifestResourceStream(sourceFile);
+            if ( inputStream == null )
+            {
+                throw new FileNotFoundException("Embedded resource not found", sourceFile);
+            }
 
-            var fileStream = File.Create(destinationFile);
-            inputStream.Seek(0, SeekOrigin.Begin);
-            inputStream.CopyTo(fileStream);
-            fileStream.Close();
+            const int tries = 3;
+            for ( int i = 1; i <= tries; i++ )
+            {
+                FileStream fileStream = null;
+                try
+                {
+                    fileStream = File.Create( destinationFile );
+                    inputStream.Seek( 0, SeekOrigin.Begin );
+                    inputStream.CopyTo( fileStream );
+                    if (i > 1) Console.WriteLine($"Attempt {i} succeeded.");
+                    break;
+                }
+                catch ( IOException ex )
+                {
+                    Console.WriteLine( $"Attempt {i} of {tries} failed: {ex.Message}" );
+                    if ( i == tries )
+                        throw;
+
+                    // Errors here are almost always because a file is in use. Just wait a second and it probably won't be in use anymore.
+                    Thread.Sleep( 1000 );
+                }
+                finally
+                {
+                    fileStream?.Dispose();
+                }
+            }
         }
 
         private async Task CopyStaticFiles(CommandLineGeneratorModel commandLineGeneratorModel)
@@ -446,11 +469,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
         private bool FileCompare(string file1, string file2)
         {
-            int file1byte;
-            int file2byte;
-            FileStream fs1;
-            FileStream fs2;
-
             // Determine if the same file was referenced two times.
             if (file1 == file2)
             {
@@ -469,40 +487,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
 
             // Open the two files.
-            fs1 = new FileStream(file1, FileMode.Open);
-            fs2 = new FileStream(file2, FileMode.Open);
+            string f1 = File.ReadAllText( file1 ).Replace("\r", "").Replace("\n", "");
+            string f2 = File.ReadAllText( file2 ).Replace("\r", "").Replace("\n", "");
 
             // Check the file sizes. If they are not the same, the files 
             // are not the same.
-            if (fs1.Length != fs2.Length)
+            if (f1.Length != f2.Length)
             {
-                // Close the file
-                fs1.Close();
-                fs2.Close();
-
                 // Return false to indicate files are different
                 return false;
             }
 
-            // Read and compare a byte from each file until either a
-            // non-matching set of bytes is found or until the end of
-            // file1 is reached.
-            do
+            if ( !string.Equals( f1, f2, StringComparison.InvariantCulture ) )
             {
-                // Read one byte from each file.
-                file1byte = fs1.ReadByte();
-                file2byte = fs2.ReadByte();
+                return false;
             }
-            while ((file1byte == file2byte) && (file1byte != -1));
 
-            // Close the files.
-            fs1.Close();
-            fs2.Close();
-
-            // Return the success of the comparison. "file1byte" is 
-            // equal to "file2byte" at this point only if the files are 
-            // the same.
-            return ((file1byte - file2byte) == 0);
+            return true;
         }
 
         private Task Generate(string templateName, string outputPath, object model)

@@ -506,7 +506,7 @@ module ViewModels {
             // Create variables for ListEditorApiUrls
             self.EmployeesListUrl = ko.computed(function()
             {
-                return areaUrl + 'Nothing' + self.companyId();
+                     return areaUrl + 'Person/table?companyId=' + self.companyId();
             });
             // Create loading function for Valid Values
 

@@ -148,7 +148,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 "Coalesce",
                 "Templates")};
 
-        private void CopyToOriginalsAndDestinationIfNeeded(string fileName, string sourcePath, string originalsPath, string destinationPath)
+        private bool _hasExplainedCopying = false;
+        private void CopyToOriginalsAndDestinationIfNeeded(string fileName, string sourcePath, string originalsPath, string destinationPath, bool alertIfNoCopy = true)
         {
             string sourceFile = ThisAssemblyName + "." + Path.Combine(sourcePath, fileName).Replace('/', '.').Replace('\\', '.');
 
@@ -162,13 +163,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             // Console.WriteLine($"Copying {sourceFile}");
 
             FileStream fileStream;
-            if (FileCompare(originalsFile, destinationFile))
+            if ( FileCompare( originalsFile, destinationFile ) )
             {
                 // The original file and the active file are the same. Overwrite the active file with the new template.
-                fileStream = File.Create(destinationFile);
-                inputStream.Seek(0, SeekOrigin.Begin);
-                inputStream.CopyTo(fileStream);
+                fileStream = File.Create( destinationFile );
+                inputStream.Seek( 0, SeekOrigin.Begin );
+                inputStream.CopyTo( fileStream );
                 fileStream.Close();
+            }
+            else if (alertIfNoCopy)
+            {
+                if (!_hasExplainedCopying)
+                {
+                    _hasExplainedCopying = true;
+                    Console.WriteLine("If you would like for your templates to be updated by the Cli, restore the copies of ");
+                    Console.WriteLine("your templates in Coalesce/Templates with those from Coalesce/Originals/Templates.");
+                    Console.WriteLine("If you experience issues with your templates, compare your template with the original to see what might need changing.");
+                }
+                Console.WriteLine($"Skipping copy to {destinationFile.Replace(_webProject.RootDirectory, "")} because it has been modified from the original.");
             }
 
             fileStream = File.Create(originalsFile);
@@ -269,6 +281,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
             {
                 CopyToOriginalsAndDestinationIfNeeded(
+                        alertIfNoCopy: false,
                         fileName: "_Layout.cshtml",
                         sourcePath: "Templates/Views/Shared",
                         originalsPath: originalsPath,
@@ -337,6 +350,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 areaLocation,
                 "Styles");
             CopyToOriginalsAndDestinationIfNeeded(
+                    alertIfNoCopy: false,
                     fileName: "site.scss",
                     sourcePath: "Templates/Styles",
                     originalsPath: originalsPath,
@@ -358,6 +372,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 foreach (var fileName in configFiles)
                 {
                     CopyToOriginalsAndDestinationIfNeeded(
+                            alertIfNoCopy: false,
                             fileName: fileName,
                             sourcePath: "Templates/ProjectConfig",
                             originalsPath: originalsPath,

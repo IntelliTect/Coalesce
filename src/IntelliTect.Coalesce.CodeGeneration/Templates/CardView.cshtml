@@ -74,11 +74,15 @@
             .OrderBy(f => f.EditorOrder)
             .ToList();
 
-        // I did this because "title" on a Person shouldn't be the title of the card - their name should.
-        var titleProp = properties.Where(f => f.Name == "Name").FirstOrDefault();
+        var titleProp = properties.Where(f => f.IsListText).FirstOrDefault();
         if (titleProp == null)
         {
-            titleProp = properties.Where(f => f.Name == "Title").FirstOrDefault();
+            // I did this because "title" on a Person shouldn't be the title of the card - their name should.
+            titleProp = properties.Where(f => f.Name == "Name").FirstOrDefault();
+            if (titleProp == null)
+            {
+                titleProp = properties.Where(f => f.Name == "Title").FirstOrDefault();
+            }
         }
     }
     <div class="flex-card ">
@@ -86,7 +90,7 @@
         {
             <div class="card-heading">
                 <h3 class="card-title">
-                    <span data-bind="text: @titleProp.JsVariable"></span>
+                    <span data-bind="text: @titleProp.JsVariableForBinding"></span>
                 </h3>
             </div>
         }

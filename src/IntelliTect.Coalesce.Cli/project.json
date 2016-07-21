@@ -15,6 +15,7 @@
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.Extensions.DependencyInjection": "1.0.0",
     "Microsoft.Extensions.DependencyModel": "1.0.0",
+    "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final"
   },
 

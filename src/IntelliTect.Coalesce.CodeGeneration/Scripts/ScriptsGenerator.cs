@@ -174,14 +174,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             string originalFile = Path.Combine( originalsPath, fileName );
 
-            // unset read-only
-            var attr = File.GetAttributes(originalFile);
-            attr = attr & ~FileAttributes.ReadOnly;
-            File.SetAttributes(originalFile, attr);
+
+            FileAttributes attr;
+            if ( File.Exists( originalFile ) )
+            {
+                // unset read-only
+                attr = File.GetAttributes(originalFile);
+                attr = attr & ~FileAttributes.ReadOnly;
+                File.SetAttributes(originalFile, attr);
+            }
 
             CopyToDestination( fileName, sourcePath, originalsPath );
 
             // set read-only
+            attr = File.GetAttributes(originalFile);
             attr = attr | FileAttributes.ReadOnly;
             File.SetAttributes(originalFile, attr);
         }
@@ -558,7 +564,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Models", "Generated");
-            Directory.Delete(modelOutputPath, true);
+            if (Directory.Exists(modelOutputPath)) Directory.Delete(modelOutputPath, true);
             foreach (var model in apiModels.ViewModelsForTemplates)
             {
                 Console.Write($"{model.Model.Name}  ");
@@ -572,7 +578,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Generated");
-            Directory.Delete(scriptOutputPath, true);
+            if (Directory.Exists(scriptOutputPath)) Directory.Delete(scriptOutputPath, true);
 
             Console.WriteLine("-- Generating Models");
             Console.Write("   ");
@@ -628,7 +634,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Api", "Generated");
-            Directory.Delete(apiOutputPath, true);
+            if (Directory.Exists(apiOutputPath)) Directory.Delete(apiOutputPath, true);
             // Generate base api controller if it doesn't already exist
             {
                 var model = apiModels.ViewModelsForTemplates.First(f => f.Model.OnContext);
@@ -649,7 +655,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Controllers", "Generated");
-            Directory.Delete(controllerOutputPath, true);
+            if (Directory.Exists(controllerOutputPath)) Directory.Delete(controllerOutputPath, true);
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
                 await Generate("ViewController.cshtml", Path.Combine(controllerOutputPath, model.Model.Name + "ControllerGen.cs"), model);
@@ -660,7 +666,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Views", "Generated");
-            Directory.Delete(viewOutputPath, true);
+            if (Directory.Exists(viewOutputPath)) Directory.Delete(viewOutputPath, true);
             foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
             {
                 var modelViewsPath = Path.Combine( viewOutputPath, model.Model.Name);

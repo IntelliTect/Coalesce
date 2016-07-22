@@ -250,6 +250,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 areaLocation,
                 "Coalesce");
 
+            var coalescePathExisted = Directory.Exists( baseCoalescePath );
+
             var originalsPath = Path.Combine( baseCoalescePath, "Originals");
             var originalTemplatesPath = Path.Combine( originalsPath, "Templates" );
             var activeTemplatesPath = Path.Combine( baseCoalescePath, "Templates" );
@@ -322,12 +324,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 // Copy files for the scripts folder
                 var scriptsOutputPath = Path.Combine(
                     _webProject.ProjectDirectory,
-                    areaLocation,
                     "Scripts", "Coalesce");
 
                 var oldScriptsOutputPath = Path.Combine(
                   _webProject.ProjectDirectory,
-                  areaLocation,
                     "Scripts", "Intellitect");
                 if (Directory.Exists(oldScriptsOutputPath)) Directory.Delete(oldScriptsOutputPath, true); // TODO: remove this at some point after all projects are upgraded.
 
@@ -347,6 +347,35 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                             destinationPath: scriptsOutputPath);
                 }
 
+                if ( !coalescePathExisted )
+                {
+                    // Only copy the typings on a brand new project. Never attempt to update them, since the end user
+                    // may want to update their libraries, get rid of some (well, you probably can't), or update versions.
+                    CopyToDestination(
+                        fileName : "tsd.d.ts",
+                        sourcePath : "typings",
+                        destinationPath : Path.Combine( _webProject.ProjectDirectory, "typings"));
+
+                    string[] typings =
+                    {
+                        "bootstrap",
+                        "bootstrap.v3.datetimepicker",
+                        "jquery",
+                        "knockout",
+                        "knockout.validation",
+                        "moment",
+                    };
+                    foreach (var fileName in typings)
+                    {
+                        CopyToDestination(
+                                fileName: fileName + ".d.ts",
+                                sourcePath: "typings." + fileName,
+                                destinationPath: Path.Combine(
+                                    _webProject.ProjectDirectory,
+                                    "typings",
+                                    fileName));
+                    }
+                }
 
 
                 string[] generationTemplates =

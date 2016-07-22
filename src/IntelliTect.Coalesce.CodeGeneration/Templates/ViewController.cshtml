@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.PlatformAbstractions;
 // Model Namespaces
+using @contextInfo.Namespace;
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
 @:using @ns;

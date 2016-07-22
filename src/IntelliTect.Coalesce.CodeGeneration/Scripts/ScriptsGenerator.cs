@@ -203,7 +203,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             var inputStream = assembly.GetManifestResourceStream(sourceFile);
             if ( inputStream == null )
             {
-                throw new FileNotFoundException("Embedded resource not found", sourceFile);
+                throw new FileNotFoundException("Embedded resource not found: " + sourceFile);
             }
 
             const int tries = 3;
@@ -243,6 +243,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             {
                 areaLocation = Path.Combine("Areas", commandLineGeneratorModel.AreaLocation);
             }
+
+            // Our gulp tasks don't like it if the areas folder doesn't exist, so just create it by default.
+            Directory.CreateDirectory(Path.Combine(_webProject.ProjectDirectory, "Areas"));
 
             // Directory location for all "original" files from intellitect
             var baseCoalescePath = Path.Combine(
@@ -353,7 +356,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     // may want to update their libraries, get rid of some (well, you probably can't), or update versions.
                     CopyToDestination(
                         fileName : "tsd.d.ts",
-                        sourcePath : "typings",
+                        sourcePath : "Templates/typings",
                         destinationPath : Path.Combine( _webProject.ProjectDirectory, "typings"));
 
                     string[] typings =
@@ -369,12 +372,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     {
                         CopyToDestination(
                                 fileName: fileName + ".d.ts",
-                                sourcePath: "typings." + fileName,
+                                sourcePath: "Templates/typings/" + fileName,
                                 destinationPath: Path.Combine(
                                     _webProject.ProjectDirectory,
                                     "typings",
                                     fileName));
                     }
+
+                    // This one is a special snowflake
+                    CopyToDestination(
+                       fileName: "moment-node.d.ts",
+                       sourcePath: "Templates/typings/moment",
+                       destinationPath: Path.Combine(_webProject.ProjectDirectory, "typings/moment"));
                 }
 
 

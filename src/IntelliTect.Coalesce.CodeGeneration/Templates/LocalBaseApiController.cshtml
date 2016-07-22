@@ -12,6 +12,7 @@
 }
 using IntelliTect.Coalesce.Controllers;
 // Model Namespaces
+using @contextInfo.Namespace;
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
     @:using @ns;

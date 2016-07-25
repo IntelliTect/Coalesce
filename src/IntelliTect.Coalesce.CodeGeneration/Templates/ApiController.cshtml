@@ -55,7 +55,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("list")]
         @(model.SecurityInfo.ReadAnnotation)
-        public virtual async Task<ListResult> List(
+        public virtual async Task<GenericListResult<@(model.Name), @(model.Name)DtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 

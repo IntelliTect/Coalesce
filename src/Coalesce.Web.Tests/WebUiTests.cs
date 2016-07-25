@@ -24,16 +24,28 @@ namespace Coalesce.Web.Tests
         public void BasicUiChrome()
         {
             IWebDriver driver = new ChromeDriver();
-
-            RunUiTest(driver);
+            try
+            {
+                RunUiTest(driver);
+            }
+            finally
+            {
+                driver.Dispose();
+            }
         }
 
         [Fact]
         public void BasicUiHeadless()
         {
             IWebDriver driver = new PhantomJSDriver();
-
-            RunUiTest(driver);
+            try
+            {
+                RunUiTest(driver);
+            }
+            finally
+            {
+                driver.Dispose();
+            }
         }
 
         private void RunUiTest(IWebDriver driver)
@@ -42,7 +54,7 @@ namespace Coalesce.Web.Tests
             //driver.Navigate().GoToUrl("http://coalesceweb.azurewebsites.net");
             driver.Navigate().GoToUrl($"http://localhost:{Port}");
 
-            IWebElement generatedLink = driver.FindElement(By.PartialLinkText("Generated Views"));
+            IWebElement generatedLink = driver.FindElement(By.PartialLinkText("Check out the Demo"));
             generatedLink.Click();
 
             IWebElement personLink = driver.FindElement(By.PartialLinkText("Person"));

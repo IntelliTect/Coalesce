@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.Models;
 using Xunit;
 
 namespace Coalesce.Web.Tests
@@ -32,10 +33,10 @@ namespace Coalesce.Web.Tests
             Assert.Equal(25, result.List.Count());
             Assert.Equal(100, result.TotalCount);
             Assert.Equal(4, result.PageCount);
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal(person.FirstName, "Joseph");
 
-            var first = await _pc.Get(result.List.Cast<Person>().First().PersonId.ToString());
+            var first = await _pc.Get(result.List.First().PersonId.ToString());
             Assert.Equal(1, first.CompanyId);
 
         }
@@ -53,7 +54,7 @@ namespace Coalesce.Web.Tests
         public async void ListOrderByFirst()
         {
             var result = await _pc.List(orderBy: "FirstName");
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal("Aaron", person.FirstName);
             Assert.Equal(25, result.List.Count());
         }
@@ -62,7 +63,7 @@ namespace Coalesce.Web.Tests
         public async void ListOrderByLast()
         {
             var result = await _pc.List(orderBy: "LastName");
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal("Arianna", person.FirstName);
             Assert.Equal(25, result.List.Count());
         }
@@ -70,7 +71,7 @@ namespace Coalesce.Web.Tests
         public async void ListOrderByLastAndFirst()
         {
             var result = await _pc.List(orderBy: "LastName, FirstName Desc, PersonId Asc");
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal("Leslie", person.FirstName);
             Assert.Equal(25, result.List.Count());
         }
@@ -80,7 +81,7 @@ namespace Coalesce.Web.Tests
         public async void ListIncludesDefault()
         {
             var result = await _pc.CustomList(personId: "1");
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.Cast<PersonDtoGen>().First();
             Assert.NotNull(person.Company);
             // GenFu's company names change.
             Assert.Equal("La Pocatière", person.Company.City);
@@ -94,7 +95,7 @@ namespace Coalesce.Web.Tests
             {
                 _pc.Db = db;
                 var result = await _pc.List(includes: "none");
-                var person = result.List.Cast<Person>().First();
+                var person = result.List.First();
                 Assert.Null(person.Company);
                 Assert.Equal(25, result.List.Count());
                 _pc.Db = DbFixture.Db;
@@ -113,7 +114,7 @@ namespace Coalesce.Web.Tests
         {
             var result = await _pc.List(personId: "1");
             Assert.Equal(1, result.List.Count());
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal("Joseph", person.FirstName);
         }
 
@@ -169,7 +170,7 @@ namespace Coalesce.Web.Tests
         {
             var result = await _pc.List(where: "personId = 1 || personid = 2");
             Assert.Equal(2, result.List.Count());
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal("Joseph", person.FirstName);
         }
 
@@ -179,7 +180,7 @@ namespace Coalesce.Web.Tests
         {
             var result = await _pc.List(search:"a", orderBy: "lastname");
             Assert.Equal(16, result.List.Count());
-            var person = result.List.Cast<Person>().First();
+            var person = result.List.First();
             Assert.Equal("Arianna", person.FirstName);
         }
 
@@ -241,9 +242,24 @@ namespace Coalesce.Web.Tests
             Assert.Equal(14, result.Object.Count());
         }
 
+
+
         [Fact]
         public async void ListOfBorC()
         {
+            //var thing = new ListResult
+            //{
+            //    List = new List<PersonDtoGen> { new PersonDtoGen { FirstName = "bob"} },
+            //    Message = "test",
+            //    Page = 1,
+            //    PageCount = 1,
+            //    PageSize = 1,
+            //    TotalCount = 1,
+            //    WasSuccessful = false,
+            //};
+
+            //var generic = new GenericListResult<Person, PersonDtoGen>(thing);
+
             var result = await _pc.List(personId: "1", listDataSource: "BorCPeople");
             Assert.Equal(0, result.List.Count());
         }

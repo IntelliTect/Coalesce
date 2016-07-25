@@ -27,7 +27,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual async Task<ListResult> List(
+        public virtual async Task<GenericListResult<Person, PersonDtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 

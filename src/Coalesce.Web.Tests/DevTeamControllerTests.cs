@@ -31,7 +31,7 @@ namespace Coalesce.Web.Tests
             Assert.Equal(4, result.List.Count());
             Assert.Equal(4, result.TotalCount);
             Assert.Equal(1, result.PageCount);
-            var person = result.List.Cast<DevTeam>().First();
+            var person = result.List.First();
             Assert.Equal("Office", person.Name);
         }
         [Fact]
@@ -48,7 +48,7 @@ namespace Coalesce.Web.Tests
         public async void ListOrderByName()
         {
             var result = await _pc.List(orderBy: "Name");
-            var person = result.List.Cast<DevTeam>().First();
+            var person = result.List.First();
             Assert.Equal("Office", person.Name);
             Assert.Equal(4, result.List.Count());
         }

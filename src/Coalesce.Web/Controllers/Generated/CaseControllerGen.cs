@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.PlatformAbstractions;
 // Model Namespaces
 using Coalesce.Domain;
+using Coalesce.Domain;
 using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Controllers

@@ -77,7 +77,7 @@
         var titleProp = properties.Where(f => f.IsListText).FirstOrDefault();
         if (titleProp == null)
         {
-            // I did this because "title" on a Person shouldn't be the title of the card - their name should.
+            // Prioritize "name" over "title" - probably more correct most of the time.
             titleProp = properties.Where(f => f.Name == "Name").FirstOrDefault();
             if (titleProp == null)
             {

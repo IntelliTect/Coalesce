@@ -744,16 +744,18 @@ module @moduleName {
             // Create variables for ListEditorApiUrls
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse))
             {
-            @:self.@prop.ListEditorUrlName = ko.computed(function()
-            @:{
-                if ( prop.ListEditorUrl == null )
-                {
-                    @: throw "Inverse property not set on @(model.Name) for property @(prop.Name)" 
-                }
-                else
-                {
-                    @: return areaUrl + '@(prop.ListEditorUrl)' + self.@(model.PrimaryKey.JsVariable)();
-                }
+            @:self.@prop.ListEditorUrlName = ko.computed({
+                @:read: function() {
+                    if (prop.ListEditorUrl == null)
+                    {
+                        @:return "Inverse property not set on @(model.Name) for property @(prop.Name)";
+                    }
+                    else
+                    {
+                        @: return areaUrl + '@(prop.ListEditorUrl)' + self.@(model.PrimaryKey.JsVariable)();
+                    }
+                @:},
+                @:deferEvaluation: true
             @:});
             }
             // Create loading function for Valid Values

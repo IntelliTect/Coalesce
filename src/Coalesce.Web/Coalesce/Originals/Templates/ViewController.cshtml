@@ -12,15 +12,19 @@
         namespaceName += "." + Model.AreaName;
         viewLocation = "~/Areas/" + Model.AreaName + "/Views";
     }
-}
 
-using IntelliTect.Coalesce.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.PlatformAbstractions;
-// Model Namespaces
-using @contextInfo.Namespace;
+    var namespaces = new List<string>();
+    namespaces.Add("IntelliTect.Coalesce.Controllers");
+    namespaces.Add("Microsoft.AspNetCore.Authorization");
+    namespaces.Add("Microsoft.AspNetCore.Mvc");
+    namespaces.Add("Microsoft.Extensions.PlatformAbstractions");
+    namespaces.Add(contextInfo.Namespace);
+}
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+{
+    if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
+}
+@foreach (var ns in namespaces)
 {
 @:using @ns;
 }

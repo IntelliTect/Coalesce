@@ -1,10 +1,7 @@
-
 using IntelliTect.Coalesce.Controllers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.PlatformAbstractions;
-// Model Namespaces
-using Coalesce.Domain;
 using Coalesce.Domain;
 using Coalesce.Domain.External;
 

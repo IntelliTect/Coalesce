@@ -139,17 +139,19 @@ ko.bindingHandlers.select2Ajax = {
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // See if the value exists. If not, we haven't loaded it from the server yet.
+        var clearOnNull = allBindings.get("clearOnNull") || false;
         var value = valueAccessor()();
         var select2Value = $(element).val();
         var setValue = true;
         var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
 
-
         // See if something has changed
         if (value != select2Value && (value || select2Value || setObject)) {
             var options = $(element).find('option[value="' + value + '"]');
             // The option doesn't exist.
-            if (options.length == 0) {
+            if (options.length == 0 && value === null && clearOnNull) {
+                $(element).val("").trigger("change");
+            } else if (options.length == 0) {
                 // Unless we make it all the way through this section, don't set the value.
                 setValue = false;
                 // Add it based on the object.
@@ -491,11 +493,11 @@ ko.bindingHandlers.datePicker = {
                 } else if (preserveTime) {
                     // This is a date entry, keep the time. 
                     var unwrappedTime = moment.duration(unwrappedValue.format('HH:mm:ss'));
-                    newValue = moment(e.date.format("YYYY/MM/DD")).add(unwrappedTime);
+                    newValue = moment(e.date.format("YYYY/MM/DD"), "YYYY/MM/DD").add(unwrappedTime);
                 } else if (preserveDate) {
                     // This is a time entry, keep the date.
                     var newTime = moment.duration(e.date.format('HH:mm:ss'));
-                    newValue = moment(unwrappedValue.format('YYYY/MM/DD')).add(newTime);
+                    newValue = moment(unwrappedValue.format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
                 }
                 // Set the value if it has changed.
                 if (!valueAccessor()() || !newValue || newValue.format() != valueAccessor()().format()) {

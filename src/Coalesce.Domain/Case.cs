@@ -29,7 +29,7 @@ namespace Coalesce.Domain
         [Key]
         public int CaseKey { get; set; }
         [ClientValidation(IsRequired = true, ErrorMessage = "You must enter a title for the case.")]
-        [Search]
+        [Search(IsSplitOnSpaces = true, SearchMethod = SearchAttribute.SearchMethods.Contains)]
         public string Title { get; set; }
         [Search]
         public string Description { get; set; }
@@ -69,12 +69,12 @@ namespace Coalesce.Domain
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
         }
 
-        public static void RandomizeDatesAndStatus( AppDbContext db )
+        public static void RandomizeDatesAndStatus(AppDbContext db)
         {
             Random random = new Random();
-            foreach ( var c in db.Cases )
+            foreach (var c in db.Cases)
             {
-                c.OpenedAt = DateTimeOffset.Now.AddSeconds( -random.Next( 10, 50000000 ) );
+                c.OpenedAt = DateTimeOffset.Now.AddSeconds(-random.Next(10, 50000000));
                 c.Status = (Statuses)random.Next(0, (int)Statuses.Cancelled + 1);
             }
 

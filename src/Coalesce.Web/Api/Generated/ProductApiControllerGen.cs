@@ -37,7 +37,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string productId = null,string name = null)
         {
-            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("ProductId", productId);
@@ -45,6 +45,33 @@ namespace Coalesce.Web.Api
         
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<Product, ProductDtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns List<dto>
+        /// </summary>
+        [HttpGet("dtolist")]
+        [Authorize]
+        public virtual async Task<ListResult> List(
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            string dto = null,
+            // Custom fields for this object.
+            string productId = null,string name = null)
+        {
+            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Customer).Assembly.GetType(dto);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
+
+            // Add custom filters
+            parameters.AddFilter("ProductId", productId);
+            parameters.AddFilter("Name", name);
+        
+            return await ListImplementation(parameters);
         }
 
 

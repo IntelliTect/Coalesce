@@ -104,6 +104,40 @@
 </code></pre>
 <br />
 
+<h4>Controlling Object Mapping</h4>
+<p>By default Coalesce maps all database entities to a generated DTO before returning to the client.  The DTO is generated based on the
+    attributes on your model, and provides security trimming on properties based on the user's roles.  If you want to handle the mapping
+    yourself simply add an implicit conversion operator to your model that returns your DTO.  Then on the client side specify the full
+    type name of the DTO and coalesce will use your DTO and conversion rather than the generated DTO.</p>
+
+<pre><code class="language-html">
+    public class PersonDropDownDto
+    {
+        public int PersonId { get; set; }
+        public string FullName { get; set; }
+    }
+
+    public class Person
+    {
+        ...
+
+        public static implicit operator PersonDropDownDto(Person person)
+        {
+            var dto = new PersonDropDownDto();
+            dto.PersonId = person.PersonId;
+            dto.FullName = person.FullName;
+            return dto;
+        }
+    }
+
+    &lt;script type="text/javascript"&gt;
+    var personList = new ListViewModels.PersonList();
+    personList.dto("Coalesce.Domain.Dtos.PersonDropDownDto");
+    personList.load();
+    &lt;/script&gt;
+</code></pre>
+<br />
+
 <h4>Validation</h4>
 <p><a href="/Docs/Annotations#ClientValidation">Validation</a> is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. </p>
 <p>The following validations are currently supported on the client side.</p>

@@ -71,7 +71,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Customer).Assembly.GetType(dto);
+            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Case).Assembly.GetType(dto);
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
 
             // Add custom filters
@@ -105,7 +105,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);

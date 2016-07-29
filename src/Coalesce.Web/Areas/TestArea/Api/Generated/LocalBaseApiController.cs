@@ -1,5 +1,6 @@
 using IntelliTect.Coalesce.Controllers;
 // Model Namespaces
+using Coalesce.Domain;
     using Coalesce.Domain;
     using Coalesce.Domain.External;
 using IntelliTect.Coalesce.Interfaces;

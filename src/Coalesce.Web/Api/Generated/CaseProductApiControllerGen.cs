@@ -65,7 +65,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Customer).Assembly.GetType(dto);
+            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(CaseProduct).Assembly.GetType(dto);
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
 
             // Add custom filters
@@ -93,7 +93,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
 
             // Add custom filters
             parameters.AddFilter("CaseProductId", caseProductId);

@@ -71,7 +71,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
         {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Customer).Assembly.GetType(dto);
+            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Person).Assembly.GetType(dto);
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
 
             // Add custom filters
@@ -105,7 +105,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);

@@ -707,13 +707,17 @@ module TestArea.ViewModels {
                         }
 
             // Create variables for ListEditorApiUrls
-            self.CasesAssignedListUrl = ko.computed(function()
-            {
-                return areaUrl + 'Case/table?assignedToId=' + self.personId();
+            self.CasesAssignedListUrl = ko.computed({
+                read: function() {
+                         return areaUrl + 'Case/table?assignedToId=' + self.personId();
+                },
+                deferEvaluation: true
             });
-            self.CasesReportedListUrl = ko.computed(function()
-            {
-                return areaUrl + 'Case/table?reportedById=' + self.personId();
+            self.CasesReportedListUrl = ko.computed({
+                read: function() {
+                         return areaUrl + 'Case/table?reportedById=' + self.personId();
+                },
+                deferEvaluation: true
             });
             // Create loading function for Valid Values
 

@@ -22,7 +22,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
   <ItemGroup>
     <DnxInvisibleContent Include=".bowerrc" />
-    <DnxInvisibleContent Include="package.json" />
   </ItemGroup>
   <ItemGroup>
     <DnxInvisibleFolder Include="CoalesceExe\" />

@@ -29,6 +29,14 @@
 {
     if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
 }
+@foreach (var method in model.Methods)
+{
+    var ns = method.ReturnType.PureType.FullNamespace;
+    if (!ns.StartsWith("System"))
+    {
+        if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
+    }
+}
 @foreach (var ns in namespaces)
 {
 @:using @ns;

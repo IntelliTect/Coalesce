@@ -263,9 +263,7 @@ module @moduleName {
         }
         @:
         }
-
-
-
+        @:public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
         public init(myself: @(model.ViewModelClassName)) {};
@@ -409,6 +407,7 @@ module @moduleName {
                 }
             }
          }
+                self.originalData(data);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

@@ -49,6 +49,16 @@
     </ul>
     The collection is keyed by the original object and the value is the DTO.
 </p>
+
+<p>
+    To get Coalesce to recognize the DTO, it must be added to the context as an IEnumerable. This is simply an indicator for Coalesce and does not impact the database. This may be replaced by other less obtrusive methods in the future.
+</p>
+<pre>
+<code class="language-html">
+    public IEnumerable&lt;CaseDto&gt; CaseDtos { get; set; }
+</code>
+</pre>
+
 <p>
     Methods are not yet supported on DTOs.
 </p>

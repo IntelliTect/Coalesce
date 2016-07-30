@@ -59,6 +59,29 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
+        public override bool IsDto
+        {
+            get
+            {
+                return Info.GetInterfaces().Any(f => f.Name.Contains("IClassDto"));
+            }
+        }
+
+        public override ClassViewModel DtoBaseType
+        {
+            get
+            {
+                var iDto = Info.GetInterfaces().FirstOrDefault(f => f.Name.Contains("IClassDto"));
+                if (iDto != null)
+                {
+                    ClassViewModel baseModel = ReflectionRepository.GetClassViewModel(iDto.GetGenericArguments()[0].Name);
+                    return baseModel;
+                }
+                return null;
+            }
+        }
+
+
         public ReflectionClassWrapper(Type classType)
         {
             Info = classType;

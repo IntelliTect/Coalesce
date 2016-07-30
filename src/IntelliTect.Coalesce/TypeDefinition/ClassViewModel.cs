@@ -72,6 +72,32 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return Name;
             }
         }
+        public string DtoName
+        {
+            get
+            {
+                if (IsDto) return Name;
+                return $"{Name}DtoGen";
+            }
+        }
+
+        public ClassViewModel BaseViewModel
+        {
+            get
+            {
+                if (IsDto) return DtoBaseViewModel;
+                return this;
+            }
+        }
+        /// <summary>
+        /// Returns true if this is a DTO that uses another underlying type specifed in DtoBaseViewModel.
+        /// </summary>
+        public bool IsDto { get { return Wrapper.IsDto; } }
+
+        /// <summary>
+        /// The ClassViewModel this DTO is based on.
+        /// </summary>
+        public ClassViewModel DtoBaseViewModel { get { return Wrapper.DtoBaseType; } }
 
 
         /// <summary>
@@ -155,8 +181,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     int count = 1;
                     foreach (var mw in Wrapper.Methods)
                     {
-                        _Methods.Add(new MethodViewModel(mw, this, count));
-                        count++;
+                        if (!IsDto || (mw.Name != "Update" && mw.Name != "CreateInstance"))
+                        {
+                            _Methods.Add(new MethodViewModel(mw, this, count));
+                            count++;
+                        }
                     }
                 }
 

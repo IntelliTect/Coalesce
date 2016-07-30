@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IntelliTect.Coalesce.Interfaces;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class SymbolClassWrapper: ClassWrapper
+    internal class SymbolClassWrapper : ClassWrapper
     {
         public SymbolClassWrapper(ITypeSymbol symbol)
         {
@@ -97,6 +98,28 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             get
             {
                 return HasAttribute<ComplexTypeAttribute>();
+            }
+        }
+
+        public override bool IsDto
+        {
+            get
+            {
+                return Symbol.AllInterfaces.Any(f => f.Name.Contains("IClassDto"));
+            }
+        }
+
+        public override ClassViewModel DtoBaseType
+        {
+            get
+            {
+                var iDto = Symbol.AllInterfaces.FirstOrDefault(f => f.Name.Contains("IClassDto"));
+                if (iDto != null)
+                {
+                    ClassViewModel baseModel = ReflectionRepository.GetClassViewModel(iDto.TypeArguments[0].Name);
+                    return baseModel;
+                }
+                return null;
             }
         }
 

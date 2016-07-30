@@ -185,6 +185,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     AddChildModels(models, model);
                 }
+
                 return models;
             }
 
@@ -202,7 +203,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
             }
         }
-
 
         /// <summary>
         /// All the namespaces in the models.

@@ -90,7 +90,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 streamWriter.WriteLine($" {"Name",-15}  {"Type",-15}  {"Pure Type",-15} {"Col",-5} {"Array",-5} {"Key",-5} {"Complex",-7} {"DisplayName",-15} {"Null?",-5} {"Many",-5} {"Internal",-5} {"FileDL",-5} {"IsNum",-5} {"IsDT",-5} {"IsDTO",-5} {"IsBool",-5} {"IsStr",-5} {"IsEnum",-8} {"JsKoType",-25} {"TsKoType",-50} {"TsType",-15} {"DateOnly",-10} {"Hidden",-8} {"Required",-8} {"KeyName",-15} {"MinLength",-8} {"MaxLength",-10} {"Range",-10}");
 
-                foreach (var obj in models.Where(p => p.HasDbSet))
+                foreach (var obj in models.Where(p => p.HasDbSet || p.IsDto))
                 {
                     //Console.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
                     streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}    Edit:{obj.IsEditAllowed}   Create:{obj.IsCreateAllowed}    Delete:{obj.IsDeleteAllowed}");
@@ -648,7 +648,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "Models", "Generated");
             using ( var output = new GenerationOutputContext( this, modelOutputPath) )
             {
-                foreach (var model in apiModels.ViewModelsForTemplates)
+                foreach (var model in apiModels.ViewModelsForTemplates.Where(f=>!f.Model.IsDto))
                 {
                     Console.Write($"{model.Model.Name}  ");
 
@@ -666,7 +666,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             {
                 Console.WriteLine("-- Generating Models");
                 Console.Write("   ");
-                foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
+                foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext || f.Model.IsDto))
                 {
                     Console.Write($"{model.Model.Name}  ");
 

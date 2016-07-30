@@ -1,7 +1,9 @@
 {
   "profiles": {
     "IntelliTect.Coalesce.Cli": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": " -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true",
+      "workingDirectory": "C:\\git\\Framework\\Coalesce\\src\\Coalesce.Web"
     }
   }
 }

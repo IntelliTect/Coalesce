@@ -25,6 +25,11 @@ namespace Coalesce.Domain
             }
         }
 
+        /// <summary>
+        /// Hook to create CaseDtos controller and type script.
+        /// </summary>
+        public IEnumerable<CaseDto> CaseDtos { get; set; }
+
         public AppDbContext()
         {
         }

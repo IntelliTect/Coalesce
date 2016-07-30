@@ -1,0 +1,65 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+        </div>
+        <h1 class="clearfix" style="display:inline-block;">Case Dto</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+
+    </div>
+
+    <div class="panel-body">
+        <div class="form-horizontal">
+            <div class="form-group btn-warning" data-bind="if: errorMessage()">
+                <label class="col-md-4 control-label">Error</label>
+                <div class="col-md-8">
+                    <div class="form-control-static" data-bind="text: errorMessage"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Title</label>
+                <div class="col-md-8">
+                    @(Knockout.InputFor<CaseDto>(p => p.Title))
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Assigned To Name</label>
+                <div class="col-md-8">
+                    @(Knockout.DisplayFor<CaseDto>(p => p.AssignedToName))
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+
+    </div>
+</div>
+
+
+
+
+@section Scripts
+{
+    <script>
+        var acaseDto = new ViewModels.CaseDto();
+        acaseDto.includes = "Editor";
+
+        @if (ViewBag.Id != null)
+        {
+            @:acaseDto.load('@ViewBag.Id');
+        }
+        @if (ViewBag.ParentIdName != null)
+        {
+        @:acaseDto.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+        }
+
+        acaseDto.isSavingAutomatically = false;
+        acaseDto.loadChildren(function() {
+            ko.applyBindings(acaseDto);
+            acaseDto.isSavingAutomatically = true;
+        });
+    </script>
+}

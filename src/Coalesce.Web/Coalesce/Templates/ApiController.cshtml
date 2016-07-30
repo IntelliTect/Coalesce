@@ -54,16 +54,16 @@ namespace @(namespaceName).Api
     }
     @(model.SecurityInfo.ClassAnnotation)
     public partial class @(model.ControllerName)Controller 
-         : LocalBaseApiController<@(model.Name), @(model.Name)DtoGen> 
+         : LocalBaseApiController<@(model.BaseViewModel.Name), @(model.DtoName)> 
     {
         public @(model.ControllerName)Controller() { }
       
         /// <summary>
-        /// Returns @(model.Name)DtoGen
+        /// Returns @(model.DtoName)
         /// </summary>
         [HttpGet("list")]
         @(model.SecurityInfo.ReadAnnotation)
-        public virtual async Task<GenericListResult<@(model.Name), @(model.Name)DtoGen>> List(
+        public virtual async Task<GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -82,7 +82,7 @@ namespace @(namespaceName).Api
             }
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<@(model.Name), @(model.Name)DtoGen>(listResult);
+            return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(listResult);
         }
 
 
@@ -143,12 +143,12 @@ namespace @(namespaceName).Api
 
         [HttpGet("get/{id}")]
         @(model.SecurityInfo.ReadAnnotation)
-        public virtual async Task<@(model.Name)DtoGen> Get(string id, string includes = null)
+        public virtual async Task<@(model.DtoName)> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
 
-        @if (model.HasDbSet && model.IsDeleteAllowed) { 
+        @if ((model.HasDbSet || model.IsDto) && model.IsDeleteAllowed) { 
         <text>
         [HttpPost("delete/{id}")]
         @(model.SecurityInfo.EditAnnotation)
@@ -169,7 +169,7 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)DtoGen> Save(@(model.Name)DtoGen dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<@(model.DtoName)> Save(@(model.DtoName) dto, string includes = null, bool returnObject = true)
         {
             @if (!model.IsCreateAllowed)
             {
@@ -188,13 +188,13 @@ namespace @(namespaceName).Api
         
         [HttpPost("AddToCollection")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)DtoGen> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         @(model.SecurityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.Name)DtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<@(model.DtoName)> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -202,7 +202,7 @@ namespace @(namespaceName).Api
         }
 
         @(model.SecurityInfo.ReadAnnotation)
-        protected override IQueryable<@(model.Name)> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<@(model.BaseViewModel.Name)> GetListDataSource(ListParameters parameters)
         {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && !m.IsInternalUse))
             {
@@ -259,11 +259,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-                @:result.Object = Mapper<@(model.Name), @(model.Name)DtoGen>.ObjToDtoMapper(objResult, User, "");
+                @:result.Object = Mapper<@(model.Name), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "");
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.Name), @(model.Name)DtoGen>.ObjToDtoMapper(o, User, ""));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.Name), @(model.DtoName)>.ObjToDtoMapper(o, User, ""));
                 }
                 else
                 {

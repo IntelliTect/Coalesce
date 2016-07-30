@@ -16,6 +16,15 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public abstract bool IsComplexType { get; }
 
+        /// <summary>
+        /// If this class implements IClassDto, return true.
+        /// </summary>
+        public abstract bool IsDto { get; }
+        /// <summary>
+        /// If this class implements IClassDto, return the ClassViewModel this DTO is based upon.
+        /// </summary>
+        public abstract ClassViewModel DtoBaseType { get; }
+
         public Type Info { get; internal set; }
         public ITypeSymbol Symbol { get; internal set; }
 

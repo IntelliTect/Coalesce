@@ -29,11 +29,17 @@ namespace IntelliTect.Coalesce.Controllers
         {
             // Set up a ViewModel so we can check out this object.
             ClassViewModel = ReflectionRepository.GetClassViewModel(typeof(T), null, ApiName);
+            if (typeof(T) == typeof(TDto) || typeof(TDto).Name.EndsWith("DtoGen")){
+                DtoViewModel = ClassViewModel; 
+            }
+            DtoViewModel = ReflectionRepository.GetClassViewModel(typeof(TDto), null, ApiName);
+
         }
 
         protected DbSet<T> _dataSource;
         protected IQueryable<T> _readOnlyDataSource;
         protected readonly ClassViewModel ClassViewModel;
+        protected readonly ClassViewModel DtoViewModel;
         protected ILogger Logger
         {
             get
@@ -454,7 +460,7 @@ namespace IntelliTect.Coalesce.Controllers
                 {
                     result.WasSuccessful = false;
                     result.Message =
-                        string.Format("Item with {0} = {1} not found.", PrimaryKey.Name, IdValue(dto));
+                        string.Format("Item with {0} = {1} not found.", ClassViewModel.PrimaryKey.Name, IdValue(dto));
                     Response.StatusCode = (int)System.Net.HttpStatusCode.NotFound;
                     return result;
                 }
@@ -468,7 +474,7 @@ namespace IntelliTect.Coalesce.Controllers
             }
 
             // Convert all DateTimeOffsets to the correct Time Zone.
-            foreach (var prop in ClassViewModel.Properties.Where(f => f.Type.IsDateTimeOffset))
+            foreach (var prop in DtoViewModel.Properties.Where(f => f.Type.IsDateTimeOffset))
             {
                 DateTimeOffset? value = (DateTimeOffset?)dto.GetType().GetProperty(prop.Name).GetValue(dto);
                 if (value != null)
@@ -662,18 +668,8 @@ namespace IntelliTect.Coalesce.Controllers
         }
 
 
-        /// <summary>
-        /// Gets the ID field for object T.
-        /// </summary>
-        protected PropertyViewModel PrimaryKey
-        {
-            get
-            {
-                //TODO: This could be more robust for finding the ID.
-                var obj = ReflectionRepository.GetClassViewModel<T>();
-                return obj.PrimaryKey;
-            }
-        }
+
+
 
 
         /// <summary>
@@ -683,7 +679,7 @@ namespace IntelliTect.Coalesce.Controllers
         /// <returns></returns>
         protected object IdValue(TDto dto)
         {
-            var propInfo = dto.GetType().GetProperty(PrimaryKey.Name);
+            var propInfo = dto.GetType().GetProperty(DtoViewModel.PrimaryKey.Name);
             object id = propInfo.GetValue(dto);
             return id;
         }
@@ -695,7 +691,7 @@ namespace IntelliTect.Coalesce.Controllers
         /// <returns></returns>
         protected object IdValue(T item)
         {
-            object id = PrimaryKey.PropertyInfo.GetValue(item);
+            object id = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
             return id;
         }
 

@@ -48,6 +48,8 @@ module ListViewModels {
    		public message: KnockoutObservable<string> = ko.observable(null);
         // Search criteria for the list. This can be exposed as a text box for searching.
    		public search: KnockoutObservable<string> = ko.observable("");
+        // Specify the DTO that should be returned - must be a fully qualified type name
+        public dto: KnockoutObservable<string> = ko.observable("");
         // If there is another page, this is true.
         public nextPageEnabled: KnockoutComputed<boolean>
         // If there is a previous page, this is true.
@@ -76,10 +78,15 @@ module ListViewModels {
                     self.queryString = $.param(self.query);
                 }
                 self.isLoading(true);
+                var isDto = (self.dto() !== null && self.dto() !== "");
+                var urlMethod = isDto ? "DtoList" : "List";
+                var url = areaUrl + "api/CaseProduct/" + urlMethod + "?includes=" + self.includes + "&page=" + self.page()
+                            + "&pageSize=" + self.pageSize() + "&search=" + self.search()
+                            + "&listDataSource=" + CaseProductDataSources[self.listDataSource];
+                if (self.queryString !== null && self.queryString !== "") url += "&" + self.queryString;
+                if (isDto) url += "&dto=" + self.dto();
                 $.ajax({ method: "GET",
-                         url: areaUrl + "api/CaseProduct/List?includes=" + self.includes + "&page=" + self.page()
-                                + "&pageSize=" + self.pageSize() + "&search=" + self.search()
-                                + "&listDataSource=" + CaseProductDataSources[self.listDataSource] + "&" + self.queryString,
+                         url: url,
                         xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.items.removeAll();

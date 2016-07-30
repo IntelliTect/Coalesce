@@ -601,6 +601,16 @@ namespace IntelliTect.Coalesce.Helpers
             return new HtmlString(result);
         }
 
+        public static HtmlString DisplayHtml<T>(Expression<Func<T, object>> propertySelector)
+        {
+            var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
+
+            string result = string.Format(@"
+                <div class=""form-control-static"" data-bind=""html: {0}()""></div>",
+                propertyModel.JsVariableForBinding);
+            return new HtmlString(result);
+        }
+
         public static HtmlString DisplayComment(string bindingValue)
         {
             string result = string.Format(@"

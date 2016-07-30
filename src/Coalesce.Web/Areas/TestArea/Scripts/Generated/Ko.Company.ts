@@ -504,9 +504,11 @@ module TestArea.ViewModels {
                         }
 
             // Create variables for ListEditorApiUrls
-            self.EmployeesListUrl = ko.computed(function()
-            {
-                return areaUrl + 'Nothing' + self.companyId();
+            self.EmployeesListUrl = ko.computed({
+                read: function() {
+                         return areaUrl + 'Person/table?companyId=' + self.companyId();
+                },
+                deferEvaluation: true
             });
             // Create loading function for Valid Values
 

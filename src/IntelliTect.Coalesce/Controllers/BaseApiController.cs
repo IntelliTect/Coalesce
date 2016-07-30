@@ -17,6 +17,8 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections;
+using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.Controllers
 {
@@ -183,14 +185,37 @@ namespace IntelliTect.Coalesce.Controllers
                 var result3 = result2.Where(f => BeforeGet(f));
 
                 // Select it into the object we want
-                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
-
-                if (listParameters.FieldList.Any())
+                if (listParameters.Dto == null)
                 {
-                    return new ListResult(result4.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
-                        page, totalCount, pageSize);
+                    // If we aren't requesting a conversion to a DTO, then map to the generated DTO
+                    IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
+
+                    if (listParameters.FieldList.Any())
+                    {
+                        return new ListResult(result4.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
+                            page, totalCount, pageSize);
+                    }
+                    return new ListResult(result4, page, totalCount, pageSize);
                 }
-                return new ListResult(result4, page, totalCount, pageSize);
+                else
+                {
+                    // Create a List<dto> to populate
+                    Type list = typeof(List<>);
+                    Type[] listTypeArgs = { listParameters.Dto };
+                    Type genericList = list.MakeGenericType(listTypeArgs);                
+                    IEnumerable result4 = (IEnumerable)Activator.CreateInstance(genericList);
+
+                    // Use the method generated in the IL to get the implicit converter we need
+                    var converter = typeof(T)
+                        .GetMethods()
+                        .Where(m => m.Name == "op_Implicit" && m.ReturnType == listParameters.Dto)
+                        .First();
+
+                    // Use the converter to map the base type to the dto
+                    result4 = result3.Select(x => converter.Invoke(null, new[] { x })).ToList();
+
+                    return new ListResult(result4, page, totalCount, pageSize);
+                }
             }
             catch (Exception ex)
             {

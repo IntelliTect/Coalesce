@@ -37,7 +37,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -52,6 +52,40 @@ namespace Coalesce.Web.Api
         
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<Case, CaseDtoGen>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns List<dto>
+        /// </summary>
+        [HttpGet("dtolist")]
+        [Authorize]
+        public virtual async Task<ListResult> List(
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            string dto = null,
+            // Custom fields for this object.
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
+        {
+            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Case).Assembly.GetType(dto);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
+
+            // Add custom filters
+            parameters.AddFilter("CaseKey", caseKey);
+            parameters.AddFilter("Title", title);
+            parameters.AddFilter("Description", description);
+            parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
+            parameters.AddFilter("Severity", severity);
+            parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
+        
+            return await ListImplementation(parameters);
         }
 
 
@@ -71,7 +105,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);

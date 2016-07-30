@@ -43,10 +43,12 @@ namespace IntelliTect.Coalesce.Models
         /// </summary>
         public Dictionary<string, string> Filters { get; }
 
+        public Type Dto { get; set; }
+
         public ListParameters(string fields = null,
             string includes = null, string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, string where = null,
-            string listDataSource = null, string search = null)
+            string listDataSource = null, string search = null, Type dto = null)
         {
             Fields = fields;
             Includes = includes;
@@ -57,25 +59,9 @@ namespace IntelliTect.Coalesce.Models
             Where = where;
             ListDataSource = listDataSource;
             Search = search;
+            Dto = dto;
             Filters = new Dictionary<string, string>();
         }
-
-        public ListParameters(string includes = null, string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, string where = null,
-            string listDataSource = null, string search = null)
-        {
-            Fields = null;
-            Includes = includes;
-            OrderBy = orderBy;
-            OrderByDescending = orderByDescending;
-            Page = page;
-            PageSize = pageSize;
-            Where = where;
-            ListDataSource = listDataSource;
-            Search = search;
-            Filters = new Dictionary<string, string>();
-        }
-
 
         /// <summary>
         /// List of OrderBy clauses keyed by column and with a value of Asc or Desc.

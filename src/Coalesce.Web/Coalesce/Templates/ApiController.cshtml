@@ -73,7 +73,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
@@ -83,6 +83,35 @@ namespace @(namespaceName).Api
         
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(listResult);
+        }
+
+
+        /// <summary>
+        /// Returns List<dto>
+        /// </summary>
+        [HttpGet("dtolist")]
+        @(model.SecurityInfo.ReadAnnotation)
+        public virtual async Task<ListResult> List(
+            string includes = null, 
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null, 
+            string where = null, 
+            string listDataSource = null, 
+            string search = null, 
+            string dto = null,
+            // Custom fields for this object.
+            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(@(model.Name)).Assembly.GetType(dto);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
+
+            // Add custom filters
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+        
+            return await ListImplementation(parameters);
         }
 
 
@@ -102,7 +131,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))

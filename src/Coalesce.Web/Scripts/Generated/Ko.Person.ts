@@ -241,13 +241,14 @@ module ViewModels {
         public changeSpacesToDashesInNameModal: (callback?: any) => void;
         // Variable for method arguments to allow for easy binding
         
-
-
-
+        
+        public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
         public init(myself: Person) {};
 
+        // This method gets called after loading data (loadFromDto), and allows setting DTO specific properties before binding happens.
+        public dtoInit(myself: Person) {};
 
         constructor(newItem?: any, parent?: any){
             var self = this;
@@ -387,6 +388,20 @@ module ViewModels {
 				self.timeZone(data.timeZone);
 				self.name(data.name);
 				self.companyId(data.companyId);
+                self.originalData(data);
+
+                // Add simple observables for any DTO properties that aren't on our view model
+                for (var key in data) {
+                    if (data.hasOwnProperty(key) && !self.hasOwnProperty(key)) {
+                        self[key] = ko.observable(data[key]);
+                    }
+                }
+
+                // Call an init function that allows for setting DTO specific properties before binding.
+                if ($.isFunction(self.dtoInit)){
+                    self.dtoInit(self);
+                }
+
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

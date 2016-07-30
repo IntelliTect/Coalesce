@@ -60,6 +60,10 @@ namespace Coalesce.Web.Controllers
         {
             return View();
         }
+        public IActionResult Dtos()
+        {
+            return View();
+        }
 
         public IActionResult Troubleshooting()
         {

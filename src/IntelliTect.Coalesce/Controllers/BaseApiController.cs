@@ -31,10 +31,14 @@ namespace IntelliTect.Coalesce.Controllers
         {
             // Set up a ViewModel so we can check out this object.
             ClassViewModel = ReflectionRepository.GetClassViewModel(typeof(T), null, ApiName);
-            if (typeof(T) == typeof(TDto) || typeof(TDto).Name.EndsWith("DtoGen")){
-                DtoViewModel = ClassViewModel; 
+            if (typeof(T) == typeof(TDto) || typeof(TDto).Name.EndsWith("DtoGen"))
+            {
+                DtoViewModel = ClassViewModel;
             }
-            DtoViewModel = ReflectionRepository.GetClassViewModel(typeof(TDto), null, ApiName);
+            else
+            {
+                DtoViewModel = ReflectionRepository.GetClassViewModel(typeof(TDto), null, ApiName);
+            }
 
         }
 

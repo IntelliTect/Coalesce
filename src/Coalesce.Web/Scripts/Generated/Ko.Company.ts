@@ -150,13 +150,14 @@ module ViewModels {
 
 
 
-
-
-
+        
+        public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
         public init(myself: Company) {};
 
+        // This method gets called after loading data (loadFromDto), and allows setting DTO specific properties before binding happens.
+        public dtoInit(myself: Company) {};
 
         constructor(newItem?: any, parent?: any){
             var self = this;
@@ -231,6 +232,20 @@ module ViewModels {
 				self.state(data.state);
 				self.zipCode(data.zipCode);
 				self.altName(data.altName);
+                self.originalData(data);
+
+                // Add simple observables for any DTO properties that aren't on our view model
+                for (var key in data) {
+                    if (data.hasOwnProperty(key) && !self.hasOwnProperty(key)) {
+                        self[key] = ko.observable(data[key]);
+                    }
+                }
+
+                // Call an init function that allows for setting DTO specific properties before binding.
+                if ($.isFunction(self.dtoInit)){
+                    self.dtoInit(self);
+                }
+
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

@@ -277,9 +277,9 @@
 <h4>Static List Methods</h4>
 <p>Static methods that return an IQueryable of the same type as the class are treated specially. These methods can be used to provide the underlying data for the list view models. The list view model has a property called listDataSource which accepts an enumeration with the available list methods. Parameters can be specified an object with name value pairs in the query property on the list view model.</p>
 <pre><code class="language-html">
-    public static IEnumerable&lt;string&gt; NamesStartingWith(string characters, DbContext db)
+    public static IQueryable&lt;string&gt; NamesStartingWithA(DbContext db, UserPrincipal user)
     {
-        return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
+        return db.People.Where(f => f.FirstName.StartsWith("A")).Select(f => f.FirstName).ToList();
     }
 </code></pre>
 

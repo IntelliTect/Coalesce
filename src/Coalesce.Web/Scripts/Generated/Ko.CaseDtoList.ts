@@ -14,6 +14,7 @@ module ListViewModels {
     // Add an enum for all methods that are static and IQueryable
     export enum CaseDtoDataSources {
             Default,
+            GetAllOpenCases,
         }
     export class CaseDtoList {
         // Query string to limit the list of items.

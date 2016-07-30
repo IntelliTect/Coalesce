@@ -53,6 +53,9 @@
 <p>
     To get Coalesce to recognize the DTO, it must be added to the context as an IEnumerable. This is simply an indicator for Coalesce and does not impact the database. This may be replaced by other less obtrusive methods in the future.
 </p>
+<p>
+    ListDataSource is supported from the POCO database object, but it transfered to the DTO. All querying must be done on the original object and not the DTO since only fields in the database can be queried via Entity Framework.
+</p>
 <pre>
 <code class="language-html">
     public IEnumerable&lt;CaseDto&gt; CaseDtos { get; set; }

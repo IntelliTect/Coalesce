@@ -84,6 +84,15 @@ namespace IntelliTect.Coalesce.Controllers
 
         protected virtual IQueryable<T> GetListDataSource(ListParameters listParameters)
         {
+            if (!string.IsNullOrWhiteSpace(listParameters.ListDataSource) && listParameters.ListDataSource != "Default")
+            {
+                // find the IQueryable if we can
+                var method = typeof(T).GetMethod(listParameters.ListDataSource);
+                if (method != null) 
+                {
+                    return (IQueryable<T>)method.Invoke(null, new object[] { Db, User });
+                }
+            }
             return DataSource ?? ReadOnlyDataSource;
         }
 
@@ -206,7 +215,7 @@ namespace IntelliTect.Coalesce.Controllers
                     // Create a List<dto> to populate
                     Type list = typeof(List<>);
                     Type[] listTypeArgs = { listParameters.Dto };
-                    Type genericList = list.MakeGenericType(listTypeArgs);                
+                    Type genericList = list.MakeGenericType(listTypeArgs);
                     IEnumerable result4 = (IEnumerable)Activator.CreateInstance(genericList);
 
                     // Use the method generated in the IL to get the implicit converter we need
@@ -304,7 +313,7 @@ namespace IntelliTect.Coalesce.Controllers
                             {
                                 if (prop.Key.Contains("[]."))
                                 {
-                                    var parts = prop.Key.Split(new [] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                    var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
                                     expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{clause}"")) > 0";
                                 }
                                 else
@@ -448,7 +457,8 @@ namespace IntelliTect.Coalesce.Controllers
             return dto;
         }
 
-        protected virtual bool BeforeGet(T obj) {
+        protected virtual bool BeforeGet(T obj)
+        {
             return true;
         }
 

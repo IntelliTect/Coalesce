@@ -165,24 +165,24 @@ namespace Coalesce.Web.Tests
             Assert.Equal("Joseph", person.FirstName);
         }
 
-        //[Fact]
-        //public async void ListByWhere()
-        //{
-        //    var result = await _pc.List(where: "personId = 1 || personid = 2");
-        //    Assert.Equal(2, result.List.Count());
-        //    var person = result.List.First();
-        //    Assert.Equal("Joseph", person.FirstName);
-        //}
+        [Fact]
+        public async void ListByWhere()
+        {
+            var result = await _pc.List(null, null, null, null, null, "personId = 1 || personid = 2", null, null, null, null, null, null, null, null, null, null, null);
+            Assert.Equal(2, result.List.Count());
+            var person = result.List.First();
+            Assert.Equal("Joseph", person.FirstName);
+        }
 
 
-        //[Fact]
-        //public async void ListSearch()
-        //{
-        //    var result = await _pc.List(search:"a", orderBy: "lastname");
-        //    Assert.Equal(16, result.List.Count());
-        //    var person = result.List.First();
-        //    Assert.Equal("Arianna", person.FirstName);
-        //}
+        [Fact]
+        public async void ListSearch()
+        {
+            var result = await _pc.List(null, "lastName", null, null, null, null, null, "a", null, null, null, null, null, null, null, null, null);
+            Assert.Equal(16, result.List.Count());
+            var person = result.List.First();
+            Assert.Equal("Arianna", person.FirstName);
+        }
 
         [Fact]
         public void PropertyValues()
@@ -244,25 +244,25 @@ namespace Coalesce.Web.Tests
 
 
 
-        //[Fact]
-        //public async void ListOfBorC()
-        //{
-        //    //var thing = new ListResult
-        //    //{
-        //    //    List = new List<PersonDtoGen> { new PersonDtoGen { FirstName = "bob"} },
-        //    //    Message = "test",
-        //    //    Page = 1,
-        //    //    PageCount = 1,
-        //    //    PageSize = 1,
-        //    //    TotalCount = 1,
-        //    //    WasSuccessful = false,
-        //    //};
+        [Fact]
+        public async void ListOfBorC()
+        {
+            var thing = new ListResult
+            {
+                List = new List<PersonDtoGen> { new PersonDtoGen { FirstName = "bob" } },
+                Message = "test",
+                Page = 1,
+                PageCount = 1,
+                PageSize = 1,
+                TotalCount = 1,
+                WasSuccessful = false,
+            };
 
-        //    //var generic = new GenericListResult<Person, PersonDtoGen>(thing);
+            var generic = new GenericListResult<Person, PersonDtoGen>(thing);
 
-        //    var result = await _pc.List(personId: "1", listDataSource: "BorCPeople");
-        //    Assert.Equal(0, result.List.Count());
-        //}
+            var result = await _pc.List(null, null, null, null, null, null, "BorCPeople", null, "1", null, null, null, null, null, null, null, null);
+            Assert.Equal(0, result.List.Count());
+        }
 
         [Fact]
         public async void CountOfBorC()

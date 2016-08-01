@@ -107,7 +107,7 @@ namespace IntelliTect.Coalesce.Validation
                             }
                             else
                             {
-                                assert.isFalse(param.IsDI, "No DI");
+                                assert.isFalse(param.IsDI, "DI properties must be named either 'db' or 'user'.");
                             }
                         }
 

@@ -15,9 +15,4 @@ namespace IntelliTect.Coalesce.Data
     {
         IQueryable<T> Include(IQueryable<T> entities, string include = null);
     }
-
-    public interface IIncludableWithDbContext<T>
-    {
-        IQueryable<T> Include(IQueryable<T> entities, DbContext context = null, string include = null);
-    }
 }

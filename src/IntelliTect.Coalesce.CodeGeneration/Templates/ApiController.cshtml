@@ -87,35 +87,6 @@ namespace @(namespaceName).Api
 
 
         /// <summary>
-        /// Returns List<dto>
-        /// </summary>
-        [HttpGet("dtolist")]
-        @(model.SecurityInfo.ReadAnnotation)
-        public virtual async Task<ListResult> List(
-            string includes = null, 
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, 
-            string where = null, 
-            string listDataSource = null, 
-            string search = null, 
-            string dto = null,
-            // Custom fields for this object.
-            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
-        {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(@(model.Name)).Assembly.GetType(dto);
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
-
-            // Add custom filters
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
-            {
-            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
-            }
-        
-            return await ListImplementation(parameters);
-        }
-
-
-        /// <summary>
         /// Returns custom object based on supplied fields
         /// </summary>
         [HttpGet("customlist")]

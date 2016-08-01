@@ -23,13 +23,18 @@ namespace IntelliTect.Coalesce.Data
         /// <param name="query"></param>
         /// <param name="include"></param>
         /// <returns></returns>
-        public static IQueryable<T> Includes<T>(this IQueryable<T> query, string includes = null) where T : class, new()
+        public static IQueryable<T> Includes<T>(this IQueryable<T> query, DbContext db = null, string includes = null) where T : class, new()
         {
             T obj = new T();
             var objT = obj as IIncludable<T>;
+            var objT2 = obj as IIncludableWithDbContext<T>;
             if (objT != null)
             {
                 return objT.Include(query, includes);
+            }
+            else if (objT2 != null)
+            {
+                return objT2.Include(query, db, includes);
             }
             else
             {

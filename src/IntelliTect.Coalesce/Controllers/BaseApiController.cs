@@ -105,7 +105,7 @@ namespace IntelliTect.Coalesce.Controllers
                 // Add the Include statements to the result to grab the right object graph. Passing "" gets the standard set.
                 if (string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
-                    result = result.Includes(listParameters.Includes);
+                    result = result.Includes(Db, listParameters.Includes);
                 }
 
                 // Add filters for the where clause, etc.
@@ -440,7 +440,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected async Task<TDto> GetImplementation(string id, string includes = null)
         {
             // Get the item and get external data.
-            var item = (await DataSource.Includes(includes).FindItemAsync(id)).IncludeExternal(includes);
+            var item = (await DataSource.Includes(includes: includes).FindItemAsync(id)).IncludeExternal(includes);
 
             if (!BeforeGet(item))
             {
@@ -539,13 +539,13 @@ namespace IntelliTect.Coalesce.Controllers
 
                         Db.SaveChanges();
                         // Pull the object to get any changes.
-                        item = DataSource.Includes(includes).FindItem(IdValue(item));
+                        item = DataSource.Includes(includes: includes).FindItem(IdValue(item));
                         // Call the method to support special cases.
                         if (AfterSave(dto, item, origItem, Db))
                         {
                             if (returnObject)
                             {
-                                item = DataSource.Includes(includes).FindItem(IdValue(item));
+                                item = DataSource.Includes(includes: includes).FindItem(IdValue(item));
                             }
                         }
 

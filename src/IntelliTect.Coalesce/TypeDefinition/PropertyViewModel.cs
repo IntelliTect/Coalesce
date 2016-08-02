@@ -648,10 +648,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (Wrapper.HasAttribute<KeyAttribute>())
                     return true;
-                else if (string.Compare(Name, "Id", StringComparison.InvariantCultureIgnoreCase) == 0)
-                    return true;
-                else
-                    return string.Compare(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase) == 0;
+                else if (string.Compare(Name, "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
+                else if (string.Compare(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
+                else if (Parent.IsDto && string.Compare(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase) == 0) return true;
+                return false;
+                
             }
         }
 

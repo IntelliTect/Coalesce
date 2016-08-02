@@ -34,6 +34,9 @@
 <h3>IClassDtos</h3>
 <p>This option for DTOs allows you to create an arbitrary class that is related one-to-one with a POCO database class. The IClassDto provides the mechanism to create the DTO and update the underlying database object. The client ViewModels as build based on the DTO class and therefore can be significantly modified from the original. These support full list and editing capability with a complete set of views: list, cards, create/edit.</p>
 <p>
+    Note: Because DTOs of this type are updatable, a primary key must be used. Select the same primary key name as the underlying object for this to be detected automatically. 
+</p>
+<p>
     The Update method passes in a database object for you to update. You can do security trimming with the user and get Includes information from the includes parameter.
 </p>
 <p>

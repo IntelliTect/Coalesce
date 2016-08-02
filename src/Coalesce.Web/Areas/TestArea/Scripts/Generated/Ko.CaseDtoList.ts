@@ -1,35 +1,36 @@
-/// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="../Coalesce/intellitect.utilities.ts" />
-/// <reference path="../Coalesce/intellitect.ko.utilities.ts" />
-/// <reference path="./Ko.CaseProduct.ts" />
+/// <reference path="../../../../typings/tsd.d.ts" />
+/// <reference path="../../../../scripts/Coalesce/intellitect.utilities.ts" />
+/// <reference path="../../../../scripts/Coalesce/intellitect.ko.utilities.ts" />
+/// <reference path="./Ko.CaseDto.ts" />
 
-// Knockout List View Model for: CaseProduct
+// Knockout List View Model for: CaseDto
 // Auto Generated Knockout List Bindings
 // Copyright IntelliTect, 2016
 
 var baseUrl = baseUrl || '';
 
-module ListViewModels {
-    export var areaUrl = areaUrl || ((true) ? baseUrl : baseUrl + '/');
+module TestArea.ListViewModels {
+    export var areaUrl = areaUrl || ((false) ? baseUrl : baseUrl + 'TestArea/');
     // Add an enum for all methods that are static and IQueryable
-    export enum CaseProductDataSources {
+    export enum CaseDtoDataSources {
             Default,
+            GetAllOpenCases,
         }
-    export class CaseProductList {
+    export class CaseDtoList {
         // Query string to limit the list of items.
         public queryString: string = "";
         // Object that is passed as the query parameters.
         public query: any = null;
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: CaseProductDataSources = CaseProductDataSources.Default;
+        public listDataSource: CaseDtoDataSources = CaseDtoDataSources.Default;
         // String the represents the child object to load 
         public includes: string = "";
         // List of items. This the main collection.
-        public items: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
+        public items: KnockoutObservableArray<TestArea.ViewModels.CaseDto> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
         // Deletes an item.
-		public deleteItem: (item: ViewModels.CaseProduct) => void;
+		public deleteItem: (item: TestArea.ViewModels.CaseDto) => void;
         // True if the collection is loading.
 		public isLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Gets the count of items without getting all the items. Data put into count.
@@ -63,10 +64,6 @@ module ListViewModels {
 		public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
 
         // Valid values
-        public caseValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCaseValidValues: (callback: any) => void;
-        public productValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadProductValidValues: (callback: any) => void;
             constructor() {
             var self = this; 
             var searchTimeout: number = 0;
@@ -79,11 +76,11 @@ module ListViewModels {
                 }
                 self.isLoading(true);
 
-                var url = areaUrl + "api/CaseProduct/List?includes=" + self.includes + "&page=" + self.page()
+                var url = areaUrl + "api/CaseDto/List?includes=" + self.includes + "&page=" + self.page()
                             + "&pageSize=" + self.pageSize() + "&search=" + self.search() + "&listDataSource=";
     
                 if (typeof self.listDataSource === "string") url += self.listDataSource;
-                else url += CaseProductDataSources[self.listDataSource];
+                else url += CaseDtoDataSources[self.listDataSource];
 
                 if (self.queryString !== null && self.queryString !== "") url += "&" + self.queryString;
 
@@ -93,7 +90,7 @@ module ListViewModels {
                 .done(function(data) {
                     self.items.removeAll();
                     for (var i in data.list) {
-                        var model = new ViewModels.CaseProduct(data.list[i]);
+                        var model = new TestArea.ViewModels.CaseDto(data.list[i]);
                         model.includes = self.includes;
                         model.onDelete(itemDeleted);
                         self.items.push(model);
@@ -112,7 +109,7 @@ module ListViewModels {
                     self.message(errorMsg);
                     self.isLoaded(false);
                     
-                    alert("Could not get list of CaseProduct items: " + errorMsg);
+                    alert("Could not get list of CaseDto items: " + errorMsg);
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -150,14 +147,14 @@ module ListViewModels {
                     self.queryString = $.param(self.query);
                 }
                 $.ajax({ method: "GET",
-                         url: areaUrl + "api/CaseProduct/count?" + "listDataSource=" + CaseProductDataSources[self.listDataSource] + "&" + self.queryString,
+                         url: areaUrl + "api/CaseDto/count?" + "listDataSource=" + CaseDtoDataSources[self.listDataSource] + "&" + self.queryString,
                          xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.count(data);
                     if ($.isFunction(callback)) callback();
                 })
                 .fail(function() {
-                    alert("Could not get count of CaseProduct items.");
+                    alert("Could not get count of CaseDto items.");
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -170,7 +167,7 @@ module ListViewModels {
             }
 
             // Deletes an item and removes it from the array.
-            self.deleteItem = function(item: ViewModels.CaseProduct)
+            self.deleteItem = function(item: TestArea.ViewModels.CaseDto)
             {
                 item.deleteItem();
             };
@@ -199,7 +196,7 @@ module ListViewModels {
         }
     }
 
-    export namespace CaseProductList {
+    export namespace CaseDtoList {
         // Classes for use in method calls to support data binding for input for arguments
     }
 }

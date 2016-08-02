@@ -49,33 +49,6 @@ namespace Coalesce.Web.Api
 
 
         /// <summary>
-        /// Returns List<dto>
-        /// </summary>
-        [HttpGet("dtolist")]
-        [Authorize]
-        public virtual async Task<ListResult> List(
-            string includes = null, 
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, 
-            string where = null, 
-            string listDataSource = null, 
-            string search = null, 
-            string dto = null,
-            // Custom fields for this object.
-            string devTeamId = null,string name = null)
-        {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(DevTeam).Assembly.GetType(dto);
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
-
-            // Add custom filters
-            parameters.AddFilter("DevTeamId", devTeamId);
-            parameters.AddFilter("Name", name);
-        
-            return await ListImplementation(parameters);
-        }
-
-
-        /// <summary>
         /// Returns custom object based on supplied fields
         /// </summary>
         [HttpGet("customlist")]
@@ -91,7 +64,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string devTeamId = null,string name = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("DevTeamId", devTeamId);

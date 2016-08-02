@@ -5,7 +5,7 @@
 
 
 
-// Knockout View Model for: DevTeam
+// Knockout View Model for: CaseDto
 // Auto Generated Knockout Object Bindings
 // Copyright IntelliTect, 2016
 
@@ -15,14 +15,14 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 module TestArea.ViewModels {
     export var areaUrl = areaUrl || ((false) ? baseUrl : baseUrl + 'TestArea/');
 
-	export class DevTeam
+	export class CaseDto
     {
         private loadingCount: number = 0;  // Stack for number of times loading has been called.
         private saveTimeout: number = 0;   // Stores the return value of setInterval for automatic save delays.
         // Callbacks to call after a delete.
-        public deleteCallbacks: { ( myself: DevTeam ): void; } [] = [];
+        public deleteCallbacks: { ( myself: CaseDto ): void; } [] = [];
         // Callbacks to call after a save.
-        public saveCallbacks: { ( myself: DevTeam ): void; } [] = [];    
+        public saveCallbacks: { ( myself: CaseDto ): void; } [] = [];    
         private loadingValidValues: number = 0;
 
         // String that defines what data should be included with the returned object.
@@ -89,8 +89,9 @@ module TestArea.ViewModels {
         public isValid: () => boolean;
     
         // Observables
-        public devTeamId: KnockoutObservable<number> = ko.observable(null);
-        public name: KnockoutObservable<string> = ko.observable(null);
+        public caseId: KnockoutObservable<number> = ko.observable(null);
+        public title: KnockoutObservable<string> = ko.observable(null);
+        public assignedToName: KnockoutObservable<string> = ko.observable(null);
 
        
         // True if the object is loading.
@@ -143,7 +144,7 @@ module TestArea.ViewModels {
         public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: DevTeam) {};
+        public init(myself: CaseDto) {};
 
         constructor(newItem?: any, parent?: any){
             var self = this;
@@ -165,8 +166,9 @@ module TestArea.ViewModels {
             // SetupValidation {
             
             self.errors = ko.validation.group([
-                self.devTeamId,
-                self.name,
+                self.caseId,
+                self.title,
+                self.assignedToName,
             ]);
             self.warnings = ko.validation.group([
             ]);
@@ -182,7 +184,7 @@ module TestArea.ViewModels {
 
             // Computed Observable for edit URL
             self.editUrl = ko.computed(function() {
-                return areaUrl + "DevTeam/CreateEdit?id=" + self.devTeamId();
+                return areaUrl + "CaseDto/CreateEdit?id=" + self.caseId();
             });
 
             // Create computeds for display for objects
@@ -193,14 +195,15 @@ module TestArea.ViewModels {
 				if (!data) return;
 				self.isLoading(true);
 				// Set the ID 
-				self.myId = data.devTeamId;
+				self.myId = data.caseId;
 				// Load the lists of other objects
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
 
 				// The rest of the objects are loaded now.
-				self.devTeamId(data.devTeamId);
-				self.name(data.name);
+				self.caseId(data.caseId);
+				self.title(data.title);
+				self.assignedToName(data.assignedToName);
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();
@@ -209,9 +212,9 @@ module TestArea.ViewModels {
     	    // Save the object into a DTO
 			self.saveToDto = function() {
 				var dto: any = {};
-				dto.devTeamId = self.devTeamId();
+				dto.caseId = self.caseId();
 
-    	        dto.name = self.name();
+    	        dto.title = self.title();
 
 				return dto;
 			}
@@ -221,7 +224,7 @@ module TestArea.ViewModels {
 					if (self.validate()) {
 						if (self.showBusyWhenSaving) intellitect.utilities.showBusy();
 						self.isSaving(true);
-                        $.ajax({ method: "POST", url: areaUrl + "api/DevTeam/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
+                        $.ajax({ method: "POST", url: areaUrl + "api/CaseDto/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
 							self.errorMessage('');
@@ -265,18 +268,18 @@ module TestArea.ViewModels {
 			// Loads an item.
 			self.load = function(id: any, callback?) {
                 if (!id) {
-                    id = self.devTeamId();
+                    id = self.caseId();
                 }
                 if (id) {
                     self.isLoading(true);
                     intellitect.utilities.showBusy();
-                    $.ajax({ method: "GET", url: areaUrl + "api/DevTeam/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
+                    $.ajax({ method: "GET", url: areaUrl + "api/CaseDto/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
                         .done(function(data) {
                             self.loadFromDto(data);
                             if ($.isFunction(callback)) callback(self);
                         })
                         .fail(function() {
-                            alert("Could not get DevTeam with id = " + id);
+                            alert("Could not get CaseDto with id = " + id);
                         })
                         .always(function() {
                             intellitect.utilities.hideBusy();
@@ -286,7 +289,7 @@ module TestArea.ViewModels {
             };
 
             self.reload = function(callback) {
-                self.load(self.devTeamId(), callback);
+                self.load(self.caseId(), callback);
             };
 
             // Deletes the object after a confirmation box.
@@ -301,9 +304,9 @@ module TestArea.ViewModels {
 
             // Deletes the object
             self.deleteItem = function(callback) {
-                var currentId = self.devTeamId();
+                var currentId = self.caseId();
                 if (currentId){
-                $.ajax({ method: "POST", url: areaUrl+ "api/DevTeam/Delete/" + currentId, xhrFields: { withCredentials: true } })
+                $.ajax({ method: "POST", url: areaUrl+ "api/CaseDto/Delete/" + currentId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     if (data) {
                         self.errorMessage('');
@@ -365,8 +368,8 @@ module TestArea.ViewModels {
             // Save a many-to-many collection
             self.saveCollection = function(propertyName, childId, operation) {
                 var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
-                var currentId = self.devTeamId();
-                $.ajax({ method: "POST", url: areaUrl + 'api/DevTeam/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
+                var currentId = self.caseId();
+                $.ajax({ method: "POST", url: areaUrl + 'api/CaseDto/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.errorMessage('');
                     self.loadFromDto(data.object);
@@ -433,7 +436,7 @@ module TestArea.ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.name.subscribe(self.autoSave);
+            self.title.subscribe(self.autoSave);
                         }
 
             // Create variables for ListEditorApiUrls
@@ -445,10 +448,10 @@ module TestArea.ViewModels {
                 $('#modal-dialog').modal('hide');
                 // Get new modal content
                 intellitect.utilities.showBusy();
-                $.ajax({ method: "GET", url: areaUrl + 'DevTeam/EditorHtml', data: {simple: true}, xhrFields: { withCredentials: true } })
+                $.ajax({ method: "GET", url: areaUrl + 'CaseDto/EditorHtml', data: {simple: true}, xhrFields: { withCredentials: true } })
                 .done(function(data){
                     // Add to DOM
-                    intellitect.webApi.setupModal('Edit Dev Team', data, true, false);
+                    intellitect.webApi.setupModal('Edit Case Dto', data, true, false);
                     // Data bind
                     var lastValue = self.isSavingAutomatically;
                     self.isSavingAutomatically = false;
@@ -537,7 +540,7 @@ module TestArea.ViewModels {
 
 
 
-    export namespace DevTeam {
+    export namespace CaseDto {
 
         // Classes for use in method calls to support data binding for input for arguments
     }

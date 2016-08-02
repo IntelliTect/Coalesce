@@ -139,13 +139,11 @@ module TestArea.ViewModels {
 
 
 
-
-
-
+        
+        public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
         public init(myself: Product) {};
-
 
         constructor(newItem?: any, parent?: any){
             var self = this;

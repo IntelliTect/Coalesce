@@ -74,13 +74,15 @@ module TestArea.ListViewModels {
                     self.queryString = $.param(self.query);
                 }
                 self.isLoading(true);
-                var isDto = (self.dto() !== null && self.dto() !== "");
-                var urlMethod = isDto ? "DtoList" : "List";
-                var url = areaUrl + "api/Product/" + urlMethod + "?includes=" + self.includes + "&page=" + self.page()
-                            + "&pageSize=" + self.pageSize() + "&search=" + self.search()
-                            + "&listDataSource=" + ProductDataSources[self.listDataSource];
+
+                var url = areaUrl + "api/Product/List?includes=" + self.includes + "&page=" + self.page()
+                            + "&pageSize=" + self.pageSize() + "&search=" + self.search() + "&listDataSource=";
+    
+                if (typeof self.listDataSource === "string") url += self.listDataSource;
+                else url += ProductDataSources[self.listDataSource];
+
                 if (self.queryString !== null && self.queryString !== "") url += "&" + self.queryString;
-                if (isDto) url += "&dto=" + self.dto();
+
                 $.ajax({ method: "GET",
                          url: url,
                         xhrFields: { withCredentials: true } })

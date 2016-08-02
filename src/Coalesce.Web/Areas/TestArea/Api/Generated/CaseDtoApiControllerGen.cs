@@ -9,25 +9,25 @@ using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Coalesce.Web.Models;
+using Coalesce.Web.TestArea.Models;
 using Coalesce.Domain;
 using Coalesce.Domain.External;
 
-namespace Coalesce.Web.Api
+namespace Coalesce.Web.TestArea.Api
 {
-    [Route("api/[controller]")]
+    [Route("TestArea/api/[controller]")]
     [Authorize]
-    public partial class CompanyController 
-         : LocalBaseApiController<Company, CompanyDtoGen> 
+    public partial class CaseDtoController 
+         : LocalBaseApiController<Case, CaseDto> 
     {
-        public CompanyController() { }
+        public CaseDtoController() { }
       
         /// <summary>
-        /// Returns CompanyDtoGen
+        /// Returns CaseDto
         /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<GenericListResult<Company, CompanyDtoGen>> List(
+        public virtual async Task<GenericListResult<Case, CaseDto>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -35,22 +35,23 @@ namespace Coalesce.Web.Api
             string listDataSource = null, 
             string search = null, 
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseKey", caseKey);
+            parameters.AddFilter("Title", title);
+            parameters.AddFilter("Description", description);
+            parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
+            parameters.AddFilter("Severity", severity);
+            parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<Company, CompanyDtoGen>(listResult);
+            return new GenericListResult<Case, CaseDto>(listResult);
         }
 
 
@@ -68,19 +69,14 @@ namespace Coalesce.Web.Api
             string listDataSource = null, 
             string search = null, 
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseId = null,string title = null,string assignedToName = null)
         {
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("Title", title);
+            parameters.AddFilter("AssignedToName", assignedToName);
         
             return await ListImplementation(parameters);
         }
@@ -93,19 +89,14 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseId = null,string title = null,string assignedToName = null)
         {
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("Title", title);
+            parameters.AddFilter("AssignedToName", assignedToName);
             
             return await CountImplementation(parameters);
         }
@@ -119,7 +110,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<CompanyDtoGen> Get(string id, string includes = null)
+        public virtual async Task<CaseDto> Get(string id, string includes = null)
         {
             return await GetImplementation(id, includes);
         }
@@ -135,26 +126,26 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> Save(CompanyDtoGen dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
         {
             return SaveImplementation(dto, includes, returnObject);
         }
         
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
         [Authorize]
-        protected override IQueryable<Company> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Case> GetListDataSource(ListParameters parameters)
         {
 
             return base.GetListDataSource(parameters);

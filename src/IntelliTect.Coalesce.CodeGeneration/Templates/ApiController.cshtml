@@ -102,7 +102,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))

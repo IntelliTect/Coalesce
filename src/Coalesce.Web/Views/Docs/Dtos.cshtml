@@ -2,21 +2,18 @@
     ViewBag.Title = "Coalesce";
     Layout = "_DocsLayout";
 }
-
 <h2>Data Transfer Objects (DTOs)</h2>
 <h3>DTO Overview</h3>
 <p>
     Data Transfer Objects, commonly known as DTOs, allow for transformations of data from the data store into a format more suited for transfer and use on the client side. This often means trimming properties and flattening structures to provide a leaner over-the-wire experience. The goal for Coalesce is to support this as seamlessly as possible.
 </p>
-
 <p>Coalesce supports several types of DTOs:</p>
 <ul>
     <li>DTOs that are automatically generated for each POCO database object. These are controlled via annotations on the POCO.</li>
     <li>DTOs that support the standard ViewModels.</li>
-    <li>DTOs that are created with IClassDto and create unique ViewModels</li>
+    <li>DTOs that are created with IClassDto and create unique ViewModels.</li>
+    <li>DTOs based on database views.</li>
 </ul>
-
-
 
 <h3>Automatically Generated DTOs</h3>
 <p>
@@ -25,9 +22,8 @@
 <p>Use this approach when you want to slightly modify an existing object either by including a new property or excluding a property. This is handy for situations where you want to consistently flatten the object model. For example going from a reference to a user in a ChangedBy property to a ChangedByName string. In this case only the ChangeByName string would be transferred, but the ChangeBy property would still be pulled from the database in order to fill the property.</p>
 <p>
     See DtoExcludes and DtoIncludes in the <a asp-controller="Docs" asp-action="Annotations" asp-fragment="DtoExcludes">Annotations</a>
- section for examples.
+    section for examples.
 </p>
-
 <h3>DTOs with Standard View Models</h3>
 <p>TODO: Dan fills this in.</p>
 <pre>
@@ -35,7 +31,6 @@
     Example needed
 </code>
 </pre>
-
 <h3>IClassDtos</h3>
 <p>This option for DTOs allows you to create an arbitrary class that is related one-to-one with a POCO database class. The IClassDto provides the mechanism to create the DTO and update the underlying database object. The client ViewModels as build based on the DTO class and therefore can be significantly modified from the original. These support full list and editing capability with a complete set of views: list, cards, create/edit.</p>
 <p>
@@ -49,7 +44,6 @@
     </ul>
     The collection is keyed by the original object and the value is the DTO.
 </p>
-
 <p>
     To get Coalesce to recognize the DTO, it must be added to the context as an IEnumerable. This is simply an indicator for Coalesce and does not impact the database. This may be replaced by other less obtrusive methods in the future.
 </p>
@@ -61,7 +55,6 @@
     public IEnumerable&lt;CaseDto&gt; CaseDtos { get; set; }
 </code>
 </pre>
-
 <p>
     Methods are not yet supported on DTOs.
 </p>
@@ -93,3 +86,8 @@
         
 </code>
 </pre>
+<h3>Database Views</h3>
+<p>
+    A view can manually be created in the database that will map to a regular POCO object. The typical approach is to create a POCO that has all the desired fields. Build an EF migration for this POCO, but don't apply it to the database. Replace the generated migration code with the code to generate/remove the view instead. This will all the view to be automatically created. This approach is ideal for situations where you want to filter at the database level on calculated fields. Be wary of unintentionally creating views that are read-only. This is fine, but the data will not be updatable like it is with a regular table based POCO. 
+</p>
+

@@ -35,14 +35,20 @@ namespace Coalesce.Web.Api
             string listDataSource = null, 
             string search = null, 
             // Custom fields for this object.
-            string caseId = null,string title = null,string assignedToName = null)
+            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("CaseKey", caseKey);
             parameters.AddFilter("Title", title);
-            parameters.AddFilter("AssignedToName", assignedToName);
+            parameters.AddFilter("Description", description);
+            parameters.AddFilter("OpenedAt", openedAt);
+            parameters.AddFilter("AssignedToId", assignedToId);
+            parameters.AddFilter("ReportedById", reportedById);
+            parameters.AddFilter("Severity", severity);
+            parameters.AddFilter("Status", status);
+            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
         
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<Case, CaseDto>(listResult);

@@ -165,7 +165,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 if (!_hasExplainedCopying)
                 {
                     _hasExplainedCopying = true;
-                    Console.WriteLine("If you would like for your templates to be updated by the Cli, restore the copies of ");
+                    Console.WriteLine("If you would like for your templates to be updated by the CLI, restore the copies of ");
                     Console.WriteLine("your templates in Coalesce/Templates with those from Coalesce/Originals/Templates.");
                     Console.WriteLine("If you experience issues with your templates, compare your template with the original to see what might need changing.");
                 }

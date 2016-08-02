@@ -71,12 +71,12 @@ namespace @(namespaceName).Api
             string listDataSource = null, 
             string search = null, 
             // Custom fields for this object.
-            @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+            @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
+            @foreach (PropertyViewModel prop in model.BaseViewModel.Properties.Where(f => f.IsUrlParameter))
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }

@@ -15,5 +15,13 @@ namespace IntelliTect.Coalesce.Utilities
             var claim = principal.FindFirst(ClaimTypes.NameIdentifier);
             return claim != null ? claim.Value : null;
         }
+
+        public static IEnumerable<string> GetRoles(this ClaimsPrincipal principal)
+        {
+            if (principal == null) throw new ArgumentNullException(nameof(principal));
+
+            var claims = principal.FindAll(ClaimTypes.Role);
+            return claims != null ? claims.Select(claim => claim.Value) : Enumerable.Empty<string>();
+        }
     }
 }

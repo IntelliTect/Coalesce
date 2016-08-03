@@ -797,22 +797,44 @@ namespace IntelliTect.Coalesce.Controllers
                 if (DateTime.TryParse(value, out parsedValue))
                 {
                     // Correct offset.
-                    DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
-                    if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
-                        !value.Contains(':'))
+                    if (prop.Type.IsDateTimeOffset)
                     {
-                        // Only a date
-                        var nextDate = dateTimeOffset.AddDays(1);
-                        return query.Where(string.Format(
-                            "{0} >= @0 && {0} < @1", prop.Name),
-                            dateTimeOffset, nextDate);
+                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
+                        if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
+                            !value.Contains(':'))
+                        {
+                            // Only a date
+                            var nextDate = dateTimeOffset.AddDays(1);
+                            return query.Where(string.Format(
+                                "{0} >= @0 && {0} < @1", prop.Name),
+                                dateTimeOffset, nextDate);
+                        }
+                        else
+                        {
+                            // Date and Time
+                            return query.Where(string.Format("{0} = @0",
+                                prop.Name), dateTimeOffset);
+                        }
                     }
                     else
                     {
-                        // Date and Time
-                        return query.Where(string.Format("{0} = @0",
-                            prop.Name), dateTimeOffset);
+                        if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
+                            !value.Contains(':'))
+                        {
+                            // Only a date
+                            var nextDate = parsedValue.AddDays(1);
+                            return query.Where(string.Format(
+                                "{0} >= @0 && {0} < @1", prop.Name),
+                                parsedValue, nextDate);
+                        }
+                        else
+                        {
+                            // Date and Time
+                            return query.Where(string.Format("{0} = @0",
+                                prop.Name), parsedValue);
+                        }
                     }
+                    
                 }
                 else
                 {

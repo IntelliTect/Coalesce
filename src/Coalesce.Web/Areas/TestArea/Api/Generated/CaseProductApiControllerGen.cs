@@ -50,34 +50,6 @@ namespace Coalesce.Web.TestArea.Api
 
 
         /// <summary>
-        /// Returns List<dto>
-        /// </summary>
-        [HttpGet("dtolist")]
-        [Authorize]
-        public virtual async Task<ListResult> List(
-            string includes = null, 
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, 
-            string where = null, 
-            string listDataSource = null, 
-            string search = null, 
-            string dto = null,
-            // Custom fields for this object.
-            string caseProductId = null,string caseId = null,string productId = null)
-        {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(CaseProduct).Assembly.GetType(dto);
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
-
-            // Add custom filters
-            parameters.AddFilter("CaseProductId", caseProductId);
-            parameters.AddFilter("CaseId", caseId);
-            parameters.AddFilter("ProductId", productId);
-        
-            return await ListImplementation(parameters);
-        }
-
-
-        /// <summary>
         /// Returns custom object based on supplied fields
         /// </summary>
         [HttpGet("customlist")]
@@ -93,7 +65,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseProductId", caseProductId);

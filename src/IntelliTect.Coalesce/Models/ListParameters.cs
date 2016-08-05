@@ -43,12 +43,10 @@ namespace IntelliTect.Coalesce.Models
         /// </summary>
         public Dictionary<string, string> Filters { get; }
 
-        public Type Dto { get; set; }
-
         public ListParameters(string fields = null,
             string includes = null, string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, string where = null,
-            string listDataSource = null, string search = null, Type dto = null)
+            string listDataSource = null, string search = null)
         {
             Fields = fields;
             Includes = includes;
@@ -59,7 +57,6 @@ namespace IntelliTect.Coalesce.Models
             Where = where;
             ListDataSource = listDataSource;
             Search = search;
-            Dto = dto;
             Filters = new Dictionary<string, string>();
         }
 

@@ -197,38 +197,14 @@ namespace IntelliTect.Coalesce.Controllers
                 // TODO: This needs to be adjusted to handle paging correctly.
                 var result3 = result2.Where(f => BeforeGet(f));
 
-                // Select it into the object we want
-                if (listParameters.Dto == null)
+                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
+
+                if (listParameters.FieldList.Any())
                 {
-                    // If we aren't requesting a conversion to a DTO, then map to the generated DTO
-                    IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
-
-                    if (listParameters.FieldList.Any())
-                    {
-                        return new ListResult(result4.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
-                            page, totalCount, pageSize);
-                    }
-                    return new ListResult(result4, page, totalCount, pageSize);
+                    return new ListResult(result4.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
+                        page, totalCount, pageSize);
                 }
-                else
-                {
-                    // Create a List<dto> to populate
-                    Type list = typeof(List<>);
-                    Type[] listTypeArgs = { listParameters.Dto };
-                    Type genericList = list.MakeGenericType(listTypeArgs);
-                    IEnumerable result4 = (IEnumerable)Activator.CreateInstance(genericList);
-
-                    // Use the method generated in the IL to get the implicit converter we need
-                    var converter = typeof(T)
-                        .GetMethods()
-                        .Where(m => m.Name == "op_Implicit" && m.ReturnType == listParameters.Dto)
-                        .First();
-
-                    // Use the converter to map the base type to the dto
-                    result4 = result3.Select(x => converter.Invoke(null, new[] { x })).ToList();
-
-                    return new ListResult(result4, page, totalCount, pageSize);
-                }
+                return new ListResult(result4, page, totalCount, pageSize);
             }
             catch (Exception ex)
             {
@@ -821,22 +797,44 @@ namespace IntelliTect.Coalesce.Controllers
                 if (DateTime.TryParse(value, out parsedValue))
                 {
                     // Correct offset.
-                    DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
-                    if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
-                        !value.Contains(':'))
+                    if (prop.Type.IsDateTimeOffset)
                     {
-                        // Only a date
-                        var nextDate = dateTimeOffset.AddDays(1);
-                        return query.Where(string.Format(
-                            "{0} >= @0 && {0} < @1", prop.Name),
-                            dateTimeOffset, nextDate);
+                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
+                        if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
+                            !value.Contains(':'))
+                        {
+                            // Only a date
+                            var nextDate = dateTimeOffset.AddDays(1);
+                            return query.Where(string.Format(
+                                "{0} >= @0 && {0} < @1", prop.Name),
+                                dateTimeOffset, nextDate);
+                        }
+                        else
+                        {
+                            // Date and Time
+                            return query.Where(string.Format("{0} = @0",
+                                prop.Name), dateTimeOffset);
+                        }
                     }
                     else
                     {
-                        // Date and Time
-                        return query.Where(string.Format("{0} = @0",
-                            prop.Name), dateTimeOffset);
+                        if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
+                            !value.Contains(':'))
+                        {
+                            // Only a date
+                            var nextDate = parsedValue.AddDays(1);
+                            return query.Where(string.Format(
+                                "{0} >= @0 && {0} < @1", prop.Name),
+                                parsedValue, nextDate);
+                        }
+                        else
+                        {
+                            // Date and Time
+                            return query.Where(string.Format("{0} = @0",
+                                prop.Name), parsedValue);
+                        }
                     }
+                    
                 }
                 else
                 {

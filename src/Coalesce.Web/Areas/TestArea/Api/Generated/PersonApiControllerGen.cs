@@ -56,40 +56,6 @@ namespace Coalesce.Web.TestArea.Api
 
 
         /// <summary>
-        /// Returns List<dto>
-        /// </summary>
-        [HttpGet("dtolist")]
-        [AllowAnonymous]
-        public virtual async Task<ListResult> List(
-            string includes = null, 
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, 
-            string where = null, 
-            string listDataSource = null, 
-            string search = null, 
-            string dto = null,
-            // Custom fields for this object.
-            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
-        {
-            Type dtoType = string.IsNullOrEmpty(dto) ? null : typeof(Person).Assembly.GetType(dto);
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, dtoType);
-
-            // Add custom filters
-            parameters.AddFilter("PersonId", personId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("FirstName", firstName);
-            parameters.AddFilter("LastName", lastName);
-            parameters.AddFilter("Email", email);
-            parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("PersonStatsId", personStatsId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("CompanyId", companyId);
-        
-            return await ListImplementation(parameters);
-        }
-
-
-        /// <summary>
         /// Returns custom object based on supplied fields
         /// </summary>
         [HttpGet("customlist")]
@@ -105,7 +71,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
         {
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search, null);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);

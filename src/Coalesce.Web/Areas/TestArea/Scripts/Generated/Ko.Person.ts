@@ -241,13 +241,11 @@ module TestArea.ViewModels {
         public changeSpacesToDashesInNameModal: (callback?: any) => void;
         // Variable for method arguments to allow for easy binding
         
-
-
-
+        
+        public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
         public init(myself: Person) {};
-
 
         constructor(newItem?: any, parent?: any){
             var self = this;

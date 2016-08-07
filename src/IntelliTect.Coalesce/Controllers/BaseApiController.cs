@@ -46,6 +46,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected IQueryable<T> _readOnlyDataSource;
         protected readonly ClassViewModel ClassViewModel;
         protected readonly ClassViewModel DtoViewModel;
+
         protected ILogger Logger
         {
             get
@@ -88,7 +89,7 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 // find the IQueryable if we can
                 var method = typeof(T).GetMethod(listParameters.ListDataSource);
-                if (method != null) 
+                if (method != null)
                 {
                     return (IQueryable<T>)method.Invoke(null, new object[] { Db, User });
                 }
@@ -507,25 +508,45 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 if (BeforeSave(dto, item))
                 {
-
+                    var original = item.Copy<T>();
                     MapDtoToObj(dto, item, includes);
                     try
                     {
                         SetFingerprint(item);
-
-                        Db.SaveChanges();
-                        // Pull the object to get any changes.
-                        item = DataSource.Includes(includes).FindItem(IdValue(item));
-                        // Call the method to support special cases.
-                        if (AfterSave(dto, item, origItem, Db))
+                        // Run validation in this controller
+                        var validateResult = Validate(original, dto, item);
+                        // Run validation from the POCO if it implements IValidatable
+                        if (typeof(IValidatable<T, TContext>).IsAssignableFrom(typeof(T)))
                         {
-                            if (returnObject)
-                            {
-                                item = DataSource.Includes(includes).FindItem(IdValue(item));
-                            }
+                            var validatable = item as IValidatable<T, TContext>;
+                            validateResult.Merge(validatable.Validate(original, item, Db, User));
                         }
 
-                        result.WasSuccessful = true;
+                        if (validateResult.WasSuccessful)
+                        {
+                            Db.SaveChanges();
+                            // Pull the object to get any changes.
+                            item = DataSource.Includes(includes).FindItem(IdValue(item));
+                            // Call the method to support special cases.
+                            if (AfterSave(dto, item, origItem, Db))
+                            {
+                                if (returnObject)
+                                {
+                                    item = DataSource.Includes(includes).FindItem(IdValue(item));
+                                }
+                            }
+
+                            result.WasSuccessful = true;
+                        }
+                        else
+                        {
+                            result.WasSuccessful = false;
+                            result.Message = validateResult.Message;
+                            if (validateResult.ReturnObject != null)
+                            {
+                                result.Object = MapObjToDto(validateResult.ReturnObject, includes);
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -834,7 +855,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 prop.Name), parsedValue);
                         }
                     }
-                    
+
                 }
                 else
                 {
@@ -872,6 +893,18 @@ namespace IntelliTect.Coalesce.Controllers
                     return query.Where(string.Format("{0} = {1}", prop.Name, value));
                 }
             }
+        }
+
+        /// <summary>
+        /// Called after the object is mapped and before it is saved. Allows for returning validation information.
+        /// </summary>
+        /// <param name="original">Property level copy of original object before mapping.</param>
+        /// <param name="dto">Values handed in by the DTO.</param>
+        /// <param name="updated">Values to be saved.</param>
+        /// <returns></returns>
+        protected virtual ValidateResult<T> Validate(T original, TDto dto, T updated)
+        {
+            return new Models.ValidateResult<T>();
         }
 
         /// <summary>

@@ -51,5 +51,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return Name;
             }
         }
+
+        public bool ConvertsFromJsString
+        {
+            get
+            {
+                return Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
+            }
+        }
     }
 }

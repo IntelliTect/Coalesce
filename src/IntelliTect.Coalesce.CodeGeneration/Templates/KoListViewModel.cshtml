@@ -101,7 +101,7 @@ module @moduleName {
         @:public @(prop.ValidValueListName.ToCamelCase()): KnockoutObservableArray<any> = ko.observableArray([]);
         @:public load@(prop.ValidValueListName): (callback: any) => void;
         }
-    @foreach(var method in model.Methods.Where(m => m.IsStatic && !m.IsInternalUse))
+    @foreach(var method in model.Methods.Where(m => m.IsStatic && m.IsClientMethod))
         {
         @:// Call server method (@method.Name)
         if (method.Comment.Length > 0)
@@ -259,7 +259,7 @@ module @moduleName {
             });
 
     // Method Implementations
-            @foreach (var method in model.Methods.Where(m => m.IsStatic && !m.IsInternalUse))
+            @foreach (var method in model.Methods.Where(m => m.IsStatic && m.IsClientMethod))
             {
             <text>
             self.@method.JsVariable = function(@method.TsParameters, reload: Boolean = true){
@@ -301,9 +301,13 @@ module @moduleName {
             }
 
             self.@method.JsVariableUi = function(callback?: any) {
-                @foreach(var param in method.ClientParameters)
+                @foreach(var param in method.ClientParameters.Where(f=>f.ConvertsFromJsString))
                 {
                 @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
+                }
+                @foreach(var param in method.ClientParameters.Where(f=>!f.ConvertsFromJsString))
+                {
+                @:var @param.Name: @param.Type.TsType = null;
                 }
                 self.@(method.JsVariable)(@(method.JsArguments("", true)));
             }
@@ -339,7 +343,7 @@ module @moduleName {
 
     export namespace @(model.ListViewModelClassName) {
         // Classes for use in method calls to support data binding for input for arguments
-        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && f.IsStatic && !f.IsInternalUse)){
+        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && f.IsStatic && f.IsClientMethod)){
         @:export class @(method.ArgsName) {
             @foreach (var arg in method.ClientParameters)
             {

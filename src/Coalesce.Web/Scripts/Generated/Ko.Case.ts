@@ -384,8 +384,12 @@ module ViewModels {
                             if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
                             self.errorMessage(errorMsg);
                             self.validationIssues(validationIssues);
-
-							alert("Could not save the item: " + errorMsg);
+                            // If an object was returned, load that object.
+                            if (xhr.responseJSON && xhr.responseJSON.object){
+                                self.loadFromDto(xhr.responseJSON.object);
+                            }
+                            // TODO: allow for turning this off
+                            alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);

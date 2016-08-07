@@ -10,7 +10,7 @@ namespace Coalesce.Web.Api
     {
         protected override bool BeforeSave(PersonDtoGen dto, Person obj)
         {
-            if (dto.FirstName.Contains("[user]"))
+            if (dto.FirstName != null && dto.FirstName.Contains("[user]"))
             {
                 dto.FirstName = dto.FirstName.Replace("[user]", User.Identity.Name);
             }

@@ -43,7 +43,7 @@ module @moduleName {
     // Add an enum for all methods that are static and IQueryable
     export enum @(model.Name)DataSources {
             Default,
-            @foreach(var method in model.BaseViewModel.Methods.Where(m => m.IsIQueryableOfParent && !m.IsInternalUse && m.IsStatic).OrderBy(m => m.Name))
+            @foreach(var method in model.BaseViewModel.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod && m.IsStatic).OrderBy(m => m.Name))
             {
             @:@method.Name,
             }

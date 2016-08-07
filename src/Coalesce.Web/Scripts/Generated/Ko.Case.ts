@@ -581,18 +581,18 @@ module ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.title.subscribe(self.autoSave);
-            self.description.subscribe(self.autoSave);
-            self.openedAt.subscribe(self.autoSave);
-            self.assignedToId.subscribe(self.autoSave);
-            self.assignedTo.subscribe(self.autoSave);
-            self.reportedById.subscribe(self.autoSave);
-            self.reportedBy.subscribe(self.autoSave);
-            self.attachment.subscribe(self.autoSave);
-            self.severity.subscribe(self.autoSave);
-            self.status.subscribe(self.autoSave);
-            self.devTeamAssignedId.subscribe(self.autoSave);
-            self.devTeamAssigned.subscribe(self.autoSave);
+                self.title.subscribe(self.autoSave);
+                self.description.subscribe(self.autoSave);
+                self.openedAt.subscribe(self.autoSave);
+                self.assignedToId.subscribe(self.autoSave);
+                self.assignedTo.subscribe(self.autoSave);
+                self.reportedById.subscribe(self.autoSave);
+                self.reportedBy.subscribe(self.autoSave);
+                self.attachment.subscribe(self.autoSave);
+                self.severity.subscribe(self.autoSave);
+                self.status.subscribe(self.autoSave);
+                self.devTeamAssignedId.subscribe(self.autoSave);
+                self.devTeamAssigned.subscribe(self.autoSave);
                             self.products.subscribe(function(changes){
                     if (!self.isLoading() && changes.length > 0){
                         for (var i in changes){
@@ -601,7 +601,7 @@ module ViewModels {
                         }
                     }
                 }, null, "arrayChange");
-            }
+}  
 
             // Create variables for ListEditorApiUrls
             // Create loading function for Valid Values

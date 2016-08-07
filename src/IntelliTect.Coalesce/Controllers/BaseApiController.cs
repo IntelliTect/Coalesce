@@ -519,7 +519,7 @@ namespace IntelliTect.Coalesce.Controllers
                         if (typeof(IValidatable<T, TContext>).IsAssignableFrom(typeof(T)))
                         {
                             var validatable = item as IValidatable<T, TContext>;
-                            validateResult.Merge(validatable.Validate(original, item, Db, User));
+                            validateResult.Merge(validatable.Validate(original, Db, User));
                         }
 
                         if (validateResult.WasSuccessful)

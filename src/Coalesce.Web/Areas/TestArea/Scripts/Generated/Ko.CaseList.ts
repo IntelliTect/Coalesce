@@ -107,6 +107,22 @@ module TestArea.ListViewModels {
         public randomizeDatesAndStatusModal: (callback?: any) => void;
         // Variable for method arguments to allow for easy binding
         
+        // Call server method (GetAllOpenCases)
+        public getAllOpenCases: (callback?: any) => void;
+        // Result of server method (GetAllOpenCases)
+        public getAllOpenCasesResult: KnockoutObservable<any> = ko.observable();
+        // True while the server method (GetAllOpenCases) is being called
+        public getAllOpenCasesIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (GetAllOpenCases) if it fails.
+        public getAllOpenCasesMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (GetAllOpenCases) was successful.
+        public getAllOpenCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (GetAllOpenCases)
+        public getAllOpenCasesUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (GetAllOpenCases)
+        public getAllOpenCasesModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        
         constructor() {
             var self = this; 
             var searchTimeout: number = 0;
@@ -317,6 +333,47 @@ module TestArea.ListViewModels {
 
             self.randomizeDatesAndStatusModal = function(callback?: any) {
                     self.randomizeDatesAndStatusUi(callback);
+            }
+            
+
+            
+            self.getAllOpenCases = function(callback?: any, reload: Boolean = true){
+                self.getAllOpenCasesIsLoading(true);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Case/GetAllOpenCases",
+                         data: {
+
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					self.getAllOpenCasesMessage('');
+					self.getAllOpenCasesWasSuccessful(true);
+					self.getAllOpenCasesResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
+				})
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.getAllOpenCasesWasSuccessful(false);
+                    self.getAllOpenCasesMessage(errorMsg);
+
+					alert("Could not call method getAllOpenCases: " + errorMsg);
+				})
+				.always(function() {
+                    self.getAllOpenCasesIsLoading(false);
+				});
+            }
+
+            self.getAllOpenCasesUi = function(callback?: any) {
+                                self.getAllOpenCases(callback);
+            }
+
+            self.getAllOpenCasesModal = function(callback?: any) {
+                    self.getAllOpenCasesUi(callback);
             }
             
 

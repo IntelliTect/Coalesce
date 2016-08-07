@@ -118,7 +118,7 @@
 
                     <!-- Editor buttons -->
                     <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                        @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
+                        @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.IsClientMethod && !f.IsStatic))
                             {
                         <!-- Action buttons -->
                             <div class="btn-group" role="group">
@@ -126,7 +126,7 @@
                                     Actions <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    @foreach (var method in model.Methods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsInternalUse && !f.IsStatic))
+                                    @foreach (var method in model.Methods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.IsClientMethod && !f.IsStatic))
                                         {
                                         <li>@Display.MethodHelper(method)</li>
                                         }
@@ -158,7 +158,7 @@
 
 
 
-@if (model.Methods.Any(f => f.IsStatic && !f.IsInternalUse))
+@if (model.Methods.Any(f => f.IsStatic && f.IsClientMethod))
 {
     <div class="card">
         <div class="card-heading">
@@ -175,7 +175,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (MethodViewModel method in model.Methods.Where(f => f.IsStatic && !f.IsInternalUse))
+                    @foreach (MethodViewModel method in model.Methods.Where(f => f.IsStatic && f.IsClientMethod))
                     {
                         <tr>
                             <td>
@@ -200,7 +200,7 @@
 }
 
 
-@foreach (var method in model.Methods.Where(f => f.IsStatic && f.ClientParameters.Any() && !f.IsInternalUse))
+@foreach (var method in model.Methods.Where(f => f.IsStatic && f.ClientParameters.Any() && f.IsClientMethod))
 {
     <!-- Modal for method: @method.Name -->
     <div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog">

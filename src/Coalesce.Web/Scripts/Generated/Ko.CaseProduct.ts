@@ -493,11 +493,11 @@ module ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.caseId.subscribe(self.autoSave);
-            self.case.subscribe(self.autoSave);
-            self.productId.subscribe(self.autoSave);
-            self.product.subscribe(self.autoSave);
-                        }
+                self.caseId.subscribe(self.autoSave);
+                self.case.subscribe(self.autoSave);
+                self.productId.subscribe(self.autoSave);
+                self.product.subscribe(self.autoSave);
+            }  
 
             // Create variables for ListEditorApiUrls
             // Create loading function for Valid Values

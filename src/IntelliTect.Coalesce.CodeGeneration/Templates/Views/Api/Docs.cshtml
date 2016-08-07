@@ -87,12 +87,12 @@
                     <th>Split on Spaces</th>
                     <th>Search Type</th>
                 </tr>
-                @foreach (var prop in vm.SearchProperties().Values)
+                @foreach (var prop in vm.SearchProperties())
                 {
                     <tr>
-                        <th>@prop.Name</th>
-                        <td>@prop.SearchIsSplitOnSpaces</td>
-                        <td>@prop.SearchMethod.ToString()</td>
+                        <th>@prop.Key</th>
+                        <td>@prop.Value.SearchIsSplitOnSpaces</td>
+                        <td>@prop.Value.SearchMethodName</td>
                     </tr>
                 }
 

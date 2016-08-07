@@ -437,8 +437,8 @@ module ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.name.subscribe(self.autoSave);
-                        }
+                self.name.subscribe(self.autoSave);
+            }  
 
             // Create variables for ListEditorApiUrls
             // Create loading function for Valid Values

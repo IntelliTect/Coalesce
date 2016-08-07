@@ -59,6 +59,9 @@ module ListViewModels {
         public nextPage: () => void;
         // Gets the previous page.
         public previousPage: () => void;
+        // Control order of results
+        public orderBy: KnockoutObservable<string> = ko.observable("");
+        public orderByDescending: KnockoutObservable<string> = ko.observable("");
 
         // True once the data has been loaded.
 		public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
@@ -122,6 +125,63 @@ module ListViewModels {
         public getUserPublicModal: (callback?: any) => void;
         // Variable for method arguments to allow for easy binding
         
+        // Call server method (NamesStartingWith)
+        // Gets all the first names starting with the characters.
+        public namesStartingWith: (characters: String, callback?: any) => void;
+        // Result of server method (NamesStartingWith)
+        public namesStartingWithResult: KnockoutObservable<any> = ko.observable();
+        // True while the server method (NamesStartingWith) is being called
+        public namesStartingWithIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (NamesStartingWith) if it fails.
+        public namesStartingWithMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (NamesStartingWith) was successful.
+        public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (NamesStartingWith)
+        public namesStartingWithUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWith)
+        public namesStartingWithModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public namesStartingWithWithArgs: (args?: PersonList.NamesStartingWithArgs, callback?: any) => void;
+        
+        public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
+        
+        // Call server method (NamesStartingWithPublic)
+        // Gets all the first names starting with the characters.
+        public namesStartingWithPublic: (characters: String, callback?: any) => void;
+        // Result of server method (NamesStartingWithPublic)
+        public namesStartingWithPublicResult: KnockoutObservable<any> = ko.observable();
+        // True while the server method (NamesStartingWithPublic) is being called
+        public namesStartingWithPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (NamesStartingWithPublic) if it fails.
+        public namesStartingWithPublicMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (NamesStartingWithPublic) was successful.
+        public namesStartingWithPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (NamesStartingWithPublic)
+        public namesStartingWithPublicUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWithPublic)
+        public namesStartingWithPublicModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        public namesStartingWithPublicWithArgs: (args?: PersonList.NamesStartingWithPublicArgs, callback?: any) => void;
+        
+        public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
+        
+        // Call server method (BorCPeople)
+        // People whose last name starts with B or c
+        public borCPeople: (callback?: any) => void;
+        // Result of server method (BorCPeople)
+        public borCPeopleResult: KnockoutObservable<any> = ko.observable();
+        // True while the server method (BorCPeople) is being called
+        public borCPeopleIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (BorCPeople) if it fails.
+        public borCPeopleMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (BorCPeople) was successful.
+        public borCPeopleWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (BorCPeople)
+        public borCPeopleUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (BorCPeople)
+        public borCPeopleModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        
         constructor() {
             var self = this; 
             var searchTimeout: number = 0;
@@ -135,7 +195,9 @@ module ListViewModels {
                 self.isLoading(true);
 
                 var url = areaUrl + "api/Person/List?includes=" + self.includes + "&page=" + self.page()
-                            + "&pageSize=" + self.pageSize() + "&search=" + self.search() + "&listDataSource=";
+                            + "&pageSize=" + self.pageSize() + "&search=" + self.search()
+                            + "&orderBy=" + self.orderBy() + "&orderByDescending=" + self.orderByDescending()
+                            + "&listDataSource=";
     
                 if (typeof self.listDataSource === "string") url += self.listDataSource;
                 else url += PersonDataSources[self.listDataSource];
@@ -388,6 +450,153 @@ module ListViewModels {
             }
             
 
+            
+            self.namesStartingWith = function(characters: String, callback?: any, reload: Boolean = true){
+                self.namesStartingWithIsLoading(true);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Person/NamesStartingWith",
+                         data: {
+                        characters: characters
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					self.namesStartingWithMessage('');
+					self.namesStartingWithWasSuccessful(true);
+					self.namesStartingWithResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
+				})
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.namesStartingWithWasSuccessful(false);
+                    self.namesStartingWithMessage(errorMsg);
+
+					alert("Could not call method namesStartingWith: " + errorMsg);
+				})
+				.always(function() {
+                    self.namesStartingWithIsLoading(false);
+				});
+            }
+
+            self.namesStartingWithUi = function(callback?: any) {
+                var characters: String = prompt('Characters');
+                                self.namesStartingWith(characters, callback);
+            }
+
+            self.namesStartingWithModal = function(callback?: any) {
+                $('#method-NamesStartingWith').modal();
+                $('#method-NamesStartingWith').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWith .btn-ok').click(function()
+                    {
+                        self.namesStartingWithWithArgs(null, callback);
+                        $('#method-NamesStartingWith').modal('hide');
+                    });
+                });
+            }
+            
+            self.namesStartingWithWithArgs = function(args?: PersonList.NamesStartingWithArgs, callback?: any) {
+                if (!args) args = self.namesStartingWithArgs;
+                self.namesStartingWith(args.characters(), callback);
+            }
+
+            
+            self.namesStartingWithPublic = function(characters: String, callback?: any, reload: Boolean = true){
+                self.namesStartingWithPublicIsLoading(true);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Person/NamesStartingWithPublic",
+                         data: {
+                        characters: characters
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					self.namesStartingWithPublicMessage('');
+					self.namesStartingWithPublicWasSuccessful(true);
+					self.namesStartingWithPublicResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
+				})
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.namesStartingWithPublicWasSuccessful(false);
+                    self.namesStartingWithPublicMessage(errorMsg);
+
+					alert("Could not call method namesStartingWithPublic: " + errorMsg);
+				})
+				.always(function() {
+                    self.namesStartingWithPublicIsLoading(false);
+				});
+            }
+
+            self.namesStartingWithPublicUi = function(callback?: any) {
+                var characters: String = prompt('Characters');
+                                self.namesStartingWithPublic(characters, callback);
+            }
+
+            self.namesStartingWithPublicModal = function(callback?: any) {
+                $('#method-NamesStartingWithPublic').modal();
+                $('#method-NamesStartingWithPublic').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWithPublic .btn-ok').click(function()
+                    {
+                        self.namesStartingWithPublicWithArgs(null, callback);
+                        $('#method-NamesStartingWithPublic').modal('hide');
+                    });
+                });
+            }
+            
+            self.namesStartingWithPublicWithArgs = function(args?: PersonList.NamesStartingWithPublicArgs, callback?: any) {
+                if (!args) args = self.namesStartingWithPublicArgs;
+                self.namesStartingWithPublic(args.characters(), callback);
+            }
+
+            
+            self.borCPeople = function(callback?: any, reload: Boolean = true){
+                self.borCPeopleIsLoading(true);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Person/BorCPeople",
+                         data: {
+
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					self.borCPeopleMessage('');
+					self.borCPeopleWasSuccessful(true);
+					self.borCPeopleResult(data.object);
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
+				})
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.borCPeopleWasSuccessful(false);
+                    self.borCPeopleMessage(errorMsg);
+
+					alert("Could not call method borCPeople: " + errorMsg);
+				})
+				.always(function() {
+                    self.borCPeopleIsLoading(false);
+				});
+            }
+
+            self.borCPeopleUi = function(callback?: any) {
+                                self.borCPeople(callback);
+            }
+
+            self.borCPeopleModal = function(callback?: any) {
+                    self.borCPeopleUi(callback);
+            }
+            
+
                     }
     }
 
@@ -396,6 +605,12 @@ module ListViewModels {
         export class AddArgs {
             public numberOne: KnockoutObservable<number> = ko.observable(null);
             public numberTwo: KnockoutObservable<number> = ko.observable(null);
+        }
+        export class NamesStartingWithArgs {
+            public characters: KnockoutObservable<string> = ko.observable(null);
+        }
+        export class NamesStartingWithPublicArgs {
+            public characters: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

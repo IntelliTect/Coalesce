@@ -692,21 +692,19 @@ module ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.title.subscribe(self.autoSave);
-            self.firstName.subscribe(self.autoSave);
-            self.lastName.subscribe(self.autoSave);
-            self.email.subscribe(self.autoSave);
-            self.gender.subscribe(self.autoSave);
-            self.casesAssigned.subscribe(self.autoSave);
-            self.casesReported.subscribe(self.autoSave);
-            self.birthDate.subscribe(self.autoSave);
-            self.lastBath.subscribe(self.autoSave);
-            self.nextUpgrade.subscribe(self.autoSave);
-            self.personStatsId.subscribe(self.autoSave);
-            self.timeZone.subscribe(self.autoSave);
-            self.companyId.subscribe(self.autoSave);
-            self.company.subscribe(self.autoSave);
-                        }
+                self.title.subscribe(self.autoSave);
+                self.firstName.subscribe(self.autoSave);
+                self.lastName.subscribe(self.autoSave);
+                self.email.subscribe(self.autoSave);
+                self.gender.subscribe(self.autoSave);
+                self.birthDate.subscribe(self.autoSave);
+                self.lastBath.subscribe(self.autoSave);
+                self.nextUpgrade.subscribe(self.autoSave);
+                self.personStatsId.subscribe(self.autoSave);
+                self.timeZone.subscribe(self.autoSave);
+                self.companyId.subscribe(self.autoSave);
+                self.company.subscribe(self.autoSave);
+            }  
 
             // Create variables for ListEditorApiUrls
             self.CasesAssignedListUrl = ko.computed({

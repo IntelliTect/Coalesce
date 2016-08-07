@@ -79,6 +79,28 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
+                <h3>@vm.Name Search Properties</h3>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Property</th>
+                    <th>Split on Spaces</th>
+                    <th>Search Type</th>
+                </tr>
+                @foreach (var prop in vm.SearchProperties().Values)
+                {
+                    <tr>
+                        <th>@prop.Name</th>
+                        <td>@prop.SearchIsSplitOnSpaces</td>
+                        <td>@prop.SearchMethod.ToString()</td>
+                    </tr>
+                }
+
+            </table>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
                 <h3>@vm.Name Methods</h3>
             </div>
             <table class="table">
@@ -89,7 +111,7 @@
                     <th>TypeScript Parameters</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var method in vm.Methods.Where(m=>!m.IsInternalUse))
+                @foreach (var method in vm.Methods.Where(m=>m.IsClientMethod))
                 {
                     <tr>
                         <th>@method.Name</th>
@@ -107,6 +129,31 @@
                 }
             </table>
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@vm.Name Alternate List Data Sources</h3>
+                <div>These can be accessed via the list view model's listDataSource via an enumeration.</div>
+            </div>
+            @if (vm.Methods.Any(m => m.IsIQueryableOfParent && m.IsClientMethod))
+            {
+            <ul>
+                @foreach (var method in vm.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod))
+                {
+                    <li>
+                        @method.Name
+                    </li>
+                }
+            </ul>
+            }
+            else
+            {
+                <div class="panel-body">
+                    None
+                </div>
+            }
+        </div>
+
 
 
         <div class="panel panel-default">

@@ -203,22 +203,5 @@ namespace Coalesce.Web.TestArea.Api
             }
             return result;
         }
-        
-        // Method: GetAllOpenCases
-        [HttpPost("GetAllOpenCases")]
-        
-        public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases (){
-            var result = new SaveResult<IEnumerable<CaseDtoGen>>();
-            try{
-                var objResult = Case.GetAllOpenCases(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Case, CaseDtoGen>.ObjToDtoMapper(o, User, ""));
-                result.WasSuccessful = true;
-                result.Message = null;
-            }catch(Exception ex){
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
             }
 }

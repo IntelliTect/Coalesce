@@ -726,9 +726,9 @@ module @moduleName {
 
             // Save on changes
             function setupSubscriptions() {
-            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && p.HasViewModelProperty))
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
             {
-            @:self.@(prop.JsVariable).subscribe(self.autoSave);
+                @:self.@(prop.JsVariable).subscribe(self.autoSave);
             }
             @foreach (PropertyViewModel prop in model.Properties.Where(p => p.IsManytoManyCollection && !p.IsInternalUse))
             {
@@ -741,7 +741,7 @@ module @moduleName {
                     @:}
                 @:}, null, "arrayChange");
             }
-            }
+}  
 
             // Create variables for ListEditorApiUrls
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse))

@@ -259,57 +259,5 @@ namespace Coalesce.Web.TestArea.Api
             }
             return result;
         }
-        
-        // Method: NamesStartingWith
-        [HttpPost("NamesStartingWith")]
-        [Authorize]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWith (String characters){
-            if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
-            var result = new SaveResult<IEnumerable<String>>();
-            try{
-                var objResult = Person.NamesStartingWith(characters, Db);
-                                result.Object = objResult;
-                result.WasSuccessful = true;
-                result.Message = null;
-            }catch(Exception ex){
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
-        
-        // Method: NamesStartingWithPublic
-        [HttpPost("NamesStartingWithPublic")]
-        
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic (String characters){
-            var result = new SaveResult<IEnumerable<String>>();
-            try{
-                var objResult = Person.NamesStartingWithPublic(characters, Db);
-                                result.Object = objResult;
-                result.WasSuccessful = true;
-                result.Message = null;
-            }catch(Exception ex){
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
-        
-        // Method: BorCPeople
-        [HttpPost("BorCPeople")]
-        
-        public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople (){
-            var result = new SaveResult<IEnumerable<PersonDtoGen>>();
-            try{
-                var objResult = Person.BorCPeople(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Person, PersonDtoGen>.ObjToDtoMapper(o, User, ""));
-                result.WasSuccessful = true;
-                result.Message = null;
-            }catch(Exception ex){
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
             }
 }

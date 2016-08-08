@@ -353,6 +353,10 @@ module ViewModels {
 				    }else{
 					    self.personStats().loadFromDto(data.personStats);
 				    }
+                    if (self.parent && self.parent.myId == self.personStats().myId && typeof self.parent == typeof self.personStats())
+                    {
+                        self.parent.loadFromDto(data.personStats);
+                    }
                 }
 				if (!data.company) { 
 					if (data.companyId != self.companyId()) {
@@ -364,6 +368,10 @@ module ViewModels {
 				    }else{
 					    self.company().loadFromDto(data.company);
 				    }
+                    if (self.parent && self.parent.myId == self.company().myId && typeof self.parent == typeof self.company())
+                    {
+                        self.parent.loadFromDto(data.company);
+                    }
                 }
 
 				// The rest of the objects are loaded now.

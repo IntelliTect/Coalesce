@@ -237,6 +237,10 @@ module ViewModels {
 				    }else{
 					    self.case().loadFromDto(data.case);
 				    }
+                    if (self.parent && self.parent.myId == self.case().myId && typeof self.parent == typeof self.case())
+                    {
+                        self.parent.loadFromDto(data.case);
+                    }
                 }
 				if (!data.product) { 
 					if (data.productId != self.productId()) {
@@ -248,6 +252,10 @@ module ViewModels {
 				    }else{
 					    self.product().loadFromDto(data.product);
 				    }
+                    if (self.parent && self.parent.myId == self.product().myId && typeof self.parent == typeof self.product())
+                    {
+                        self.parent.loadFromDto(data.product);
+                    }
                 }
 
 				// The rest of the objects are loaded now.

@@ -387,13 +387,10 @@ module @moduleName {
 				    @:}else{
 					    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
 				    @:}
-                    if (prop.IsDbSet)
-                    {
                     @:if (self.parent && self.parent.myId == self.@(prop.JsVariable)().myId && typeof self.parent == typeof self.@(prop.JsVariable)())
                     @:{
                         @:self.parent.loadFromDto(data.@prop.JsonName);
                     @:}
-                    }
                 @:}
                 }
 

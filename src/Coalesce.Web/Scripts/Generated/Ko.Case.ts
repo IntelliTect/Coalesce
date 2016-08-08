@@ -295,6 +295,10 @@ module ViewModels {
 				    }else{
 					    self.assignedTo().loadFromDto(data.assignedTo);
 				    }
+                    if (self.parent && self.parent.myId == self.assignedTo().myId && typeof self.parent == typeof self.assignedTo())
+                    {
+                        self.parent.loadFromDto(data.assignedTo);
+                    }
                 }
 				if (!data.reportedBy) { 
 					if (data.reportedById != self.reportedById()) {
@@ -306,6 +310,10 @@ module ViewModels {
 				    }else{
 					    self.reportedBy().loadFromDto(data.reportedBy);
 				    }
+                    if (self.parent && self.parent.myId == self.reportedBy().myId && typeof self.parent == typeof self.reportedBy())
+                    {
+                        self.parent.loadFromDto(data.reportedBy);
+                    }
                 }
 				if (!data.devTeamAssigned) { 
 					if (data.devTeamAssignedId != self.devTeamAssignedId()) {
@@ -317,6 +325,10 @@ module ViewModels {
 				    }else{
 					    self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
 				    }
+                    if (self.parent && self.parent.myId == self.devTeamAssigned().myId && typeof self.parent == typeof self.devTeamAssigned())
+                    {
+                        self.parent.loadFromDto(data.devTeamAssigned);
+                    }
                 }
 
 				// The rest of the objects are loaded now.

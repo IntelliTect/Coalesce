@@ -294,7 +294,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsClientMethod { get
             {
-                return !IsInternalUse && Name != "Validate";
+                return !IsInternalUse && Name != "Validate" && Name != "PostSave";
             } }
     }
 }

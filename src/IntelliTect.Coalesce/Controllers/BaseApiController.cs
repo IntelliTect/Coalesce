@@ -519,7 +519,7 @@ namespace IntelliTect.Coalesce.Controllers
                         if (typeof(IValidatable<T, TContext>).IsAssignableFrom(typeof(T)))
                         {
                             var validatable = item as IValidatable<T, TContext>;
-                            validateResult.Merge(validatable.Validate(original, Db, User));
+                            validateResult.Merge(validatable.Validate(original, Db, User, includes));
                         }
 
                         if (validateResult.WasSuccessful)
@@ -530,6 +530,13 @@ namespace IntelliTect.Coalesce.Controllers
                             // Call the method to support special cases.
                             if (AfterSave(dto, item, origItem, Db))
                             {
+                                // Call PostSave if the object has that.
+                                if (typeof(IPostSavable<T, TContext>).IsAssignableFrom(typeof(T)))
+                                {
+                                    var postSavable = item as IPostSavable<T, TContext>;
+                                    postSavable.PostSave(original, Db, User, includes);
+                                }
+
                                 if (returnObject)
                                 {
                                     item = DataSource.Includes(includes).FindItem(IdValue(item));
@@ -580,6 +587,7 @@ namespace IntelliTect.Coalesce.Controllers
 
             return result;
         }
+
 
         protected virtual void SetFingerprint(T item)
         {

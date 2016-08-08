@@ -235,7 +235,7 @@ namespace Coalesce.Domain
                 .Include(f => f.Company);
         }
 
-        public ValidateResult<Person> Validate(Person original, AppDbContext db, ClaimsPrincipal user)
+        public ValidateResult<Person> Validate(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
         {
             // Check to make sure the name is a certain length after it has been saved.
             if (PersonId >0 && FirstName != null && FirstName.Length < 3    )

@@ -231,20 +231,24 @@ module TestArea.ViewModels {
 					if (data.caseId != self.caseId()) {
                         self.case(null);
                     }
-                }else if (!self.case()){
-					self.case(new Case(data.case, self));
-				}else{
-					self.case().loadFromDto(data.case);
-				}
+                }else {
+                    if (!self.case()){
+					    self.case(new Case(data.case, self));
+				    }else{
+					    self.case().loadFromDto(data.case);
+				    }
+                }
 				if (!data.product) { 
 					if (data.productId != self.productId()) {
                         self.product(null);
                     }
-                }else if (!self.product()){
-					self.product(new Product(data.product, self));
-				}else{
-					self.product().loadFromDto(data.product);
-				}
+                }else {
+                    if (!self.product()){
+					    self.product(new Product(data.product, self));
+				    }else{
+					    self.product().loadFromDto(data.product);
+				    }
+                }
 
 				// The rest of the objects are loaded now.
 				self.caseProductId(data.caseProductId);

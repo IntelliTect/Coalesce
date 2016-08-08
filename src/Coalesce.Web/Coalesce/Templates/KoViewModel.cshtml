@@ -381,11 +381,20 @@ module @moduleName {
                     }else{
 					@:self.@(prop.JsVariable)(null);
                     }
-                @:}else if (!self.@(prop.JsVariable)()){
-					@:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
-				@:}else{
-					@:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
-				@:}
+                @:}else {
+                    @:if (!self.@(prop.JsVariable)()){
+					    @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
+				    @:}else{
+					    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
+				    @:}
+                    if (prop.IsDbSet)
+                    {
+                    @:if (self.parent && self.parent.myId == self.@(prop.JsVariable)().myId && typeof self.parent == typeof self.@(prop.JsVariable)())
+                    @:{
+                        @:self.parent.loadFromDto(data.@prop.JsonName);
+                    @:}
+                    }
+                @:}
                 }
 
 				// The rest of the objects are loaded now.

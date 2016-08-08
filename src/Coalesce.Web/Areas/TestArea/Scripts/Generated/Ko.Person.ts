@@ -347,20 +347,24 @@ module TestArea.ViewModels {
 					if (data.personStatsId != self.personStatsId()) {
                         self.personStats(null);
                     }
-                }else if (!self.personStats()){
-					self.personStats(new PersonStats(data.personStats, self));
-				}else{
-					self.personStats().loadFromDto(data.personStats);
-				}
+                }else {
+                    if (!self.personStats()){
+					    self.personStats(new PersonStats(data.personStats, self));
+				    }else{
+					    self.personStats().loadFromDto(data.personStats);
+				    }
+                }
 				if (!data.company) { 
 					if (data.companyId != self.companyId()) {
                         self.company(null);
                     }
-                }else if (!self.company()){
-					self.company(new Company(data.company, self));
-				}else{
-					self.company().loadFromDto(data.company);
-				}
+                }else {
+                    if (!self.company()){
+					    self.company(new Company(data.company, self));
+				    }else{
+					    self.company().loadFromDto(data.company);
+				    }
+                }
 
 				// The rest of the objects are loaded now.
 				self.personId(data.personId);

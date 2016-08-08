@@ -19,11 +19,11 @@ namespace IntelliTect.Coalesce.Data
         /// <summary>
         /// Called after the object is mapped and before it is saved. Allows for returning validation information.
         /// </summary>
-        /// <param name="updated">Values to be saved.</param>
+        /// <param name="original">Object before being updated from DTO.</param>
         /// <param name="db">Database context.</param>
         /// <param name="user">Current user.</param>
         /// <returns></returns>
-        ValidateResult<T> Validate(T original, TContext db, ClaimsPrincipal user);
+        ValidateResult<T> Validate(T original, TContext db, ClaimsPrincipal user, string includes);
         
     }
 }

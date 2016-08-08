@@ -58,8 +58,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string JsonName => Wrapper.Name.ToCamelCase();
 
-        public string Comment => Wrapper.Comment;
-
+        public string Comment {
+            get
+            {
+                return Regex.Replace(Wrapper.Comment, "\n(\\s+)", "\n        // ");
+            }
+        }
         /// <summary>
         /// Name of the type
         /// </summary>

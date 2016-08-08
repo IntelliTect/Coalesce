@@ -353,7 +353,7 @@ module @moduleName {
 				// Load the lists of other objects
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
                 { 
-                @:if (data.@prop.Name !== null) {
+                @:if (data.@prop.JsonName != null) {
 					@:// Merge the incoming array
 					@:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self);
                     if (prop.IsManytoManyCollection)

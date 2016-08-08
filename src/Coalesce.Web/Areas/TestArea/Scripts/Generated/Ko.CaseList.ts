@@ -257,6 +257,8 @@ module TestArea.ListViewModels {
 
             self.getAllOpenCasesCount = function(callback?: any, reload: Boolean = true){
                 self.getAllOpenCasesCountIsLoading(true);
+                self.getAllOpenCasesCountMessage('');
+                self.getAllOpenCasesCountWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Case/GetAllOpenCasesCount",
                          data: {
@@ -264,8 +266,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getAllOpenCasesCountMessage('');
-					self.getAllOpenCasesCountWasSuccessful(true);
 					self.getAllOpenCasesCountResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -279,7 +279,7 @@ module TestArea.ListViewModels {
                     self.getAllOpenCasesCountWasSuccessful(false);
                     self.getAllOpenCasesCountMessage(errorMsg);
 
-					alert("Could not call method getAllOpenCasesCount: " + errorMsg);
+					//alert("Could not call method getAllOpenCasesCount: " + errorMsg);
 				})
 				.always(function() {
                     self.getAllOpenCasesCountIsLoading(false);
@@ -298,6 +298,8 @@ module TestArea.ListViewModels {
             
             self.randomizeDatesAndStatus = function(callback?: any, reload: Boolean = true){
                 self.randomizeDatesAndStatusIsLoading(true);
+                self.randomizeDatesAndStatusMessage('');
+                self.randomizeDatesAndStatusWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Case/RandomizeDatesAndStatus",
                          data: {
@@ -305,8 +307,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.randomizeDatesAndStatusMessage('');
-					self.randomizeDatesAndStatusWasSuccessful(true);
 					self.randomizeDatesAndStatusResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -320,7 +320,7 @@ module TestArea.ListViewModels {
                     self.randomizeDatesAndStatusWasSuccessful(false);
                     self.randomizeDatesAndStatusMessage(errorMsg);
 
-					alert("Could not call method randomizeDatesAndStatus: " + errorMsg);
+					//alert("Could not call method randomizeDatesAndStatus: " + errorMsg);
 				})
 				.always(function() {
                     self.randomizeDatesAndStatusIsLoading(false);
@@ -339,6 +339,8 @@ module TestArea.ListViewModels {
             
             self.getAllOpenCases = function(callback?: any, reload: Boolean = true){
                 self.getAllOpenCasesIsLoading(true);
+                self.getAllOpenCasesMessage('');
+                self.getAllOpenCasesWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Case/GetAllOpenCases",
                          data: {
@@ -346,8 +348,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getAllOpenCasesMessage('');
-					self.getAllOpenCasesWasSuccessful(true);
 					self.getAllOpenCasesResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -361,7 +361,7 @@ module TestArea.ListViewModels {
                     self.getAllOpenCasesWasSuccessful(false);
                     self.getAllOpenCasesMessage(errorMsg);
 
-					alert("Could not call method getAllOpenCases: " + errorMsg);
+					//alert("Could not call method getAllOpenCases: " + errorMsg);
 				})
 				.always(function() {
                     self.getAllOpenCasesIsLoading(false);

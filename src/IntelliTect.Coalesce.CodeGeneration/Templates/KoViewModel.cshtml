@@ -977,6 +977,7 @@ module @moduleName {
                 @if (method.ClientParameters.Any()) {
                 @:$('#method-@method.Name').modal();
                 @:$('#method-@method.Name').on('shown.bs.modal', function() {
+                    @:$('#method-@method.Name .btn-ok').unbind('click');
                     @:$('#method-@method.Name .btn-ok').click(function()
                     @:{
                         @:self.@(method.JsVariableWithArgs)(null, callback);

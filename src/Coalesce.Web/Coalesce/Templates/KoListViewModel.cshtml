@@ -269,13 +269,13 @@ module @moduleName {
             <text>
             self.@method.JsVariable = function(@method.TsParameters, reload: Boolean = true){
                 self.@(method.JsVariableIsLoading)(true);
+                self.@(method.JsVariableMessage)('');
+                self.@(method.JsVariableWasSuccessful)(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "@(method.ApiUrl)",
                          data: @method.JsPostObject,
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.@(method.JsVariableMessage)('');
-					self.@(method.JsVariableWasSuccessful)(true);
 					self.@(method.JsVariableResult)(data.object);
                     @if (method.ReturnType.Name == method.Parent.Name)
                     {
@@ -298,7 +298,7 @@ module @moduleName {
                     self.@(method.JsVariableWasSuccessful)(false);
                     self.@(method.JsVariableMessage)(errorMsg);
 
-					alert("Could not call method @method.JsVariable: " + errorMsg);
+					//alert("Could not call method @method.JsVariable: " + errorMsg);
 				})
 				.always(function() {
                     self.@(method.JsVariableIsLoading)(false);
@@ -321,6 +321,7 @@ module @moduleName {
                 @if (method.ClientParameters.Any()) { 
                 @:$('#method-@method.Name').modal();
                 @:$('#method-@method.Name').on('shown.bs.modal', function() {
+                    @:$('#method-@method.Name .btn-ok').unbind('click');
                     @:$('#method-@method.Name .btn-ok').click(function()
                     @:{
                         @:self.@(method.JsVariableWithArgs)(null, callback);

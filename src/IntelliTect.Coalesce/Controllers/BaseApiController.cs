@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
 using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.Controllers
 {
@@ -97,6 +98,7 @@ namespace IntelliTect.Coalesce.Controllers
             return DataSource ?? ReadOnlyDataSource;
         }
 
+        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<ListResult> ListImplementation(ListParameters listParameters)
         {
             try
@@ -157,7 +159,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Get a count
                 int totalCount; 
-                if (result is IAsyncQueryProvider) totalCount = await result.CountAsync();
+                if (result is IAsyncQueryProvider) totalCount = result.Count();
                 else totalCount = result.Count();
 
 
@@ -179,7 +181,9 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Make the database call
                 IEnumerable<T> result2;
-                if (result is IAsyncQueryProvider) result2 = await result.ToListAsync();
+                // TODO: The Async queries can be much slower than synchronous ones at RTM GME: 8/8/2016
+                // https://github.com/aspnet/Home/releases/tag/1.0.0#issue142
+                if (result is IAsyncQueryProvider) result2 = result.ToList();
                 else result2 = result.ToList();
 
                 // Add external entities
@@ -219,6 +223,7 @@ namespace IntelliTect.Coalesce.Controllers
         }
 
 
+        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<int> CountImplementation(ListParameters listParameters)
         {
             try
@@ -228,7 +233,7 @@ namespace IntelliTect.Coalesce.Controllers
                 result = AddFilters(result, listParameters);
 
                 int count;
-                if (result is IAsyncQueryProvider) count = await result.CountAsync();
+                if (result is IAsyncQueryProvider) count = result.Count();
                 else count = result.Count();
 
                 return count;
@@ -414,10 +419,11 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
+        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<TDto> GetImplementation(string id, string includes = null)
         {
             // Get the item and get external data.
-            var item = (await DataSource.Includes(includes).FindItemAsync(id)).IncludeExternal(includes);
+            var item = (DataSource.Includes(includes).FindItem(id)).IncludeExternal(includes);
 
             if (!BeforeGet(item))
             {

@@ -94,9 +94,13 @@ namespace IntelliTect.Coalesce.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                if ( prop.ListEditorUrl == null )
+                if (prop.ListEditorUrl == null)
                 {
-                    Console.WriteLine( $"WARNING: Inverse Property was not found on {prop.Parent.Name}.{prop.Name}. You're missing an InverseProperty attribute." );
+                    Console.WriteLine($"WARNING: Inverse Property was not found on {prop.Parent.Name}.{prop.Name}. You're missing an InverseProperty attribute.");
+                    //if (prop.InverseProperty != null)
+                    //{
+                    //    Console.WriteLine($"{prop.InverseProperty.Name}");
+                    //}
                 }
                 return @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
             }

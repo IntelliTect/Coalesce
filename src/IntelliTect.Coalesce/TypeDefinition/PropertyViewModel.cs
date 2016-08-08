@@ -855,7 +855,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 else if (Object != null)
                 {
-                    return Object.PrimaryKey;
+                    return Object.PropertyByName(Parent.Name);
                 }
                 return null;
             }

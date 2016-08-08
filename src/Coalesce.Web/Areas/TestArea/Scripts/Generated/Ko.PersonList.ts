@@ -316,6 +316,8 @@ module TestArea.ListViewModels {
 
             self.add = function(numberOne: number, numberTwo: number, callback?: any, reload: Boolean = true){
                 self.addIsLoading(true);
+                self.addMessage('');
+                self.addWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/Add",
                          data: {
@@ -324,8 +326,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.addMessage('');
-					self.addWasSuccessful(true);
 					self.addResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -339,7 +339,7 @@ module TestArea.ListViewModels {
                     self.addWasSuccessful(false);
                     self.addMessage(errorMsg);
 
-					alert("Could not call method add: " + errorMsg);
+					//alert("Could not call method add: " + errorMsg);
 				})
 				.always(function() {
                     self.addIsLoading(false);
@@ -355,6 +355,7 @@ module TestArea.ListViewModels {
             self.addModal = function(callback?: any) {
                 $('#method-Add').modal();
                 $('#method-Add').on('shown.bs.modal', function() {
+                    $('#method-Add .btn-ok').unbind('click');
                     $('#method-Add .btn-ok').click(function()
                     {
                         self.addWithArgs(null, callback);
@@ -371,6 +372,8 @@ module TestArea.ListViewModels {
             
             self.getUser = function(callback?: any, reload: Boolean = true){
                 self.getUserIsLoading(true);
+                self.getUserMessage('');
+                self.getUserWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/GetUser",
                          data: {
@@ -378,8 +381,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getUserMessage('');
-					self.getUserWasSuccessful(true);
 					self.getUserResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -393,7 +394,7 @@ module TestArea.ListViewModels {
                     self.getUserWasSuccessful(false);
                     self.getUserMessage(errorMsg);
 
-					alert("Could not call method getUser: " + errorMsg);
+					//alert("Could not call method getUser: " + errorMsg);
 				})
 				.always(function() {
                     self.getUserIsLoading(false);
@@ -412,6 +413,8 @@ module TestArea.ListViewModels {
             
             self.getUserPublic = function(callback?: any, reload: Boolean = true){
                 self.getUserPublicIsLoading(true);
+                self.getUserPublicMessage('');
+                self.getUserPublicWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/GetUserPublic",
                          data: {
@@ -419,8 +422,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getUserPublicMessage('');
-					self.getUserPublicWasSuccessful(true);
 					self.getUserPublicResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -434,7 +435,7 @@ module TestArea.ListViewModels {
                     self.getUserPublicWasSuccessful(false);
                     self.getUserPublicMessage(errorMsg);
 
-					alert("Could not call method getUserPublic: " + errorMsg);
+					//alert("Could not call method getUserPublic: " + errorMsg);
 				})
 				.always(function() {
                     self.getUserPublicIsLoading(false);
@@ -453,6 +454,8 @@ module TestArea.ListViewModels {
             
             self.namesStartingWith = function(characters: String, callback?: any, reload: Boolean = true){
                 self.namesStartingWithIsLoading(true);
+                self.namesStartingWithMessage('');
+                self.namesStartingWithWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/NamesStartingWith",
                          data: {
@@ -460,8 +463,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.namesStartingWithMessage('');
-					self.namesStartingWithWasSuccessful(true);
 					self.namesStartingWithResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -475,7 +476,7 @@ module TestArea.ListViewModels {
                     self.namesStartingWithWasSuccessful(false);
                     self.namesStartingWithMessage(errorMsg);
 
-					alert("Could not call method namesStartingWith: " + errorMsg);
+					//alert("Could not call method namesStartingWith: " + errorMsg);
 				})
 				.always(function() {
                     self.namesStartingWithIsLoading(false);
@@ -490,6 +491,7 @@ module TestArea.ListViewModels {
             self.namesStartingWithModal = function(callback?: any) {
                 $('#method-NamesStartingWith').modal();
                 $('#method-NamesStartingWith').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWith .btn-ok').unbind('click');
                     $('#method-NamesStartingWith .btn-ok').click(function()
                     {
                         self.namesStartingWithWithArgs(null, callback);
@@ -506,6 +508,8 @@ module TestArea.ListViewModels {
             
             self.namesStartingWithPublic = function(characters: String, callback?: any, reload: Boolean = true){
                 self.namesStartingWithPublicIsLoading(true);
+                self.namesStartingWithPublicMessage('');
+                self.namesStartingWithPublicWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/NamesStartingWithPublic",
                          data: {
@@ -513,8 +517,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.namesStartingWithPublicMessage('');
-					self.namesStartingWithPublicWasSuccessful(true);
 					self.namesStartingWithPublicResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -528,7 +530,7 @@ module TestArea.ListViewModels {
                     self.namesStartingWithPublicWasSuccessful(false);
                     self.namesStartingWithPublicMessage(errorMsg);
 
-					alert("Could not call method namesStartingWithPublic: " + errorMsg);
+					//alert("Could not call method namesStartingWithPublic: " + errorMsg);
 				})
 				.always(function() {
                     self.namesStartingWithPublicIsLoading(false);
@@ -543,6 +545,7 @@ module TestArea.ListViewModels {
             self.namesStartingWithPublicModal = function(callback?: any) {
                 $('#method-NamesStartingWithPublic').modal();
                 $('#method-NamesStartingWithPublic').on('shown.bs.modal', function() {
+                    $('#method-NamesStartingWithPublic .btn-ok').unbind('click');
                     $('#method-NamesStartingWithPublic .btn-ok').click(function()
                     {
                         self.namesStartingWithPublicWithArgs(null, callback);
@@ -559,6 +562,8 @@ module TestArea.ListViewModels {
             
             self.borCPeople = function(callback?: any, reload: Boolean = true){
                 self.borCPeopleIsLoading(true);
+                self.borCPeopleMessage('');
+                self.borCPeopleWasSuccessful(null);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/BorCPeople",
                          data: {
@@ -566,8 +571,6 @@ module TestArea.ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.borCPeopleMessage('');
-					self.borCPeopleWasSuccessful(true);
 					self.borCPeopleResult(data.object);
                     if (reload) {
                       self.load(callback);
@@ -581,7 +584,7 @@ module TestArea.ListViewModels {
                     self.borCPeopleWasSuccessful(false);
                     self.borCPeopleMessage(errorMsg);
 
-					alert("Could not call method borCPeople: " + errorMsg);
+					//alert("Could not call method borCPeople: " + errorMsg);
 				})
 				.always(function() {
                     self.borCPeopleIsLoading(false);

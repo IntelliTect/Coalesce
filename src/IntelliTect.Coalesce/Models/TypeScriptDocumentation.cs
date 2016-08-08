@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.Models
         {
             // Read it a line at a time and build the docs.
             List<string> comments = new List<string>() ;
-            foreach (var rawLine in file.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var rawLine in file.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var line = rawLine.Trim();
                 //Console.WriteLine(line);

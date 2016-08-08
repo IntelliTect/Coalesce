@@ -59,6 +59,9 @@ module TestArea.ListViewModels {
         public nextPage: () => void;
         // Gets the previous page.
         public previousPage: () => void;
+        // Control order of results
+        public orderBy: KnockoutObservable<string> = ko.observable("");
+        public orderByDescending: KnockoutObservable<string> = ko.observable("");
 
         // True once the data has been loaded.
 		public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
@@ -192,7 +195,9 @@ module TestArea.ListViewModels {
                 self.isLoading(true);
 
                 var url = areaUrl + "api/Person/List?includes=" + self.includes + "&page=" + self.page()
-                            + "&pageSize=" + self.pageSize() + "&search=" + self.search() + "&listDataSource=";
+                            + "&pageSize=" + self.pageSize() + "&search=" + self.search()
+                            + "&orderBy=" + self.orderBy() + "&orderByDescending=" + self.orderByDescending()
+                            + "&listDataSource=";
     
                 if (typeof self.listDataSource === "string") url += self.listDataSource;
                 else url += PersonDataSources[self.listDataSource];
@@ -344,7 +349,7 @@ module TestArea.ListViewModels {
             self.addUi = function(callback?: any) {
                 var numberOne: number = parseFloat(prompt('Number One'));
                 var numberTwo: number = parseFloat(prompt('Number Two'));
-                self.add(numberOne, numberTwo, callback);
+                                self.add(numberOne, numberTwo, callback);
             }
 
             self.addModal = function(callback?: any) {
@@ -396,7 +401,7 @@ module TestArea.ListViewModels {
             }
 
             self.getUserUi = function(callback?: any) {
-                self.getUser(callback);
+                                self.getUser(callback);
             }
 
             self.getUserModal = function(callback?: any) {
@@ -437,7 +442,7 @@ module TestArea.ListViewModels {
             }
 
             self.getUserPublicUi = function(callback?: any) {
-                self.getUserPublic(callback);
+                                self.getUserPublic(callback);
             }
 
             self.getUserPublicModal = function(callback?: any) {
@@ -479,7 +484,7 @@ module TestArea.ListViewModels {
 
             self.namesStartingWithUi = function(callback?: any) {
                 var characters: String = prompt('Characters');
-                self.namesStartingWith(characters, callback);
+                                self.namesStartingWith(characters, callback);
             }
 
             self.namesStartingWithModal = function(callback?: any) {
@@ -532,7 +537,7 @@ module TestArea.ListViewModels {
 
             self.namesStartingWithPublicUi = function(callback?: any) {
                 var characters: String = prompt('Characters');
-                self.namesStartingWithPublic(characters, callback);
+                                self.namesStartingWithPublic(characters, callback);
             }
 
             self.namesStartingWithPublicModal = function(callback?: any) {
@@ -584,7 +589,7 @@ module TestArea.ListViewModels {
             }
 
             self.borCPeopleUi = function(callback?: any) {
-                self.borCPeople(callback);
+                                self.borCPeople(callback);
             }
 
             self.borCPeopleModal = function(callback?: any) {

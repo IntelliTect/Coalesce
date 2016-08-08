@@ -234,7 +234,7 @@ module @moduleName {
         @:];
         }
 
-        @foreach(var method in model.Methods.Where(m => !m.IsStatic && !m.IsInternalUse))
+        @foreach(var method in model.Methods.Where(m => !m.IsStatic && m.IsClientMethod))
         {
         @:// Call server method (@method.Name)
         if (method.Comment.Length > 0)
@@ -381,11 +381,17 @@ module @moduleName {
                     }else{
 					@:self.@(prop.JsVariable)(null);
                     }
-                @:}else if (!self.@(prop.JsVariable)()){
-					@:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
-				@:}else{
-					@:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
-				@:}
+                @:}else {
+                    @:if (!self.@(prop.JsVariable)()){
+					    @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
+				    @:}else{
+					    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
+				    @:}
+                    @:if (self.parent && self.parent.myId == self.@(prop.JsVariable)().myId && typeof self.parent == typeof self.@(prop.JsVariable)())
+                    @:{
+                        @:self.parent.loadFromDto(data.@prop.JsonName);
+                    @:}
+                @:}
                 }
 
 				// The rest of the objects are loaded now.
@@ -482,8 +488,12 @@ module @moduleName {
                             if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
                             self.errorMessage(errorMsg);
                             self.validationIssues(validationIssues);
-
-							alert("Could not save the item: " + errorMsg);
+                            // If an object was returned, load that object.
+                            if (xhr.responseJSON && xhr.responseJSON.object){
+                                self.loadFromDto(xhr.responseJSON.object);
+                            }
+                            // TODO: allow for turning this off
+                            alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -722,9 +732,9 @@ module @moduleName {
 
             // Save on changes
             function setupSubscriptions() {
-            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && p.HasViewModelProperty))
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
             {
-            @:self.@(prop.JsVariable).subscribe(self.autoSave);
+                @:self.@(prop.JsVariable).subscribe(self.autoSave);
             }
             @foreach (PropertyViewModel prop in model.Properties.Where(p => p.IsManytoManyCollection && !p.IsInternalUse))
             {
@@ -737,7 +747,7 @@ module @moduleName {
                     @:}
                 @:}, null, "arrayChange");
             }
-            }
+}  
 
             // Create variables for ListEditorApiUrls
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse))
@@ -906,7 +916,7 @@ module @moduleName {
 
 
             // Method Implementations
-            @foreach (var method in model.Methods.Where(m => !m.IsStatic && !m.IsInternalUse))
+            @foreach (var method in model.Methods.Where(m => !m.IsStatic && m.IsClientMethod))
             {
             <text>
             self.@method.JsVariable = function(@method.TsParameters, reload: Boolean = true){
@@ -952,9 +962,13 @@ module @moduleName {
             </text>
 
             @:self.@method.JsVariableUi = function(callback?: any) {
-                @foreach (var param in method.ClientParameters)
+                @foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
                 {
                 @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
+                }
+                @foreach(var param in method.ClientParameters.Where(f=>!f.ConvertsFromJsString))
+                {
+                @:var @param.Name: @param.Type.TsType = null;
                 }
                 @:self.@(method.JsVariable)(@(method.JsArguments("", true)));
             @:}
@@ -1024,7 +1038,7 @@ module @moduleName {
         }
 
         // Classes for use in method calls to support data binding for input for arguments
-        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && !f.IsStatic && !f.IsInternalUse)){
+        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && !f.IsStatic && f.IsClientMethod)){
         @:export class @(method.ArgsName) {
             @foreach (var arg in method.ClientParameters)
             {

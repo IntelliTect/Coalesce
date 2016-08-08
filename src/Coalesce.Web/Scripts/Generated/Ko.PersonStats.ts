@@ -6,6 +6,9 @@ module ViewModels {
     // *** External Type PersonStats
     export class PersonStats
     {
+        // ID of the object.
+        public myId: any = 0;
+
         // Observables
 		public personStatsId: KnockoutObservable<number> = ko.observable(null);
 		public height: KnockoutObservable<number> = ko.observable(null);
@@ -21,6 +24,8 @@ module ViewModels {
             // Load the object
 			self.loadFromDto = function(data: any) {
 				if (!data) return;
+				// Set the ID
+				self.myId = data.personStatsId;
 
                 // Load the properties.
                 self.personStatsId(data.personStatsId);

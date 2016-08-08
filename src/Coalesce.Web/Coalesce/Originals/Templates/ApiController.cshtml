@@ -204,7 +204,7 @@ namespace @(namespaceName).Api
         @(model.SecurityInfo.ReadAnnotation)
         protected override IQueryable<@(model.BaseViewModel.Name)> GetListDataSource(ListParameters parameters)
         {
-            @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && !m.IsInternalUse))
+            @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && m.IsClientMethod))
             {
             @:if (parameters.ListDataSource == "@(method.Name)")
             @:{
@@ -224,7 +224,7 @@ namespace @(namespaceName).Api
         }
 
         // Methods
-        @foreach (var method in model.Methods.Where(m=>!m.IsInternalUse))
+        @foreach (var method in model.Methods.Where(m=>m.IsClientMethod))
         {
         <text>
         // Method: @method.Name

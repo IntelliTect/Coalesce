@@ -59,6 +59,9 @@ module TestArea.ListViewModels {
         public nextPage: () => void;
         // Gets the previous page.
         public previousPage: () => void;
+        // Control order of results
+        public orderBy: KnockoutObservable<string> = ko.observable("");
+        public orderByDescending: KnockoutObservable<string> = ko.observable("");
 
         // True once the data has been loaded.
 		public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
@@ -133,7 +136,9 @@ module TestArea.ListViewModels {
                 self.isLoading(true);
 
                 var url = areaUrl + "api/Case/List?includes=" + self.includes + "&page=" + self.page()
-                            + "&pageSize=" + self.pageSize() + "&search=" + self.search() + "&listDataSource=";
+                            + "&pageSize=" + self.pageSize() + "&search=" + self.search()
+                            + "&orderBy=" + self.orderBy() + "&orderByDescending=" + self.orderByDescending()
+                            + "&listDataSource=";
     
                 if (typeof self.listDataSource === "string") url += self.listDataSource;
                 else url += CaseDataSources[self.listDataSource];
@@ -282,7 +287,7 @@ module TestArea.ListViewModels {
             }
 
             self.getAllOpenCasesCountUi = function(callback?: any) {
-                self.getAllOpenCasesCount(callback);
+                                self.getAllOpenCasesCount(callback);
             }
 
             self.getAllOpenCasesCountModal = function(callback?: any) {
@@ -323,7 +328,7 @@ module TestArea.ListViewModels {
             }
 
             self.randomizeDatesAndStatusUi = function(callback?: any) {
-                self.randomizeDatesAndStatus(callback);
+                                self.randomizeDatesAndStatus(callback);
             }
 
             self.randomizeDatesAndStatusModal = function(callback?: any) {
@@ -364,7 +369,7 @@ module TestArea.ListViewModels {
             }
 
             self.getAllOpenCasesUi = function(callback?: any) {
-                self.getAllOpenCases(callback);
+                                self.getAllOpenCases(callback);
             }
 
             self.getAllOpenCasesModal = function(callback?: any) {

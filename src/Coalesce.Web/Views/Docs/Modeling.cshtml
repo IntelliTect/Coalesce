@@ -6,7 +6,7 @@
 <h2>Modeling</h2>
 <h3>Model Overview</h3>
 <p>
-    Models are core business objects of your application. Specifically they are how the data in your application will be handled. The design of your models is very important. In Entity Framework, data models are just Plain Old CLR Classes (POCOs). 
+    Models are core business objects of your application. Specifically they are how the data in your application will be handled. The design of your models is very important. In Entity Framework, data models are just Plain Old CLR Classes (POCOs).
 </p>
 
 <h3>Building a data model</h3>
@@ -19,7 +19,6 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
     }
-
     public class DbContext: DbContext
     {
         public DbSet&lt;Person&gt; People { get; set; }
@@ -38,7 +37,6 @@
         public int CompanyId { get; set; }
         public string Name { get; set; }
     }
-
     public class Person
     {
         public int PersonId { get; set; }
@@ -47,7 +45,6 @@
         public int? CompanyId { get; set; }
         public Company Company { get; set; }
     }
-
     public class DbContext: DbContext
     {
         public DbSet&lt;Person&gt; People { get; set; }
@@ -57,7 +54,7 @@
 </pre>
 <p>
     If the naming convention for the foreign key isn't followed, you need to use the [ForeignKey("keyName")] attribute on the related object. This is a regular EF convention.
-</p>    
+</p>
 <pre>
 <code class="language-html">
         public int? OrgId { get; set; }
@@ -104,11 +101,23 @@
 </code></pre>
 <br />
 
+<h4>Custom Server Validation</h4>
+<p>
+    Using the IValidatable interface exposes the <code>ValidateResult&lt;T&gt; Validate(T original, TContext db, ClaimsPrincipal user, string includes)</code>. This allows for validating the result of the mapping before it is saved. It also allows for a custom error message to be returned to the client.
+</p>
+
+<h4>Custom Logic After Save</h4>
+<p>
+    Using the IPostSavable interface exposes the <code>void PostSave(T original, TContext db, ClaimsPrincipal user, string includes);</code>. This allows for doing additional work after the save succeeds.
+</p>
+
 <h4>Controlling Object Mapping</h4>
-<p>By default Coalesce maps all database entities to a generated DTO before returning to the client.  The DTO is generated based on the
+<p>
+    By default Coalesce maps all database entities to a generated DTO before returning to the client.  The DTO is generated based on the
     attributes on your model, and provides security trimming on properties based on the user's roles.  If you want to handle the mapping
     yourself simply add an implicit conversion operator to your model that returns your DTO.  Then on the client side specify the full
-    type name of the DTO and coalesce will use your DTO and conversion rather than the generated DTO.</p>
+    type name of the DTO and coalesce will use your DTO and conversion rather than the generated DTO.
+</p>
 
 <pre><code class="language-html">
     public class PersonDropDownDto
@@ -116,11 +125,9 @@
         public int PersonId { get; set; }
         public string FullName { get; set; }
     }
-
     public class Person
     {
         ...
-
         public static implicit operator PersonDropDownDto(Person person)
         {
             var dto = new PersonDropDownDto();
@@ -129,7 +136,6 @@
             return dto;
         }
     }
-
     &lt;script type="text/javascript"&gt;
     var personList = new ListViewModels.PersonList();
     personList.dto("Coalesce.Domain.Dtos.PersonDropDownDto");
@@ -285,4 +291,5 @@
 
 <br />
 <p>
-    <b>The generated admin views have documentation pages that include all view model documentation specific to each class.</b></p>
+    <b>The generated admin views have documentation pages that include all view model documentation specific to each class.</b>
+</p>

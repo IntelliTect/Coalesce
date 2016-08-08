@@ -45,7 +45,7 @@
         }
     }
 
-    @if (model.Methods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic && !f.IsInternalUse))
+    @if (model.Methods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic && f.IsClientMethod))
     {
     <div class="row">
         <div class="col-lg-offset-2 col-lg-10">
@@ -61,7 +61,7 @@
                         <label class="col-md-2">Loading</label>
                         <label class="col-md-2 bold">Notes</label>
                     </div>
-                    @foreach (MethodViewModel method in model.Methods.Where(f => f.SecurityInfo.IsExecutable(User) && !f.IsStatic && !f.IsInternalUse))
+                    @foreach (MethodViewModel method in model.Methods.Where(f => f.SecurityInfo.IsExecutable(User) && !f.IsStatic && f.IsClientMethod))
                         {
                         <div class="form-group form-horizontal">
                             <div class="col-md-2">

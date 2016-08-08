@@ -289,29 +289,47 @@ module ViewModels {
 					if (data.assignedToId != self.assignedToId()) {
                         self.assignedTo(null);
                     }
-                }else if (!self.assignedTo()){
-					self.assignedTo(new Person(data.assignedTo, self));
-				}else{
-					self.assignedTo().loadFromDto(data.assignedTo);
-				}
+                }else {
+                    if (!self.assignedTo()){
+					    self.assignedTo(new Person(data.assignedTo, self));
+				    }else{
+					    self.assignedTo().loadFromDto(data.assignedTo);
+				    }
+                    if (self.parent && self.parent.myId == self.assignedTo().myId && typeof self.parent == typeof self.assignedTo())
+                    {
+                        self.parent.loadFromDto(data.assignedTo);
+                    }
+                }
 				if (!data.reportedBy) { 
 					if (data.reportedById != self.reportedById()) {
                         self.reportedBy(null);
                     }
-                }else if (!self.reportedBy()){
-					self.reportedBy(new Person(data.reportedBy, self));
-				}else{
-					self.reportedBy().loadFromDto(data.reportedBy);
-				}
+                }else {
+                    if (!self.reportedBy()){
+					    self.reportedBy(new Person(data.reportedBy, self));
+				    }else{
+					    self.reportedBy().loadFromDto(data.reportedBy);
+				    }
+                    if (self.parent && self.parent.myId == self.reportedBy().myId && typeof self.parent == typeof self.reportedBy())
+                    {
+                        self.parent.loadFromDto(data.reportedBy);
+                    }
+                }
 				if (!data.devTeamAssigned) { 
 					if (data.devTeamAssignedId != self.devTeamAssignedId()) {
                         self.devTeamAssigned(null);
                     }
-                }else if (!self.devTeamAssigned()){
-					self.devTeamAssigned(new DevTeam(data.devTeamAssigned, self));
-				}else{
-					self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
-				}
+                }else {
+                    if (!self.devTeamAssigned()){
+					    self.devTeamAssigned(new DevTeam(data.devTeamAssigned, self));
+				    }else{
+					    self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
+				    }
+                    if (self.parent && self.parent.myId == self.devTeamAssigned().myId && typeof self.parent == typeof self.devTeamAssigned())
+                    {
+                        self.parent.loadFromDto(data.devTeamAssigned);
+                    }
+                }
 
 				// The rest of the objects are loaded now.
 				self.caseKey(data.caseKey);
@@ -384,8 +402,12 @@ module ViewModels {
                             if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
                             self.errorMessage(errorMsg);
                             self.validationIssues(validationIssues);
-
-							alert("Could not save the item: " + errorMsg);
+                            // If an object was returned, load that object.
+                            if (xhr.responseJSON && xhr.responseJSON.object){
+                                self.loadFromDto(xhr.responseJSON.object);
+                            }
+                            // TODO: allow for turning this off
+                            alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -577,18 +599,18 @@ module ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.title.subscribe(self.autoSave);
-            self.description.subscribe(self.autoSave);
-            self.openedAt.subscribe(self.autoSave);
-            self.assignedToId.subscribe(self.autoSave);
-            self.assignedTo.subscribe(self.autoSave);
-            self.reportedById.subscribe(self.autoSave);
-            self.reportedBy.subscribe(self.autoSave);
-            self.attachment.subscribe(self.autoSave);
-            self.severity.subscribe(self.autoSave);
-            self.status.subscribe(self.autoSave);
-            self.devTeamAssignedId.subscribe(self.autoSave);
-            self.devTeamAssigned.subscribe(self.autoSave);
+                self.title.subscribe(self.autoSave);
+                self.description.subscribe(self.autoSave);
+                self.openedAt.subscribe(self.autoSave);
+                self.assignedToId.subscribe(self.autoSave);
+                self.assignedTo.subscribe(self.autoSave);
+                self.reportedById.subscribe(self.autoSave);
+                self.reportedBy.subscribe(self.autoSave);
+                self.attachment.subscribe(self.autoSave);
+                self.severity.subscribe(self.autoSave);
+                self.status.subscribe(self.autoSave);
+                self.devTeamAssignedId.subscribe(self.autoSave);
+                self.devTeamAssigned.subscribe(self.autoSave);
                             self.products.subscribe(function(changes){
                     if (!self.isLoading() && changes.length > 0){
                         for (var i in changes){
@@ -597,7 +619,7 @@ module ViewModels {
                         }
                     }
                 }, null, "arrayChange");
-            }
+}  
 
             // Create variables for ListEditorApiUrls
             // Create loading function for Valid Values

@@ -347,20 +347,32 @@ module TestArea.ViewModels {
 					if (data.personStatsId != self.personStatsId()) {
                         self.personStats(null);
                     }
-                }else if (!self.personStats()){
-					self.personStats(new PersonStats(data.personStats, self));
-				}else{
-					self.personStats().loadFromDto(data.personStats);
-				}
+                }else {
+                    if (!self.personStats()){
+					    self.personStats(new PersonStats(data.personStats, self));
+				    }else{
+					    self.personStats().loadFromDto(data.personStats);
+				    }
+                    if (self.parent && self.parent.myId == self.personStats().myId && typeof self.parent == typeof self.personStats())
+                    {
+                        self.parent.loadFromDto(data.personStats);
+                    }
+                }
 				if (!data.company) { 
 					if (data.companyId != self.companyId()) {
                         self.company(null);
                     }
-                }else if (!self.company()){
-					self.company(new Company(data.company, self));
-				}else{
-					self.company().loadFromDto(data.company);
-				}
+                }else {
+                    if (!self.company()){
+					    self.company(new Company(data.company, self));
+				    }else{
+					    self.company().loadFromDto(data.company);
+				    }
+                    if (self.parent && self.parent.myId == self.company().myId && typeof self.parent == typeof self.company())
+                    {
+                        self.parent.loadFromDto(data.company);
+                    }
+                }
 
 				// The rest of the objects are loaded now.
 				self.personId(data.personId);
@@ -443,8 +455,12 @@ module TestArea.ViewModels {
                             if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
                             self.errorMessage(errorMsg);
                             self.validationIssues(validationIssues);
-
-							alert("Could not save the item: " + errorMsg);
+                            // If an object was returned, load that object.
+                            if (xhr.responseJSON && xhr.responseJSON.object){
+                                self.loadFromDto(xhr.responseJSON.object);
+                            }
+                            // TODO: allow for turning this off
+                            alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -688,21 +704,19 @@ module TestArea.ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.title.subscribe(self.autoSave);
-            self.firstName.subscribe(self.autoSave);
-            self.lastName.subscribe(self.autoSave);
-            self.email.subscribe(self.autoSave);
-            self.gender.subscribe(self.autoSave);
-            self.casesAssigned.subscribe(self.autoSave);
-            self.casesReported.subscribe(self.autoSave);
-            self.birthDate.subscribe(self.autoSave);
-            self.lastBath.subscribe(self.autoSave);
-            self.nextUpgrade.subscribe(self.autoSave);
-            self.personStatsId.subscribe(self.autoSave);
-            self.timeZone.subscribe(self.autoSave);
-            self.companyId.subscribe(self.autoSave);
-            self.company.subscribe(self.autoSave);
-                        }
+                self.title.subscribe(self.autoSave);
+                self.firstName.subscribe(self.autoSave);
+                self.lastName.subscribe(self.autoSave);
+                self.email.subscribe(self.autoSave);
+                self.gender.subscribe(self.autoSave);
+                self.birthDate.subscribe(self.autoSave);
+                self.lastBath.subscribe(self.autoSave);
+                self.nextUpgrade.subscribe(self.autoSave);
+                self.personStatsId.subscribe(self.autoSave);
+                self.timeZone.subscribe(self.autoSave);
+                self.companyId.subscribe(self.autoSave);
+                self.company.subscribe(self.autoSave);
+            }  
 
             // Create variables for ListEditorApiUrls
             self.CasesAssignedListUrl = ko.computed({

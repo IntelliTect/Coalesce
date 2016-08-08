@@ -47,15 +47,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string JsVariable { get { return Name.ToCamelCase(); } }
-        public string JsVariableResult { get { return Name.ToCamelCase() + "Result"; } }
-        public string JsVariableIsLoading { get { return Name.ToCamelCase() + "IsLoading"; } }
-        public string JsVariableMessage { get { return Name.ToCamelCase() + "Message"; } }
-        public string JsVariableWasSuccessful { get { return Name.ToCamelCase() + "WasSuccessful"; } }
-        public string JsVariableUi { get { return Name.ToCamelCase() + "Ui"; } }
-        public string JsVariableModal { get { return Name.ToCamelCase() + "Modal"; } }
-        public string JsVariableArgs { get { return Name.ToCamelCase() + "Args"; } }
-        public string JsVariableWithArgs { get { return Name.ToCamelCase() + "WithArgs"; } }
+        public string JsVariable
+        {
+            get
+            {
+                if (Wrapper.Name == "Validate") return "serverValidate";
+                return Name.ToCamelCase();
+            }
+        }
+        public string JsVariableResult { get { return JsVariable + "Result"; } }
+        public string JsVariableIsLoading { get { return JsVariable + "IsLoading"; } }
+        public string JsVariableMessage { get { return JsVariable + "Message"; } }
+        public string JsVariableWasSuccessful { get { return JsVariable + "WasSuccessful"; } }
+        public string JsVariableUi { get { return JsVariable + "Ui"; } }
+        public string JsVariableModal { get { return JsVariable + "Modal"; } }
+        public string JsVariableArgs { get { return JsVariable + "Args"; } }
+        public string JsVariableWithArgs { get { return JsVariable + "WithArgs"; } }
 
         public string Comment { get { return Wrapper.Comment; } }
 
@@ -63,6 +70,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Name of the property
         /// </summary>
         public string Name { get { return Wrapper.Name; } }
+
 
         /// <summary>
         /// Name of the class that is used for storing arguments on the client.
@@ -178,7 +186,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                result =  string.Join(", ", ClientParameters.Select(f => obj + f.Name));
+                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name));
             }
             if (callback)
             {
@@ -281,6 +289,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
+        /// <summary>
+        /// If true, this is a client side method.
+        /// </summary>
+        public bool IsClientMethod { get
+            {
+                return !IsInternalUse && Name != "Validate" && Name != "PostSave";
+            } }
     }
 }

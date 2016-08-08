@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this property has a ViewModel.
         /// </summary>
-        public bool HasViewModel => Object != null && Object.HasDbSet && !IsInternalUse;
+        public bool HasViewModel => Object != null && (Object.HasDbSet || Object.IsDto) && !IsInternalUse;
 
         /// <summary>
         /// Gets the ClassViewModel associated with the Object

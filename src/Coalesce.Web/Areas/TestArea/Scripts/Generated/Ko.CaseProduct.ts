@@ -231,20 +231,32 @@ module TestArea.ViewModels {
 					if (data.caseId != self.caseId()) {
                         self.case(null);
                     }
-                }else if (!self.case()){
-					self.case(new Case(data.case, self));
-				}else{
-					self.case().loadFromDto(data.case);
-				}
+                }else {
+                    if (!self.case()){
+					    self.case(new Case(data.case, self));
+				    }else{
+					    self.case().loadFromDto(data.case);
+				    }
+                    if (self.parent && self.parent.myId == self.case().myId && typeof self.parent == typeof self.case())
+                    {
+                        self.parent.loadFromDto(data.case);
+                    }
+                }
 				if (!data.product) { 
 					if (data.productId != self.productId()) {
                         self.product(null);
                     }
-                }else if (!self.product()){
-					self.product(new Product(data.product, self));
-				}else{
-					self.product().loadFromDto(data.product);
-				}
+                }else {
+                    if (!self.product()){
+					    self.product(new Product(data.product, self));
+				    }else{
+					    self.product().loadFromDto(data.product);
+				    }
+                    if (self.parent && self.parent.myId == self.product().myId && typeof self.parent == typeof self.product())
+                    {
+                        self.parent.loadFromDto(data.product);
+                    }
+                }
 
 				// The rest of the objects are loaded now.
 				self.caseProductId(data.caseProductId);
@@ -296,8 +308,12 @@ module TestArea.ViewModels {
                             if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
                             self.errorMessage(errorMsg);
                             self.validationIssues(validationIssues);
-
-							alert("Could not save the item: " + errorMsg);
+                            // If an object was returned, load that object.
+                            if (xhr.responseJSON && xhr.responseJSON.object){
+                                self.loadFromDto(xhr.responseJSON.object);
+                            }
+                            // TODO: allow for turning this off
+                            alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -489,11 +505,11 @@ module TestArea.ViewModels {
 
             // Save on changes
             function setupSubscriptions() {
-            self.caseId.subscribe(self.autoSave);
-            self.case.subscribe(self.autoSave);
-            self.productId.subscribe(self.autoSave);
-            self.product.subscribe(self.autoSave);
-                        }
+                self.caseId.subscribe(self.autoSave);
+                self.case.subscribe(self.autoSave);
+                self.productId.subscribe(self.autoSave);
+                self.product.subscribe(self.autoSave);
+            }  
 
             // Create variables for ListEditorApiUrls
             // Create loading function for Valid Values

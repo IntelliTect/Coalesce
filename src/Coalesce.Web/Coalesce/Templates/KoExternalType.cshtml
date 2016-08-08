@@ -27,6 +27,9 @@ module @moduleName {
     // *** External Type @(model.Name)
     export class @(model.ViewModelClassName)
     {
+        // ID of the object.
+        public myId: any = 0;
+
         // Observables
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))
         {
@@ -47,6 +50,8 @@ module @moduleName {
             // Load the object
 			self.loadFromDto = function(data: any) {
 				if (!data) return;
+				// Set the ID
+				self.myId = data.@(model.PrimaryKey.JsonName);
 
                 // Load the properties.
                 @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))

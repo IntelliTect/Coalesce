@@ -444,7 +444,7 @@ namespace IntelliTect.Coalesce.Helpers
         public static HtmlString ExpandButton(double size = 2)
         {
             string result = string.Format(@"
-                <div class=""pull-right"" data-bind=""click: changeIsExpanded"" style=""font-size: {0}em;"">
+                <div class=""pull-right"" data-bind=""click: changeIsExpanded"" style=""font-size: {0}em; cursor:pointer;"">
                          <i class=""fa fa-minus-circle"" data-bind=""visible: isExpanded()""></i>
                     <i class=""fa fa-plus-circle"" data-bind=""visible: !isExpanded()""></i>
                 </div>", size);

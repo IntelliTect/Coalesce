@@ -14,7 +14,7 @@ namespace Coalesce.Web.Tests
         public void LoadContext()
         {
             var models = ReflectionRepository.AddContext<AppDbContext>();
-            Assert.Equal(7, models.Count);
+            Assert.Equal(8, models.Count);
             Assert.Equal(5, models.Where(f=>f.HasDbSet).Count());
         }
 

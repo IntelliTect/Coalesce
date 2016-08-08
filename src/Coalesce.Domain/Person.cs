@@ -8,12 +8,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.Models;
 
 namespace Coalesce.Domain
 {
     [Edit(AllowAnonymous = true)]
     [Table("Person")]
-    public class Person : IIncludable<Person>
+    public class Person : IIncludable<Person>, IValidatable<Person, AppDbContext>
     {
         public enum Genders
         {
@@ -232,6 +233,17 @@ namespace Coalesce.Domain
             return entities.Include(f => f.CasesAssigned)
                 .Include(f => f.CasesReported)
                 .Include(f => f.Company);
+        }
+
+        public ValidateResult<Person> Validate(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
+        {
+            // Check to make sure the name is a certain length after it has been saved.
+            if (PersonId >0 && FirstName != null && FirstName.Length < 3    )
+            {
+                FirstName = original.FirstName;
+                return new ValidateResult<Domain.Person>(false, "First Name cannot be this short. Reverting.", this);
+            }
+            return new ValidateResult<Domain.Person>();
         }
     }
 }

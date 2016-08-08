@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.Controllers
                 }
 
                 // Get a count
-                int totalCount;
+                int totalCount; 
                 if (result is IAsyncQueryProvider) totalCount = await result.CountAsync();
                 else totalCount = result.Count();
 
@@ -491,11 +491,16 @@ namespace IntelliTect.Coalesce.Controllers
             // Convert all DateTimeOffsets to the correct Time Zone.
             foreach (var prop in DtoViewModel.Properties.Where(f => f.Type.IsDateTimeOffset))
             {
-                DateTimeOffset? value = (DateTimeOffset?)dto.GetType().GetProperty(prop.Name).GetValue(dto);
-                if (value != null)
+                var typeProperty = dto.GetType().GetProperty(prop.Name);
+                // Make sure the property exists. TODO: Check this out for base classes.
+                if (typeProperty != null)
                 {
-                    dto.GetType().InvokeMember(prop.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
-                        Type.DefaultBinder, dto, new object[] { TimeZoneInfo.ConvertTime(value.Value, CurrentTimeZone) });
+                    DateTimeOffset? value = (DateTimeOffset?)typeProperty.GetValue(dto);
+                    if (value != null)
+                    {
+                        dto.GetType().InvokeMember(prop.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
+                            Type.DefaultBinder, dto, new object[] { TimeZoneInfo.ConvertTime(value.Value, CurrentTimeZone) });
+                    }
                 }
             }
 

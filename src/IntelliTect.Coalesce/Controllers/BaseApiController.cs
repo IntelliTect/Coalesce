@@ -158,7 +158,7 @@ namespace IntelliTect.Coalesce.Controllers
                 }
 
                 // Get a count
-                int totalCount; 
+                int totalCount;
                 if (result is IAsyncQueryProvider) totalCount = result.Count();
                 else totalCount = result.Count();
 
@@ -538,20 +538,20 @@ namespace IntelliTect.Coalesce.Controllers
                             Db.SaveChanges();
                             // Pull the object to get any changes.
                             item = DataSource.Includes(includes).FindItem(IdValue(item));
-                            // Call the method to support special cases.
-                            if (AfterSave(dto, item, origItem, Db))
-                            {
-                                // Call PostSave if the object has that.
-                                if (typeof(IPostSavable<T, TContext>).IsAssignableFrom(typeof(T)))
-                                {
-                                    var postSavable = item as IPostSavable<T, TContext>;
-                                    postSavable.PostSave(original, Db, User, includes);
-                                }
 
-                                if (returnObject)
-                                {
-                                    item = DataSource.Includes(includes).FindItem(IdValue(item));
-                                }
+                            // Call the AfterSave method to support special cases.
+                            var reloadItem = AfterSave(dto, item, origItem, Db);
+
+                            // Call PostSave if the object has that.
+                            if (typeof(IPostSavable<T, TContext>).IsAssignableFrom(typeof(T)))
+                            {
+                                var postSavable = item as IPostSavable<T, TContext>;
+                                postSavable.PostSave(original, Db, User, includes);
+                            }
+
+                            if (reloadItem && returnObject)
+                            {
+                                item = DataSource.Includes(includes).FindItem(IdValue(item));
                             }
 
                             result.WasSuccessful = true;

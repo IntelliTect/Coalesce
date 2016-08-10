@@ -137,7 +137,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 string result = "";
                 result = string.Join(", ", ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
                 if (!string.IsNullOrWhiteSpace(result)) result = result + ", ";
-                result = result + "callback?: any";
+                result = result + "callback?: any, reload?: boolean";
                 return result;
             }
         }

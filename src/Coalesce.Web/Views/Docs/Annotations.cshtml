@@ -34,6 +34,7 @@
 </ul>
 <a name="ClientValidation"></a>
 <h3>Client Validation</h3>
+<p>Client side annotations are only evaluated on the client. These can be used to perform validations with immediate feedback to the user without a server round trip. The AllowSave attribute property specified if the save will take place even if the validation fails. This allows for partially complete data to be saved with a warning noted on the user interface. Database validation is available via standard POCO database annotations. These propagate to the client as validations in TypeScript and prevent saves from going to the server. Additionally, there is general server side validation for cases like duplicate names or other validations requiring database lookups.</p>
 <h4>Options</h4>
     <ul>
         <li><span class="text-info">bool</span> AllowSave = <span class="text-info">false</span></li>

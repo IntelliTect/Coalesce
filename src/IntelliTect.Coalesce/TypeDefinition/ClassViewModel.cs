@@ -499,7 +499,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                //TODO: Make this more robust
+                string tableName = (string)Wrapper.GetAttributeValue<TableAttribute>(nameof(TableAttribute.Name));
+
+                if (tableName != null)
+                    return "dbo." + tableName;
+
+                //TODO: Make this more robust. The above is a start, but might not be good enough.
                 return "dbo." + Name;
             }
         }

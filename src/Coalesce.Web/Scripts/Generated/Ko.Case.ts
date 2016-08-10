@@ -266,12 +266,12 @@ module ViewModels {
 
             // Load the object
 			self.loadFromDto = function(data: any) {
-				if (!data) return;
+				if (!data ) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.caseKey;
 				// Load the lists of other objects
-                if (data.CaseProducts !== null) {
+                if (data.caseProducts != null) {
 					// Merge the incoming array
 					RebuildArray(self.caseProducts, data.caseProducts, 'caseProductId', CaseProduct, self);
                     // Add many-to-many collection

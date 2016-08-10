@@ -73,7 +73,7 @@ module ListViewModels {
         public loadCompanyValidValues: (callback: any) => void;
             // Call server method (Add)
         // Adds two numbers.
-        public add: (numberOne: number, numberTwo: number, callback?: any) => void;
+        public add: (numberOne: number, numberTwo: number, callback?: any, reload?: boolean) => void;
         // Result of server method (Add)
         public addResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (Add) is being called
@@ -93,7 +93,7 @@ module ListViewModels {
         
         // Call server method (GetUser)
         // Returns the user name
-        public getUser: (callback?: any) => void;
+        public getUser: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetUser)
         public getUserResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetUser) is being called
@@ -110,7 +110,7 @@ module ListViewModels {
         
         // Call server method (GetUserPublic)
         // Returns the user name
-        public getUserPublic: (callback?: any) => void;
+        public getUserPublic: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetUserPublic)
         public getUserPublicResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetUserPublic) is being called
@@ -127,7 +127,7 @@ module ListViewModels {
         
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
-        public namesStartingWith: (characters: String, callback?: any) => void;
+        public namesStartingWith: (characters: String, callback?: any, reload?: boolean) => void;
         // Result of server method (NamesStartingWith)
         public namesStartingWithResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWith) is being called
@@ -147,7 +147,7 @@ module ListViewModels {
         
         // Call server method (NamesStartingWithPublic)
         // Gets all the first names starting with the characters.
-        public namesStartingWithPublic: (characters: String, callback?: any) => void;
+        public namesStartingWithPublic: (characters: String, callback?: any, reload?: boolean) => void;
         // Result of server method (NamesStartingWithPublic)
         public namesStartingWithPublicResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWithPublic) is being called
@@ -167,7 +167,7 @@ module ListViewModels {
         
         // Call server method (BorCPeople)
         // People whose last name starts with B or c
-        public borCPeople: (callback?: any) => void;
+        public borCPeople: (callback?: any, reload?: boolean) => void;
         // Result of server method (BorCPeople)
         public borCPeopleResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (BorCPeople) is being called
@@ -314,7 +314,7 @@ module ListViewModels {
 
     // Method Implementations
 
-            self.add = function(numberOne: number, numberTwo: number, callback?: any, reload: Boolean = true){
+            self.add = function(numberOne: number, numberTwo: number, callback?: any, reload: boolean = true){
                 self.addIsLoading(true);
                 self.addMessage('');
                 self.addWasSuccessful(null);
@@ -370,7 +370,7 @@ module ListViewModels {
             }
 
             
-            self.getUser = function(callback?: any, reload: Boolean = true){
+            self.getUser = function(callback?: any, reload: boolean = true){
                 self.getUserIsLoading(true);
                 self.getUserMessage('');
                 self.getUserWasSuccessful(null);
@@ -411,7 +411,7 @@ module ListViewModels {
             
 
             
-            self.getUserPublic = function(callback?: any, reload: Boolean = true){
+            self.getUserPublic = function(callback?: any, reload: boolean = true){
                 self.getUserPublicIsLoading(true);
                 self.getUserPublicMessage('');
                 self.getUserPublicWasSuccessful(null);
@@ -452,7 +452,7 @@ module ListViewModels {
             
 
             
-            self.namesStartingWith = function(characters: String, callback?: any, reload: Boolean = true){
+            self.namesStartingWith = function(characters: String, callback?: any, reload: boolean = true){
                 self.namesStartingWithIsLoading(true);
                 self.namesStartingWithMessage('');
                 self.namesStartingWithWasSuccessful(null);
@@ -506,7 +506,7 @@ module ListViewModels {
             }
 
             
-            self.namesStartingWithPublic = function(characters: String, callback?: any, reload: Boolean = true){
+            self.namesStartingWithPublic = function(characters: String, callback?: any, reload: boolean = true){
                 self.namesStartingWithPublicIsLoading(true);
                 self.namesStartingWithPublicMessage('');
                 self.namesStartingWithPublicWasSuccessful(null);
@@ -560,7 +560,7 @@ module ListViewModels {
             }
 
             
-            self.borCPeople = function(callback?: any, reload: Boolean = true){
+            self.borCPeople = function(callback?: any, reload: boolean = true){
                 self.borCPeopleIsLoading(true);
                 self.borCPeopleMessage('');
                 self.borCPeopleWasSuccessful(null);

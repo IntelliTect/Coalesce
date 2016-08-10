@@ -208,12 +208,12 @@ module ViewModels {
 
             // Load the object
 			self.loadFromDto = function(data: any) {
-				if (!data) return;
+				if (!data ) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.companyId;
 				// Load the lists of other objects
-                if (data.Employees !== null) {
+                if (data.employees != null) {
 					// Merge the incoming array
 					RebuildArray(self.employees, data.employees, 'personId', Person, self);
 				} 

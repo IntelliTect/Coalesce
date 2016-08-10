@@ -206,7 +206,7 @@ module ViewModels {
 
         // Call server method (Rename)
         // Adds the text to the first name.
-        public rename: (addition: String, callback?: any) => void;
+        public rename: (addition: String, callback?: any, reload?: boolean) => void;
         // Result of server method (Rename)
         public renameResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (Rename) is being called
@@ -226,7 +226,7 @@ module ViewModels {
         
         // Call server method (ChangeSpacesToDashesInName)
         // Removes spaces from the name and puts in dashes
-        public changeSpacesToDashesInName: (callback?: any) => void;
+        public changeSpacesToDashesInName: (callback?: any, reload?: boolean) => void;
         // Result of server method (ChangeSpacesToDashesInName)
         public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (ChangeSpacesToDashesInName) is being called
@@ -328,16 +328,16 @@ module ViewModels {
 
             // Load the object
 			self.loadFromDto = function(data: any) {
-				if (!data) return;
+				if (!data ) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.personId;
 				// Load the lists of other objects
-                if (data.CasesAssigned !== null) {
+                if (data.casesAssigned != null) {
 					// Merge the incoming array
 					RebuildArray(self.casesAssigned, data.casesAssigned, 'caseKey', Case, self);
 				} 
-                if (data.CasesReported !== null) {
+                if (data.casesReported != null) {
 					// Merge the incoming array
 					RebuildArray(self.casesReported, data.casesReported, 'caseKey', Case, self);
 				} 
@@ -890,7 +890,7 @@ module ViewModels {
 
             // Method Implementations
 
-            self.rename = function(addition: String, callback?: any, reload: Boolean = true){
+            self.rename = function(addition: String, callback?: any, reload: boolean = true){
                 self.renameIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/Rename",
@@ -930,6 +930,7 @@ module ViewModels {
             self.renameModal = function(callback?: any) {
                 $('#method-Rename').modal();
                 $('#method-Rename').on('shown.bs.modal', function() {
+                    $('#method-Rename .btn-ok').unbind('click');
                     $('#method-Rename .btn-ok').click(function()
                     {
                         self.renameWithArgs(null, callback);
@@ -942,7 +943,7 @@ module ViewModels {
                 self.rename(args.addition(), callback);
             }
 
-            self.changeSpacesToDashesInName = function(callback?: any, reload: Boolean = true){
+            self.changeSpacesToDashesInName = function(callback?: any, reload: boolean = true){
                 self.changeSpacesToDashesInNameIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/ChangeSpacesToDashesInName",

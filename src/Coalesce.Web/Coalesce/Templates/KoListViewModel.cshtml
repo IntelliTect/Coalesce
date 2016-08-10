@@ -267,7 +267,7 @@ module @moduleName {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && m.IsClientMethod))
             {
             <text>
-            self.@method.JsVariable = function(@method.TsParameters, reload: Boolean = true){
+            self.@method.JsVariable = function(@method.TsParameters.Replace("reload?: boolean", "reload: boolean = true")){
                 self.@(method.JsVariableIsLoading)(true);
                 self.@(method.JsVariableMessage)('');
                 self.@(method.JsVariableWasSuccessful)(null);

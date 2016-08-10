@@ -192,7 +192,7 @@ module ViewModels {
 
             // Load the object
 			self.loadFromDto = function(data: any) {
-				if (!data) return;
+				if (!data ) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.caseId;

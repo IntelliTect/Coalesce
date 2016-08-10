@@ -346,7 +346,7 @@ module @moduleName {
 
             // Load the object
 			self.loadFromDto = function(data: any) {
-				if (!data) return;
+				if (!data || self.isLoading()) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.@(model.PrimaryKey.JsonName);

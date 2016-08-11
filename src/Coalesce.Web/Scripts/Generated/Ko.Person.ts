@@ -272,6 +272,7 @@ module ViewModels {
 			self.birthDate = self.birthDate.extend({ moment: { unix: true } });
 			self.lastBath = self.lastBath.extend({ moment: { unix: true } });
 			self.nextUpgrade = self.nextUpgrade.extend({ moment: { unix: true } });
+			self.companyId = self.companyId.extend({ required: true });
             
             self.errors = ko.validation.group([
                 self.personId,
@@ -339,11 +340,11 @@ module ViewModels {
 				// Load the lists of other objects
                 if (data.casesAssigned != null) {
 					// Merge the incoming array
-					RebuildArray(self.casesAssigned, data.casesAssigned, 'caseKey', Case, self);
+					RebuildArray(self.casesAssigned, data.casesAssigned, 'caseKey', Case, self, allowCollectionDeletes);
 				} 
                 if (data.casesReported != null) {
 					// Merge the incoming array
-					RebuildArray(self.casesReported, data.casesReported, 'caseKey', Case, self);
+					RebuildArray(self.casesReported, data.casesReported, 'caseKey', Case, self, allowCollectionDeletes);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.

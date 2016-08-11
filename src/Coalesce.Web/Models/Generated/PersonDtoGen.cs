@@ -30,7 +30,7 @@ namespace Coalesce.Web.Models
              public Nullable<DateTime> BirthDate { get; set; }
              public Nullable<DateTime> LastBath { get; set; }
              public Nullable<DateTimeOffset> NextUpgrade { get; set; }
-             public Int32? PersonStatsId { get; set; }
+             public Nullable<Int32> PersonStatsId { get; set; }
              public PersonStats PersonStats { get; set; }
              public TimeZoneInfo TimeZone { get; set; }
              public String Name { get; set; }
@@ -128,7 +128,7 @@ namespace Coalesce.Web.Models
 			entity.BirthDate = BirthDate;
 			entity.LastBath = LastBath;
 			entity.NextUpgrade = NextUpgrade;
-			entity.PersonStatsId = (Int32)(PersonStatsId ?? 0);
+			entity.PersonStatsId = PersonStatsId;
 			entity.TimeZone = TimeZone;
 			entity.CompanyId = (Int32)(CompanyId ?? 0);
         }

@@ -518,6 +518,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var value = Wrapper.HasAttribute<RequiredAttribute>();
                 if (value) return true;
+                if (IsForeignKey && !Type.IsNullable) return true;
                 if (IsPrimaryKey) return false;  // Because it will be created by the server.
                 // TODO: Figure out how to handle situations where we want to hand back an invalid model because the server side is going to figure things out for us.
                 //if (IsId && !IsNullable) return true;

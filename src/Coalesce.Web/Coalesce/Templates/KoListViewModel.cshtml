@@ -280,7 +280,7 @@ module @moduleName {
                     @if (method.ReturnType.Name == method.Parent.Name)
                     {
                     @:// The return type is the type of the object, load it.
-                    @:self.loadFromDto(data.object)
+                    @:self.loadFromDto(data.object, true)
                     @:if ($.isFunction(callback)) {
                     @:    callback();
                     @:}

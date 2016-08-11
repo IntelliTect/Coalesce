@@ -118,7 +118,9 @@ module ViewModels {
         public reportedByText: () => string;
         public devTeamAssignedText: () => string;
         // Loads this object from a data transfer object received from the server.
-        public loadFromDto: (data: any) => void;
+        // Force: Will override the check against isLoading that is done to prevent recursion.
+        // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        public loadFromDto: (data: any, force?: boolean, allowCollectionDeletes?: boolean) => void;
         // Saves this object into a data transfer object to send to the server.
         public saveToDto: () => any;
         // Saves the object to the server and then calls the callback.
@@ -264,9 +266,11 @@ module ViewModels {
 			});
 
 
-            // Load the object
-			self.loadFromDto = function(data: any) {
-				if (!data ) return;
+            // Load the ViewModel object from the DTO. 
+            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
+				if (!data || (!force && self.isLoading())) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.caseKey;
@@ -281,7 +285,7 @@ module ViewModels {
                             objs.push(item.product);
                         }
                     });
-					RebuildArray(self.products, objs, 'ProductId', Product, self);
+					RebuildArray(self.products, objs, 'ProductId', Product, self, allowCollectionDeletes);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
@@ -297,7 +301,7 @@ module ViewModels {
 				    }
                     if (self.parent && self.parent.myId == self.assignedTo().myId && typeof self.parent == typeof self.assignedTo())
                     {
-                        self.parent.loadFromDto(data.assignedTo);
+                        self.parent.loadFromDto(data.assignedTo, undefined, false);
                     }
                 }
 				if (!data.reportedBy) { 
@@ -312,7 +316,7 @@ module ViewModels {
 				    }
                     if (self.parent && self.parent.myId == self.reportedBy().myId && typeof self.parent == typeof self.reportedBy())
                     {
-                        self.parent.loadFromDto(data.reportedBy);
+                        self.parent.loadFromDto(data.reportedBy, undefined, false);
                     }
                 }
 				if (!data.devTeamAssigned) { 
@@ -327,7 +331,7 @@ module ViewModels {
 				    }
                     if (self.parent && self.parent.myId == self.devTeamAssigned().myId && typeof self.parent == typeof self.devTeamAssigned())
                     {
-                        self.parent.loadFromDto(data.devTeamAssigned);
+                        self.parent.loadFromDto(data.devTeamAssigned, undefined, false);
                     }
                 }
 
@@ -388,7 +392,7 @@ module ViewModels {
 							self.isDirty(false);
 							self.errorMessage('');
                             if (self.isDataFromSaveLoadedComputed()) {
-								self.loadFromDto(data.object);
+								self.loadFromDto(data.object, true);
                             }
 							// The object is now saved. Call any callback.
 							for (var i in self.saveCallbacks) {
@@ -404,7 +408,7 @@ module ViewModels {
                             self.validationIssues(validationIssues);
                             // If an object was returned, load that object.
                             if (xhr.responseJSON && xhr.responseJSON.object){
-                                self.loadFromDto(xhr.responseJSON.object);
+                                self.loadFromDto(xhr.responseJSON.object, true);
                             }
                             // TODO: allow for turning this off
                             alert("Could not save the item: " + errorMsg);
@@ -438,7 +442,7 @@ module ViewModels {
                     intellitect.utilities.showBusy();
                     $.ajax({ method: "GET", url: areaUrl + "api/Case/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
                         .done(function(data) {
-                            self.loadFromDto(data);
+                            self.loadFromDto(data, true);
                             if ($.isFunction(callback)) callback(self);
                         })
                         .fail(function() {
@@ -535,7 +539,7 @@ module ViewModels {
                 $.ajax({ method: "POST", url: areaUrl + 'api/Case/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.errorMessage('');
-                    self.loadFromDto(data.object);
+                    self.loadFromDto(data.object, true);
                     // The object is now saved. Call any callback.
                     for (var i in self.saveCallbacks) {
                         self.saveCallbacks[i](self);
@@ -861,7 +865,7 @@ module ViewModels {
 
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem);
+                else self.loadFromDto(newItem, true);
             }
 
 

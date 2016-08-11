@@ -134,7 +134,9 @@ module TestArea.ViewModels {
         // Company loaded from the Company ID
         public companyText: () => string;
         // Loads this object from a data transfer object received from the server.
-        public loadFromDto: (data: any) => void;
+        // Force: Will override the check against isLoading that is done to prevent recursion.
+        // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        public loadFromDto: (data: any, force?: boolean, allowCollectionDeletes?: boolean) => void;
         // Saves this object into a data transfer object to send to the server.
         public saveToDto: () => any;
         // Saves the object to the server and then calls the callback.
@@ -206,7 +208,7 @@ module TestArea.ViewModels {
 
         // Call server method (Rename)
         // Adds the text to the first name.
-        public rename: (addition: String, callback?: any) => void;
+        public rename: (addition: String, callback?: any, reload?: boolean) => void;
         // Result of server method (Rename)
         public renameResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (Rename) is being called
@@ -226,7 +228,7 @@ module TestArea.ViewModels {
         
         // Call server method (ChangeSpacesToDashesInName)
         // Removes spaces from the name and puts in dashes
-        public changeSpacesToDashesInName: (callback?: any) => void;
+        public changeSpacesToDashesInName: (callback?: any, reload?: boolean) => void;
         // Result of server method (ChangeSpacesToDashesInName)
         public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (ChangeSpacesToDashesInName) is being called
@@ -326,18 +328,20 @@ module TestArea.ViewModels {
 			});
 
 
-            // Load the object
-			self.loadFromDto = function(data: any) {
-				if (!data) return;
+            // Load the ViewModel object from the DTO. 
+            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
+				if (!data || (!force && self.isLoading())) return;
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.personId;
 				// Load the lists of other objects
-                if (data.CasesAssigned !== null) {
+                if (data.casesAssigned != null) {
 					// Merge the incoming array
 					RebuildArray(self.casesAssigned, data.casesAssigned, 'caseKey', Case, self);
 				} 
-                if (data.CasesReported !== null) {
+                if (data.casesReported != null) {
 					// Merge the incoming array
 					RebuildArray(self.casesReported, data.casesReported, 'caseKey', Case, self);
 				} 
@@ -355,7 +359,7 @@ module TestArea.ViewModels {
 				    }
                     if (self.parent && self.parent.myId == self.personStats().myId && typeof self.parent == typeof self.personStats())
                     {
-                        self.parent.loadFromDto(data.personStats);
+                        self.parent.loadFromDto(data.personStats, undefined, false);
                     }
                 }
 				if (!data.company) { 
@@ -370,7 +374,7 @@ module TestArea.ViewModels {
 				    }
                     if (self.parent && self.parent.myId == self.company().myId && typeof self.parent == typeof self.company())
                     {
-                        self.parent.loadFromDto(data.company);
+                        self.parent.loadFromDto(data.company, undefined, false);
                     }
                 }
 
@@ -441,7 +445,7 @@ module TestArea.ViewModels {
 							self.isDirty(false);
 							self.errorMessage('');
                             if (self.isDataFromSaveLoadedComputed()) {
-								self.loadFromDto(data.object);
+								self.loadFromDto(data.object, true);
                             }
 							// The object is now saved. Call any callback.
 							for (var i in self.saveCallbacks) {
@@ -457,7 +461,7 @@ module TestArea.ViewModels {
                             self.validationIssues(validationIssues);
                             // If an object was returned, load that object.
                             if (xhr.responseJSON && xhr.responseJSON.object){
-                                self.loadFromDto(xhr.responseJSON.object);
+                                self.loadFromDto(xhr.responseJSON.object, true);
                             }
                             // TODO: allow for turning this off
                             alert("Could not save the item: " + errorMsg);
@@ -491,7 +495,7 @@ module TestArea.ViewModels {
                     intellitect.utilities.showBusy();
                     $.ajax({ method: "GET", url: areaUrl + "api/Person/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
                         .done(function(data) {
-                            self.loadFromDto(data);
+                            self.loadFromDto(data, true);
                             if ($.isFunction(callback)) callback(self);
                         })
                         .fail(function() {
@@ -640,7 +644,7 @@ module TestArea.ViewModels {
                 $.ajax({ method: "POST", url: areaUrl + 'api/Person/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done(function(data) {
                     self.errorMessage('');
-                    self.loadFromDto(data.object);
+                    self.loadFromDto(data.object, true);
                     // The object is now saved. Call any callback.
                     for (var i in self.saveCallbacks) {
                         self.saveCallbacks[i](self);
@@ -890,7 +894,7 @@ module TestArea.ViewModels {
 
             // Method Implementations
 
-            self.rename = function(addition: String, callback?: any, reload: Boolean = true){
+            self.rename = function(addition: String, callback?: any, reload: boolean = true){
                 self.renameIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/Rename",
@@ -905,7 +909,7 @@ module TestArea.ViewModels {
                     self.renameWasSuccessful(true);
                     self.renameResult(data.object);
                     // The return type is the type of the object, load it.
-                    self.loadFromDto(data.object)
+                    self.loadFromDto(data.object, true)
                     if ($.isFunction(callback)) {
                         callback();
                     }
@@ -930,6 +934,7 @@ module TestArea.ViewModels {
             self.renameModal = function(callback?: any) {
                 $('#method-Rename').modal();
                 $('#method-Rename').on('shown.bs.modal', function() {
+                    $('#method-Rename .btn-ok').unbind('click');
                     $('#method-Rename .btn-ok').click(function()
                     {
                         self.renameWithArgs(null, callback);
@@ -942,7 +947,7 @@ module TestArea.ViewModels {
                 self.rename(args.addition(), callback);
             }
 
-            self.changeSpacesToDashesInName = function(callback?: any, reload: Boolean = true){
+            self.changeSpacesToDashesInName = function(callback?: any, reload: boolean = true){
                 self.changeSpacesToDashesInNameIsLoading(true);
                 $.ajax({ method: "POST",
                          url: areaUrl + "api/Person/ChangeSpacesToDashesInName",
@@ -990,7 +995,7 @@ module TestArea.ViewModels {
 
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem);
+                else self.loadFromDto(newItem, true);
             }
 
 

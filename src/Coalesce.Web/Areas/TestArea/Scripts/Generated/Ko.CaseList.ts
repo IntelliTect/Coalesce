@@ -76,7 +76,7 @@ module TestArea.ListViewModels {
         public devTeamAssignedValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadDevTeamAssignedValidValues: (callback: any) => void;
             // Call server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCount: (callback?: any) => void;
+        public getAllOpenCasesCount: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetAllOpenCasesCount)
         public getAllOpenCasesCountResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCasesCount) is being called
@@ -92,7 +92,7 @@ module TestArea.ListViewModels {
         // Variable for method arguments to allow for easy binding
         
         // Call server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatus: (callback?: any) => void;
+        public randomizeDatesAndStatus: (callback?: any, reload?: boolean) => void;
         // Result of server method (RandomizeDatesAndStatus)
         public randomizeDatesAndStatusResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (RandomizeDatesAndStatus) is being called
@@ -108,7 +108,7 @@ module TestArea.ListViewModels {
         // Variable for method arguments to allow for easy binding
         
         // Call server method (GetAllOpenCases)
-        public getAllOpenCases: (callback?: any) => void;
+        public getAllOpenCases: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetAllOpenCases)
         public getAllOpenCasesResult: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCases) is being called
@@ -255,7 +255,7 @@ module TestArea.ListViewModels {
 
     // Method Implementations
 
-            self.getAllOpenCasesCount = function(callback?: any, reload: Boolean = true){
+            self.getAllOpenCasesCount = function(callback?: any, reload: boolean = true){
                 self.getAllOpenCasesCountIsLoading(true);
                 self.getAllOpenCasesCountMessage('');
                 self.getAllOpenCasesCountWasSuccessful(null);
@@ -296,7 +296,7 @@ module TestArea.ListViewModels {
             
 
             
-            self.randomizeDatesAndStatus = function(callback?: any, reload: Boolean = true){
+            self.randomizeDatesAndStatus = function(callback?: any, reload: boolean = true){
                 self.randomizeDatesAndStatusIsLoading(true);
                 self.randomizeDatesAndStatusMessage('');
                 self.randomizeDatesAndStatusWasSuccessful(null);
@@ -337,7 +337,7 @@ module TestArea.ListViewModels {
             
 
             
-            self.getAllOpenCases = function(callback?: any, reload: Boolean = true){
+            self.getAllOpenCases = function(callback?: any, reload: boolean = true){
                 self.getAllOpenCasesIsLoading(true);
                 self.getAllOpenCasesMessage('');
                 self.getAllOpenCasesWasSuccessful(null);

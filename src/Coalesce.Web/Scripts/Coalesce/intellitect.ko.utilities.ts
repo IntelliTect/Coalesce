@@ -1,7 +1,14 @@
 ﻿// Function to marge two arrays based on data from the server
-function RebuildArray(observableArray, incomingArray, idField, viewModelClass, parent) {
-    // Move all the items to a new array so we can populate the original one.
-    var obsArrayContent = observableArray().splice(0, observableArray().length);
+function RebuildArray(observableArray, incomingArray, idField, viewModelClass, parent, allowCollectionDeletes: boolean = true) {
+
+    var obsArrayContent;
+    if (allowCollectionDeletes) {
+        // Move all the items to a new array so we can populate the original one.
+        obsArrayContent = observableArray().splice(0, observableArray().length);
+    } else {
+        // Use the original array because we aren't removing anything.
+        obsArrayContent = observableArray();
+    }
     for (var i in incomingArray) {
         var newItem;
         var inItem = incomingArray[i];
@@ -22,25 +29,32 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
             if (!matchingItems[0].isDirty()) {
                 matchingItems[0].loadFromDto(inItem);
             }
-            // This is an update. Update it and add it to the new collection.
-            observableArray.push(matchingItems[0]);
-            // Remove this on from the collection so we don't add it later.
-            obsArrayContent.splice(obsArrayContent.indexOf(matchingItems[0]), 1);
+            // use the intermediary collection if we are not preserving, allowing deletes.
+            if (allowCollectionDeletes) {
+                // This is an update. Update it and add it to the new collection.
+                observableArray.push(matchingItems[0]);
+                // Remove this on from the collection so we don't add it later.
+                obsArrayContent.splice(obsArrayContent.indexOf(matchingItems[0]), 1);
+            }
         } else {
             // We have a problem because keys are duplicated.
         }
     }
-    // Add any items that are already there but are still dirty.
-    for (var i in obsArrayContent) {
-        var existingItem = obsArrayContent[i];
-        if (existingItem.isDirty()) {
-            observableArray.push(existingItem);
+
+    // If we are not allowing deletes.
+    if (allowCollectionDeletes) {
+        // Add any items that are already there but are still dirty.
+        for (var i in obsArrayContent) {
+            var existingItem = obsArrayContent[i];
+            if (existingItem.isDirty()) {
+                observableArray.push(existingItem);
+            }
         }
     }
 }
 
 // Used by tooltip from Knockstrap
-function unwrapProperties (wrappedProperies) {
+function unwrapProperties(wrappedProperies) {
 
     if (wrappedProperies === null || typeof wrappedProperies !== 'object') {
         return wrappedProperies;

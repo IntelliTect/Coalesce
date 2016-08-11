@@ -129,10 +129,11 @@ namespace IntelliTect.Coalesce.Controllers
                 else
                 {
                     // Use the DefaultOrderBy attributes if available
-                    if (ClassViewModel.DefaultOrderBy.Any())
+                    var defaultOrderBy = ClassViewModel.DefaultOrderBy.ToList();
+                    if (defaultOrderBy.Any())
                     {
                         var orderByClauseList = new List<string>();
-                        foreach (var orderInfo in ClassViewModel.DefaultOrderBy)
+                        foreach (var orderInfo in defaultOrderBy)
                         {
                             if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
                             {

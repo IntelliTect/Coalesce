@@ -359,7 +359,7 @@ module @moduleName {
                 { 
                 @:if (data.@prop.JsonName != null) {
 					@:// Merge the incoming array
-					@:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self);
+					@:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
                     if (prop.IsManytoManyCollection)
                     {
                     @:// Add many-to-many collection

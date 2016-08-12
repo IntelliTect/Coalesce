@@ -219,7 +219,7 @@ module ViewModels {
 				// Load the lists of other objects
                 if (data.employees != null) {
 					// Merge the incoming array
-					RebuildArray(self.employees, data.employees, 'personId', Person, self);
+					RebuildArray(self.employees, data.employees, 'personId', Person, self, allowCollectionDeletes);
 				} 
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.

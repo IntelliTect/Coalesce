@@ -176,6 +176,8 @@ module ViewModels {
             });
 
             // SetupValidation {
+			self.caseId = self.caseId.extend({ required: true });
+			self.productId = self.productId.extend({ required: true });
             
             self.errors = ko.validation.group([
                 self.caseProductId,

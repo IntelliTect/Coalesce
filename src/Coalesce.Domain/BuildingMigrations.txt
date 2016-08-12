@@ -1,0 +1,32 @@
+﻿This is information on how to build migrations.
+
+Be sure that the project.json file has 
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+This is required because of broken tooling for EF migrations. The data project needs to be an executable.
+We have had mixed results as to whether it needs to be set back to false after the migration is made.
+
+Note: The database all migrations is based on is named in TemporaryDbContextFactory.
+Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDb;Trusted_Connection=True;
+
+
+To Build a migration using the Package Manager Console:
+cd src\coalesce.domain
+dotnet ef migrations add [NameOfMigration] -c AppDbContext
+
+
+To remove all migrations that are not applied to the database:
+dotnet ef migrations remove
+
+
+To update the database manually to the latest migration. This is done by the application at startup.
+dotnet ef database update
+
+To update the database manually to the latest migration. Use this to roll back a migration along with the above remove command.
+dotnet ef database update [TargetMigrationName]
+
+
+Running Coalesce:
+Run the Coalesce Task Runner Explorer task. Then the TS task to generate the JavaScript from the TypeScript.
+

@@ -277,7 +277,7 @@ module ViewModels {
 				// Load the lists of other objects
                 if (data.caseProducts != null) {
 					// Merge the incoming array
-					RebuildArray(self.caseProducts, data.caseProducts, 'caseProductId', CaseProduct, self);
+					RebuildArray(self.caseProducts, data.caseProducts, 'caseProductId', CaseProduct, self, allowCollectionDeletes);
                     // Add many-to-many collection
                     var objs = [];
                     $.each(data.caseProducts, function(index, item) {

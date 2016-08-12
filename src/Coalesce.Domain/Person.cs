@@ -95,7 +95,8 @@ namespace Coalesce.Domain
         [Hidden]
         public DateTimeOffset? NextUpgrade { get; set; }
 
-        public int PersonStatsId { get; set; }
+
+        public int? PersonStatsId { get; set; }
         [Hidden]
         public PersonStats PersonStats {get
             {

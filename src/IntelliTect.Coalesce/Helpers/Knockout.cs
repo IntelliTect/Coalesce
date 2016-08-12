@@ -332,7 +332,7 @@ namespace IntelliTect.Coalesce.Helpers
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             if (propertyModel != null)
             {
-                return SelectObject(propertyModel, placeholder, prefix, !propertyModel.IsRequired);
+                return SelectObject(propertyModel, placeholder, prefix, propertyModel.ObjectIdProperty == null ? !propertyModel.IsRequired : !propertyModel.ObjectIdProperty.IsRequired);
             }
             return HtmlString.Empty;
         }

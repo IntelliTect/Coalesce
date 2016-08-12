@@ -521,9 +521,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
                 if (IsForeignKey && !Type.IsNullable) return true;
-                var key = ObjectIdProperty;
-                if (key != null && key.IsForeignKey && !key.Type.IsNullable) return true;
-
 
                 if (IsPrimaryKey) return false;  // Because it will be created by the server.
                 // TODO: Figure out how to handle situations where we want to hand back an invalid model because the server side is going to figure things out for us.

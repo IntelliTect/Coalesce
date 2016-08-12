@@ -359,13 +359,13 @@ namespace IntelliTect.Coalesce.Helpers
 
             string result = string.Format(@"
                     <select class=""form-control"" 
-                        data-bind=""select2Ajax: {6}{0}, url: '/api/{1}/list', idField: '{2}', textField: '{3}', object: {6}{4}, allowsClear: {7}"" 
+                        data-bind=""select2Ajax: {6}{0}, url: '/api/{1}/list', idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
                         placeholder=""{5}"">
                             <option>{5}</option>
                     </select >
                     ",
                 propertyModel.ObjectIdProperty.JsVariable, propertyModel.PureType.Name, propertyModel.Object.PrimaryKey.Name,
-                propertyModel.Object.ListTextProperty.Name, propertyModel.JsVariable, placeholder, prefix, allowsClear);
+                propertyModel.Object.ListTextProperty.Name, propertyModel.JsVariable, placeholder, prefix, allowsClear.ToString().ToLowerInvariant());
             return new HtmlString(result);
         }
 

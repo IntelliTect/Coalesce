@@ -61,7 +61,7 @@ namespace Coalesce.Web.Tests
             personLink.Click();
             driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
 
-            IWebElement editLink = driver.FindElement(By.CssSelector(@"table tr:nth-child(1) td:nth-child(15) > div > a"));
+            IWebElement editLink = driver.FindElement(By.CssSelector(@"table tr:nth-child(1) td:nth-child(11) > div > a"));
             editLink.Click();
 
             IWebElement nameInput = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-body > div > div:nth-child(3) > div > input"));
@@ -85,29 +85,29 @@ namespace Coalesce.Web.Tests
 
             driver.Navigate().Refresh();
 
-            IWebElement nametd = driver.FindElement(By.CssSelector(@"body > div.containerfluid.body-content > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div"));
+            IWebElement nametd = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(3) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div"));
             Assert.Equal(nametd.Text, "AdamTest");
 
             // Table Edit
-            IWebElement edit = driver.FindElement(By.CssSelector(@"body > div.containerfluid.body-content > div > div > div.btn-group.pull-right > a:nth-child(3)"));
+            IWebElement edit = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(1) > div > div.btn-group.pull-right > a:nth-child(3)"));
             edit.Click();
 
-            nameInput = driver.FindElement(By.CssSelector(@"body > div.containerfluid.body-content > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > input"));
+            nameInput = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(3) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > input"));
             nameInput.Click();
             // This is only required for the chrome driver
             for (var i = 0; i < 20; i++) nameInput.SendKeys(Keys.Backspace);
             nameInput.Clear();
             nameInput.SendKeys("Adam");
 
-            nextInput = driver.FindElement(By.CssSelector(@"body > div.containerfluid.body-content > div > table > tbody > tr:nth-child(1) > td:nth-child(3) > input"));
+            nextInput = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(3) > div > table > tbody > tr:nth-child(1) > td:nth-child(3) > input"));
             nextInput.Click();
             loading = driver.FindElement(By.ClassName("label-info"));
             Thread.Sleep(3000);
 
-            IWebElement readonlyButton = driver.FindElement(By.CssSelector(@"body > div.containerfluid.body-content > div > div > div.btn-group.pull-right > a:nth-child(3)"));
+            IWebElement readonlyButton = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(1) > div > div.btn-group.pull-right > a:nth-child(3)"));
             readonlyButton.Click();
 
-            nametd = driver.FindElement(By.CssSelector(@"body > div.containerfluid.body-content > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div"));
+            nametd = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(3) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div"));
             Assert.Equal(nametd.Text, "Adam");
 
             // Show the final results.

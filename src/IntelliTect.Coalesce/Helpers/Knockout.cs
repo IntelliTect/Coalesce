@@ -259,6 +259,13 @@ namespace IntelliTect.Coalesce.Helpers
                 ", bindingValue, bindingName));
         }
 
+        public static HtmlString BooleanSelect(string bindingValue, string trueText, string falseText)
+        {
+            return new HtmlString($@"<select class=""form-control"" data-bind=""booleanValue: {bindingValue}"" tabindex=""-1"" aria-hidden=""true"">
+                        <option value=""true"">{trueText}</option>
+                        <option value=""false"">{falseText}</option></select>");
+        }
+
         public static HtmlString InputFor<T>(Expression<Func<T, bool>> propertySelector, string bindingName = "checked")
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
@@ -283,6 +290,17 @@ namespace IntelliTect.Coalesce.Helpers
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return InputFor<T>(propertySelector, bindingName).AddLabel(propertyModel.DisplayNameLabel(label), labelCols, inputCols);
+        }
+
+        public static HtmlString BooleanValueFor<T>(Expression<Func<T, bool>> propertySelector, string trueText = "Yes", string falseText = "No")
+        {
+            var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
+            return BooleanSelect(propertyModel.JsVariableForBinding, trueText, falseText);
+        }
+        public static HtmlString BooleanValueFor<T>(Expression<Func<T, bool?>> propertySelector, string trueText = "Yes", string falseText = "No")
+        {
+            var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
+            return BooleanSelect(propertyModel.JsVariableForBinding, trueText, falseText);
         }
 
         #endregion

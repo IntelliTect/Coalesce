@@ -20,7 +20,7 @@ namespace Coalesce.Web.Api
         protected override bool AfterSave(PersonDtoGen dto, Person obj, Person orig, AppDbContext context)
         {
             // Add the company name to the last name if it changed.
-            if (obj.CompanyId != orig.CompanyId && !obj.LastName.Contains(obj.Company.Name))
+            if (obj.CompanyId != orig.CompanyId && !string.IsNullOrEmpty(obj.LastName) && !obj.LastName.Contains(obj.Company.Name))
             {
                 obj.LastName = obj.LastName + "-" + obj.Company.Name;
                 Db.SaveChanges();

@@ -21,27 +21,21 @@ namespace Coalesce.Web.Tests
         public SecurityTestsAnonymous(TestModel model, StreamWriter output)
             : base (model, output, "None", "Anonymous User") { }
 
-        public override Task<bool> RunTests()
+        public override async Task<bool> RunTests()
         {
-            return base.RunTests();
-        }
+            var baseTests = await base.RunTests();
+            var roleRestricted = await RoleRestrictedCreate(HttpStatusCode.NotFound);
+            var authorized = await AuthorizedCreate(HttpStatusCode.NotFound);
+            var anonymous = await AnonymousCreate(HttpStatusCode.OK);
+            var notAllowed = await NotAllowedCreate(HttpStatusCode.NotFound);
 
-        //if (response.IsSuccessStatusCode)
-        //{
-        //    using (var content = response.Content)
-        //    {
-        //        if (content != null)
-        //        {
-        //            string contents = await content.ReadAsStringAsync();
-        //            dynamic data = JsonConvert.DeserializeObject<dynamic>(contents);
-        //            bool ws = data.wasSuccessful;
-        //            int tc = data.totalCount;
-        //            _model.Logger.LogInformation($"{ws}: {tc}");
-        //            //_model.Logger.LogInformation(data.First());
-        //            //_model.Logger.LogInformation(contents);
-        //            return true;
-        //        }
-        //    }
-        //}
+            var results = baseTests 
+                && roleRestricted
+                && authorized
+                && anonymous
+                && notAllowed;
+
+            return results;
+        }
     }
 }

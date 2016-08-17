@@ -70,69 +70,29 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.Title))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.Description))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.OpenedAt))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Case>(p => p.AssignedTo))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Case>(p => p.ReportedBy))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Case>(p => p.Attachment))
-                    </td>
-                    <td>
-                        @(Knockout.SelectFor<Case>(p => p.Severity))
-                    </td>
-                    <td>
-                        @(Knockout.SelectFor<Case>(p => p.Status))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))
-                    </td>
+                    <td class="title">@(Knockout.InputFor<Case>(p => p.Title))</td>
+                    <td class="description">@(Knockout.InputFor<Case>(p => p.Description))</td>
+                    <td class="openedAt">@(Knockout.InputFor<Case>(p => p.OpenedAt))</td>
+                    <td class="assignedTo">@(Knockout.SelectForObject<Case>(p => p.AssignedTo))</td>
+                    <td class="reportedBy">@(Knockout.SelectForObject<Case>(p => p.ReportedBy))</td>
+                    <td class="attachment">@(Knockout.InputFor<Case>(p => p.Attachment))</td>
+                    <td class="severity">@(Knockout.SelectFor<Case>(p => p.Severity))</td>
+                    <td class="status">@(Knockout.SelectFor<Case>(p => p.Status))</td>
+                    <td class="caseProducts">@(Knockout.SelectForManyToMany<Case>(p => p.CaseProducts))</td>
+                    <td class="devTeamAssigned">@(Knockout.SelectForObject<Case>(p => p.DevTeamAssigned))</td>
                     }
                     else
                     {
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.Title))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.Description))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.OpenedAt))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.AssignedTo))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.ReportedBy))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.Attachment))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.Severity))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.Status))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.CaseProducts))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))
-                    </td>
+                    <td class="title">@(Knockout.DisplayFor<Case>(p => p.Title))</td>
+                    <td class="description">@(Knockout.DisplayFor<Case>(p => p.Description))</td>
+                    <td class="openedAt">@(Knockout.DisplayFor<Case>(p => p.OpenedAt))</td>
+                    <td class="assignedTo">@(Knockout.DisplayFor<Case>(p => p.AssignedTo))</td>
+                    <td class="reportedBy">@(Knockout.DisplayFor<Case>(p => p.ReportedBy))</td>
+                    <td class="attachment">@(Knockout.DisplayFor<Case>(p => p.Attachment))</td>
+                    <td class="severity">@(Knockout.DisplayFor<Case>(p => p.Severity))</td>
+                    <td class="status">@(Knockout.DisplayFor<Case>(p => p.Status))</td>
+                    <td class="caseProducts">@(Knockout.DisplayFor<Case>(p => p.CaseProducts))</td>
+                    <td class="devTeamAssigned">@(Knockout.DisplayFor<Case>(p => p.DevTeamAssigned))</td>
                     }
                 <td>
 

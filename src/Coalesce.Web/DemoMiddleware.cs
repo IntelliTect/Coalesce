@@ -22,13 +22,18 @@ namespace Coalesce.Web
         public async Task Invoke(HttpContext context)
         {
             var validRoles = new List<string> { "Admin", "User", "None" };
+            var wasLoggedIn = context.User.Identity.IsAuthenticated;
 
             var cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "SecurityTestRole");
             if (!cookie.Equals(default(KeyValuePair<string, string>))
                 && validRoles.Contains(cookie.Value)
                 && context.Request.Host.Value.ToLower().Contains("localhost"))
             {
-                if (cookie.Value != "None") await SignInUser(context, "SecurityTestUser", cookie.Value);
+                if (cookie.Value != "None")
+                {
+                    await SignInUser(context, "SecurityTestUser", cookie.Value);
+                    if (!wasLoggedIn) context.Response.Redirect(context.Request.Path);
+                }
             }
             else
             {
@@ -44,7 +49,10 @@ namespace Coalesce.Web
                     await SignInUser(context, "DemoUser", "Admin");
                 }
             }
-            await _next(context);
+
+            var isLoggedIn = context.User.Identity.IsAuthenticated;
+            if (!wasLoggedIn && isLoggedIn) context.Response.Redirect("/");
+            else await _next(context);
         }
 
         private async Task SignInUser(HttpContext context, string name, string role)
@@ -56,7 +64,7 @@ namespace Coalesce.Web
                     new Claim(ClaimTypes.Role, role)
                 };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(claims, "AutoSignIn");
             await context.Authentication.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
         }
     }

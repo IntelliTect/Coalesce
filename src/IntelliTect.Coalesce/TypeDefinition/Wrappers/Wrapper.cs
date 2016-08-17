@@ -1,8 +1,5 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+﻿using IntelliTect.Coalesce.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
@@ -26,7 +23,9 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             return GetAttributeValue<TAttribute>(valueName) as T;
         }
 
-
-
+        public virtual AttributeWrapper GetSecurityAttribute<TAttribute>() where TAttribute : SecurityAttribute
+        {
+            throw new NotImplementedException();
+        }
     }
 }

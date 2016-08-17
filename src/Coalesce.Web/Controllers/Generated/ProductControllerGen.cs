@@ -24,23 +24,23 @@ namespace Coalesce.Web.Controllers
         }
 
 
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult TableEdit(){
             return IndexImplementation(true, @"~/Views/Generated/Product/Table.cshtml");
         }
 
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult CreateEdit(){
             return CreateEditImplementation(@"~/Views/Generated/Product/CreateEdit.cshtml");
         }
                       
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
         }
                               
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult Docs()
         {
             return DocsImplementation();

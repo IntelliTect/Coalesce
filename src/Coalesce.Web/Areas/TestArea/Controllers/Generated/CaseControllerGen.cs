@@ -14,12 +14,12 @@ namespace Coalesce.Web.TestArea.Controllers
     { 
         public CaseController() : base() { }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Cards(){
             return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Case/Cards.cshtml");
         }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Areas/TestArea/Views/Generated/Case/Table.cshtml");
         }

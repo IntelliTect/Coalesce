@@ -109,3 +109,17 @@
     RoleMapping.Add("User", "AllUsers");  // Interactive user.
 </code>
 </pre>
+
+<h3>Using AuthorizeAttribute</h3>
+<p>
+    The code Coalesce generates doesn't rely on specifying roles or policies in the Authorize attribute.  In .Net Core this would require additional
+    work in Startup.cs to create policies
+</p>
+<p>
+    The example below maps the "User" role to an internal AD role name of AllUsers.
+</p>
+<pre>
+<code class="language-html">
+    RoleMapping.Add("User", "AllUsers");  // Interactive user.
+</code>
+</pre>

@@ -55,7 +55,7 @@
 
         <div class="btn-group pull-right">
             @{
-                if (model.IsCreateAllowed)
+                if (model.SecurityInfo.IsCreateAllowed())
                 {
                     @:<a href="~/@(model.ControllerName)/CreateEdit?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 }
@@ -137,13 +137,13 @@
                             </ul>
                         </div>
                     }
-                    @if (model.IsEditAllowed)
+                    @if (model.SecurityInfo.IsEditAllowed())
                     {
                         <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
                             <i class="fa fa-pencil"></i>
                         </a>
                     }
-                    @if (model.IsDeleteAllowed)
+                    @if (model.SecurityInfo.IsDeleteAllowed())
                     {
                         <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
                             <i class="fa fa-remove"></i>

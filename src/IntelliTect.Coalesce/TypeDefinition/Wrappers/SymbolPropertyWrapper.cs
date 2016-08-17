@@ -29,7 +29,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             return ((IPropertySymbol)Symbol).HasAttribute<TAttribute>();
         }
 
-
         public override TypeWrapper Type { get { return new SymbolTypeWrapper(Symbol.Type); } }
 
         public override bool CanRead { get { return !Symbol.IsWriteOnly; } }

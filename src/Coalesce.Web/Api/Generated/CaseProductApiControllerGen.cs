@@ -2,12 +2,14 @@ using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using Coalesce.Web.Models;
 using Coalesce.Domain;
@@ -20,8 +22,14 @@ namespace Coalesce.Web.Api
     public partial class CaseProductController 
          : LocalBaseApiController<CaseProduct, CaseProductDtoGen> 
     {
-        public CaseProductController() { }
+        private ClassViewModel _model;
+
+        public CaseProductController() 
+        { 
+             _model = ReflectionRepository.Models.Single(m => m.Name == "CaseProduct");
+        }
       
+
         /// <summary>
         /// Returns CaseProductDtoGen
         /// </summary>
@@ -37,6 +45,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
+            
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -47,7 +56,6 @@ namespace Coalesce.Web.Api
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<CaseProduct, CaseProductDtoGen>(listResult);
         }
-
 
         /// <summary>
         /// Returns custom object based on supplied fields
@@ -65,6 +73,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
+
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -75,7 +84,6 @@ namespace Coalesce.Web.Api
             return await ListImplementation(parameters);
         }
 
-
         [HttpGet("count")]
         [Authorize]
         public virtual async Task<int> Count(
@@ -85,6 +93,7 @@ namespace Coalesce.Web.Api
             // Custom fields for this object.
             string caseProductId = null,string caseId = null,string productId = null)
         {
+            
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
@@ -99,6 +108,7 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
         {
+            
             return PropertyValuesImplementation(property, page, search);
         }
 
@@ -106,14 +116,17 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<CaseProductDtoGen> Get(string id, string includes = null)
         {
+            
             return await GetImplementation(id, includes);
         }
+        
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual bool Delete(string id)
         {
+            
             return DeleteImplementation(id);
         }
         
@@ -122,6 +135,24 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual SaveResult<CaseProductDtoGen> Save(CaseProductDtoGen dto, string includes = null, bool returnObject = true)
         {
+            
+            // Check if creates/edits aren't allowed
+            
+            if (!dto.CaseProductId.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
+                var result = new SaveResult<CaseProductDtoGen>();
+                result.WasSuccessful = false;
+                result.Message = "Create not allowed on CaseProduct objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+            else if (dto.CaseProductId.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
+                var result = new SaveResult<CaseProductDtoGen>();
+                result.WasSuccessful = false;
+                result.Message = "Edit not allowed on CaseProduct objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+
             return SaveImplementation(dto, includes, returnObject);
         }
         

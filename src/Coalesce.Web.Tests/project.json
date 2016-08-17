@@ -21,6 +21,8 @@
     "xunit": "2.2.0-beta2-build3300"
   },
 
+  "scripts": { "precompile": "taskkill /IM Coalesce.Web.exe /F" },
+
   "testRunner": "xunit",
 
   "frameworks": {

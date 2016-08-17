@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IntelliTect.Coalesce.Helpers;
 
 namespace Coalesce.Domain
 {
     [Table("Company")]
+    [Create(PermissionLevel = SecurityPermissionLevels.DenyAll)]
     public class Company
     {
         public int CompanyId { get; set; }

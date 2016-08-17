@@ -62,21 +62,13 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td>
-                        @(Knockout.InputFor<CaseDto>(p => p.Title))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<CaseDto>(p => p.AssignedToName))
-                    </td>
+                    <td class="title">@(Knockout.InputFor<CaseDto>(p => p.Title))</td>
+                    <td class="assignedToName">@(Knockout.DisplayFor<CaseDto>(p => p.AssignedToName))</td>
                     }
                     else
                     {
-                    <td>
-                        @(Knockout.DisplayFor<CaseDto>(p => p.Title))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<CaseDto>(p => p.AssignedToName))
-                    </td>
+                    <td class="title">@(Knockout.DisplayFor<CaseDto>(p => p.Title))</td>
+                    <td class="assignedToName">@(Knockout.DisplayFor<CaseDto>(p => p.AssignedToName))</td>
                     }
                 <td>
 

@@ -1,6 +1,7 @@
 ﻿using Coalesce.Domain.External;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Linq;
 namespace Coalesce.Domain
 {
     [Table("Case")]
+    [Create(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     public class Case : IIncludable<Case>, IIncludeExternal<Case>
     {
         public enum Statuses

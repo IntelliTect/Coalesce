@@ -21,9 +21,21 @@ namespace Coalesce.Web.Tests
         public SecurityTestsAdmin(TestModel model, StreamWriter output)
             : base (model, output, "Admin", "Admin User") { }
 
-        public override Task<bool> RunTests()
+        public override async Task<bool> RunTests()
         {
-            return base.RunTests();
+            var baseTests = await base.RunTests();
+            var roleRestricted = await RoleRestrictedCreate(HttpStatusCode.OK);
+            var authorized = await AuthorizedCreate(HttpStatusCode.OK);
+            var anonymous = await AnonymousCreate(HttpStatusCode.OK);
+            var notAllowed = await NotAllowedCreate(HttpStatusCode.NotFound);
+
+            var results = baseTests
+                && roleRestricted
+                && authorized
+                && anonymous
+                && notAllowed;
+
+            return results;
         }
     }
 }

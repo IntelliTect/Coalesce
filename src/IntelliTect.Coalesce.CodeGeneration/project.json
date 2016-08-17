@@ -18,9 +18,11 @@
   },
 
   "buildOptions": {
-    "embed": [
-      "Templates/**"
-    ]
+    "embed": {
+      "include": [
+        "Templates/**"
+      ]
+    }
   },
 
   "frameworks": {

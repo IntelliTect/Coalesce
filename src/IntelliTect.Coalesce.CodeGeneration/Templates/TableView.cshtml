@@ -55,7 +55,7 @@
 
         <div class="btn-group pull-right">
             @{
-                if (model.IsCreateAllowed)
+                if (model.SecurityInfo.IsCreateAllowed())
                 {
                     @:<a href="~/@(model.ControllerName)/CreateEdit?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 }
@@ -64,7 +64,7 @@
                 @:{
                 @:<a href="~/@(model.ControllerName)/Table?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
                 @:}
-                if (model.IsEditAllowed)
+                if (model.SecurityInfo.IsEditAllowed())
                 {
                     @:else
                     @:{
@@ -99,18 +99,14 @@
                     @:{
                     @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
-                    <td>
-                        @Display.PropertyHelper(prop, !prop.IsReadOnly)
-                    </td>
+                    @:<td class="@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly)</td>
                         }
                     @:}
                     @:else
                     @:{
                     @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
-                    <td>
-                        @Display.PropertyHelper(prop, false)
-                    </td>
+                    @:<td class="@(prop.JsonName)">@Display.PropertyHelper(prop, false)</td>
                         }
                     @:}
                 }
@@ -133,13 +129,13 @@
                                 </ul>
                             </div>
                             }
-                        @if (model.IsEditAllowed)
+                        @if (model.SecurityInfo.IsEditAllowed())
                             {
                             <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
                                 <i class="fa fa-pencil"></i>
                             </a>
                             }
-                        @if (model.IsDeleteAllowed)
+                        @if (model.SecurityInfo.IsDeleteAllowed())
                             {
                             <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
                                 <i class="fa fa-remove"></i>

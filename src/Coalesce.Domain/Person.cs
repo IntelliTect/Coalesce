@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using IntelliTect.Coalesce.Models;
 
 namespace Coalesce.Domain
 {
-    [Edit(AllowAnonymous = true)]
+    [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
     public class Person : IIncludable<Person>, IValidatable<Person, AppDbContext>
     {
@@ -131,6 +132,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Company ID this person is employed by
         /// </summary>
+        [ClientValidation(IsRequired = true, AllowSave = false)]
         public int CompanyId { get; set; }
         /// <summary>
         /// Company loaded from the Company ID

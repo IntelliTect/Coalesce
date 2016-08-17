@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IntelliTect.Coalesce.Helpers;
+using System;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
     /// <summary>
-    /// Should users be allowed to delete via the API/button.
+    /// Should users be allowed to delete an entity via the API/button.
     /// </summary>    
-    [System.AttributeUsage(AttributeTargets.Class)]
-    public class DeleteAttribute: System.Attribute
+    [AttributeUsage(AttributeTargets.Class)]
+    public class DeleteAttribute: SecurityAttribute
     {
-        public bool Allow { get; set; } = true;
-        // Add security to delete
-        public string Roles { get; set; }
-        public bool AllowAnonymous { get; set; }
-
     }
 }

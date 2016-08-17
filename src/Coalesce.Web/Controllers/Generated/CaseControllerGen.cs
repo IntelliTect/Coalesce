@@ -13,12 +13,12 @@ namespace Coalesce.Web.Controllers
     { 
         public CaseController() : base() { }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Cards(){
             return IndexImplementation(false, @"~/Views/Generated/Case/Cards.cshtml");
         }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Table(){
             return IndexImplementation(false, @"~/Views/Generated/Case/Table.cshtml");
         }

@@ -12,6 +12,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
+using IntelliTect.Coalesce.Helpers;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -511,31 +512,40 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool OnContext { get; set; }
 
+        private SecurityInfoClass _securityInfo;
         public SecurityInfoClass SecurityInfo
         {
             get
             {
-                var result = new SecurityInfoClass();
-
-                if (HasAttribute<ReadAttribute>())
+                if (_securityInfo == null)
                 {
-                    result.IsRead = true;
-                    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.AllowAnonymous));
-                    if (allowAnonmous.HasValue) result.AllowAnonymousRead = allowAnonmous.Value;
-                    var roles = (string)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.Roles));
-                    result.ReadRoles = roles;
+                    _securityInfo = new SecurityInfoClass(
+                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<ReadAttribute>()),
+                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<EditAttribute>()),
+                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<DeleteAttribute>()),
+                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<CreateAttribute>())
+                    );
+                    
+                    //if (HasAttribute<ReadAttribute>())
+                    //{
+                    //    _securityInfo.IsRead = true;
+                    //    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.AllowAnonymous));
+                    //    if (allowAnonmous.HasValue) _securityInfo.AllowAnonymousRead = allowAnonmous.Value;
+                    //    var roles = (string)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.Roles));
+                    //    _securityInfo.ReadRoles = roles;
+                    //}
+
+                    //if (HasAttribute<EditAttribute>())
+                    //{
+                    //    _securityInfo.IsEdit = true;
+                    //    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.AllowAnonymous));
+                    //    if (allowAnonmous.HasValue) _securityInfo.AllowAnonymousEdit = allowAnonmous.Value;
+                    //    var roles = (string)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Roles));
+                    //    _securityInfo.EditRoles = roles;
+                    //}
                 }
 
-                if (HasAttribute<EditAttribute>())
-                {
-                    result.IsEdit = true;
-                    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.AllowAnonymous));
-                    if (allowAnonmous.HasValue) result.AllowAnonymousEdit = allowAnonmous.Value;
-                    var roles = (string)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Roles));
-                    result.EditRoles = roles;
-                }
-
-                return result;
+                return _securityInfo;
             }
         }
 
@@ -547,51 +557,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 return Properties.Any(f => f.ClientValidationAllowSave);
-            }
-        }
-
-        /// <summary>
-        /// True if this class can be created.
-        /// </summary>
-        public bool IsCreateAllowed
-        {
-            get
-            {
-                if (Wrapper.HasAttribute<CreateAttribute>())
-                {
-                    var allowCreate = Wrapper.GetAttributeValue<CreateAttribute>(nameof(CreateAttribute.Allow)) as bool?;
-                    return !allowCreate.HasValue || allowCreate.Value;
-                }
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// True if this class can be created.
-        /// </summary>
-        public bool IsDeleteAllowed
-        {
-            get
-            {
-                if (Wrapper.HasAttribute<DeleteAttribute>())
-                {
-                    var allowDelete = Wrapper.GetAttributeValue<DeleteAttribute>(nameof(DeleteAttribute.Allow)) as bool?;
-                    return !allowDelete.HasValue || allowDelete.Value;
-                }
-                return true;
-            }
-        }
-
-        public bool IsEditAllowed
-        {
-            get
-            {
-                if (Wrapper.HasAttribute<EditAttribute>())
-                {
-                    var allowEdit = Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Allow)) as bool?;
-                    return !allowEdit.HasValue || allowEdit.Value;
-                }
-                return true;
             }
         }
 

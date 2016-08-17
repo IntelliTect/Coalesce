@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
 using System.Linq.Expressions;
+using System.Net;
 using System.Diagnostics.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.Controllers
@@ -387,6 +388,8 @@ namespace IntelliTect.Coalesce.Controllers
             var originalProp = ClassViewModel.PropertyByName(property);
             if (originalProp != null)
             {
+                if (!originalProp.SecurityInfo.IsReadable(User)) throw new AccessViolationException($"{property} is not accessible by current user.");
+
                 List<PropertyViewModel> properties = new List<PropertyViewModel>();
                 if (originalProp.ListGroup != null)
                 {
@@ -406,8 +409,10 @@ namespace IntelliTect.Coalesce.Controllers
                     {
                         matches = matches.Where(string.Format("{0}.StartsWith(\"{1}\")", prop.Name, search));
                     }
-                    var result2 = matches.GroupBy(prop.Name, "it").OrderBy("it.Key").Select("it.Key").Skip(20 * (page - 1)).Take(20) as IEnumerable<string>;
-                    result.AddRange(result2);
+                    var first20 = matches.GroupBy(prop.Name, "it").OrderBy("it.Key").Select("it.Key").Skip(20 * (page - 1)).Take(20);
+                    var asString = new List<string>();
+                    foreach (var obj in first20) { asString.Add(obj.ToString()); }
+                    result.AddRange(asString);
                     result = result.Distinct().ToList();
                     // Bail out if we already have 20 or more items.
                     if (result.Count >= 20) break;
@@ -972,7 +977,7 @@ namespace IntelliTect.Coalesce.Controllers
         {
             var response = context.HttpContext.Response;
 
-            if (response.StatusCode == 200)
+            if (response.StatusCode == (int)HttpStatusCode.OK)
             {
                 var contents = context.Result as ObjectResult;
                 if (contents != null)
@@ -981,7 +986,7 @@ namespace IntelliTect.Coalesce.Controllers
                     var saveResult = contents.Value as SaveResult;
                     if ((listResult != null && !listResult.WasSuccessful) || (saveResult != null && !saveResult.WasSuccessful))
                     {
-                        context.HttpContext.Response.StatusCode = 500;
+                        context.HttpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     }
                 }
             }

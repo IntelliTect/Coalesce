@@ -56,14 +56,12 @@
                 }
                 </div>
             </div>
-            }
-            else
-            {
+                }
+                else
+                {
             <div class="form-group">
                 <label class="col-md-4 control-label">@prop.DisplayName</label>
-                <div class="col-md-8">
-                    @Display.PropertyHelper(prop, !prop.IsReadOnly, Model.AreaName)
-                </div>
+                    @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName)
             </div>
             }
             }

@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 foreach (var obj in models.Where(p => p.HasDbSet || p.IsDto))
                 {
                     //Console.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
-                    streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}    Edit:{obj.IsEditAllowed}   Create:{obj.IsCreateAllowed}    Delete:{obj.IsDeleteAllowed}");
+                    streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}    Edit:{obj.SecurityInfo.IsEditAllowed()}   Create:{obj.SecurityInfo.IsCreateAllowed()}    Delete:{obj.SecurityInfo.IsDeleteAllowed()}");
 
                     foreach (var prop in obj.Properties.Where(f => !f.IsInternalUse))
                     {

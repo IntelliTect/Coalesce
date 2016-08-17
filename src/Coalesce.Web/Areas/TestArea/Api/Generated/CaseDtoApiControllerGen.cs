@@ -2,12 +2,14 @@ using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using Coalesce.Web.TestArea.Models;
 using Coalesce.Domain;
@@ -20,8 +22,14 @@ namespace Coalesce.Web.TestArea.Api
     public partial class CaseDtoController 
          : LocalBaseApiController<Case, CaseDto> 
     {
-        public CaseDtoController() { }
+        private ClassViewModel _model;
+
+        public CaseDtoController() 
+        { 
+             _model = ReflectionRepository.Models.Single(m => m.Name == "CaseDto");
+        }
       
+
         /// <summary>
         /// Returns CaseDto
         /// </summary>
@@ -37,6 +45,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
+            
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -54,7 +63,6 @@ namespace Coalesce.Web.TestArea.Api
             return new GenericListResult<Case, CaseDto>(listResult);
         }
 
-
         /// <summary>
         /// Returns custom object based on supplied fields
         /// </summary>
@@ -71,6 +79,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseId = null,string title = null,string assignedToName = null)
         {
+
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -81,7 +90,6 @@ namespace Coalesce.Web.TestArea.Api
             return await ListImplementation(parameters);
         }
 
-
         [HttpGet("count")]
         [Authorize]
         public virtual async Task<int> Count(
@@ -91,6 +99,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseId = null,string title = null,string assignedToName = null)
         {
+            
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
@@ -105,6 +114,7 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
         {
+            
             return PropertyValuesImplementation(property, page, search);
         }
 
@@ -112,14 +122,17 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual async Task<CaseDto> Get(string id, string includes = null)
         {
+            
             return await GetImplementation(id, includes);
         }
+        
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual bool Delete(string id)
         {
+            
             return DeleteImplementation(id);
         }
         
@@ -128,6 +141,24 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual SaveResult<CaseDto> Save(CaseDto dto, string includes = null, bool returnObject = true)
         {
+            
+            // Check if creates/edits aren't allowed
+            
+            if (dto.CaseId == 0 && !_model.SecurityInfo.IsCreateAllowed(User)) {
+                var result = new SaveResult<CaseDto>();
+                result.WasSuccessful = false;
+                result.Message = "Create not allowed on CaseDto objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+            else if (dto.CaseId != 0 && !_model.SecurityInfo.IsEditAllowed(User)) {
+                var result = new SaveResult<CaseDto>();
+                result.WasSuccessful = false;
+                result.Message = "Edit not allowed on CaseDto objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+
             return SaveImplementation(dto, includes, returnObject);
         }
         

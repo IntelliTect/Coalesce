@@ -51,7 +51,7 @@ namespace @(namespaceName).Controllers
             return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Table.cshtml");
         }
 
-        @if (model.IsEditAllowed) { 
+        @if (model.SecurityInfo.IsEditAllowed()) { 
         <text>
         @(model.SecurityInfo.EditAnnotation)
         public ActionResult TableEdit(){

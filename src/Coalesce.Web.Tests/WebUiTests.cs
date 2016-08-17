@@ -20,7 +20,7 @@ namespace Coalesce.Web.Tests
             _process = Processes.StartDotNet();
         }
 
-        [Fact]
+        [Fact(Skip = "Need to figure out IDs for easier testing")]
         public void BasicUiChrome()
         {
             IWebDriver driver = new ChromeDriver();
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Need to figure out IDs for easier testing")]
         public void BasicUiHeadless()
         {
             IWebDriver driver = new PhantomJSDriver();
@@ -61,7 +61,7 @@ namespace Coalesce.Web.Tests
             personLink.Click();
             driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
 
-            IWebElement editLink = driver.FindElement(By.CssSelector(@"table tr:nth-child(1) td:nth-child(11) > div > a"));
+            IWebElement editLink = driver.FindElement(By.CssSelector(@"table tbody tr:nth-child(1) td:nth-child(11) > div > a"));
             editLink.Click();
 
             IWebElement nameInput = driver.FindElement(By.CssSelector(@"body > div.container.body-content > div > div.panel-body > div > div:nth-child(3) > div > input"));

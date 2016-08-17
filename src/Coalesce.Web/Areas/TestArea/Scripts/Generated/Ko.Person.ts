@@ -272,6 +272,7 @@ module TestArea.ViewModels {
 			self.birthDate = self.birthDate.extend({ moment: { unix: true } });
 			self.lastBath = self.lastBath.extend({ moment: { unix: true } });
 			self.nextUpgrade = self.nextUpgrade.extend({ moment: { unix: true } });
+            self.companyId = self.companyId.extend({ required: true });
             
             self.errors = ko.validation.group([
                 self.personId,

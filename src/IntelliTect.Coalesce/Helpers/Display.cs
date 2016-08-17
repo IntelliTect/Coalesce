@@ -161,5 +161,10 @@ namespace IntelliTect.Coalesce.Helpers
             return $@"<a href=""#"" data-bind = 'click: {method.JsVariableUi}'>{method.DisplayName}</a>";
         }
 
+        public static string PropertyHelperWithSurroundingDiv(PropertyViewModel prop, bool editable, string areaName = "")
+        {
+            var propertyHelper = PropertyHelper(prop, editable, areaName);
+            return $"<div class=\"col-md-8 {prop.JsonName}\">{propertyHelper}</div>";
+        }
     }
 }

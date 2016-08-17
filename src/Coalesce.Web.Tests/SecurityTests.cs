@@ -35,8 +35,8 @@ namespace Coalesce.Web.Tests
                             .ToList();
         }
 
-        [Fact(Skip = "Run Explicitly By Removing Skip", DisplayName = "Security Tests: Remove Skip To Run")]
-        //[Fact]
+        //[Fact(Skip = "Run Explicitly By Removing Skip", DisplayName = "Security Tests: Remove Skip To Run; Best To Run Alone")]
+        [Fact]
         public async Task AllTests()
         {
             using (var output = new StreamWriter("output.txt"))
@@ -63,7 +63,7 @@ namespace Coalesce.Web.Tests
                 Assert.Equal(true, userResults);
             }
 
-            Process.Start("output.txt");
+            // Process.Start("output.txt");
         }
 
         public void Dispose()

@@ -8,6 +8,8 @@ using IntelliTect.Coalesce.DataAnnotations;
 namespace Coalesce.Domain
 {
     [Table("Product")]
+    [Create(Roles = "Admin")]
+    [Edit(Roles = "Admin")]
     public class Product
     {
         public int ProductId { get; set; }

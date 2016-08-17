@@ -24,15 +24,21 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public static Object GetAttributeValue<TAttribute>(this ISymbol symbol, string valueName) where TAttribute : Attribute
         {
             var attributeData = symbol.GetAttribute<TAttribute>();
-            if (attributeData == null) return null;
-            var namedArgument = attributeData.NamedArguments.SingleOrDefault(na => na.Key == valueName);
+            return attributeData.GetPropertyValue(valueName, null);
+        }
+
+        public static object GetPropertyValue(this AttributeData attributeData, string propertyName, object defaultValue)
+        {
+            if (attributeData == null) return defaultValue;
+            var namedArgument = attributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
             var constructorArgument = attributeData.ConstructorArguments.FirstOrDefault();
+
+            if (namedArgument.Key == null && constructorArgument.IsNull) return defaultValue;
 
             var propertyValue = namedArgument.Key != null ? namedArgument.Value : constructorArgument;
 
             return propertyValue.Value;
         }
-
 
         // Not sure if these even work...
         public static Nullable<T> GetAttributeValue<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector) where TAttribute : Attribute where T : struct

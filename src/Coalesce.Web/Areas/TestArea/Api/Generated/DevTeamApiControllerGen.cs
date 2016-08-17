@@ -2,12 +2,14 @@ using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using Coalesce.Web.TestArea.Models;
 using Coalesce.Domain;
@@ -20,8 +22,14 @@ namespace Coalesce.Web.TestArea.Api
     public partial class DevTeamController 
          : LocalBaseApiController<DevTeam, DevTeamDtoGen> 
     {
-        public DevTeamController() { }
+        private ClassViewModel _model;
+
+        public DevTeamController() 
+        { 
+             _model = ReflectionRepository.Models.Single(m => m.Name == "DevTeam");
+        }
       
+
         /// <summary>
         /// Returns DevTeamDtoGen
         /// </summary>
@@ -37,6 +45,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string devTeamId = null,string name = null)
         {
+            
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -46,7 +55,6 @@ namespace Coalesce.Web.TestArea.Api
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<DevTeam, DevTeamDtoGen>(listResult);
         }
-
 
         /// <summary>
         /// Returns custom object based on supplied fields
@@ -64,6 +72,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string devTeamId = null,string name = null)
         {
+
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -72,7 +81,6 @@ namespace Coalesce.Web.TestArea.Api
         
             return await ListImplementation(parameters);
         }
-
 
         [HttpGet("count")]
         [Authorize]
@@ -83,6 +91,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string devTeamId = null,string name = null)
         {
+            
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
@@ -96,6 +105,7 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
         {
+            
             return PropertyValuesImplementation(property, page, search);
         }
 
@@ -103,15 +113,43 @@ namespace Coalesce.Web.TestArea.Api
         [Authorize]
         public virtual async Task<DevTeamDtoGen> Get(string id, string includes = null)
         {
+            
             return await GetImplementation(id, includes);
         }
+        
 
 
+        [HttpPost("delete/{id}")]
+        [Authorize]
+        public virtual bool Delete(string id)
+        {
+            
+            return DeleteImplementation(id);
+        }
+        
 
         [HttpPost("save")]
         [Authorize]
         public virtual SaveResult<DevTeamDtoGen> Save(DevTeamDtoGen dto, string includes = null, bool returnObject = true)
         {
+            
+            // Check if creates/edits aren't allowed
+            
+            if (!dto.DevTeamId.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
+                var result = new SaveResult<DevTeamDtoGen>();
+                result.WasSuccessful = false;
+                result.Message = "Create not allowed on DevTeam objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+            else if (dto.DevTeamId.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
+                var result = new SaveResult<DevTeamDtoGen>();
+                result.WasSuccessful = false;
+                result.Message = "Edit not allowed on DevTeam objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+
             return SaveImplementation(dto, includes, returnObject);
         }
         

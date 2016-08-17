@@ -2,12 +2,14 @@ using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using Coalesce.Web.TestArea.Models;
 using Coalesce.Domain;
@@ -20,13 +22,19 @@ namespace Coalesce.Web.TestArea.Api
     public partial class CaseController 
          : LocalBaseApiController<Case, CaseDtoGen> 
     {
-        public CaseController() { }
+        private ClassViewModel _model;
+
+        public CaseController() 
+        { 
+             _model = ReflectionRepository.Models.Single(m => m.Name == "Case");
+        }
       
+
         /// <summary>
         /// Returns CaseDtoGen
         /// </summary>
         [HttpGet("list")]
-        [Authorize]
+        [AllowAnonymous]
         public virtual async Task<GenericListResult<Case, CaseDtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
@@ -37,6 +45,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
+            
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -54,12 +63,11 @@ namespace Coalesce.Web.TestArea.Api
             return new GenericListResult<Case, CaseDtoGen>(listResult);
         }
 
-
         /// <summary>
         /// Returns custom object based on supplied fields
         /// </summary>
         [HttpGet("customlist")]
-        [Authorize]
+        [AllowAnonymous]
         public virtual async Task<ListResult> CustomList(
             string fields = null, 
             string includes = null, 
@@ -71,6 +79,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
+
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -87,9 +96,8 @@ namespace Coalesce.Web.TestArea.Api
             return await ListImplementation(parameters);
         }
 
-
         [HttpGet("count")]
-        [Authorize]
+        [AllowAnonymous]
         public virtual async Task<int> Count(
             string where = null, 
             string listDataSource = null,
@@ -97,6 +105,7 @@ namespace Coalesce.Web.TestArea.Api
             // Custom fields for this object.
             string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
         {
+            
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
@@ -114,32 +123,54 @@ namespace Coalesce.Web.TestArea.Api
         }
 
         [HttpGet("propertyValues")]
-        [Authorize]
+        [AllowAnonymous]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
         {
+            
             return PropertyValuesImplementation(property, page, search);
         }
 
         [HttpGet("get/{id}")]
-        [Authorize]
+        [AllowAnonymous]
         public virtual async Task<CaseDtoGen> Get(string id, string includes = null)
         {
+            
             return await GetImplementation(id, includes);
         }
+        
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual bool Delete(string id)
         {
+            
             return DeleteImplementation(id);
         }
         
 
         [HttpPost("save")]
-        [Authorize]
+        [AllowAnonymous]
         public virtual SaveResult<CaseDtoGen> Save(CaseDtoGen dto, string includes = null, bool returnObject = true)
         {
+            
+            // Check if creates/edits aren't allowed
+            
+            if (!dto.CaseKey.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
+                var result = new SaveResult<CaseDtoGen>();
+                result.WasSuccessful = false;
+                result.Message = "Create not allowed on Case objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+            else if (dto.CaseKey.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
+                var result = new SaveResult<CaseDtoGen>();
+                result.WasSuccessful = false;
+                result.Message = "Edit not allowed on Case objects.";
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return result;
+            }
+
             return SaveImplementation(dto, includes, returnObject);
         }
         
@@ -156,7 +187,7 @@ namespace Coalesce.Web.TestArea.Api
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
-        [Authorize]
+        [AllowAnonymous]
         protected override IQueryable<Case> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "GetAllOpenCases")

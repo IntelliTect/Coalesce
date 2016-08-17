@@ -25,23 +25,23 @@ namespace Coalesce.Web.TestArea.Controllers
         }
 
 
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult TableEdit(){
             return IndexImplementation(true, @"~/Areas/TestArea/Views/Generated/Product/Table.cshtml");
         }
 
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult CreateEdit(){
             return CreateEditImplementation(@"~/Areas/TestArea/Views/Generated/Product/CreateEdit.cshtml");
         }
                       
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
         }
                               
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ActionResult Docs()
         {
             return DocsImplementation();

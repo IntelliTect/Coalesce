@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -55,11 +56,12 @@ namespace Coalesce.Web.Tests
         protected ClaimsPrincipal User { get; set; }
         protected TestModel Model { get; set; }
 
-
         public virtual async Task<bool> RunTests()
         {
             var results = new List<bool>();
 
+            // The following tests are self-contained.  The only properties that we will attempt to read/edit
+            //      are ones the current user can't access for that purpose.
             results.Add(await RestrictedReadPropertiesViaPropertyValues());
             results.Add(await RestrictedEditProperties());
 
@@ -70,7 +72,7 @@ namespace Coalesce.Web.Tests
         {
             // Get a list of properties on anonmymous models that have read restrictions
             var models = Model.Models
-                            .Where(m => m.SecurityInfo.AllowAnonymousEdit || m.SecurityInfo.AllowAnonymousRead)
+                            .Where(m => m.SecurityInfo.AllowAnonymousAny)
                             .SelectMany(m => m.Properties
                                                 .Where(p => !p.SecurityInfo.IsReadable(User))
                                                 .Select(p => new { Model = m, Property = p }))
@@ -86,7 +88,7 @@ namespace Coalesce.Web.Tests
         {
             // Get a list of properties on anonmymous models that have edit restrictions
             var models = Model.Models
-                            .Where(m => m.SecurityInfo.AllowAnonymousEdit)
+                            .Where(m => m.SecurityInfo.Edit.AllowAnonymous)
                             .SelectMany(m => m.Properties
                                                 .Where(p => !p.SecurityInfo.IsEditable(User) && p.SecurityInfo.IsReadable(User))
                                                 .Select(p => new { Model = m, Property = p }))
@@ -98,22 +100,109 @@ namespace Coalesce.Web.Tests
             return results.All(b => b);
         }
 
-        //public async Task<bool> RestrictedEditProperties()
-        //{
-        //    // Get a list of properties on anonmymous models that have edit restrictions
-        //    var models = Model.Models
-        //                    .Where(m => m.SecurityInfo.AllowAnonymousEdit)
-        //                    .SelectMany(m => m.Properties
-        //                                        .Where(p => !p.SecurityInfo.IsEditable(User) && p.SecurityInfo.IsReadable(User))
-        //                                        .Select(p => new { Model = m, Property = p }))
-        //                    .ToList();
+        public async Task<bool> RoleRestrictedCreate(HttpStatusCode expectedStatus)
+        {
+            var response = await CreateProduct();
+            return response.StatusCode == expectedStatus;
+        }
 
-        //    var tasks = models
-        //                .Select(async m => await AttemptToChangeRestrictedProperty(m.Model, m.Property));
-        //    var results = await Task.WhenAll(tasks);
-        //    return results.All(b => b);
-        //}
+        public async Task<bool> AuthorizedCreate(HttpStatusCode expectedStatus)
+        {
+            var response = await CreatePerson();
+            return response.StatusCode == expectedStatus;
+        }
 
+        public async Task<bool> AnonymousCreate(HttpStatusCode expectedStatus)
+        {
+            var response = await CreateCase();
+            return response.StatusCode == expectedStatus;
+        }
+
+        public async Task<bool> NotAllowedCreate(HttpStatusCode expectedStatus)
+        {
+            var response = await CreateCompany();
+            return response.StatusCode == expectedStatus;
+        }
+
+
+        private async Task<HttpResponseMessage> CreateCase()
+        {
+            var formData = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("caseKey", ""),
+                new KeyValuePair<string, string>("title", "Test Case"),
+                new KeyValuePair<string, string>("description", ""),
+                new KeyValuePair<string, string>("openedAt", DateTime.UtcNow.ToString("s", CultureInfo.InvariantCulture)),
+                new KeyValuePair<string, string>("assignedToId", ""),
+                new KeyValuePair<string, string>("reportedById", ""),
+                new KeyValuePair<string, string>("severity", ""),
+                new KeyValuePair<string, string>("status", ""),
+                new KeyValuePair<string, string>("devTeamAssignedId", "")
+            });
+
+            var model = ReflectionRepository.Models.Single(m => m.Name == "Case");
+
+            return await ApiPost(model, "Save", formData);
+        }
+
+        private async Task<HttpResponseMessage> CreatePerson()
+        {
+            var formData = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("personId", ""),
+                new KeyValuePair<string, string>("title", ""),
+                new KeyValuePair<string, string>("firstName", "TestFirstName"),
+                new KeyValuePair<string, string>("lastName", ""),
+                new KeyValuePair<string, string>("email", ""),
+                new KeyValuePair<string, string>("gender", ""),
+                new KeyValuePair<string, string>("BirthDate", ""),
+                new KeyValuePair<string, string>("LastBath", ""),
+                new KeyValuePair<string, string>("NextUpgrade", ""),
+                new KeyValuePair<string, string>("personStatsId", ""),
+                new KeyValuePair<string, string>("timeZone", ""),
+                new KeyValuePair<string, string>("companyId", "1")
+            });
+
+            var model = ReflectionRepository.Models.Single(m => m.Name == "Person");
+
+            return await ApiPost(model, "Save", formData);
+        }
+
+        private async Task<HttpResponseMessage> CreateProduct()
+        {
+            var formData = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("productId", ""),
+                new KeyValuePair<string, string>("name", "Test Product")
+            });
+
+            var model = ReflectionRepository.Models.Single(m => m.Name == "Product");
+
+            return await ApiPost(model, "Save", formData);
+        }
+
+        private async Task<HttpResponseMessage> CreateCompany()
+        {
+            var formData = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("companyId", ""),
+                new KeyValuePair<string, string>("name", "Test Company"),
+                new KeyValuePair<string, string>("address1", ""),
+                new KeyValuePair<string, string>("address2", ""),
+                new KeyValuePair<string, string>("city", ""),
+                new KeyValuePair<string, string>("state", ""),
+                new KeyValuePair<string, string>("zipCode", "")
+            });
+
+            var model = ReflectionRepository.Models.Single(m => m.Name == "Company");
+
+            return await ApiPost(model, "Save", formData);
+        }
+
+        private async Task<HttpResponseMessage> ApiPost(ClassViewModel model, string action, FormUrlEncodedContent formData)
+        {
+            return await Client.PostAsync($"{model.ApiUrl}/{action}", formData);
+        }
 
         private async Task<bool> AttemptToGetRestrictedPropertyValues(ClassViewModel model, PropertyViewModel property)
         {
@@ -122,7 +211,11 @@ namespace Coalesce.Web.Tests
             var result = false;
             using (var response = await Client.GetAsync(apiPath))
             {
-                result = response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.InternalServerError;
+                result = response.StatusCode == HttpStatusCode.Unauthorized ||
+                    response.StatusCode == HttpStatusCode.InternalServerError ||
+                    response.StatusCode == HttpStatusCode.NotFound ||
+                    response.StatusCode == HttpStatusCode.Found ||
+                    (response.StatusCode == HttpStatusCode.OK && response.Content.Headers.ContentType != new MediaTypeHeaderValue("application/json"));
                 message += result ? "passed" : "failed";
             }
 
@@ -134,14 +227,16 @@ namespace Coalesce.Web.Tests
         {
             var message = $"Attempting to change {property.Name} on model {model.Name}: ";
 
-            // Get the first item and attempt to change the property
+            // See if we can get the list
             dynamic list = await GetEntityList(model);
+            if (list == null) return true;
+
+            // Get the first item and attempt to change the property
             var entity = list.list[0];
             string originalPropertyValue = ((IDictionary<string, object>)entity)[property.JsonName].ToString();
             ((IDictionary<string, object>)entity)[property.JsonName] = "Changed Value";
 
             string apiPath = $"{model.ApiUrl}/Save";
-
             var content = new StringContent(entity.ToString(), Encoding.UTF8, "application/json");
             await Client.PostAsync(apiPath, content);
 
@@ -150,7 +245,7 @@ namespace Coalesce.Web.Tests
             entity = list.list[0];
             var propMatchesOriginal = ((IDictionary<string, object>)entity)[property.JsonName].ToString() == originalPropertyValue;
 
-            message += propMatchesOriginal ? "passed" : "failed";
+            message += propMatchesOriginal ? "value not changed" : "value changed";
             WriteMessage(message);
 
             return propMatchesOriginal;
@@ -178,7 +273,7 @@ namespace Coalesce.Web.Tests
             return null;
         }
 
-        private void WriteMessage(string message)
+        protected void WriteMessage(string message)
         {
             lock (OutputFile)
             {

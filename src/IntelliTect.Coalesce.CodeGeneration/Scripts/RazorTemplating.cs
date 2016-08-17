@@ -34,10 +34,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             using (var reader = new StringReader(content))
             {
                 var generatorResults = engine.GenerateCode(reader);
-                if (!generatorResults.Success) return null;
+                if (!generatorResults.Success)
+                {
+                    using (var newReader = new StringReader(content))
+                    {
+                        var readerText = newReader.ReadToEnd();
+                        File.WriteAllText("c:\\temp\\badreader.txt", readerText);
+                    }
+                    return null;
+                }
 
                 var templateResult = _compilationService.Compile(generatorResults.GeneratedCode);
-                if (templateResult.Messages.Any()) return null;
+                if (templateResult.Messages.Any())
+                {
+                    File.WriteAllText("c:\\temp\\badtemplate.txt", generatorResults.GeneratedCode);
+                    return null;
+                }
 
                 var compiledObject = Activator.CreateInstance(templateResult.CompiledType);
                 var razorTemplate = compiledObject as RazorTemplateBase;

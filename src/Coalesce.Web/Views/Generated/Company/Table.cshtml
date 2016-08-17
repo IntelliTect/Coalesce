@@ -32,7 +32,6 @@
         <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
 
         <div class="btn-group pull-right">
-                    <a href="~/Company/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
                 @if (ViewBag.Editable)
                 {
@@ -68,57 +67,25 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td>
-                        @(Knockout.InputFor<Company>(p => p.Name))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Company>(p => p.Address1))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Company>(p => p.Address2))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Company>(p => p.City))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Company>(p => p.State))
-                    </td>
-                    <td>
-                        @(Knockout.InputFor<Company>(p => p.ZipCode))
-                    </td>
-                    <td>
-                        <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.AltName))
-                    </td>
+                    <td class="name">@(Knockout.InputFor<Company>(p => p.Name))</td>
+                    <td class="address1">@(Knockout.InputFor<Company>(p => p.Address1))</td>
+                    <td class="address2">@(Knockout.InputFor<Company>(p => p.Address2))</td>
+                    <td class="city">@(Knockout.InputFor<Company>(p => p.City))</td>
+                    <td class="state">@(Knockout.InputFor<Company>(p => p.State))</td>
+                    <td class="zipCode">@(Knockout.InputFor<Company>(p => p.ZipCode))</td>
+                    <td class="employees"><a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                    <td class="altName">@(Knockout.DisplayFor<Company>(p => p.AltName))</td>
                     }
                     else
                     {
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.Name))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.Address1))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.Address2))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.City))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.State))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.ZipCode))
-                    </td>
-                    <td>
-                        <a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<Company>(p => p.AltName))
-                    </td>
+                    <td class="name">@(Knockout.DisplayFor<Company>(p => p.Name))</td>
+                    <td class="address1">@(Knockout.DisplayFor<Company>(p => p.Address1))</td>
+                    <td class="address2">@(Knockout.DisplayFor<Company>(p => p.Address2))</td>
+                    <td class="city">@(Knockout.DisplayFor<Company>(p => p.City))</td>
+                    <td class="state">@(Knockout.DisplayFor<Company>(p => p.State))</td>
+                    <td class="zipCode">@(Knockout.DisplayFor<Company>(p => p.ZipCode))</td>
+                    <td class="employees"><a data-bind = 'attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                    <td class="altName">@(Knockout.DisplayFor<Company>(p => p.AltName))</td>
                     }
                 <td>
 

@@ -62,21 +62,13 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td>
-                        @(Knockout.SelectForObject<CaseProduct>(p => p.Case))
-                    </td>
-                    <td>
-                        @(Knockout.SelectForObject<CaseProduct>(p => p.Product))
-                    </td>
+                    <td class="case">@(Knockout.SelectForObject<CaseProduct>(p => p.Case))</td>
+                    <td class="product">@(Knockout.SelectForObject<CaseProduct>(p => p.Product))</td>
                     }
                     else
                     {
-                    <td>
-                        @(Knockout.DisplayFor<CaseProduct>(p => p.Case))
-                    </td>
-                    <td>
-                        @(Knockout.DisplayFor<CaseProduct>(p => p.Product))
-                    </td>
+                    <td class="case">@(Knockout.DisplayFor<CaseProduct>(p => p.Case))</td>
+                    <td class="product">@(Knockout.DisplayFor<CaseProduct>(p => p.Product))</td>
                     }
                 <td>
 

@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Interfaces;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
@@ -81,7 +84,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
-
         public ReflectionClassWrapper(Type classType)
         {
             Info = classType;
@@ -95,7 +97,12 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         {
             return Info.HasAttribute<TAttribute>();
         }
-
-
+        public override AttributeWrapper GetSecurityAttribute<TAttribute>()
+        {
+            return new AttributeWrapper
+            {
+                Attribute = Info.GetAttribute<TAttribute>()
+            };
+        }
     }
 }

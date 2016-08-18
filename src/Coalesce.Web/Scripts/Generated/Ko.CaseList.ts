@@ -77,8 +77,10 @@ module ListViewModels {
         public loadDevTeamAssignedValidValues: (callback: any) => void;
             // Call server method (GetAllOpenCasesCount)
         public getAllOpenCasesCount: (callback?: any, reload?: boolean) => void;
-        // Result of server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (GetAllOpenCasesCount) strongly typed in a observable.
+        public getAllOpenCasesCountResult: KnockoutObservable<number> = ko.observable(null);
+        // Result of server method (GetAllOpenCasesCount) simply wrapped in an observable.
+        public getAllOpenCasesCountResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCasesCount) is being called
         public getAllOpenCasesCountIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (GetAllOpenCasesCount) if it fails.
@@ -93,8 +95,10 @@ module ListViewModels {
         
         // Call server method (RandomizeDatesAndStatus)
         public randomizeDatesAndStatus: (callback?: any, reload?: boolean) => void;
-        // Result of server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatusResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (RandomizeDatesAndStatus) strongly typed in a observable.
+        public randomizeDatesAndStatusResult: KnockoutObservable<any> = ko.observable(null);
+        // Result of server method (RandomizeDatesAndStatus) simply wrapped in an observable.
+        public randomizeDatesAndStatusResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (RandomizeDatesAndStatus) is being called
         public randomizeDatesAndStatusIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (RandomizeDatesAndStatus) if it fails.
@@ -109,8 +113,10 @@ module ListViewModels {
         
         // Call server method (GetAllOpenCases)
         public getAllOpenCases: (callback?: any, reload?: boolean) => void;
-        // Result of server method (GetAllOpenCases)
-        public getAllOpenCasesResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (GetAllOpenCases) strongly typed in a observable.
+        public getAllOpenCasesResult: KnockoutObservableArray<any> = ko.observableArray([]);
+        // Result of server method (GetAllOpenCases) simply wrapped in an observable.
+        public getAllOpenCasesResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCases) is being called
         public getAllOpenCasesIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (GetAllOpenCases) if it fails.
@@ -121,6 +127,25 @@ module ListViewModels {
         public getAllOpenCasesUi: (callback?: any) => void;
         // Presents a modal with input boxes to call the server method (GetAllOpenCases)
         public getAllOpenCasesModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        
+        // Call server method (GetCaseSummary)
+        // Returns a list of summary information about Cases
+        public getCaseSummary: (callback?: any, reload?: boolean) => void;
+        // Result of server method (GetCaseSummary) strongly typed in a observable.
+        public getCaseSummaryResult: KnockoutObservable<ViewModels.CaseSummary> = ko.observable(null);
+        // Result of server method (GetCaseSummary) simply wrapped in an observable.
+        public getCaseSummaryResultRaw: KnockoutObservable<any> = ko.observable();
+        // True while the server method (GetCaseSummary) is being called
+        public getCaseSummaryIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (GetCaseSummary) if it fails.
+        public getCaseSummaryMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (GetCaseSummary) was successful.
+        public getCaseSummaryWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (GetCaseSummary)
+        public getCaseSummaryUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (GetCaseSummary)
+        public getCaseSummaryModal: (callback?: any) => void;
         // Variable for method arguments to allow for easy binding
         
         constructor() {
@@ -266,8 +291,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getAllOpenCasesCountResult(data.object);
-                    if (reload) {
+					self.getAllOpenCasesCountResultRaw(data.object);
+                    self.getAllOpenCasesCountResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -307,8 +333,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.randomizeDatesAndStatusResult(data.object);
-                    if (reload) {
+					self.randomizeDatesAndStatusResultRaw(data.object);
+                    self.randomizeDatesAndStatusResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -348,8 +375,11 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getAllOpenCasesResult(data.object);
-                    if (reload) {
+					self.getAllOpenCasesResultRaw(data.object);
+                    if (self.getAllOpenCasesResult()){
+					    RebuildArray(self.getAllOpenCasesResult, data.object, 'caseKey', ViewModels.Case, self, true);
+                    }
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -374,6 +404,51 @@ module ListViewModels {
 
             self.getAllOpenCasesModal = function(callback?: any) {
                     self.getAllOpenCasesUi(callback);
+            }
+            
+
+            
+            self.getCaseSummary = function(callback?: any, reload: boolean = true){
+                self.getCaseSummaryIsLoading(true);
+                self.getCaseSummaryMessage('');
+                self.getCaseSummaryWasSuccessful(null);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Case/GetCaseSummary",
+                         data: {
+
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					self.getCaseSummaryResultRaw(data.object);
+                    if (!self.getCaseSummaryResult()){
+                        self.getCaseSummaryResult(new ViewModels.CaseSummary());
+                    }
+                    self.getCaseSummaryResult().loadFromDto(data.object);
+                                        if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
+				})
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.getCaseSummaryWasSuccessful(false);
+                    self.getCaseSummaryMessage(errorMsg);
+
+					//alert("Could not call method getCaseSummary: " + errorMsg);
+				})
+				.always(function() {
+                    self.getCaseSummaryIsLoading(false);
+				});
+            }
+
+            self.getCaseSummaryUi = function(callback?: any) {
+                                self.getCaseSummary(callback);
+            }
+
+            self.getCaseSummaryModal = function(callback?: any) {
+                    self.getCaseSummaryUi(callback);
             }
             
 

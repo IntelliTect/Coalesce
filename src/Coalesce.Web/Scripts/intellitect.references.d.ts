@@ -8,6 +8,7 @@
 /// <reference path="Generated\Ko.CaseList.ts" />
 /// <reference path="Generated\Ko.CaseProduct.ts" />
 /// <reference path="Generated\Ko.CaseProductList.ts" />
+/// <reference path="Generated\Ko.CaseSummary.ts" />
 /// <reference path="Generated\Ko.Company.ts" />
 /// <reference path="Generated\Ko.CompanyList.ts" />
 /// <reference path="Generated\Ko.DevTeam.ts" />

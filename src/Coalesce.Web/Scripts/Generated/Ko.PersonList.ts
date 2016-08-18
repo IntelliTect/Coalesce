@@ -74,8 +74,10 @@ module ListViewModels {
             // Call server method (Add)
         // Adds two numbers.
         public add: (numberOne: number, numberTwo: number, callback?: any, reload?: boolean) => void;
-        // Result of server method (Add)
-        public addResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (Add) strongly typed in a observable.
+        public addResult: KnockoutObservable<number> = ko.observable(null);
+        // Result of server method (Add) simply wrapped in an observable.
+        public addResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (Add) is being called
         public addIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (Add) if it fails.
@@ -94,8 +96,10 @@ module ListViewModels {
         // Call server method (GetUser)
         // Returns the user name
         public getUser: (callback?: any, reload?: boolean) => void;
-        // Result of server method (GetUser)
-        public getUserResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (GetUser) strongly typed in a observable.
+        public getUserResult: KnockoutObservable<string> = ko.observable(null);
+        // Result of server method (GetUser) simply wrapped in an observable.
+        public getUserResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetUser) is being called
         public getUserIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (GetUser) if it fails.
@@ -111,8 +115,10 @@ module ListViewModels {
         // Call server method (GetUserPublic)
         // Returns the user name
         public getUserPublic: (callback?: any, reload?: boolean) => void;
-        // Result of server method (GetUserPublic)
-        public getUserPublicResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (GetUserPublic) strongly typed in a observable.
+        public getUserPublicResult: KnockoutObservable<string> = ko.observable(null);
+        // Result of server method (GetUserPublic) simply wrapped in an observable.
+        public getUserPublicResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetUserPublic) is being called
         public getUserPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (GetUserPublic) if it fails.
@@ -128,8 +134,10 @@ module ListViewModels {
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
         public namesStartingWith: (characters: String, callback?: any, reload?: boolean) => void;
-        // Result of server method (NamesStartingWith)
-        public namesStartingWithResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (NamesStartingWith) strongly typed in a observable.
+        public namesStartingWithResult: KnockoutObservableArray<any> = ko.observableArray([]);
+        // Result of server method (NamesStartingWith) simply wrapped in an observable.
+        public namesStartingWithResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWith) is being called
         public namesStartingWithIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (NamesStartingWith) if it fails.
@@ -148,8 +156,10 @@ module ListViewModels {
         // Call server method (NamesStartingWithPublic)
         // Gets all the first names starting with the characters.
         public namesStartingWithPublic: (characters: String, callback?: any, reload?: boolean) => void;
-        // Result of server method (NamesStartingWithPublic)
-        public namesStartingWithPublicResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (NamesStartingWithPublic) strongly typed in a observable.
+        public namesStartingWithPublicResult: KnockoutObservableArray<any> = ko.observableArray([]);
+        // Result of server method (NamesStartingWithPublic) simply wrapped in an observable.
+        public namesStartingWithPublicResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWithPublic) is being called
         public namesStartingWithPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (NamesStartingWithPublic) if it fails.
@@ -168,8 +178,10 @@ module ListViewModels {
         // Call server method (BorCPeople)
         // People whose last name starts with B or c
         public borCPeople: (callback?: any, reload?: boolean) => void;
-        // Result of server method (BorCPeople)
-        public borCPeopleResult: KnockoutObservable<any> = ko.observable();
+        // Result of server method (BorCPeople) strongly typed in a observable.
+        public borCPeopleResult: KnockoutObservableArray<any> = ko.observableArray([]);
+        // Result of server method (BorCPeople) simply wrapped in an observable.
+        public borCPeopleResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (BorCPeople) is being called
         public borCPeopleIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (BorCPeople) if it fails.
@@ -326,8 +338,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.addResult(data.object);
-                    if (reload) {
+					self.addResultRaw(data.object);
+                    self.addResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -381,8 +394,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getUserResult(data.object);
-                    if (reload) {
+					self.getUserResultRaw(data.object);
+                    self.getUserResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -422,8 +436,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.getUserPublicResult(data.object);
-                    if (reload) {
+					self.getUserPublicResultRaw(data.object);
+                    self.getUserPublicResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -463,8 +478,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.namesStartingWithResult(data.object);
-                    if (reload) {
+					self.namesStartingWithResultRaw(data.object);
+                    self.namesStartingWithResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -517,8 +533,9 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.namesStartingWithPublicResult(data.object);
-                    if (reload) {
+					self.namesStartingWithPublicResultRaw(data.object);
+                    self.namesStartingWithPublicResult(data.object);
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -571,8 +588,11 @@ module ListViewModels {
                     },
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.borCPeopleResult(data.object);
-                    if (reload) {
+					self.borCPeopleResultRaw(data.object);
+                    if (self.borCPeopleResult()){
+					    RebuildArray(self.borCPeopleResult, data.object, 'personId', ViewModels.Person, self, true);
+                    }
+                                        if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);

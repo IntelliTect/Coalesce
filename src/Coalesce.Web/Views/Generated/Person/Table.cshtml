@@ -192,7 +192,9 @@
                                 <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithModal">Names Starting With</button>
                             </td>
                             <td>
-                                <span class="" data-bind="text: namesStartingWithResult"></span>
+                                    <ul data-bind="foreach: namesStartingWithResult">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
                             </td>
                             <td>
                                 <span class="" data-bind="text: namesStartingWithWasSuccessful"></span>
@@ -207,7 +209,9 @@
                                 <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithPublicModal">Names Starting With Public</button>
                             </td>
                             <td>
-                                <span class="" data-bind="text: namesStartingWithPublicResult"></span>
+                                    <ul data-bind="foreach: namesStartingWithPublicResult">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
                             </td>
                             <td>
                                 <span class="" data-bind="text: namesStartingWithPublicWasSuccessful"></span>
@@ -222,7 +226,9 @@
                                 <button class="btn btn-default btn-xs" data-bind="click: borCPeopleModal">Bor C People</button>
                             </td>
                             <td>
-                                <span class="" data-bind="text: borCPeopleResult"></span>
+                                    <ul data-bind="foreach: borCPeopleResult">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
                             </td>
                             <td>
                                 <span class="" data-bind="text: borCPeopleWasSuccessful"></span>

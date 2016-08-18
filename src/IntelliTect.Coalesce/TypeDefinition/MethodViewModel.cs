@@ -56,6 +56,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
         public string JsVariableResult { get { return JsVariable + "Result"; } }
+        public string JsVariableResultRaw { get { return JsVariable + "ResultRaw"; } }
         public string JsVariableIsLoading { get { return JsVariable + "IsLoading"; } }
         public string JsVariableMessage { get { return JsVariable + "Message"; } }
         public string JsVariableWasSuccessful { get { return JsVariable + "WasSuccessful"; } }
@@ -292,9 +293,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, this is a client side method.
         /// </summary>
-        public bool IsClientMethod { get
+        public bool IsClientMethod
+        {
+            get
             {
                 return !IsInternalUse && Name != "Validate" && Name != "PostSave";
-            } }
+            }
+        }
     }
 }

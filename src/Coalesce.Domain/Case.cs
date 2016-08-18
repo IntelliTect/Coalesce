@@ -100,5 +100,14 @@ namespace Coalesce.Domain
         {
             return entities.IncludeExternal(f => f.DevTeamAssigned);
         }
+
+        /// <summary>
+        /// Returns a list of summary information about Cases
+        /// </summary>
+        /// <returns></returns>
+        public static CaseSummary GetCaseSummary(AppDbContext db)
+        {
+            return CaseSummary.GetCaseSummary(db);
+        }
     }
 }

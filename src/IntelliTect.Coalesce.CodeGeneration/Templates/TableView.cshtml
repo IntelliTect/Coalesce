@@ -178,7 +178,26 @@
                                 <button class="btn btn-default btn-xs" data-bind="click: @method.JsVariableModal">@method.DisplayName</button>
                             </td>
                             <td>
+                                @if (method.ReturnType.IsCollection)
+                                {
+                                    <ul data-bind="foreach: @method.JsVariableResult">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
+                                }
+                                else if (method.ReturnType.HasClassViewModel)
+                                {
+                                    <dl class="dl-horizontal" data-bind="with: @method.JsVariableResult">
+                                        @foreach (var prop in method.ReturnType.ClassViewModel.Properties.Where(f => f.HasViewModelProperty && !f.IsHidden(HiddenAttribute.Areas.Edit)))
+                                        {
+                                            <dt>@prop.DisplayName</dt>
+                                            <dd data-bind="text: @prop.JsVariableForBinding"></dd>
+                                        }
+                                    </dl>
+                                }
+                                else
+                                {
                                 <span class="" data-bind="text: @method.JsVariableResult"></span>
+                                }
                             </td>
                             <td>
                                 <span class="" data-bind="text: @method.JsVariableWasSuccessful"></span>

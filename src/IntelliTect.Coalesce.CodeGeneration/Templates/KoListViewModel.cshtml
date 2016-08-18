@@ -112,8 +112,10 @@ module @moduleName {
         @:// @(method.Comment)
         }
         @:public @method.JsVariable: (@method.TsParameters) => void;
-        @:// Result of server method (@method.Name)
-        @:public @method.JsVariableResult: KnockoutObservable<any> = ko.observable();
+        @:// Result of server method (@method.Name) strongly typed in a observable.
+        @:public @method.JsVariableResult: @method.ReturnType.TsKnockoutType = @method.ReturnType.JsKnockoutType;
+        @:// Result of server method (@method.Name) simply wrapped in an observable.
+        @:public @method.JsVariableResultRaw: KnockoutObservable<any> = ko.observable();
         @:// True while the server method (@method.Name) is being called
         @:public @method.JsVariableIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         @:// Error message for server method (@method.Name) if it fails.
@@ -276,7 +278,26 @@ module @moduleName {
                          data: @method.JsPostObject,
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
-					self.@(method.JsVariableResult)(data.object);
+					self.@(method.JsVariableResultRaw)(data.object);
+                    @if (method.ReturnType.PureType.HasClassViewModel) {
+                    if (method.ReturnType.IsCollection)
+                    {
+                    @:if (self.@(method.JsVariableResult)()){
+   					// Merge the incoming array
+					    @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                    @:}
+                    }
+                    else
+                    {
+                    @:if (!self.@(method.JsVariableResult)()){
+                    @:    self.@(method.JsVariableResult)(new ViewModels.@(method.ReturnType.PureType.ClassViewModel.Name)());
+                    @:}
+                    @:self.@(method.JsVariableResult)().loadFromDto(data.object);
+                    }
+                    }
+                    else {
+                    @:self.@(method.JsVariableResult)(data.object);
+                    }
                     @if (method.ReturnType.Name == method.Parent.Name)
                     {
                     @:// The return type is the type of the object, load it.

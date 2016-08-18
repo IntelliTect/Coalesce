@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public static class ReflectionRepository
     {
-        private static Dictionary<string, ClassViewModel> models = new Dictionary<string, ClassViewModel>();
+        private static Dictionary<string, ClassViewModel> _models = new Dictionary<string, ClassViewModel>();
         private static object _lock = new object();
 
 
@@ -40,19 +40,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (!IsValidViewModelClass(apiName)) return null;
 
             // Get a unique key
-            //TODO: The apiname probably don't need to be specified here, can cause problems where it isn't available.
+            //TODO: The apiName probably don't need to be specified here, can cause problems where it isn't available.
             string key = GetKey(classType);
             // Create it if is doesn't exist.
             // TODO: This could be better multi-threading code
-            lock (models)
+            lock (_models)
             {
-                if (!models.ContainsKey(key))
+                if (!_models.ContainsKey(key))
                 {
-                    models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
+                    _models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
                 }
             }
             // Return the class requested.
-            return models[key];
+            return _models[key];
         }
 
         public static ClassViewModel GetClassViewModel(INamedTypeSymbol classType, string controllerName = null,
@@ -68,22 +68,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string key = GetKey(classType);
             // Create it if is doesn't exist.
             // TODO: This could be better multi-threading code
-            lock (models)
+            lock (_models)
             {
-                if (!models.ContainsKey(key))
+                if (!_models.ContainsKey(key))
                 {
-                    models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
+                    _models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
                 }
             }
             // Return the class requested.
-            return models[key];
+            return _models[key];
         }
 
 
 
         public static ClassViewModel GetClassViewModel(string className)
         {
-            return models.FirstOrDefault(f => f.Value.Name == className).Value;
+            return _models.FirstOrDefault(f => f.Value.Name == className).Value;
         }
         public static ClassViewModel GetClassViewModel<T>()
         {
@@ -120,6 +120,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <param name="classType"></param>
         /// <returns></returns>
+        private static string GetKey(TypeViewModel type)
+        {
+            if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
+            {
+                return GetKey(((ReflectionTypeWrapper)(type.Wrapper)).Info);
+            }
+            else
+            {
+                return GetKey((INamedTypeSymbol)(((SymbolTypeWrapper)(type.Wrapper)).Symbol));
+            }
+        }
+        /// <summary>
+        /// Gets a unique key for the collection.
+        /// </summary>
+        /// <param name="classType"></param>
+        /// <returns></returns>
         private static string GetKey(Type classType)
         {
             return string.Format("{0}", classType.FullName);
@@ -140,7 +156,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                return models.Values;
+                return _models.Values;
             }
         }
 
@@ -202,6 +218,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     AddChildModels(models, propModel);
                 }
             }
+            foreach (var prop in model.Methods.Where(p => !p.ReturnType.IsVoid && p.ReturnType.PureType.IsPOCO))
+            {
+                // Get a unique key
+                string key = GetKey(prop.ReturnType.PureType);
+                lock (models)
+                {
+                    if (!models.Any(f => f.Name == prop.ReturnType.PureType.Name))
+                    {
+                        var methodModel = new ClassViewModel(prop.ReturnType.PureType, "", "", false);
+                        models.Add(methodModel);
+                        AddChildModels(models, methodModel);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -211,7 +241,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var result = models.Select(f => f.Value.Namespace).Distinct();
+                var result = _models.Select(f => f.Value.Namespace).Distinct();
                 return result;
             }
         }

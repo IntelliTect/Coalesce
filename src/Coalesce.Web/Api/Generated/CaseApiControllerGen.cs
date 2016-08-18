@@ -251,5 +251,22 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
+        
+        // Method: GetCaseSummary
+        [HttpPost("GetCaseSummary")]
+        
+        public virtual SaveResult<CaseSummary> GetCaseSummary (){
+            var result = new SaveResult<CaseSummary>();
+            try{
+                var objResult = Case.GetCaseSummary(Db);
+                                result.Object = objResult;
+                result.WasSuccessful = true;
+                result.Message = null;
+            }catch(Exception ex){
+                result.WasSuccessful = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
             }
 }

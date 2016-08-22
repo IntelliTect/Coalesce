@@ -71,7 +71,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 var models = ReflectionRepository
                                 .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
-                                .Where(m => m.PrimaryKey != null)
+                                //.Where(m => m.PrimaryKey != null)
                                 .ToList();
 
                 var validationResult = ValidateContext.Validate(models);

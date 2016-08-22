@@ -13,12 +13,12 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
         var newItem;
         var inItem = incomingArray[i];
         var key = inItem[idField] || inItem.id;
-        var matchingItems = obsArrayContent.filter(
+        var matchingItems = idField ? obsArrayContent.filter(
             function (value) {
                 return value[intellitect.utilities.lowerFirstLetter(idField)]() == key;
             }
-        );
-        if (matchingItems.length == 0) {
+        ) : [ obsArrayContent[i] ];
+        if (matchingItems.length == 0 || typeof (matchingItems[0]) === 'undefined') {
             // Add this to the observable collection
             newItem = new viewModelClass(inItem)
             newItem.parent = parent;
@@ -26,7 +26,7 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
             observableArray.push(newItem);
         } else if (matchingItems.length == 1) {
             // See if the item is dirty. If so, leave it so we don't overwrite changes.
-            if (!matchingItems[0].isDirty()) {
+            if (typeof(matchingItems[0].isDirty) === 'undefined' || !matchingItems[0].isDirty()) {
                 matchingItems[0].loadFromDto(inItem);
             }
             // use the intermediary collection if we are not preserving, allowing deletes.

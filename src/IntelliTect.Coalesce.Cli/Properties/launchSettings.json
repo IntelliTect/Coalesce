@@ -2,8 +2,8 @@
   "profiles": {
     "IntelliTect.Coalesce.Cli": {
       "commandName": "Project",
-      "commandLineArgs": " -dc AppDbContext -dp ../../Coalesce.Domain -wp ../ -filesOnly true",
-      "workingDirectory": "C:\\git\\Coalesce\\src\\Coalesce.Web\\CoalesceExe"
+      "commandLineArgs": " -dc AppDbContext -dp ../../Meterator.Data -wp ../ -filesOnly true",
+      "workingDirectory": "C:\\Users\\aas4498\\Source\\Repos\\MDMLoad\\src\\Meterator.Web\\CoalesceExe"
     }
   }
 }

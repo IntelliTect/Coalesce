@@ -70,7 +70,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             {
                 template.Model = templateModel;
                 //ToDo: If there are errors executing the code, they are missed here.
-                result = await template.ExecuteTemplate();
+                try
+                {
+                    result = await template.ExecuteTemplate();
+                }
+                catch (Exception ex)
+                {
+                    return new TemplateResult()
+                    {
+                        GeneratedText = "",
+                        ProcessingException = new TemplateProcessingException(new string[] { ex.ToString() }, "")
+                    };
+                }
             }
 
             return new TemplateResult()

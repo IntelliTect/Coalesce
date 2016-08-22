@@ -218,7 +218,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     AddChildModels(models, propModel);
                 }
             }
-            foreach (var prop in model.Methods.Where(p => !p.ReturnType.IsVoid && p.ReturnType.PureType.IsPOCO))
+            foreach (var prop in model.Methods.Where(p => !p.IsInternalUse && !p.ReturnType.IsVoid && p.ReturnType.PureType.IsPOCO))
             {
                 // Get a unique key
                 string key = GetKey(prop.ReturnType.PureType);

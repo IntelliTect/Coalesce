@@ -284,7 +284,14 @@ module @moduleName {
                     {
                     @:if (self.@(method.JsVariableResult)()){
    					// Merge the incoming array
-					    @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        @if (method.ReturnType.PureType.ClassViewModel.PrimaryKey != null)
+                        {
+                            @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        }
+                        else
+                        {
+                            @:RebuildArray(self.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        }
                     @:}
                     }
                     else

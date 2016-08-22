@@ -217,7 +217,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsPOCO) return PureType.Wrapper.ClassViewModel;
+                if (PureType.IsPOCO) return PureType.Wrapper.ClassViewModel;
                 return null;
             }
         }

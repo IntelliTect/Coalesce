@@ -27,8 +27,11 @@ module @moduleName {
     // *** External Type @(model.Name)
     export class @(model.ViewModelClassName)
     {
+        @if (model.PrimaryKey != null)
+        {
         // ID of the object.
-        public myId: any = 0;
+        @:public myId: any = 0;
+        }
 
         // Observables
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))
@@ -50,31 +53,47 @@ module @moduleName {
             // Load the object
 			self.loadFromDto = function(data: any) {
 				if (!data) return;
-				// Set the ID
-				self.myId = data.@(model.PrimaryKey.JsonName);
+            @if (model.PrimaryKey != null)
+            {
+                @:// Set the ID
+                @:self.myId = data.@(model.PrimaryKey.JsonName);
+            }
 
                 // Load the properties.
-                @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))
+        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))
+        {
+            if (prop.Type.IsCollection && prop.HasViewModel)
+            {
+                @:if (data.@prop.JsonName != null) {
+                @:// Merge the incoming array
+                @if (prop.Type.PureType.ClassViewModel.PrimaryKey != null)
                 {
-                    if (prop.Type.IsDate)
-                    {
+                    @:RebuildArray(self.@(prop.JsVariable), data.@prop.JsonName, '@prop.Type.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@prop.Type.PureType.ClassViewModel.Name, self, true);
+                }
+                else
+                {
+                    @:RebuildArray(self.@(prop.JsVariable), data.@prop.JsonName, null, ViewModels.@prop.Type.PureType.ClassViewModel.Name, self, true);
+                }
+                @:}
+
+            }
+            else if (prop.Type.IsDate)
+            {
                 @:if (data.@prop.JsVariable == null) self.@(prop.JsVariable)(null);
                 @:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsVariable))){
                 @:self.@(prop.JsVariable)(moment(data.@prop.JsVariable));
                 @:}
-                    }
-                    else if (prop.IsPOCO)
-                    {
+            }
+            else if (prop.IsPOCO)
+            {
                 @:self.@(prop.JsVariable)(new @(prop.PureType.Name)());
                 @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsVariable);
-                    }
-                    else
-                    {
+            }
+            else
+            {
                 @:self.@(prop.JsVariable)(data.@prop.JsVariable);
-                    }
-                
-
-                }
+            }
+        }
                 
             };
 

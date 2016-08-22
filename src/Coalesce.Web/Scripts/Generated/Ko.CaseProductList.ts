@@ -28,6 +28,8 @@ module ListViewModels {
         public items: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
+        // Adds a new item to the collection.
+		public addNewItem: () => ViewModels.CaseProduct;
         // Deletes an item.
 		public deleteItem: (item: ViewModels.CaseProduct) => void;
         // True if the collection is loading.
@@ -173,6 +175,14 @@ module ListViewModels {
             function itemDeleted(item) {
                 self.items.remove(item);
             }
+
+            // Adds a new item to the array.
+            self.addNewItem = function()
+            {
+                var item = new ViewModels.CaseProduct();
+                self.items.push(item);
+                return item;
+            };
 
             // Deletes an item and removes it from the array.
             self.deleteItem = function(item: ViewModels.CaseProduct)

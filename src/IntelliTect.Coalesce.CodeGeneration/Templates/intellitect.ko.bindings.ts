@@ -29,6 +29,7 @@ interface KnockoutBindingHandlers {
     fadeVisible: KnockoutBindingHandler;
     slideVisible: KnockoutBindingHandler;
     moment: any;
+    momentFromNow: any;
     booleanValue: KnockoutBindingHandler;
 }
 
@@ -665,8 +666,6 @@ ko.bindingHandlers.booleanValue = {
                 observable(val);
 
             });
-
-
         },
 
         update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -691,6 +690,61 @@ ko.bindingHandlers.booleanValue = {
             } else {
                 $(element).text(output);
             }
+
+        }
+    };
+
+
+
+
+
+
+
+    ko.bindingHandlers.momentFromNow = {
+
+        isDate: function (input) {
+            return Object.prototype.toString.call(input) === '[object Date]' ||
+                input instanceof Date;
+        },
+
+        defaults: {
+            invalid: '',
+        },
+
+        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+
+            var allBindings = allBindingsAccessor();
+
+            ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                clearInterval(element.koFromNowTimer);
+            });
+        },
+
+        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+
+            var value = valueAccessor(),
+                allBindings = allBindingsAccessor(),
+                valueUnwrapped = ko.utils.unwrapObservable(value);
+
+            // Date formats: http://momentjs.com/docs/#/displaying/format/
+            var invalidString = allBindings.invalid == undefined ? ko.bindingHandlers.moment.defaults.invalid : allBindings.invalid;
+
+            var dateMoment = moment(valueUnwrapped);
+
+            // format string for input box
+            var output = dateMoment.isValid() ?
+                dateMoment.fromNow() :
+                invalidString;
+
+            $(element).text(output);
+
+            clearInterval(element.koFromNowTimer);
+            element.koFromNowTimer = setInterval(function () {
+                var output = dateMoment.isValid() ?
+                    dateMoment.fromNow() :
+                    invalidString;
+                $(element).text(output);
+            }, 1000);
 
         }
     };

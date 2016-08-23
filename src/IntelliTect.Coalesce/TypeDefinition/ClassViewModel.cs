@@ -76,6 +76,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get { return Wrapper.Name; }
         }
 
+        public string FullName
+        {
+            get { return Wrapper.Namespace + "." + Wrapper.Name; }
+        }
+
         public string Comment { get { return Wrapper.Comment; } }
 
         public string ControllerName

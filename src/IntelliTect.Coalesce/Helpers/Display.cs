@@ -110,7 +110,7 @@ namespace IntelliTect.Coalesce.Helpers
                 {
                     if (prop.Type.IsEnum)
                     {
-                        return $"@(Knockout.SelectFor<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}))";
+                        return $"@(Knockout.SelectFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                     }
                     else if (prop.HasValidValues)
                     {
@@ -118,34 +118,34 @@ namespace IntelliTect.Coalesce.Helpers
                         {
                             if (!string.IsNullOrWhiteSpace(areaName))
                             {
-                                return $"@(Knockout.SelectForManyToMany<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}, areaName: \"StokesTest\"))";
+                                return $"@(Knockout.SelectForManyToMany<{prop.Parent.FullName}>(p => p.{prop.Name}, areaName: \"StokesTest\"))";
                             }
                             else
                             {
-                                return $"@(Knockout.SelectForManyToMany<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}))";
+                                return $"@(Knockout.SelectForManyToMany<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                             }
                             //return Knockout.SelectForManyToMany(prop);
                         }
                         else
                         {
-                            return $"@(Knockout.SelectForObject<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}))";
+                            return $"@(Knockout.SelectForObject<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                             //return Knockout.SelectObject(prop);
                         }
 
                     }
                     else if (prop.ListGroup != null)
                     {
-                        return $"@(Knockout.SelectFor<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}))";
+                        return $"@(Knockout.SelectFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                         //return Knockout.SelectString(prop);
                     }
                     else
                     {
-                        return $"@(Knockout.InputFor<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}))";
+                        return $"@(Knockout.InputFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                     }
                 }
                 else
                 {
-                    return $"@(Knockout.DisplayFor<{prop.Parent.ViewModelClassName}>(p => p.{prop.Name}))";
+                    return $"@(Knockout.DisplayFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                 }
             }
 

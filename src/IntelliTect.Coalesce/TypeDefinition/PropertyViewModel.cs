@@ -680,6 +680,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     return true;
                 }
+                if (Parent.Properties.Any( p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name))))
+                {
+                    // You can also put the attribute on the POCO property and refer to the key property. This detects that.
+                    return true;
+                }
+
                 return false;
             }
         }
@@ -751,6 +757,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     /// Use the ForeignKey Attribute if it is there.
                     var value = (string)Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name));
                     if (value != null) return value;
+
+                    // Use the ForeignKey Attribute on the object property if it is there.
+                    var prop = Parent.Properties.SingleOrDefault(p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name)));
+                    if (prop != null) return prop.Name;
+
                     // Else, by convention remove the Id at the end.
                     return Name.Substring(0, Name.Length - 2);
                 }

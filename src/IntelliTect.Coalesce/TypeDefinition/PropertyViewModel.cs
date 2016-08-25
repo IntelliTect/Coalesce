@@ -466,6 +466,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsHidden(HiddenAttribute.Areas area)
         {
             if (IsId) return true;
+            if (IsInternalUse) return true;
             // Check the attribute
             var value = Wrapper.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(nameof(HiddenAttribute.Area));
             if (value != null) return value.Value == area || value.Value == HiddenAttribute.Areas.All;
@@ -1059,7 +1060,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string setter;
             if (Type.IsCollection)
             {
-                setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
+                string orderBy = "";
+                if (PureType.HasClassViewModel)
+                {
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause;
+                    if (defaultOrderBy != null)
+                    {
+                        orderBy = $".OrderBy(\"{defaultOrderBy}\")";
+                    }
+                }
+
+                setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
             }else if (Type.HasClassViewModel && Type.ClassViewModel.OnContext)
             {
                 setter = $"{objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects);";

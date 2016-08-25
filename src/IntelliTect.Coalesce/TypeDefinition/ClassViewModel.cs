@@ -258,6 +258,31 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get { return baseUrl + ControllerName; }
         }
 
+        public string DefaultOrderByClause
+        {
+            get
+            {
+                var defaultOrderBy = DefaultOrderBy.ToList();
+                if (defaultOrderBy.Any())
+                {
+                    var orderByClauseList = new List<string>();
+                    foreach (var orderInfo in defaultOrderBy)
+                    {
+                        if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
+                        {
+                            orderByClauseList.Add($"{orderInfo.FieldName} ASC");
+                        }
+                        else
+                        {
+                            orderByClauseList.Add($"{orderInfo.FieldName} DESC");
+                        }
+                    }
+                    return string.Join(",", orderByClauseList);
+                }
+                return null;
+            }
+        }
+
         /// <summary>
         /// Gets a sorted list of the default order by attributes for the class.
         /// </summary>

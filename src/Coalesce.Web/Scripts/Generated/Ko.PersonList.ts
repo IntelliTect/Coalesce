@@ -29,6 +29,8 @@ module ListViewModels {
         public items: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
+        // Adds a new item to the collection.
+		public addNewItem: () => ViewModels.Person;
         // Deletes an item.
 		public deleteItem: (item: ViewModels.Person) => void;
         // True if the collection is loading.
@@ -286,6 +288,14 @@ module ListViewModels {
                 self.items.remove(item);
             }
 
+            // Adds a new item to the array.
+            self.addNewItem = function()
+            {
+                var item = new ViewModels.Person();
+                self.items.push(item);
+                return item;
+            };
+
             // Deletes an item and removes it from the array.
             self.deleteItem = function(item: ViewModels.Person)
             {
@@ -327,6 +337,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.addResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -382,6 +393,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.getUserResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -423,6 +435,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.getUserPublicResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -464,6 +477,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.namesStartingWithResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -518,6 +532,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.namesStartingWithPublicResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -572,6 +587,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.borCPeopleResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {

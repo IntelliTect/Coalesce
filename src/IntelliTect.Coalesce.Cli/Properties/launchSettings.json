@@ -3,7 +3,7 @@
     "IntelliTect.Coalesce.Cli": {
       "commandName": "Project",
       "commandLineArgs": " -dc AppDbContext -dp ../../Coalesce.Domain -wp ../ -filesOnly true",
-      "workingDirectory": "C:\\git\\Coalesce\\src\\Coalesce.Web\\CoalesceExe"
+      "workingDirectory": "..\\Coalesce.Web\\CoalesceExe"
     }
   }
 }

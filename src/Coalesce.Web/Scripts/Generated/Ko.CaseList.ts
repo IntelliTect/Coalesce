@@ -29,6 +29,8 @@ module ListViewModels {
         public items: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
+        // Adds a new item to the collection.
+		public addNewItem: () => ViewModels.Case;
         // Deletes an item.
 		public deleteItem: (item: ViewModels.Case) => void;
         // True if the collection is loading.
@@ -227,6 +229,14 @@ module ListViewModels {
                 self.items.remove(item);
             }
 
+            // Adds a new item to the array.
+            self.addNewItem = function()
+            {
+                var item = new ViewModels.Case();
+                self.items.push(item);
+                return item;
+            };
+
             // Deletes an item and removes it from the array.
             self.deleteItem = function(item: ViewModels.Case)
             {
@@ -267,6 +277,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.getAllOpenCasesCountResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -308,6 +319,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.randomizeDatesAndStatusResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
@@ -349,6 +361,7 @@ module ListViewModels {
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {
 					self.getAllOpenCasesResult(data.object);
+                    
                     if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {

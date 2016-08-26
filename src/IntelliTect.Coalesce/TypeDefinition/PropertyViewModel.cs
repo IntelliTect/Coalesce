@@ -204,6 +204,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         errorMessage = Wrapper.GetAttributeObject<RequiredAttribute, string>(nameof(RequiredAttribute.ErrorMessage));
                     }
+                    if (string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        var name = (IdPropertyObjectProperty ?? this).DisplayName;
+                        errorMessage = $"{name} is required.";
+                    }
+
                     validationText = $"required: {KoValidationOptions("true", errorMessage)}";
                 }
                 if (MaxLength.HasValue)

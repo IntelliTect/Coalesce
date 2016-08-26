@@ -309,7 +309,7 @@ namespace @(namespaceName).Api
                 @:object objResult = null;
                 @:@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
                 }else{
-                @:var objResult = @(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+                @:var objResult = @(method.Parent.FullName).@(method.Name)(@(method.CsArguments));
                 }
                 }
                 else
@@ -326,11 +326,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-                @:result.Object = Mapper<@(model.Name), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "");
+                @:result.Object = Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "");
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.Name), @(model.DtoName)>.ObjToDtoMapper(o, User, ""));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, ""));
                 }
                 else
                 {

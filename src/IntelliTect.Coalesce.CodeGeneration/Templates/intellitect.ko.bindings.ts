@@ -138,6 +138,10 @@ ko.bindingHandlers.select2Ajax = {
             });
         }
 
+        // Add the validation message
+        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        // The validation message needs to go after the new select2 dropdown, not before it.
+        $(element).next(".validationMessage").insertAfter($(element).next(".select2"));
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // See if the value exists. If not, we haven't loaded it from the server yet.
@@ -178,7 +182,6 @@ ko.bindingHandlers.select2Ajax = {
         }
     }
 };
-
 
 // Multi-select Select2 binding that uses an AJAX call for the list of valid values.
 ko.bindingHandlers.select2AjaxMultiple = {

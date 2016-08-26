@@ -53,6 +53,38 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
     }
 }
 
+
+function RebuildArrayInPlace(existingArray, incomingArray, idField) {
+    var incomingArrayUnwrapped = ko.unwrap(incomingArray);
+    var existingArrayCopy = existingArray().slice();
+
+    for (var i in incomingArrayUnwrapped) {
+        var newItem;
+        var inItem = incomingArrayUnwrapped[i];
+        var key = inItem[idField] || inItem.id;
+        var matchingItems = idField ? existingArrayCopy.filter(
+            function (value) {
+                return value[intellitect.utilities.lowerFirstLetter(idField)]() == ko.utils.unwrapObservable(key);
+            }
+        ) : [existingArrayCopy[i]];
+
+        if (matchingItems.length == 0 || typeof (matchingItems[0]) === 'undefined') {
+            // Add this to the observable collection
+            existingArray.push(inItem);
+        } else if (matchingItems.length == 1) {
+            // Remove this one from the copy so we don't remove it later.
+            existingArrayCopy.splice(existingArrayCopy.indexOf(matchingItems[0]), 1);
+        } else {
+            // We have a problem because keys are duplicated.
+        }
+    }
+
+    // Remove any items that we didn't find in the incoming array.
+    for (var i in existingArrayCopy) {
+        existingArray.splice(existingArray.indexOf(existingArrayCopy[i]), 1);
+    }
+}
+
 // Used by tooltip from Knockstrap
 function unwrapProperties(wrappedProperies) {
 

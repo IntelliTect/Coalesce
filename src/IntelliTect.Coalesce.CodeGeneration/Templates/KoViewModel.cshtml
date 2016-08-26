@@ -236,7 +236,7 @@ module @moduleName {
         @:];
         }
 
-        @foreach(var method in model.Methods.Where(m => !m.IsStatic && m.IsClientMethod))
+        @foreach(var method in model.Methods.Where(m => m.IsClientMethod && (!m.IsStatic || m.ReturnType.Name == model.Name)))
         {
         @:// Call server method (@method.Name)
         if (method.Comment.Length > 0)
@@ -245,7 +245,7 @@ module @moduleName {
         }
         @:public @method.JsVariable: (@method.TsParameters) => void;
         @:// Result of server method (@method.Name)
-        @:public @method.JsVariableResult: KnockoutObservable<any> = ko.observable();
+        @:public @method.JsVariableResult: @method.ReturnType.TsKnockoutType = @method.ReturnType.JsKnockoutType;
         @:// True while the server method (@method.Name) is being called
         @:public @method.JsVariableIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         @:// Error message for server method (@method.Name) if it fails.
@@ -920,7 +920,7 @@ module @moduleName {
 
 
             // Method Implementations
-            @foreach (var method in model.Methods.Where(m => !m.IsStatic && m.IsClientMethod))
+            @foreach (var method in model.Methods.Where(m => m.IsClientMethod && (!m.IsStatic || m.ReturnType.Name == model.Name)))
             {
             <text>
             self.@method.JsVariable = function(@method.TsParameters.Replace("reload?: boolean", "reload: boolean = true")){
@@ -1043,7 +1043,7 @@ module @moduleName {
         }
 
         // Classes for use in method calls to support data binding for input for arguments
-        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && !f.IsStatic && f.IsClientMethod)){
+        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && (!f.IsStatic || f.ReturnType.Name == model.Name) && f.IsClientMethod)){
         @:export class @(method.ArgsName) {
             @foreach (var arg in method.ClientParameters)
             {

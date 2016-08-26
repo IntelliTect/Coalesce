@@ -242,39 +242,36 @@ gulp.task('nuget:publish:NLogExtensions',
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
 
-gulp.task('coalesce:build', function (cb) {
-    exec('dotnet build "../IntelliTect.Coalesce.Cli/project.json" -o ./CoalesceExe -f net46', function(err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        cb(err);
-    });
-});
+gulp.task('coalesce:build', shell.task
+    (['dotnet build "../IntelliTect.Coalesce.Cli/project.json" -o ./CoalesceExe -f net46'],
+{ verbose: true }
+));
 
-gulp.task('coalesce', ['coalesce:build'], function (cb) {
-    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true', function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        console.log(err);
-        cb(err);
-    });
-});
 
-gulp.task('coalesce:area', ['coalesce:build'], function (cb) {
-    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        console.log(err);
-        cb(err);
-    });
-});
+gulp.task('coalesce', ['coalesce:build'], shell.task
+    (['"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext ' +
+    '-dp ../Coalesce.Domain -wp ./ -filesOnly true'],
+{ verbose: true }
+));
 
-gulp.task('coalesce:area-all', ['coalesce'], function (cb) {
-    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        console.log(err);
-        cb(err);
-    });
-});
+
+
+//gulp.task('coalesce:area', ['coalesce:build'], function (cb) {
+//    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
+//        console.log(stdout);
+//        console.log(stderr);
+//        console.log(err);
+//        cb(err);
+//    });
+//});
+
+//gulp.task('coalesce:area-all', ['coalesce'], function (cb) {
+//    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
+//        console.log(stdout);
+//        console.log(stderr);
+//        console.log(err);
+//        cb(err);
+//    });
+//});
 
 gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);

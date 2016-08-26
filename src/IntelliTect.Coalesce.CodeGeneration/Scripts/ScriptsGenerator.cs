@@ -206,30 +206,33 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 throw new FileNotFoundException("Embedded resource not found: " + sourceFile);
             }
 
-            const int tries = 3;
-            for ( int i = 1; i <= tries; i++ )
+            if (FileUtilities.HasDifferences(inputStream, destinationFile))
             {
-                FileStream fileStream = null;
-                try
+                const int tries = 3;
+                for (int i = 1; i <= tries; i++)
                 {
-                    fileStream = File.Create( destinationFile );
-                    inputStream.Seek( 0, SeekOrigin.Begin );
-                    inputStream.CopyTo( fileStream );
-                    if (i > 1) Console.WriteLine($"Attempt {i} succeeded.");
-                    break;
-                }
-                catch ( IOException ex )
-                {
-                    Console.WriteLine( $"Attempt {i} of {tries} failed: {ex.Message}" );
-                    if ( i == tries )
-                        throw;
+                    FileStream fileStream = null;
+                    try
+                    {
+                        fileStream = File.Create(destinationFile);
+                        inputStream.Seek(0, SeekOrigin.Begin);
+                        inputStream.CopyTo(fileStream);
+                        if (i > 1) Console.WriteLine($"Attempt {i} succeeded.");
+                        break;
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine($"Attempt {i} of {tries} failed: {ex.Message}");
+                        if (i == tries)
+                            throw;
 
-                    // Errors here are almost always because a file is in use. Just wait a second and it probably won't be in use anymore.
-                    Thread.Sleep( 1000 );
-                }
-                finally
-                {
-                    fileStream?.Dispose();
+                        // Errors here are almost always because a file is in use. Just wait a second and it probably won't be in use anymore.
+                        Thread.Sleep(1000);
+                    }
+                    finally
+                    {
+                        fileStream?.Dispose();
+                    }
                 }
             }
         }

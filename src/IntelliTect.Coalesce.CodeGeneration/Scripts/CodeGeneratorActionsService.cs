@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration;
+using System.Security.Cryptography;
+using System.Linq;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -108,13 +111,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         private async Task AddFileHelper(string outputPath, Stream sourceStream)
         {
             _fileSystem.CreateDirectory(Path.GetDirectoryName(outputPath));
+            bool hasChange = true;
 
             if (_fileSystem.FileExists(outputPath))
             {
-                _fileSystem.MakeFileWritable(outputPath);
+                if (!FileUtilities.HasDifferences(sourceStream, outputPath))
+                {
+                    hasChange = false;
+                }
+                else
+                {
+                    _fileSystem.MakeFileWritable(outputPath);
+                }
+
             }
 
-            await _fileSystem.AddFileAsync(outputPath, sourceStream);
+            if (hasChange)
+            {
+                sourceStream.Seek(0, SeekOrigin.Begin);
+                await _fileSystem.AddFileAsync(outputPath, sourceStream);
+            }
         }
     }
 }

@@ -61,6 +61,8 @@ module @moduleName {
         public items: KnockoutObservableArray<@viewModelModuleName.@(model.ViewModelClassName)> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
+        // Adds a new item to the collection.
+		public addNewItem: () => @viewModelModuleName.@(model.ViewModelClassName);
         // Deletes an item.
 		public deleteItem: (item: @viewModelModuleName.@(model.ViewModelClassName)) => void;
         // True if the collection is loading.
@@ -239,6 +241,14 @@ module @moduleName {
                 self.items.remove(item);
             }
 
+            // Adds a new item to the array.
+            self.addNewItem = function()
+            {
+                var item = new @viewModelModuleName.@(model.ViewModelClassName)();
+                self.items.push(item);
+                return item;
+            };
+
             // Deletes an item and removes it from the array.
             self.deleteItem = function(item: @viewModelModuleName.@(model.ViewModelClassName))
             {
@@ -305,19 +315,11 @@ module @moduleName {
                     else {
                     @:self.@(method.JsVariableResult)(data.object);
                     }
-                    @if (method.ReturnType.Name == method.Parent.Name)
-                    {
-                    @:// The return type is the type of the object, load it.
-                    @:self.loadFromDto(data.object, true)
-                    @:if ($.isFunction(callback)) {
-                    @:    callback();
-                    @:}
-                    }else{
-                    @:if (reload) {
-                    @:  self.load(callback);
-                    @:} else if ($.isFunction(callback)) {
-                    @:  callback(data);
-                    @:}
+                    
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
                     }
 				})
 				.fail(function(xhr) {

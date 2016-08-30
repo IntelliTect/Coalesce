@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Common
                 var result = sourceString != origString;
                 if (result)
                 {
-                    Console.WriteLine($"Change to {filename}");
+                    //Console.WriteLine($"Change to {filename}");
                 }
                 return result;
             }

@@ -472,6 +472,11 @@ ko.bindingHandlers.select2 = {
             });
         }
 
+
+        // Add the validation message
+        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        // The validation message needs to go after the new select2 dropdown, not before it.
+        $(element).next(".validationMessage").insertAfter($(element).nextAll(".select2").first());
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // Set the element based on the value in the model.

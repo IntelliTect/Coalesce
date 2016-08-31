@@ -33,28 +33,32 @@ namespace IntelliTect.Coalesce.Utilities
         // Convert the string to camel case.
         public static string ToCamelCase(this string theString)
         {
-            // If there are 0 or 1 characters, just return the string.
-            if (theString == null || theString.Length < 2)
-                return theString;
+            if (theString == null) return theString;
+            if (theString.Length <= 2) return theString.ToLower();
+            else return theString.Substring(0, 1).ToLower() + theString.Substring(1);
 
-            Regex r = new Regex("([A-Z]+[a-z]+)");
-            string spaced = r.Replace(theString, m => m + " ");
+            //// If there are 0 or 1 characters, just return the string.
+            //if (theString == null || theString.Length < 2)
+            //    return theString;
 
-            // Split the string into words.
-            string[] words = spaced.Split(
-                new char[] {' '},
-                StringSplitOptions.RemoveEmptyEntries);
+            //Regex r = new Regex("([A-Z]+[a-z]+)");
+            //string spaced = r.Replace(theString, m => m + " ");
 
-            // Combine the words.
-            string result = words[0].ToLower();
-            for (int i = 1; i < words.Length; i++)
-            {
-                result +=
-                    words[i].Substring(0, 1).ToUpper() +
-                    words[i].Substring(1);
-            }
+            //// Split the string into words.
+            //string[] words = spaced.Split(
+            //    new char[] {' '},
+            //    StringSplitOptions.RemoveEmptyEntries);
 
-            return result;
+            //// Combine the words.
+            //string result = words[0].ToLower();
+            //for (int i = 1; i < words.Length; i++)
+            //{
+            //    result +=
+            //        words[i].Substring(0, 1).ToUpper() +
+            //        words[i].Substring(1);
+            //}
+
+            //return result;
         }
 
         // Capitalize the first character and add a space before

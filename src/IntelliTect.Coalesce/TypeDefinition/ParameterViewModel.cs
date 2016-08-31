@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.Utilities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,10 +19,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Type = type;
         }
 
-        public bool IsDI { get
+        public bool IsDI
+        {
+            get
             {
                 return IsAContext || IsAUser;
-            } }
+            }
+        }
 
         public bool IsAContext
         {
@@ -48,7 +52,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (IsAContext) return "Db";
                 if (IsAUser) return "User";
-                return Name;
+                return Name.ToCamelCase();
             }
         }
 
@@ -57,6 +61,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 return Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
+            }
+        }
+
+        /// <summary>
+        /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()
+        /// </summary>
+        public string TsConversion
+        {
+            get
+            {
+                if (Type.IsDate)
+                {
+                    return ".format()";
+                }
+                return "";
             }
         }
     }

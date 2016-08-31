@@ -337,7 +337,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string CsDeclaration(string parameterName)
         {
-            return $"{Name} {parameterName}";
+            return $"{NameWithTypeParams} {parameterName.ToCamelCase()}";
         }
 
 
@@ -366,7 +366,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 //var model = ReflectionRepository.Models.Where(m => m.OnContext && m.Name == typeName).FirstOrDefault();
                 var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
-                if (model != null && model.OnContext)
+                if (model != null)
                 {
                     typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
                 }

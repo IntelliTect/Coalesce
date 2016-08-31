@@ -4,7 +4,7 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
     var obsArrayContent;
     if (allowCollectionDeletes) {
         // Move all the items to a new array so we can populate the original one.
-        obsArrayContent = observableArray().splice(0, observableArray().length);
+        obsArrayContent = observableArray.splice(0, observableArray().length);
     } else {
         // Use the original array because we aren't removing anything.
         obsArrayContent = observableArray();

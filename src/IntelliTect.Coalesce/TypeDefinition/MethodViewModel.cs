@@ -183,11 +183,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string result;
             if (obj != "")
             {
-                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name}()"));
+                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name.ToCamelCase()}()"));
             }
             else
             {
-                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name));
+                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name.ToCamelCase()));
             }
             if (callback)
             {
@@ -211,7 +211,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     if (Parameters.Any()) result = result + ", " + Environment.NewLine;
                 }
 
-                result += string.Join(", " + Environment.NewLine, ClientParameters.Select(f => $"                        {f.Name}: {f.Name}"));
+                result += string.Join(", " + Environment.NewLine, ClientParameters.Select(f => $"                        {f.Name}: {f.Name}{f.TsConversion}"));
                 result += Environment.NewLine + "                    }";
                 return result;
 

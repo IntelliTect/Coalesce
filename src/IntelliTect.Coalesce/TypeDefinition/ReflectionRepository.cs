@@ -209,7 +209,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private static void AddChildModels(List<ClassViewModel> models, ClassViewModel model)
         {
-            foreach (var prop in model.Properties.Where(p => p.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
+            foreach (var prop in model.Properties.Where(p => p.PureType.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
             {
                 var propModel = prop.PureType.ClassViewModel;
                 if (propModel != null && !propModel.HasDbSet && !models.Contains(propModel))

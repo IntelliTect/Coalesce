@@ -1074,10 +1074,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         orderBy = $".OrderBy(\"{defaultOrderBy}\")";
                     }
+                setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
+                }
+                else
+                {
+                setter = $@"{objectName}.{Name} = obj.{Name};";
                 }
 
-                setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
-            }else if (Type.HasClassViewModel && Type.ClassViewModel.OnContext)
+            }else if (Type.HasClassViewModel)
             {
                 setter = $"{objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects);";
             }else

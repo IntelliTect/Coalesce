@@ -60,9 +60,9 @@ module @moduleName {
             }
 
                 // Load the properties.
-        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))
+        @foreach (PropertyViewModel prop in model.Properties)
         {
-            if (prop.Type.IsCollection && prop.HasViewModel)
+            if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
             {
                 @:if (data.@prop.JsonName != null) {
                 @:// Merge the incoming array

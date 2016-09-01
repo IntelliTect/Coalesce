@@ -4,7 +4,7 @@ using System;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using IntelliTect.Coalesce.TypeDefinition;
-
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.Helpers
 {
@@ -375,15 +375,35 @@ namespace IntelliTect.Coalesce.Helpers
                 prefix = "$data.";
             }
 
+
+            string filterString = "";
+            if (propertyModel.Wrapper.HasAttribute<SelectFilterAttribute>())
+            {
+                var foreignPropName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.ForeignPropertyName)).ToString();
+                var localPropName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.LocalPropertyName));
+                var localValue = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.StaticPropertyValue));
+
+                var foreignProp = propertyModel.Object.PropertyByName(foreignPropName);
+                if (localValue != null)
+                {
+                    filterString = $"?{foreignProp.JsVariable}={localValue}";
+                }
+                else
+                {
+                    var localProp = propertyModel.Parent.PropertyByName((localPropName ?? foreignPropName).ToString());
+                    filterString = $"?{foreignProp.JsVariable}=' + {localProp.JsVariableForBinding}() + '";
+                }
+            }
+
             string result = string.Format(@"
                     <select class=""form-control"" 
-                        data-bind=""select2Ajax: {6}{0}, url: '/api/{1}/list', idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
+                        data-bind=""select2Ajax: {6}{0}, url: function() {{ return '/api/{1}/list{8}' }}, idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
                         placeholder=""{5}"">
                             <option>{5}</option>
                     </select >
                     ",
                 propertyModel.ObjectIdProperty.JsVariable, propertyModel.PureType.Name, propertyModel.Object.PrimaryKey.Name,
-                propertyModel.Object.ListTextProperty.Name, propertyModel.JsVariable, placeholder, prefix, allowsClear.ToString().ToLowerInvariant());
+                propertyModel.Object.ListTextProperty.Name, propertyModel.JsVariable, placeholder, prefix, allowsClear.ToString().ToLowerInvariant(), filterString);
             return new HtmlString(result);
         }
 

@@ -40,7 +40,7 @@
         if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
     }
 }
-@foreach (var ns in namespaces)
+@foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)))
 {
 @:using @ns;
 }

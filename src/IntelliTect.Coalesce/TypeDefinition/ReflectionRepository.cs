@@ -149,7 +149,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private static string GetKey(INamedTypeSymbol classType)
         {
-            return string.Format("{0}", $"{classType.ContainingNamespace.Name}.{classType.Name}");
+            List<string> namespaces = new List<string>();
+            var curNamespace = classType.ContainingNamespace;
+            while (curNamespace.CanBeReferencedByName)
+            {
+                namespaces.Add(curNamespace.Name);
+                curNamespace = curNamespace.ContainingNamespace;
+            }
+            namespaces.Reverse();
+
+            var fullNamespace = string.Join(".", namespaces);
+
+            return string.Format("{0}", $"{fullNamespace}.{classType.Name}");
         }
 
         public static IEnumerable<ClassViewModel> Models

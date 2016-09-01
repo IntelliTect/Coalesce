@@ -9,7 +9,8 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
         // Use the original array because we aren't removing anything.
         obsArrayContent = observableArray();
     }
-    for (var i in incomingArray) {
+    // Can't do for (var i in array) because IE sees new methods added on to the prototype as keys
+    for (var i = 0; i < incomingArray.length; i++) {
         var newItem;
         var inItem = incomingArray[i];
         var key = inItem[idField] || inItem.id;
@@ -44,7 +45,8 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
     // If we are not allowing deletes.
     if (allowCollectionDeletes) {
         // Add any items that are already there but are still dirty.
-        for (var i in obsArrayContent) {
+        for (var i = 0; i < obsArrayContent.length; i++) {
+        //for (var i in obsArrayContent) {
             var existingItem = obsArrayContent[i];
             if (existingItem.isDirty()) {
                 observableArray.push(existingItem);

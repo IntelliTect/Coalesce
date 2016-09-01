@@ -381,7 +381,6 @@ namespace IntelliTect.Coalesce.Helpers
             if (propertyModel.Wrapper.HasAttribute<SelectFilterAttribute>())
             {
                 var foreignPropName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.ForeignPropertyName)).ToString();
-                var localPropName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.LocalPropertyName));
                 var localValue = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.StaticPropertyValue));
 
                 var foreignProp = propertyModel.Object.PropertyByName(foreignPropName);
@@ -391,14 +390,28 @@ namespace IntelliTect.Coalesce.Helpers
                 }
                 else
                 {
-                    var localProp = propertyModel.Parent.PropertyByName((localPropName ?? foreignPropName).ToString());
-                    filterString = $"?{foreignProp.JsVariable}=' + {localProp.JsVariableForBinding}() + '";
+                    var localPropName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.LocalPropertyName));
+                    var localPropObjName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.LocalPropertyObjectName));
+
+
+                    if (localPropObjName != null)
+                    {
+                        var localPropObj = propertyModel.Parent.PropertyByName(localPropObjName.ToString());
+                        var localProp = localPropObj.PureType.ClassViewModel.PropertyByName((localPropName ?? foreignPropName).ToString());
+
+                        filterString = $"?{foreignProp.JsVariable}=' + ({localPropObj.JsVariableForBinding}() ? {localPropObj.JsVariableForBinding}().{localProp.JsVariable}() : 'null') + '";
+                    }
+                    else
+                    {
+                        var localProp = propertyModel.Parent.PropertyByName((localPropName ?? foreignPropName).ToString());
+                        filterString = $"?{foreignProp.JsVariable}=' + {localProp.JsVariableForBinding}() + '";
+                    }
                 }
             }
 
             string result = string.Format(@"
                     <select class=""form-control"" 
-                        data-bind=""select2Ajax: {6}{0}, url: function() {{ return '/api/{1}/list{8}' }}, idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
+                        data-bind=""select2Ajax: {6}{0}, url: function() {{ return '/api/{1}/customlist{8}' }}, idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
                         placeholder=""{5}"">
                             <option>{5}</option>
                     </select >

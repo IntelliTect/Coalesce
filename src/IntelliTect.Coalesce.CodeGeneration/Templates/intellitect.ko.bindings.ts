@@ -113,11 +113,13 @@ ko.bindingHandlers.select2Ajax = {
                         valueAccessor()(value);
                     } else {
                         valueAccessor()(null);
-                        // Clear the object as well.
-                        if (object) {
-                            object(null);
-                        }
                     }
+
+                    // Clear the object because it might be wrong now. It will be reloaded when the parent is saved.
+                    if (object) {
+                        object(null);
+                    }
+
                     // Set the object if that is what is needed.
                     if (setObject && object) {
                         var selectedData = $(element).select2("data");

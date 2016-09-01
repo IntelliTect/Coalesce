@@ -22,6 +22,13 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public string LocalPropertyName { get; set; }
 
         /// <summary>
+        /// If specified, the LocalPropertyName will be resolved from the property by this name that resides on the local object.
+        /// 
+        /// This allows for querying against properties that are one level away from the current object.
+        /// </summary>
+        public string LocalPropertyObjectName { get; set; }
+
+        /// <summary>
         /// A constant value that the foreign property will be filtered against.
         /// 
         /// If this is set, LocalPropertyName will be ignored.

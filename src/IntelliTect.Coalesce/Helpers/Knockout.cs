@@ -377,6 +377,7 @@ namespace IntelliTect.Coalesce.Helpers
 
 
             string filterString = "";
+
             if (propertyModel.Wrapper.HasAttribute<SelectFilterAttribute>())
             {
                 var foreignPropName = propertyModel.Wrapper.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.ForeignPropertyName)).ToString();

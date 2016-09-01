@@ -33,7 +33,6 @@
     },
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-preview2-final",
     "IntelliTect.Coalesce": "1.1.0",
-    "IntelliTect.Coalesce.CodeGeneration": "1.1.0",
     "Coalesce.Domain": "1.1.0"
   },
 

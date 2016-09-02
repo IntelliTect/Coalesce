@@ -36,7 +36,14 @@ namespace IntelliTect.Coalesce.Data
                 var model = ReflectionRepository.GetClassViewModel<T>();
                 foreach (var prop in model.Properties.Where(f => !f.IsStatic && !f.IsInternalUse && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet && !f.HasNotMapped))
                 {
-                    query = query.IncludeString(prop.Name);
+                    if (prop.IsManytoManyCollection)
+                    {
+                        query = query.IncludeString(prop.Name + "." + prop.ManyToManyCollectionProperty.Name);
+                    }
+                    else
+                    {
+                        query = query.IncludeString(prop.Name);
+                    }
                 }
             }
             return query;
@@ -57,7 +64,8 @@ namespace IntelliTect.Coalesce.Data
             {
                 return await query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").FirstAsync();
             }
-            else {
+            else
+            {
                 return await query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).FirstAsync();
             }
         }
@@ -101,7 +109,7 @@ namespace IntelliTect.Coalesce.Data
                 .Single(mi => !mi.GetParameters()[0].ParameterType.GenericTypeArguments[1].IsGenericParameter);
 
         // to get this to work, code was referenced and borrowed from https://github.com/aspnet/EntityFramework/blob/dev/src/EntityFramework.Core/EntityFrameworkQueryableExtensions.cs
-        public static IQueryable<T> IncludeString<T>(this IQueryable<T> query, string include) where T: class, new()
+        public static IQueryable<T> IncludeString<T>(this IQueryable<T> query, string include) where T : class, new()
         {
             // need to get the first include, and then append the thenincludes
             Type childType, parentType = typeof(T);
@@ -121,7 +129,7 @@ namespace IntelliTect.Coalesce.Data
 
             resultQuery = new IncludableQueryable<T, object>(query.Provider.CreateQuery<T>(methodCallExpression));
 
-            for(int i = 1; i < includeProperties.Length; i++)
+            for (int i = 1; i < includeProperties.Length; i++)
             {
                 parentType = childType;
                 if (parentType.IsGenericType)

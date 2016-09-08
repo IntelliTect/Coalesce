@@ -1074,7 +1074,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         orderBy = $".OrderBy(\"{defaultOrderBy}\")";
                     }
-                    setter = $@"if (obj.{Name} != null && (tree == null || tree[nameof({objectName}.{Name})] != null))
+                    // Only check the includes tree for things that are in the database.
+                    // Otherwise, this would break IncludesExternal.
+                    string treeCheck = PureType.ClassViewModel.HasDbSet ? $"&& (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
+                    setter = $@"if (obj.{Name} != null {treeCheck})
                 {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();
 ";
                 }
@@ -1086,7 +1089,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else if (Type.HasClassViewModel)
             {
-                setter = $@"if (tree == null || tree[nameof({objectName}.{Name})] != null)
+                // Only check the includes tree for things that are in the database.
+                // Otherwise, this would break IncludesExternal.
+                string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
+                setter = $@"{treeCheck}
                 {objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects, tree?[nameof({objectName}.{Name})]);
 ";
             }

@@ -418,7 +418,8 @@ namespace IntelliTect.Coalesce.Controllers
         protected async Task<TDto> GetImplementation(string id, string includes = null)
         {
             // Get the item and get external data.
-            var item = (DataSource.Includes(includes).FindItem(id)).IncludeExternal(includes);
+            var query = DataSource.Includes(includes);
+            var item = query.FindItem(id).IncludeExternal(includes);
 
             if (!BeforeGet(item))
             {
@@ -430,7 +431,7 @@ namespace IntelliTect.Coalesce.Controllers
             //    ((IExcludable)item).Exclude(includes);
             //}
             // Map to DTO
-            var dto = MapObjToDto(item, includes);
+            var dto = MapObjToDto(item, includes, query.GetIncludeTree());
 
             return dto;
         }
@@ -514,6 +515,8 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 if (BeforeSave(dto, item))
                 {
+                    IncludeTree includeTree = null;
+
                     var original = item.Copy<T>();
                     MapDtoToObj(dto, item, includes);
                     try
@@ -532,7 +535,10 @@ namespace IntelliTect.Coalesce.Controllers
                         {
                             Db.SaveChanges();
                             // Pull the object to get any changes.
-                            item = DataSource.Includes(includes).FindItem(IdValue(item));
+                            var query = DataSource.Includes(includes);
+                            includeTree = query.GetIncludeTree();
+
+                            item = query.FindItem(IdValue(item));
 
                             // Call the AfterSave method to support special cases.
                             var reloadItem = AfterSave(dto, item, origItem, Db);
@@ -574,7 +580,7 @@ namespace IntelliTect.Coalesce.Controllers
                         //{
                         //    ((IExcludable)item).Exclude(includes);
                         //}
-                        result.Object = MapObjToDto(item, includes);
+                        result.Object = MapObjToDto(item, includes, includeTree);
                     }
                 }
                 else

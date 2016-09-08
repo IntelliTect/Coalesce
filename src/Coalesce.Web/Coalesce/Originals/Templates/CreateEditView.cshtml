@@ -145,24 +145,31 @@
 @:@@section Scripts
 @:{
     <script>
-        var a@(model.ViewModelObjectName) = new @viewModelsNamespace.@(@model.ViewModelClassName)();
-        a@(model.ViewModelObjectName).includes = "Editor";
+        @{
+            var obj = 'a' + model.ViewModelObjectName;
+        }
+        var @(obj) = new @viewModelsNamespace.@(@model.ViewModelClassName)();
+        @(obj).includes = "Editor";
 
         @{
         @:@@if (ViewBag.Id != null)
         @:{
-            @:@@:a@(model.ViewModelObjectName).load('@@ViewBag.Id');
+            @:@@:@(obj).load('@@ViewBag.Id');
         @:}
         @:@@if (ViewBag.ParentIdName != null)
         @:{
-        @:@@:a@(model.ViewModelObjectName).@@(((string)(@@ViewBag.ParentIdName)))(@@ViewBag.ParentId);
+            @:@@:@(obj).@@(((string)(@@ViewBag.ParentIdName)))(@@ViewBag.ParentId);
         @:}
         }
 
-        a@(model.ViewModelObjectName).isSavingAutomatically = false;
-        a@(model.ViewModelObjectName).loadChildren(function() {
-            ko.applyBindings(a@(model.ViewModelObjectName));
-            a@(model.ViewModelObjectName).isSavingAutomatically = true;
+        window.onbeforeunload = function(){
+            @(obj).save();
+        }
+
+        @(obj).isSavingAutomatically = false;
+        @(obj).loadChildren(function() {
+            ko.applyBindings(@(obj));
+            @(obj).isSavingAutomatically = true;
         });
     </script>
 @:}

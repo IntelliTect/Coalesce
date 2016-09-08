@@ -6,7 +6,6 @@ module ViewModels {
     // *** External Type CaseSummary
     export class CaseSummary
     {
-        // ID of the object.
         public myId: any = 0;
 
         // Observables
@@ -26,8 +25,8 @@ module ViewModels {
             // Load the object
 			self.loadFromDto = function(data: any) {
 				if (!data) return;
-				// Set the ID
-				self.myId = data.caseSummaryId;
+                // Set the ID
+                self.myId = data.caseSummaryId;
 
                 // Load the properties.
                 self.caseSummaryId(data.caseSummaryId);

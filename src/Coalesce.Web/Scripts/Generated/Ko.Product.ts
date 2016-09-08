@@ -259,6 +259,12 @@ module ViewModels {
 							if (self.showBusyWhenSaving) intellitect.utilities.hideBusy();
 						});
 					}
+                    else
+                    {
+                        // If validation fails, we still want to try and load any child objects which may have just been set.
+                        // Normally, we get these from the result of the save.
+                        self.loadChildren();
+                    }
 				}
 			}
 

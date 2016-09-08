@@ -20,23 +20,23 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Title</label>
-                    <div class="col-md-8 title">@(Knockout.SelectFor<Person>(p => p.Title))</div>
+                    <div class="col-md-8 title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">First Name</label>
-                    <div class="col-md-8 firstName">@(Knockout.InputFor<Person>(p => p.FirstName))</div>
+                    <div class="col-md-8 firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Last Name</label>
-                    <div class="col-md-8 lastName">@(Knockout.InputFor<Person>(p => p.LastName))</div>
+                    <div class="col-md-8 lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Email</label>
-                    <div class="col-md-8 email">@(Knockout.InputFor<Person>(p => p.Email))</div>
+                    <div class="col-md-8 email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Gender</label>
-                    <div class="col-md-8 gender">@(Knockout.SelectFor<Person>(p => p.Gender))</div>
+                    <div class="col-md-8 gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Cases Assigned</label>
@@ -48,15 +48,15 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Birth Date</label>
-                    <div class="col-md-8 birthDate">@(Knockout.InputFor<Person>(p => p.BirthDate))</div>
+                    <div class="col-md-8 birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Name</label>
-                    <div class="col-md-8 name">@(Knockout.DisplayFor<Person>(p => p.Name))</div>
+                    <div class="col-md-8 name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Company</label>
-                    <div class="col-md-8 company">@(Knockout.SelectForObject<Person>(p => p.Company))</div>
+                    <div class="col-md-8 company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>
             </div>
         </div>
     </div>
@@ -147,7 +147,11 @@
         }
         @if (ViewBag.ParentIdName != null)
         {
-        @:aperson.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+            @:aperson.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+        }
+
+        window.onbeforeunload = function(){
+            aperson.save();
         }
 
         aperson.isSavingAutomatically = false;

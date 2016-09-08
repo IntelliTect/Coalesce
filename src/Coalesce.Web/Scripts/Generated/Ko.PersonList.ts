@@ -29,6 +29,8 @@ module ListViewModels {
         public items: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
+        // Adds a new item to the collection.
+		public addNewItem: () => ViewModels.Person;
         // Deletes an item.
 		public deleteItem: (item: ViewModels.Person) => void;
         // True if the collection is loading.
@@ -179,7 +181,7 @@ module ListViewModels {
         // People whose last name starts with B or c
         public borCPeople: (callback?: any, reload?: boolean) => void;
         // Result of server method (BorCPeople) strongly typed in a observable.
-        public borCPeopleResult: KnockoutObservableArray<any> = ko.observableArray([]);
+        public borCPeopleResult: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         // Result of server method (BorCPeople) simply wrapped in an observable.
         public borCPeopleResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (BorCPeople) is being called
@@ -298,6 +300,14 @@ module ListViewModels {
                 self.items.remove(item);
             }
 
+            // Adds a new item to the array.
+            self.addNewItem = function()
+            {
+                var item = new ViewModels.Person();
+                self.items.push(item);
+                return item;
+            };
+
             // Deletes an item and removes it from the array.
             self.deleteItem = function(item: ViewModels.Person)
             {
@@ -340,7 +350,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.addResultRaw(data.object);
                     self.addResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -396,7 +407,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.getUserResultRaw(data.object);
                     self.getUserResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -438,7 +450,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.getUserPublicResultRaw(data.object);
                     self.getUserPublicResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -480,7 +493,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.namesStartingWithResultRaw(data.object);
                     self.namesStartingWithResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -535,7 +549,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.namesStartingWithPublicResultRaw(data.object);
                     self.namesStartingWithPublicResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -590,9 +605,10 @@ module ListViewModels {
 				.done(function(data) {
 					self.borCPeopleResultRaw(data.object);
                     if (self.borCPeopleResult()){
-					    RebuildArray(self.borCPeopleResult, data.object, 'personId', ViewModels.Person, self, true);
+                            RebuildArray(self.borCPeopleResult, data.object, 'personId', ViewModels.Person, self, true);
                     }
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);

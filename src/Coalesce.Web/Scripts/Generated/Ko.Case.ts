@@ -103,7 +103,7 @@ module ViewModels {
         public status: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Status
         public statusText: KnockoutComputed<string> = ko.computed<string>(() => "");
-        public caseProducts: KnockoutObservableArray<any> = ko.observableArray([]);
+        public caseProducts: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);  // Many to Many Collection
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
         public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam> = ko.observable(null);
@@ -299,7 +299,7 @@ module ViewModels {
 				    }else{
 					    self.assignedTo().loadFromDto(data.assignedTo);
 				    }
-                    if (self.parent && self.parent.myId == self.assignedTo().myId && typeof self.parent == typeof self.assignedTo())
+                    if (self.parent && self.parent.myId == self.assignedTo().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.assignedTo()))
                     {
                         self.parent.loadFromDto(data.assignedTo, undefined, false);
                     }
@@ -314,7 +314,7 @@ module ViewModels {
 				    }else{
 					    self.reportedBy().loadFromDto(data.reportedBy);
 				    }
-                    if (self.parent && self.parent.myId == self.reportedBy().myId && typeof self.parent == typeof self.reportedBy())
+                    if (self.parent && self.parent.myId == self.reportedBy().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.reportedBy()))
                     {
                         self.parent.loadFromDto(data.reportedBy, undefined, false);
                     }
@@ -329,7 +329,7 @@ module ViewModels {
 				    }else{
 					    self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
 				    }
-                    if (self.parent && self.parent.myId == self.devTeamAssigned().myId && typeof self.parent == typeof self.devTeamAssigned())
+                    if (self.parent && self.parent.myId == self.devTeamAssigned().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.devTeamAssigned()))
                     {
                         self.parent.loadFromDto(data.devTeamAssigned, undefined, false);
                     }
@@ -421,6 +421,12 @@ module ViewModels {
 							if (self.showBusyWhenSaving) intellitect.utilities.hideBusy();
 						});
 					}
+                    else
+                    {
+                        // If validation fails, we still want to try and load any child objects which may have just been set.
+                        // Normally, we get these from the result of the save.
+                        self.loadChildren();
+                    }
 				}
 			}
 

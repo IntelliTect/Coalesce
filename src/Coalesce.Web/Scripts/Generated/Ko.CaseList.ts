@@ -29,6 +29,8 @@ module ListViewModels {
         public items: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         // Load the list.
 		public load: (callback?: any) => void;
+        // Adds a new item to the collection.
+		public addNewItem: () => ViewModels.Case;
         // Deletes an item.
 		public deleteItem: (item: ViewModels.Case) => void;
         // True if the collection is loading.
@@ -114,7 +116,7 @@ module ListViewModels {
         // Call server method (GetAllOpenCases)
         public getAllOpenCases: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetAllOpenCases) strongly typed in a observable.
-        public getAllOpenCasesResult: KnockoutObservableArray<any> = ko.observableArray([]);
+        public getAllOpenCasesResult: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         // Result of server method (GetAllOpenCases) simply wrapped in an observable.
         public getAllOpenCasesResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCases) is being called
@@ -252,6 +254,14 @@ module ListViewModels {
                 self.items.remove(item);
             }
 
+            // Adds a new item to the array.
+            self.addNewItem = function()
+            {
+                var item = new ViewModels.Case();
+                self.items.push(item);
+                return item;
+            };
+
             // Deletes an item and removes it from the array.
             self.deleteItem = function(item: ViewModels.Case)
             {
@@ -293,7 +303,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.getAllOpenCasesCountResultRaw(data.object);
                     self.getAllOpenCasesCountResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -335,7 +346,8 @@ module ListViewModels {
 				.done(function(data) {
 					self.randomizeDatesAndStatusResultRaw(data.object);
                     self.randomizeDatesAndStatusResult(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -377,9 +389,10 @@ module ListViewModels {
 				.done(function(data) {
 					self.getAllOpenCasesResultRaw(data.object);
                     if (self.getAllOpenCasesResult()){
-					    RebuildArray(self.getAllOpenCasesResult, data.object, 'caseKey', ViewModels.Case, self, true);
+                            RebuildArray(self.getAllOpenCasesResult, data.object, 'caseKey', ViewModels.Case, self, true);
                     }
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);
@@ -424,7 +437,8 @@ module ListViewModels {
                         self.getCaseSummaryResult(new ViewModels.CaseSummary());
                     }
                     self.getCaseSummaryResult().loadFromDto(data.object);
-                                        if (reload) {
+                    
+                    if (reload) {
                       self.load(callback);
                     } else if ($.isFunction(callback)) {
                       callback(data);

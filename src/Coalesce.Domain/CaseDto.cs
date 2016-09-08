@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using IntelliTect.Coalesce.Helpers;
 
 namespace Coalesce.Domain
 {
@@ -22,7 +23,7 @@ namespace Coalesce.Domain
             obj.Title = Title;
         }
 
-        public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary<object, object> objects = null)
+        public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary<object, object> objects = null, IncludeTree tree = null)
         {
             var dto = new CaseDto();
             dto.CaseId = obj.CaseKey;

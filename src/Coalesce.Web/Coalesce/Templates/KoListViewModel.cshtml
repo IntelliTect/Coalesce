@@ -294,7 +294,14 @@ module @moduleName {
                     {
                     @:if (self.@(method.JsVariableResult)()){
    					// Merge the incoming array
-					    @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        @if (method.ReturnType.PureType.ClassViewModel.PrimaryKey != null)
+                        {
+                            @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        }
+                        else
+                        {
+                            @:RebuildArray(self.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        }
                     @:}
                     }
                     else
@@ -331,7 +338,7 @@ module @moduleName {
             self.@method.JsVariableUi = function(callback?: any) {
                 @foreach(var param in method.ClientParameters.Where(f=>f.ConvertsFromJsString))
                 {
-                @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
+                @:var @param.Name.ToCamelCase(): @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
                 }
                 @foreach(var param in method.ClientParameters.Where(f=>!f.ConvertsFromJsString))
                 {

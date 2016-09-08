@@ -12,6 +12,13 @@ module intellitect {
         var busyDepth = 0;
         var _isBusyEnabled = true;
 
+        export function getClassName(object: any) {
+            if (typeof object !== 'object') return null;
+            var funcNameRegex = /function (.{1,})\(/;
+            var results = (funcNameRegex).exec(object.constructor.toString());
+            return (results && results.length > 1) ? results[1] : "";
+        };
+
         // Turn on or off the busy indicator as a whole
         export function isBusyEnabled(value: boolean) {
             if (!value) {

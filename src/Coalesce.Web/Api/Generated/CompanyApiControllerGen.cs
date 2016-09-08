@@ -20,7 +20,7 @@ namespace Coalesce.Web.Api
     [Route("api/[controller]")]
     [Authorize]
     public partial class CompanyController 
-         : LocalBaseApiController<Company, CompanyDtoGen> 
+         : LocalBaseApiController<Coalesce.Domain.Company, CompanyDtoGen> 
     {
         private ClassViewModel _model;
 
@@ -35,7 +35,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<GenericListResult<Company, CompanyDtoGen>> List(
+        public virtual async Task<GenericListResult<Coalesce.Domain.Company, CompanyDtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -59,7 +59,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("AltName", altName);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<Company, CompanyDtoGen>(listResult);
+            return new GenericListResult<Coalesce.Domain.Company, CompanyDtoGen>(listResult);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Coalesce.Web.Api
         }
         
         [Authorize]
-        protected override IQueryable<Company> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Coalesce.Domain.Company> GetListDataSource(ListParameters parameters)
         {
 
             return base.GetListDataSource(parameters);

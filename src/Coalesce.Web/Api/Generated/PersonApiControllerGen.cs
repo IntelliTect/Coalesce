@@ -20,7 +20,7 @@ namespace Coalesce.Web.Api
     [Route("api/[controller]")]
     [Authorize]
     public partial class PersonController 
-         : LocalBaseApiController<Person, PersonDtoGen> 
+         : LocalBaseApiController<Coalesce.Domain.Person, PersonDtoGen> 
     {
         private ClassViewModel _model;
 
@@ -35,7 +35,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual async Task<GenericListResult<Person, PersonDtoGen>> List(
+        public virtual async Task<GenericListResult<Coalesce.Domain.Person, PersonDtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -60,7 +60,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("CompanyId", companyId);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<Person, PersonDtoGen>(listResult);
+            return new GenericListResult<Coalesce.Domain.Person, PersonDtoGen>(listResult);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Coalesce.Web.Api
         }
         
         [AllowAnonymous]
-        protected override IQueryable<Person> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Coalesce.Domain.Person> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "BorCPeople")
             {
@@ -209,7 +209,7 @@ namespace Coalesce.Web.Api
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                                result.Object = Mapper<Person, PersonDtoGen>.ObjToDtoMapper(objResult, User, "");
+                                result.Object = Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(objResult, User, "");
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -245,7 +245,7 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<Int32> Add (Int32 numberOne, Int32 numberTwo){
             var result = new SaveResult<Int32>();
             try{
-                var objResult = Person.Add(numberOne, numberTwo);
+                var objResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -263,7 +263,7 @@ namespace Coalesce.Web.Api
             if (!ClassViewModel.MethodByName("GetUser").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             var result = new SaveResult<String>();
             try{
-                var objResult = Person.GetUser(User);
+                var objResult = Coalesce.Domain.Person.GetUser(User);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -280,7 +280,7 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<String> GetUserPublic (){
             var result = new SaveResult<String>();
             try{
-                var objResult = Person.GetUserPublic(User);
+                var objResult = Coalesce.Domain.Person.GetUserPublic(User);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -298,7 +298,7 @@ namespace Coalesce.Web.Api
             if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             var result = new SaveResult<IEnumerable<String>>();
             try{
-                var objResult = Person.NamesStartingWith(characters, Db);
+                var objResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -315,7 +315,7 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic (String characters){
             var result = new SaveResult<IEnumerable<String>>();
             try{
-                var objResult = Person.NamesStartingWithPublic(characters, Db);
+                var objResult = Coalesce.Domain.Person.NamesStartingWithPublic(characters, Db);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -332,8 +332,8 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople (){
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
             try{
-                var objResult = Person.BorCPeople(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Person, PersonDtoGen>.ObjToDtoMapper(o, User, ""));
+                var objResult = Coalesce.Domain.Person.BorCPeople(Db);
+                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, ""));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

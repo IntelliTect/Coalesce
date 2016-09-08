@@ -1,9 +1,11 @@
     using IntelliTect.Coalesce.Interfaces;
     using IntelliTect.Coalesce.Mapping;
     using IntelliTect.Coalesce.Models;
+    using IntelliTect.Coalesce.Helpers;
     using Newtonsoft.Json;
     using System;
     using System.Linq;
+    using System.Linq.Dynamic;
     using System.Collections.Generic;
     using System.Security.Claims;
     using Coalesce.Web.Models;
@@ -14,8 +16,8 @@ using static Coalesce.Domain.Case;
 
 namespace Coalesce.Web.Models
 {
-    public partial class CaseDtoGen : GeneratedDto<Case, CaseDtoGen>
-        , IClassDto<Case, CaseDtoGen>
+    public partial class CaseDtoGen : GeneratedDto<Coalesce.Domain.Case, CaseDtoGen>
+        , IClassDto<Coalesce.Domain.Case, CaseDtoGen>
         {
         public CaseDtoGen() { }
 
@@ -35,8 +37,8 @@ namespace Coalesce.Web.Models
              public DevTeamDtoGen DevTeamAssigned { get; set; }
 
         // Create a new version of this object or use it from the lookup.
-        public static CaseDtoGen Create(Case obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<object, object> objects = null) {
+        public static CaseDtoGen Create(Coalesce.Domain.Case obj, ClaimsPrincipal user = null, string includes = null,
+                                   Dictionary<object, object> objects = null, IncludeTree tree = null) {
             // Return null of the object is null;
             if (obj == null) return null;
                         
@@ -57,44 +59,53 @@ namespace Coalesce.Web.Models
 
 
 
-            // See if the object is already created.
-            if (objects.ContainsKey(obj)) 
+            // See if the object is already created, but only if we aren't restricting by an includes tree.
+            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
+            if (tree == null && objects.ContainsKey(obj)) 
                 return (CaseDtoGen)objects[obj];
 
             var newObject = new CaseDtoGen();
-            objects.Add(obj, newObject);
+            if (tree == null) objects.Add(obj, newObject);
             // Fill the properties of the object.
             newObject.CaseKey = obj.CaseKey;
             newObject.Title = obj.Title;
             newObject.Description = obj.Description;
             newObject.OpenedAt = obj.OpenedAt;
             newObject.AssignedToId = obj.AssignedToId;
-          if (!(excludePersonListGen))
-            {
-                newObject.AssignedTo = PersonDtoGen.Create(obj.AssignedTo, user, includes, objects);
-            }  
-                        newObject.ReportedById = obj.ReportedById;
-          if (!(excludePersonListGen))
-            {
-                newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, user, includes, objects);
-            }  
-                        newObject.Attachment = obj.Attachment;
+            newObject.ReportedById = obj.ReportedById;
+            newObject.Attachment = obj.Attachment;
             newObject.Severity = obj.Severity;
             newObject.Status = obj.Status;
-            if (obj.CaseProducts != null) newObject.CaseProducts = obj.CaseProducts.Select(f => CaseProductDtoGen.Create(f, user, includes, objects)).ToList();
             newObject.DevTeamAssignedId = obj.DevTeamAssignedId;
-            newObject.DevTeamAssigned = DevTeamDtoGen.Create(obj.DevTeamAssigned, user, includes, objects);
+            if (!(excludePersonListGen))
+            {
+                if (tree == null || tree[nameof(newObject.AssignedTo)] != null)
+                newObject.AssignedTo = PersonDtoGen.Create(obj.AssignedTo, user, includes, objects, tree?[nameof(newObject.AssignedTo)]);
+
+            }
+            if (!(excludePersonListGen))
+            {
+                if (tree == null || tree[nameof(newObject.ReportedBy)] != null)
+                newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, user, includes, objects, tree?[nameof(newObject.ReportedBy)]);
+
+            }
+            if (obj.CaseProducts != null && (tree == null || tree[nameof(newObject.CaseProducts)] != null))
+                newObject.CaseProducts = obj.CaseProducts.OrderBy("CaseProductId ASC").Select(f => CaseProductDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CaseProducts)])).ToList();
+
+            
+                newObject.DevTeamAssigned = DevTeamDtoGen.Create(obj.DevTeamAssigned, user, includes, objects, tree?[nameof(newObject.DevTeamAssigned)]);
+
             return newObject;
         }
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public CaseDtoGen CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<object, object> objects = null) {
-            return Create(obj, user, includes, objects);
+        public CaseDtoGen CreateInstance(Coalesce.Domain.Case obj, ClaimsPrincipal user = null, string includes = null,
+                                Dictionary<object, object> objects = null, IncludeTree tree = null) {
+            return Create(obj, user, includes, objects, tree);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(Case entity, ClaimsPrincipal user = null, string includes = null)
+        public void Update(Coalesce.Domain.Case entity, ClaimsPrincipal user = null, string includes = null)
         {
             includes = includes ?? "";
 

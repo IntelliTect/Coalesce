@@ -74,7 +74,7 @@
         {
             obj.Title = Title;
         }
-        public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary&lt;object, object&gt; objects = null)
+        public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary&lt;object, object&gt; objects = null, IncludeTree tree = null)
         {
             var dto = new CaseDto();
             dto.CaseId = obj.CaseKey;
@@ -89,6 +89,14 @@
         
 </code>
 </pre>
+<h3>IncludeTree</h3>
+<p>
+    When a DTO is created by one of the API methods that Coalesce provides, such as List, CustomList, Save, or Get, the CreateInstance method will be passed an IncludeTree object.
+    This object represents all of EntityFramework .Include() calls that have been made against the source IQueryable that will apply to the children of the object that the DTO is being constructed for.
+    The purpose of this is so that only DTOs that line up with the structure of the .Include() calls are created, thus avoiding circular references which can cause the size of serialized output to balloon out of control.
+    To see how this is used in practice, take a look at one of the generated DTOs in the Models folder of your web project. If no IncludeTree is given, circular references will be reconstructed as they exist among the source entities.
+    IncludeTrees only apply to objects and properties that exist in the database.
+</p>
 <h3>Database Views</h3>
 <p>
     A view can manually be created in the database that will map to a regular POCO object. The typical approach is to create a POCO that has all the desired fields. Build an EF migration for this POCO, but don't apply it to the database. Replace the generated migration code with the code to generate/remove the view instead. This will all the view to be automatically created. This approach is ideal for situations where you want to filter at the database level on calculated fields. Be wary of unintentionally creating views that are read-only. This is fine, but the data will not be updatable like it is with a regular table based POCO. 

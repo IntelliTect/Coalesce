@@ -20,7 +20,7 @@ namespace Coalesce.Web.Api
     [Route("api/[controller]")]
     [Authorize]
     public partial class CaseController 
-         : LocalBaseApiController<Case, CaseDtoGen> 
+         : LocalBaseApiController<Coalesce.Domain.Case, CaseDtoGen> 
     {
         private ClassViewModel _model;
 
@@ -35,7 +35,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual async Task<GenericListResult<Case, CaseDtoGen>> List(
+        public virtual async Task<GenericListResult<Coalesce.Domain.Case, CaseDtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -60,7 +60,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<Case, CaseDtoGen>(listResult);
+            return new GenericListResult<Coalesce.Domain.Case, CaseDtoGen>(listResult);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Coalesce.Web.Api
         }
         
         [AllowAnonymous]
-        protected override IQueryable<Case> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Coalesce.Domain.Case> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "GetAllOpenCases")
             {
@@ -206,7 +206,7 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<Int32> GetAllOpenCasesCount (){
             var result = new SaveResult<Int32>();
             try{
-                var objResult = Case.GetAllOpenCasesCount(Db);
+                var objResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -241,8 +241,8 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases (){
             var result = new SaveResult<IEnumerable<CaseDtoGen>>();
             try{
-                var objResult = Case.GetAllOpenCases(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Case, CaseDtoGen>.ObjToDtoMapper(o, User, ""));
+                var objResult = Coalesce.Domain.Case.GetAllOpenCases(Db);
+                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, ""));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -258,7 +258,7 @@ namespace Coalesce.Web.Api
         public virtual SaveResult<CaseSummary> GetCaseSummary (){
             var result = new SaveResult<CaseSummary>();
             try{
-                var objResult = Case.GetCaseSummary(Db);
+                var objResult = Coalesce.Domain.Case.GetCaseSummary(Db);
                                 result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;

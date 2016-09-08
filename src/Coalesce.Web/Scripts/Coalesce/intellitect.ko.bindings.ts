@@ -29,6 +29,7 @@ interface KnockoutBindingHandlers {
     fadeVisible: KnockoutBindingHandler;
     slideVisible: KnockoutBindingHandler;
     moment: any;
+    momentFromNow: any;
     booleanValue: KnockoutBindingHandler;
 }
 
@@ -112,11 +113,13 @@ ko.bindingHandlers.select2Ajax = {
                         valueAccessor()(value);
                     } else {
                         valueAccessor()(null);
-                        // Clear the object as well.
-                        if (object) {
-                            object(null);
-                        }
                     }
+
+                    // Clear the object because it might be wrong now. It will be reloaded when the parent is saved.
+                    if (object) {
+                        object(null);
+                    }
+
                     // Set the object if that is what is needed.
                     if (setObject && object) {
                         var selectedData = $(element).select2("data");
@@ -137,6 +140,10 @@ ko.bindingHandlers.select2Ajax = {
             });
         }
 
+        // Add the validation message
+        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        // The validation message needs to go after the new select2 dropdown, not before it.
+        $(element).next(".validationMessage").insertAfter($(element).nextAll(".select2").first());
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // See if the value exists. If not, we haven't loaded it from the server yet.
@@ -177,7 +184,6 @@ ko.bindingHandlers.select2Ajax = {
         }
     }
 };
-
 
 // Multi-select Select2 binding that uses an AJAX call for the list of valid values.
 ko.bindingHandlers.select2AjaxMultiple = {
@@ -468,6 +474,11 @@ ko.bindingHandlers.select2 = {
             });
         }
 
+
+        // Add the validation message
+        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        // The validation message needs to go after the new select2 dropdown, not before it.
+        $(element).next(".validationMessage").insertAfter($(element).nextAll(".select2").first());
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // Set the element based on the value in the model.
@@ -665,8 +676,6 @@ ko.bindingHandlers.booleanValue = {
                 observable(val);
 
             });
-
-
         },
 
         update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -691,6 +700,61 @@ ko.bindingHandlers.booleanValue = {
             } else {
                 $(element).text(output);
             }
+
+        }
+    };
+
+
+
+
+
+
+
+    ko.bindingHandlers.momentFromNow = {
+
+        isDate: function (input) {
+            return Object.prototype.toString.call(input) === '[object Date]' ||
+                input instanceof Date;
+        },
+
+        defaults: {
+            invalid: '',
+        },
+
+        init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+
+            var allBindings = allBindingsAccessor();
+
+            ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                clearInterval(element.koFromNowTimer);
+            });
+        },
+
+        update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+
+            var value = valueAccessor(),
+                allBindings = allBindingsAccessor(),
+                valueUnwrapped = ko.utils.unwrapObservable(value);
+
+            // Date formats: http://momentjs.com/docs/#/displaying/format/
+            var invalidString = allBindings.invalid == undefined ? ko.bindingHandlers.moment.defaults.invalid : allBindings.invalid;
+
+            var dateMoment = moment(valueUnwrapped);
+
+            // format string for input box
+            var output = dateMoment.isValid() ?
+                dateMoment.fromNow() :
+                invalidString;
+
+            $(element).text(output);
+
+            clearInterval(element.koFromNowTimer);
+            element.koFromNowTimer = setInterval(function () {
+                var output = dateMoment.isValid() ?
+                    dateMoment.fromNow() :
+                    invalidString;
+                $(element).text(output);
+            }, 1000);
 
         }
     };

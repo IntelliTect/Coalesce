@@ -20,7 +20,7 @@ namespace Coalesce.Web.Api
     [Route("api/[controller]")]
     [Authorize]
     public partial class CaseProductController 
-         : LocalBaseApiController<CaseProduct, CaseProductDtoGen> 
+         : LocalBaseApiController<Coalesce.Domain.CaseProduct, CaseProductDtoGen> 
     {
         private ClassViewModel _model;
 
@@ -35,7 +35,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<GenericListResult<CaseProduct, CaseProductDtoGen>> List(
+        public virtual async Task<GenericListResult<Coalesce.Domain.CaseProduct, CaseProductDtoGen>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -54,7 +54,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("ProductId", productId);
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<CaseProduct, CaseProductDtoGen>(listResult);
+            return new GenericListResult<Coalesce.Domain.CaseProduct, CaseProductDtoGen>(listResult);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace Coalesce.Web.Api
         }
         
         [Authorize]
-        protected override IQueryable<CaseProduct> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Coalesce.Domain.CaseProduct> GetListDataSource(ListParameters parameters)
         {
 
             return base.GetListDataSource(parameters);

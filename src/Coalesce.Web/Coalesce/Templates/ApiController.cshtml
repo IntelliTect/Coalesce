@@ -40,7 +40,7 @@
         if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
     }
 }
-@foreach (var ns in namespaces)
+@foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)))
 {
 @:using @ns;
 }
@@ -57,7 +57,7 @@ namespace @(namespaceName).Api
     }
     @(securityInfo.ClassAnnotation)
     public partial class @(model.ControllerName)Controller 
-         : LocalBaseApiController<@(model.BaseViewModel.Name), @(model.DtoName)> 
+         : LocalBaseApiController<@(model.BaseViewModel.FullName), @(model.DtoName)> 
     {
         private ClassViewModel _model;
 
@@ -74,7 +74,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("list")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>> List(
+        public virtual async Task<GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>> List(
             string includes = null, 
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, 
@@ -99,7 +99,7 @@ namespace @(namespaceName).Api
             }
         
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(listResult);
+            return new GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>(listResult);
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace @(namespaceName).Api
         }
 
         @(securityInfo.ReadAnnotation)
-        protected override IQueryable<@(model.BaseViewModel.Name)> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<@(model.BaseViewModel.FullName)> GetListDataSource(ListParameters parameters)
         {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && m.IsClientMethod))
             {
@@ -309,7 +309,7 @@ namespace @(namespaceName).Api
                 @:object objResult = null;
                 @:@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
                 }else{
-                @:var objResult = @(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+                @:var objResult = @(method.Parent.FullName).@(method.Name)(@(method.CsArguments));
                 }
                 }
                 else
@@ -326,11 +326,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-                @:result.Object = Mapper<@(model.Name), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "");
+                @:result.Object = Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "");
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.Name), @(model.DtoName)>.ObjToDtoMapper(o, User, ""));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, ""));
                 }
                 else
                 {

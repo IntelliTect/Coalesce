@@ -1,9 +1,11 @@
     using IntelliTect.Coalesce.Interfaces;
     using IntelliTect.Coalesce.Mapping;
     using IntelliTect.Coalesce.Models;
+    using IntelliTect.Coalesce.Helpers;
     using Newtonsoft.Json;
     using System;
     using System.Linq;
+    using System.Linq.Dynamic;
     using System.Collections.Generic;
     using System.Security.Claims;
     using Coalesce.Web.Models;
@@ -14,8 +16,8 @@ using static Coalesce.Domain.Company;
 
 namespace Coalesce.Web.Models
 {
-    public partial class CompanyDtoGen : GeneratedDto<Company, CompanyDtoGen>
-        , IClassDto<Company, CompanyDtoGen>
+    public partial class CompanyDtoGen : GeneratedDto<Coalesce.Domain.Company, CompanyDtoGen>
+        , IClassDto<Coalesce.Domain.Company, CompanyDtoGen>
         {
         public CompanyDtoGen() { }
 
@@ -30,8 +32,8 @@ namespace Coalesce.Web.Models
              public String AltName { get; set; }
 
         // Create a new version of this object or use it from the lookup.
-        public static CompanyDtoGen Create(Company obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<object, object> objects = null) {
+        public static CompanyDtoGen Create(Coalesce.Domain.Company obj, ClaimsPrincipal user = null, string includes = null,
+                                   Dictionary<object, object> objects = null, IncludeTree tree = null) {
             // Return null of the object is null;
             if (obj == null) return null;
                         
@@ -52,12 +54,13 @@ namespace Coalesce.Web.Models
 
 
 
-            // See if the object is already created.
-            if (objects.ContainsKey(obj)) 
+            // See if the object is already created, but only if we aren't restricting by an includes tree.
+            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
+            if (tree == null && objects.ContainsKey(obj)) 
                 return (CompanyDtoGen)objects[obj];
 
             var newObject = new CompanyDtoGen();
-            objects.Add(obj, newObject);
+            if (tree == null) objects.Add(obj, newObject);
             // Fill the properties of the object.
             newObject.CompanyId = obj.CompanyId;
             newObject.Name = obj.Name;
@@ -66,19 +69,21 @@ namespace Coalesce.Web.Models
             newObject.City = obj.City;
             newObject.State = obj.State;
             newObject.ZipCode = obj.ZipCode;
-            if (obj.Employees != null) newObject.Employees = obj.Employees.Select(f => PersonDtoGen.Create(f, user, includes, objects)).ToList();
             newObject.AltName = obj.AltName;
+            if (obj.Employees != null && (tree == null || tree[nameof(newObject.Employees)] != null))
+                newObject.Employees = obj.Employees.OrderBy("PersonId ASC").Select(f => PersonDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.Employees)])).ToList();
+
             return newObject;
         }
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public CompanyDtoGen CreateInstance(Company obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<object, object> objects = null) {
-            return Create(obj, user, includes, objects);
+        public CompanyDtoGen CreateInstance(Coalesce.Domain.Company obj, ClaimsPrincipal user = null, string includes = null,
+                                Dictionary<object, object> objects = null, IncludeTree tree = null) {
+            return Create(obj, user, includes, objects, tree);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(Company entity, ClaimsPrincipal user = null, string includes = null)
+        public void Update(Coalesce.Domain.Company entity, ClaimsPrincipal user = null, string includes = null)
         {
             includes = includes ?? "";
 

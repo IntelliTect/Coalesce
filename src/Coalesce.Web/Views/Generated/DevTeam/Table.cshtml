@@ -61,11 +61,11 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="name">@(Knockout.InputFor<DevTeam>(p => p.Name))</td>
+                    <td class="name">@(Knockout.InputFor<Coalesce.Domain.External.DevTeam>(p => p.Name))</td>
                     }
                     else
                     {
-                    <td class="name">@(Knockout.DisplayFor<DevTeam>(p => p.Name))</td>
+                    <td class="name">@(Knockout.DisplayFor<Coalesce.Domain.External.DevTeam>(p => p.Name))</td>
                     }
                 <td>
 

@@ -70,29 +70,29 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="title">@(Knockout.SelectFor<Person>(p => p.Title))</td>
-                    <td class="firstName">@(Knockout.InputFor<Person>(p => p.FirstName))</td>
-                    <td class="lastName">@(Knockout.InputFor<Person>(p => p.LastName))</td>
-                    <td class="email">@(Knockout.InputFor<Person>(p => p.Email))</td>
-                    <td class="gender">@(Knockout.SelectFor<Person>(p => p.Gender))</td>
+                    <td class="title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
+                    <td class="firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
+                    <td class="lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
+                    <td class="email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
+                    <td class="gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
                     <td class="casesAssigned"><a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                     <td class="casesReported"><a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="birthDate">@(Knockout.InputFor<Person>(p => p.BirthDate))</td>
-                    <td class="name">@(Knockout.DisplayFor<Person>(p => p.Name))</td>
-                    <td class="company">@(Knockout.SelectForObject<Person>(p => p.Company))</td>
+                    <td class="birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
+                    <td class="name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</td>
+                    <td class="company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
                     }
                     else
                     {
-                    <td class="title">@(Knockout.DisplayFor<Person>(p => p.Title))</td>
-                    <td class="firstName">@(Knockout.DisplayFor<Person>(p => p.FirstName))</td>
-                    <td class="lastName">@(Knockout.DisplayFor<Person>(p => p.LastName))</td>
-                    <td class="email">@(Knockout.DisplayFor<Person>(p => p.Email))</td>
-                    <td class="gender">@(Knockout.DisplayFor<Person>(p => p.Gender))</td>
+                    <td class="title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title))</td>
+                    <td class="firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
+                    <td class="lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName))</td>
+                    <td class="email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email))</td>
+                    <td class="gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender))</td>
                     <td class="casesAssigned"><a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                     <td class="casesReported"><a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="birthDate">@(Knockout.DisplayFor<Person>(p => p.BirthDate))</td>
-                    <td class="name">@(Knockout.DisplayFor<Person>(p => p.Name))</td>
-                    <td class="company">@(Knockout.DisplayFor<Person>(p => p.Company))</td>
+                    <td class="birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
+                    <td class="name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</td>
+                    <td class="company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company))</td>
                     }
                 <td>
 

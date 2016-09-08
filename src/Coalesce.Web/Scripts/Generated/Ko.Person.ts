@@ -108,9 +108,9 @@ module ViewModels {
         // Genetic Gender of the person.
         public genderText: KnockoutComputed<string> = ko.computed<string>(() => "");
         // List of cases assigned to the person
-        public casesAssigned: KnockoutObservableArray<any> = ko.observableArray([]);
+        public casesAssigned: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         // List of cases reported by the person.
-        public casesReported: KnockoutObservableArray<any> = ko.observableArray([]);
+        public casesReported: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         public birthDate: KnockoutObservable<any> = ko.observable(null);
         public lastBath: KnockoutObservable<any> = ko.observable(null);
         public nextUpgrade: KnockoutObservable<any> = ko.observable(null);
@@ -210,7 +210,7 @@ module ViewModels {
         // Adds the text to the first name.
         public rename: (addition: String, callback?: any, reload?: boolean) => void;
         // Result of server method (Rename)
-        public renameResult: KnockoutObservable<any> = ko.observable();
+        public renameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
         // True while the server method (Rename) is being called
         public renameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (Rename) if it fails.
@@ -230,7 +230,7 @@ module ViewModels {
         // Removes spaces from the name and puts in dashes
         public changeSpacesToDashesInName: (callback?: any, reload?: boolean) => void;
         // Result of server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable();
+        public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable(null);
         // True while the server method (ChangeSpacesToDashesInName) is being called
         public changeSpacesToDashesInNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (ChangeSpacesToDashesInName) if it fails.
@@ -272,7 +272,7 @@ module ViewModels {
 			self.birthDate = self.birthDate.extend({ moment: { unix: true } });
 			self.lastBath = self.lastBath.extend({ moment: { unix: true } });
 			self.nextUpgrade = self.nextUpgrade.extend({ moment: { unix: true } });
-			self.companyId = self.companyId.extend({ required: true });
+			self.companyId = self.companyId.extend({ required: {params: true, message: "Company is required."} });
             self.companyId = self.companyId.extend({ required: true });
             
             self.errors = ko.validation.group([
@@ -359,7 +359,7 @@ module ViewModels {
 				    }else{
 					    self.personStats().loadFromDto(data.personStats);
 				    }
-                    if (self.parent && self.parent.myId == self.personStats().myId && typeof self.parent == typeof self.personStats())
+                    if (self.parent && self.parent.myId == self.personStats().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.personStats()))
                     {
                         self.parent.loadFromDto(data.personStats, undefined, false);
                     }
@@ -374,7 +374,7 @@ module ViewModels {
 				    }else{
 					    self.company().loadFromDto(data.company);
 				    }
-                    if (self.parent && self.parent.myId == self.company().myId && typeof self.parent == typeof self.company())
+                    if (self.parent && self.parent.myId == self.company().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.company()))
                     {
                         self.parent.loadFromDto(data.company, undefined, false);
                     }
@@ -476,6 +476,12 @@ module ViewModels {
 							if (self.showBusyWhenSaving) intellitect.utilities.hideBusy();
 						});
 					}
+                    else
+                    {
+                        // If validation fails, we still want to try and load any child objects which may have just been set.
+                        // Normally, we get these from the result of the save.
+                        self.loadChildren();
+                    }
 				}
 			}
 

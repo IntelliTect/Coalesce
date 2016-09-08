@@ -176,8 +176,8 @@ module ViewModels {
             });
 
             // SetupValidation {
-			self.caseId = self.caseId.extend({ required: true });
-			self.productId = self.productId.extend({ required: true });
+			self.caseId = self.caseId.extend({ required: {params: true, message: "Case is required."} });
+			self.productId = self.productId.extend({ required: {params: true, message: "Product is required."} });
             
             self.errors = ko.validation.group([
                 self.caseProductId,
@@ -243,7 +243,7 @@ module ViewModels {
 				    }else{
 					    self.case().loadFromDto(data.case);
 				    }
-                    if (self.parent && self.parent.myId == self.case().myId && typeof self.parent == typeof self.case())
+                    if (self.parent && self.parent.myId == self.case().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.case()))
                     {
                         self.parent.loadFromDto(data.case, undefined, false);
                     }
@@ -258,7 +258,7 @@ module ViewModels {
 				    }else{
 					    self.product().loadFromDto(data.product);
 				    }
-                    if (self.parent && self.parent.myId == self.product().myId && typeof self.parent == typeof self.product())
+                    if (self.parent && self.parent.myId == self.product().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.product()))
                     {
                         self.parent.loadFromDto(data.product, undefined, false);
                     }
@@ -329,6 +329,12 @@ module ViewModels {
 							if (self.showBusyWhenSaving) intellitect.utilities.hideBusy();
 						});
 					}
+                    else
+                    {
+                        // If validation fails, we still want to try and load any child objects which may have just been set.
+                        // Normally, we get these from the result of the save.
+                        self.loadChildren();
+                    }
 				}
 			}
 

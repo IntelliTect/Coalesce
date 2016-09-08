@@ -192,7 +192,8 @@ namespace IntelliTect.Coalesce.Controllers
                 // TODO: This needs to be adjusted to handle paging correctly.
                 var result3 = result2.Where(f => BeforeGet(f));
 
-                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes)).ToList();
+                var tree = result.GetIncludeTree();
+                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes, tree)).ToList();
 
                 if (listParameters.FieldList.Any())
                 {
@@ -604,10 +605,10 @@ namespace IntelliTect.Coalesce.Controllers
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        protected virtual TDto MapObjToDto(T obj, string includes)
+        protected virtual TDto MapObjToDto(T obj, string includes, IncludeTree tree = null)
         {
             //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
-            return Mapper<T, TDto>.ObjToDtoMapper(obj, User, includes);
+            return Mapper<T, TDto>.ObjToDtoMapper(obj, User, includes, tree);
         }
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj

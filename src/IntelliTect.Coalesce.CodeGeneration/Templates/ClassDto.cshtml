@@ -15,6 +15,7 @@
     namespaces.Add("IntelliTect.Coalesce.Interfaces");
     namespaces.Add("IntelliTect.Coalesce.Mapping");
     namespaces.Add("IntelliTect.Coalesce.Models");
+    namespaces.Add("IntelliTect.Coalesce.Helpers");
     namespaces.Add("Newtonsoft.Json");
     namespaces.Add("System");
     namespaces.Add("System.Linq");
@@ -56,7 +57,7 @@ namespace @(namespaceName).Models
 
         // Create a new version of this object or use it from the lookup.
         public static @(model.Name)DtoGen Create(@(model.FullName) obj, ClaimsPrincipal user = null, string includes = null,
-                                   @("Dictionary<object, object>") objects = null) {
+                                   @("Dictionary<object, object>") objects = null, IncludeTree tree = null) {
             // Return null of the object is null;
             if (obj == null) return null;
                         
@@ -75,14 +76,15 @@ namespace @(namespaceName).Models
 
 
 
-            // See if the object is already created.
-            if (objects.ContainsKey(obj)) 
+            // See if the object is already created, but only if we aren't restricting by an includes tree.
+            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
+            if (tree == null && objects.ContainsKey(obj)) 
                 return (@(model.Name)DtoGen)objects[obj];
 
             var newObject = new @(model.Name)DtoGen();
-            objects.Add(obj, newObject);
+            if (tree == null) objects.Add(obj, newObject);
             // Fill the properties of the object.
-            @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
+            @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty).OrderBy(p => p.PureType.HasClassViewModel))
             {
                 @prop.ObjToDtoPropertySetter("newObject")
             }            
@@ -91,8 +93,8 @@ namespace @(namespaceName).Models
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
         public @(model.Name)DtoGen CreateInstance(@(model.FullName) obj, ClaimsPrincipal user = null, string includes = null,
-                                @("Dictionary<object, object>") objects = null) {
-            return Create(obj, user, includes, objects);
+                                @("Dictionary<object, object>") objects = null, IncludeTree tree = null) {
+            return Create(obj, user, includes, objects, tree);
         }
 
         // Updates an object from the database to the state handed in by the DTO.

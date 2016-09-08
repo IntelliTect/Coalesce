@@ -1074,30 +1074,38 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         orderBy = $".OrderBy(\"{defaultOrderBy}\")";
                     }
-                setter = $@"if (obj.{Name} != null) {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects)).ToList();";
+                    setter = $@"if (obj.{Name} != null && (tree == null || tree[nameof({objectName}.{Name})] != null))
+                {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();
+";
                 }
                 else
                 {
-                setter = $@"{objectName}.{Name} = obj.{Name};";
+                    setter = $@"{objectName}.{Name} = obj.{Name};";
                 }
 
-            }else if (Type.HasClassViewModel)
+            }
+            else if (Type.HasClassViewModel)
             {
-                setter = $"{objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects);";
-            }else
+                setter = $@"if (tree == null || tree[nameof({objectName}.{Name})] != null)
+                {objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects, tree?[nameof({objectName}.{Name})]);
+";
+            }
+            else
             {
                 setter = $"{objectName}.{Name} = obj.{Name};";
             }
+
             var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
             if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
             {
                 var statement = GetPropertySetterConditional( readRolesList );
 
-                return $@"          if ({statement})
+                return $@"            if ({statement})
             {{
                 {setter}
-            }}  
-            ";
+            }}
+";
             }
             else
             {

@@ -203,6 +203,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         if (model != null)
                         {
                             model.OnContext = true;
+                            model.ContextPropertyName = prop.Name;
                             models.Add(model);
                         }
                     }

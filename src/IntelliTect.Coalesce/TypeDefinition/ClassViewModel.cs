@@ -556,11 +556,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (tableName != null)
                     return "dbo." + tableName;
 
-                //TODO: Make this more robust. The above is a start, but might not be good enough.
+                if (ContextPropertyName != null)
+                    return "dbo." + ContextPropertyName;
+                
                 return "dbo." + Name;
             }
         }
-
+        
+        public string ContextPropertyName { get; set; }
         public bool OnContext { get; set; }
 
         private SecurityInfoClass _securityInfo;

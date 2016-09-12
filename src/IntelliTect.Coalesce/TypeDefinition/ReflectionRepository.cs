@@ -110,6 +110,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (name == "IdentityRoleClaim") return false;
             if (name == "IdentityUserClaim") return false;
             if (name == "IdentityUserLogin") return false;
+            if (name == "IdentityUserToken") return false;
             return true;
         }
 

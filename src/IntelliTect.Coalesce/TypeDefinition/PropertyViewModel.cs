@@ -679,6 +679,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // TODO: should this be the same as IsPrimaryKey
             get
             {
+                if (IsPOCO) return false;
                 if (Wrapper.HasAttribute<ForeignKeyAttribute>() && !IsPOCO)
                 {
                     return true;

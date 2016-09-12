@@ -345,7 +345,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Process these items to make sure we have things we can search on.
                 foreach (var prop in searchProperties)
                 {
-                    if (prop.Type.PureType.HasClassViewModel )
+                    if (prop.Type.PureType.HasClassViewModel)
                     {
                         // If we will exceed the depth don't try to query on an object.
                         if (depth < 2)
@@ -479,6 +479,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (PrimaryKey == null) return false;
                 return PrimaryKey.IsForeignKey;
             }
         }
@@ -579,7 +580,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         new SecurityInfoPermission(Wrapper.GetSecurityAttribute<DeleteAttribute>()),
                         new SecurityInfoPermission(Wrapper.GetSecurityAttribute<CreateAttribute>())
                     );
-                    
+
                     //if (HasAttribute<ReadAttribute>())
                     //{
                     //    _securityInfo.IsRead = true;

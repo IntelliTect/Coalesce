@@ -76,16 +76,49 @@
         ...
         public IQueryable&lt;Person&gt; Include(IQueryable&lt;Person&gt; entities, string include = null)
         {
-            return entities.Include(f => f.CasesAssigned)
+            return entities
+                .Include(f => f.CasesAssigned)
                 .Include(f => f.Company);
         }
     }
 </code></pre>
-<p>The Include method takes a string parameter called include. This can be specified in the client-side view model to specify which data to include. The admin pages will use the string 'Editor' when they call to the API layer.</p>
+<p>
+    The Include method takes a string parameter called include.
+    This can be specified in the client-side view model to specify which data to include.
+    The admin pages will use the string 'Editor' when they call to the API layer.
+    You may also call .IncludeChildren() to use the default behavior of loading all immediate children. For example:
+</p>
+<pre><code class="language-html">
+    public class Person : IIncludable&lt;Person&gt;
+    {
+        ...
+        public IQueryable&lt;Person&gt; Include(IQueryable&lt;Person&gt; entities, string include = null)
+        {
+            if (include == "editor")
+            {
+                return entities
+                    .Include(f => f.CasesAssigned)
+                    .Include(f => f.Company);
+            }
+            return entities.IncludeChildren();
+        }
+    }
+</code></pre>
+<p>
+    Any includes that are applied in this method will be used to build the IncludeTree that is used to shape the DTOs that are constructed from the data that comes back from your database.
+    For more information on IncludeTree, check out the docs for <a href="/Docs/Dtos">DTOs</a>.
+</p>
 <br />
 
 <h4>Controlling Object Deletion</h4>
-<p>There are times when you will need to manually remove related objects when deleting an object. You can specify what to delete by using the IDeletable interface. The method is called right before the delete is executed. The instance object has already been removed from the context's collection. This gives you a chance to remove any additional objects. To stop the delete at this point, an exception must be thrown. </p>
+<p>
+    There are times when you will need to manually remove related objects when deleting an object.
+    You can specify what to delete by using the IDeletable interface.
+    The method is called right before the delete is executed.
+    The instance object has already been removed from the context's collection.
+    This gives you a chance to remove any additional objects.
+    To stop the delete at this point, an exception must be thrown.
+</p>
 
 <pre><code class="language-html">
     public class Person : IDeletable&lt;DbContext&gt;
@@ -144,7 +177,7 @@
 <br />
 
 <h4>Validation</h4>
-<p>Validation is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. There is also flexible annotation-based validation for the client side. Full validation documentation is in the <a asp-controller="Docs" asp-action="Annotations" >Annotations</a> section</p>
+<p>Validation is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. There is also flexible annotation-based validation for the client side. Full validation documentation is in the <a asp-controller="Docs" asp-action="Annotations">Annotations</a> section</p>
 <br />
 
 <h4>Display and Order</h4>

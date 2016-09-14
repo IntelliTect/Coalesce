@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.Data
 {
     // This class was stolen directly from https://github.com/aspnet/EntityFramework/blob/dev/src/EntityFramework.Core/EntityFrameworkQueryableExtensions.cs around line 2334
-    internal class IncludableQueryable<TEntity, TProperty> : IIncludableQueryable<TEntity, TProperty>, IAsyncEnumerable<TEntity>
+    public class IncludableQueryable<TEntity, TProperty> : IIncludableQueryable<TEntity, TProperty>, IAsyncEnumerable<TEntity>
     {
         private readonly IQueryable<TEntity> _queryable;
 
@@ -29,4 +29,10 @@ namespace IntelliTect.Coalesce.Data
         IAsyncEnumerator<TEntity> IAsyncEnumerable<TEntity>.GetEnumerator()
             => ((IAsyncEnumerable<TEntity>)_queryable).GetEnumerator();
     }
+
+    public interface IIncludedSeparatelyQueryable
+    {
+        Expression IncludeExpression { get; }
+    }
+
 }

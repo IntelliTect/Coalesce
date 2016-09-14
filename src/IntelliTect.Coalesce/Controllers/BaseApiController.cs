@@ -12,7 +12,7 @@ using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
-using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -21,6 +21,7 @@ using System.Collections;
 using System.Linq.Expressions;
 using System.Net;
 using System.Diagnostics.CodeAnalysis;
+using IntelliTect.Coalesce.Helpers;
 
 namespace IntelliTect.Coalesce.Controllers
 {

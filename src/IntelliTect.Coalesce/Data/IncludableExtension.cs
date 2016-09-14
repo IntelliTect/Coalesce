@@ -11,6 +11,10 @@ using System.Reflection;
 using IntelliTect.Coalesce.Data;
 using System.Reflection.Emit;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+using System.Threading;
+using IntelliTect.Coalesce.Helpers;
+using System.Collections;
 
 namespace IntelliTect.Coalesce.Data
 {
@@ -161,5 +165,6 @@ namespace IntelliTect.Coalesce.Data
 
             return resultQuery;
         }
+
     }
 }

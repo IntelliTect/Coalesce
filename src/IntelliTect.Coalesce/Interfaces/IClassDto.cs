@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Helpers;
+﻿using IntelliTect.Coalesce.Helpers.IncludeTree;
 using System.Collections.Generic;
 using System.Security.Claims;
 

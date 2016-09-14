@@ -2,7 +2,7 @@
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Collections.Concurrent;
 using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 
 namespace IntelliTect.Coalesce.Mapping
 {

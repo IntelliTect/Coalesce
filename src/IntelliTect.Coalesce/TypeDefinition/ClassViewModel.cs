@@ -551,7 +551,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                string tableName = (string)Wrapper.GetAttributeValue<TableAttribute>(nameof(TableAttribute.Name));
+                string tableName = (string)Wrapper.GetAttributeValue<TableAttribute>(nameof(TableAttribute.Name)) ?? ContextPropertyName;
 
                 if (tableName != null)
                     return "dbo." + tableName;
@@ -561,6 +561,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public string ContextPropertyName { get; set; }
         public bool OnContext { get; set; }
 
         private SecurityInfoClass _securityInfo;

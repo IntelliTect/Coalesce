@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -197,11 +198,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var models = new List<ClassViewModel>();
                 foreach (var prop in context.Properties)
                 {
-                    if ((prop.Type.IsCollection || prop.IsDbSet) && IsValidViewModelClass(prop.PureType.Name))
+                    if ((prop.Type.IsCollection || prop.IsDbSet)
+                        && IsValidViewModelClass(prop.PureType.Name)
+                        && !prop.IsInternalUse)
                     {
                         var model = ReflectionRepository.GetClassViewModel(classType: prop.PureType, hasDbSet: prop.IsDbSet);
                         if (model != null)
                         {
+                            model.ContextPropertyName = prop.Name;
                             model.OnContext = true;
                             models.Add(model);
                         }

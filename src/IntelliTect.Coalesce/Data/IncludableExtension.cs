@@ -33,17 +33,30 @@ namespace IntelliTect.Coalesce.Data
             }
             else
             {
-                var model = ReflectionRepository.GetClassViewModel<T>();
-                foreach (var prop in model.Properties.Where(f => !f.IsStatic && !f.IsInternalUse && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet && !f.HasNotMapped))
+                query = query.IncludeChildren();
+            }
+            return query;
+        }
+
+
+        /// <summary>
+        /// Includes immediate children, as well as the other side of many-to-many relationships.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query) where T : class, new()
+        {
+            var model = ReflectionRepository.GetClassViewModel<T>();
+            foreach (var prop in model.Properties.Where(f => !f.IsStatic && !f.IsInternalUse && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet && !f.HasNotMapped))
+            {
+                if (prop.IsManytoManyCollection)
                 {
-                    if (prop.IsManytoManyCollection)
-                    {
-                        query = query.IncludeString(prop.Name + "." + prop.ManyToManyCollectionProperty.Name);
-                    }
-                    else
-                    {
-                        query = query.IncludeString(prop.Name);
-                    }
+                    query = query.IncludeString(prop.Name + "." + prop.ManyToManyCollectionProperty.Name);
+                }
+                else
+                {
+                    query = query.IncludeString(prop.Name);
                 }
             }
             return query;

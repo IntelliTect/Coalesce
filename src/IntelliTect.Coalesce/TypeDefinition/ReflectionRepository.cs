@@ -111,6 +111,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (name == "IdentityRoleClaim") return false;
             if (name == "IdentityUserClaim") return false;
             if (name == "IdentityUserLogin") return false;
+            if (name == "IdentityUserToken") return false;
             return true;
         }
 
@@ -207,6 +208,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         {
                             model.ContextPropertyName = prop.Name;
                             model.OnContext = true;
+                            model.ContextPropertyName = prop.Name;
                             models.Add(model);
                         }
                     }

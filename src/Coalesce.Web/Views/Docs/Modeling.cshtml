@@ -82,7 +82,6 @@
     }
 </code></pre>
 <p>The Include method takes a string parameter called include. This can be specified in the client-side view model to specify which data to include. The admin pages will use the string 'Editor' when they call to the API layer.</p>
-<p>Additionally there is an IExcludable interface that allows for doing object trimming before the object is serialized. EF will fill out your object graph with objects that were loaded via a different Include. For example is you have an object for who modified an object. If user with ID 1 is loaded on one place, that user object will appear on all objects that reference it even though it is not loaded explicitly.</p>
 <br />
 
 <h4>Controlling Object Deletion</h4>

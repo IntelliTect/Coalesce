@@ -179,15 +179,6 @@ namespace IntelliTect.Coalesce.Controllers
                 // Add external entities
                 result2.IncludesExternal(listParameters.Includes);
 
-                // Exclude certain data
-                //if (new T() is IExcludable)
-                //{
-                //    foreach (var obj in result2)
-                //    {
-                //        ((IExcludable)obj).Exclude(listParameters.Includes);
-                //    }
-                //}
-
                 // Allow for security trimming
                 // TODO: This needs to be adjusted to handle paging correctly.
                 var result3 = result2.Where(f => BeforeGet(f));
@@ -425,11 +416,7 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 return null;
             }
-            //// Exclude data
-            //if (item is IExcludable)
-            //{
-            //    ((IExcludable)item).Exclude(includes);
-            //}
+
             // Map to DTO
             var dto = MapObjToDto(item, includes, query.GetIncludeTree());
 
@@ -576,10 +563,6 @@ namespace IntelliTect.Coalesce.Controllers
                     // Get the key back.
                     if (item != null)
                     {
-                        //if (item is IExcludable)
-                        //{
-                        //    ((IExcludable)item).Exclude(includes);
-                        //}
                         result.Object = MapObjToDto(item, includes, includeTree);
                     }
                 }

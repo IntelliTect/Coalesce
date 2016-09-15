@@ -10,6 +10,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.Models;
+using static Coalesce.Domain.Case;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 
 namespace Coalesce.Domain
 {
@@ -220,6 +222,20 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
         }
 
+        public static IQueryable<Person> NamesStartingWithAWithCases(AppDbContext db)
+        {
+            db.Cases
+                .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .Load();
+
+            return db.People
+                .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+                .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+                .Where(f => f.FirstName.StartsWith("A"));
+        }
+        
+
         /// <summary>
         /// People whose last name starts with B or c
         /// </summary>
@@ -233,6 +249,9 @@ namespace Coalesce.Domain
 
         public IQueryable<Person> Include(IQueryable<Person> entities, string include = null)
         {
+            if (include == "none")
+                return entities;
+
             return entities.Include(f => f.CasesAssigned)
                 .Include(f => f.CasesReported)
                 .Include(f => f.Company);

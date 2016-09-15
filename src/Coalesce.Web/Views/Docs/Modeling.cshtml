@@ -310,8 +310,37 @@
 <pre><code class="language-html">
     public static IQueryable&lt;string&gt; NamesStartingWithA(DbContext db, UserPrincipal user)
     {
-        return db.People.Where(f => f.FirstName.StartsWith("A")).Select(f => f.FirstName).ToList();
+        return db.People.Where(f => f.FirstName.StartsWith("A")).Select(f => f.FirstName);
     }
+</code></pre>
+<p>
+    If you load data into your context in an IQueryable that is different from the one that is returned,
+    you need to let Coalesce know that you did so that it will be correctly serialized in the response to the client.
+    You can do this by calling .IncludedSeparately(x => x.PropertyName) on your main queryable that is returned.
+</p>
+<p>
+    For example, if you want to load all people with a first name starting with "A", as well as all their open or in-progress cases, you might do the following:
+</p>
+<pre><code class="language-html">
+    public static IQueryable&lt;Person&gt; NamesStartingWithAWithCases(AppDbContext db, UserPrincipal user)
+    {
+        db.Case
+            .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+            .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+            .Load();
+
+        return db.People
+            .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+            .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+            .Where(f => f.FirstName.StartsWith("A"));
+    }
+
+    // Implement IIncludable to prevent the default behavior of loading all child models.
+    public IQueryable&lt;Person&gt; Include(IQueryable&lt;Person&gt; entities, string include = null)
+    {
+        return entities;
+    }
+
 </code></pre>
 
 <br />

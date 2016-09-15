@@ -54,7 +54,7 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
         }
 
 
-        public static IQueryable<T> CaptureSeparateIncludes<T>(this IQueryable<T> queryable)
+        internal static IQueryable<T> CaptureSeparateIncludes<T>(this IQueryable<T> queryable)
         {
             return new IncludableQueryProvider.WrappedProviderQueryable<T>(queryable, new IncludableQueryProvider(queryable.Provider as EntityQueryProvider));
         }
@@ -66,7 +66,8 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
             var provider = query.Provider as IncludableQueryProvider;
             if (provider == null)
             {
-                throw new InvalidOperationException("Cannot use IncludedSeparately on providers other than IncludableQueryProvider.");
+                query = query.CaptureSeparateIncludes();
+                provider = query.Provider as IncludableQueryProvider;
             }
 
             IncludeTree tail;

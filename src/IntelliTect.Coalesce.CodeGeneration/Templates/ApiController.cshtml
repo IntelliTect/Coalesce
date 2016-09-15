@@ -186,6 +186,7 @@ namespace @(namespaceName).Api
             }*@
             
             ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
         </text>

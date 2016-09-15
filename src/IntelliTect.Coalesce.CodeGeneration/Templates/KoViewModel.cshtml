@@ -535,7 +535,7 @@ module @moduleName {
                     self.isLoading(true);
                     intellitect.utilities.showBusy();
 
-                    var url = areaUrl + "@(model.ApiUrl)/Get/" + id + '?includes=' + self.includes + '&listDataSource=';
+                    var url = areaUrl + "@(model.ApiUrl)/Get/" + id + '?includes=' + self.includes + '&dataSource=';
                     if (typeof self.dataSource === "string") url += self.dataSource;
                     else url += ListViewModels.@(model.Name)DataSources[self.dataSource];
 

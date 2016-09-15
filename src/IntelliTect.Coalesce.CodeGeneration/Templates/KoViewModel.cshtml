@@ -51,6 +51,8 @@ module @moduleName {
 
         // String that defines what data should be included with the returned object.
         public includes = null;
+        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        public dataSource: ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources.Default;
         // If true, the busy indicator is shown when loading.
         public showBusyWhenSaving = false;  // If true a busy indicator shows when saving.
 
@@ -532,7 +534,12 @@ module @moduleName {
                 if (id) {
                     self.isLoading(true);
                     intellitect.utilities.showBusy();
-                    $.ajax({ method: "GET", url: areaUrl + "@(model.ApiUrl)/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
+
+                    var url = areaUrl + "@(model.ApiUrl)/Get/" + id + '?includes=' + self.includes + '&listDataSource=';
+                    if (typeof self.dataSource === "string") url += self.dataSource;
+                    else url += ListViewModels.@(model.Name)DataSources[self.dataSource];
+
+                    $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                         .done(function(data) {
                             self.loadFromDto(data, true);
                             if ($.isFunction(callback)) callback(self);

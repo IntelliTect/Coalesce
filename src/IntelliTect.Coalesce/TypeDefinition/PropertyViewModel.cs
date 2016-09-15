@@ -10,6 +10,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Text;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -1067,20 +1068,53 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string setter;
             if (Type.IsCollection)
             {
-                string orderBy = "";
                 if (PureType.HasClassViewModel)
                 {
+                    // Only check the includes tree for things that are in the database.
+                    // Otherwise, this would break IncludesExternal.
+                    var sb = new StringBuilder();
+
+                    sb.Append($"if (obj.{Name} != null");
+                    if (PureType.ClassViewModel.HasDbSet)
+                    {
+                        sb.Append($" && (tree == null || tree[nameof({objectName}.{Name})] != null)");
+                    }
+                    sb.Append(") {");
+                    sb.AppendLine();
+                    sb.Append("                ");
+                    sb.Append($"{objectName}.{Name} = obj.{Name}");
+
                     var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause;
                     if (defaultOrderBy != null)
                     {
-                        orderBy = $".OrderBy(\"{defaultOrderBy}\")";
+                        sb.Append($".OrderBy(\"{defaultOrderBy}\")");
                     }
-                    // Only check the includes tree for things that are in the database.
-                    // Otherwise, this would break IncludesExternal.
-                    string treeCheck = PureType.ClassViewModel.HasDbSet ? $"&& (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
-                    setter = $@"if (obj.{Name} != null {treeCheck})
-                {objectName}.{Name} = obj.{Name}{orderBy}.Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();
-";
+
+                    sb.Append($".Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();");
+
+                    sb.AppendLine();
+                    sb.Append("            ");
+                    if (PureType.ClassViewModel.HasDbSet)
+                    {
+                        sb.Append("}");
+                        // If we know for sure that we're loading these things (becuse the IncludeTree said so),
+                        // but EF didn't load any, then add a blank collection so the client will delete any that already exist.
+                        sb.Append($" else if (obj.{Name} == null && tree?[nameof({objectName}.{Name})] != null)");
+                        sb.Append(" {");
+                        sb.AppendLine();
+                        sb.Append("                ");
+                        sb.Append($"{objectName}.{Name} = new {PureType.Name}DtoGen[0];");
+                        sb.AppendLine();
+                        sb.Append("            ");
+                        sb.Append("}");
+                    }
+                    else
+                    {
+                        sb.Append("}");
+                    }
+
+                    sb.AppendLine();
+                    setter = sb.ToString();
                 }
                 else
                 {

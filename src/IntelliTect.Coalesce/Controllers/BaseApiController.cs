@@ -407,11 +407,14 @@ namespace IntelliTect.Coalesce.Controllers
         }
 
         [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
-        protected async Task<TDto> GetImplementation(string id, string includes = null)
+        protected async Task<TDto> GetImplementation(string id, ListParameters listParameters)
         {
+            // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
+            IQueryable<T> source = GetListDataSource(listParameters);
+
             // Get the item and get external data.
-            var query = DataSource.Includes(includes);
-            var item = query.FindItem(id).IncludeExternal(includes);
+            var query = source.Includes(listParameters.Includes);
+            var item = query.FindItem(id).IncludeExternal(listParameters.Includes);
 
             if (!BeforeGet(item))
             {
@@ -419,7 +422,7 @@ namespace IntelliTect.Coalesce.Controllers
             }
 
             // Map to DTO
-            var dto = MapObjToDto(item, includes, query.GetIncludeTree());
+            var dto = MapObjToDto(item, listParameters.Includes, query.GetIncludeTree());
 
             return dto;
         }

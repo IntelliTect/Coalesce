@@ -306,7 +306,13 @@
 </dl>
 
 <h4>Static List Methods</h4>
-<p>Static methods that return an IQueryable of the same type as the class are treated specially. These methods can be used to provide the underlying data for the list view models. The list view model has a property called listDataSource which accepts an enumeration with the available list methods. Parameters can be specified an object with name value pairs in the query property on the list view model.</p>
+<p>
+    Static methods that return an IQueryable of the same type as the class are treated specially.
+    These methods can be used to provide the underlying data for the list view models.
+    The list view model has a property called listDataSource which accepts an enumeration with the available list methods.
+    Parameters can be specified an object with name value pairs in the query property on the list view model.
+    When a non-default data source is used, any custom IIncludable.Includes implementation will not be called.
+</p>
 <pre><code class="language-html">
     public static IQueryable&lt;string&gt; NamesStartingWithA(DbContext db, UserPrincipal user)
     {
@@ -314,7 +320,7 @@
     }
 </code></pre>
 <p>
-    If you load data into your context in an IQueryable that is different from the one that is returned,
+    If you load data into your context using an IQueryable that is different from the one that is returned,
     you need to let Coalesce know that you did so that it will be correctly serialized in the response to the client.
     You can do this by calling .IncludedSeparately(x => x.PropertyName) on your main queryable that is returned.
 </p>
@@ -328,19 +334,11 @@
             .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
             .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
             .Load();
-
         return db.People
             .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
             .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
             .Where(f => f.FirstName.StartsWith("A"));
     }
-
-    // Implement IIncludable to prevent the default behavior of loading all child models.
-    public IQueryable&lt;Person&gt; Include(IQueryable&lt;Person&gt; entities, string include = null)
-    {
-        return entities;
-    }
-
 </code></pre>
 
 <br />

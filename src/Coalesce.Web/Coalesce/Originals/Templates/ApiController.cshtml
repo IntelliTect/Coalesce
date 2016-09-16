@@ -1,6 +1,5 @@
 ﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using IntelliTect.Coalesce.TypeDefinition
-@using IntelliTect.Coalesce.CodeGeneration.Utilities
 @using Microsoft.VisualStudio.Web.CodeGeneration
 @{
     ModelType contextInfo = Model.ContextInfo;
@@ -16,6 +15,7 @@
     namespaces.Add("IntelliTect.Coalesce.Controllers");
     namespaces.Add("IntelliTect.Coalesce.Data");
     namespaces.Add("IntelliTect.Coalesce.Mapping");
+    namespaces.Add("IntelliTect.Coalesce.Helpers.IncludeTree");
     namespaces.Add("IntelliTect.Coalesce.Models");
     namespaces.Add("IntelliTect.Coalesce.TypeDefinition");
     namespaces.Add("Microsoft.AspNetCore.Authorization");
@@ -176,7 +176,7 @@ namespace @(namespaceName).Api
 
         [HttpGet("get/{id}")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<@(model.DtoName)> Get(string id, string includes = null)
+        public virtual async Task<@(model.DtoName)> Get(string id, string includes = null, string dataSource = null)
         {
             @*if (!_model.SecurityInfo.IsReadAllowed(User))
             {
@@ -184,7 +184,9 @@ namespace @(namespaceName).Api
                 return null;
             }*@
             
-            return await GetImplementation(id, includes);
+            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            listParams.AddFilter("id", id);
+            return await GetImplementation(id, listParams);
         }
         </text>
         }
@@ -330,7 +332,7 @@ namespace @(namespaceName).Api
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, ""));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
                 }
                 else
                 {

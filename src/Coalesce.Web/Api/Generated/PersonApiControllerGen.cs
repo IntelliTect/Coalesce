@@ -1,6 +1,7 @@
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
@@ -132,10 +133,12 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual async Task<PersonDtoGen> Get(string id, string includes = null)
+        public virtual async Task<PersonDtoGen> Get(string id, string includes = null, string dataSource = null)
         {
             
-            return await GetImplementation(id, includes);
+            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            listParams.AddFilter("id", id);
+            return await GetImplementation(id, listParams);
         }
         
 
@@ -190,6 +193,10 @@ namespace Coalesce.Web.Api
         [AllowAnonymous]
         protected override IQueryable<Coalesce.Domain.Person> GetListDataSource(ListParameters parameters)
         {
+            if (parameters.ListDataSource == "NamesStartingWithAWithCases")
+            {
+                return Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
+            }
             if (parameters.ListDataSource == "BorCPeople")
             {
                 return Coalesce.Domain.Person.BorCPeople(Db);
@@ -326,6 +333,23 @@ namespace Coalesce.Web.Api
             return result;
         }
         
+        // Method: NamesStartingWithAWithCases
+        [HttpPost("NamesStartingWithAWithCases")]
+        
+        public virtual SaveResult<IEnumerable<PersonDtoGen>> NamesStartingWithAWithCases (){
+            var result = new SaveResult<IEnumerable<PersonDtoGen>>();
+            try{
+                var objResult = Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
+                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
+                result.WasSuccessful = true;
+                result.Message = null;
+            }catch(Exception ex){
+                result.WasSuccessful = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+        
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
         
@@ -333,7 +357,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
             try{
                 var objResult = Coalesce.Domain.Person.BorCPeople(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, ""));
+                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

@@ -88,11 +88,17 @@ namespace Coalesce.Web.Models
             newObject.TimeZone = obj.TimeZone;
             newObject.Name = obj.Name;
             newObject.CompanyId = obj.CompanyId;
-            if (obj.CasesAssigned != null && (tree == null || tree[nameof(newObject.CasesAssigned)] != null))
+            if (obj.CasesAssigned != null && (tree == null || tree[nameof(newObject.CasesAssigned)] != null)) {
                 newObject.CasesAssigned = obj.CasesAssigned.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesAssigned)])).ToList();
+            } else if (obj.CasesAssigned == null && tree?[nameof(newObject.CasesAssigned)] != null) {
+                newObject.CasesAssigned = new CaseDtoGen[0];
+            }
 
-            if (obj.CasesReported != null && (tree == null || tree[nameof(newObject.CasesReported)] != null))
+            if (obj.CasesReported != null && (tree == null || tree[nameof(newObject.CasesReported)] != null)) {
                 newObject.CasesReported = obj.CasesReported.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesReported)])).ToList();
+            } else if (obj.CasesReported == null && tree?[nameof(newObject.CasesReported)] != null) {
+                newObject.CasesReported = new CaseDtoGen[0];
+            }
 
             
                 newObject.PersonStats = PersonStatsDtoGen.Create(obj.PersonStats, user, includes, objects, tree?[nameof(newObject.PersonStats)]);

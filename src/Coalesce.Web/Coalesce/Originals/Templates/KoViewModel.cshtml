@@ -1,6 +1,5 @@
 ﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using IntelliTect.Coalesce.TypeDefinition
-@using IntelliTect.Coalesce.CodeGeneration.Utilities
 @using IntelliTect.Coalesce.Utilities
 @{
     ClassViewModel model = Model.Model;
@@ -51,8 +50,12 @@ module @moduleName {
 
         // String that defines what data should be included with the returned object.
         public includes = null;
+        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        public dataSource: ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources.Default;
         // If true, the busy indicator is shown when loading.
         public showBusyWhenSaving = false;  // If true a busy indicator shows when saving.
+        // Whether or not alerts should be shown when loading fails.
+        public showFailureAlerts: boolean = true;
 
         // Parent of this object.
         public parent = null;
@@ -142,6 +145,8 @@ module @moduleName {
        
         // True if the object is loading.
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // True once the data has been loaded.
+		public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
         // URL to a stock editor for this object.
         public editUrl: () => string;
         // Create computeds for display for objects
@@ -496,8 +501,8 @@ module @moduleName {
                             if (xhr.responseJSON && xhr.responseJSON.object){
                                 self.loadFromDto(xhr.responseJSON.object, true);
                             }
-                            // TODO: allow for turning this off
-                            alert("Could not save the item: " + errorMsg);
+                            if (self.showFailureAlerts)
+                                alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -532,13 +537,21 @@ module @moduleName {
                 if (id) {
                     self.isLoading(true);
                     intellitect.utilities.showBusy();
-                    $.ajax({ method: "GET", url: areaUrl + "@(model.ApiUrl)/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
+
+                    var url = areaUrl + "@(model.ApiUrl)/Get/" + id + '?includes=' + self.includes + '&dataSource=';
+                    if (typeof self.dataSource === "string") url += self.dataSource;
+                    else url += ListViewModels.@(model.Name)DataSources[self.dataSource];
+
+                    $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                         .done(function(data) {
                             self.loadFromDto(data, true);
+                            self.isLoaded(true);
                             if ($.isFunction(callback)) callback(self);
                         })
                         .fail(function() {
-                            alert("Could not get @(model.Name) with id = " + id);
+                            self.isLoaded(false);
+                            if (self.showFailureAlerts)
+                                alert("Could not get @(model.Name) with id = " + id);
                         })
                         .always(function() {
                             intellitect.utilities.hideBusy();
@@ -584,7 +597,8 @@ module @moduleName {
                     }
                 })
                 .fail(function() {
-                    alert("Could not delete the item.");
+                    if (self.showFailureAlerts)
+                        alert("Could not delete the item.");
                 })
                 .always(function() {
                     if ($.isFunction(callback)) {
@@ -692,7 +706,8 @@ module @moduleName {
                     self.errorMessage(errorMsg);
                     self.validationIssues(validationIssues);
 
-                    alert("Could not save the item: " + errorMsg);
+                    if (self.showFailureAlerts)
+                        alert("Could not save the item: " + errorMsg);
                 })
                 .always(function() {
                     // Nothing here yet.
@@ -793,7 +808,8 @@ module @moduleName {
                     if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
                     self.isLoading(false);
 
-                    alert("Could not get Valid Values for @(prop.Name): " + errorMsg);
+                    if (self.showFailureAlerts)
+                        alert("Could not get Valid Values for @(prop.Name): " + errorMsg);
                 })
                 .always(function(){
                     self.loadingValidValues--;
@@ -963,7 +979,8 @@ module @moduleName {
                     self.@(method.JsVariableWasSuccessful)(false);
                     self.@(method.JsVariableMessage)(errorMsg);
 
-                    alert("Could not call method @method.JsVariable: " + errorMsg);
+                    if (self.showFailureAlerts)
+                        alert("Could not call method @method.JsVariable: " + errorMsg);
                 })
                 .always(function() {
                     self.@(method.JsVariableIsLoading)(false);

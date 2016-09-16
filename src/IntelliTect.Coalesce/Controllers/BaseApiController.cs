@@ -108,7 +108,7 @@ namespace IntelliTect.Coalesce.Controllers
                 IQueryable<T> result = GetListDataSource(listParameters);
 
                 // Add the Include statements to the result to grab the right object graph. Passing "" gets the standard set.
-                if (string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
+                if ((result is DbSet<T>) && string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     result = result.Includes(listParameters.Includes);
                 }
@@ -413,8 +413,12 @@ namespace IntelliTect.Coalesce.Controllers
             IQueryable<T> source = GetListDataSource(listParameters);
 
             // Get the item and get external data.
-            var query = source.Includes(listParameters.Includes);
-            var item = query.FindItem(id).IncludeExternal(listParameters.Includes);
+            if ((source is DbSet<T>) && string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
+            {
+                source = source.Includes(listParameters.Includes);
+            }
+
+            var item = source.FindItem(id).IncludeExternal(listParameters.Includes);
 
             if (!BeforeGet(item))
             {
@@ -422,7 +426,7 @@ namespace IntelliTect.Coalesce.Controllers
             }
 
             // Map to DTO
-            var dto = MapObjToDto(item, listParameters.Includes, query.GetIncludeTree());
+            var dto = MapObjToDto(item, listParameters.Includes, source.GetIncludeTree());
 
             return dto;
         }

@@ -89,8 +89,11 @@ namespace Coalesce.Web.Models
                 newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, user, includes, objects, tree?[nameof(newObject.ReportedBy)]);
 
             }
-            if (obj.CaseProducts != null && (tree == null || tree[nameof(newObject.CaseProducts)] != null))
+            if (obj.CaseProducts != null && (tree == null || tree[nameof(newObject.CaseProducts)] != null)) {
                 newObject.CaseProducts = obj.CaseProducts.OrderBy("CaseProductId ASC").Select(f => CaseProductDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CaseProducts)])).ToList();
+            } else if (obj.CaseProducts == null && tree?[nameof(newObject.CaseProducts)] != null) {
+                newObject.CaseProducts = new CaseProductDtoGen[0];
+            }
 
             
                 newObject.DevTeamAssigned = DevTeamDtoGen.Create(obj.DevTeamAssigned, user, includes, objects, tree?[nameof(newObject.DevTeamAssigned)]);

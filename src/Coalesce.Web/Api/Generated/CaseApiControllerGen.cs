@@ -1,6 +1,7 @@
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
@@ -132,10 +133,12 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual async Task<CaseDtoGen> Get(string id, string includes = null)
+        public virtual async Task<CaseDtoGen> Get(string id, string includes = null, string dataSource = null)
         {
             
-            return await GetImplementation(id, includes);
+            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            listParams.AddFilter("id", id);
+            return await GetImplementation(id, listParams);
         }
         
 
@@ -242,7 +245,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<IEnumerable<CaseDtoGen>>();
             try{
                 var objResult = Coalesce.Domain.Case.GetAllOpenCases(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, ""));
+                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

@@ -1,6 +1,7 @@
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
@@ -120,10 +121,12 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<CaseDto> Get(string id, string includes = null)
+        public virtual async Task<CaseDto> Get(string id, string includes = null, string dataSource = null)
         {
             
-            return await GetImplementation(id, includes);
+            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            listParams.AddFilter("id", id);
+            return await GetImplementation(id, listParams);
         }
         
 

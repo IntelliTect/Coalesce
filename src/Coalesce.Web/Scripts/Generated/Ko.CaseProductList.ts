@@ -24,6 +24,8 @@ module ListViewModels {
         public listDataSource: CaseProductDataSources = CaseProductDataSources.Default;
         // String the represents the child object to load 
         public includes: string = "";
+        // Whether or not alerts should be shown when loading fails.
+        public showFailureAlerts: boolean = true;
         // List of items. This the main collection.
         public items: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
         // Load the list.
@@ -119,7 +121,8 @@ module ListViewModels {
                     self.message(errorMsg);
                     self.isLoaded(false);
                     
-                    alert("Could not get list of CaseProduct items: " + errorMsg);
+                    if (self.showFailureAlerts)
+                        alert("Could not get list of CaseProduct items: " + errorMsg);
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -164,7 +167,8 @@ module ListViewModels {
                     if ($.isFunction(callback)) callback();
                 })
                 .fail(function() {
-                    alert("Could not get count of CaseProduct items.");
+                    if (self.showFailureAlerts)
+                        alert("Could not get count of CaseProduct items.");
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();

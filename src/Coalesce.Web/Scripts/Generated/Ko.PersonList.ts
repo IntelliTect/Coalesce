@@ -15,6 +15,7 @@ module ListViewModels {
     export enum PersonDataSources {
             Default,
             BorCPeople,
+            NamesStartingWithAWithCases,
         }
     export class PersonList {
         // Query string to limit the list of items.
@@ -25,6 +26,8 @@ module ListViewModels {
         public listDataSource: PersonDataSources = PersonDataSources.Default;
         // String the represents the child object to load 
         public includes: string = "";
+        // Whether or not alerts should be shown when loading fails.
+        public showFailureAlerts: boolean = true;
         // List of items. This the main collection.
         public items: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         // Load the list.
@@ -177,6 +180,24 @@ module ListViewModels {
         
         public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
         
+        // Call server method (NamesStartingWithAWithCases)
+        public namesStartingWithAWithCases: (callback?: any, reload?: boolean) => void;
+        // Result of server method (NamesStartingWithAWithCases) strongly typed in a observable.
+        public namesStartingWithAWithCasesResult: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
+        // Result of server method (NamesStartingWithAWithCases) simply wrapped in an observable.
+        public namesStartingWithAWithCasesResultRaw: KnockoutObservable<any> = ko.observable();
+        // True while the server method (NamesStartingWithAWithCases) is being called
+        public namesStartingWithAWithCasesIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (NamesStartingWithAWithCases) if it fails.
+        public namesStartingWithAWithCasesMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (NamesStartingWithAWithCases) was successful.
+        public namesStartingWithAWithCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (NamesStartingWithAWithCases)
+        public namesStartingWithAWithCasesUi: (callback?: any) => void;
+        // Presents a modal with input boxes to call the server method (NamesStartingWithAWithCases)
+        public namesStartingWithAWithCasesModal: (callback?: any) => void;
+        // Variable for method arguments to allow for easy binding
+        
         // Call server method (BorCPeople)
         // People whose last name starts with B or c
         public borCPeople: (callback?: any, reload?: boolean) => void;
@@ -243,7 +264,8 @@ module ListViewModels {
                     self.message(errorMsg);
                     self.isLoaded(false);
                     
-                    alert("Could not get list of Person items: " + errorMsg);
+                    if (self.showFailureAlerts)
+                        alert("Could not get list of Person items: " + errorMsg);
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -288,7 +310,8 @@ module ListViewModels {
                     if ($.isFunction(callback)) callback();
                 })
                 .fail(function() {
-                    alert("Could not get count of Person items.");
+                    if (self.showFailureAlerts)
+                        alert("Could not get count of Person items.");
                 })
                 .always(function() {
                     intellitect.utilities.hideBusy();
@@ -590,6 +613,51 @@ module ListViewModels {
                 if (!args) args = self.namesStartingWithPublicArgs;
                 self.namesStartingWithPublic(args.characters(), callback);
             }
+
+            
+            self.namesStartingWithAWithCases = function(callback?: any, reload: boolean = true){
+                self.namesStartingWithAWithCasesIsLoading(true);
+                self.namesStartingWithAWithCasesMessage('');
+                self.namesStartingWithAWithCasesWasSuccessful(null);
+                $.ajax({ method: "POST",
+                         url: areaUrl + "api/Person/NamesStartingWithAWithCases",
+                         data: {
+
+                    },
+                         xhrFields: { withCredentials: true } })
+				.done(function(data) {
+					self.namesStartingWithAWithCasesResultRaw(data.object);
+                    if (self.namesStartingWithAWithCasesResult()){
+                            RebuildArray(self.namesStartingWithAWithCasesResult, data.object, 'personId', ViewModels.Person, self, true);
+                    }
+                    
+                    if (reload) {
+                      self.load(callback);
+                    } else if ($.isFunction(callback)) {
+                      callback(data);
+                    }
+				})
+				.fail(function(xhr) {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    self.namesStartingWithAWithCasesWasSuccessful(false);
+                    self.namesStartingWithAWithCasesMessage(errorMsg);
+
+					//alert("Could not call method namesStartingWithAWithCases: " + errorMsg);
+				})
+				.always(function() {
+                    self.namesStartingWithAWithCasesIsLoading(false);
+				});
+            }
+
+            self.namesStartingWithAWithCasesUi = function(callback?: any) {
+                                self.namesStartingWithAWithCases(callback);
+            }
+
+            self.namesStartingWithAWithCasesModal = function(callback?: any) {
+                    self.namesStartingWithAWithCasesUi(callback);
+            }
+            
 
             
             self.borCPeople = function(callback?: any, reload: boolean = true){

@@ -27,8 +27,12 @@ module ViewModels {
 
         // String that defines what data should be included with the returned object.
         public includes = null;
+        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        public dataSource: ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources.Default;
         // If true, the busy indicator is shown when loading.
         public showBusyWhenSaving = false;  // If true a busy indicator shows when saving.
+        // Whether or not alerts should be shown when loading fails.
+        public showFailureAlerts: boolean = true;
 
         // Parent of this object.
         public parent = null;
@@ -102,6 +106,8 @@ module ViewModels {
        
         // True if the object is loading.
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // True once the data has been loaded.
+		public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
         // URL to a stock editor for this object.
         public editUrl: () => string;
         // Create computeds for display for objects
@@ -281,8 +287,8 @@ module ViewModels {
                             if (xhr.responseJSON && xhr.responseJSON.object){
                                 self.loadFromDto(xhr.responseJSON.object, true);
                             }
-                            // TODO: allow for turning this off
-                            alert("Could not save the item: " + errorMsg);
+                            if (self.showFailureAlerts)
+                                alert("Could not save the item: " + errorMsg);
 						})
 						.always(function() {
 							self.isSaving(false);
@@ -317,13 +323,21 @@ module ViewModels {
                 if (id) {
                     self.isLoading(true);
                     intellitect.utilities.showBusy();
-                    $.ajax({ method: "GET", url: areaUrl + "api/Company/Get/" + id + '?includes=' + self.includes, xhrFields: { withCredentials: true } })
+
+                    var url = areaUrl + "api/Company/Get/" + id + '?includes=' + self.includes + '&dataSource=';
+                    if (typeof self.dataSource === "string") url += self.dataSource;
+                    else url += ListViewModels.CompanyDataSources[self.dataSource];
+
+                    $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                         .done(function(data) {
                             self.loadFromDto(data, true);
+                            self.isLoaded(true);
                             if ($.isFunction(callback)) callback(self);
                         })
                         .fail(function() {
-                            alert("Could not get Company with id = " + id);
+                            self.isLoaded(false);
+                            if (self.showFailureAlerts)
+                                alert("Could not get Company with id = " + id);
                         })
                         .always(function() {
                             intellitect.utilities.hideBusy();
@@ -369,7 +383,8 @@ module ViewModels {
                     }
                 })
                 .fail(function() {
-                    alert("Could not delete the item.");
+                    if (self.showFailureAlerts)
+                        alert("Could not delete the item.");
                 })
                 .always(function() {
                     if ($.isFunction(callback)) {
@@ -456,7 +471,8 @@ module ViewModels {
                     self.errorMessage(errorMsg);
                     self.validationIssues(validationIssues);
 
-                    alert("Could not save the item: " + errorMsg);
+                    if (self.showFailureAlerts)
+                        alert("Could not save the item: " + errorMsg);
                 })
                 .always(function() {
                     // Nothing here yet.

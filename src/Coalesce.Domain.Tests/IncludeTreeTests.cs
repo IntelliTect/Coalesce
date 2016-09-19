@@ -27,7 +27,9 @@ namespace Coalesce.Domain.Tests
                 .Where(e => e.FirstName != null)
                 .Include(p => p.Company)
                 .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.AssignedTo)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.ReportedBy)
                 .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.Company)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
                 .Where(e => e.LastName != null);
 
             // Just calling this to make sure the query can execute.
@@ -42,11 +44,26 @@ namespace Coalesce.Domain.Tests
                 [nameof(CaseProduct.Case)]
                 [nameof(Case.AssignedTo)]);
 
+            // Make sure that multiple EF include calls merge properly.
+            // If this doesn't pass, something is wrong with the way merging is done.
+            Assert.NotNull(tree
+                [nameof(Person.CasesAssigned)]
+                [nameof(Case.CaseProducts)]
+                [nameof(CaseProduct.Case)]
+                [nameof(Case.ReportedBy)]);
+
             // check to see if IncludedSeparately works
             Assert.NotNull(tree
                 [nameof(Person.CasesReported)]
                 [nameof(Case.ReportedBy)]
                 [nameof(Person.Company)]);
+
+            // Make sure that multiple IncludedSeprately calls merge properly.
+            // If this doesn't pass, something is wrong with the way merging is done.
+            Assert.NotNull(tree
+                [nameof(Person.CasesReported)]
+                [nameof(Case.ReportedBy)]
+                [nameof(Person.CasesAssigned)]);
 
         }
     }

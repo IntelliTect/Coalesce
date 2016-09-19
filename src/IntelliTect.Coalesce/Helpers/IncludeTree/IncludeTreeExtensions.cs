@@ -75,7 +75,8 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
             var head = IncludeTree.ParseMemberExpression(body, out tail);
 
             // Add the head of this expression to the root includetree for the query.
-            provider.IncludeTree.AddChild(head);
+            tail = provider.IncludeTree.AddLinearChild(head);
+
 
             return new IncludedSeparatelyQueryable<TEntity, TProperty>(query) { IncludeTree = tail };
         }
@@ -91,7 +92,7 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
             var head = IncludeTree.ParseMemberExpression(body, out tail);
 
             // Merge in the head of this tree as a child of the parent tree.
-            source.IncludeTree.AddChild(head);
+            tail = source.IncludeTree.AddLinearChild(head);
 
             return new IncludedSeparatelyQueryable<TEntity, TProperty>(source) { IncludeTree = tail };
         }

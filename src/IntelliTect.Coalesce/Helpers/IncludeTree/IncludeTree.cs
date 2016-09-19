@@ -34,6 +34,30 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
             }
         }
 
+        /// <summary>
+        /// Merges in a linearly-structured IncludeTree, and returns the tail of that tree.
+        /// </summary>
+        /// <param name="tree"></param>
+        /// <returns></returns>
+        public IncludeTree AddLinearChild(IncludeTree tree)
+        {
+            if (!_children.ContainsKey(tree.PropertyName))
+            {
+                _children[tree.PropertyName] = new IncludeTree { PropertyName = tree.PropertyName };
+            }
+
+            if (tree.Any())
+            {
+                // Recursively merge into the existing tree. Returns the tail.
+                return _children[tree.PropertyName].AddLinearChild(tree.Single().Value);
+            }
+            else
+            {
+                // Nothing underneath - the new node is the tail. Return it up the call stack.
+                return _children[tree.PropertyName];
+            }
+        }
+
         public static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)
         {
             var newNode = tail = new IncludeTree();

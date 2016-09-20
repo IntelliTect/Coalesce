@@ -46,13 +46,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the parameter to pass to the actual method accounting for DI.
         /// </summary>
-        public object CsArgumentName
+        public string CsArgumentName
         {
             get
             {
                 if (IsAContext) return "Db";
                 if (IsAUser) return "User";
                 return Name.ToCamelCase();
+            }
+        }
+
+        public string PascalCaseName
+        {
+            get
+            {
+                return Name.ToPascalCase();
             }
         }
 

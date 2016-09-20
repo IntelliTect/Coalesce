@@ -284,6 +284,10 @@ namespace @(namespaceName).Api
                 @:{
                     @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.CsArgumentName"]);
                 @:}
+            @:    else if (parameters.Filters.ContainsKey("@parameter.PascalCaseName"))
+                @:{
+                    @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.PascalCaseName"]);
+                @:}
             }
             @:    return @(method.Parent.Namespace).@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
             @:}

@@ -409,6 +409,18 @@ namespace IntelliTect.Coalesce.Controllers
         [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<TDto> GetImplementation(string id, ListParameters listParameters)
         {
+            IncludeTree tree;
+            var item = GetUnmapped(id, listParameters, out tree);
+            if (item == null) return null;
+
+            // Map to DTO
+            var dto = MapObjToDto(item, listParameters.Includes, tree);
+
+            return dto;
+        }
+
+        private T GetUnmapped(string id, ListParameters listParameters, out IncludeTree tree)
+        {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
             IQueryable<T> source = GetListDataSource(listParameters);
 
@@ -420,15 +432,14 @@ namespace IntelliTect.Coalesce.Controllers
 
             var item = source.FindItem(id).IncludeExternal(listParameters.Includes);
 
+            tree = source.GetIncludeTree();
+
             if (!BeforeGet(item))
             {
                 return null;
             }
 
-            // Map to DTO
-            var dto = MapObjToDto(item, listParameters.Includes, source.GetIncludeTree());
-
-            return dto;
+            return item;
         }
 
         protected virtual bool BeforeGet(T obj)
@@ -457,8 +468,10 @@ namespace IntelliTect.Coalesce.Controllers
             return false;
         }
 
-        protected SaveResult<TDto> SaveImplementation(TDto dto, string includes = null, bool returnObject = true)
+        protected SaveResult<TDto> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
+            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+
             var result = new SaveResult<TDto>();
 
             // See if this is new or an update using the key.
@@ -529,11 +542,11 @@ namespace IntelliTect.Coalesce.Controllers
                         if (validateResult.WasSuccessful)
                         {
                             Db.SaveChanges();
-                            // Pull the object to get any changes.
-                            var query = DataSource.Includes(includes);
-                            includeTree = query.GetIncludeTree();
 
-                            item = query.FindItem(IdValue(item));
+                            // Pull the object to get any changes.
+                            var idString = IdValue(item).ToString();
+                            listParams.AddFilter("id", idString);
+                            item = GetUnmapped(idString, listParams, out includeTree);
 
                             // Call the AfterSave method to support special cases.
                             var reloadItem = AfterSave(dto, item, origItem, Db);
@@ -547,7 +560,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                             if (reloadItem && returnObject)
                             {
-                                item = DataSource.Includes(includes).FindItem(IdValue(item));
+                                item = GetUnmapped(idString, listParams, out includeTree);
                             }
 
                             result.WasSuccessful = true;

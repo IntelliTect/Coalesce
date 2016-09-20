@@ -104,6 +104,7 @@ namespace IntelliTect.Coalesce.Models
         {
             if (propertyValue != null)
             {
+                if (Filters.ContainsKey(propertyName)) Filters.Remove(propertyName);
                 Filters.Add(propertyName, propertyValue);
             }
         }

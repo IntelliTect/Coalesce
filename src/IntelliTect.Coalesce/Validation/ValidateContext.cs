@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.Validation
             var assert = new ValidationHelper();
             assert.IsTrue(models.Count > 0, "No models were created");
             // Make sure everyone has an id property
-            foreach (var model in models.Where(f=>f.HasDbSet))
+            foreach (var model in models.Where(f => f.HasDbSet))
             {
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Has name");
@@ -80,7 +80,7 @@ namespace IntelliTect.Coalesce.Validation
                 }
 
                 // Validate Methods
-                foreach (var method in model.Methods.Where(f=>!f.IsInternalUse))
+                foreach (var method in model.Methods.Where(f => !f.IsInternalUse))
                 {
                     assert.Area = $"{model.Name}: {method.Name}";
                     try
@@ -120,8 +120,25 @@ namespace IntelliTect.Coalesce.Validation
                 }
 
             }
-            return assert;
 
+            // Validate the non-DbSet items (DTOs)
+            foreach (var model in models.Where(f => !f.HasDbSet && f.OnContext))
+            {
+                Console.WriteLine($"Validating DTO: {model.Name}");
+                // Make sure the key matches the object
+                assert.IsTrue(model.DtoBaseViewModel.PrimaryKey.Name == model.PrimaryKey.Name, 
+                    $"{model.Name} primary key must match underlying object's ({model.DtoBaseViewModel.Name}) primary key. For {model.Name} the key must be {model.DtoBaseViewModel.PrimaryKey.Name}");
+            }
+
+            // Validate the objects found that is not on the context. 
+            foreach (var model in models.Where(f => !f.OnContext))
+            {
+                Console.WriteLine($"Validating Other Object: {model.Name}");
+                // Make sure these don't inherit from IClassDto because they should have an IEnumerable on the Context.
+                assert.IsTrue(model.DtoBaseViewModel == null, $"{model.Name} appears to be a DTO but doesn't have an IEnumerable<{model.Name} entry in the Context. Add to the context or remove IClassDto.");
+            }
+
+            return assert;
 
         }
     }

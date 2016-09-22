@@ -70,29 +70,29 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</td>
-                    <td class="description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</td>
-                    <td class="openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
-                    <td class="assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
-                    <td class="reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
-                    <td class="attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
-                    <td class="severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</td>
-                    <td class="status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
-                    <td class="caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
-                    <td class="devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
+                    <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</td>
+                    <td class="prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</td>
+                    <td class="prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
+                    <td class="prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
+                    <td class="prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
+                    <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
+                    <td class="prop-severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</td>
+                    <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
+                    <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
+                    <td class="prop-devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
                     }
                     else
                     {
-                    <td class="title">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title))</td>
-                    <td class="description">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description))</td>
-                    <td class="openedAt">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
-                    <td class="assignedTo">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
-                    <td class="reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
-                    <td class="attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
-                    <td class="severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity))</td>
-                    <td class="status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status))</td>
-                    <td class="caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
-                    <td class="devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
+                    <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title))</td>
+                    <td class="prop-description">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description))</td>
+                    <td class="prop-openedAt">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
+                    <td class="prop-assignedTo">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
+                    <td class="prop-reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
+                    <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
+                    <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity))</td>
+                    <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status))</td>
+                    <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
+                    <td class="prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
                     }
                 <td>
 

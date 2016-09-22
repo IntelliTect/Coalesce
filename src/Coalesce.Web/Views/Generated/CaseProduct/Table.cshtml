@@ -62,13 +62,13 @@
             <tr data-bind="css: {'btn-warning': errorMessage()}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
-                    <td class="product">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
+                    <td class="prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
+                    <td class="prop-product">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
                     }
                     else
                     {
-                    <td class="case">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
-                    <td class="product">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
+                    <td class="prop-case">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
+                    <td class="prop-product">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
                     }
                 <td>
 

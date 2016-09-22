@@ -131,7 +131,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     }
                 }
 
-                if (foundIssues) throw new Exception("Model did not validate. " + validationResult.First(f => !f.WasSuccessful).ToString());
+                if (foundIssues)
+                {
+                    //throw new Exception("Model did not validate. " + validationResult.First(f => !f.WasSuccessful).ToString());
+                    if (Debugger.IsAttached)
+                    {
+                        Console.WriteLine("Press enter to quit");
+                        Console.Read();
+                    }
+                    Environment.Exit(1);
+                }
 
                 if (model.ValidateOnly)
                 {
@@ -187,9 +196,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             CopyToDestination( fileName, sourcePath, originalsPath );
 
             // set read-only
-            attr = File.GetAttributes(originalFile);
-            attr = attr | FileAttributes.ReadOnly;
-            File.SetAttributes(originalFile, attr);
+            if (File.Exists(originalFile))
+            {
+                attr = File.GetAttributes(originalFile);
+                attr = attr | FileAttributes.ReadOnly;
+                File.SetAttributes(originalFile, attr);
+            }
         }
 
         private void CopyToDestination(string fileName, string sourcePath, string destinationPath)

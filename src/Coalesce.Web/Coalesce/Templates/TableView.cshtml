@@ -98,14 +98,14 @@
                     @:{
                     @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
-                    @:<td class="@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly)</td>
+                    @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly)</td>
                         }
                     @:}
                     @:else
                     @:{
                     @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
-                    @:<td class="@(prop.JsonName)">@Display.PropertyHelper(prop, false)</td>
+                    @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false)</td>
                         }
                     @:}
                 }

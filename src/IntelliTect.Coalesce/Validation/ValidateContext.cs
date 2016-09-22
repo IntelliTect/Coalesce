@@ -124,16 +124,22 @@ namespace IntelliTect.Coalesce.Validation
             // Validate the non-DbSet items (DTOs)
             foreach (var model in models.Where(f => !f.HasDbSet && f.OnContext))
             {
-                Console.WriteLine($"Validating DTO: {model.Name}");
+                // Console.WriteLine($"Validating DTO: {model.Name}");
                 // Make sure the key matches the object
-                assert.IsTrue(model.DtoBaseViewModel.PrimaryKey.Name == model.PrimaryKey.Name, 
-                    $"{model.Name} primary key must match underlying object's ({model.DtoBaseViewModel.Name}) primary key. For {model.Name} the key must be {model.DtoBaseViewModel.PrimaryKey.Name}");
+                if (model.IsDto)
+                {
+                    assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base view model for DTO {model.Name} ");
+                    assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model.Name} ");
+                }else
+                {
+                    assert.IsTrue(model.DtoBaseViewModel == null, $"External type should not implement IClassDto ");
+                }
             }
 
             // Validate the objects found that is not on the context. 
             foreach (var model in models.Where(f => !f.OnContext))
             {
-                Console.WriteLine($"Validating Other Object: {model.Name}");
+                //Console.WriteLine($"Validating Other Object: {model.Name}");
                 // Make sure these don't inherit from IClassDto because they should have an IEnumerable on the Context.
                 assert.IsTrue(model.DtoBaseViewModel == null, $"{model.Name} appears to be a DTO but doesn't have an IEnumerable<{model.Name} entry in the Context. Add to the context or remove IClassDto.");
             }

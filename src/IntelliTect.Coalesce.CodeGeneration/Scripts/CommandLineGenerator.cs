@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.DotNet.ProjectModel;
+using System.Diagnostics;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -26,6 +27,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         {
             var generator = new ScriptsGenerator(_webProject, _dataProject);
             await generator.Generate(model);
+
+            if (Debugger.IsAttached)
+            {
+                Console.WriteLine("Press Enter to quit");
+                Console.Read();
+            }
+
         }
     }
 }

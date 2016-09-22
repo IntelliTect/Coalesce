@@ -234,7 +234,13 @@ module ViewModels {
 					if (self.validate()) {
 						if (self.showBusyWhenSaving) intellitect.utilities.showBusy();
 						self.isSaving(true);
-                        $.ajax({ method: "POST", url: areaUrl + "api/CaseDto/Save?includes=" + self.includes, data: self.saveToDto(), xhrFields: { withCredentials: true } })
+
+                        
+                        var url = areaUrl + "api/CaseDto/Save?includes=" + self.includes + '&dataSource=';
+                        if (typeof self.dataSource === "string") url += self.dataSource;
+                        else url += ListViewModels.CaseDtoDataSources[self.dataSource];
+
+                        $.ajax({ method: "POST", url: url, data: self.saveToDto(), xhrFields: { withCredentials: true } })
 						.done(function(data) {
 							self.isDirty(false);
 							self.errorMessage('');

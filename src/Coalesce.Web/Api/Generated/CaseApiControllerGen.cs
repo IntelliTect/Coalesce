@@ -12,11 +12,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading.Tasks;
-using Coalesce.Web.Models;
+using Coalesce.Domain.Models;
 using Coalesce.Domain;
 using Coalesce.Domain.External;
 
-namespace Coalesce.Web.Api
+namespace Coalesce.Domain.Api
 {
     [Route("api/[controller]")]
     [Authorize]
@@ -154,7 +154,7 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual SaveResult<CaseDtoGen> Save(CaseDtoGen dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<CaseDtoGen> Save(CaseDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
             
             // Check if creates/edits aren't allowed
@@ -174,7 +174,7 @@ namespace Coalesce.Web.Api
                 return result;
             }
 
-            return SaveImplementation(dto, includes, returnObject);
+            return SaveImplementation(dto, includes, dataSource, returnObject);
         }
         
         [HttpPost("AddToCollection")]

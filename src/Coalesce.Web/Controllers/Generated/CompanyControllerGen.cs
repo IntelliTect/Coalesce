@@ -5,7 +5,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Coalesce.Domain;
 using Coalesce.Domain.External;
 
-namespace Coalesce.Web.Controllers
+namespace Coalesce.Domain.Controllers
 {
     [Authorize]
     public partial class CompanyController 

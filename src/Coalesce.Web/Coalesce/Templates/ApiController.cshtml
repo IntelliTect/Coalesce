@@ -213,7 +213,7 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        public virtual SaveResult<@(model.DtoName)> Save(@(model.DtoName) dto, string includes = null, bool returnObject = true)
+        public virtual SaveResult<@(model.DtoName)> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
             @{
                 var createIf = "";
@@ -252,7 +252,7 @@ namespace @(namespaceName).Api
                 return result;
             }
 
-            return SaveImplementation(dto, includes, returnObject);
+            return SaveImplementation(dto, includes, dataSource, returnObject);
         }
         
         [HttpPost("AddToCollection")]
@@ -283,6 +283,10 @@ namespace @(namespaceName).Api
             @:    if (parameters.Filters.ContainsKey("@parameter.CsArgumentName"))
                 @:{
                     @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.CsArgumentName"]);
+                @:}
+            @:    else if (parameters.Filters.ContainsKey("@parameter.PascalCaseName"))
+                @:{
+                    @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.PascalCaseName"]);
                 @:}
             }
             @:    return @(method.Parent.Namespace).@(method.Parent.Name).@(method.Name)(@(method.CsArguments));

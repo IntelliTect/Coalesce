@@ -1,7 +1,8 @@
 
 // Model Namespaces 
 using Coalesce.Domain;
-using Coalesce.Web.Models;
+using Coalesce.Domain.Api;
+using Coalesce.Domain.Models;
 
 namespace Coalesce.Web.Api
 {

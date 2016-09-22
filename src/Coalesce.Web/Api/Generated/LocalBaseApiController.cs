@@ -5,7 +5,7 @@ using Coalesce.Domain;
     using Coalesce.Domain.External;
 using IntelliTect.Coalesce.Interfaces;
 
-namespace Coalesce.Web.Api
+namespace Coalesce.Domain.Api
 {
     // This class allows developers to inject base class behaviors into the inheritance chain
     // This file should not be modified, but another partial class should be created where your custom behavior can be placed.

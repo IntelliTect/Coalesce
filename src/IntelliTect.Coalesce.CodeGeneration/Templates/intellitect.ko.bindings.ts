@@ -31,6 +31,7 @@ interface KnockoutBindingHandlers {
     moment: any;
     momentFromNow: any;
     booleanValue: KnockoutBindingHandler;
+    formatNumberText: KnockoutBindingHandler;
 }
 
 
@@ -645,6 +646,15 @@ ko.bindingHandlers.booleanValue = {
     }
 };
 
+ko.bindingHandlers.formatNumberText = {
+    update: function (element, valueAccessor) {
+        var phone = ko.utils.unwrapObservable(valueAccessor());
+        var formatPhone = function () {
+            return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+        }
+        ko.bindingHandlers.text.update(element, formatPhone);
+    }
+};
 // Used from grahampcharles 
 // https://github.com/grahampcharles/moment-knockout/
 

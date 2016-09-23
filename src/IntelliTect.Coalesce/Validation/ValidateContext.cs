@@ -20,49 +20,49 @@ namespace IntelliTect.Coalesce.Validation
         public static ValidationHelper Validate(List<ClassViewModel> models)
         {
             var assert = new ValidationHelper();
-            assert.IsTrue(models.Count > 0, "No models were created");
+            assert.IsTrue(models.Count > 0, "No models were created. Make sure all models have a DbSet on the context.");
             // Make sure everyone has an id property
             foreach (var model in models.Where(f => f.HasDbSet))
             {
                 assert.Area = model.Name;
-                assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Has name");
-                assert.IsNotNull(model.PrimaryKey, "Has primary key");
-                assert.IsTrue(model.SearchProperties().Any(), "Has search properties");
-                assert.IsNotNull(model.ListTextProperty, "Has list text");
-                assert.IsTrue(model.DefaultOrderBy.Any(), "Has order by");
+                assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
+                assert.IsNotNull(model.PrimaryKey, $"Primary key not found for {model.Name}. Primary key should be named {model.Name}Id or have the [Key] attribute.");
+                assert.IsTrue(model.SearchProperties().Any(), $"No searchable properties found for {model.Name}. Annotate a property with [Search].");
+                assert.IsNotNull(model.ListTextProperty, $"No default text for dropdown lists found for {model.Name}. Add a Name property or use the [ListText] annotation on the property to be used.");
+                assert.IsTrue(model.DefaultOrderBy.Any(), $"No default order found for {model.Name}. Use the [DefaultOrderBy] annotation.");
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.Properties.Where(f => !f.IsInternalUse))
                 {
                     assert.Area = $"{model.Name}: {prop.Name}";
                     try
                     {
-                        assert.IsNotNull(prop.JsVariable, $"JS Variable is: {prop.JsVariable}");
-                        assert.IsNotNull(prop.JsVariableForBinding, $"JS Variable for binding is: {prop.JsVariableForBinding}");
-                        assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type is: {prop.Type.TsKnockoutType}");
-                        assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type is: {prop.Type.JsKnockoutType}");
+                        assert.IsNotNull(prop.JsVariable, $"JS Variable not found.");
+                        assert.IsNotNull(prop.JsVariableForBinding, $"JS Variable for binding not found.");
+                        assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type not found.");
+                        assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type not found.");
                         if (prop.IsPOCO && !prop.IsComplexType && !prop.IsReadOnly)
                         {
-                            assert.IsNotNull(prop.Object, "Has target object");
-                            assert.IsNotNull(prop.ObjectIdPropertyName, "Has ID Property Name");
+                            assert.IsNotNull(prop.Object, "The target object for the property was found found. Make sure naming is consistent.");
+                            assert.IsNotNull(prop.ObjectIdPropertyName, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
                             if (!prop.Object.IsOneToOne)
                             {
                                 assert.IsNotNull(prop.ObjectIdProperty, "Has no ID Property - Add a ForiegnKey attribute to the object");
                             }
-                            assert.IsNotNull(prop.Object.PrimaryKey, "Has Primary key for related object");
+                            assert.IsNotNull(prop.Object.PrimaryKey, "No Primary key for related object. Ensure the target object has a [Key] attributed property.");
                         }
                         if (prop.IsId && !prop.IsPrimaryKey)
                         {
-                            assert.IsNotNull(prop.IdPropertyObjectProperty, "Has Object property");
-                            assert.IsNotNull(prop.IdPropertyObjectProperty.Object, "Has Object property object");
-                            assert.IsNotNull(prop.IdPropertyObjectProperty.Object.PrimaryKey, "Has object Property Object primary key");
+                            assert.IsNotNull(prop.IdPropertyObjectProperty, "Object property not found.");
+                            assert.IsNotNull(prop.IdPropertyObjectProperty.Object, "Object property related object not found.");
+                            assert.IsNotNull(prop.IdPropertyObjectProperty.Object.PrimaryKey, "Object Property Object primary key is missing.");
                         }
                         if (prop.Type.IsCollection)
                         {
-                            assert.AreNotEqual(prop.TypeName, prop.PureType, "Has correct collection type");
+                            assert.AreNotEqual(prop.TypeName, prop.PureType, "Collection is not defined correctly.");
                         }
                         if (prop.IsManytoManyCollection)
                         {
-                            assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name is: {prop.ManyToManyCollectionName}");
+                            assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist");
                             assert.IsNotNull(prop.ManyToManyCollectionProperty.Object.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty.Object.ViewModelClassName}");
                         }
                         if (prop.Type.IsEnum)
@@ -124,21 +124,26 @@ namespace IntelliTect.Coalesce.Validation
             // Validate the non-DbSet items (DTOs)
             foreach (var model in models.Where(f => !f.HasDbSet && f.OnContext))
             {
+                assert.Area = $"DTO: {model.Name}";
                 // Console.WriteLine($"Validating DTO: {model.Name}");
                 // Make sure the key matches the object
                 if (model.IsDto)
                 {
-                    assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base view model for DTO {model.Name} ");
-                    assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model.Name} ");
+                    assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base model for DTO {model.Name}. Add the base model as a DbSet to the context.");
+                    if (model.DtoBaseViewModel != null)
+                    {
+                        assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model.Name}. It must be the [name]Id, [base model]Id or marked with the [Key] attribute. ");
+                    }
                 }else
                 {
-                    assert.IsTrue(model.DtoBaseViewModel == null, $"External type should not implement IClassDto ");
+                    assert.IsTrue(model.DtoBaseViewModel == null, $"External type should not implement IClassDto. IClassDtos should have an IEnumerable<{model.Name}> in the context.");
                 }
             }
 
             // Validate the objects found that is not on the context. 
             foreach (var model in models.Where(f => !f.OnContext))
             {
+                assert.Area = $"External Model: {model.Name}";
                 //Console.WriteLine($"Validating Other Object: {model.Name}");
                 // Make sure these don't inherit from IClassDto because they should have an IEnumerable on the Context.
                 assert.IsTrue(model.DtoBaseViewModel == null, $"{model.Name} appears to be a DTO but doesn't have an IEnumerable<{model.Name} entry in the Context. Add to the context or remove IClassDto.");

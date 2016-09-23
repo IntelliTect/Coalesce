@@ -69,12 +69,43 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     Console.WriteLine($"Building scripts for: {dataContext.FullName}");
                 }
 
-                var models = ReflectionRepository
-                                .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
-                                //.Where(m => m.PrimaryKey != null)
-                                .ToList();
 
-                var validationResult = ValidateContext.Validate(models);
+                List<ClassViewModel> models = null;
+                try
+                {
+                    models = ReflectionRepository
+                                    .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
+                                    //.Where(m => m.PrimaryKey != null)
+                                    .ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to generate models\n   {ex.Message}\n{ex.StackTrace}");
+                    if (Debugger.IsAttached)
+                    {
+                        Console.WriteLine("Press enter to quit");
+                        Console.Read();
+                    }
+                    Environment.Exit(1);
+                }
+
+
+                ValidationHelper validationResult = null;
+
+                try
+                {
+                    validationResult = ValidateContext.Validate(models);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An Exception occurred during validation\n   {ex.Message}\n{ex.StackTrace}");
+                    if (Debugger.IsAttached)
+                    {
+                        Console.WriteLine("Press enter to quit");
+                        Console.Read();
+                    }
+                    Environment.Exit(1);
+                }
 
                 bool foundIssues = false;
                 foreach (var validation in validationResult.Where(f => !f.WasSuccessful))
@@ -153,7 +184,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
         }
 
-        private string[] ActiveTemplatesPaths => new [] { Path.Combine(
+        private string[] ActiveTemplatesPaths => new[] { Path.Combine(
                 _webProject.ProjectDirectory,
                 "Coalesce",
                 "Templates")};
@@ -161,10 +192,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         private bool _hasExplainedCopying = false;
         private void CopyToOriginalsAndDestinationIfNeeded(string fileName, string sourcePath, string originalsPath, string destinationPath, bool alertIfNoCopy = true)
         {
-            string originalsFile = Path.Combine( originalsPath, fileName );
-            string destinationFile = Path.Combine(destinationPath, fileName );
+            string originalsFile = Path.Combine(originalsPath, fileName);
+            string destinationFile = Path.Combine(destinationPath, fileName);
 
-            if ( FileCompare( originalsFile, destinationFile ) )
+            if (FileCompare(originalsFile, destinationFile))
             {
                 // The original file and the active file are the same. Overwrite the active file with the new template.
                 CopyToDestination(fileName, sourcePath, destinationPath);
@@ -181,11 +212,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 Console.WriteLine($"Skipping copy to {destinationFile.Replace(_webProject.RootDirectory, "")} because it has been modified from the original.");
             }
 
-            string originalFile = Path.Combine( originalsPath, fileName );
+            string originalFile = Path.Combine(originalsPath, fileName);
 
 
             FileAttributes attr;
-            if ( File.Exists( originalFile ) )
+            if (File.Exists(originalFile))
             {
                 // unset read-only
                 attr = File.GetAttributes(originalFile);
@@ -193,7 +224,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 File.SetAttributes(originalFile, attr);
             }
 
-            CopyToDestination( fileName, sourcePath, originalsPath );
+            CopyToDestination(fileName, sourcePath, originalsPath);
 
             // set read-only
             if (File.Exists(originalFile))
@@ -211,9 +242,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             Directory.CreateDirectory(destinationPath);
 
-            string destinationFile = Path.Combine(destinationPath, fileName );
+            string destinationFile = Path.Combine(destinationPath, fileName);
             var inputStream = assembly.GetManifestResourceStream(sourceFile);
-            if ( inputStream == null )
+            if (inputStream == null)
             {
                 throw new FileNotFoundException("Embedded resource not found: " + sourceFile);
             }
@@ -268,11 +299,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 areaLocation,
                 "Coalesce");
 
-            var coalescePathExisted = Directory.Exists( baseCoalescePath );
+            var coalescePathExisted = Directory.Exists(baseCoalescePath);
 
-            var originalsPath = Path.Combine( baseCoalescePath, "Originals");
-            var originalTemplatesPath = Path.Combine( originalsPath, "Templates" );
-            var activeTemplatesPath = Path.Combine( baseCoalescePath, "Templates" );
+            var originalsPath = Path.Combine(baseCoalescePath, "Originals");
+            var originalTemplatesPath = Path.Combine(originalsPath, "Templates");
+            var activeTemplatesPath = Path.Combine(baseCoalescePath, "Templates");
 
 
             Directory.CreateDirectory(baseCoalescePath);
@@ -284,7 +315,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                  _webProject.ProjectDirectory,
                  areaLocation,
                  "intelliTect");
-            if (Directory.Exists(oldOriginalsPath)) 
+            if (Directory.Exists(oldOriginalsPath))
                 Directory.Move(oldOriginalsPath, originalsPath);// TODO: remove this at some point after all projects are upgraded.
 
             Directory.CreateDirectory(originalsPath);
@@ -335,7 +366,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                         sourcePath: "Templates/Views/Shared",
                         originalsPath: originalsPath,
                         destinationPath: sharedViewOutputPath);
-            
+
 
 
                 // only copy the intellitect scripts when generating the root site, this isn't needed for areas since it will already exist at the root
@@ -357,7 +388,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "intellitect.ko.utilities.ts",
                     "intellitect.utilities.ts",
                 };
-                foreach ( var fileName in intellitectScripts)
+                foreach (var fileName in intellitectScripts)
                 {
                     CopyToDestination(
                             fileName: fileName,
@@ -365,14 +396,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                             destinationPath: scriptsOutputPath);
                 }
 
-                if ( !coalescePathExisted )
+                if (!coalescePathExisted)
                 {
                     // Only copy the typings on a brand new project. Never attempt to update them, since the end user
                     // may want to update their libraries, get rid of some (well, you probably can't), or update versions.
                     CopyToDestination(
-                        fileName : "tsd.d.ts",
-                        sourcePath : "Templates/typings",
-                        destinationPath : Path.Combine( _webProject.ProjectDirectory, "typings"));
+                        fileName: "tsd.d.ts",
+                        sourcePath: "Templates/typings",
+                        destinationPath: Path.Combine(_webProject.ProjectDirectory, "typings"));
 
                     string[] typings =
                     {
@@ -507,7 +538,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
 
 
-            string destPath = Path.Combine( _webProject.ProjectDirectory, areaLocation, "Views", "_ViewImports.cshtml" );
+            string destPath = Path.Combine(_webProject.ProjectDirectory, areaLocation, "Views", "_ViewImports.cshtml");
             CopyToOriginalsAndDestinationIfNeeded(
                     fileName: "_ViewImports.cshtml",
                     sourcePath: "Templates/Views",
@@ -546,8 +577,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
 
             // Open the two files.
-            string f1 = File.ReadAllText( file1 ).Replace("\r", "").Replace("\n", "");
-            string f2 = File.ReadAllText( file2 ).Replace("\r", "").Replace("\n", "");
+            string f1 = File.ReadAllText(file1).Replace("\r", "").Replace("\n", "");
+            string f2 = File.ReadAllText(file2).Replace("\r", "").Replace("\n", "");
 
             // Check the file sizes. If they are not the same, the files 
             // are not the same.
@@ -557,7 +588,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 return false;
             }
 
-            if ( !string.Equals( f1, f2, StringComparison.InvariantCulture ) )
+            if (!string.Equals(f1, f2, StringComparison.InvariantCulture))
             {
                 return false;
             }
@@ -579,7 +610,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             private List<string> GeneratedFiles { get; } = new List<string>();
 
-            public GenerationOutputContext( ScriptsGenerator generator, string outputDir )
+            public GenerationOutputContext(ScriptsGenerator generator, string outputDir)
             {
                 Generator = generator;
                 OutputDir = outputDir;
@@ -587,10 +618,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             public Task Generate(string templateName, string outputName, object model)
             {
-                string outputPath = Path.Combine( OutputDir, outputName );
-                GeneratedFiles.Add(outputPath );
+                string outputPath = Path.Combine(OutputDir, outputName);
+                GeneratedFiles.Add(outputPath);
 
-                return Generator.Generate( templateName, outputPath, model );
+                return Generator.Generate(templateName, outputPath, model);
             }
 
             public void Cleanup()
@@ -601,7 +632,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 //}
                 foreach (var file in Directory.EnumerateFiles(OutputDir, "*", SearchOption.AllDirectories))
                 {
-                    if (!GeneratedFiles.Contains( file ))
+                    if (!GeneratedFiles.Contains(file))
                     {
                         Console.WriteLine($"   Deleting {file} because it seems to be unused.");
                         File.Delete(file);
@@ -661,9 +692,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Models", "Generated");
-            using ( var output = new GenerationOutputContext( this, modelOutputPath) )
+            using (var output = new GenerationOutputContext(this, modelOutputPath))
             {
-                foreach (var model in apiModels.ViewModelsForTemplates.Where(f=>!f.Model.IsDto))
+                foreach (var model in apiModels.ViewModelsForTemplates.Where(f => !f.Model.IsDto))
                 {
                     Console.Write($"{model.Model.Name}  ");
 
@@ -677,7 +708,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Generated");
-            using ( var output = new GenerationOutputContext( this, scriptOutputPath ) )
+            using (var output = new GenerationOutputContext(this, scriptOutputPath))
             {
                 Console.WriteLine("-- Generating Models");
                 Console.Write("   ");
@@ -727,20 +758,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 {
                     var fileName = (string.IsNullOrWhiteSpace(complexType.ModulePrefix)) ? $"Ko.{complexType.Model.Name}.ts" : $"Ko.{complexType.ModulePrefix}.{complexType.Model.Name}.ts";
 
-                    var path = Path.Combine( scriptOutputPath, fileName );
+                    var path = Path.Combine(scriptOutputPath, fileName);
                     await output.Generate("KoComplexType.cshtml", fileName, complexType);
 
                     Console.WriteLine("   Added: " + path);
                 }
             }
 
-            
+
             Console.WriteLine("-- Generating API Controllers");
             string apiOutputPath = Path.Combine(
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Api", "Generated");
-            using ( var output = new GenerationOutputContext( this, apiOutputPath) )
+            using (var output = new GenerationOutputContext(this, apiOutputPath))
             {
                 // Generate base api controller if it doesn't already exist
                 {
@@ -762,7 +793,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Controllers", "Generated");
-            using ( var output = new GenerationOutputContext( this, controllerOutputPath) )
+            using (var output = new GenerationOutputContext(this, controllerOutputPath))
             {
                 foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
                 {
@@ -775,7 +806,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     "Views", "Generated");
-            using ( var output = new GenerationOutputContext( this, viewOutputPath) )
+            using (var output = new GenerationOutputContext(this, viewOutputPath))
             {
                 foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
                 {

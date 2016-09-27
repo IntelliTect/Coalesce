@@ -44,7 +44,7 @@ ko.bindingHandlers.select2Ajax = {
         var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
         var object = allBindings.has('object') ? allBindings.get('object') : null;
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : true;
+        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
         var placeholder = $(element).attr('placeholder') || "select";
         var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
@@ -348,7 +348,7 @@ ko.bindingHandlers.select2AjaxText = {
         var saveImmediately = allBindings.get('saveImmediately') || false;
         var url = baseUrl + "api/" + allBindings.get('object') + "/PropertyValues";
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : true;
+        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.get('allowClear') || true
         var placeholder = $(element).attr('placeholder') || "select";
 
@@ -447,7 +447,7 @@ ko.bindingHandlers.select2AjaxText = {
 ko.bindingHandlers.select2 = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : true;
+        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.get('allowClear') || true
         var placeholder = $(element).attr('placeholder') || "select";
 

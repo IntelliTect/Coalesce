@@ -519,6 +519,10 @@ ko.bindingHandlers.datePicker = {
                 }
 
             });
+        // Add the validation message
+        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        // The validation message needs to go after the input group with the button.
+        $(element).next(".validationMessage").insertAfter($(theElement));
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // Set the element based on the value in the model.

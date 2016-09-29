@@ -12,11 +12,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading.Tasks;
-using Coalesce.Domain.Models;
+using Coalesce.Web.Models;
 using Coalesce.Domain;
 using Coalesce.Domain.External;
 
-namespace Coalesce.Domain.Api
+namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
     [Authorize]

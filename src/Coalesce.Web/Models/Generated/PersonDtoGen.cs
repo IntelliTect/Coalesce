@@ -8,13 +8,13 @@
     using System.Linq.Dynamic;
     using System.Collections.Generic;
     using System.Security.Claims;
-    using Coalesce.Domain.Models;
+    using Coalesce.Web.Models;
     using Coalesce.Domain;
     using Coalesce.Domain.External;
 
 using static Coalesce.Domain.Person;
 
-namespace Coalesce.Domain.Models
+namespace Coalesce.Web.Models
 {
     public partial class PersonDtoGen : GeneratedDto<Coalesce.Domain.Person, PersonDtoGen>
         , IClassDto<Coalesce.Domain.Person, PersonDtoGen>

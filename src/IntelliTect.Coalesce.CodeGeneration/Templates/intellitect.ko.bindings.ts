@@ -494,7 +494,8 @@ ko.bindingHandlers.datePicker = {
         var theElement = $(element).parent(".input-group.date") || $(element);
         theElement.datetimepicker({
             format: allBindings.get('format') || "M/D/YY h:mm a",
-            stepping: allBindings.get('stepping') || 1
+            stepping: allBindings.get('stepping') || 1,
+            sideBySide: allBindings.get('sideBySide') || false
         })
             .on("dp.change", function (e) {
                 var preserveDate = allBindings.get('preserveDate') || false;

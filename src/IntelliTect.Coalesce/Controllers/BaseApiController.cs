@@ -456,12 +456,25 @@ namespace IntelliTect.Coalesce.Controllers
                 {
                     DataSource.Remove(item);
                     // Allow for other cascade deletes.
-                    if (item is IDeletable<TContext>)
+                    var validationInfo = new ValidateResult();
+                    if (item is IBeforeDelete<TContext>)
                     {
-                        (item as IDeletable<TContext>).BeforeDeleteCommit(Db);
+                        validationInfo.Merge((item as IBeforeDelete<TContext>).BeforeDelete(Db, User));
                     }
-                    Db.SaveChanges();
-                    return AfterDelete(item, Db);
+                    if (validationInfo.WasSuccessful)
+                    {
+                        Db.SaveChanges();
+                        if (item is IAfterDelete<TContext>)
+                        {
+                            (item as IAfterDelete<TContext>).AfterDelete(Db, User);
+                        }
+                        return AfterDelete(item, Db);
+                    }
+                    else
+                    {
+                        // TODO: Fix delete to actually return good information rather than a stupid bool.
+                        throw new Exception($"Delete failed: {validationInfo.Message}", null);
+                    }
                 }
             }
             Response.StatusCode = (int)System.Net.HttpStatusCode.NotFound;
@@ -533,10 +546,10 @@ namespace IntelliTect.Coalesce.Controllers
                         // Run validation in this controller
                         var validateResult = Validate(original, dto, item);
                         // Run validation from the POCO if it implements IValidatable
-                        if (typeof(IValidatable<T, TContext>).IsAssignableFrom(typeof(T)))
+                        if (typeof(IBeforeSave<T, TContext>).IsAssignableFrom(typeof(T)))
                         {
-                            var validatable = item as IValidatable<T, TContext>;
-                            validateResult.Merge(validatable.Validate(original, Db, User, includes));
+                            var itemAsBeforeSave = item as IBeforeSave<T, TContext>;
+                            validateResult.Merge(itemAsBeforeSave.BeforeSave(original, Db, User, includes));
                         }
 
                         if (validateResult.WasSuccessful)
@@ -552,10 +565,10 @@ namespace IntelliTect.Coalesce.Controllers
                             var reloadItem = AfterSave(dto, item, origItem, Db);
 
                             // Call PostSave if the object has that.
-                            if (typeof(IPostSavable<T, TContext>).IsAssignableFrom(typeof(T)))
+                            if (typeof(IAfterSave<T, TContext>).IsAssignableFrom(typeof(T)))
                             {
-                                var postSavable = item as IPostSavable<T, TContext>;
-                                postSavable.PostSave(original, Db, User, includes);
+                                var itemAsAfterSave = item as IAfterSave<T, TContext>;
+                                itemAsAfterSave.AfterSave(original, Db, User, includes);
                             }
 
                             if (reloadItem && returnObject)

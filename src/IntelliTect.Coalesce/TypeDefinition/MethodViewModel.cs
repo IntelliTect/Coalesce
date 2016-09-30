@@ -297,7 +297,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                return !IsInternalUse && Name != "Validate" && Name != "PostSave";
+                return !IsInternalUse && 
+                    Name != "BeforeSave" && 
+                    Name != "AfterSave" && 
+                    Name != "BeforeDelete" && 
+                    Name != "AfterDelete";
             }
         }
     }

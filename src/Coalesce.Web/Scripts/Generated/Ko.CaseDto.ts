@@ -109,6 +109,8 @@ module ViewModels {
         // Force: Will override the check against isLoading that is done to prevent recursion.
         // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
         public loadFromDto: (data: any, force?: boolean, allowCollectionDeletes?: boolean) => void;
+        // Called at the end of loadFromDto to allow for custom code like sorting child collections.
+        public afterLoadFromDto:() => void;
         // Saves this object into a data transfer object to send to the server.
         public saveToDto: () => any;
         // Saves the object to the server and then calls the callback.
@@ -214,6 +216,9 @@ module ViewModels {
 				self.caseId(data.caseId);
 				self.title(data.title);
 				self.assignedToName(data.assignedToName);
+                if (self.afterLoadFromDto){
+                    self.afterLoadFromDto();
+                }
 				self.isLoading(false);
 				self.isDirty(false);
                 self.validate();

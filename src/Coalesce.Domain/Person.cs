@@ -17,7 +17,7 @@ namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
-    public class Person : IIncludable<Person>, IValidatable<Person, AppDbContext>
+    public class Person : IIncludable<Person>, IBeforeSave<Person, AppDbContext>
     {
         public enum Genders
         {
@@ -257,7 +257,7 @@ namespace Coalesce.Domain
                 .Include(f => f.Company);
         }
 
-        public ValidateResult<Person> Validate(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
+        public ValidateResult<Person> BeforeSave(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
         {
             // Check to make sure the name is a certain length after it has been saved.
             if (PersonId >0 && FirstName != null && FirstName.Length < 3    )

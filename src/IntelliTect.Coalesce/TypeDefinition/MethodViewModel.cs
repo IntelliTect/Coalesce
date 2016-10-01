@@ -301,7 +301,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     Name != "BeforeSave" && 
                     Name != "AfterSave" && 
                     Name != "BeforeDelete" && 
-                    Name != "AfterDelete";
+                    Name != "AfterDelete" &&
+                    Name != "Exclude";
             }
         }
     }

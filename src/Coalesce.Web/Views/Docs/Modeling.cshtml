@@ -2,13 +2,11 @@
     ViewBag.Title = "Coalesce";
     Layout = "_DocsLayout";
 }
-
-<h2>Modeling</h2>
-<h3>Model Overview</h3>
+<h1>Modeling</h1>
+<h2>Model Overview</h2>
 <p>
     Models are core business objects of your application. Specifically they are how the data in your application will be handled. The design of your models is very important. In Entity Framework, data models are just Plain Old CLR Classes (POCOs).
 </p>
-
 <h3>Building a data model</h3>
 <p>Here is an example of a POCO class as a model. Adding this class to a context and using Coalesce would give you an admin site that allows for editing the first and last name of a person.</p>
 <pre>
@@ -25,10 +23,8 @@
     }
 </code>
 </pre>
-
-<h3>Let's add some complexity</h3>
-
-<h4>Object References</h4>
+<h2>Business Logic and DTOs</h2>
+<h3>Object References</h3>
 <p>References to other objects can be made easily via a pair of properties, a key and the object itself. Note that in order for these to be loaded, they need to use eager loading via the .Include(f=>f.fieldname) extension method.</p>
 <pre>
 <code class="language-html">
@@ -64,12 +60,9 @@
 </pre>
 <br />
 
-
-
-<h4>Controlling Object Loading</h4>
+<h3>Controlling Object Loading</h3>
 <p>When transferring data to a client via a network, it is important to be able to determine which objects get sent. So, as a result, the framework uses eager loading which can be specifically controlled rather than lazy loading which loads everything.</p>
 <p>By default when an object is sent to the client, that object and all of its immediate children are loaded and sent. However, in some cases you may need more or less data. The IIncludable interface is used for this purpose. It allows for grouping a number of .Include methods. The following example shows how to preemptively load the Person's Company and the CasesAssigned.</p>
-
 <pre><code class="language-html">
     public class Person : IIncludable&lt;Person&gt;
     {
@@ -84,40 +77,32 @@
 <p>The Include method takes a string parameter called include. This can be specified in the client-side view model to specify which data to include. The admin pages will use the string 'Editor' when they call to the API layer.</p>
 <br />
 
-<h4>Controlling Object Deletion</h4>
-<p>There are times when you will need to manually remove related objects when deleting an object. You can specify what to delete by using the IDeletable interface. The method is called right before the delete is executed. The instance object has already been removed from the context's collection. This gives you a chance to remove any additional objects. To stop the delete at this point, an exception must be thrown. </p>
-
-<pre><code class="language-html">
-    public class Person : IDeletable&lt;DbContext&gt;
-    {
-        ...
-        public void BeforeDeleteCommit(DbContext db)
-        {
-            // Remove related history
-            db.PersonHistories.RemoveRange(db.PersonHistories.Where(f => f.PersonId == this.PersonId));
-        }
-    }
-</code></pre>
-<br />
-
-<h4>Custom Server Validation</h4>
+<h3>Model Business Rules</h3>
 <p>
-    Using the IValidatable interface exposes the <code>ValidateResult&lt;T&gt; Validate(T original, TContext db, ClaimsPrincipal user, string includes)</code>. This allows for validating the result of the mapping before it is saved. It also allows for a custom error message to be returned to the client.
+    There are a set of interfaces provided to implement business rules. These can be implemented in the model or in the controllers. The models use interfaces, the controllers use override methods. One advantage to Coalesce is that by default all changes to tables come through a common set of APIs allowing for centralized control of business rules.
 </p>
+<p>The Before methods return ValidationResult objects. The default constructor creates a successful version of this object making a successful return result easy. </p>
+<p>The following interfaces each have a single method. They are consolidated into two groups <code>IDeleteCustomizable</code> and <code>ISaveCustomizable</code></p>
+<h5>IBeforeSave</h5>
+<p><code>void AfterSave(T original, TContext db, ClaimsPrincipal user, string includes)</code></p>
+<p>The before IBeforeSave interface exposes the BeforeSave method that is called before the save action happens. This passes back validation information via <code>ValidateResult&lt;T&gt;</code> and allows for canceling the save as well as providing a message back to the client about why the save failed. This method is called on the current instance of the item after it has been mapped from the incoming DTO. Included in the call is a shallow copy of the original object before the DTO values are set. Also supplied is the <code>DbContext</code>, the <code>ClaimsPrincipal</code>, and the includes string. This allows for significant customization of validation rules.</p>
+<h5>IAfterSave</h5>
+<p><code>ValidateResult<T> BeforeSave(T original, TContext db, ClaimsPrincipal user, string includes)</code></p>
+<p>This method is called after the save is complete. It is called on an instance of the newly saved object. Included in the call is a shallow copy of the original object before the DTO values are set. Also supplied is the <code>DbContext</code>, the <code>ClaimsPrincipal</code>, and the includes string. A typical use would be to update related data in other parts of the model. </p>
+<h5>IBeforeDelete</h5>
+<p><code>ValidateResult BeforeDelete(TContext db, ClaimsPrincipal user)</code></p>
+<p>Called before the delete is attempted, this method allows for delete validation and related object cleanup. This method is called on the object being deleted and includes the <code>DbContext</code> and the <code>ClaimsPrincipal</code>. This is useful for not allowing deletes in certain circumstances. It also provides a way to remove related objects from the model to ensure the delete is not blocked by key constraints when cascading deletes are turned off. This returns a <code>ValidateResult</code> object to return information to the client about why the object wasn't deleted.</p>
+<h5>IAfterDelete</h5>
+<p><code>AfterDelete(TContext db, ClaimsPrincipal user)</code></p>
+<p>Like IAfterSave, this method is called after the delete was successful. It is called on the newly deleted object and includes the <code>DbContext</code> and the <code>ClaimsPrincipal</code>. This can be used for cleanup of related objects.</p>
 
-<h4>Custom Logic After Save</h4>
-<p>
-    Using the IPostSavable interface exposes the <code>void PostSave(T original, TContext db, ClaimsPrincipal user, string includes);</code>. This allows for doing additional work after the save succeeds.
-</p>
-
-<h4>Controlling Object Mapping</h4>
+<h3>Controlling Object Mapping</h3>
 <p>
     By default Coalesce maps all database entities to a generated DTO before returning to the client.  The DTO is generated based on the
     attributes on your model, and provides security trimming on properties based on the user's roles.  If you want to handle the mapping
     yourself simply add an implicit conversion operator to your model that returns your DTO.  Then on the client side specify the full
     type name of the DTO and coalesce will use your DTO and conversion rather than the generated DTO.
 </p>
-
 <pre><code class="language-html">
     public class PersonDropDownDto
     {
@@ -141,12 +126,11 @@
     personList.load();
     &lt;/script&gt;
 </code></pre>
-<br />
-
+<hr />
+<h1>Other Attributes</h1>
 <h4>Validation</h4>
-<p>Validation is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. There is also flexible annotation-based validation for the client side. Full validation documentation is in the <a asp-controller="Docs" asp-action="Annotations" >Annotations</a> section</p>
+<p>Validation is handled using standard MVC attributes. These attributes are not only enforced on the server side in the database, but are also passed to the client and enforced using the Knockout Validation library. There is also flexible annotation-based validation for the client side. Full validation documentation is in the <a asp-controller="Docs" asp-action="Annotations">Annotations</a> section</p>
 <br />
-
 <h4>Display and Order</h4>
 <p>The <a href="/Docs/Annotations#Display">display</a> name of a field can be set via the DisplayName attribute. The display name and field order can be set via the Display attribute using the Name and Order properties. This only impacts the order of fields in the admin pages and pop-up editors. By default, the fields will be in the order they are found in the class.</p>
 <pre>
@@ -156,7 +140,6 @@
 </code>
 </pre>
 <br />
-
 <h4>Searching</h4>
 <p>Coalesce supports <a href="/Docs/Annotations#Search">searching</a> in various contexts. First is for a list of items in a table. Second is in a drop down selection list. In both these cases, it is important to know which fields to search. By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used. Additionally the [Search] attribute can be used on any fields to be searched. The following example searches both first and last name.</p>
 <pre><code class="language-html">
@@ -167,7 +150,6 @@
 </code></pre>
 <p>The Search attribute has two optional parameters: SearchMethod and IsSplitOnSpaces. SearchMethod specifies whether the search will be a contains or a begins with. The default is begins with. Note that standard indexing can be used to speed up begins with searches. If IsSplitOnSpaces is true, each word will be searched independently. This is useful when searching for a full name across two or more fields. In the above example, using IsSplitOnSpaces: true, would likely provide more intuitive behavior as it will search both first name and last name for each value entered. </p>
 <p>Additionally, you can add the Search annotation to a child object. This will search the searchable fields of child. </p>
-
 <h4>Default Text for List Boxes</h4>
 <p>When selecting an object from a drop down list, it is important to be able to specify <a href="/Docs/Annotations#ListText">the text to be displayed</a> for each object in the list. Like the search, this will use a property with the name of 'Name' first and then the ID if one isn't found. You can use the attribute [ListText] to specify which field to use. This is often a calculated field.</p>
 <pre><code class="language-html">
@@ -181,7 +163,6 @@
     } }
 </code></pre>
 <br />
-
 <h4>Hiding and Ignoring Fields</h4>
 <p>You will often want to <a href="/Docs/Annotations#Hidden">hide fields</a> on the admin pages and pop-up editors. This can be done by using the [Hidden] attribute and specifying which view you want to hide the data on. Choices are the List or the Editor or both. The following example hides the FullName field from both the list and the editor</p>
 <pre><code class="language-html">
@@ -195,27 +176,21 @@
     } }
 </code></pre>
 <br />
-
 <h4>Calculated Fields</h4>
 <p>Calculated fields can be easily added to your model. These do not get stored in the database and should be marked with the [NotMapped] attribute. See example above.</p>
 <br />
-
 <h4>Ignoring Fields</h4>
 <p>Some properties you want to only handle internally to the application, never sending them to the client. Use the <a href="/Docs/Annotations#InternalUse">[InternalUse]</a> attribute to prevent a property from being sent to the client or saved by the server.</p>
 <br />
-
 <h4>Read-only Fields</h4>
 <p>Some properties you want to expose to the client for viewing but not changing regardless of permissions. This would include items like last modified date, etc. Use the <a href="/Docs/Annotations#ReadOnlyApi">[ReadOnlyApi]</a> attribute to make items read only via the API.</p>
 <br />
-
 <h4>Security</h4>
 <p>Security is handled via attributes on the class, properties, and methods. </p>
-
 
 <h3>Methods</h3>
 <p>Any public methods you place on your POCO classes will get built into your view models. There are two main types of methods: instance and static.</p>
 <p>For each method several TypeScript methods will be created. Additionally if there are arguments, an class with the type of [name]Args will be created. The main TypeScript will have a property for each of these classes that can be easily bound to.</p>
-
 
 <h4>Instance Methods</h4>
 <p>Instance methods exist on an instance of an object and should use information contained in the object during the execution of the method. These methods are created as functions on the object's view model on the client side. The client view model will actually have several observable properties created for you. The example below is for a method called Move that takes a single parameter 'int feet' and returns a string.</p>
@@ -244,7 +219,6 @@
 </dl>
 <p>Additionally, if the method has a parameter of type ClaimsPrincipal, the current user will be added to the method call automatically. This does not appear on the client side. Also, if the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method.</p>
 <br />
-
 <h4>Static Methods</h4>
 <p>Static methods exist on a class without respect to an instance of that class. These methods are created as functions on the object's <b>list</b> view model on the client side. The example below is for a method called NameStartingWith that takes a single parameter 'string characters' and returns a list of strings. The DbContext parameter is injected automatically by the controller.</p>
 <pre><code class="language-html">
@@ -271,7 +245,6 @@
     <dt>namesStartingWithModal</dt>
     <dd>Simple modal interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
 </dl>
-
 <h4>Static List Methods</h4>
 <p>Static methods that return an IQueryable of the same type as the class are treated specially. These methods can be used to provide the underlying data for the list view models. The list view model has a property called listDataSource which accepts an enumeration with the available list methods. Parameters can be specified an object with name value pairs in the query property on the list view model.</p>
 <pre><code class="language-html">
@@ -280,7 +253,6 @@
         return db.People.Where(f => f.FirstName.StartsWith("A")).Select(f => f.FirstName).ToList();
     }
 </code></pre>
-
 <br />
 <p>
     <b>The generated admin views have documentation pages that include all view model documentation specific to each class.</b>

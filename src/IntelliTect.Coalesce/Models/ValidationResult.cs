@@ -44,6 +44,16 @@ namespace IntelliTect.Coalesce.Models
         }
 
 
+        public static implicit operator ValidateResult(bool success)
+        {
+            return new ValidateResult(wasSuccessful: success);
+        }
+
+        public static implicit operator ValidateResult(string message)
+        {
+            return new ValidateResult(wasSuccessful: false, message: message);
+        }
+
         //TODO: Build out field level support.
     }
     public class ValidateResult<T> : ValidateResult where T : class
@@ -67,6 +77,17 @@ namespace IntelliTect.Coalesce.Models
         {
             base.Merge(result);
             if (result.ReturnObject != null) { ReturnObject = result.ReturnObject; }
+        }
+
+
+        public static implicit operator ValidateResult<T>(bool success)
+        {
+            return new ValidateResult<T>(wasSuccessful: success);
+        }
+
+        public static implicit operator ValidateResult<T>(string message)
+        {
+            return new ValidateResult<T>(wasSuccessful: false, message: message);
         }
     }
 }

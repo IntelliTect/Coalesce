@@ -108,7 +108,7 @@ namespace IntelliTect.Coalesce.Helpers
             {
                 if (editable)
                 {
-                    if (prop.Type.IsEnum)
+                    if ((prop.Type.IsNullable && prop.PureType.IsEnum) || prop.Type.IsEnum)
                     {
                         return $"@(Knockout.SelectFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                     }

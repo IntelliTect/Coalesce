@@ -46,7 +46,12 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             get
             {
                 var result = new Dictionary<int, string>();
-                foreach (var value in Enum.GetValues(Info))
+                var info = Info;
+                if (IsNullableType)
+                {
+                    info = Nullable.GetUnderlyingType(info);
+                }
+                foreach (var value in Enum.GetValues(info))
                 {
                     result.Add((int)value, value.ToString());
                 }

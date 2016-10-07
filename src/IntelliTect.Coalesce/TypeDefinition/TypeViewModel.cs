@@ -360,18 +360,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                string typeName = "";
-                if (Wrapper.IsNullable || Wrapper.IsArray) typeName = Wrapper.NameWithTypeParams;
-                else typeName = Wrapper.Name + "?";
-
-                //var model = ReflectionRepository.Models.Where(m => m.OnContext && m.Name == typeName).FirstOrDefault();
                 var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
                 if (model != null)
                 {
+                    string typeName = "";
+
+                    if (Wrapper.IsNullable || Wrapper.IsArray)
+                        typeName = Wrapper.NameWithTypeParams;
+                    else
+                        typeName = Wrapper.Name + "?";
+
                     typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+
+                    return typeName;
+                }
+                else
+                {
+                    if (Wrapper.IsNullable || Wrapper.IsArray)
+                        return Wrapper.FullyQualifiedNameWithTypeParams;
+                    else
+                        return Wrapper.Name + "?";
                 }
 
-                return typeName;
             }
         }
 

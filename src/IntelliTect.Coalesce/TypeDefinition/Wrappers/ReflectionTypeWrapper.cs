@@ -14,14 +14,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         }
 
         public override string Name { get { return Info.Name; } }
-        public override string NameWithTypeParams
-        { get
-            {
-                if (IsArray) return $"{PureType.Name}[]";
-                if (IsGeneric) return $"{Name}<{PureType.Name}>";
-                return Name;
-            }
-        }
 
         public override object GetAttributeValue<TAttribute>(string valueName)
         {

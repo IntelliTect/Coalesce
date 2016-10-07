@@ -97,9 +97,15 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
                 if (!IsArray)
                 {
                     var enumType = NamedSymbol.EnumUnderlyingType;
+                    var symbol = Symbol;
+                    if (IsNullableType)
+                    {
+                        enumType = (PureType as SymbolTypeWrapper).NamedSymbol.EnumUnderlyingType;
+                        symbol = PureType.Symbol;
+                    }
                     if (enumType != null)
                     {
-                        foreach (var member in Symbol.GetMembers())
+                        foreach (var member in symbol.GetMembers())
                         {
                             if (member is IFieldSymbol)
                             {

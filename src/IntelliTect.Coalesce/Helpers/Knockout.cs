@@ -614,7 +614,7 @@ namespace IntelliTect.Coalesce.Helpers
             {
                 returnString = DisplayObject(propertyModel);
             }
-            else if (propertyModel.Type.IsEnum)
+            else if (propertyModel.Type.IsEnum || (propertyModel.PureType.IsEnum && propertyModel.Type.IsNullable))
             {
                 returnString = DisplayEnum(propertyModel);
             }

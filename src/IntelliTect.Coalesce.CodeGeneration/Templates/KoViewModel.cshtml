@@ -123,7 +123,7 @@ module @moduleName {
         @:// @(prop.Comment)
         }
         @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType) = @(prop.Type.JsKnockoutType);
-        if (prop.Type.IsEnum)
+        if (prop.Type.IsEnum || (prop.Type.IsNullable && prop.PureType.IsEnum))
         {
         @:// Text value for enumeration @prop.Name
         if (prop.Comment.Length > 0)
@@ -233,7 +233,7 @@ module @moduleName {
         public isSelectedToggle: () => boolean;
 
 
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:public @(prop.JsVariable)Values: EnumValue[] = [ 
         @foreach (var kvp in prop.Type.EnumValues)
@@ -908,7 +908,7 @@ module @moduleName {
             };
 
             // Enumeration Lookups.
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => (f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)) && !f.IsInternalUse))
             {
             @:self.@(prop.JsTextPropertyName) = ko.computed(function() {
                 @:for(var i=0;i < self.@(prop.JsVariable)Values.length; i++){
@@ -1066,7 +1066,7 @@ module @moduleName {
 
 
     export namespace @(model.ViewModelClassName) {
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:export enum @(prop.Name)Enum {
         @foreach (var kvp in prop.Type.EnumValues)

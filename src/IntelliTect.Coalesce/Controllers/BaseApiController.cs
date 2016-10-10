@@ -100,7 +100,6 @@ namespace IntelliTect.Coalesce.Controllers
             return DataSource ?? ReadOnlyDataSource;
         }
 
-        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<ListResult> ListImplementation(ListParameters listParameters)
         {
             try
@@ -150,7 +149,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Get a count
                 int totalCount;
-                if (result is IAsyncQueryProvider) totalCount = result.Count();
+                if (result is IAsyncQueryProvider) totalCount = await result.CountAsync();
                 else totalCount = result.Count();
 
 
@@ -172,9 +171,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Make the database call
                 IEnumerable<T> result2;
-                // TODO: The Async queries can be much slower than synchronous ones at RTM GME: 8/8/2016
-                // https://github.com/aspnet/Home/releases/tag/1.0.0#issue142
-                if (result is IAsyncQueryProvider) result2 = result.ToList();
+                if (result is IAsyncQueryProvider) result2 = await result.ToListAsync();
                 else result2 = result.ToList();
 
                 // Add external entities
@@ -215,7 +212,6 @@ namespace IntelliTect.Coalesce.Controllers
         }
 
 
-        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<int> CountImplementation(ListParameters listParameters)
         {
             try
@@ -225,7 +221,7 @@ namespace IntelliTect.Coalesce.Controllers
                 result = AddFilters(result, listParameters);
 
                 int count;
-                if (result is IAsyncQueryProvider) count = result.Count();
+                if (result is IAsyncQueryProvider) count = await result.CountAsync();
                 else count = result.Count();
 
                 return count;

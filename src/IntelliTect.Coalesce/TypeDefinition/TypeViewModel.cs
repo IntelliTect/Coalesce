@@ -118,6 +118,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsDate) return "any"; // "moment.Moment";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType + "[]";
+                if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
@@ -148,6 +149,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (this.Name == nameof(TimeZoneInfo)) return "any";
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
+                if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";

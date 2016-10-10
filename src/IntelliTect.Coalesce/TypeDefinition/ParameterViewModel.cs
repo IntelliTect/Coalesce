@@ -75,16 +75,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()
         /// </summary>
-        public string TsConversion
+        public string TsConversion(string argument)
         {
-            get
+            if (Type.IsDate)
             {
-                if (Type.IsDate)
-                {
-                    return ".format()";
-                }
-                return "";
+                return $"{argument} ? {argument}.format() : null";
             }
+            return argument;
         }
     }
 }

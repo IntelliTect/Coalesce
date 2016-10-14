@@ -249,7 +249,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 throw new FileNotFoundException("Embedded resource not found: " + sourceFile);
             }
 
-            if (FileUtilities.HasDifferences(inputStream, destinationFile))
+            if (!File.Exists(destinationFile) || FileUtilities.HasDifferences(inputStream, destinationFile))
             {
                 const int tries = 3;
                 for (int i = 1; i <= tries; i++)

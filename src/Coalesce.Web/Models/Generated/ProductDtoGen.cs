@@ -21,8 +21,8 @@ namespace Coalesce.Web.Models
         {
         public ProductDtoGen() { }
 
-             public Int32? ProductId { get; set; }
-             public String Name { get; set; }
+        public Int32? ProductId { get; set; }
+        public System.String Name { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static ProductDtoGen Create(Coalesce.Domain.Product obj, ClaimsPrincipal user = null, string includes = null,

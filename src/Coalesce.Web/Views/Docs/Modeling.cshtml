@@ -95,6 +95,7 @@
 <h5>IAfterDelete</h5>
 <p><code>AfterDelete(TContext db, ClaimsPrincipal user)</code></p>
 <p>Like IAfterSave, this method is called after the delete was successful. It is called on the newly deleted object and includes the <code>DbContext</code> and the <code>ClaimsPrincipal</code>. This can be used for cleanup of related objects.</p>
+<p>Note: Generated controllers have overridable methods that can also control behavior.</p>
 
 <h3>Controlling Object Mapping</h3>
 <p>

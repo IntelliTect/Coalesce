@@ -21,23 +21,23 @@ namespace Coalesce.Web.Models
         {
         public PersonDtoGen() { }
 
-             public Int32? PersonId { get; set; }
-             public Titles? Title { get; set; }
-             public String FirstName { get; set; }
-             public String LastName { get; set; }
-             public String Email { get; set; }
-             public Genders? Gender { get; set; }
-             public ICollection<CaseDtoGen> CasesAssigned { get; set; }
-             public ICollection<CaseDtoGen> CasesReported { get; set; }
-             public Nullable<DateTime> BirthDate { get; set; }
-             public Nullable<DateTime> LastBath { get; set; }
-             public Nullable<DateTimeOffset> NextUpgrade { get; set; }
-             public Nullable<Int32> PersonStatsId { get; set; }
-             public PersonStatsDtoGen PersonStats { get; set; }
-             public TimeZoneInfo TimeZone { get; set; }
-             public String Name { get; set; }
-             public Int32? CompanyId { get; set; }
-             public CompanyDtoGen Company { get; set; }
+        public Int32? PersonId { get; set; }
+        public Titles? Title { get; set; }
+        public System.String FirstName { get; set; }
+        public System.String LastName { get; set; }
+        public System.String Email { get; set; }
+        public Genders? Gender { get; set; }
+        public ICollection<CaseDtoGen> CasesAssigned { get; set; }
+        public ICollection<CaseDtoGen> CasesReported { get; set; }
+        public Nullable<System.DateTime> BirthDate { get; set; }
+        public Nullable<System.DateTime> LastBath { get; set; }
+        public Nullable<System.DateTimeOffset> NextUpgrade { get; set; }
+        public Nullable<System.Int32> PersonStatsId { get; set; }
+        public PersonStatsDtoGen PersonStats { get; set; }
+        public System.TimeZoneInfo TimeZone { get; set; }
+        public System.String Name { get; set; }
+        public Int32? CompanyId { get; set; }
+        public CompanyDtoGen Company { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static PersonDtoGen Create(Coalesce.Domain.Person obj, ClaimsPrincipal user = null, string includes = null,

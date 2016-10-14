@@ -12,6 +12,7 @@ interface JQuery {
 declare module BootstrapV3DatetimePicker {
     interface DatetimepickerOptions {
         stepping: any;
+        keyBinds: any;
     }
 }
 
@@ -495,7 +496,8 @@ ko.bindingHandlers.datePicker = {
         theElement.datetimepicker({
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
-            sideBySide: allBindings.get('sideBySide') || false
+            sideBySide: allBindings.get('sideBySide') || false,
+            keyBinds: allBindings.get('keyBinds') || undefined,
         })
             .on("dp.change", function (e) {
                 var preserveDate = allBindings.get('preserveDate') || false;

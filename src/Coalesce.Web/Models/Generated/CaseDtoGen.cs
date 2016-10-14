@@ -21,20 +21,20 @@ namespace Coalesce.Web.Models
         {
         public CaseDtoGen() { }
 
-             public Int32? CaseKey { get; set; }
-             public String Title { get; set; }
-             public String Description { get; set; }
-             public DateTimeOffset? OpenedAt { get; set; }
-             public Nullable<Int32> AssignedToId { get; set; }
-             public PersonDtoGen AssignedTo { get; set; }
-             public Nullable<Int32> ReportedById { get; set; }
-             public PersonDtoGen ReportedBy { get; set; }
-             public Byte[] Attachment { get; set; }
-             public String Severity { get; set; }
-             public Statuses? Status { get; set; }
-             public ICollection<CaseProductDtoGen> CaseProducts { get; set; }
-             public Nullable<Int32> DevTeamAssignedId { get; set; }
-             public DevTeamDtoGen DevTeamAssigned { get; set; }
+        public Int32? CaseKey { get; set; }
+        public System.String Title { get; set; }
+        public System.String Description { get; set; }
+        public DateTimeOffset? OpenedAt { get; set; }
+        public Nullable<System.Int32> AssignedToId { get; set; }
+        public PersonDtoGen AssignedTo { get; set; }
+        public Nullable<System.Int32> ReportedById { get; set; }
+        public PersonDtoGen ReportedBy { get; set; }
+        public System.Byte[] Attachment { get; set; }
+        public System.String Severity { get; set; }
+        public Statuses? Status { get; set; }
+        public ICollection<CaseProductDtoGen> CaseProducts { get; set; }
+        public Nullable<System.Int32> DevTeamAssignedId { get; set; }
+        public DevTeamDtoGen DevTeamAssigned { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static CaseDtoGen Create(Coalesce.Domain.Case obj, ClaimsPrincipal user = null, string includes = null,

@@ -20,43 +20,43 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Title</label>
-                    <div class="col-md-8 title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</div>
+                    <div class="col-md-8 prop-title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Description</label>
-                    <div class="col-md-8 description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</div>
+                    <div class="col-md-8 prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Opened At</label>
-                    <div class="col-md-8 openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</div>
+                    <div class="col-md-8 prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Assigned To</label>
-                    <div class="col-md-8 assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</div>
+                    <div class="col-md-8 prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Reported By</label>
-                    <div class="col-md-8 reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</div>
+                    <div class="col-md-8 prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Attachment</label>
-                    <div class="col-md-8 attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</div>
+                    <div class="col-md-8 prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Severity</label>
-                    <div class="col-md-8 severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</div>
+                    <div class="col-md-8 prop-severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Status</label>
-                    <div class="col-md-8 status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</div>
+                    <div class="col-md-8 prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Case Products</label>
-                    <div class="col-md-8 caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</div>
+                    <div class="col-md-8 prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Dev Team Assigned</label>
-                    <div class="col-md-8 devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</div>
+                    <div class="col-md-8 prop-devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</div>
             </div>
         </div>
     </div>

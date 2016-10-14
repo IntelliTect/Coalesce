@@ -226,11 +226,11 @@ module ViewModels {
         // True if the server method (Rename) was successful.
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Rename)
-        public renameUi: (callback?: any) => void;
+        public renameUi: (callback?: any, reload?: boolean) => void;
         // Presents a modal with input boxes to call the server method (Rename)
-        public renameModal: (callback?: any) => void;
+        public renameModal: (callback?: any, reload?: boolean) => void;
         // Variable for method arguments to allow for easy binding
-        public renameWithArgs: (args?: Person.RenameArgs, callback?: any) => void;
+        public renameWithArgs: (args?: Person.RenameArgs, callback?: any, reload?: boolean) => void;
         // Object that can be easily bound to fields to allow data entry for the method
         public renameArgs = new Person.RenameArgs(); 
         
@@ -246,9 +246,9 @@ module ViewModels {
         // True if the server method (ChangeSpacesToDashesInName) was successful.
         public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameUi: (callback?: any) => void;
+        public changeSpacesToDashesInNameUi: (callback?: any, reload?: boolean) => void;
         // Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameModal: (callback?: any) => void;
+        public changeSpacesToDashesInNameModal: (callback?: any, reload?: boolean) => void;
         // Variable for method arguments to allow for easy binding
         
         
@@ -965,24 +965,24 @@ module ViewModels {
                 });
             }
             
-            self.renameUi = function(callback?: any) {
+            self.renameUi = function(callback?: any, reload: boolean = true) {
                 var addition: String = prompt('Addition');
-                self.rename(addition, callback);
+                self.rename(addition, callback, reload);
             }
-            self.renameModal = function(callback?: any) {
+            self.renameModal = function(callback?: any, reload: boolean = true) {
                 $('#method-Rename').modal();
                 $('#method-Rename').on('shown.bs.modal', function() {
                     $('#method-Rename .btn-ok').unbind('click');
                     $('#method-Rename .btn-ok').click(function()
                     {
-                        self.renameWithArgs(null, callback);
+                        self.renameWithArgs(null, callback, reload);
                         $('#method-Rename').modal('hide');
                     });
                 });
             }
-            self.renameWithArgs = function(args?: Person.RenameArgs, callback?: any) {
+            self.renameWithArgs = function(args?: Person.RenameArgs, callback?: any, reload: boolean = true) {
                 if (!args) args = self.renameArgs;
-                self.rename(args.addition(), callback);
+                self.rename(args.addition(), callback, reload);
             }
 
             self.changeSpacesToDashesInName = function(callback?: any, reload: boolean = true){
@@ -1018,11 +1018,11 @@ module ViewModels {
                 });
             }
             
-            self.changeSpacesToDashesInNameUi = function(callback?: any) {
-                self.changeSpacesToDashesInName(callback);
+            self.changeSpacesToDashesInNameUi = function(callback?: any, reload: boolean = true) {
+                self.changeSpacesToDashesInName(callback, reload);
             }
-            self.changeSpacesToDashesInNameModal = function(callback?: any) {
-                    self.changeSpacesToDashesInNameUi(callback);
+            self.changeSpacesToDashesInNameModal = function(callback?: any, reload: boolean = true) {
+                    self.changeSpacesToDashesInNameUi(callback, reload);
             }
 
 

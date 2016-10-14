@@ -123,7 +123,7 @@ module @moduleName {
         @:// @(prop.Comment)
         }
         @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType) = @(prop.Type.JsKnockoutType);
-        if (prop.Type.IsEnum)
+        if (prop.Type.IsEnum || (prop.Type.IsNullable && prop.PureType.IsEnum))
         {
         @:// Text value for enumeration @prop.Name
         if (prop.Comment.Length > 0)
@@ -233,7 +233,7 @@ module @moduleName {
         public isSelectedToggle: () => boolean;
 
 
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:public @(prop.JsVariable)Values: EnumValue[] = [ 
         @foreach (var kvp in prop.Type.EnumValues)
@@ -260,13 +260,13 @@ module @moduleName {
         @:// True if the server method (@method.Name) was successful.
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         @:// Presents a series of input boxes to call the server method (@method.Name)
-        @:public @method.JsVariableUi: (callback?: any) => void;
+        @:public @method.JsVariableUi: (callback?: any, reload?: boolean) => void;
         @:// Presents a modal with input boxes to call the server method (@method.Name)
-        @:public @method.JsVariableModal: (callback?: any) => void;
+        @:public @method.JsVariableModal: (callback?: any, reload?: boolean) => void;
         @:// Variable for method arguments to allow for easy binding
         @if (method.ClientParameters.Any())
         {
-        @:public @method.JsVariableWithArgs: (args?: @(model.Name).@(method.ArgsName), callback?: any) => void;
+        @:public @method.JsVariableWithArgs: (args?: @(model.Name).@(method.ArgsName), callback?: any, reload?: boolean) => void;
         @:// Object that can be easily bound to fields to allow data entry for the method
         @:public @(method.JsVariableArgs) = new @(model.Name).@(method.ArgsName)(); 
         }
@@ -908,7 +908,7 @@ module @moduleName {
             };
 
             // Enumeration Lookups.
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => (f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)) && !f.IsInternalUse))
             {
             @:self.@(prop.JsTextPropertyName) = ko.computed(function() {
                 @:for(var i=0;i < self.@(prop.JsVariable)Values.length; i++){
@@ -999,7 +999,7 @@ module @moduleName {
             }
             </text>
 
-            @:self.@method.JsVariableUi = function(callback?: any) {
+            @:self.@method.JsVariableUi = function(callback?: any, reload: boolean = true) {
                 @foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
                 {
                 @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
@@ -1008,33 +1008,33 @@ module @moduleName {
                 {
                 @:var @param.Name: @param.Type.TsType = null;
                 }
-                @:self.@(method.JsVariable)(@(method.JsArguments("", true)));
+                @:self.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
             @:}
 
-            @:self.@method.JsVariableModal = function(callback?: any) {
+            @:self.@method.JsVariableModal = function(callback?: any, reload: boolean = true) {
                 @if (method.ClientParameters.Any()) {
                 @:$('#method-@method.Name').modal();
                 @:$('#method-@method.Name').on('shown.bs.modal', function() {
                     @:$('#method-@method.Name .btn-ok').unbind('click');
                     @:$('#method-@method.Name .btn-ok').click(function()
                     @:{
-                        @:self.@(method.JsVariableWithArgs)(null, callback);
+                        @:self.@(method.JsVariableWithArgs)(null, callback, reload);
                         @:$('#method-@method.Name').modal('hide');
                     @:});
                 @:});
                 }
                 else
                 {
-                    @:self.@(method.JsVariableUi)(callback);
+                    @:self.@(method.JsVariableUi)(callback, reload);
                 }
             @:}
 
             @if (method.ClientParameters.Any()) {
-            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelClassName).@(method.ArgsName), callback?: any) {
+            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelClassName).@(method.ArgsName), callback?: any, reload: boolean = true) {
                 @:if (!args) args = self.@(method.JsVariableArgs);
                 @foreach (var param in method.ClientParameters)
                 {
-                @:self.@(method.JsVariable)(@(method.JsArguments("args", true)));
+                @:self.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
                 }
             @:}
             }
@@ -1066,7 +1066,7 @@ module @moduleName {
 
 
     export namespace @(model.ViewModelClassName) {
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:export enum @(prop.Name)Enum {
         @foreach (var kvp in prop.Type.EnumValues)

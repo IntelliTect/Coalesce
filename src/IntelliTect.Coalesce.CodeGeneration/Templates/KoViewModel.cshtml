@@ -1032,10 +1032,7 @@ module @moduleName {
             @if (method.ClientParameters.Any()) {
             @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelClassName).@(method.ArgsName), callback?: any, reload: boolean = true) {
                 @:if (!args) args = self.@(method.JsVariableArgs);
-                @foreach (var param in method.ClientParameters)
-                {
                 @:self.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
-                }
             @:}
             }
             }

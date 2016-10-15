@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Intellitect.NLog.Extensions
+namespace IntelliTect.NLog.Extensions
 {
     /// <summary>
     /// URL Encoding helper.

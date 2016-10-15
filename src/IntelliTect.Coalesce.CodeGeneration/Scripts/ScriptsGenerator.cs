@@ -377,7 +377,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 var oldScriptsOutputPath = Path.Combine(
                   _webProject.ProjectDirectory,
-                    "Scripts", "Intellitect");
+                    "Scripts", "IntelliTect");
                 if (Directory.Exists(oldScriptsOutputPath)) Directory.Delete(oldScriptsOutputPath, true); // TODO: remove this at some point after all projects are upgraded.
 
                 string[] intellitectScripts =

@@ -25,7 +25,7 @@
     <h1 style="display:inline-block">
         @(model.Name.ToProperCase()) List
         @{
-            @:<span style="font-size: .5em; padding-left: 20px;@@(User.IsInRole("Admin") ? "" : " visibility:hidden;")"><a href="~/@(model.ControllerName)/Docs">API Docs</a></span>
+            @:<span style="font-size: .5em; padding-left: 20px;"><a href="~/@(model.ControllerName)/Docs">API Docs</a></span>
         }
     </h1>
     <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>

@@ -79,16 +79,24 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             get
             {
                 var result = new List<MethodWrapper>();
-                var methods = Symbol.GetMembers().Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public).Cast<IMethodSymbol>();
-                foreach (var methodInfo in methods.Where(f => f.MethodKind == MethodKind.Ordinary))
+                var methods = Symbol.GetMembers()
+                    .Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public)
+                    .Cast<IMethodSymbol>()
+                    .Where(f => f.MethodKind == MethodKind.Ordinary);
+                foreach (var methodInfo in methods)
                 {
                     result.Add(new SymbolMethodWrapper(methodInfo));
                 }
+
                 // Add methods from the base class
                 if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
                 {
                     var parentSymbol = new SymbolClassWrapper(Symbol.BaseType);
-                    result.AddRange(parentSymbol.Methods);
+                    result.AddRange(parentSymbol.Methods
+                        .Cast<SymbolMethodWrapper>()
+                        // Don't add overriden methods
+                        .Where(baseMethod => !methods.Any(method => method.OverriddenMethod == baseMethod.Symbol)
+                    ));
                 }
                 return result;
             }

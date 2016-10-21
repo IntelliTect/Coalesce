@@ -497,7 +497,7 @@ ko.bindingHandlers.datePicker = {
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
             sideBySide: allBindings.get('sideBySide') || false,
-            keyBinds: allBindings.get('keyBinds') || undefined,
+            keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
         })
             .on("dp.change", function (e) {
                 var preserveDate = allBindings.get('preserveDate') || false;

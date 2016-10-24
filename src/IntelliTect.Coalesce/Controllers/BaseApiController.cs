@@ -414,8 +414,9 @@ namespace IntelliTect.Coalesce.Controllers
         [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<TDto> GetImplementation(string id, ListParameters listParameters)
         {
-            IncludeTree tree;
-            var item = GetUnmapped(id, listParameters, out tree);
+            var tuple = await GetUnmapped(id, listParameters);
+            var item = tuple.Item1;
+            IncludeTree tree = tuple.Item2;
             if (item == null) return null;
 
             // Map to DTO
@@ -424,7 +425,7 @@ namespace IntelliTect.Coalesce.Controllers
             return dto;
         }
 
-        private T GetUnmapped(string id, ListParameters listParameters, out IncludeTree tree)
+        private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
         {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
             IQueryable<T> source = GetListDataSource(listParameters);
@@ -435,16 +436,16 @@ namespace IntelliTect.Coalesce.Controllers
                 source = source.Includes(listParameters.Includes);
             }
 
-            var item = source.FindItem(id).IncludeExternal(listParameters.Includes);
+            var item = (await source.FindItemAsync(id)).IncludeExternal(listParameters.Includes);
 
-            tree = source.GetIncludeTree();
+            var tree = source.GetIncludeTree();
 
             if (!BeforeGet(item))
             {
                 return null;
             }
 
-            return item;
+            return new Tuple<T, IncludeTree>(item, tree);
         }
 
         protected virtual bool BeforeGet(T obj)
@@ -564,7 +565,9 @@ namespace IntelliTect.Coalesce.Controllers
                             // Pull the object to get any changes.
                             var idString = IdValue(item).ToString();
                             listParams.AddFilter("id", idString);
-                            item = GetUnmapped(idString, listParams, out includeTree);
+                            var itemResult = GetUnmapped(idString, listParams).Result;
+                            item = itemResult.Item1;
+                            includeTree = itemResult.Item2;
 
                             // Call the AfterSave method to support special cases.
                             var reloadItem = AfterSave(dto, item, origItem, Db);
@@ -578,7 +581,9 @@ namespace IntelliTect.Coalesce.Controllers
 
                             if (reloadItem && returnObject)
                             {
-                                item = GetUnmapped(idString, listParams, out includeTree);
+                                itemResult = GetUnmapped(idString, listParams).Result;
+                                item = itemResult.Item1;    
+                                includeTree = itemResult.Item2;
                             }
 
                             result.WasSuccessful = true;

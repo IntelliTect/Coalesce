@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
     internal class SymbolMethodWrapper : MethodWrapper
     {
-        protected IMethodSymbol Symbol;
+        public IMethodSymbol Symbol { get; protected set; }
 
         public SymbolMethodWrapper(IMethodSymbol symbol)
         {

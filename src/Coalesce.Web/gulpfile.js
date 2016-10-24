@@ -237,7 +237,7 @@ gulp.task('nuget:publish:CodeGeneratorsMvc',
 gulp.task('nuget:publish:NLogExtensions',
     shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
         'push ' +
-        '..\\..\\artifacts\\bin\\Intellitect.NLog.Extensions\\debug\\Intellitect.NLog.Extensions.' + nlogExtensionsVersion + '.nupkg ' +
+        '..\\..\\artifacts\\bin\\IntelliTect.NLog.Extensions\\debug\\IntelliTect.NLog.Extensions.' + nlogExtensionsVersion + '.nupkg ' +
         '536300da-5e23-433c-8f45-f84e9a225b4b ' +
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );

@@ -61,6 +61,18 @@
 <br />
 
 <h3>Controlling Object Loading</h3>
+<h4>Static List Methods</h4>
+<p>Static methods that return an IQueryable of the same type as the class are treated specially. These methods can be used to provide the underlying data for the list view models and for getting data on single object models. The list view model has a property called listDataSource which accepts an enumeration with the available list methods. Parameters can be specified an object with name value pairs in the query property on the list view model.</p>
+<p>This method must receive two parameters: db as the context type and user as a UserPrincipal. No other parameters are currently supported. Sorting is currently handled by the sorting mechanisms in the list view model. </p>
+<pre><code class="language-html">
+    public static IQueryable&lt;Person&gt; MyNamesStartingWithA(DbContext db, UserPrincipal user)
+    {
+        return db.People
+            .Include(f => f.Siblings)
+            .Where(f => f.FirstName.StartsWith("A") && f.UserId == user.GetUserId());
+    }
+</code></pre>
+<h4>Using Includable</h4>
 <p>When transferring data to a client via a network, it is important to be able to determine which objects get sent. So, as a result, the framework uses eager loading which can be specifically controlled rather than lazy loading which loads everything.</p>
 <p>By default when an object is sent to the client, that object and all of its immediate children are loaded and sent. However, in some cases you may need more or less data. The IIncludable interface is used for this purpose. It allows for grouping a number of .Include methods. The following example shows how to preemptively load the Person's Company and the CasesAssigned.</p>
 <pre><code class="language-html">
@@ -76,6 +88,10 @@
 </code></pre>
 <p>The Include method takes a string parameter called include. This can be specified in the client-side view model to specify which data to include. The admin pages will use the string 'Editor' when they call to the API layer.</p>
 <br />
+
+<p>
+    <b>The generated admin views have documentation pages that include all view model documentation specific to each class.</b>
+</p>
 
 <h3>Model Business Rules</h3>
 <p>
@@ -246,15 +262,3 @@
     <dt>namesStartingWithModal</dt>
     <dd>Simple modal interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
 </dl>
-<h4>Static List Methods</h4>
-<p>Static methods that return an IQueryable of the same type as the class are treated specially. These methods can be used to provide the underlying data for the list view models. The list view model has a property called listDataSource which accepts an enumeration with the available list methods. Parameters can be specified an object with name value pairs in the query property on the list view model.</p>
-<pre><code class="language-html">
-    public static IQueryable&lt;string&gt; NamesStartingWithA(DbContext db, UserPrincipal user)
-    {
-        return db.People.Where(f => f.FirstName.StartsWith("A")).Select(f => f.FirstName).ToList();
-    }
-</code></pre>
-<br />
-<p>
-    <b>The generated admin views have documentation pages that include all view model documentation specific to each class.</b>
-</p>

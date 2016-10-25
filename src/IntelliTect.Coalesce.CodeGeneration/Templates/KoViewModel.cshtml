@@ -376,7 +376,7 @@ module @moduleName {
                             @:objs.push(item.@prop.ManyToManyCollectionProperty.JsonName);
                         @:}
                     @:});
-					@:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdPropertyName', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
+					@:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
                     }
 				@:} 
                 }

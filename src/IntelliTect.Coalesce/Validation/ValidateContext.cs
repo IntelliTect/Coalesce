@@ -105,9 +105,14 @@ namespace IntelliTect.Coalesce.Validation
                                 assert.IsTrue(param.IsAContext, "Is a context");
                                 assert.IsTrue(param.IsDI, "Is DI");
                             }
+                            else if (param.Name == "includeTree")
+                            {
+                                assert.IsTrue(param.IsAnIncludeTree, "Is an IncludeTree");
+                                assert.IsTrue(param.IsDI, "Is DI");
+                            }
                             else
                             {
-                                assert.isFalse(param.IsDI, "DI properties must be named either 'db' or 'user'.");
+                                assert.isFalse(param.IsDI, $"DI properties must be named either 'db' or 'user' or 'out includeTree'. Got {param.Name}");
                             }
                         }
 

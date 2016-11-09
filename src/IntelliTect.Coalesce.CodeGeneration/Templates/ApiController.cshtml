@@ -309,6 +309,7 @@ namespace @(namespaceName).Api
             }
             var result = new SaveResult<@method.ReturnTypeNameForApi>();
             try{
+                IncludeTree includeTree = null;
                 @if (method.IsStatic)
                 {
                 if(method.ReturnType.IsVoid){
@@ -332,11 +333,11 @@ namespace @(namespaceName).Api
                 }
                 @if (method.ReturnType.Name == method.Parent.Name)
                 {
-                @:result.Object = Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "");
+                @:result.Object = Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
                 }
                 else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
                 }
                 else
                 {

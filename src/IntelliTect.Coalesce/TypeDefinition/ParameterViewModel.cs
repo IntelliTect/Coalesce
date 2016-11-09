@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                return IsAContext || IsAUser;
+                return IsAContext || IsAUser || IsAnIncludeTree;
             }
         }
 
@@ -43,6 +44,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public bool IsAnIncludeTree
+        {
+            get
+            {
+                return Type.IsA<IncludeTree>();
+            }
+        }
+
         /// <summary>
         /// Returns the parameter to pass to the actual method accounting for DI.
         /// </summary>
@@ -52,6 +61,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (IsAContext) return "Db";
                 if (IsAUser) return "User";
+                if (IsAnIncludeTree) return "out includeTree";
                 return Name.ToCamelCase();
             }
         }

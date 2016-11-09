@@ -234,7 +234,10 @@
     <dt>moveModal</dt>
     <dd>Simple modal interface to prompt the user for the required data for the method call. The call is then made with the data provided.</dd>
 </dl>
-<p>Additionally, if the method has a parameter of type ClaimsPrincipal, the current user will be added to the method call automatically. This does not appear on the client side. Also, if the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method.</p>
+<p>Additionally, if the method has a parameter of type ClaimsPrincipal, the current user will be added to the method call automatically. This does not appear on the client side.
+Also, if the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method.
+Also, if the method has an out parameter of type IncludeTree, then the IncludeTree that is passed out will be used to control serialization. See <a href="/Docs/Dtos">the DTO docs for more information about IncludeTree.</a>
+</p>
 <br />
 <h4>Static Methods</h4>
 <p>Static methods exist on a class without respect to an instance of that class. These methods are created as functions on the object's <b>list</b> view model on the client side. The example below is for a method called NameStartingWith that takes a single parameter 'string characters' and returns a list of strings. The DbContext parameter is injected automatically by the controller.</p>

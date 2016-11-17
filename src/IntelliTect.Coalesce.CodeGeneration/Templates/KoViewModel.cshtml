@@ -187,7 +187,7 @@ module @moduleName {
         }
         @:public addTo@(prop.Name): () => @prop.PureType.ClassViewModel.Name;
         @:// List Object model for @(prop.Name). Allows for loading subsets of data.
-        @:public @(prop.JsVariable)List: () => @(listModuleName).@(prop.Object.ListViewModelClassName);
+        @:public @(prop.JsVariable)List: (loadImmediate?: boolean) => @(listModuleName).@(prop.Object.ListViewModelClassName);
         }
         
         // Saves a many-to-many collection change. This is done automatically and doesn't need to be called.
@@ -673,10 +673,10 @@ module @moduleName {
             {
             @:// List Object model for @(prop.Name). Allows for loading subsets of data.
             @:var _@(prop.JsVariable)List: @(listModuleName).@(prop.Object.ListViewModelClassName) = null;
-            @:self.@(prop.JsVariable)List = function() {
+            @:self.@(prop.JsVariable)List = function(loadImmediate = true) {
                 @:if (!_@(prop.JsVariable)List){
                     @:_@(prop.JsVariable)List = new @(listModuleName).@(prop.Object.ListViewModelClassName)();
-                    @:load@(prop.Name)List();
+                    @:if (loadImmediate) load@(prop.Name)List();
                     @:self.@(prop.Parent.PrimaryKey.JsVariable).subscribe(load@(prop.Name)List)
                 @:}
                 @:return _@(prop.JsVariable)List;

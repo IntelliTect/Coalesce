@@ -312,7 +312,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                                 FieldOrder = 1
                             });
                     }
-                    else
+                    else if (Properties.Any(f => f.IsPrimaryKey))
                     {
                         result.Add(
                             new OrderByInformation()

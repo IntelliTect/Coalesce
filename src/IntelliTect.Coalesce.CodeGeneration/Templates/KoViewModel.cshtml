@@ -179,7 +179,7 @@ module @moduleName {
         // Deletes the object without confirmation.
         public deleteItem: (callback?: any) => void;
         
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && !f.IsInternalUse))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
         {
         if (prop.Comment.Length > 0)
         {
@@ -200,7 +200,7 @@ module @moduleName {
         public autoSave: () => void;
         // If true, many-to-many collections are automatically saved.
         public autoSaveCollection: (property: string, id: any, changeStatus: string) => void;
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsInternalUse))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsInternalUse && f.PureTypeOnContext))
         {
         if (prop.Comment.Length > 0)
         {
@@ -362,11 +362,13 @@ module @moduleName {
 				// Set the ID 
 				self.myId = data.@(model.PrimaryKey.JsonName);
 				// Load the lists of other objects
-                @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
-                { 
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
+            { 
                 @:if (data.@prop.JsonName != null) {
-					@:// Merge the incoming array
-					@:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
+                @if (prop.Object.PrimaryKey != null)
+                {
+				    @:// Merge the incoming array
+				    @:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
                     if (prop.IsManytoManyCollection)
                     {
                     @:// Add many-to-many collection
@@ -376,10 +378,15 @@ module @moduleName {
                             @:objs.push(item.@prop.ManyToManyCollectionProperty.JsonName);
                         @:}
                     @:});
-					@:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
+				    @:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
                     }
-				@:} 
                 }
+                else
+                {
+                    @:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, null, @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
+                }
+				@:} 
+            }
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
@@ -647,7 +654,7 @@ module @moduleName {
             }
 
             // Methods to add to child collections
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             <text>
             self.addTo@(prop.Name) = function() {
@@ -669,7 +676,7 @@ module @moduleName {
             </text>
             }
 
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             @:// List Object model for @(prop.Name). Allows for loading subsets of data.
             @:var _@(prop.JsVariable)List: @(listModuleName).@(prop.Object.ListViewModelClassName) = null;
@@ -786,7 +793,7 @@ module @moduleName {
 }  
 
             // Create variables for ListEditorApiUrls
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse && f.PureTypeOnContext))
             {
             @:self.@prop.ListEditorUrlName = ko.computed({
                 @:read: function() {

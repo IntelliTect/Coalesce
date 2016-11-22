@@ -183,6 +183,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if ((IsArray || IsCollection) && (IsNumber)) return "KnockoutObservableArray<number>";
+                if ((IsArray || IsCollection) && (IsString)) return "KnockoutObservableArray<string>";
                 if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
                 else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
                 else if (IsCollection || IsArray) return "KnockoutObservableArray<any>";

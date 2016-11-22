@@ -77,6 +77,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public TypeViewModel PureType => new TypeViewModel(Wrapper.Type.PureType);
 
+        public bool PureTypeOnContext => PureType.ClassViewModel?.OnContext ?? false;
+
         /// <summary>
         /// Gets the name for the API call.
         /// </summary>
@@ -160,7 +162,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this property has a ViewModel.
         /// </summary>
-        public bool HasViewModel => Object != null && (Object.HasDbSet || Object.IsDto) && !IsInternalUse;
+        public bool HasViewModel => Object != null && !IsInternalUse;
 
         /// <summary>
         /// Gets the ClassViewModel associated with the Object

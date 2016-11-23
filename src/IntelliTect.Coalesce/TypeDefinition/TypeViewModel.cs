@@ -99,7 +99,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsVoid { get { return Name == "Void"; } }
 
-
+        public bool IsPrimitive => Wrapper.IsPrimitive;
 
         /// <summary>
         /// Returns the first generic argument for a generic type.
@@ -182,8 +182,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if ((IsArray || IsCollection) && (IsNumber)) return "KnockoutObservableArray<number>";
-                if ((IsArray || IsCollection) && (IsString)) return "KnockoutObservableArray<string>";
+                if ((IsArray || IsCollection) && (PureType.IsNumber)) return "KnockoutObservableArray<number>";
+                if ((IsArray || IsCollection) && (PureType.IsString)) return "KnockoutObservableArray<string>";
                 if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
                 else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
                 else if (IsCollection || IsArray) return "KnockoutObservableArray<any>";

@@ -381,6 +381,10 @@ module @moduleName {
 				    @:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
                     }
                 }
+                else if (prop.PureType.IsPrimitive)
+                {
+                    @:self.@(prop.JsVariable)(data.@prop.JsVariable);
+                }
                 else
                 {
                     @:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, null, @prop.Object.ViewModelClassName, self, allowCollectionDeletes);

@@ -97,6 +97,14 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public bool IsString { get { return Name == "String"; } }
         public bool IsBool { get { return Name == "Boolean"; } }
 
+        public bool IsPrimitive
+        {
+            get
+            {
+                return IsString || IsNumber || IsBool || IsEnum;
+            }
+        }
+
 
         /// <summary>
         /// Creates or gets the ClassViewModel. Only for external classes.

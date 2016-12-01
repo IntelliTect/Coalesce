@@ -59,6 +59,21 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
             return new IncludableQueryProvider.WrappedProviderQueryable<T>(queryable, new IncludableQueryProvider(queryable.Provider as EntityQueryProvider));
         }
 
+        /// <summary>
+        /// Specifies additional related entities to include in serialized output of a Coalesce custom data source. 
+        ///     The specified entities must have already been loaded into the context that was provided for the data source.
+        ///     to be included is specified starting with the type of entity being queried (TEntity).
+        ///     If you wish to include additional types based on the navigation properties of
+        ///     the type being included, then chain a call to .ThenIncluded(prop => prop.Child)
+        ///     after this call.
+        ///     
+        ///     The purpose of this is to allow loading subsets of navigation properties without neccesarily loading the entire contents of the navigation property.
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="expr">An expression which returns the navigation property that should be included in the data source's output.</param>
+        /// <returns></returns>
         public static IIncludedSeparatelyQueryable<TEntity, TProperty> IncludedSeparately<TEntity, TProperty>(
             this IQueryable<TEntity> query,
             Expression<Func<TEntity, TProperty>> expr) where TEntity : class

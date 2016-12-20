@@ -757,22 +757,28 @@ ko.bindingHandlers.formatNumberText = {
 
             // Date formats: http://momentjs.com/docs/#/displaying/format/
             var invalidString = allBindings.invalid == undefined ? ko.bindingHandlers.moment.defaults.invalid : allBindings.invalid;
+            var shorten = allBindings.shorten == undefined ? false : allBindings.shorten;
 
             var dateMoment = moment(valueUnwrapped);
 
-            // format string for input box
-            var output = dateMoment.isValid() ?
-                dateMoment.fromNow() :
-                invalidString;
-
-            $(element).text(output);
-
-            clearInterval(element.koFromNowTimer);
-            element.koFromNowTimer = setInterval(function () {
+            var fmt = () => {
                 var output = dateMoment.isValid() ?
                     dateMoment.fromNow() :
                     invalidString;
-                $(element).text(output);
+
+                if (shorten) {
+                    output = output.replace("minutes", "mins");
+                    output = output.replace("a few seconds", "a moment");
+                }
+                return output;
+            }
+
+            $(element).text(fmt());
+
+            clearInterval(element.koFromNowTimer);
+            element.koFromNowTimer = setInterval(function () {
+
+                $(element).text(fmt());
             }, 1000);
 
         }

@@ -670,7 +670,7 @@ module @moduleName {
                 {
                 @:newItem.@(prop.InverseIdProperty.JsVariable)(self.@(model.PrimaryKey.JsVariable)());
                 }
-                else
+                else if (prop.Object.PropertyByName(model.PrimaryKey.JsVariable) != null)
                 {
                 @:newItem.@(model.PrimaryKey.JsVariable)(self.@(model.PrimaryKey.JsVariable)());
                 }

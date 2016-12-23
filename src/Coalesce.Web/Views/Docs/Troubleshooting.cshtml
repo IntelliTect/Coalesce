@@ -3,104 +3,59 @@
     Layout = "_DocsLayout";
 }
 
-<h2>Troubleshooting ASP.NET 5, DNX, Bower, NPM, Gulp, and related tools.</h2>
+<h2>Troubleshooting ASP.NET Core, DotNet, Bower, NPM, Gulp, and related tools.</h2>
 <h3>Overview</h3>
 <p>
-    ASP.NET 5 is in the Release Candidate phase of development. While this version does have a go-live license, the tooling for it in Visual Studio is not as streamlined as other parts of .net. As a result there are several areas where command line tools need to be used to configure the environment. While this may seem like steps backwards, the command line tools allow much easier application life-cycle management in areas like deployment and automated builds. Microsoft has heard the cries of the community that the current process is too painful and they are working to address the situation, probably in a Visual Studio Update 2 sometime in early 2016.
+    ASP.NET Core RTM was released summer of 2016. While this version if an offical release, the tooling for it in Visual Studio is not as streamlined as other parts of .net. As a result there are many rough edges. There are times when restarting Visual Studio will fix your problems. </p>
+<p>Because DotNet Core is cross platform, all the tooling is designed to work from the command line. While this may seem like steps backwards, the command line tools allow much easier application life-cycle management in areas like deployment and automated builds. Microsoft has heard the cries of the community that the current process is too painful and they are working to address the situation. Each set of tooling has gotten better. However, the 'best practices' have been shifting significantly. There is also a potential gap between best practice and what is scaffolded by the Visual Studio new project tooling.
 </p>
 
-<h4>What is DNX</h4>
+<h4>What is DotNet Core</h4>
 <p>
-    DNX.exe is the Dot Net eXecution environment. It is akin to the Node or Java runtime. DNX is a transitional executable that will be replaced with what appears to be DotNet.exe. DNX commands are typically structured like <code>DNX [Command] [SubCommand] -[option] [option value]</code>. DNU.exe is a utilities module that provides some additional features.
-</p>
-<p>
-    As per discussion with Damian Edwards on 12/15/2015 it appears that the commands for DNX will change in the RC2 release due out in February.
+    DotNet.exe is the cross platform .Net execution environment. It is akin to the Node or Java runtime. DotNet commands are typically structured like <code>DotNet [module] [Command] [SubCommand] -[option] [option value]</code>. For example: <code>dotnet ef migrations add MyMigration</code>
 </p>
 <p>
     The paths given below are for a standard configuration Windows 10 system. Please modify them as needed for your configuration.
 </p>
 
 
-<h4>Command Line Options</h4>
-<p>
-    There are several options for command line interfaces for DNX/DNU. You can use a regular command prompt. You can use the Package Manager Console in Visual Studio. PowerShell is also an option.
-</p>
-
 <h3>Installing</h3>
 <p>
-    This troubleshooting guide covers the typical install case. Assuming a 64-bit Windows OS. This is required to run DNX commands from the command line.
+    Install the latest version of Visual Studio. DotNet is typically installed by the .net Core Visual Studio tooling. It can be found at <a href="https://www.microsoft.com/net/core">https://www.microsoft.com/net/core</a>
 </p>
-<ul>
-    <li>Install or Upgrade Visual Studio 2015 Update 1</li>
-    <li>Go to https://get.asp.net/ and click on the ASP.NET 5 area's button 'Install for Windows'. Install the downloaded file.</li>
-    <li>
-        Clear any old dnvm files.
-        <pre><code>
-        c:
-        cd users\[user name]\.dnx\bin
-        delete dnvm.cmd and dnvm.ps1.
-    </code></pre>
+<p>Once installed, the command <code>dotnet</code> should run from any command line prompt.</p>
 
-    </li>
-    <li>
-        You will need to register the current version of DNX via the Dot Net Version Manager.
-        <pre><code>
-        c:
-        cd Program Files\Microsoft DNX\Dnvm
-        dnvm setup
-    </code></pre>
-    </li>
-    <li>
-        <p>
-            Set the default version of DNX for the command line. Run the <code>dnvm list</code> command and find the largest version. Use the <code>dnvm use...</code> command. You can then run <code>dnvm list</code> command and it should have a * by the version you are currently using as default. The runtime should be clr and the architecture should be x86.
-        </p>
-        <pre><code>
-        dnvm list
-        dnvm use 1.0.0-rc1-final -persist
-        dnvm list
-    </code></pre>
-        <p>
-            Note that the alias column effects which DNX is used by Visual Studio. It should either be not set (blank for all versions) or the version you want to use in Visual Studio should be aliased as 'default'.
-        </p>
-    </li>
-    <li>
-        Check the DNX version. The first is full information and the second is just the version.
-        <pre><code>
-        dnvm
-        dnvm version
-    </code></pre>
-    </li>
-    <li>
-        Once complete, you should be able to run the command <code>dnx</code> from the root of c:.
-    </li>
+<p>
+    This troubleshooting guide covers the typical install case. Assuming a 64-bit Windows OS. 
+</p>
 
-</ul>
 
 <h3>NuGet Package Errors</h3>
 <p>
-    Project.json contains references to .net NuGet packages that are used in the solution. When packages don't load try these steps:
+    Project.json contains references to .net NuGet packages that are used in the solution. This is much less frequent with DotNet Core. When packages don't load try these steps:
 </p>
 <ul>
     <li>Right click on your project's references folder and choose Restore Packages.</li>
     <li>Close Visual Studio and reopen your project. On project open, VS will restore your packages again.</li>
-    <li>Via the command line, go into your project directory and run the command <code>dnu restore</code></li>
-    <li>Clear the .dnx cache at c:/users/[username]/.dnx/packages by deleting all the folders. Then run <code>dnu restore</code> for all your projects from the various project directories. (Yes, this is a hassle.)</li>
-    <li>A restore can also be done by changing the project.json file and saving it.</li>
+    <li>Via the command line, go into your project directory and run the command <code>dotnet restore</code></li>
+    <li>A restore can also be done by changing the project.json file and saving it. The project.json.lock file can also be deleted. It will be automatically rebuilt.</li>
 </ul>
 <p>
-    Packages are downloaded to a package cache in c:/users/[username]/.dnx/packages. All packages found in your project.json files are downloaded here as a cache. In some rare cases, this cache seems to be corrupted and needs to be removed and reloaded from NuGet sources via a package restore.
+    Packages are downloaded to a package cache in c:/users/[username]/.nuget/packages. All packages found in your project.json files are downloaded here as a cache. In some rare cases, this cache seems to be corrupted and needs to be removed and reloaded from NuGet sources via a package restore.
 </p>
 <p>
     If you are getting messages about not being able to restore packages, a likely cause is that there is not a NuGet feed in Visual Studio that contains the packages you want to load. This happens if you are using packages not found on nuget.org and haven't added the additional NuGet feed. Changing development machines and forgetting to update the NuGet package sources is a common culprit, especially if you are using the nightly builds. NuGet feeds can be added to your solution via the NuGet.config file.
 </p>
 
 <p>
-    Another common messages is something like 'attempted to get version 5 but ended up with version 2.' This is typically caused by referencing two different versions of the same NuGet package in the same solution. The best way to track this down is to start at your lowest level project (no dependencies on other projects) and check the References node in the solution explorer and compare this with the packages and versions in the project.json file. An additional feature is that all the dependent packages and their versions are listed under the References node as well. A package may reference an older or newer version of a package than what is explicitly specified in your project.json.
+    Another common messages is something like 'attempted to get version 5 but ended up with version 2.' This is typically caused by referencing two different versions of the same NuGet package in the same solution based on dependency trees. The best way to track this down is to start at your lowest level project (no dependencies on other projects) and check the References node in the solution explorer and compare this with the packages and versions in the project.json file. An additional feature is that all the dependent packages and their versions are listed under the References node as well. A package may reference an older or newer version of a package than what is explicitly specified in your project.json. Unloading all the projects and reloading them from the bottom one by one getting them to each compile without dependent projects.
 </p>
 
 <h3>Bower Component Package Errors</h3>
 <p>
-    Bower is the source for web-client libraries. The packages to be loaded are listed in the bower.json file in your project. For IntelliTect projects, these Bower packages get stored in the bower_compontents folder in your solution. Bower typically contains source files as well as compiled versions. For example scss and css files. These source files are often compiled via a Gulp task. The compiled files are then copied into the wwwroot area of the solution for deployment again by a Gulp task.
+    Bower is a source for web-client libraries, however more users are moving to npm for all their JavaScript and client libraries. The packages to be loaded are listed in the bower.json file in your project. For IntelliTect projects, these Bower packages get stored in the bower_compontents folder in your solution. Bower typically contains source files as well as compiled versions. For example scss and css files. These source files are often compiled via a Gulp task. The compiled files are then copied into the wwwroot area of the solution for deployment again by a Gulp task.
+    </p>
+<p>The most common reason for Bower failures is a misconfigured npm.
 </p>
 <p>
     When Bower packages don't load try these steps:
@@ -118,13 +73,14 @@
     Node Packages and Gulp
 </h3>
 <p>
-    Node is a powerful JavaScript runtime engine that is used in many projects. Specifically Microsoft has adopted it as a means of running tools within the development environment via a system called Gulp. Gulp runs on Node and uses external components via the Node Package Manager (npm). Node gets installed with Visual Studio and it is not recommended to install it stand alone. Note that if you have Node installed stand alone, Visual Studio will not use that version by default, but you can run the new version via the command line.
+    Node is a powerful JavaScript runtime engine that is used in many projects. Specifically Microsoft has adopted it as a means of running tools within the development environment via a system called Gulp (Grunt was the tool of choice a year ago.). Gulp runs on Node and uses external components via the Node Package Manager (npm). Node gets installed with Visual Studio and it is not recommended to install it stand alone. Note that if you have Node installed stand alone, Visual Studio will not use that version by default, but you can run the new version via the command line.
 </p>
 <p>Node packages are specified in the package.json file. These packages are used with Gulp. Note that by default this file may be hidden in your solution. Use show all files to see it.</p>
 
 <p>If you are having issues with Node, npm or Gulp try these options.</p>
 <ul>
     <li>
+        <p>Make sure you are using npm version 3 or greater. This installs with Visual Studio 2015 update 3. Older versions of npm had very long path names which caused lots of issues with Windows because of path length restrictions. </p>
         <p>
             If Gulp tasks in the Task Runner Explorer are not showing correctly, the issue is likely that npm didn't restore packages correctly for Gulp. If Visual Studio crashes after adding a package try these steps. Note that you may need to use rimraf to delete long file names. 
         </p>
@@ -139,7 +95,26 @@
             </li>
         </ul>
     </li>
-    <li>If you want to run node and npm from the command line you must add <code>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External</code> to your command line.</li>
+    <li>
+        If you want to run node and npm from any folder via command line you must either
+        <ul>
+            <li>
+                Add to your path the location of node and npm: <code>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External</code> or <code>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Web\External</code> or more recent location.
+            </li>
+            <li>
+                Download and install node from <a hhref="https://nodejs.org">https://nodejs.org</a>.
+            </li>
+        </ul>
+    </li>
+    <li>
+        If you are having trouble getting the Task Runner Explorer to load the Gulp file successfully, try the following:
+        <ol>
+            <li>Exit Visual Studio</li>
+            <li>Download and Install Node</li>
+            <li>Remove any node modules folders from your application</li>
+            <li>Restart Visual Studio and reload your project</li>
+        </ol>
+    </li>
 </ul>
 
 

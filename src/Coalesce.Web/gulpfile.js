@@ -108,19 +108,20 @@ gulp.task("sass", function () {
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest(paths.css));
 
-    // get the files from the areas
-    gulp.src('Areas/**/Styles/*.scss')
-    .pipe(sass().on('error', sass.logError))
-        .pipe(flatten({ includeParents: 1 }))
-        .pipe(rename(function(path) {
-            var originalPath = path.dirname;
-            path.dirname += '/css';
-    }))
-    .pipe(gulp.dest(paths.wwwroot));
+    //// get the files from the areas
+    //gulp.src('Areas/**/Styles/*.scss')
+    //.pipe(sass().on('error', sass.logError))
+    //    .pipe(flatten({ includeParents: 1 }))
+    //    .pipe(rename(function(path) {
+    //        var originalPath = path.dirname;
+    //        path.dirname += '/css';
+    //}))
+    //.pipe(gulp.dest(paths.wwwroot));
 });
 
 gulp.task('sass:watch', function () {
-    gulp.watch([paths.styles + '/*.scss', 'Areas/**/Styles/*.scss'], ['sass']);
+    gulp.watch([paths.styles + '/*.scss'], ['sass']);
+    //gulp.watch([paths.styles + '/*.scss', 'Areas/**/Styles/*.scss'], ['sass']);
 });
 
 
@@ -152,21 +153,21 @@ gulp.task('ts', function () {
         .pipe(gulp.dest(paths.js));
 
     // compile the area generated code into an app.js file
-    var folders = getFolders('Areas');
+    //var folders = getFolders('Areas');
 
-    folders.map(function (folder) {
-        var areaAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-        var areaApp = gulp.src([path.join('Areas', folder, 'Scripts', '**/{Ko,ko}*.ts'), path.join('!Areas', folder, '**/*.d.ts')])
-		.pipe(sourcemaps.init())
-		.pipe(typescriptCompiler(areaAppJsProject));
+    //folders.map(function (folder) {
+    //    var areaAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
+    //    var areaApp = gulp.src([path.join('Areas', folder, 'Scripts', '**/{Ko,ko}*.ts'), path.join('!Areas', folder, '**/*.d.ts')])
+	//	.pipe(sourcemaps.init())
+	//	.pipe(typescriptCompiler(areaAppJsProject));
 
-        areaApp.dts
-			.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
+    //    areaApp.dts
+	//		.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
 
-        areaApp.js
-			.pipe(sourcemaps.write('.'))
-			.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-    });
+    //    areaApp.js
+	//		.pipe(sourcemaps.write('.'))
+	//		.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
+    //});
 
     // now compile the root individual page files
     var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
@@ -180,22 +181,22 @@ gulp.task('ts', function () {
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.js));
 
-    // now compile the areas individual page files
-    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
-    var individualTsResult = gulp.src(['Areas/**/Scripts/*.ts', '!Areas/**/Scripts/**/{intellitect,Ko,ko}*.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(individualFileTypescriptProject));
+    //// now compile the areas individual page files
+    //var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
+    //var individualTsResult = gulp.src(['Areas/**/Scripts/*.ts', '!Areas/**/Scripts/**/{intellitect,Ko,ko}*.ts'])
+    //.pipe(sourcemaps.init())
+    //.pipe(typescriptCompiler(individualFileTypescriptProject));
 
-    individualTsResult.dts.pipe(gulp.dest(paths.js));
+    //individualTsResult.dts.pipe(gulp.dest(paths.js));
 
-    individualTsResult.js
-    .pipe(sourcemaps.write('.'))
-        .pipe(flatten({ includeParents: 1 }))
-        .pipe(rename(function (path) {
-            var originalPath = path.dirname;
-            path.dirname += '/js';
-        }))
-        .pipe(gulp.dest(paths.wwwroot));
+    //individualTsResult.js
+    //.pipe(sourcemaps.write('.'))
+    //    .pipe(flatten({ includeParents: 1 }))
+    //    .pipe(rename(function (path) {
+    //        var originalPath = path.dirname;
+    //        path.dirname += '/js';
+    //    }))
+    //    .pipe(gulp.dest(paths.wwwroot));
 });
 
 gulp.task("copy-ts", ['ts'], function () {
@@ -204,7 +205,8 @@ gulp.task("copy-ts", ['ts'], function () {
 });
 
 gulp.task('ts:watch', function () {
-    gulp.watch([paths.scripts + '*.ts', 'Areas/**/Scripts/*.ts'], ['ts']);
+    gulp.watch([paths.scripts + '*.ts'], ['ts']);
+    //gulp.watch([paths.scripts + '*.ts', 'Areas/**/Scripts/*.ts'], ['ts']);
 });
 
 gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
@@ -237,7 +239,7 @@ gulp.task('nuget:publish:CodeGeneratorsMvc',
 gulp.task('nuget:publish:NLogExtensions',
     shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
         'push ' +
-        '..\\..\\artifacts\\bin\\Intellitect.NLog.Extensions\\debug\\Intellitect.NLog.Extensions.' + nlogExtensionsVersion + '.nupkg ' +
+        '..\\..\\artifacts\\bin\\IntelliTect.NLog.Extensions\\debug\\IntelliTect.NLog.Extensions.' + nlogExtensionsVersion + '.nupkg ' +
         '536300da-5e23-433c-8f45-f84e9a225b4b ' +
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );

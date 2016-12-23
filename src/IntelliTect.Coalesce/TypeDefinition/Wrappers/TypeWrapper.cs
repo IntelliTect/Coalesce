@@ -11,7 +11,24 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         protected internal ITypeSymbol Symbol { get; internal set; }
 
 
-        public abstract string NameWithTypeParams { get; }
+        public string NameWithTypeParams
+        {
+            get
+            {
+                if (IsArray) return $"{PureType.Name}[]";
+                if (IsGeneric) return $"{Name}<{PureType.Name}>";
+                return Name;
+            }
+        }
+        public string FullyQualifiedNameWithTypeParams
+        {
+            get
+            {
+                if (IsArray) return $"{PureType.FullNamespace}.{PureType.Name}[]";
+                if (IsGeneric) return $"{Name}<{PureType.FullNamespace}.{PureType.Name}>";
+                return $"{PureType.FullNamespace}.{Name}";
+            }
+        }
 
         public abstract string Namespace { get; }
 
@@ -79,6 +96,14 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public bool IsString { get { return Name == "String"; } }
         public bool IsBool { get { return Name == "Boolean"; } }
+
+        public bool IsPrimitive
+        {
+            get
+            {
+                return IsString || IsNumber || IsBool || IsEnum;
+            }
+        }
 
 
         /// <summary>

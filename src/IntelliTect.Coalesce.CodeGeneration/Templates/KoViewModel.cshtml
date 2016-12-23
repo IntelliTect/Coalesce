@@ -123,7 +123,7 @@ module @moduleName {
         @:// @(prop.Comment)
         }
         @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType) = @(prop.Type.JsKnockoutType);
-        if (prop.Type.IsEnum)
+        if (prop.Type.IsEnum || (prop.Type.IsNullable && prop.PureType.IsEnum))
         {
         @:// Text value for enumeration @prop.Name
         if (prop.Comment.Length > 0)
@@ -179,7 +179,7 @@ module @moduleName {
         // Deletes the object without confirmation.
         public deleteItem: (callback?: any) => void;
         
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && !f.IsInternalUse))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
         {
         if (prop.Comment.Length > 0)
         {
@@ -187,7 +187,7 @@ module @moduleName {
         }
         @:public addTo@(prop.Name): () => @prop.PureType.ClassViewModel.Name;
         @:// List Object model for @(prop.Name). Allows for loading subsets of data.
-        @:public @(prop.JsVariable)List: () => @(listModuleName).@(prop.Object.ListViewModelClassName);
+        @:public @(prop.JsVariable)List: (loadImmediate?: boolean) => @(listModuleName).@(prop.Object.ListViewModelClassName);
         }
         
         // Saves a many-to-many collection change. This is done automatically and doesn't need to be called.
@@ -200,7 +200,7 @@ module @moduleName {
         public autoSave: () => void;
         // If true, many-to-many collections are automatically saved.
         public autoSaveCollection: (property: string, id: any, changeStatus: string) => void;
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsInternalUse))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsInternalUse && f.PureTypeOnContext))
         {
         if (prop.Comment.Length > 0)
         {
@@ -233,7 +233,7 @@ module @moduleName {
         public isSelectedToggle: () => boolean;
 
 
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:public @(prop.JsVariable)Values: EnumValue[] = [ 
         @foreach (var kvp in prop.Type.EnumValues)
@@ -260,13 +260,13 @@ module @moduleName {
         @:// True if the server method (@method.Name) was successful.
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         @:// Presents a series of input boxes to call the server method (@method.Name)
-        @:public @method.JsVariableUi: (callback?: any) => void;
+        @:public @method.JsVariableUi: (callback?: any, reload?: boolean) => void;
         @:// Presents a modal with input boxes to call the server method (@method.Name)
-        @:public @method.JsVariableModal: (callback?: any) => void;
+        @:public @method.JsVariableModal: (callback?: any, reload?: boolean) => void;
         @:// Variable for method arguments to allow for easy binding
         @if (method.ClientParameters.Any())
         {
-        @:public @method.JsVariableWithArgs: (args?: @(model.Name).@(method.ArgsName), callback?: any) => void;
+        @:public @method.JsVariableWithArgs: (args?: @(model.Name).@(method.ArgsName), callback?: any, reload?: boolean) => void;
         @:// Object that can be easily bound to fields to allow data entry for the method
         @:public @(method.JsVariableArgs) = new @(model.Name).@(method.ArgsName)(); 
         }
@@ -362,11 +362,13 @@ module @moduleName {
 				// Set the ID 
 				self.myId = data.@(model.PrimaryKey.JsonName);
 				// Load the lists of other objects
-                @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
-                { 
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
+            { 
                 @:if (data.@prop.JsonName != null) {
-					@:// Merge the incoming array
-					@:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
+                @if (prop.Object.PrimaryKey != null)
+                {
+				    @:// Merge the incoming array
+				    @:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
                     if (prop.IsManytoManyCollection)
                     {
                     @:// Add many-to-many collection
@@ -376,10 +378,19 @@ module @moduleName {
                             @:objs.push(item.@prop.ManyToManyCollectionProperty.JsonName);
                         @:}
                     @:});
-					@:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdPropertyName', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
+				    @:RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
                     }
-				@:} 
                 }
+                else if (prop.PureType.IsPrimitive)
+                {
+                    @:self.@(prop.JsVariable)(data.@prop.JsVariable);
+                }
+                else
+                {
+                    @:RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, null, @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
+                }
+				@:} 
+            }
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
                 @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
@@ -647,7 +658,7 @@ module @moduleName {
             }
 
             // Methods to add to child collections
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             <text>
             self.addTo@(prop.Name) = function() {
@@ -669,14 +680,14 @@ module @moduleName {
             </text>
             }
 
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             @:// List Object model for @(prop.Name). Allows for loading subsets of data.
             @:var _@(prop.JsVariable)List: @(listModuleName).@(prop.Object.ListViewModelClassName) = null;
-            @:self.@(prop.JsVariable)List = function() {
+            @:self.@(prop.JsVariable)List = function(loadImmediate = true) {
                 @:if (!_@(prop.JsVariable)List){
                     @:_@(prop.JsVariable)List = new @(listModuleName).@(prop.Object.ListViewModelClassName)();
-                    @:load@(prop.Name)List();
+                    @:if (loadImmediate) load@(prop.Name)List();
                     @:self.@(prop.Parent.PrimaryKey.JsVariable).subscribe(load@(prop.Name)List)
                 @:}
                 @:return _@(prop.JsVariable)List;
@@ -786,7 +797,7 @@ module @moduleName {
 }  
 
             // Create variables for ListEditorApiUrls
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse && f.PureTypeOnContext))
             {
             @:self.@prop.ListEditorUrlName = ko.computed({
                 @:read: function() {
@@ -908,7 +919,7 @@ module @moduleName {
             };
 
             // Enumeration Lookups.
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => (f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)) && !f.IsInternalUse))
             {
             @:self.@(prop.JsTextPropertyName) = ko.computed(function() {
                 @:for(var i=0;i < self.@(prop.JsVariable)Values.length; i++){
@@ -966,7 +977,18 @@ module @moduleName {
                     self.isDirty(false);
                     self.@(method.JsVariableMessage)('');
                     self.@(method.JsVariableWasSuccessful)(true);
-                    self.@(method.JsVariableResult)(data.object);
+                @if (method.ReturnType.IsPOCO && method.ReturnType.HasClassViewModel)
+                {
+                    @:if (!self.@(method.JsVariableResult)()){
+                        @:self.@(method.JsVariableResult)(new @(method.ReturnType.ClassViewModel.ViewModelClassName)(data.object));
+                    @:}else{
+                        @:self.@(method.JsVariableResult)().loadFromDto(data.object);
+                    @:}
+                }
+                else
+                {
+                    @:self.@(method.JsVariableResult)(data.object);
+                }
                     @if (method.ReturnType.Name == method.Parent.Name)
                     {
                     @:// The return type is the type of the object, load it.
@@ -999,7 +1021,7 @@ module @moduleName {
             }
             </text>
 
-            @:self.@method.JsVariableUi = function(callback?: any) {
+            @:self.@method.JsVariableUi = function(callback?: any, reload: boolean = true) {
                 @foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
                 {
                 @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
@@ -1008,34 +1030,31 @@ module @moduleName {
                 {
                 @:var @param.Name: @param.Type.TsType = null;
                 }
-                @:self.@(method.JsVariable)(@(method.JsArguments("", true)));
+                @:self.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
             @:}
 
-            @:self.@method.JsVariableModal = function(callback?: any) {
+            @:self.@method.JsVariableModal = function(callback?: any, reload: boolean = true) {
                 @if (method.ClientParameters.Any()) {
                 @:$('#method-@method.Name').modal();
                 @:$('#method-@method.Name').on('shown.bs.modal', function() {
                     @:$('#method-@method.Name .btn-ok').unbind('click');
                     @:$('#method-@method.Name .btn-ok').click(function()
                     @:{
-                        @:self.@(method.JsVariableWithArgs)(null, callback);
+                        @:self.@(method.JsVariableWithArgs)(null, callback, reload);
                         @:$('#method-@method.Name').modal('hide');
                     @:});
                 @:});
                 }
                 else
                 {
-                    @:self.@(method.JsVariableUi)(callback);
+                    @:self.@(method.JsVariableUi)(callback, reload);
                 }
             @:}
 
             @if (method.ClientParameters.Any()) {
-            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelClassName).@(method.ArgsName), callback?: any) {
+            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelClassName).@(method.ArgsName), callback?: any, reload: boolean = true) {
                 @:if (!args) args = self.@(method.JsVariableArgs);
-                @foreach (var param in method.ClientParameters)
-                {
-                @:self.@(method.JsVariable)(@(method.JsArguments("args", true)));
-                }
+                @:self.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
             @:}
             }
             }
@@ -1066,7 +1085,7 @@ module @moduleName {
 
 
     export namespace @(model.ViewModelClassName) {
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:export enum @(prop.Name)Enum {
         @foreach (var kvp in prop.Type.EnumValues)

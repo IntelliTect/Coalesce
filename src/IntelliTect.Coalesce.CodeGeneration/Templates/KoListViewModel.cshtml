@@ -301,6 +301,10 @@ module @moduleName {
                         {
                             @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
                         }
+                        else if (method.ReturnType.PureType.IsPrimitive)
+                        {
+                            @:self.@(method.JsVariableResult)(data.object);
+                        }
                         else
                         {
                             @:RebuildArray(self.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);

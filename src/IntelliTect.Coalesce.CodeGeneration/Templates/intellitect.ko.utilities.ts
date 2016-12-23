@@ -48,7 +48,7 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
         for (var i = 0; i < obsArrayContent.length; i++) {
         //for (var i in obsArrayContent) {
             var existingItem = obsArrayContent[i];
-            if (existingItem.isDirty()) {
+            if (typeof(existingItem.isDirty) !== 'undefined' && existingItem.isDirty()) {
                 observableArray.push(existingItem);
             }
         }

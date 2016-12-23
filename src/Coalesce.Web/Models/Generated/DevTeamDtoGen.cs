@@ -21,8 +21,8 @@ namespace Coalesce.Web.Models
         {
         public DevTeamDtoGen() { }
 
-             public Int32? DevTeamId { get; set; }
-             public String Name { get; set; }
+        public Int32? DevTeamId { get; set; }
+        public System.String Name { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static DevTeamDtoGen Create(Coalesce.Domain.External.DevTeam obj, ClaimsPrincipal user = null, string includes = null,

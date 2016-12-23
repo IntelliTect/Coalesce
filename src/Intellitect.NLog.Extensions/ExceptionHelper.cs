@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Intellitect.NLog.Extensions
+namespace IntelliTect.NLog.Extensions
 {
     /// <summary>
     /// Helper class for dealing with exceptions.

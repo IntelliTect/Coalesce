@@ -1,10 +1,10 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
-// Intellitect.Utilities
+// IntelliTect.Utilities
 
 // Turn off AJAX Caching
 $.ajaxSetup({ cache: false });
 
-// Add to the Intellitect namespace or create it.
+// Add to the IntelliTect namespace or create it.
 module intellitect {
     // Create a sub namespace.
     export module utilities {

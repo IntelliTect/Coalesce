@@ -249,7 +249,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 throw new FileNotFoundException("Embedded resource not found: " + sourceFile);
             }
 
-            if (FileUtilities.HasDifferences(inputStream, destinationFile))
+            if (!File.Exists(destinationFile) || FileUtilities.HasDifferences(inputStream, destinationFile))
             {
                 const int tries = 3;
                 for (int i = 1; i <= tries; i++)
@@ -377,7 +377,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 var oldScriptsOutputPath = Path.Combine(
                   _webProject.ProjectDirectory,
-                    "Scripts", "Intellitect");
+                    "Scripts", "IntelliTect");
                 if (Directory.Exists(oldScriptsOutputPath)) Directory.Delete(oldScriptsOutputPath, true); // TODO: remove this at some point after all projects are upgraded.
 
                 string[] intellitectScripts =

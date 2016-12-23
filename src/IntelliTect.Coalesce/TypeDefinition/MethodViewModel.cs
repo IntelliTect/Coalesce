@@ -211,7 +211,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     if (Parameters.Any()) result = result + ", " + Environment.NewLine;
                 }
 
-                result += string.Join(", " + Environment.NewLine, ClientParameters.Select(f => $"                        {f.Name}: {f.Name}{f.TsConversion}"));
+                result += string.Join(", " + Environment.NewLine, ClientParameters.Select(f => $"                        {f.Name}: {f.TsConversion(f.Name)}"));
                 result += Environment.NewLine + "                    }";
                 return result;
 

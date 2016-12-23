@@ -21,11 +21,11 @@ namespace Coalesce.Web.Models
         {
         public CaseProductDtoGen() { }
 
-             public Int32? CaseProductId { get; set; }
-             public Int32? CaseId { get; set; }
-             public CaseDtoGen Case { get; set; }
-             public Int32? ProductId { get; set; }
-             public ProductDtoGen Product { get; set; }
+        public Int32? CaseProductId { get; set; }
+        public Int32? CaseId { get; set; }
+        public CaseDtoGen Case { get; set; }
+        public Int32? ProductId { get; set; }
+        public ProductDtoGen Product { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static CaseProductDtoGen Create(Coalesce.Domain.CaseProduct obj, ClaimsPrincipal user = null, string includes = null,

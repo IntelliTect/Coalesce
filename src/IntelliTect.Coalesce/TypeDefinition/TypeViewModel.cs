@@ -99,7 +99,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsVoid { get { return Name == "Void"; } }
 
-
+        public bool IsPrimitive => Wrapper.IsPrimitive;
 
         /// <summary>
         /// Returns the first generic argument for a generic type.
@@ -118,6 +118,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsDate) return "any"; // "moment.Moment";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType + "[]";
+                if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
@@ -148,6 +149,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (this.Name == nameof(TimeZoneInfo)) return "any";
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
+                if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
@@ -180,10 +182,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if ((IsArray || IsCollection) && (IsNumber)) return "KnockoutObservableArray<number>";
+                if ((IsArray || IsCollection) && (PureType.IsNumber)) return "KnockoutObservableArray<number>";
+                if ((IsArray || IsCollection) && (PureType.IsString)) return "KnockoutObservableArray<string>";
                 if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
                 else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
-                else if (IsCollection) return "KnockoutObservableArray<any>";
+                else if (IsCollection || IsArray) return "KnockoutObservableArray<any>";
                 else if (IsString) return "KnockoutObservable<string>";
                 else if (IsPOCO && HasClassViewModel) return "KnockoutObservable<ViewModels." + ClassViewModel.ViewModelClassName + ">";
                 else return "KnockoutObservable<" + TsType + ">";
@@ -360,18 +363,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                string typeName = "";
-                if (Wrapper.IsNullable || Wrapper.IsArray) typeName = Wrapper.NameWithTypeParams;
-                else typeName = Wrapper.Name + "?";
-
-                //var model = ReflectionRepository.Models.Where(m => m.OnContext && m.Name == typeName).FirstOrDefault();
                 var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
                 if (model != null)
                 {
+                    string typeName = "";
+
+                    if (Wrapper.IsNullable || Wrapper.IsArray)
+                        typeName = Wrapper.NameWithTypeParams;
+                    else
+                        typeName = Wrapper.Name + "?";
+
                     typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+
+                    return typeName;
+                }
+                else
+                {
+                    if (Wrapper.IsNullable || Wrapper.IsArray)
+                        return Wrapper.FullyQualifiedNameWithTypeParams;
+                    else
+                        return Wrapper.Name + "?";
                 }
 
-                return typeName;
             }
         }
 

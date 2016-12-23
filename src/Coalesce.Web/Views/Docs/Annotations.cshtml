@@ -37,27 +37,27 @@
 <h3>Client Validation</h3>
 <p>Client side annotations are only evaluated on the client. These can be used to perform validations with immediate feedback to the user without a server round trip. The AllowSave attribute property specified if the save will take place even if the validation fails. This allows for partially complete data to be saved with a warning noted on the user interface. Database validation is available via standard POCO database annotations. These propagate to the client as validations in TypeScript and prevent saves from going to the server. Additionally, there is general server side validation for cases like duplicate names or other validations requiring database lookups.</p>
 <h4>Options</h4>
-    <ul>
-        <li><span class="text-info">bool</span> AllowSave = <span class="text-info">false</span></li>
-        <li><span class="text-info">bool</span> IsRequired</li>
-        <li><span class="text-info">double</span> MinValue =<span class="text-info">double</span>.MaxValue</li>
-        <li><span class="text-info">double</span> MaxValue =<span class="text-info">double</span>.MinValue</li>
-        <li><span class="text-info">double</span> MinLength =<span class="text-info">double</span>.MaxValue</li>
-        <li><span class="text-info">double</span> MaxLength =<span class="text-info">double</span>.MinValue</li>
-        <li><span class="text-info">string</span> Pattern</li>
-        <li><span class="text-info">double</span> Step</li>
-        <li><span class="text-info">bool</span> IsEmail</li>
-        <li><span class="text-info">bool</span> IsPhoneUs</li>
-        <li><span class="text-info">string</span> Equal - This is an unquoted string when converted to JS. Use '' to specify strings.</li>
-        <li><span class="text-info">string</span> NotEqual - This is an unquoted string when converted to JS. Use '' to specify strings.</li>
-        <li><span class="text-info">bool</span> IsDate</li>
-        <li><span class="text-info">bool</span> IsDateIso</li>
-        <li><span class="text-info">bool</span> IsNumber</li>
-        <li><span class="text-info">bool</span> IsDigit</li>
-        <li><span class="text-info">string</span> CustomName - Allows specifying a name used in a custom validation. .extend({ CustomName: CustomValue })</li>
-        <li><span class="text-info">string</span> CustomValue - Allows specifying a value used in a custom validation. .extend({ CustomName: CustomValue })</li>
-        <li><span class="text-info">string</span> ErrorMessage - Gets or sets an error message to associate with a validation control if validation fails.</li>
-    </ul>
+<ul>
+    <li><span class="text-info">bool</span> AllowSave = <span class="text-info">false</span></li>
+    <li><span class="text-info">bool</span> IsRequired</li>
+    <li><span class="text-info">double</span> MinValue =<span class="text-info">double</span>.MaxValue</li>
+    <li><span class="text-info">double</span> MaxValue =<span class="text-info">double</span>.MinValue</li>
+    <li><span class="text-info">double</span> MinLength =<span class="text-info">double</span>.MaxValue</li>
+    <li><span class="text-info">double</span> MaxLength =<span class="text-info">double</span>.MinValue</li>
+    <li><span class="text-info">string</span> Pattern</li>
+    <li><span class="text-info">double</span> Step</li>
+    <li><span class="text-info">bool</span> IsEmail</li>
+    <li><span class="text-info">bool</span> IsPhoneUs</li>
+    <li><span class="text-info">string</span> Equal - This is an unquoted string when converted to JS. Use '' to specify strings.</li>
+    <li><span class="text-info">string</span> NotEqual - This is an unquoted string when converted to JS. Use '' to specify strings.</li>
+    <li><span class="text-info">bool</span> IsDate</li>
+    <li><span class="text-info">bool</span> IsDateIso</li>
+    <li><span class="text-info">bool</span> IsNumber</li>
+    <li><span class="text-info">bool</span> IsDigit</li>
+    <li><span class="text-info">string</span> CustomName - Allows specifying a name used in a custom validation. .extend({ CustomName: CustomValue })</li>
+    <li><span class="text-info">string</span> CustomValue - Allows specifying a value used in a custom validation. .extend({ CustomName: CustomValue })</li>
+    <li><span class="text-info">string</span> ErrorMessage - Gets or sets an error message to associate with a validation control if validation fails.</li>
+</ul>
 
 <h4>Example</h4>
 <pre>
@@ -65,10 +65,8 @@
     public class Person
     {
         public int PersonId { get; set; }
-
         [<span class="text-success">ClientValidation</span>(IsRequired = <span class="text-info">true</span>, AllowSave = <span class="text-info">false</span>)]
         public string FirstName { get; set; }
-
         [<span class="text-success">ClientValidation</span>(IsRequired = <span class="text-info">true</span>, AllowSave = <span class="text-info">false</span>, MinValue =  1, MaxValue = 50)]
         public string LastName { get; set; }
     }
@@ -76,9 +74,10 @@
 </pre>
 <a name="Create"></a>
 <h3>Create</h3>
-    <ul>
-        <li><span class="text-info">bool</span> Allow = <span class="text-info">true</span></li>
-    </ul>
+<p>Controls whether creation of a new object of this type is allowed from the client side.</p>
+<ul>
+    <li><span class="text-info">bool</span> Allow = <span class="text-info">true</span></li>
+</ul>
 <pre>
 <code class="language-html">
     [Create(Allow = false)]
@@ -93,7 +92,7 @@
 </pre>
 <a name="CreateController"></a>
 <h3>Create Controller</h3>
-<p></p>
+<p>By default an API and View controller are both created. This allows for supressing the creation of either or both of these.</p>
 <ul>
     <li><span class="text-info">bool</span> WillCreateView</li>
     <li><span class="text-info">bool</span> WillCreateApi</li>
@@ -111,6 +110,7 @@
 </pre>
 <a name="DateType"></a>
 <h3>Date Type</h3>
+<p>Specifies whether a DateTime type will have a date and a time or only a date.</p>
 <p>Class defaults to DateTypes.DateTime<br />Date Types:</p>
 <ul>
     <li>DateTime = 0</li>
@@ -123,7 +123,6 @@
         public int PersonId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTime? LastWellCheck { get; set; }
     }
@@ -131,6 +130,7 @@
 </pre>
 <a name="DefaultOrderBy"></a>
 <h3>Default Order By</h3>
+<p>Allows setting of the default manner in which the data returned to the client will be sorted. Multiple fields can be used on the sort by specifying an index.</p>
 <p>Order By Directions</p>
 <ul>
     <li>Ascending = 0</li>
@@ -146,14 +146,12 @@
     public class Person
     {
         public int PersonId { get; set; }
-
         [DefaultOrderBy(2)]    
         public string FirstName { get; set; }
         
         [DefaultOrderBy(1)]
         public string LastName { get; set; }
     }
-
     public class LoginHistory
     {
         public int LoginHistoryId {get; set;}
@@ -165,6 +163,8 @@
 </pre>
 <a name="Delete"></a>
 <h3>Delete</h3>
+<p>Controls whether an object of this type can be deleted from the client side.</p>
+
 <ul>
     <li><span class="text-info">bool</span> Allow = <span class="text-info">true</span></li>
 </ul>
@@ -182,6 +182,7 @@
 </pre>
 <a name="Detail"></a>
 <h3>Detail</h3>
+<p>Provides a detail field. Can be used to expose a tooltip or hint.</p>
 <pre>
 <code class="language-html">
     public class Person
@@ -189,7 +190,6 @@
         public int PersonId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         [Detail("i.e., asthma, reflux, eczema")]
         public string ChronicHealthProblems { get; set; }
     }
@@ -197,6 +197,7 @@
 </pre>
 <a name="Display"></a>
 <h3>Display</h3>
+<p>Controls the display name and the ordering on the admin pages.</p>
 <pre>
 <code class="language-html">
     public class Person
@@ -211,23 +212,26 @@
 <a name="DtoExcludes"></a>
 <h3>DtoExcludes</h3>
 <p>
-    When requesting data from the generated client-side list view models you can specify an "Includes" property.  
+    Allows for easily controlling when data gets set to the client. When requesting data from the generated client-side list view models you can specify an "Includes" property.
     This property controls two areas:
     <ul>
-        <li>If your underlying class implements IIncludable then the Include method will be called before querying the database, and
-        you can choose which properties to include based on the passed view.</li>
-        <li>When the database entries are returned to the client they will be trimmed based on the requested view and the values in
-        DtoExcludes and DtoIncludes.</li>
+        <li>
+            If your underlying class implements IIncludable then the Include method will be called before querying the database, and
+            you can choose which properties to include based on the passed view.
+        </li>
+        <li>
+            When the database entries are returned to the client they will be trimmed based on the requested view and the values in
+            DtoExcludes and DtoIncludes.
+        </li>
     </ul>
 </p>
 <ul>
     <li><span class="text-info">string</span> ContentViews = comma-separated list of views this property will not be included on.</li>
 </ul>
 <pre>
-    <code>
+<code>
     &lt;script&gt;
     [... additional code ...]
-
     personList.includes = "Editor";
     personList.load();
     &lt;/script&gt;
@@ -238,7 +242,6 @@
     // Don't include CreatedBy when editing - will be included for all other views
     [DtoExcludes("Editor")]
     public AppUser CreatedBy { get; set; }
-
     // LastName will be included in all views
     public string LastName { get; set; }
 </code>
@@ -246,7 +249,7 @@
 <a name="DtoIncludes"></a>
 <h3>DtoIncludes</h3>
 <p>
-    See <a href="#DtoExcludes">DtoExcludes</a> for more information.<br />
+    This is the opposite of DtoExcludes. See <a href="#DtoExcludes">DtoExcludes</a> for more information.<br />
     Controls when a property is visible on the client.
 </p>
 <ul>
@@ -266,7 +269,6 @@
     // Include Title only when all information is being displayed
     [DtoIncludes("AllInfo")]
     public string Title { get; set; }
-
     // LastName will be included in all views
     public string LastName { get; set; }
 </code>
@@ -300,7 +302,7 @@
 </pre>
 <a name="FileDownload"></a>
 <h3>File Download</h3>
-<p></p>
+<p>Specifies that this property should be exposed as a file download.</p>
 <pre>
 <code class="language-html">
         public class Signature: TrackingBase
@@ -347,7 +349,6 @@
         public int PersonId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         [Hidden(HiddenAttribute.Areas.All)]
         public int? IncomeLevelId { get; set; }
     }
@@ -355,7 +356,7 @@
 </pre>
 <a name="Internal Use"></a>
 <h3>Internal Use</h3>
-<p>Used to mark a property or method for internal use.</p>
+<p>Used to mark a property or method for internal use. Internal use methods are not exposed via the API.</p>
 <pre>
 <code class="language-html">
     public class Picture
@@ -382,7 +383,7 @@
 </pre>
 <a name="ListGroup"></a>
 <h3>List Group</h3>
-<p></p>
+<p>List groups are used for string fields that should provide a dropdown list. This allows for multiple properties to contribute values to a common list. This is a simple solution to using a linked table where adding items is really easy, but it is also easy to select existing items.</p>
 <pre>
 <code class="language-html">
     public class Person
@@ -391,14 +392,16 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
         
-        [ListGroup("School")]
+            [ListGroup("School")]
+        public string Education1School { get; set; }
+            [ListGroup("School")]
         public string Education2School { get; set; }
     }
 </code>
 </pre>
 <a name="ListText"></a>
 <h3>List Text</h3>
-<p>Used to specify which property is used in lists.</p>
+<p>When a dropdown list is used to select a related object, this controls the text shown in the dropdown by default. When using these dropdown, only the key and this field are returned as search results. </p>
 <pre>
 <code class="language-html">
     public class Person
@@ -406,7 +409,6 @@
         public int PersonId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         [ListText]
         [Hidden]
         [NotMapped]
@@ -419,7 +421,7 @@
 </pre>
 <a name="ManytoMany"></a>
 <h3>Many to Many</h3>
-<p>Used to specify a Many to Many relationship.</p>
+<p>Used to specify a Many to Many relationship. Because EF core does not support automatic intermediate mapping tables, this field is used to allow for direct reference of the many-to-many collections from the ViewModel. </p>
 <pre>
 <code class="language-html">
     public class Person
@@ -427,7 +429,6 @@
         public int PersonId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         [ManyToMany("Appointments")]
         public ICollection<PersonAppointment> PersonAppointments { get; set; }
     }
@@ -455,10 +456,8 @@
     public class Person
     {
         public int PersonId { get; set; }
-
         [ReadOnlyApi]
         public string FirstName { get; set; }
-
         [ReadOnlyApi]
         public string LastName { get; set; }
     }
@@ -466,7 +465,8 @@
 </pre>
 <a name="Search"></a>
 <h3>Search</h3>
-<p>Coalesce supports searching in various contexts. First is for a list of items in a table. Second is in a drop down selection list. In both these cases, it is important to know which fields to search. By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used. Additionally the [Search] attribute can be used on any fields to be searched.</p>
+<p>Coalesce supports searching in various properties. First is for a list of items in a table. Second is in a drop down selection list. In both these cases, it is important to know which fields to search. By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used. Additionally the [Search] attribute can be used on any fields to be searched.</p>
+<p>Search attributes can also be placed on objects. In this case the searchable fields of the child object will be used in the search. Note that due to a feature/bug in EF Core, objects that are nullable are not supported.</p>
 <pre>
 <code>
     public enum SearchMethods
@@ -487,7 +487,6 @@
     {
         public int PersonId { get; set; }
         public string FirstName { get; set; }
-
         [Search]
         public string LastName { get; set; }
     }
@@ -506,11 +505,8 @@
     public class Employee
     {
         public int EmployeeId { get; set; }
-
         public int EmployeeTypeId { get; set; }
-
         public EmployeeType EmployeeType { get; set; }
-
         public int EmployeeRankId { get; set; }
     
         [SelectFilter(ForeignPropertyName = nameof(EmployeeTypeId), LocalPropertyName = nameof(EmployeeTypeId))]
@@ -520,9 +516,7 @@
     public class EmployeeRank
     {
         public int EmployeeRankId { get; set; }
-
         public int EmployeeTypeId { get; set; }
-
         public EmployeeType EmployeeType { get; set; }
     }
     

@@ -14,7 +14,7 @@
       "version": "1.1.0"
     },
     "Microsoft.Extensions.WebEncoders.Core": "1.0.0-rc1-final",
-    "Microsoft.AspNetCore.Mvc.Razor": "1.0.0"
+    "Microsoft.AspNetCore.Mvc.Razor": "1.0.1"
   },
 
   "buildOptions": {

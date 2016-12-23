@@ -21,15 +21,15 @@ namespace Coalesce.Web.Models
         {
         public CompanyDtoGen() { }
 
-             public Int32? CompanyId { get; set; }
-             public String Name { get; set; }
-             public String Address1 { get; set; }
-             public String Address2 { get; set; }
-             public String City { get; set; }
-             public String State { get; set; }
-             public String ZipCode { get; set; }
-             public ICollection<PersonDtoGen> Employees { get; set; }
-             public String AltName { get; set; }
+        public Int32? CompanyId { get; set; }
+        public System.String Name { get; set; }
+        public System.String Address1 { get; set; }
+        public System.String Address2 { get; set; }
+        public System.String City { get; set; }
+        public System.String State { get; set; }
+        public System.String ZipCode { get; set; }
+        public ICollection<PersonDtoGen> Employees { get; set; }
+        public System.String AltName { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static CompanyDtoGen Create(Coalesce.Domain.Company obj, ClaimsPrincipal user = null, string includes = null,

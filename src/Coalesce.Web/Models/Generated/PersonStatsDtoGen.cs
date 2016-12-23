@@ -21,9 +21,9 @@ namespace Coalesce.Web.Models
         {
         public PersonStatsDtoGen() { }
 
-             public Int32? PersonStatsId { get; set; }
-             public Double? Height { get; set; }
-             public Double? Weight { get; set; }
+        public Int32? PersonStatsId { get; set; }
+        public Double? Height { get; set; }
+        public Double? Weight { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static PersonStatsDtoGen Create(Coalesce.Domain.PersonStats obj, ClaimsPrincipal user = null, string includes = null,

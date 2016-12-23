@@ -94,21 +94,27 @@ namespace IntelliTect.Coalesce.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                if (prop.ListEditorUrl == null)
+                if (prop.PureTypeOnContext)
                 {
-                    Console.WriteLine($"WARNING: Inverse Property was not found on {prop.Parent.Name}.{prop.Name}. You're missing an InverseProperty attribute.");
-                    //if (prop.InverseProperty != null)
-                    //{
-                    //    Console.WriteLine($"{prop.InverseProperty.Name}");
-                    //}
+                    if (prop.ListEditorUrl == null)
+                    {
+                        Console.WriteLine($"WARNING: Inverse Property {prop.Parent.Name} was not found on {prop.Object.Name}. You need to add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name}.");
+                        //if (prop.InverseProperty != null)
+                        //{
+                        //    Console.WriteLine($"{prop.InverseProperty.Name}");
+                        //}
+                    }
+
+                    return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 }
-                return @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+
+                return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: " + prop.JsVariableForBinding + @"().length + "" Items""' ></div>";
             }
             else
             {
                 if (editable)
                 {
-                    if (prop.Type.IsEnum)
+                    if ((prop.Type.IsNullable && prop.PureType.IsEnum) || prop.Type.IsEnum)
                     {
                         return $"@(Knockout.SelectFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                     }
@@ -164,7 +170,7 @@ namespace IntelliTect.Coalesce.Helpers
         public static string PropertyHelperWithSurroundingDiv(PropertyViewModel prop, bool editable, string areaName = "")
         {
             var propertyHelper = PropertyHelper(prop, editable, areaName);
-            return $"<div class=\"col-md-8 {prop.JsonName}\">{propertyHelper}</div>";
+            return $"<div class=\"col-md-8 prop-{prop.JsonName}\">{propertyHelper}</div>";
         }
     }
 }

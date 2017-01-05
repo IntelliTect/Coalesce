@@ -302,26 +302,32 @@ namespace @(namespaceName).Api
         <text>
         // Method: @method.Name
         [HttpPost("@(method.Name)")]
+        @if (!string.IsNullOrEmpty(method.SecurityInfo.ExecuteAnnotation)) {
         @(method.SecurityInfo.ExecuteAnnotation)
+        }
         public virtual SaveResult<@method.ReturnTypeNameForApi> @method.Name (@method.CsParameters){
             @if (method.SecurityInfo.IsExecute) {
             @:if (!ClassViewModel.MethodByName("@method.Name").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             }
             var result = new SaveResult<@method.ReturnTypeNameForApi>();
             try{
-                IncludeTree includeTree = null;
+                @if (method.ReturnType.Name == method.Parent.Name ||
+                    (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection))
+                {
+                @:IncludeTree includeTree = null;
+                }
                 @if (method.IsStatic)
                 {
                 if(method.ReturnType.IsVoid){
                 @:object objResult = null;
                 @:@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
                 }else{
-                @:var objResult = @(method.Parent.FullName).@(method.Name)(@(method.CsArguments));
+@:var objResult = @(method.Parent.FullName).@(method.Name)(@(method.CsArguments));
                 }
                 }
                 else
                 {
-                @:var item = DataSource.Includes().FindItem(id);
+@:var item = DataSource.Includes().FindItem(id);
                 if (method.ReturnType.IsVoid)
                 {
                 @:object objResult = null;
@@ -331,7 +337,7 @@ namespace @(namespaceName).Api
                 }
                 @:Db.SaveChanges();
                 }
-                @if (method.ReturnType.Name == method.Parent.Name)
+@if (method.ReturnType.Name == method.Parent.Name)
                 {
                 @:result.Object = Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
                 }
@@ -351,7 +357,7 @@ namespace @(namespaceName).Api
             }
             return result;
         }
-        </text>
+</text>
         }    
     }
 }

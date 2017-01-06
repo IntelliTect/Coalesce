@@ -101,14 +101,14 @@ namespace IntelliTect.Coalesce.Helpers
                         <span class=""input-group-addon"">
                             <span class=""fa {4}""></span>
                         </span>
-                    </div>", 
-                    dataBinding, 
+                    </div>",
+                    dataBinding,
                     format,
                     (preserve == DateTimePreservationOptions.Time).ToString().ToLower(),
                     (preserve == DateTimePreservationOptions.Date).ToString().ToLower(),
-                    icon, 
+                    icon,
                     steppingText,
-                    delaySave ? "delaySave: true": "");
+                    delaySave ? "delaySave: true" : "");
             return new HtmlString(result);
         }
 
@@ -140,14 +140,14 @@ namespace IntelliTect.Coalesce.Helpers
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
-            string format = null, int ? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
+            string format = null, int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
-            string format = "M/D/YYYY", int ? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
+            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols);
@@ -184,6 +184,21 @@ namespace IntelliTect.Coalesce.Helpers
             int? labelCols = null, int? textCols = null)
         {
             return TextArea(bindingValue, bindingName, rows).AddLabel(label, labelCols, textCols);
+        }
+
+        public static HtmlString TextAreaFor<T>(Expression<Func<T, string>> propertySelector,
+            int? rows = null, string bindingName = "value")
+        {
+            var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
+            return TextArea(propertyModel.JsVariableForBinding, bindingName, rows);
+        }
+
+
+        public static HtmlString TextAreaWithLabelFor<T>(Expression<Func<T, string>> propertySelector,
+            int? rows = null, int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "value")
+        {
+            var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
+            return TextAreaFor(propertySelector, rows).AddLabel(propertyModel.DisplayNameLabel(label), labelCols, inputCols);
         }
 
         #endregion
@@ -354,11 +369,11 @@ namespace IntelliTect.Coalesce.Helpers
             }
             return HtmlString.Empty;
         }
-        
+
         public static HtmlString SelectObject(PropertyViewModel propertyModel, string placeholder = "", string prefix = "", bool allowsClear = true)
         {
 
-            if ( prefix == "" && propertyModel.JsVariableIsReserved )
+            if (prefix == "" && propertyModel.JsVariableIsReserved)
             {
                 // This fixes bug #7799: in cases where the object that we're binding to is a js reserved word,
                 // we need to prefix it with $data, which is used by knockout internally as follows.
@@ -437,7 +452,7 @@ namespace IntelliTect.Coalesce.Helpers
                     idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist'""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
-                prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName, 
+                prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
                 propertyModel.ManyToManyCollectionProperty.Object.PrimaryKey.Name,
                 propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name, propertyModel.ManyToManyCollectionProperty.Object.Name,
                 (string.IsNullOrWhiteSpace(areaName) ? "" : $"{areaName}."));
@@ -541,7 +556,7 @@ namespace IntelliTect.Coalesce.Helpers
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             HtmlString returnString;
-            switch(preserve)
+            switch (preserve)
             {
                 case (DateTimePreservationOptions.Date):
                     returnString = DisplayDate(propertyModel.JsVariableForBinding, format);
@@ -596,7 +611,7 @@ namespace IntelliTect.Coalesce.Helpers
 
             if (propertyModel.IsDateOnly)
             {
-                returnString =  DisplayDate(propertyModel.JsVariableForBinding);
+                returnString = DisplayDate(propertyModel.JsVariableForBinding);
             }
             else if (propertyModel.Type.IsDate)
             {

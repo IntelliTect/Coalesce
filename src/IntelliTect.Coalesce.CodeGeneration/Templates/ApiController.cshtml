@@ -303,7 +303,7 @@ namespace @(namespaceName).Api
         // Method: @method.Name
         [HttpPost("@(method.Name)")]
         @if (!string.IsNullOrEmpty(method.SecurityInfo.ExecuteAnnotation)) {
-        @(method.SecurityInfo.ExecuteAnnotation)
+@:        @(method.SecurityInfo.ExecuteAnnotation)
         }
         public virtual SaveResult<@method.ReturnTypeNameForApi> @method.Name (@method.CsParameters){
             @if (method.SecurityInfo.IsExecute) {

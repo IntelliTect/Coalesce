@@ -977,7 +977,25 @@ module @moduleName {
                     self.isDirty(false);
                     self.@(method.JsVariableMessage)('');
                     self.@(method.JsVariableWasSuccessful)(true);
-                @if (method.ReturnType.IsPOCO && method.ReturnType.HasClassViewModel)
+                @if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel)
+                {
+                    @:if (self.@(method.JsVariableResult)()){
+   					// Merge the incoming array
+                        @if (method.ReturnType.PureType.ClassViewModel.PrimaryKey != null)
+                        {
+                            @:RebuildArray(self.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        }
+                        else if (method.ReturnType.PureType.IsPrimitive)
+                        {
+                            @:self.@(method.JsVariableResult)(data.object);
+                        }
+                        else
+                        {
+                            @:RebuildArray(self.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, self, true);
+                        }
+                    @:}
+                }
+                else if (method.ReturnType.IsPOCO && method.ReturnType.HasClassViewModel)
                 {
                     @:if (!self.@(method.JsVariableResult)()){
                         @:self.@(method.JsVariableResult)(new @(method.ReturnType.ClassViewModel.ViewModelClassName)(data.object));
@@ -989,6 +1007,7 @@ module @moduleName {
                 {
                     @:self.@(method.JsVariableResult)(data.object);
                 }
+
                     @if (method.ReturnType.Name == method.Parent.Name)
                     {
                     @:// The return type is the type of the object, load it.

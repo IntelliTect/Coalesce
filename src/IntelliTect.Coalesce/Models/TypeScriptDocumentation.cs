@@ -14,14 +14,15 @@ namespace IntelliTect.Coalesce.Models
 
         private List<string> Namespaces { get; } = new List<string>();
 
-        
+
 
 
         /// <summary>
         /// Pass in the text of a typescript file to build the documentation
         /// </summary>
         /// <param name="file"></param>
-        public void Generate(string file)
+        /// <param name="className">A specific class name to look for.</param>
+        public void Generate(string file, string className = null)
         {
             // Read it a line at a time and build the docs.
             List<string> comments = new List<string>() ;
@@ -38,7 +39,10 @@ namespace IntelliTect.Coalesce.Models
                 {
                     Name = CleanVariable(line, "export class");
                 }
-                else if (line.StartsWith("public "))
+                if (className != null && Name != null && Name != className)
+                    continue;
+
+                if (line.StartsWith("public "))
                 {
                     var fn = new TypeScriptFunction();
                     fn.Name = CleanVariable(line, "public");
@@ -80,7 +84,7 @@ namespace IntelliTect.Coalesce.Models
         private string CleanVariable(string line, string pre)
         {
             var parts = line.Split(new[] { pre }, StringSplitOptions.None);
-            var result = parts[1].Trim().Split(new[] { ' ', '{', ':' })[0];
+            var result = parts[1].Trim().Split(new[] { ' ', '{', ':', '<' })[0];
             return result;
         }
 

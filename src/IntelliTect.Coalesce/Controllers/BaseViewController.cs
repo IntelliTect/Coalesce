@@ -102,18 +102,21 @@ namespace IntelliTect.Coalesce.Controllers
         protected ActionResult DocsImplementation()
         {
             // Load TypeScript docs
+            var baseClassPath = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Coalesce", "intellitect.ko.base.ts");
             var path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ViewModelClassName}.ts");
 
-            ViewBag.ObjDoc = GenerateTypeScriptDocs(path);
+            ViewBag.ObjDoc = GenerateTypeScriptDocs(path, classViewModel.ViewModelClassName);
+            ViewBag.BaseObjDoc = GenerateTypeScriptDocs(baseClassPath, "BaseViewModel");
 
             path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ListViewModelClassName}.ts");
 
-            ViewBag.ListDoc = GenerateTypeScriptDocs(path);
+            ViewBag.ListDoc = GenerateTypeScriptDocs(path, classViewModel.ListViewModelClassName);
+            ViewBag.BaseListDoc = GenerateTypeScriptDocs( baseClassPath, "BaseListViewModel");
 
             return View("~/Views/Api/Docs.cshtml", classViewModel);
         }
 
-        private TypeScriptDocumentation GenerateTypeScriptDocs(string path)
+        private TypeScriptDocumentation GenerateTypeScriptDocs(string path, string className = null)
         {
             var doc = new TypeScriptDocumentation();
             var file = new FileInfo(path);
@@ -123,7 +126,7 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 var reader = file.OpenText();
                 doc.TsFilename = file.Name;
-                doc.Generate(reader.ReadToEnd());
+                doc.Generate(reader.ReadToEnd(), className);
             }
 
             return doc;

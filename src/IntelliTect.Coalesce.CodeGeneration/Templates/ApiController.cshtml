@@ -311,8 +311,8 @@ namespace @(namespaceName).Api
             }
             var result = new SaveResult<@method.ReturnTypeNameForApi>();
             try{
-                @if (method.ReturnType.Name == method.Parent.Name ||
-                    (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection))
+                @if (method.ReturnType.HasClassViewModel ||
+                    (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection))
                 {
                 @:IncludeTree includeTree = null;
                 }
@@ -337,13 +337,13 @@ namespace @(namespaceName).Api
                 }
                 @:Db.SaveChanges();
                 }
-@if (method.ReturnType.Name == method.Parent.Name)
+@if (method.ReturnType.HasClassViewModel && !method.ReturnType.IsCollection)
                 {
-                @:result.Object = Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
+                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
                 }
-                else if (method.ReturnType.PureType.Name == method.Parent.Name && method.ReturnType.IsCollection)
+                else if (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(model.FullName), @(model.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
                 }
                 else
                 {

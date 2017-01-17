@@ -112,8 +112,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 string result = ReturnType.NameWithTypeParams;
                 if (result == "Void") return "object";
                 result = result.Replace("IQueryable", "IEnumerable");
-                if (result == Parent.Name) result = $"{Parent.Name}DtoGen";
-                if (result.Contains($"<{Parent.Name}>")) result = result.Replace($"<{Parent.Name}>", $"<{Parent.Name}DtoGen>");
+                result = result.Replace("ICollection", "IEnumerable");
+                if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
+                {
+                    var name = ReturnType.PureType.ClassViewModel.Name;
+                    result = result.Replace($"<{name}>", $"<{name}DtoGen>");
+                }
+                else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
+                {
+                    result = $"{result}DtoGen";
+                }
                 return result;
             }
         }

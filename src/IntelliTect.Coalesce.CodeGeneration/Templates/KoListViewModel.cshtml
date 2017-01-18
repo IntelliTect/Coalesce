@@ -21,6 +21,10 @@
         viewModelModuleName = Model.ModulePrefix + "." + viewModelModuleName;
         viewModelName = Model.ModulePrefix + "." + viewModelName;
     }
+    if (model.HasTypeScriptPartial)
+    {
+        viewModelName += ".Partial";
+    }
 }
 @{ 
 @:/// <reference path="@typingReferencePath/typings/tsd.d.ts" />

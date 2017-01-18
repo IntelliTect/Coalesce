@@ -37,7 +37,7 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 
 module @moduleName {
 
-	export class @(model.ViewModelClassName) extends BaseViewModel<@(model.ViewModelClassName)>
+	export class @(model.ViewModelGeneratedClassName) extends BaseViewModel<@(model.ViewModelClassName)>
     {
         protected modelName = "@(model.Name)";
         protected modelDisplayName = "@(model.DisplayName)";
@@ -159,9 +159,9 @@ module @moduleName {
         @:// Variable for method arguments to allow for easy binding
         @if (method.ClientParameters.Any())
         {
-        @:public @method.JsVariableWithArgs: (args?: @(model.Name).@(method.ArgsName), callback?: any, reload?: boolean) => void;
+        @:public @method.JsVariableWithArgs: (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback?: any, reload?: boolean) => void;
         @:// Object that can be easily bound to fields to allow data entry for the method
-        @:public @(method.JsVariableArgs) = new @(model.Name).@(method.ArgsName)(); 
+        @:public @(method.JsVariableArgs) = new @(model.ViewModelGeneratedClassName).@(method.ArgsName)(); 
         }
         @:
         }
@@ -169,7 +169,7 @@ module @moduleName {
         public originalData: KnockoutObservable<any> = ko.observable(null);
         
         // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: @(model.ViewModelClassName)) {};
+        public init(myself: @(model.ViewModelGeneratedClassName)) {};
 
         constructor(newItem?: any, parent?: any){
             super();
@@ -663,7 +663,7 @@ module @moduleName {
             @:}
 
             @if (method.ClientParameters.Any()) {
-            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelClassName).@(method.ArgsName), callback?: any, reload: boolean = true) {
+            @:self.@(method.JsVariableWithArgs) = function(args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback?: any, reload: boolean = true) {
                 @:if (!args) args = self.@(method.JsVariableArgs);
                 @:self.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
             @:}
@@ -695,7 +695,7 @@ module @moduleName {
 
 
 
-    export namespace @(model.ViewModelClassName) {
+    export namespace @(model.ViewModelGeneratedClassName) {
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
         @:export enum @(prop.Name)Enum {

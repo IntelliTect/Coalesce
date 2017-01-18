@@ -53,6 +53,11 @@ module @moduleName {
         protected apiUrlBase = "@(model.ApiUrl)";
         public dataSources = @(model.Name)DataSources;
 
+        public query: {
+            where?: string;
+            @(string.Join("\n            ", model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"{f.UrlParameterName}?:{f.Type.TsType};")))
+        } = null;
+
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
         public listDataSource: @(model.Name)DataSources = @(model.Name)DataSources.Default;
 

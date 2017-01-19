@@ -25,7 +25,7 @@
 
 <h4>Class View Models</h4>
 <p>Class view models represent your class on the client side. They have observable properties for each of your properties and functions for the methods. They have load and save functionality and by default save change to properties automatically. This feature can be disabled and the save method bound to a button to enable an on demand save. </p>
-
+<p>Coalesce includes an easy way to extend these models with your own custom typescript. Simply add the <code>[TypeScriptPartial]</code> attibute to your C# class. Upon running code generation, a typescript file will then be generated for you in ./Scripts/Partials that you are free to modify as desired. </p>
 <h4>List View Models</h4>
 <p>List view models are designed to retrieve a list of a certain type of object. The load function get this list and puts it into an array in the collection. The items in the array are of the type of the Class view model. This means that if one of the items in the collection is modified, the change can be automatically saved. This makes creating editable tables simple.</p>
 

@@ -70,8 +70,7 @@ gulp.task("copy-lib", ['clean-lib'], function () {
     }
 });
 
-gulp.task("copy-files", ['copy-lib', 'copy-ts', 'copy-js'])
-{}
+gulp.task("copy-files", ['copy-lib', 'copy-ts', 'copy-js']);
 
 gulp.task("copy-js", function () {
     gulp.src(paths.scripts + "*.js")
@@ -109,7 +108,7 @@ gulp.task('ts', function () {
 
     // compile the root generated code into an app.js file
     var rootAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', '!' + paths.scripts + '/*.d.ts'])
+    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/{Ko,ko}*.ts', '!' + paths.scripts + '/*.d.ts'])
     .pipe(sourcemaps.init())
     .pipe(typescriptCompiler(rootAppJsProject));
 

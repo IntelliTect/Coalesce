@@ -9,7 +9,7 @@ namespace Coalesce.Web.Controllers
 {
     [Authorize]
     public partial class ProductController 
-        : BaseViewController<Product, AppDbContext> 
+        : BaseViewController<Coalesce.Domain.Product, AppDbContext> 
     { 
         public ProductController() : base() { }
 

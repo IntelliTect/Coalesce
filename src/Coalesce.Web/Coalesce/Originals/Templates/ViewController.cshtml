@@ -36,7 +36,7 @@ namespace @(namespaceName).Controllers
     }
     @(model.SecurityInfo.ClassAnnotation)
     public partial class @(model.ControllerName)Controller 
-        : BaseViewController<@(model.Name), @contextInfo.Name> 
+        : BaseViewController<@(model.FullName), @contextInfo.Name> 
     { 
         public @(model.ControllerName)Controller() : base() { }
 

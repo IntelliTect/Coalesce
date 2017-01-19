@@ -933,9 +933,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             // Do files in the Partials folder.
             dir = new DirectoryInfo(path + "\\Partials");
-            foreach (var file in dir.GetFiles("*.ts"))
-            {
-                fileContents.Add($"/// <reference path=\"Partials\\{file.Name}\" />");
+            if (dir.Exists)
+            { 
+                foreach (var file in dir.GetFiles("*.ts"))
+                {
+                    fileContents.Add($"/// <reference path=\"Partials\\{file.Name}\" />");
+                }
             }
 
             // Write the file with the array list of content.

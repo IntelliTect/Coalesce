@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsString) { return ""; }
+                if (IsString) { return "\"\""; }
                 if (IsPOCO) { return "null"; }
                 if (IsEnum) { return "0"; }
                 if (IsNumber) { return "0"; }

@@ -19,6 +19,11 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public OrderByDirections OrderByDirection { get; set; }
         public int FieldOrder { get; set; }
 
+        /// <summary>
+        /// When using the DefaultOrderByAttribute on an object property, specifies the field on the object to use for sorting.
+        /// </summary>
+        public string FieldName { get; set; }
+
         public DefaultOrderByAttribute(int fieldOrder = 0, OrderByDirections orderByDirection = OrderByDirections.Ascending)
         {
             this.OrderByDirection = orderByDirection;

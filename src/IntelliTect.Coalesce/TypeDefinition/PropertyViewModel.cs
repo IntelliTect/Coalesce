@@ -822,9 +822,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var order = (int?)Wrapper.GetAttributeValue<DefaultOrderByAttribute>(nameof(DefaultOrderByAttribute.FieldOrder));
                 var direction = Wrapper.GetAttributeValue<DefaultOrderByAttribute, DefaultOrderByAttribute.OrderByDirections>(nameof(DefaultOrderByAttribute.OrderByDirection));
+                var fieldName = Wrapper.GetAttributeValue<DefaultOrderByAttribute>(nameof(DefaultOrderByAttribute.FieldName)) as string;
                 if (order != null && direction != null)
                 {
-                    return new OrderByInformation() { FieldName = Name, FieldOrder = order.Value, OrderByDirection = direction.Value };
+                    var name = Name;
+                    if (fieldName != null)
+                    {
+                        string defaultValue = Type.ClassViewModel?.PropertyByName(fieldName).Type.CsDefaultValue ?? "\"\"";
+
+                        name = $"({name} == null ? {defaultValue}: {name}.{fieldName})";
+                    }
+                    return new OrderByInformation() { FieldName = name, FieldOrder = order.Value, OrderByDirection = direction.Value };
                 }
                 return null;
             }
@@ -1086,7 +1094,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     sb.Append("                ");
                     sb.Append($"{objectName}.{Name} = obj.{Name}");
 
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause;
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause.Replace("\"", "\\\"");
                     if (defaultOrderBy != null)
                     {
                         sb.Append($".OrderBy(\"{defaultOrderBy}\")");

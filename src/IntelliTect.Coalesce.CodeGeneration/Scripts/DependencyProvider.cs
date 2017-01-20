@@ -61,6 +61,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
         public static ModelTypesLocator ModelTypesLocator(ProjectContext project)
         {
+            //var workspace = MSBuildWorkspace.Create();
+            //var result = workspace.OpenProjectAsync(project.ProjectDirectory).Result;
+
             var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
 
             return new ModelTypesLocator(LibraryExporter(project), workspace);

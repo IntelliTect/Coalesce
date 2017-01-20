@@ -44,7 +44,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             var rootDirectory = curDirectory.Root.FullName;
             while (curDirectory.FullName != rootDirectory)
             {
-                if (curDirectory.EnumerateFiles("project.json", SearchOption.TopDirectoryOnly).Count() == 1)
+                if (curDirectory.EnumerateFiles("*.csproj", SearchOption.TopDirectoryOnly).Count() == 1)
                 {
                     foundProjectJsonPath = curDirectory.FullName;
                     break;

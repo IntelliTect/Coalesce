@@ -69,7 +69,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     Console.WriteLine($"Building scripts for: {dataContext.FullName}");
                 }
 
-
                 List<ClassViewModel> models = null;
                 try
                 {

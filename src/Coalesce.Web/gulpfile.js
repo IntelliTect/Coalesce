@@ -245,13 +245,13 @@ gulp.task('nuget:publish:NLogExtensions',
 );
 
 gulp.task('coalesce:build', shell.task
-    (['dotnet build "../IntelliTect.Coalesce.Cli/project.json" -o ./CoalesceExe -f net46'],
+    (['dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj"'],
 { verbose: true }
 ));
 
 
-gulp.task('coalesce', ['coalesce:build'], shell.task
-    (['"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext ' +
+gulp.task('coalesce', [/*'coalesce:build'*/], shell.task
+    (['"../IntelliTect.Coalesce.Cli/bin/Debug/net46/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext ' +
     '-dp ../Coalesce.Domain -wp ./ -filesOnly true'],
 { verbose: true }
 ));

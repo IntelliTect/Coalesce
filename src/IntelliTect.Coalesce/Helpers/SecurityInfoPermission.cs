@@ -73,15 +73,20 @@ namespace IntelliTect.Coalesce.Helpers
         }
 
 
+        public string ToStringWithName()
+        {
+            return $"{Name}: {ToString()}";
+        }
+
         public override string ToString()
         {
             if (HasAttribute)
             {
-                if (PermissionLevel == SecurityPermissionLevels.AllowAll) return $"{Name}: Allow All ";
-                else if (PermissionLevel == SecurityPermissionLevels.DenyAll) return $"{Name}: Deny All ";
-                else return $"{Name}: Allow Authorized -- {ExternalRoleList} ";
+                if (PermissionLevel == SecurityPermissionLevels.AllowAll) return $"Allow All ";
+                else if (PermissionLevel == SecurityPermissionLevels.DenyAll) return $"Deny All ";
+                else return $"Allow Authorized Roles: {ExternalRoleList} ";
             }
-            return "";
+            return $"Allow All Authorized";
         }
     }
 }

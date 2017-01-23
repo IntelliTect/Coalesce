@@ -32,8 +32,30 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Security: @vm.SecurityInfo.ToString()</h4>
+                <h4>Controller Level Security</h4>
             </div>
+            <table class="table">
+                <tr>
+                    <td>Class Annotation</td>
+                    <td>@vm.SecurityInfo.ClassAnnotation</td>
+                </tr>
+                <tr>
+                    <td>Create</td>
+                    <td>@vm.SecurityInfo.Create.ToString()</td>
+                </tr>
+                <tr>
+                    <td>Read Annotation</td>
+                    <td>@vm.SecurityInfo.ReadAnnotation</td>
+                </tr>
+                <tr>
+                    <td>Edit Annotation</td>
+                    <td>@vm.SecurityInfo.EditAnnotation</td>
+                </tr>
+                <tr>
+                    <td>Delete Annotation</td>
+                    <td>@vm.SecurityInfo.DeleteAnnotation</td>
+                </tr>
+            </table>
         </div>
 
 
@@ -48,7 +70,8 @@
                     <th>Required</th>
                     <th>Read Only</th>
                     <th>Has Valid Values</th>
-                    <th>Security</th>
+                    <th>Read</th>
+                    <th>Edit</th>
                 </tr>
                 @foreach (var prop in vm.Properties)
                 {
@@ -71,7 +94,8 @@
                         <td>@prop.IsRequired</td>
                         <td>@prop.IsReadOnly</td>
                         <td>@prop.HasValidValues</td>
-                        <td>@prop.SecurityInfo.ToString()</td>
+                        <td>@prop.SecurityReadToString()</td>
+                        <td>@prop.SecurityEditToString()</td>
                     </tr>
                 }
             </table>

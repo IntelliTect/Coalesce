@@ -740,7 +740,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 Console.Write("   ");
                 foreach (var externalType in apiModels.ViewModelsForTemplates.Where(f => !f.Model.OnContext))
                 {
-                    var fileName = (string.IsNullOrWhiteSpace(externalType.ModulePrefix)) ? $"Ko.{externalType.Model.Name}.ts" : $"Ko.{externalType.ModulePrefix}.{externalType.Model.Name}.ts";
+                    var fileName = "Ko";
+                    if (!string.IsNullOrWhiteSpace(externalType.ModulePrefix)) fileName += "." + externalType.ModulePrefix;
+                    fileName += "." + externalType.Model.Name;
+                    if (externalType.Model.HasTypeScriptPartial) fileName += ".Partial";
+                    fileName += ".ts";
                     await output.Generate("KoExternalType.cshtml", fileName, externalType);
 
                     Console.Write(externalType.Model.Name + "  ");
@@ -775,7 +779,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     _webProject.ProjectDirectory,
                     areaLocation,
                     ScriptsFolderName, "Partials");
-            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.HasTypeScriptPartial && (f.Model.OnContext || f.Model.IsDto)))
+            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.HasTypeScriptPartial))
             {
                 var fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.Name}.partial.ts" : $"Ko.{model.ModulePrefix}.{model.Model.Name}.partial.ts";
                 var fullName = Path.Combine(partialOutputPath, fileName);

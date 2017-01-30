@@ -529,6 +529,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var value = Wrapper.HasAttribute<RequiredAttribute>();
                 if (value) return true;
 
+                value = Wrapper.HasAttribute<ClientValidationAttribute>();
+                if (value && Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool? == false) return false;
+
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
                 if (IsForeignKey && !Type.IsNullable) return true;
 

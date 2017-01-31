@@ -209,14 +209,14 @@ namespace Coalesce.Web.Api
 
         // Method: Rename
         [HttpPost("Rename")]
-        
         public virtual SaveResult<PersonDtoGen> Rename (Int32 id, String addition){
             var result = new SaveResult<PersonDtoGen>();
             try{
+                IncludeTree includeTree = null;
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
-                                result.Object = Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(objResult, User, "");
+                result.Object = Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(objResult, User, "", includeTree);
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -225,10 +225,9 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: ChangeSpacesToDashesInName
         [HttpPost("ChangeSpacesToDashesInName")]
-        
         public virtual SaveResult<object> ChangeSpacesToDashesInName (Int32 id){
             var result = new SaveResult<object>();
             try{
@@ -236,7 +235,7 @@ namespace Coalesce.Web.Api
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -245,15 +244,14 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: Add
         [HttpPost("Add")]
-        
         public virtual SaveResult<Int32> Add (Int32 numberOne, Int32 numberTwo){
             var result = new SaveResult<Int32>();
             try{
                 var objResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -262,7 +260,7 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: GetUser
         [HttpPost("GetUser")]
         [Authorize]
@@ -271,7 +269,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<String>();
             try{
                 var objResult = Coalesce.Domain.Person.GetUser(User);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -280,15 +278,14 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: GetUserPublic
         [HttpPost("GetUserPublic")]
-        
         public virtual SaveResult<String> GetUserPublic (){
             var result = new SaveResult<String>();
             try{
                 var objResult = Coalesce.Domain.Person.GetUserPublic(User);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -297,7 +294,7 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: NamesStartingWith
         [HttpPost("NamesStartingWith")]
         [Authorize]
@@ -306,7 +303,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<IEnumerable<String>>();
             try{
                 var objResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -315,15 +312,14 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: NamesStartingWithPublic
         [HttpPost("NamesStartingWithPublic")]
-        
         public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic (String characters){
             var result = new SaveResult<IEnumerable<String>>();
             try{
                 var objResult = Coalesce.Domain.Person.NamesStartingWithPublic(characters, Db);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -332,15 +328,15 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: NamesStartingWithAWithCases
         [HttpPost("NamesStartingWithAWithCases")]
-        
         public virtual SaveResult<IEnumerable<PersonDtoGen>> NamesStartingWithAWithCases (){
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
             try{
+                IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -349,15 +345,15 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: BorCPeople
         [HttpPost("BorCPeople")]
-        
         public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople (){
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
             try{
+                IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Person.BorCPeople(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -366,5 +362,5 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-            }
+    }
 }

@@ -164,7 +164,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
         }
 
-        private bool AllowAnonymousAll()
+        public bool AllowAnonymousAll()
         {
             return Read.AllowAnonymous && Edit.AllowAnonymous && Delete.AllowAnonymous && Create.AllowAnonymous;
         }

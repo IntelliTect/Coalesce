@@ -13,7 +13,7 @@
         <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
             <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
             Page
-            <input data-bind="textInput: page" style="width: 35px">
+            <input data-bind="value: page" style="width: 35px">
             of
             <span data-bind="text: pageCount"></span>
             <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
@@ -71,11 +71,11 @@
                     </dd>
                     <dt>Cases Assigned</dt>
                     <dd>
-                        <a data-bind = 'attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                        <a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
                     </dd>
                     <dt>Cases Reported</dt>
                     <dd>
-                        <a data-bind = 'attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                        <a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
                     </dd>
                     <dt>Birth Date</dt>
                     <dd>

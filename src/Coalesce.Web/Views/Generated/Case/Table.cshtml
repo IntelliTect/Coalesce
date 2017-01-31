@@ -5,18 +5,18 @@
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Case List
-            <span style="font-size: .5em; padding-left: 20px;@(User.IsInRole("Admin") ? "" : " visibility:hidden;")"><a href="~/Case/Docs">API Docs</a></span>
+            <span style="font-size: .5em; padding-left: 20px;"><a href="~/Case/Docs">API Docs</a></span>
     </h1>
     <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
 
     <div class="clearfix">
         <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
-            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
             Page
-            <input data-bind="textInput: page" style="width: 35px">
+            <input data-bind="value: page" style="width: 35px">
             of
             <span data-bind="text: pageCount"></span>
-            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
         </div>
         <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
             <option value="1">1</option>

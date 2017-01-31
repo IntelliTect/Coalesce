@@ -59,7 +59,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string JsonName => Wrapper.Name.ToCamelCase();
 
-        public string Comment {
+        public string Comment
+        {
             get
             {
                 return Regex.Replace(Wrapper.Comment, "\n(\\s+)", "\n        // ");
@@ -609,7 +610,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                switch ( SearchMethod )
+                switch (SearchMethod)
                 {
                     case SearchAttribute.SearchMethods.Contains:
                         return "Contains";
@@ -670,7 +671,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 else if (string.Compare(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
                 else if (Parent.IsDto && Parent.BaseViewModel != null && string.Compare(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase) == 0) return true;
                 return false;
-                
+
             }
         }
 
@@ -691,7 +692,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     return true;
                 }
-                if (Parent.Properties.Any( p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name))))
+                if (Parent.Properties.Any(p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name))))
                 {
                     // You can also put the attribute on the POCO property and refer to the key property. This detects that.
                     return true;
@@ -933,6 +934,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return $"{Name} : {TypeName}";
         }
 
+        public string SecurityToString()
+        {
+
+            return $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
+        }
+        public string SecurityEditToString()
+        {
+            if (IsInternalUse) return "None";
+            if (SecurityInfo.IsSecuredProperty)
+            {
+                if (!SecurityInfo.IsEdit) return "None";
+                return $"Roles: {SecurityInfo.EditRolesExternal}";
+            }
+            return "Allow";
+        }
+        public string SecurityReadToString()
+        {
+            if (IsInternalUse) return "None";
+            if (SecurityInfo.IsSecuredProperty) return $"Roles: {SecurityInfo.ReadRolesExternal}";
+            return "Allow";
+        }
+
         public SecurityInfoProperty SecurityInfo
         {
             get
@@ -1034,7 +1057,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return includes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
             }
         }
-        
+
         /// <summary>
         /// True if this property has the Excludes Attribute
         /// </summary>
@@ -1058,7 +1081,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        private string GetPropertySetterConditional(List<string> rolesList )
+        private string GetPropertySetterConditional(List<string> rolesList)
         {
             var roles = (SecurityInfo.IsSecuredProperty && rolesList.Count() > 0) ?
                 string.Join(" || ", rolesList.Select(s => $"is{s}")) : "";
@@ -1070,7 +1093,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
             if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
 
-            return string.Join( " && ", statement );
+            return string.Join(" && ", statement);
         }
 
         public string ObjToDtoPropertySetter(string objectName)
@@ -1094,7 +1117,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     sb.Append("                ");
                     sb.Append($"{objectName}.{Name} = obj.{Name}");
 
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause.Replace("\"", "\\\"");
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause?.Replace("\"", "\\\"");
                     if (defaultOrderBy != null)
                     {
                         sb.Append($".OrderBy(\"{defaultOrderBy}\")");
@@ -1146,11 +1169,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 setter = $"{objectName}.{Name} = obj.{Name};";
             }
 
-            var readRolesList = SecurityInfo.ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-            if ((SecurityInfo.IsSecuredProperty && readRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+            if ((SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
             {
-                var statement = GetPropertySetterConditional( readRolesList );
+                var statement = GetPropertySetterConditional(SecurityInfo.ReadRolesList);
 
                 return $@"            if ({statement})
             {{

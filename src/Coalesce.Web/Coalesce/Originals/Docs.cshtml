@@ -333,6 +333,15 @@
                             <td>@f.Comment</td>
                         </tr>
                     }
+                    @foreach (var f in ((TypeScriptDocumentation)(ViewBag.BaseObjDoc)).Functions.OrderBy(f => f.Name))
+                    {
+                        <tr>
+                            <td>@f.Name</td>
+                            <td>@f.Observable</td>
+                            <td>@f.Type</td>
+                            <td>@f.Comment</td>
+                        </tr>
+                    }
                 </tbody>
             </table>
 
@@ -356,6 +365,15 @@
 
                 <tbody>
                     @foreach (var f in listDoc.Functions.OrderBy(f => f.Name))
+                    {
+                        <tr>
+                            <td>@f.Name</td>
+                            <td>@f.Observable</td>
+                            <td>@f.Type</td>
+                            <td>@f.Comment</td>
+                        </tr>
+                    }
+                    @foreach (var f in ((TypeScriptDocumentation)(ViewBag.BaseListDoc)).Functions.OrderBy(f => f.Name))
                     {
                         <tr>
                             <td>@f.Name</td>

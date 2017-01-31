@@ -205,12 +205,11 @@ namespace Coalesce.Web.Api
 
         // Method: GetAllOpenCasesCount
         [HttpPost("GetAllOpenCasesCount")]
-        
         public virtual SaveResult<Int32> GetAllOpenCasesCount (){
             var result = new SaveResult<Int32>();
             try{
                 var objResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -219,16 +218,15 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: RandomizeDatesAndStatus
         [HttpPost("RandomizeDatesAndStatus")]
-        
         public virtual SaveResult<object> RandomizeDatesAndStatus (){
             var result = new SaveResult<object>();
             try{
-                object objResult = null;
+                                object objResult = null;
                 Case.RandomizeDatesAndStatus(Db);
-                                result.Object = objResult;
+                result.Object = objResult;
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -237,15 +235,15 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: GetAllOpenCases
         [HttpPost("GetAllOpenCases")]
-        
         public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases (){
             var result = new SaveResult<IEnumerable<CaseDtoGen>>();
             try{
+                IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetAllOpenCases(Db);
-                                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree()));
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -254,15 +252,15 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-        
+
         // Method: GetCaseSummary
         [HttpPost("GetCaseSummary")]
-        
-        public virtual SaveResult<CaseSummary> GetCaseSummary (){
-            var result = new SaveResult<CaseSummary>();
+        public virtual SaveResult<CaseSummaryDtoGen> GetCaseSummary (){
+            var result = new SaveResult<CaseSummaryDtoGen>();
             try{
+                IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetCaseSummary(Db);
-                                result.Object = objResult;
+                result.Object = Mapper<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>.ObjToDtoMapper(objResult, User, "", includeTree);
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){
@@ -271,5 +269,5 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-            }
+    }
 }

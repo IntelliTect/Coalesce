@@ -41,7 +41,7 @@
         public int? CompanyId { get; set; }
         public Company Company { get; set; }
     }
-    public class DbContext: DbContext
+    public class AppDbContext: DbContext
     {
         public DbSet&lt;Person&gt; People { get; set; }
         public DbSet&lt;Company&gt; Company{ get; set; }
@@ -113,36 +113,7 @@
 <p>Like IAfterSave, this method is called after the delete was successful. It is called on the newly deleted object and includes the <code>DbContext</code> and the <code>ClaimsPrincipal</code>. This can be used for cleanup of related objects.</p>
 <p>Note: Generated controllers have overridable methods that can also control behavior.</p>
 
-<h3>Controlling Object Mapping</h3>
-<p>
-    By default Coalesce maps all database entities to a generated DTO before returning to the client.  The DTO is generated based on the
-    attributes on your model, and provides security trimming on properties based on the user's roles.  If you want to handle the mapping
-    yourself simply add an implicit conversion operator to your model that returns your DTO.  Then on the client side specify the full
-    type name of the DTO and coalesce will use your DTO and conversion rather than the generated DTO.
-</p>
-<pre><code class="language-html">
-    public class PersonDropDownDto
-    {
-        public int PersonId { get; set; }
-        public string FullName { get; set; }
-    }
-    public class Person
-    {
-        ...
-        public static implicit operator PersonDropDownDto(Person person)
-        {
-            var dto = new PersonDropDownDto();
-            dto.PersonId = person.PersonId;
-            dto.FullName = person.FullName;
-            return dto;
-        }
-    }
-    &lt;script type="text/javascript"&gt;
-    var personList = new ListViewModels.PersonList();
-    personList.dto("Coalesce.Domain.Dtos.PersonDropDownDto");
-    personList.load();
-    &lt;/script&gt;
-</code></pre>
+
 <hr />
 <h1>Other Attributes</h1>
 <h4>Validation</h4>

@@ -135,6 +135,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get { return Name; }
         }
 
+        public string ViewModelGeneratedClassName
+        {
+            get
+            {
+                if (!HasTypeScriptPartial)
+                    return ViewModelClassName;
+
+                var name = Wrapper.GetAttributeValue<TypeScriptPartialAttribute>(nameof(TypeScriptPartialAttribute.BaseClassName)) as string;
+
+                if (string.IsNullOrEmpty(name)) return $"{ViewModelClassName}Partial";
+
+                return name;
+            }
+        }
+
         public string Namespace { get { return Wrapper.Namespace; } }
 
         /// <summary>
@@ -494,6 +509,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return HasAttribute<ComplexTypeAttribute>();
             }
         }
+
+        /// <summary>
+        /// Returns true if this class has a partial typescript file.
+        /// </summary>
+        public bool HasTypeScriptPartial => HasAttribute<TypeScriptPartialAttribute>();
+
 
         /// <summary>
         /// Returns true if the attribute exists.

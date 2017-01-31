@@ -1,0 +1,37 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Utilities
+@{
+    ClassViewModel model = Model.Model;
+    string typingReferencePath = "../..";
+    string intellitectUtilitiesPath = "..";
+    string moduleName = "ViewModels";
+    string listModuleName = "ListViewModels";
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        typingReferencePath = "../../../..";
+        intellitectUtilitiesPath = "../../../../scripts";
+        moduleName = Model.AreaName + "." + moduleName;
+        listModuleName = Model.AreaName + "." + listModuleName;
+    }
+    if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
+    {
+        moduleName = Model.ModulePrefix + "." + moduleName;
+    }
+}
+@{ 
+@:/// <reference path="../../typings/tsd.d.ts" />
+@:/// <reference path="../intellitect.references.d.ts" />
+}
+
+
+
+module @moduleName {
+	export class @(model.ViewModelClassName) extends @(model.ViewModelGeneratedClassName) {
+
+        constructor(newItem?: any, parent?: any) {
+            super(newItem, parent);
+
+        }
+    }
+}

@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsString) { return ""; }
+                if (IsString) { return "\"\""; }
                 if (IsPOCO) { return "null"; }
                 if (IsEnum) { return "0"; }
                 if (IsNumber) { return "0"; }
@@ -164,6 +164,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsByteArray) return "ko.observable(null)";
                 if (IsCollection || IsArray) return "ko.observableArray([])";
                 if (IsComplexType) return "ko.observable(null)";
                 else if (IsDate)
@@ -182,6 +183,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsByteArray) return "KnockoutObservable<string>";
                 if ((IsArray || IsCollection) && (PureType.IsNumber)) return "KnockoutObservableArray<number>";
                 if ((IsArray || IsCollection) && (PureType.IsString)) return "KnockoutObservableArray<string>";
                 if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
@@ -189,21 +191,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 else if (IsCollection || IsArray) return "KnockoutObservableArray<any>";
                 else if (IsString) return "KnockoutObservable<string>";
                 else if (IsPOCO && HasClassViewModel) return "KnockoutObservable<ViewModels." + ClassViewModel.ViewModelClassName + ">";
-                else return "KnockoutObservable<" + TsType + ">";
-            }
-        }
-
-
-        /// <summary>
-        /// Type used in knockout for the observable without viewmodels.
-        /// </summary>
-        public string TsKnockoutTypePlain
-        {
-            get
-            {
-                if ((IsArray || IsCollection) && IsNumber) return "KnockoutObservableArray<number>";
-                else if (IsCollection) return "KnockoutObservableArray<any>";
-                else if (IsString) return "KnockoutObservable<string>";
                 else return "KnockoutObservable<" + TsType + ">";
             }
         }

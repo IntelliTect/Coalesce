@@ -13,6 +13,7 @@ declare module BootstrapV3DatetimePicker {
     interface DatetimepickerOptions {
         stepping: any;
         keyBinds: any;
+        timeZone: any;
     }
 }
 
@@ -497,7 +498,8 @@ ko.bindingHandlers.datePicker = {
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
             sideBySide: allBindings.get('sideBySide') || false,
-            keyBinds: allBindings.get('keyBinds') || undefined,
+            timeZone: allBindings.get('timeZone') || null,
+            keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
         })
             .on("dp.change", function (e) {
                 var preserveDate = allBindings.get('preserveDate') || false;
@@ -755,22 +757,28 @@ ko.bindingHandlers.formatNumberText = {
 
             // Date formats: http://momentjs.com/docs/#/displaying/format/
             var invalidString = allBindings.invalid == undefined ? ko.bindingHandlers.moment.defaults.invalid : allBindings.invalid;
+            var shorten = allBindings.shorten == undefined ? false : allBindings.shorten;
 
             var dateMoment = moment(valueUnwrapped);
 
-            // format string for input box
-            var output = dateMoment.isValid() ?
-                dateMoment.fromNow() :
-                invalidString;
-
-            $(element).text(output);
-
-            clearInterval(element.koFromNowTimer);
-            element.koFromNowTimer = setInterval(function () {
+            var fmt = () => {
                 var output = dateMoment.isValid() ?
                     dateMoment.fromNow() :
                     invalidString;
-                $(element).text(output);
+
+                if (shorten) {
+                    output = output.replace("minutes", "mins");
+                    output = output.replace("a few seconds", "a moment");
+                }
+                return output;
+            }
+
+            $(element).text(fmt());
+
+            clearInterval(element.koFromNowTimer);
+            element.koFromNowTimer = setInterval(function () {
+
+                $(element).text(fmt());
             }, 1000);
 
         }

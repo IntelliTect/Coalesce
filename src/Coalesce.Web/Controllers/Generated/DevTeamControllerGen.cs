@@ -9,7 +9,7 @@ namespace Coalesce.Web.Controllers
 {
     [Authorize]
     public partial class DevTeamController 
-        : BaseViewController<DevTeam, AppDbContext> 
+        : BaseViewController<Coalesce.Domain.External.DevTeam, AppDbContext> 
     { 
         public DevTeamController() : base() { }
 

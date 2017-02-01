@@ -28,9 +28,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         public const string ScriptsFolderName = "Scripts";
         public const string ThisAssemblyName = "IntelliTect.Coalesce.CodeGeneration";
 
-        private IProjectContext _webProject;
+        private ProjectContext _webProject;
 
-        public ScriptsGenerator(IProjectContext webProject, IProjectContext dataProject)
+        public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
             : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = DependencyProvider.ModelTypesLocator(webProject);

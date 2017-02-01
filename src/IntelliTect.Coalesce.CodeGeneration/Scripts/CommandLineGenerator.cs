@@ -8,16 +8,17 @@ using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using Microsoft.Extensions.ProjectModel;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
     [Alias("scripts")]
     public class CommandLineGenerator : ICodeGenerator
     {
-        private IProjectContext _webProject;
-        private IProjectContext _dataProject;
+        private ProjectContext _webProject;
+        private ProjectContext _dataProject;
 
-        public CommandLineGenerator(IProjectContext webProject, IProjectContext dataProject)
+        public CommandLineGenerator(ProjectContext webProject, ProjectContext dataProject)
         {
             _webProject = webProject;
             _dataProject = dataProject;

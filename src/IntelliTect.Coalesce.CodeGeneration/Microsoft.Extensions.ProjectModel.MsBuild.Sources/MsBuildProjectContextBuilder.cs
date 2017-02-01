@@ -13,6 +13,8 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using NuGet.Frameworks;
 using System.Text;
+using Microsoft.Extensions.ProjectModel.Resolution;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 
 namespace Microsoft.Extensions.ProjectModel
 {
@@ -238,28 +240,8 @@ namespace Microsoft.Extensions.ProjectModel
 
     public class MsBuildProjectContextBuilder
     {
-        private string _projectPath;
-        private string _targetLocation;
-        private string _configuration;
 
-        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation, string configuration="Debug")
-        {
-            if (string.IsNullOrEmpty(projectPath))
-            {
-                throw new ArgumentNullException(nameof(projectPath));
-            }
-
-            if (string.IsNullOrEmpty(targetsLocation))
-            {
-                throw new ArgumentNullException(nameof(targetsLocation));
-            }
-
-            _configuration = configuration;
-            _projectPath = projectPath;
-            _targetLocation = targetsLocation;
-        }
-
-        public IProjectContext Build()
+        public static ProjectContext Build(string projectPath, string projectFile, string targetsLocation, string configuration = "Debug")
         {
             var errors = new List<string>();
             var output = new List<string>();
@@ -268,9 +250,10 @@ namespace Microsoft.Extensions.ProjectModel
                 "msbuild",
                 new string[]
                 {
-                    _projectPath,
+                    projectPath,
+                    $"/v:n",
                     $"/t:EvaluateProjectInfoForCodeGeneration",
-                    $"/p:OutputFile={tmpFile};CustomBeforeMicrosoftCSharpTargets={_targetLocation};Configuration={_configuration};BaseOutputPath=c:\\temp"
+                    $"/p:OutputFile={tmpFile};CustomBeforeMicrosoftCSharpTargets={targetsLocation};Configuration={configuration};BuildProjectReferences=false"
                 })
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))
@@ -278,31 +261,35 @@ namespace Microsoft.Extensions.ProjectModel
 
             if (result.ExitCode != 0)
             {
-                throw CreateProjectContextCreationFailedException(_projectPath, errors);
+                var errorMsg = $"Failed to get Project Context for {projectPath}.";
+                if (errors != null)
+                {
+                    errorMsg += $"{Environment.NewLine} { string.Join(Environment.NewLine, errors)} ";
+                }
+
+                throw new InvalidOperationException(errorMsg);
             }
             try
             {
-                var info = File.ReadAllText(tmpFile);
+                var lines = File.ReadAllLines(tmpFile);
+                var references = new List<ResolvedReference>();
 
-                var buildContext = JsonConvert.DeserializeObject<CommonProjectContext>(info);
+                foreach (var line in lines)
+                {
+                    references.Add(new ResolvedReference(Path.GetFileName(line), line));
+                }
 
-                return buildContext;
+                return new ProjectContext
+                {
+                    CompilationAssemblies = references,
+                    ProjectFullPath = projectPath,
+                    ProjectFilePath = projectFile
+                };
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to read the BuildContext information.", ex);
             }
-        }
-
-        private Exception CreateProjectContextCreationFailedException(string _projectPath, List<string> errors)
-        {
-            var errorMsg = $"Failed to get Project Context for {_projectPath}.";
-            if (errors != null)
-            {
-                errorMsg += $"{Environment.NewLine} { string.Join(Environment.NewLine, errors)} ";
-            }
-
-            return new InvalidOperationException(errorMsg);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Scripts;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.ProjectModel;
 using System;
 using System.IO;
 using System.Reflection;
@@ -43,11 +43,11 @@ namespace IntelliTect.Coalesce.Cli
                 };
 
                 // Find the web project
-                ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
+                IProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
                 if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
 
                 // Find the data project
-                ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
+                IProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
                 CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);

@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.DotNet.ProjectModel;
 using System.Diagnostics;
+using Microsoft.Extensions.ProjectModel;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
     [Alias("scripts")]
     public class CommandLineGenerator : ICodeGenerator
     {
-        private ProjectContext _webProject;
-        private ProjectContext _dataProject;
+        private IProjectContext _webProject;
+        private IProjectContext _dataProject;
 
-        public CommandLineGenerator(ProjectContext webProject, ProjectContext dataProject)
+        public CommandLineGenerator(IProjectContext webProject, IProjectContext dataProject)
         {
             _webProject = webProject;
             _dataProject = dataProject;

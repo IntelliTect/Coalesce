@@ -7,13 +7,13 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using NuGet.Frameworks;
-using Microsoft.DotNet.ProjectModel;
 using System.IO;
 using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.DotNet.ProjectModel.Workspaces;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
+using Microsoft.CodeAnalysis.MSBuild;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 #endif
         }
 
-        public static ProjectContext ProjectContext(string projectPath)
+        public static IProjectContext ProjectContext(string projectPath)
         {
             if (string.IsNullOrEmpty(projectPath))
                 throw new ArgumentException($"{nameof(projectPath)} is required.");
@@ -53,50 +53,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
             if (string.IsNullOrEmpty(foundProjectJsonPath)) throw new ArgumentException("Project path not found.");
 
-            return new ProjectContextBuilder()
-                    .WithProjectDirectory(foundProjectJsonPath)
-                    .WithTargetFramework(framework)
-                    .Build();
+            var configuration = "Debug";
+#if RELEASE
+            configuration = "Release";
+#endif
+
+            return new MsBuildProjectContextBuilder(foundProjectJsonPath, "D:\\Work\\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets", configuration)
+                .Build();
         }
 
-        public static ModelTypesLocator ModelTypesLocator(ProjectContext project)
+        public static ModelTypesLocator ModelTypesLocator(IProjectContext project)
         {
-            //var workspace = MSBuildWorkspace.Create();
-            //var result = workspace.OpenProjectAsync(project.ProjectDirectory).Result;
+            var workspace = MSBuildWorkspace.Create();
+            var result = workspace.OpenProjectAsync(project.ProjectFullPath).Result;
 
-            var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
+            //var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
 
-            return new ModelTypesLocator(LibraryExporter(project), workspace);
+            return new ModelTypesLocator(workspace);
         }
 
-        public static CodeGeneratorActionsService CodeGeneratorActionsService(ProjectContext project)
+        public static CodeGeneratorActionsService CodeGeneratorActionsService(IProjectContext project)
         {
             ICodeGenAssemblyLoadContext loadContext = new DefaultAssemblyLoadContext();
             IFilesLocator files = new FilesLocator();
 
             return new CodeGeneratorActionsService(new RazorTemplating(
-                new RoslynCompilationService(ApplicationInfo(project), loadContext, LibraryExporter(project))), files);
+                new RoslynCompilationService(ApplicationInfo(project), loadContext, project)), files);
         }
 
-        public static LibraryManager LibraryManager(ProjectContext project)
+        private static ApplicationInfo ApplicationInfo(IProjectContext project)
         {
-            return new LibraryManager(project);
-        }
-
-
-
-        private static LibraryExporter LibraryExporter(ProjectContext project)
-        {
-            return new LibraryExporter(project, ApplicationInfo(project));
-        }
-
-        private static ApplicationInfo ApplicationInfo(ProjectContext project)
-        {
-#if RELEASE
-            return new ApplicationInfo(project.GetType().ToString(), project.ProjectDirectory, "Release");
-#else
-            return new ApplicationInfo(project.GetType().ToString(), project.ProjectDirectory, "Debug");
-#endif
+            return new ApplicationInfo(
+                project.ProjectName,
+                Path.GetDirectoryName(project.ProjectFullPath));
         }
     }
 }

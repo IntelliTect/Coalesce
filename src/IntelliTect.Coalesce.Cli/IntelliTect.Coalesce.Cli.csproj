@@ -20,8 +20,7 @@
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.0-preview4-final" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Core" Version="1.1.0-preview4-final" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.0-msbuild3-final" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />

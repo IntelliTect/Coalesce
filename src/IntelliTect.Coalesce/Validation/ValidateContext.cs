@@ -40,15 +40,19 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsNotNull(prop.JsVariableForBinding, $"JS Variable for binding not found.");
                         assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type not found.");
                         assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type not found.");
-                        if (prop.IsPOCO && !prop.IsComplexType && !prop.IsReadOnly)
+                        if (prop.IsPOCO && !prop.IsComplexType)
                         {
-                            assert.IsNotNull(prop.Object, "The target object for the property was found found. Make sure naming is consistent.");
-                            assert.IsNotNull(prop.ObjectIdPropertyName, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
-                            if (!prop.Object.IsOneToOne)
+                            assert.IsNotNull(prop.Object, "The target object for the property was not found. Make sure naming is consistent.");
+                            assert.IsNotNull(prop.Object.ListTextProperty, "The target object for the property has no discernable list text. Add a [ListTextAttribute] to one of its properties.");
+                            if (!prop.IsReadOnly)
                             {
-                                assert.IsNotNull(prop.ObjectIdProperty, "Has no ID Property - Add a ForiegnKey attribute to the object");
+                                assert.IsNotNull(prop.ObjectIdPropertyName, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
+                                if (!prop.Object.IsOneToOne)
+                                {
+                                    assert.IsNotNull(prop.ObjectIdProperty, "Has no ID Property - Add a ForiegnKey attribute to the object");
+                                }
+                                assert.IsNotNull(prop.Object.PrimaryKey, "No Primary key for related object. Ensure the target object has a [Key] attributed property.");
                             }
-                            assert.IsNotNull(prop.Object.PrimaryKey, "No Primary key for related object. Ensure the target object has a [Key] attributed property.");
                         }
                         if (prop.IsId && !prop.IsPrimaryKey)
                         {

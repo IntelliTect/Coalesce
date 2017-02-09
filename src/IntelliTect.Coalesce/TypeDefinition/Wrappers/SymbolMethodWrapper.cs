@@ -57,7 +57,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
                 var result = new List<ParameterViewModel>();
                 foreach (var parameter in Symbol.Parameters)
                 {
-                    result.Add(new ParameterViewModel(parameter.Name, new TypeViewModel(new SymbolTypeWrapper(parameter.Type))));
+                    result.Add(new ParameterViewModel( new SymbolParameterWrapper(parameter)));
                 }
                 return result;
             }

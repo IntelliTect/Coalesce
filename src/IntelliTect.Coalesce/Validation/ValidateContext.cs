@@ -116,7 +116,7 @@ namespace IntelliTect.Coalesce.Validation
                             }
                             else
                             {
-                                assert.isFalse(param.IsDI, $"DI properties must be named either 'db' or 'user' or 'out includeTree'. Got {param.Name}");
+                                assert.isFalse(param.IsManualDI, $"DI properties must be named either 'db' or 'user' or 'out includeTree'. Got {param.Name}");
                             }
                         }
 

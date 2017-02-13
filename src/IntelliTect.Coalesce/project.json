@@ -5,7 +5,8 @@
 
   "dependencies": {
     "Remotion.Linq": "2.1.1",
-    "Microsoft.EntityFrameworkCore.Relational": "1.1.0",
+    "Microsoft.EntityFrameworkCore": "1.0.1",
+    "Microsoft.EntityFrameworkCore.Relational": "1.0.0",
     "Microsoft.AspNetCore.Identity": "1.0.0",
     "Microsoft.AspNetCore.Mvc.ViewFeatures": "1.0.0",
     "System.Linq.Dynamic": "1.0.4",

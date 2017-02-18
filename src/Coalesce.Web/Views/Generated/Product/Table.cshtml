@@ -1,7 +1,11 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+</style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Product List
@@ -57,14 +61,14 @@
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: productId}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Name))</td>
+                        <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Name))</td>
                     }
                     else
                     {
-                    <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Name))</td>
+                        <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Name, true))</td>
                     }
                 <td>
 

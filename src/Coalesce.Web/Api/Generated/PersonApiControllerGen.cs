@@ -209,7 +209,7 @@ namespace Coalesce.Web.Api
 
         // Method: Rename
         [HttpPost("Rename")]
-        public virtual SaveResult<PersonDtoGen> Rename (Int32 id, String addition){
+        public virtual SaveResult<PersonDtoGen> Rename (Int32 id, System.String addition){
             var result = new SaveResult<PersonDtoGen>();
             try{
                 IncludeTree includeTree = null;
@@ -247,7 +247,7 @@ namespace Coalesce.Web.Api
 
         // Method: Add
         [HttpPost("Add")]
-        public virtual SaveResult<Int32> Add (Int32 numberOne, Int32 numberTwo){
+        public virtual SaveResult<Int32> Add (System.Int32 numberOne, System.Int32 numberTwo){
             var result = new SaveResult<Int32>();
             try{
                 var objResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
@@ -298,7 +298,7 @@ namespace Coalesce.Web.Api
         // Method: NamesStartingWith
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWith (String characters){
+        public virtual SaveResult<IEnumerable<String>> NamesStartingWith (System.String characters){
             if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             var result = new SaveResult<IEnumerable<String>>();
             try{
@@ -315,7 +315,7 @@ namespace Coalesce.Web.Api
 
         // Method: NamesStartingWithPublic
         [HttpPost("NamesStartingWithPublic")]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic (String characters){
+        public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic (System.String characters){
             var result = new SaveResult<IEnumerable<String>>();
             try{
                 var objResult = Coalesce.Domain.Person.NamesStartingWithPublic(characters, Db);

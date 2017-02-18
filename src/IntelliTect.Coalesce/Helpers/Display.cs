@@ -90,7 +90,7 @@ namespace IntelliTect.Coalesce.Helpers
             //return Knockout.DisplayComment(prop.JsVariable);
         }
 
-        public static string PropertyHelper(PropertyViewModel prop, bool editable, string areaName = "")
+        public static string PropertyHelper(PropertyViewModel prop, bool editable, string areaName = "", bool objectLink = false)
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
@@ -151,7 +151,7 @@ namespace IntelliTect.Coalesce.Helpers
                 }
                 else
                 {
-                    return $"@(Knockout.DisplayFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
+                    return $"@(Knockout.DisplayFor<{prop.Parent.FullName}>(p => p.{prop.Name}, {objectLink.ToString().ToLower()}))";
                 }
             }
 
@@ -167,10 +167,10 @@ namespace IntelliTect.Coalesce.Helpers
             return $@"<a href=""#"" data-bind = 'click: {method.JsVariableUi}'>{method.DisplayName}</a>";
         }
 
-        public static string PropertyHelperWithSurroundingDiv(PropertyViewModel prop, bool editable, string areaName = "")
+        public static string PropertyHelperWithSurroundingDiv(PropertyViewModel prop, bool editable, string areaName = "", int cols = 8)
         {
             var propertyHelper = PropertyHelper(prop, editable, areaName);
-            return $"<div class=\"col-md-8 prop-{prop.JsonName}\">{propertyHelper}</div>";
+            return $"<div class=\"col-md-{cols} prop-{prop.JsonName}\">{propertyHelper}</div>";
         }
     }
 }

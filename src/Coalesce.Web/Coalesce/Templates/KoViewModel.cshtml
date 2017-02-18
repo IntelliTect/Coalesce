@@ -294,10 +294,12 @@ module @moduleName {
 				    @:}else{
 					    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
 				    @:}
+                    @if (prop.Object.OnContext) { 
                     @:if (self.parent && self.parent.myId == self.@(prop.JsVariable)().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.@(prop.JsVariable)()))
                     @:{
                         @:self.parent.loadFromDto(data.@prop.JsonName, undefined, false);
                     @:}
+                    }
                 @:}
                 }
 

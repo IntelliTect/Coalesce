@@ -1,7 +1,11 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+</style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Person List
@@ -66,32 +70,32 @@
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: personId}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
-                    <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
-                    <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
-                    <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
-                    <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
-                    <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
-                    <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</td>
-                    <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
+                        <td class="prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
+                        <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
+                        <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
+                        <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
+                        <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
+                        <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
+                        <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
+                        <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
                     }
                     else
                     {
-                    <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title))</td>
-                    <td class="prop-firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
-                    <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName))</td>
-                    <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email))</td>
-                    <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender))</td>
-                    <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
-                    <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</td>
-                    <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company))</td>
+                        <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title, true))</td>
+                        <td class="prop-firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName, true))</td>
+                        <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, true))</td>
+                        <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, true))</td>
+                        <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, true))</td>
+                        <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, true))</td>
+                        <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
+                        <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, true))</td>
                     }
                 <td>
 

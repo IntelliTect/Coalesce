@@ -20,7 +20,11 @@
 @@using IntelliTect.Coalesce.Helpers
 @@{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+</style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         @(model.Name.ToProperCase()) List
@@ -91,20 +95,20 @@
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: @(model.PrimaryKey.Name.ToCamelCase())}">
                 @{
                     @:@@if (@@ViewBag.Editable)
                     @:{
                     @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
-                    @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly)</td>
+                        @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)</td>
                         }
                     @:}
                     @:else
                     @:{
                     @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
-                    @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false)</td>
+                        @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false, null, true)</td>
                         }
                     @:}
                 }

@@ -1,7 +1,11 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+</style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Case Dto List
@@ -58,16 +62,16 @@
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseId}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDto>(p => p.Title))</td>
-                    <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName))</td>
+                        <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDto>(p => p.Title))</td>
+                        <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, true))</td>
                     }
                     else
                     {
-                    <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.Title))</td>
-                    <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName))</td>
+                        <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.Title, true))</td>
+                        <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, true))</td>
                     }
                 <td>
 

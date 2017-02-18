@@ -51,11 +51,11 @@
             <dl>
                     <dt>Title</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.Title))
+                        @(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.Title, false))
                     </dd>
                     <dt>Assigned To Name</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName))
+                        @(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, false))
                     </dd>
 
             </dl>

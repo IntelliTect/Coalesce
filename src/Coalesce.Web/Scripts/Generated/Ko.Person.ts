@@ -84,9 +84,7 @@ module ViewModels {
         public CasesAssignedListUrl: () => void; 
         // List of cases reported by the person.
         public CasesReportedListUrl: () => void; 
-                public personStatsValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadPersonStatsValidValues: (callback?: any) => void;
-        // Company loaded from the Company ID
+                // Company loaded from the Company ID
         public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
@@ -252,10 +250,6 @@ module ViewModels {
 				    }else{
 					    self.personStats().loadFromDto(data.personStats);
 				    }
-                    if (self.parent && self.parent.myId == self.personStats().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.personStats()))
-                    {
-                        self.parent.loadFromDto(data.personStats, undefined, false);
-                    }
                 }
 				if (!data.company) { 
 					if (data.companyId != self.companyId()) {
@@ -419,30 +413,6 @@ module ViewModels {
             });
             // Create loading function for Valid Values
 
-            self.loadPersonStatsValidValues = function(callback) {
-                self.loadingValidValues++;
-                $.ajax({ method: "GET", url: self.areaUrl + "api/PersonStats/CustomList?Fields=PersonStatsId,PersonStatsId", xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.personStatsValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.showFailureAlerts)
-                        alert("Could not get Valid Values for PersonStats: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
             self.loadCompanyValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: self.areaUrl + "api/Company/CustomList?Fields=CompanyId,AltName", xhrFields: { withCredentials: true } })
@@ -500,7 +470,6 @@ module ViewModels {
             // Load all the valid values in parallel.
             self.loadValidValues = function(callback) {
                 self.loadingValidValues = 0;
-                self.loadPersonStatsValidValues(callback);
                 self.loadCompanyValidValues(callback);
             };
 

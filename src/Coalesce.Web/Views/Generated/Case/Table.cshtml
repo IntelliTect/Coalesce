@@ -5,6 +5,12 @@
     td div a{
         display: block;
     }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
 </style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
@@ -56,16 +62,43 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                        <th data-bind="click: function(){orderByToggle('Title')}">Title</th>
-                        <th data-bind="click: function(){orderByToggle('Description')}">Description</th>
-                        <th data-bind="click: function(){orderByToggle('OpenedAt')}">Opened At</th>
-                        <th data-bind="click: function(){orderByToggle('AssignedTo')}">Assigned To</th>
-                        <th data-bind="click: function(){orderByToggle('ReportedBy')}">Reported By</th>
-                        <th data-bind="click: function(){orderByToggle('Attachment')}">Attachment</th>
-                        <th data-bind="click: function(){orderByToggle('Severity')}">Severity</th>
-                        <th data-bind="click: function(){orderByToggle('Status')}">Status</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
+                            Title
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Title', 'fa-caret-down': orderByDescending() == 'Title'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Description')}">
+                            Description
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Description', 'fa-caret-down': orderByDescending() == 'Description'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('OpenedAt')}">
+                            Opened At
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'OpenedAt', 'fa-caret-down': orderByDescending() == 'OpenedAt'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AssignedTo')}">
+                            Assigned To
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AssignedTo', 'fa-caret-down': orderByDescending() == 'AssignedTo'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ReportedBy')}">
+                            Reported By
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ReportedBy', 'fa-caret-down': orderByDescending() == 'ReportedBy'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Attachment')}">
+                            Attachment
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Attachment', 'fa-caret-down': orderByDescending() == 'Attachment'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
+                            Severity
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Severity', 'fa-caret-down': orderByDescending() == 'Severity'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Status')}">
+                            Status
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Status', 'fa-caret-down': orderByDescending() == 'Status'}"></i>
+                        </th>
                         <th>Case Products</th>
-                        <th data-bind="click: function(){orderByToggle('DevTeamAssigned')}">Dev Team Assigned</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('DevTeamAssigned')}">
+                            Dev Team Assigned
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'DevTeamAssigned', 'fa-caret-down': orderByDescending() == 'DevTeamAssigned'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>

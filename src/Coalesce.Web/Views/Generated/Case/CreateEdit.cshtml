@@ -27,13 +27,13 @@
                     <div class="form-group">
                         <label class="col-md-4 control-label">Assigned To</label>
 <div class="col-md-7 prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</div>                            <div class="col-md-1" data-bind="with: assignedTo">
-                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right">...</a>
+                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                             </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Reported By</label>
 <div class="col-md-7 prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</div>                            <div class="col-md-1" data-bind="with: reportedBy">
-                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right">...</a>
+                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                             </div>
                     </div>
                     <div class="form-group">
@@ -51,7 +51,7 @@
                     <div class="form-group">
                         <label class="col-md-4 control-label">Dev Team Assigned</label>
 <div class="col-md-7 prop-devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</div>                            <div class="col-md-1" data-bind="with: devTeamAssigned">
-                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right">...</a>
+                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                             </div>
                     </div>
         </div>

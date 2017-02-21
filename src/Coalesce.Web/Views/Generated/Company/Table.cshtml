@@ -5,6 +5,12 @@
     td div a{
         display: block;
     }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
 </style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
@@ -55,14 +61,35 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                        <th data-bind="click: function(){orderByToggle('Name')}">Name</th>
-                        <th data-bind="click: function(){orderByToggle('Address1')}">Address1</th>
-                        <th data-bind="click: function(){orderByToggle('Address2')}">Address2</th>
-                        <th data-bind="click: function(){orderByToggle('City')}">City</th>
-                        <th data-bind="click: function(){orderByToggle('State')}">State</th>
-                        <th data-bind="click: function(){orderByToggle('ZipCode')}">Zip Code</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                            Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Address1')}">
+                            Address1
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address1', 'fa-caret-down': orderByDescending() == 'Address1'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Address2')}">
+                            Address2
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address2', 'fa-caret-down': orderByDescending() == 'Address2'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('City')}">
+                            City
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'City', 'fa-caret-down': orderByDescending() == 'City'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
+                            State
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'State', 'fa-caret-down': orderByDescending() == 'State'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ZipCode')}">
+                            Zip Code
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ZipCode', 'fa-caret-down': orderByDescending() == 'ZipCode'}"></i>
+                        </th>
                         <th>Employees</th>
-                        <th data-bind="click: function(){orderByToggle('AltName')}">Alt Name</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AltName')}">
+                            Alt Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AltName', 'fa-caret-down': orderByDescending() == 'AltName'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>

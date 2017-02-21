@@ -24,6 +24,12 @@
     td div a{
         display: block;
     }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
 </style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
@@ -93,7 +99,10 @@
                 {
                     @if (!prop.Type.IsCollection)
                     {
-                        <th data-bind="click: function(){orderByToggle('@prop.Name')}">@prop.DisplayName</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('@prop.Name')}">
+                            @prop.DisplayName
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == '@prop.Name', 'fa-caret-down': orderByDescending() == '@prop.Name'}"></i>
+                        </th>
                     }
                     else
                     {

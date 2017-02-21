@@ -125,12 +125,27 @@ namespace IntelliTect.Coalesce.Controllers
                 var orderByParams = listParameters.OrderByList;
                 if (orderByParams.Any())
                 {
-                    result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{f.Key} {f.Value}")));
+                    foreach (var orderByParam in orderByParams)
+                    {
+                        string fieldName = orderByParam.Key;
+                        var prop = ClassViewModel.PropertyByName(fieldName);
+                        if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
+                        {
+                            string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
+                            clause = clause.Replace("ASC", orderByParam.Value.ToUpper());
+                            clause = clause.Replace("DESC", orderByParam.Value.ToUpper());
+                            result = result.OrderBy(clause);
+                        }
+                        else
+                        {
+                            result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{fieldName} {f.Value}")));
+                        }
+                    }
                 }
                 else
                 {
                     // Use the DefaultOrderBy attributes if available
-                    var defaultOrderBy = ClassViewModel.DefaultOrderByClause;
+                    var defaultOrderBy = ClassViewModel.DefaultOrderByClause();
                     if (defaultOrderBy != null)
                     {
                         result = result.OrderBy(defaultOrderBy);
@@ -582,7 +597,7 @@ namespace IntelliTect.Coalesce.Controllers
                             if (reloadItem && returnObject)
                             {
                                 itemResult = GetUnmapped(idString, listParams).Result;
-                                item = itemResult.Item1;    
+                                item = itemResult.Item1;
                                 includeTree = itemResult.Item2;
                             }
 

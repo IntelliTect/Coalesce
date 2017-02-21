@@ -5,6 +5,12 @@
     td div a{
         display: block;
     }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
 </style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
@@ -56,10 +62,14 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Name</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                            Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->

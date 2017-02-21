@@ -1122,7 +1122,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     sb.Append("                ");
                     sb.Append($"{objectName}.{Name} = obj.{Name}");
 
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause?.Replace("\"", "\\\"");
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.Replace("\"", "\\\"");
                     if (defaultOrderBy != null)
                     {
                         sb.Append($".OrderBy(\"{defaultOrderBy}\")");

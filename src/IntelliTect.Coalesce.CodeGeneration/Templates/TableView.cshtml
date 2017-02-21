@@ -24,6 +24,12 @@
     td div a{
         display: block;
     }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
 </style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
@@ -91,11 +97,22 @@
             <tr>
                 @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                 {
-                    <th>@prop.DisplayName</th>
+                    @if (!prop.Type.IsCollection)
+                    {
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('@prop.Name')}">
+                            @prop.DisplayName
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == '@prop.Name', 'fa-caret-down': orderByDescending() == '@prop.Name'}"></i>
+                        </th>
+                    }
+                    else
+                    {
+                        <th>@prop.DisplayName</th>
+                    }
                 }
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->

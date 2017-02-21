@@ -531,8 +531,25 @@ var ListViewModels;
                 }
             };
             // Control order of results
+            // Set to field name to order by ascending.
             this.orderBy = ko.observable("");
+            // Set to field name to order by descending.
             this.orderByDescending = ko.observable("");
+            // Set to field name to toggle ordering, ascending, descending, none.
+            this.orderByToggle = function (field) {
+                if (_this.orderBy() == field && !_this.orderByDescending()) {
+                    _this.orderBy('');
+                    _this.orderByDescending(field);
+                }
+                else if (!_this.orderBy() && _this.orderByDescending() == field) {
+                    _this.orderBy('');
+                    _this.orderByDescending('');
+                }
+                else {
+                    _this.orderBy(field);
+                    _this.orderByDescending('');
+                }
+            };
             // True once the data has been loaded.
             this.isLoaded = ko.observable(false);
             // Gets a URL to download a CSV for the current list with all elements.
@@ -587,6 +604,17 @@ var ListViewModels;
                 // Click on the input box
                 $('#csv-upload input[type=file]').click();
             };
+            this.loadTimeout = 0;
+            // reloads the page after a slight delay (100ms default) to ensure that all changes are made.
+            this.delayedLoad = function (milliseconds) {
+                if (_this.loadTimeout) {
+                    clearTimeout(_this.loadTimeout);
+                }
+                _this.loadTimeout = setTimeout(function () {
+                    _this.loadTimeout = 0;
+                    _this.load();
+                }, milliseconds || 100);
+            };
             var searchTimeout = 0;
             this.pageSize.subscribe(function () {
                 if (_this.isLoaded()) {
@@ -607,6 +635,8 @@ var ListViewModels;
                     _this.load();
                 }, 300);
             });
+            this.orderBy.subscribe(function () { _this.delayedLoad(); });
+            this.orderByDescending.subscribe(function () { _this.delayedLoad(); });
         }
         ;
         ;

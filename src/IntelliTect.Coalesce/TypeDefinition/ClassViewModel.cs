@@ -273,29 +273,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get { return baseUrl + ControllerName; }
         }
 
-        public string DefaultOrderByClause
+        public string DefaultOrderByClause(string prependText = "")
         {
-            get
+            var defaultOrderBy = DefaultOrderBy.ToList();
+            if (defaultOrderBy.Any())
             {
-                var defaultOrderBy = DefaultOrderBy.ToList();
-                if (defaultOrderBy.Any())
+                var orderByClauseList = new List<string>();
+                foreach (var orderInfo in defaultOrderBy)
                 {
-                    var orderByClauseList = new List<string>();
-                    foreach (var orderInfo in defaultOrderBy)
+                    if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
                     {
-                        if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
-                        {
-                            orderByClauseList.Add($"{orderInfo.FieldName} ASC");
-                        }
-                        else
-                        {
-                            orderByClauseList.Add($"{orderInfo.FieldName} DESC");
-                        }
+                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
                     }
-                    return string.Join(",", orderByClauseList);
+                    else
+                    {
+                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
+                    }
                 }
-                return null;
+                return string.Join(",", orderByClauseList);
             }
+            return null;
+
         }
 
         /// <summary>
@@ -581,7 +579,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return "dbo." + Name;
             }
         }
-        
+
         public string ContextPropertyName { get; set; }
         public bool OnContext { get; set; }
 

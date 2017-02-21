@@ -465,10 +465,7 @@ module ListViewModels {
                 }
                 this.isLoading(true);
 
-                var url = this.areaUrl + this.apiUrlBase + "/List?includes=" + this.includes + "&page=" + this.page()
-                    + "&pageSize=" + this.pageSize() + "&search=" + this.search()
-                    + "&orderBy=" + this.orderBy() + "&orderByDescending=" + this.orderByDescending()
-                            + "&listDataSource=";
+                var url = this.areaUrl + this.apiUrlBase + "/List?" + this.queryParams();
     
                 if (typeof this.listDataSource === "string") url += this.listDataSource;
                 else url += this.dataSources[this.listDataSource];
@@ -510,6 +507,13 @@ module ListViewModels {
                     this.isLoading(false);
                 });
         };
+        protected queryParams = (pageSize?: number) => {
+            var query = "includes=" + this.includes + "&page=" + this.page()
+            + "&pageSize=" + (pageSize || this.pageSize()) + "&search=" + this.search()
+            + "&orderBy=" + this.orderBy() + "&orderByDescending=" + this.orderByDescending()
+            + "&listDataSource=";
+            return query;
+        }
         protected createItem: (newItem?: any, parent?: any) => TItem;
         // Adds a new item to the collection.
         public addNewItem = () => {
@@ -588,6 +592,59 @@ module ListViewModels {
 
         // True once the data has been loaded.
         public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
+
+        // Gets a URL to download a CSV for the current list with all elements.
+        public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
+            var url = this.areaUrl + this.apiUrlBase + "/CsvDownload?" + this.queryParams(10000);
+            return url;
+        });
+        // Starts an upload of a CSV file
+        public csvUploadUi = (callback?: any) => {
+            // Remove the form if it exists.
+            $('#csv-upload').remove();
+            // Add the form to the page to take the input
+            $('body')
+                .append('<form id="csv-upload" display="none"></form>'); 
+            $('#csv-upload')
+                .attr("action", this.areaUrl + this.apiUrlBase + "/CsvUpload").attr("method", "post")
+                .append('<input type="file" style="visibility: hidden;" name="file"/>');
+            var self = this; // The next call messes up 'this' for TypeScript...
+            // Set up the click callback.
+            $('#csv-upload input[type=file]').change(function () {
+                // Get the files
+                var fileInput = $('#csv-upload input[type=file]')[0] as any;
+                var file = fileInput.files[0];
+                if (file) {
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    intellitect.utilities.showBusy();
+                    self.isLoading(true);
+                    $.ajax({
+                        url: self.areaUrl + self.apiUrlBase + "/CsvUpload",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        type: 'POST'
+                    } as any)
+                    .done(function (data) {
+                        self.isLoading(false);
+                        if ($.isFunction(callback)) callback(data);
+                    })
+                    .fail(function (data) {
+                        alert("CSV Upload Failed");
+                    })
+                    .always(function () {
+                        self.load();
+                        intellitect.utilities.hideBusy();
+                    });
+                }
+                // Remove the form
+                $('#csv-upload').remove();
+            });
+            // Click on the input box
+            $('#csv-upload input[type=file]').click();
+        };
+
 
         public constructor() {
             var searchTimeout: number = 0;

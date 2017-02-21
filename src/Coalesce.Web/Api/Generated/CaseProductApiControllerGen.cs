@@ -233,18 +233,15 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CaseProductDtoGen>>> CsvUpload(List<Microsoft.AspNetCore.Http.IFormFile> files, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<CaseProductDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
         {
-            foreach (var formFile in files)
+            if (file != null && file.Length > 0)
             {
-                if (formFile.Length > 0)
+                using (var stream = file.OpenReadStream())
                 {
-                    using (var stream = formFile.OpenReadStream())
-                    {
-                        using (var reader = new System.IO.StreamReader(stream)) {
-                            var csv = reader.ReadToEnd();
-                            return await CsvSave(csv);
-                        }
+                    using (var reader = new System.IO.StreamReader(stream)) {
+                        var csv = reader.ReadToEnd();
+                        return await CsvSave(csv, hasHeader);
                     }
                 }
             }

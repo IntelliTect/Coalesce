@@ -263,28 +263,19 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(CsvUploadClass inbound) 
+        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
         {
-            //foreach (var formFile in files)
-            //{
-                if (inbound.File.Length > 0)
+            if (file != null && file.Length > 0)
+            {
+                using (var stream = file.OpenReadStream())
                 {
-                    using (var stream = inbound.File.OpenReadStream())
-                    {
-                        using (var reader = new System.IO.StreamReader(stream)) {
-                            var csv = reader.ReadToEnd();
-                            return await CsvSave(csv);
-                        }
+                    using (var reader = new System.IO.StreamReader(stream)) {
+                        var csv = reader.ReadToEnd();
+                        return await CsvSave(csv, hasHeader);
                     }
                 }
-            //}
+            }
             throw new ArgumentException("No files uploaded");
-        }
-
-        public class CsvUploadClass
-        {
-            public Microsoft.AspNetCore.Http.IFormFile File { get; set; }
-            public bool HasHeaders { get; set; }
         }
 
         /// <summary>

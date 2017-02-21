@@ -13,7 +13,7 @@
     "IntelliTect.Coalesce": "1.1.0",
     "Microsoft.CodeAnalysis": "2.0.0-beta1",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection": "1.0.1",
     "Microsoft.Extensions.DependencyModel": "1.0.0",
     "Microsoft.VisualStudio.Web.CodeGeneration": "1.0.0-preview2-final",
     "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-preview2-final"

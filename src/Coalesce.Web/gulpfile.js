@@ -249,7 +249,7 @@ gulp.task('coalesce:build', shell.task
 { verbose: true }
 ));
 
-
+// Build is required every time because the templates are compiled into the dll.
 gulp.task('coalesce', ['coalesce:build'], shell.task
     (['"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext ' +
     '-dp ../Coalesce.Domain -wp ./ -filesOnly true'],

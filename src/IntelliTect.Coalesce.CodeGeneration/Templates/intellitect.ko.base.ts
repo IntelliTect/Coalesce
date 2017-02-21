@@ -587,8 +587,25 @@ module ListViewModels {
         };
 
         // Control order of results
+        // Set to field name to order by ascending.
         public orderBy: KnockoutObservable<string> = ko.observable("");
+        // Set to field name to order by descending.
         public orderByDescending: KnockoutObservable<string> = ko.observable("");
+        // Set to field name to toggle ordering, ascending, descending, none.
+        public orderByToggle = (field: string) => {
+        if (this.orderBy() == field && !this.orderByDescending()) {
+            this.orderBy('');
+            this.orderByDescending(field);
+        }
+        else if (!this.orderBy() && this.orderByDescending() == field) {
+            this.orderBy('');
+            this.orderByDescending('');
+        }
+        else {
+            this.orderBy(field);
+            this.orderByDescending('');
+        }
+    };
 
         // True once the data has been loaded.
         public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
@@ -645,6 +662,18 @@ module ListViewModels {
             $('#csv-upload input[type=file]').click();
         };
 
+        private loadTimeout: number = 0;
+        // reloads the page after a slight delay (100ms default) to ensure that all changes are made.
+        private delayedLoad = (milliseconds?: number) => {
+            if(this.loadTimeout) {
+                clearTimeout(this.loadTimeout);
+            }
+            this.loadTimeout = setTimeout(() => {
+                this.loadTimeout = 0;
+                this.load();
+            }, milliseconds || 100);
+        }
+
 
         public constructor() {
             var searchTimeout: number = 0;
@@ -668,6 +697,8 @@ module ListViewModels {
                     this.load();
                 }, 300);
             });
+            this.orderBy.subscribe(() => { this.delayedLoad(); });
+            this.orderByDescending.subscribe(() => { this.delayedLoad(); });
         }
     }
 }

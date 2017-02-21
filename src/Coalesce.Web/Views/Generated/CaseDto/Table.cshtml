@@ -56,11 +56,12 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Title</th>
-                    <th>Assigned To Name</th>
+                        <th data-bind="click: function(){orderByToggle('Title')}">Title</th>
+                        <th data-bind="click: function(){orderByToggle('AssignedToName')}">Assigned To Name</th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->

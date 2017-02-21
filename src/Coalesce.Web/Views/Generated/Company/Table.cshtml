@@ -55,17 +55,18 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Name</th>
-                    <th>Address1</th>
-                    <th>Address2</th>
-                    <th>City</th>
-                    <th>State</th>
-                    <th>Zip Code</th>
-                    <th>Employees</th>
-                    <th>Alt Name</th>
+                        <th data-bind="click: function(){orderByToggle('Name')}">Name</th>
+                        <th data-bind="click: function(){orderByToggle('Address1')}">Address1</th>
+                        <th data-bind="click: function(){orderByToggle('Address2')}">Address2</th>
+                        <th data-bind="click: function(){orderByToggle('City')}">City</th>
+                        <th data-bind="click: function(){orderByToggle('State')}">State</th>
+                        <th data-bind="click: function(){orderByToggle('ZipCode')}">Zip Code</th>
+                        <th>Employees</th>
+                        <th data-bind="click: function(){orderByToggle('AltName')}">Alt Name</th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->

@@ -358,29 +358,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Process these items to make sure we have things we can search on.
                 foreach (var prop in searchProperties)
                 {
-                    if (prop.Type.PureType.HasClassViewModel)
+                    // Get all the child items
+                    foreach (var kvp in prop.SearchTerms(depth))
                     {
-                        // If we will exceed the depth don't try to query on an object.
-                        if (depth < 2)
-                        {
-                            // Remove this item and add the child's search items with a prepended property name
-                            var childResult = prop.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
-                            foreach (var childProp in childResult)
-                            {
-                                if (prop.Type.IsCollection)
-                                {
-                                    result.Add($"{prop.Name}[].{childProp.Key}", childProp.Value);
-                                }
-                                else
-                                {
-                                    result.Add($"{prop.Name}.{childProp.Key}", childProp.Value);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        result.Add(prop.Name, prop);
+                        result.Add(kvp.Key, kvp.Value);
                     }
                 }
             }

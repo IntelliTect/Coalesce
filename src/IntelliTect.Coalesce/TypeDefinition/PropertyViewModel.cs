@@ -642,6 +642,44 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        /// <summary>
+        /// Returns the fields to search for this object. This could be just the field itself 
+        /// or a number of child fields if this is an object or collection.
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="maxDepth"></param>
+        /// <returns></returns>
+        public Dictionary<string, PropertyViewModel> SearchTerms(int depth, int maxDepth = 3)
+        {
+            var result = new Dictionary<string, PropertyViewModel>();
+            if (this.PureType.HasClassViewModel)
+            {
+
+                // If we will exceed the depth don't try to query on an object.
+                if (depth < maxDepth - 1)
+                {
+                    // Remove this item and add the child's search items with a prepended property name
+                    var childResult = this.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
+                    foreach (var childProp in childResult)
+                    {
+                        if (this.Type.IsCollection)
+                        {
+                            result.Add($"{this.Name}[].{childProp.Key}", childProp.Value);
+                        }
+                        else
+                        {
+                            result.Add($"{this.Name}.{childProp.Key}", childProp.Value);
+                        }
+                    }
+                }
+            }else
+            {
+                // This is just a regular field, add it.
+                result.Add(this.Name, this);
+            }
+            return result;
+        }
+
 
         /// <summary>
         /// Returns true if this property is the field to be used for list text and marked with the ListText Attribute.

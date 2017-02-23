@@ -298,9 +298,8 @@ namespace IntelliTect.Coalesce.Controllers
                             {
                                 if (kvp.Key.Contains("[]."))
                                 {
-                                    var expr;
                                     var parts = kvp.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.ToString().{kvp.Value.SearchMethodName}(""{value}"")) > 0";
+                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{kvp.Value.SearchMethodName}(""{value}"")) > 0";
                                     expressions.Add(expr);
                                 }
                                 else

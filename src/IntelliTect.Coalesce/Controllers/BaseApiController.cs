@@ -474,7 +474,6 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
-        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<TDto> GetImplementation(string id, ListParameters listParameters)
         {
             var tuple = await GetUnmapped(id, listParameters);
@@ -488,6 +487,7 @@ namespace IntelliTect.Coalesce.Controllers
             return dto;
         }
 
+        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
         {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
@@ -499,7 +499,7 @@ namespace IntelliTect.Coalesce.Controllers
                 source = source.Includes(listParameters.Includes);
             }
 
-            var item = (await source.FindItemAsync(id)).IncludeExternal(listParameters.Includes);
+            var item = (source.FindItem(id)).IncludeExternal(listParameters.Includes);
 
             var tree = source.GetIncludeTree();
 

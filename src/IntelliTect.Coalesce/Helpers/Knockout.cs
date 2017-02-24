@@ -646,7 +646,7 @@ namespace IntelliTect.Coalesce.Helpers
             string result = "";
             result += $@"
                 <div data-bind=""if: {propertyModel.JsVariableForBinding}()"">";
-            if (linkObject)
+            if (linkObject && propertyModel.PureTypeOnContext)
             {
                 result += $@"
                     <a class=""form-control-static"" data-bind=""attr: {{href: editUrl}}, text: {propertyModel.JsVariableForBinding}().{propertyModel.Object.ListTextProperty.JsVariable}""></a>";

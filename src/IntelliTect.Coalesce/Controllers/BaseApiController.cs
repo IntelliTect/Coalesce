@@ -290,6 +290,7 @@ namespace IntelliTect.Coalesce.Controllers
                     var value = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[1].Trim();
                     if (prop != null && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
                     {
+                        value = value.Replace("\"", "\"\"");
                         var expressions = new List<string>();
                         foreach (var kvp in prop.SearchTerms(1))
                         {
@@ -305,7 +306,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 else if (prop.Type.IsString)
                                 {
                                     var expr = $@"{kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)}";
-                                    expressions.Add(expr);
+                                   expressions.Add(expr);
                                 }
                                 else
                                 {

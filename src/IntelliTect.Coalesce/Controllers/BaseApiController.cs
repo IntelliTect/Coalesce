@@ -299,12 +299,17 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (kvp.Key.Contains("[]."))
                                 {
                                     var parts = kvp.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{kvp.Value.SearchMethodName}(""{value}"")) > 0";
+                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(kvp.Value.SearchMethodName, value)}";
+                                    expressions.Add(expr);
+                                }
+                                else if (prop.Type.IsString)
+                                {
+                                    var expr = $@"{kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)}";
                                     expressions.Add(expr);
                                 }
                                 else
                                 {
-                                    var expr = $@"{kvp.Key}.ToString().{kvp.Value.SearchMethodName}(""{value}"")";
+                                    var expr = $@"{kvp.Key}.ToString().{string.Format(kvp.Value.SearchMethodName, value)}";
                                     expressions.Add(expr);
                                 }
                             }
@@ -341,11 +346,11 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{clause}"")) > 0";
+                                        expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
                                     }
                                     else
                                     {
-                                        expr = $"{prop.Key}.{prop.Value.SearchMethodName}(\"{clause}\")";
+                                        expr = $"{prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)}";
                                     }
                                 }
                                 else
@@ -353,11 +358,11 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]}.ToString().{prop.Value.SearchMethodName}(""{clause}"")) > 0";
+                                        expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
                                     }
                                     else
                                     {
-                                        expr = $@"{prop.Key}.ToString().{prop.Value.SearchMethodName}(""{clause}"")";
+                                        expr = $@"{prop.Key}.ToString().{string.Format(prop.Value.SearchMethodName, clause)}";
                                     }
                                 }
                                 searchClauses.Add(expr);
@@ -382,11 +387,11 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{listParameters.Search}"")) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)}) > 0";
                                 }
                                 else
                                 {
-                                    expr = $"{prop.Key}.{prop.Value.SearchMethodName}(\"{listParameters.Search}\")";
+                                    expr = $"{prop.Key}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)}";
                                 }
                                 completeSearchClauses.Add(expr);
                             }
@@ -396,7 +401,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({prop.Key} = {listParameters.Search}) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]} = {listParameters.Search}) > 0";
                                 }
                                 else
                                 {

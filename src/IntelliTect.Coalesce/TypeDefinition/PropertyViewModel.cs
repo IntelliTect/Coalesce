@@ -618,10 +618,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 switch (SearchMethod)
                 {
                     case SearchAttribute.SearchMethods.Contains:
-                        return "Contains";
+                        // There isn't a good way to do case insensitive contains. This ends up being done on the client side.
+                        // Not sure how to get like '%abc%'
+                        // return @"IndexOf(""{0}"", System.StringComparison.OrdinalIgnoreCase) >= 0";
+                        return @"ToLower().IndexOf(""{0}"".ToLower()) >= 0";
                     case SearchAttribute.SearchMethods.BeginsWith:
                     default:
-                        return "StartsWith";
+                        return @"StartsWith(""{0}"")";
                 }
             }
         }

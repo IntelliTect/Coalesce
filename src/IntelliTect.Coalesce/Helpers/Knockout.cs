@@ -649,7 +649,7 @@ namespace IntelliTect.Coalesce.Helpers
             if (linkObject && propertyModel.PureTypeOnContext)
             {
                 result += $@"
-                    <a class=""form-control-static"" data-bind=""attr: {{href: editUrl}}, text: {propertyModel.JsVariableForBinding}().{propertyModel.Object.ListTextProperty.JsVariable}""></a>";
+                    <a class=""form-control-static"" data-bind=""attr: {{href: {propertyModel.JsVariableForBinding}().editUrl()}}, text: {propertyModel.JsVariableForBinding}().{propertyModel.Object.ListTextProperty.JsVariable}""></a>";
             }
             else
             {

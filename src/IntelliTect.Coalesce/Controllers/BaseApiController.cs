@@ -499,7 +499,7 @@ namespace IntelliTect.Coalesce.Controllers
                 source = source.Includes(listParameters.Includes);
             }
 
-            var item = (source.FindItem(id)).IncludeExternal(listParameters.Includes);
+            var item = (await source.FindItemAsync(id)).IncludeExternal(listParameters.Includes);
 
             var tree = source.GetIncludeTree();
 
@@ -550,7 +550,7 @@ namespace IntelliTect.Coalesce.Controllers
             return false;
         }
 
-        protected SaveResult<TDto> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
+        protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
             ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
 
@@ -563,7 +563,7 @@ namespace IntelliTect.Coalesce.Controllers
 
             if (idValue is int && (int)idValue != 0 || idValue is string && (string)idValue != "")
             {
-                item = DataSource.FindItem(idValue);
+                item = await DataSource.FindItemAsync(idValue);
                 if (item == null)
                 {
                     result.WasSuccessful = false;
@@ -623,12 +623,12 @@ namespace IntelliTect.Coalesce.Controllers
 
                         if (validateResult.WasSuccessful)
                         {
-                            Db.SaveChanges();
+                            await Db.SaveChangesAsync();
 
                             // Pull the object to get any changes.
                             var idString = IdValue(item).ToString();
                             listParams.AddFilter("id", idString);
-                            var itemResult = GetUnmapped(idString, listParams).Result;
+                            var itemResult = await GetUnmapped(idString, listParams);
                             item = itemResult.Item1;
                             includeTree = itemResult.Item2;
 
@@ -644,7 +644,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                             if (reloadItem && returnObject)
                             {
-                                itemResult = GetUnmapped(idString, listParams).Result;
+                                itemResult = await GetUnmapped(idString, listParams);
                                 item = itemResult.Item1;
                                 includeTree = itemResult.Item2;
                             }

@@ -154,7 +154,7 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual SaveResult<CaseDtoGen> Save(CaseDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<CaseDtoGen>> Save(CaseDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
             if (!dto.CaseKey.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
@@ -172,7 +172,7 @@ namespace Coalesce.Web.Api
                 return result;
             }
 
-            return SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, includes, dataSource, returnObject);
         }
 
         [HttpPost("AddToCollection")]
@@ -305,7 +305,7 @@ namespace Coalesce.Web.Api
                     resultList.Add(result);
                 }
                 else {
-                    var result = SaveImplementation(dto, "none", null, false);
+                    var result = await SaveImplementation(dto, "none", null, false);
                     resultList.Add(result);
                 }
             }

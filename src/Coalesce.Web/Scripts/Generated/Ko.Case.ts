@@ -66,10 +66,10 @@ module ViewModels {
         public devTeamAssignedValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadDevTeamAssignedValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
-        public showAssignedToEditor: () => void;
-        public showReportedByEditor: () => void;
-        public showDevTeamAssignedEditor: () => void;
+        public showEditor: (callback?: any) => void;
+        public showAssignedToEditor: (callback?: any) => void;
+        public showReportedByEditor: (callback?: any) => void;
+        public showDevTeamAssignedEditor: (callback?: any) => void;
 
 
         public statusValues: EnumValue[] = [ 
@@ -404,17 +404,17 @@ module ViewModels {
                 });
             }
             
-            self.showAssignedToEditor = function() {
+            self.showAssignedToEditor = function(callback: any) {
                 if (!self.assignedTo()) {
                     self.assignedTo(new Person());
                 }
-                self.assignedTo().showEditor()
+                self.assignedTo().showEditor(callback)
             };
-            self.showReportedByEditor = function() {
+            self.showReportedByEditor = function(callback: any) {
                 if (!self.reportedBy()) {
                     self.reportedBy(new Person());
                 }
-                self.reportedBy().showEditor()
+                self.reportedBy().showEditor(callback)
             };
 
             // Load all child objects that are not loaded.

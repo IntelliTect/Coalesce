@@ -58,7 +58,7 @@
                 {
                     <div class="form-group">
                         <label class="col-md-4 control-label">@prop.DisplayName</label>
-                        @if (prop.IsPOCO)
+                        @if (prop.IsPOCO && prop.PureTypeOnContext)
                         {
                             @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName, 7)
                             <div class="col-md-1" data-bind="with: @prop.JsonName">

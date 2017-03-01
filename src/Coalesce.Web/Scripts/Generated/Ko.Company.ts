@@ -49,7 +49,7 @@ module ViewModels {
 
         public EmployeesListUrl: () => void; 
                 // Pops up a stock editor for this object.
-        public showEditor: () => void;
+        public showEditor: (callback?: any) => void;
 
 
 

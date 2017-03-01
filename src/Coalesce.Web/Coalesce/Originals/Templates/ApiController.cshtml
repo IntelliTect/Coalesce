@@ -236,7 +236,7 @@ else
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        public virtual SaveResult<@(model.DtoName)> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
             @(createIf)
@@ -254,7 +254,7 @@ else
                 return result;
             }
 
-            return SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, includes, dataSource, returnObject);
         }
 
         [HttpPost("AddToCollection")]
@@ -379,7 +379,7 @@ else
                     resultList.Add(result);
                 }
                 else {
-                    var result = SaveImplementation(dto, "none", null, false);
+                    var result = await SaveImplementation(dto, "none", null, false);
                     resultList.Add(result);
                 }
             }

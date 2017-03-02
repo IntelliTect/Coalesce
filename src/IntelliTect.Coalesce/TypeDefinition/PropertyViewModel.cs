@@ -451,7 +451,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (!Object.OnContext) return null;
+                if (Object == null || !Object.OnContext) return null;
 
                 if (IsPOCO && !IsComplexType) return Name;
                 // TODO: Fix this so it is right. 
@@ -675,7 +675,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         }
                     }
                 }
-            }else
+            }
+            else
             {
                 // This is just a regular field, add it.
                 result.Add(this.Name, this);

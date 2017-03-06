@@ -88,9 +88,9 @@ module ViewModels {
         public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
-        public showPersonStatsEditor: () => void;
-        public showCompanyEditor: () => void;
+        public showEditor: (callback?: any) => void;
+        public showPersonStatsEditor: (callback?: any) => void;
+        public showCompanyEditor: (callback?: any) => void;
 
 
         public titleValues: EnumValue[] = [ 
@@ -437,11 +437,11 @@ module ViewModels {
                 });
             }
             
-            self.showCompanyEditor = function() {
+            self.showCompanyEditor = function(callback: any) {
                 if (!self.company()) {
                     self.company(new Company());
                 }
-                self.company().showEditor()
+                self.company().showEditor(callback)
             };
 
             // Load all child objects that are not loaded.

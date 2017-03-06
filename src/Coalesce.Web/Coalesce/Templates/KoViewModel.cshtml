@@ -119,10 +119,10 @@ module @moduleName {
         @:public load@(prop.ValidValueListName): (callback?: any) => void;
         }
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
+        public showEditor: (callback?: any) => void;
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsInternalUse))
         {
-        @:public show@(prop.Name)Editor: () => void;
+        @:public show@(prop.Name)Editor: (callback?: any) => void;
         }
 
 
@@ -494,11 +494,11 @@ module @moduleName {
 
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet && !f.IsInternalUse))
             {
-            @:self.show@(prop.Name)Editor = function() {
+            @:self.show@(prop.Name)Editor = function(callback: any) {
                 @:if (!self.@(prop.JsVariable)()) {
                     @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)());
                 @:}
-                @:self.@(prop.JsVariable)().showEditor()
+                @:self.@(prop.JsVariable)().showEditor(callback)
             @:};
             }
 

@@ -402,7 +402,7 @@ module ViewModels {
         }
 
         // Supply methods to pop up a model editor
-        public showEditor = () => {
+        public showEditor = (callback?: any) => {
             // Close any existing modal
             $('#modal-dialog').modal('hide');
             // Get new modal content
@@ -414,10 +414,14 @@ module ViewModels {
                     // Data bind
                     var lastValue = this.isSavingAutomatically;
                     this.isSavingAutomatically = false;
-                    ko.applyBindings(self, document.getElementById("modal-dialog"));
+                    ko.applyBindings(this, document.getElementById("modal-dialog"));
                     this.isSavingAutomatically = lastValue;
                     // Show the dialog
                     $('#modal-dialog').modal('show');
+                    // Make the callback when the form closes.
+                    $("#modal-dialog").on("hidden.bs.modal", () => {
+                        if ($.isFunction(callback)) callback(this);
+                    });
                 })
                 .always(() => {
                     intellitect.utilities.hideBusy();

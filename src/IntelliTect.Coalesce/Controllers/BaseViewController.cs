@@ -9,6 +9,8 @@ using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using Microsoft.Extensions.Primitives;
 
 namespace IntelliTect.Coalesce.Controllers
 {
@@ -65,17 +67,20 @@ namespace IntelliTect.Coalesce.Controllers
         //[OutputCache(Duration = 10000, VaryByParam = "*")]
         protected ActionResult CreateEditImplementation(string viewName = "~/Views/Api/CreateEdit.cshtml")
         {
-            string id = "";
-            ViewBag.ParentIdName = null;
-            ViewBag.ParentId = null;
+            string id = null;
+            var parentIds = new Dictionary<string, StringValues>();
+            ViewBag.ParentIds = parentIds;
 
             foreach (var kvp in Request.Query)
             {
                 if (kvp.Key == "id") id = kvp.Value;
                 else if (kvp.Key != string.Empty)
                 {
-                    ViewBag.ParentIdName = classViewModel.PropertyByName(kvp.Key).JsVariable;
-                    ViewBag.ParentId = kvp.Value;
+                    var varName = classViewModel.PropertyByName(kvp.Key)?.JsVariable;
+                    if (varName != null)
+                    {
+                        parentIds.Add(varName, kvp.Value);
+                    }
                     ViewBag.Query = kvp.Key + "=" + kvp.Value;
                 }
             }

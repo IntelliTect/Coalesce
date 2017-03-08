@@ -523,7 +523,6 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 if (BeforeDelete(item))
                 {
-                    DataSource.Remove(item);
                     // Allow for other cascade deletes.
                     var validationInfo = new ValidateResult();
                     if (item is IBeforeDelete<TContext>)
@@ -532,6 +531,7 @@ namespace IntelliTect.Coalesce.Controllers
                     }
                     if (validationInfo.WasSuccessful)
                     {
+                        DataSource.Remove(item);
                         Db.SaveChanges();
                         if (item is IAfterDelete<TContext>)
                         {

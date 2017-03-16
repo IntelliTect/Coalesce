@@ -305,7 +305,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 }
                                 else if (prop.Type.IsString)
                                 {
-                                    var expr = $@"{kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)}";
+                                    var expr = $@"({kvp.Key} != null && {kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)})";
                                    expressions.Add(expr);
                                 }
                                 else
@@ -351,7 +351,7 @@ namespace IntelliTect.Coalesce.Controllers
                                     }
                                     else
                                     {
-                                        expr = $"{prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)}";
+                                        expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)})";
                                     }
                                 }
                                 else
@@ -392,7 +392,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 }
                                 else
                                 {
-                                    expr = $"{prop.Key}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)}";
+                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)})";
                                 }
                                 completeSearchClauses.Add(expr);
                             }

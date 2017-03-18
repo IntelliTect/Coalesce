@@ -26,5 +26,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         public string TypescriptModulePrefix { get; set; }
         [Option(Name = "namespace", ShortName = "namespace", Description = "Target Namespace for the generated code.")]
         public string TargetNamespace { get; set; }
+        [Option(Name = "dataassembly", ShortName = "dataassembly", Description = "Name of the data assembly.")]
+        public string DataAssembly { get; set; }
+        [Option(Name = "dataproject", ShortName = "dataproject", Description = "Relative path to the data project.")]
+        public string DataProject { get; set; }
     }
 }

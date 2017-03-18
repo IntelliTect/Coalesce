@@ -15,6 +15,8 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using System.Collections.Generic;
 using IntelliTect.Coalesce.CodeGeneration.Common;
+using Microsoft.Extensions.ProjectModel.Resolution;
+using System.Diagnostics;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -22,10 +24,42 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
     public class RazorTemplating : ITemplating
     {
         private ProjectContext _projectContext;
+        private IEnumerable<MetadataReference> References { get; }
+
+        /// <summary>
+        /// This method does stuff that causes assemblies to be loaded. 
+        /// </summary>
+        /// <remarks>
+        /// This is because the only way we have reliably figured out how to get a list of 
+        /// assemblies to load for roslyn references is by using the ones that are currently 
+        /// loaded. It seems like there must be a better way.
+        /// This could be expanded to take some sort of user input to load assemblies of their choice
+        /// if they chose to customize the temaplates in their project.
+        /// </remarks>
+        private void ForceLoadOfNeededAssemblies()
+        {
+            // Load Microsoft.CSharp.RuntimeBinder
+            var test = new Microsoft.CSharp.RuntimeBinder.RuntimeBinderException();
+
+            // Load Micosoft.AspNetCore.Html
+            var htmlString = new Microsoft.AspNetCore.Html.HtmlString("test");
+
+        }
 
         public RazorTemplating(ProjectContext projectContext)
         {
             _projectContext = projectContext;
+
+            // Load the references to use to do the compiling from the current context.
+            ForceLoadOfNeededAssemblies();
+
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var resolvedReferences = loadedAssemblies.Select(f => new ResolvedReference(f.FullName, f.Location));
+            foreach (var r in resolvedReferences)
+            {
+                Debug.WriteLine($"{r.Name}: {r.ResolvedPath}");
+            }
+            References = resolvedReferences.SelectMany(f => f.GetMetadataReference());
         }
 
         public RazorTemplateBase GetCompiledTemplate(string content)
@@ -50,7 +84,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 if (templateResult.Messages.Any())
                 {
                     File.WriteAllText("c:\\temp\\badtemplate.txt", generatorResults.GeneratedCode);
-                    return null;
+                    throw new Exception(string.Join(Environment.NewLine, templateResult.Messages));
                 }
 
                 var compiledObject = Activator.CreateInstance(templateResult.CompiledType);
@@ -98,20 +132,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         {
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
-            var references = GetApplicationReferences();
+            //var references = GetApplicationReferences();
+
+            //var references = _projectContext.CompilationAssemblies.SelectMany(f=>f.GetMetadataReference());
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,
                         options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
                         syntaxTrees: syntaxTrees,
-                        references: references);
+                        references: References);
 
 
             var result = CommonUtilities.GetAssemblyFromCompilation(new DefaultAssemblyLoadContext(), compilation);
             if (result.Success)
             {
-                var type = result.Assembly.GetExportedTypes()
-                                   .First();
+                var type = result.Assembly.GetExportedTypes().First();
 
                 return Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation.CompilationResult.Successful(string.Empty, type);
             }
@@ -134,7 +169,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             // some other references which are not available in any of these closures.
             // As the above comment, the right thing to do here is to use the dependency closure of
             // the assembly which has the template.
-            var exports = _projectContext.CompilationAssemblies;
+            var exports = new List<ResolvedReference>();
+            //var exports = _projectContext.CompilationAssemblies;
 
             if (exports != null)
             {

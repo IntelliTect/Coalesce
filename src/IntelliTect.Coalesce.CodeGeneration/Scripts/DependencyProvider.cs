@@ -64,7 +64,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             configuration = "Release";
 #endif
 
-            return MsBuildProjectContextBuilder.Build(
+                return MsBuildProjectContextBuilder.Build(
                 foundProjectJsonPath,
                 foundProjectJsonFile,
                 "D:\\Work\\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
@@ -128,12 +128,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         public ModelTypesLocator(
             Workspace projectWorkspace)
         {
-            if (projectWorkspace == null)
-            {
-                throw new ArgumentNullException(nameof(projectWorkspace));
-            }
-
-            _projectWorkspace = projectWorkspace;
+            _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
         }
 
         public IEnumerable<ModelType> GetAllTypes()

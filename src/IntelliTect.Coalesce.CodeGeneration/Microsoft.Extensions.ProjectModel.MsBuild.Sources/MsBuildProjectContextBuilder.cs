@@ -281,7 +281,7 @@ namespace Microsoft.Extensions.ProjectModel
 
                 return new ProjectContext
                 {
-                    CompilationAssemblies = references,
+                    //CompilationAssemblies = references,
                     ProjectFullPath = projectPath,
                     ProjectFilePath = projectFile
                 };

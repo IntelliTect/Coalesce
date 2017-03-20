@@ -44,6 +44,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             // Load Micosoft.AspNetCore.Html
             var htmlString = new Microsoft.AspNetCore.Html.HtmlString("test");
 
+            // Load IntelliTect.Coalesce
+            var models = IntelliTect.Coalesce.TypeDefinition.ReflectionRepository.Models;
         }
 
         public RazorTemplating(ProjectContext projectContext)

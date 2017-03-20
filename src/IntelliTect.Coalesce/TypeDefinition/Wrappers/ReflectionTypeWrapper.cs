@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             Info = type;
         }
 
-        public override string Name { get { return Info.Name; } }
+        public override string Name { get { return Info.Name.Replace("`1",""); } }
 
         public override object GetAttributeValue<TAttribute>(string valueName)
         {
@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override bool IsA<T>()
         {
-            return Info.IsSubclassOf(typeof(T)) || typeof(T) == Info;
+            return Info.IsSubclassOf(typeof(T)) || typeof(T).IsAssignableFrom(Info) || typeof(T) == Info;
         }
 
         public override bool IsGeneric { get { return Info.IsGenericType; } }

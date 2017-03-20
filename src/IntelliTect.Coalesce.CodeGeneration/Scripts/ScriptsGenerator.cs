@@ -203,7 +203,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
                 else
                 {
-                    var contextInfo = new ContextInfo(dataContext);
+                    var contextInfo = new ContextInfo(dataContext, targetNamespace);
                     return GenerateScripts(model, models, contextInfo, targetNamespace);
                 }
             }

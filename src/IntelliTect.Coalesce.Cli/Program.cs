@@ -17,6 +17,7 @@ namespace IntelliTect.Coalesce.Cli
                 Name = "Coalesce"
             };
 
+
             app.HelpOption("-h|--help");
             var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);
             var dataAssembly = app.Option("-da|--dataassembly", "Name of the data assembly", CommandOptionType.SingleValue);
@@ -46,6 +47,9 @@ namespace IntelliTect.Coalesce.Cli
                     DataAssembly = dataAssembly.Value() ?? ""
                 };
 
+                // Check the target namespace.
+                if (string.IsNullOrWhiteSpace(model.TargetNamespace)) throw new ArgumentException("Target Namespace was not found.");
+
                 // Find the web project
                 //ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
                 ProjectContext webContext = new ProjectContext(webProject.Value(), model.TargetNamespace);
@@ -56,10 +60,6 @@ namespace IntelliTect.Coalesce.Cli
                 // Get the data assembly
                 ProjectContext dataContext = new ProjectContext(model.DataProject, model.DataAssembly);
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
-
-                // Check the target namespace.
-                if (string.IsNullOrWhiteSpace(model.TargetNamespace)) throw new ArgumentException("Target Namespace was not found.");
-
 
                 CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);
 

@@ -13,9 +13,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
     /// </summary>
     public class ContextInfo
     {
-        public ContextInfo(Type type)
+        public ContextInfo(Type type, string nameSpace)
         {
-            Namespace = type.Namespace;
+            Namespace = nameSpace;
             Name = type.Name;
         }
 

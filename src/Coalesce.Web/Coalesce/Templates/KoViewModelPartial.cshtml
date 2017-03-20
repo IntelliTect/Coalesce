@@ -3,16 +3,10 @@
 @using IntelliTect.Coalesce.Utilities
 @{
     ClassViewModel model = Model.Model;
-    string typingReferencePath = "../..";
-    string intellitectUtilitiesPath = "..";
     string moduleName = "ViewModels";
-    string listModuleName = "ListViewModels";
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
     {
-        typingReferencePath = "../../../..";
-        intellitectUtilitiesPath = "../../../../scripts";
         moduleName = Model.AreaName + "." + moduleName;
-        listModuleName = Model.AreaName + "." + listModuleName;
     }
     if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
     {

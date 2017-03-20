@@ -274,7 +274,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (minLength.HasValue && minLength.Value != int.MaxValue) validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
                 if (maxLength.HasValue && maxLength.Value != int.MinValue) validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
                 if (pattern != null) validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
-                if (step.HasValue) validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
+                if (step.HasValue && step.Value != 0) validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
                 if (isEmail.HasValue && isEmail.Value) validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
                 if (isPhoneUs.HasValue && isPhoneUs.Value) validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
                 if (equal != null) validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");

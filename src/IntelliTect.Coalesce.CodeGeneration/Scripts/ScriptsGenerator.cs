@@ -724,7 +724,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 {
                     Console.Write($"{model.Model.Name}  ");
 
-                    await output.Generate("ClassDto.cshtml", Path.Combine(modelOutputPath, model.Model.Name + "DtoGen.cs"), model);
+                    await output.Generate("ClassDto.cshtml", model.Model.Name + "DtoGen.cs", model);
                 }
                 Console.WriteLine();
             }

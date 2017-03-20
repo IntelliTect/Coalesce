@@ -102,7 +102,6 @@ module ListViewModels {
         // Variable for method arguments to allow for easy binding
         
         // Call server method (GetCaseSummary)
-        // Returns a list of summary information about Cases
         public getCaseSummary: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetCaseSummary) strongly typed in a observable.
         public getCaseSummaryResult: KnockoutObservable<ViewModels.CaseSummary> = ko.observable(null);

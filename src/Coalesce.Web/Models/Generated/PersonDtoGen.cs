@@ -75,7 +75,10 @@ namespace Coalesce.Web.Models
             newObject.PersonId = obj.PersonId;
             newObject.Title = obj.Title;
             newObject.FirstName = obj.FirstName;
-            newObject.LastName = obj.LastName;
+            if ((isAdmin))
+            {
+                newObject.LastName = obj.LastName;
+            }
             newObject.Email = obj.Email;
             if ((isAdmin))
             {

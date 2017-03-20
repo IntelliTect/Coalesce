@@ -30,7 +30,6 @@ module ViewModels {
         
     
         // Observables
-        // The Primary key for the Case object
         public caseKey: KnockoutObservable<number> = ko.observable(null);
         public title: KnockoutObservable<string> = ko.observable(null);
         public description: KnockoutObservable<string> = ko.observable(null);

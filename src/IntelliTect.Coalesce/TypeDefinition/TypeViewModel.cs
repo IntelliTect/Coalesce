@@ -355,7 +355,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     string typeName = "";
 
-                    if (Wrapper.IsNullable || Wrapper.IsArray)
+                    if (Wrapper.IsNullable || Wrapper.IsArray || Wrapper.IsCollection)
                         typeName = Wrapper.NameWithTypeParams;
                     else
                         typeName = Wrapper.Name + "?";

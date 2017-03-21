@@ -1,6 +1,7 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Scripts;
-using Microsoft.DotNet.ProjectModel;
+﻿using IntelliTect.Coalesce.CodeGeneration.Common;
+using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.ProjectModel;
 using System;
 using System.IO;
 using System.Reflection;
@@ -16,8 +17,10 @@ namespace IntelliTect.Coalesce.Cli
                 Name = "Coalesce"
             };
 
+
             app.HelpOption("-h|--help");
             var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);
+            var dataAssembly = app.Option("-da|--dataassembly", "Name of the data assembly", CommandOptionType.SingleValue);
             var force = app.Option("-f|--force", "Use this option to overwrite existing files", CommandOptionType.SingleValue);
             var relativeFolderPath = app.Option("-outDir|--relativeFolderPath", "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder", CommandOptionType.SingleValue);
             var onlyGenerateFiles = app.Option("-filesOnly|--onlyGenerateFiles", "Will only generate the file output and will not restore any of the packages", CommandOptionType.SingleValue);
@@ -39,15 +42,23 @@ namespace IntelliTect.Coalesce.Cli
                     ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
                     AreaLocation = area.Value() ?? "",
                     TypescriptModulePrefix = module.Value() ?? "",
-                    TargetNamespace = targetNamespace.Value() ?? ""
+                    TargetNamespace = targetNamespace.Value() ?? "",
+                    DataProject = dataProject.Value() ?? "",
+                    DataAssembly = dataAssembly.Value() ?? ""
                 };
 
+                // Check the target namespace.
+                if (string.IsNullOrWhiteSpace(model.TargetNamespace)) throw new ArgumentException("Target Namespace was not found.");
+
                 // Find the web project
-                ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
+                //ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
+                ProjectContext webContext = new ProjectContext(webProject.Value(), model.TargetNamespace);
                 if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
 
                 // Find the data project
-                ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
+                //ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
+                // Get the data assembly
+                ProjectContext dataContext = new ProjectContext(model.DataProject, model.DataAssembly);
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
                 CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);

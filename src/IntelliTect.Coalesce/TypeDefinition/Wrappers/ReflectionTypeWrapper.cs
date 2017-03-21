@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             Info = type;
         }
 
-        public override string Name { get { return Info.Name; } }
+        public override string Name { get { return Info.Name.Replace("`1",""); } }
 
         public override object GetAttributeValue<TAttribute>(string valueName)
         {
@@ -26,11 +26,11 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override bool IsA<T>()
         {
-            return Info.IsSubclassOf(typeof(T)) || typeof(T) == Info;
+            return Info.IsSubclassOf(typeof(T)) || typeof(T).IsAssignableFrom(Info) || typeof(T) == Info;
         }
 
         public override bool IsGeneric { get { return Info.IsGenericType; } }
-        
+
         public override bool IsCollection { get { return Info.GetInterface("IEnumerable") != null && !IsArray && !IsString; } }
 
         public override bool IsArray { get { return Info.IsArray; } }
@@ -63,7 +63,13 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override string Namespace { get { return Info.Namespace; } }
 
-        public override string FullNamespace { get { throw new NotImplementedException(); } }
+        public override string FullNamespace
+        {
+            get
+            {
+                return Info.Namespace;
+            }
+        }
 
         public override TypeWrapper PureType
         {

@@ -7,13 +7,16 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using NuGet.Frameworks;
-using Microsoft.DotNet.ProjectModel;
 using System.IO;
 using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.Extensions.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.DotNet.ProjectModel.Workspaces;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
+using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -40,60 +43,171 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             // Search up the folders from the path provided and find a project.json
             var foundProjectJsonPath = "";
+            var foundProjectJsonFile = "";
             var curDirectory = new DirectoryInfo(projectPath);
             var rootDirectory = curDirectory.Root.FullName;
             while (curDirectory.FullName != rootDirectory)
             {
-                if (curDirectory.EnumerateFiles("project.json", SearchOption.TopDirectoryOnly).Count() == 1)
+                var files = curDirectory.EnumerateFiles("*.csproj", SearchOption.TopDirectoryOnly);
+                if (files.Count() == 1)
                 {
                     foundProjectJsonPath = curDirectory.FullName;
+                    foundProjectJsonFile = files.Single().FullName;
                     break;
                 }
                 curDirectory = curDirectory.Parent;
             }
             if (string.IsNullOrEmpty(foundProjectJsonPath)) throw new ArgumentException("Project path not found.");
 
-            return new ProjectContextBuilder()
-                    .WithProjectDirectory(foundProjectJsonPath)
-                    .WithTargetFramework(framework)
-                    .Build();
+            var configuration = "Debug";
+#if RELEASE
+            configuration = "Release";
+#endif
+
+                return MsBuildProjectContextBuilder.Build(
+                foundProjectJsonPath,
+                foundProjectJsonFile,
+                "D:\\Work\\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
+                configuration);
         }
+
 
         public static ModelTypesLocator ModelTypesLocator(ProjectContext project)
         {
-            var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
+            var workspace = MSBuildWorkspace.Create();
+            workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
+            {
+                if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+                    throw new Exception(e.Diagnostic.Message);
+            };
 
-            return new ModelTypesLocator(LibraryExporter(project), workspace);
+            var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
+
+            //var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
+
+            return new ModelTypesLocator(workspace);
         }
 
         public static CodeGeneratorActionsService CodeGeneratorActionsService(ProjectContext project)
         {
-            ICodeGenAssemblyLoadContext loadContext = new DefaultAssemblyLoadContext();
             IFilesLocator files = new FilesLocator();
 
-            return new CodeGeneratorActionsService(new RazorTemplating(
-                new RoslynCompilationService(ApplicationInfo(project), loadContext, LibraryExporter(project))), files);
+            return new CodeGeneratorActionsService(new RazorTemplating(project), files);
+        }
+    }
+
+    internal static class RoslynUtilities
+    {
+        public static IEnumerable<ITypeSymbol> GetDirectTypesInCompilation(Compilation compilation)
+        {
+            if (compilation == null)
+            {
+                throw new ArgumentNullException(nameof(compilation));
+            }
+
+            var types = new List<ITypeSymbol>();
+            CollectTypes(compilation.Assembly.GlobalNamespace, types);
+            return types;
         }
 
-        public static LibraryManager LibraryManager(ProjectContext project)
+        private static void CollectTypes(INamespaceSymbol ns, List<ITypeSymbol> types)
         {
-            return new LibraryManager(project);
+            types.AddRange(ns.GetTypeMembers().Cast<ITypeSymbol>());
+
+            foreach (var nestedNs in ns.GetNamespaceMembers())
+            {
+                CollectTypes(nestedNs, types);
+            }
+        }
+    }
+
+    public class ModelTypesLocator : IModelTypesLocator
+    {
+        private Workspace _projectWorkspace;
+
+        public ModelTypesLocator(
+            Workspace projectWorkspace)
+        {
+            _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
         }
 
-
-
-        private static LibraryExporter LibraryExporter(ProjectContext project)
+        public IEnumerable<ModelType> GetAllTypes()
         {
-            return new LibraryExporter(project, ApplicationInfo(project));
+            return _projectWorkspace.CurrentSolution.Projects
+                .Select(project => project.GetCompilationAsync().Result)
+                .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
+                .Aggregate((col1, col2) => col1.Concat(col2).ToList())
+                .Distinct(new TypeSymbolEqualityComparer())
+                .Select(ts => ModelType.FromITypeSymbol(ts));
         }
 
-        private static ApplicationInfo ApplicationInfo(ProjectContext project)
+        public IEnumerable<ModelType> GetType(string typeName)
         {
-#if RELEASE
-            return new ApplicationInfo(project.GetType().ToString(), project.ProjectDirectory, "Release");
-#else
-            return new ApplicationInfo(project.GetType().ToString(), project.ProjectDirectory, "Debug");
-#endif
+            if (typeName == null)
+            {
+                throw new ArgumentNullException(nameof(typeName));
+            }
+
+            var compilation = _projectWorkspace
+                .CurrentSolution.Projects.First().GetCompilationAsync().Result;
+
+            var exactTypesInAllProjects = _projectWorkspace
+                .CurrentSolution.Projects
+                .Select(project => project.GetCompilationAsync().Result)
+                .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
+                .Where(type => type != null)
+                .Distinct(new TypeSymbolEqualityComparer());
+
+            if (exactTypesInAllProjects.Any())
+            {
+                return exactTypesInAllProjects.Select(ts => ModelType.FromITypeSymbol(ts));
+            }
+            //For short type names, we don't give special preference to types in current app,
+            //should we do that?
+            return GetAllTypes()
+                .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
+        }
+
+        private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>
+        {
+            public bool Equals(ITypeSymbol x, ITypeSymbol y)
+            {
+                if (Object.ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                //Check for namespace to be the same.
+                var isNamespaceEqual = (Object.ReferenceEquals(x.ContainingNamespace, y.ContainingNamespace)
+                        || ((x.ContainingNamespace != null && y.ContainingNamespace != null)
+                            && (x.ContainingNamespace.Name == y.ContainingNamespace.Name)));
+                //Check for assembly to be the same.
+                var isAssemblyEqual = (object.ReferenceEquals(x.ContainingAssembly, y.ContainingAssembly)
+                        || ((x.ContainingAssembly != null && y.ContainingAssembly != null)
+                            && (x.ContainingAssembly.Name == y.ContainingAssembly.Name)));
+
+                return x.Name == y.Name
+                    && isNamespaceEqual
+                    && isAssemblyEqual;
+
+            }
+
+            public int GetHashCode(ITypeSymbol obj)
+            {
+                if (Object.ReferenceEquals(obj, null))
+                {
+                    return 0;
+                }
+                var hashName = obj.Name == null ? 0 : obj.Name.GetHashCode();
+                var hashNamespace = obj.ContainingNamespace?.Name == null ? 0 : obj.ContainingNamespace.Name.GetHashCode();
+                var hashAssembly = obj.ContainingAssembly?.Name == null ? 0 : obj.ContainingAssembly.Name.GetHashCode();
+
+                return hashName ^ hashNamespace ^ hashAssembly;
+            }
         }
     }
 }

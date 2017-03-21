@@ -11,7 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Common
     {
         public IEnumerable<ClassViewModel> Models { get; set; }
 
-        public ModelType ContextInfo { get; set; }
+        public ContextInfo ContextInfo { get; set; }
 
         public string Namespace { get; set; }
 
@@ -44,7 +44,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Common
     {
         public ClassViewModel Model { get; set; }
 
-        public ModelType ContextInfo { get; set; }
+        public ContextInfo ContextInfo { get; set; }
 
         public string Namespace { get; set; }
         public string AreaName { get; internal set; }

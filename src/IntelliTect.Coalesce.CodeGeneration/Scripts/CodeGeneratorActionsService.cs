@@ -92,6 +92,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 razorTemplate = _templatingService.GetCompiledTemplate(templateContent);
                 _templateCache.Add(templatePath, razorTemplate);
             }
+
+            if (razorTemplate == null) throw new Exception("Compiled template does not exist. Probably means that compile failed due to missing references.");
+            if (templateModel == null) throw new Exception("Model missing for generating code.");
+
             templateResult = await _templatingService.RunTemplateAsync(razorTemplate, templateModel);
 
             if (templateResult.ProcessingException != null)

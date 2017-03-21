@@ -8,22 +8,60 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
+using Microsoft.Extensions.ProjectModel;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Web.CodeGeneration;
+using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using System.Collections.Generic;
+using IntelliTect.Coalesce.CodeGeneration.Common;
+using Microsoft.Extensions.ProjectModel.Resolution;
+using System.Diagnostics;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
     //Todo: Make this internal and expose as a sevice
     public class RazorTemplating : ITemplating
     {
-        private ICompilationService _compilationService;
+        private ProjectContext _projectContext;
+        private IEnumerable<MetadataReference> References { get; }
 
-        public RazorTemplating(ICompilationService compilationService)
+        /// <summary>
+        /// This method does stuff that causes assemblies to be loaded. 
+        /// </summary>
+        /// <remarks>
+        /// This is because the only way we have reliably figured out how to get a list of 
+        /// assemblies to load for roslyn references is by using the ones that are currently 
+        /// loaded. It seems like there must be a better way.
+        /// This could be expanded to take some sort of user input to load assemblies of their choice
+        /// if they chose to customize the temaplates in their project.
+        /// </remarks>
+        private void ForceLoadOfNeededAssemblies()
         {
-            if (compilationService == null)
-            {
-                throw new ArgumentNullException(nameof(compilationService));
-            }
+            // Load Microsoft.CSharp.RuntimeBinder
+            var test = new Microsoft.CSharp.RuntimeBinder.RuntimeBinderException();
 
-            _compilationService = compilationService;
+            // Load Micosoft.AspNetCore.Html
+            var htmlString = new Microsoft.AspNetCore.Html.HtmlString("test");
+
+            // Load IntelliTect.Coalesce
+            var models = IntelliTect.Coalesce.TypeDefinition.ReflectionRepository.Models;
+        }
+
+        public RazorTemplating(ProjectContext projectContext)
+        {
+            _projectContext = projectContext;
+
+            // Load the references to use to do the compiling from the current context.
+            ForceLoadOfNeededAssemblies();
+
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var resolvedReferences = loadedAssemblies.Select(f => new ResolvedReference(f.FullName, f.Location));
+            foreach (var r in resolvedReferences)
+            {
+                Debug.WriteLine($"{r.Name}: {r.ResolvedPath}");
+            }
+            References = resolvedReferences.SelectMany(f => f.GetMetadataReference());
         }
 
         public RazorTemplateBase GetCompiledTemplate(string content)
@@ -44,11 +82,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     return null;
                 }
 
-                var templateResult = _compilationService.Compile(generatorResults.GeneratedCode);
+                var templateResult = Compile(generatorResults.GeneratedCode);
                 if (templateResult.Messages.Any())
                 {
                     File.WriteAllText("c:\\temp\\badtemplate.txt", generatorResults.GeneratedCode);
-                    return null;
+                    throw new Exception(string.Join(Environment.NewLine, templateResult.Messages));
                 }
 
                 var compiledObject = Activator.CreateInstance(templateResult.CompiledType);
@@ -90,5 +128,63 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 ProcessingException = null
             };
         }
+
+
+        public Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation.CompilationResult Compile(string content)
+        {
+            var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
+
+            //var references = GetApplicationReferences();
+
+            //var references = _projectContext.CompilationAssemblies.SelectMany(f=>f.GetMetadataReference());
+            var assemblyName = Path.GetRandomFileName();
+
+            var compilation = CSharpCompilation.Create(assemblyName,
+                        options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
+                        syntaxTrees: syntaxTrees,
+                        references: References);
+
+
+            var result = CommonUtilities.GetAssemblyFromCompilation(new DefaultAssemblyLoadContext(), compilation);
+            if (result.Success)
+            {
+                var type = result.Assembly.GetExportedTypes().First();
+
+                return Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation.CompilationResult.Successful(string.Empty, type);
+            }
+            else
+            {
+                return Microsoft.VisualStudio.Web.CodeGeneration.Templating.Compilation.CompilationResult.Failed(content, result.ErrorMessages);
+            }
+        }
+
+        //Todo: This is using application references to compile the template,
+        //perhaps that's not right, we should use the dependencies of the caller
+        //who calls the templating API.
+        private List<MetadataReference> GetApplicationReferences()
+        {
+            var references = new List<MetadataReference>();
+
+            // Todo: When the target app references scaffolders as nuget packages rather than project references,
+            // we need to ensure all dependencies for compiling the generated razor template.
+            // This requires further thinking for custom scaffolders because they may be using
+            // some other references which are not available in any of these closures.
+            // As the above comment, the right thing to do here is to use the dependency closure of
+            // the assembly which has the template.
+            var exports = new List<ResolvedReference>();
+            //var exports = _projectContext.CompilationAssemblies;
+
+            if (exports != null)
+            {
+                foreach (var metadataReference in exports.SelectMany(exp => exp.GetMetadataReference(throwOnError: false)))
+                {
+                    references.Add(metadataReference);
+                }
+            }
+
+            return references;
+        }
+
+
     }
 }

@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.ProjectModel;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Documentation
 {
@@ -54,38 +54,34 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
     {
         public const string ThisAssemblyName = "IntelliTect.Coalesce.CodeGeneration";
         public IModelTypesLocator ModelTypesLocator { get; }
+        protected IProjectContext ProjectContext { get; }
         protected IServiceProvider ServiceProvider { get; }
-        protected ILibraryManager LibraryManager { get; }
         protected ICodeGeneratorActionsService CodeGeneratorActionsService { get; }
         public IEnumerable<string> TemplateFolders
         {
             get
             {
-                return Common.TemplateFoldersUtilities.GetTemplateFolders(
+                return Microsoft.VisualStudio.Web.CodeGeneration.TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: ThisAssemblyName,
                     applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
                     baseFolders: new[] { "" },
-                    libraryManager: LibraryManager);
+                    projectContext: ProjectContext);
             }
         }
         public DocumentationGenerator(
-            ILibraryManager libraryManager,
             IModelTypesLocator modelTypesLocator,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
-            ILogger logger)
+            Microsoft.Extensions.Logging.ILogger logger)
             : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = modelTypesLocator;
             ServiceProvider = serviceProvider;
             CodeGeneratorActionsService = codeGeneratorActionsService;
-            LibraryManager = libraryManager;
         }
 
         internal async Task Generate(CommandLineGeneratorModel model)
         {
-            LibraryDescription componentModel = LibraryManager.GetLibrary("IntelliTect.Coalesce");
-            LibraryDescription codeGenerator = LibraryManager.GetLibrary("IntelliTect.Coalesce.CodeGeneration");
             DocumentationViewModel viewModel = new DocumentationViewModel();
 
             viewModel.Attributes = new List<AttributeInfo>();

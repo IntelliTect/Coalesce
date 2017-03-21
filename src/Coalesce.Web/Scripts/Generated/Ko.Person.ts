@@ -30,27 +30,17 @@ module ViewModels {
         
     
         // Observables
-        // ID for the person object.
         public personId: KnockoutObservable<number> = ko.observable(null);
-        // Title of the person, Mr. Mrs, etc.
         public title: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Title
-        // Title of the person, Mr. Mrs, etc.
         public titleText: KnockoutComputed<string> = ko.computed<string>(() => "");
-        // First name of the person.
         public firstName: KnockoutObservable<string> = ko.observable(null);
-        // Last name of the person
         public lastName: KnockoutObservable<string> = ko.observable(null);
-        // Email address of the person
         public email: KnockoutObservable<string> = ko.observable(null);
-        // Genetic Gender of the person.
         public gender: KnockoutObservable<number> = ko.observable(null);
         // Text value for enumeration Gender
-        // Genetic Gender of the person.
         public genderText: KnockoutComputed<string> = ko.computed<string>(() => "");
-        // List of cases assigned to the person
         public casesAssigned: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
-        // List of cases reported by the person.
         public casesReported: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         public birthDate: KnockoutObservable<any> = ko.observable(null);
         public lastBath: KnockoutObservable<any> = ko.observable(null);
@@ -58,35 +48,26 @@ module ViewModels {
         public personStatsId: KnockoutObservable<number> = ko.observable(null);
         public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
         public timeZone: KnockoutObservable<any> = ko.observable(null);
-        // Calculated name of the person. eg., Mr. Michael Stokesbary.
         public name: KnockoutObservable<string> = ko.observable(null);
-        // Company ID this person is employed by
         public companyId: KnockoutObservable<number> = ko.observable(null);
-        // Company loaded from the Company ID
         public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
 
        
         // Create computeds for display for objects
         public personStatsText: () => string;
-        // Company loaded from the Company ID
         public companyText: () => string;
         
-        // Add object to casesAssigned
         public addToCasesAssigned: () => Case;
         // List Object model for CasesAssigned. Allows for loading subsets of data.
         public casesAssignedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
-        // Add object to casesReported
         public addToCasesReported: () => Case;
         // List Object model for CasesReported. Allows for loading subsets of data.
         public casesReportedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
 
-        // List of cases assigned to the person
         public CasesAssignedListUrl: () => void; 
-        // List of cases reported by the person.
         public CasesReportedListUrl: () => void; 
                 public personStatsValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadPersonStatsValidValues: (callback?: any) => void;
-        // Company loaded from the Company ID
         public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
@@ -108,7 +89,6 @@ module ViewModels {
         ];
 
         // Call server method (Rename)
-        // Adds the text to the first name.
         public rename: (addition: String, callback?: any, reload?: boolean) => void;
         // Result of server method (Rename)
         public renameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
@@ -128,7 +108,6 @@ module ViewModels {
         public renameArgs = new Person.RenameArgs(); 
         
         // Call server method (ChangeSpacesToDashesInName)
-        // Removes spaces from the name and puts in dashes
         public changeSpacesToDashesInName: (callback?: any, reload?: boolean) => void;
         // Result of server method (ChangeSpacesToDashesInName)
         public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable(null);

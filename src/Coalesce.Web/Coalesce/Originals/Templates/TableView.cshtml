@@ -5,7 +5,7 @@
 @using IntelliTect.Coalesce.DataAnnotations
 @using IntelliTect.Coalesce.Helpers
 @{
-    ModelType contextInfo = Model.ContextInfo;
+    ContextInfo contextInfo = Model.ContextInfo;
     ClassViewModel model = Model.Model;
     string listViewModelsNamespace = "ListViewModels";
     if (!string.IsNullOrWhiteSpace(Model.AreaName))

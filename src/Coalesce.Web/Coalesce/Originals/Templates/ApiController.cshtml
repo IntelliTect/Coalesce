@@ -2,7 +2,7 @@
 @using IntelliTect.Coalesce.TypeDefinition
 @using Microsoft.VisualStudio.Web.CodeGeneration
 @{
-    ModelType contextInfo = Model.ContextInfo;
+    ContextInfo contextInfo = Model.ContextInfo;
     ClassViewModel model = Model.Model;
     string namespaceName = Model.Namespace;
     if (!string.IsNullOrWhiteSpace(Model.AreaName))

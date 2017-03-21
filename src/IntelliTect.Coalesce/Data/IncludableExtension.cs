@@ -117,8 +117,9 @@ namespace IntelliTect.Coalesce.Data
 
         internal static readonly MethodInfo IncludeMethodInfo
             = typeof(EntityFrameworkQueryableExtensions)
-                .GetTypeInfo().GetDeclaredMethods("Include")
-                .Single(mi => mi.GetParameters().Any(pi => pi.Name == "navigationPropertyPath"));
+                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.Include))
+                .Single(mi => mi.GetParameters().Any(
+                    pi => pi.Name == "navigationPropertyPath" && pi.ParameterType != typeof(string)));
 
         internal static readonly MethodInfo ThenIncludeAfterCollectionMethodInfo
             = typeof(EntityFrameworkQueryableExtensions)

@@ -180,7 +180,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public static List<ClassViewModel> AddContext<T>(string area = "") where T : DbContext
         {
-            var context = new ClassViewModel(typeof(T), null, null, false);
+            return AddContext(typeof(T), area);
+        }
+
+
+        /// <summary>
+        /// Adds a context to the reflection repository. Do this on startup with all the contexts.
+        /// </summary>
+        /// <typeparam name="t">Type of DbContext to add.</typeparam>
+        /// <returns></returns>
+        public static List<ClassViewModel> AddContext(Type t, string area = "")
+        {
+            var context = new ClassViewModel(t, null, null, false);
             return AddContext(context, area);
         }
 

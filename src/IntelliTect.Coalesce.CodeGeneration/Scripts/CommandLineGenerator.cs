@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.DotNet.ProjectModel;
 using System.Diagnostics;
+using Microsoft.Extensions.ProjectModel;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {

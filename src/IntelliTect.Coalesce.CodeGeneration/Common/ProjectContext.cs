@@ -24,21 +24,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Common
             }
             if (assemblyFile == null)
             {
-                throw new ArgumentException($"Could not find a file named {assemblyName + ".*"} in {ProjectFullPath}");
+                //throw new ArgumentException($"Could not find a assembly named {assemblyName + ".*"} in {ProjectFullPath}");
+                Console.WriteLine ($"Could not find a assembly named {assemblyName + ".*"} in {ProjectFullPath}");
             }
-
-            AssemblyFilePath = assemblyFile.FullName;
-
-            // Load the assembly
-            AssemblyName an = AssemblyName.GetAssemblyName(AssemblyFilePath);
-            Assembly = Assembly.Load(an);
-
-            CompilationAssemblies = new List<ResolvedReference>();
-            // Pull in all the dependencies
-            //var allDlls = assemblyFile.Directory.GetFiles("*.dll", SearchOption.AllDirectories);
-            foreach (var item in Assembly.GetReferencedAssemblies())
+            else
             {
-                //CompilationAssemblies.Add(new ResolvedReference(item.Name.Substring(0, item.Name.Length - item.Extension.Length), item.FullName));
+                AssemblyFilePath = assemblyFile.FullName;
+
+                // Load the assembly
+                AssemblyName an = AssemblyName.GetAssemblyName(AssemblyFilePath);
+                Assembly = Assembly.Load(an);
+
+                CompilationAssemblies = new List<ResolvedReference>();
+                // Pull in all the dependencies
+                //var allDlls = assemblyFile.Directory.GetFiles("*.dll", SearchOption.AllDirectories);
+                foreach (var item in Assembly.GetReferencedAssemblies())
+                {
+                    //CompilationAssemblies.Add(new ResolvedReference(item.Name.Substring(0, item.Name.Length - item.Extension.Length), item.FullName));
+                }
             }
         }
 

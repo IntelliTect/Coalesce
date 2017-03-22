@@ -16,6 +16,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         private static Dictionary<string, ClassViewModel> _models = new Dictionary<string, ClassViewModel>();
         private static object _lock = new object();
+        private static string _contextNamespace;
 
 
         public static ClassViewModel GetClassViewModel(TypeViewModel classType, string controllerName = null,
@@ -204,6 +205,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static List<ClassViewModel> AddContext(ClassViewModel context, string area = "")
         {
+            _contextNamespace = context.Namespace;
             // Lock so that parallel execution only uses this once at a time.
             lock (_lock)
             {
@@ -283,7 +285,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var result = _models.Select(f => f.Value.Namespace).Distinct();
+                var result = _models.Select(f => f.Value.Namespace).Distinct().ToList();
+                // Make sure we add the namespace of the context
+                if (!result.Contains(_contextNamespace)) result.Add(_contextNamespace);
                 return result;
             }
         }

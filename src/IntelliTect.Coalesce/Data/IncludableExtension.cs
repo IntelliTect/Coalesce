@@ -20,6 +20,32 @@ namespace IntelliTect.Coalesce.Data
 {
     public static class IncludableExtension
     {
+        internal static MethodInfo IncludeMethodInfo { get; }
+        internal static MethodInfo ThenIncludeAfterCollectionMethodInfo { get; }
+
+        static IncludableExtension()
+        {
+            IncludeMethodInfo = typeof(EntityFrameworkQueryableExtensions)
+                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.Include))
+                .Single(mi => mi.GetParameters().Any(
+                    pi => pi.Name == "navigationPropertyPath" && pi.ParameterType != typeof(string)));
+
+            ThenIncludeAfterCollectionMethodInfo = typeof(EntityFrameworkQueryableExtensions)
+                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.ThenInclude))
+                .Single(mi =>
+                {
+                    var typeInfo = mi.GetParameters()[0].ParameterType.GenericTypeArguments[1].GetTypeInfo();
+                    return typeInfo.IsGenericType
+                           && typeInfo.GetGenericTypeDefinition() == typeof(ICollection<>);
+                });
+
+        }
+
+
+
+
+
+
         /// <summary>
         /// Includes sub objects from the graph based on IIncludable method on class.
         /// </summary>
@@ -114,17 +140,6 @@ namespace IntelliTect.Coalesce.Data
             body = Expression.PropertyOrField(body, propertyName);
             return Expression.Lambda(body, param);
         }
-
-        internal static readonly MethodInfo IncludeMethodInfo
-            = typeof(EntityFrameworkQueryableExtensions)
-                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.Include))
-                .Single(mi => mi.GetParameters().Any(
-                    pi => pi.Name == "navigationPropertyPath" && pi.ParameterType != typeof(string)));
-
-        internal static readonly MethodInfo ThenIncludeAfterCollectionMethodInfo
-            = typeof(EntityFrameworkQueryableExtensions)
-                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.ThenInclude))
-                .Single(mi => !mi.GetParameters()[0].ParameterType.GenericTypeArguments[1].IsGenericParameter);
 
         // to get this to work, code was referenced and borrowed from https://github.com/aspnet/EntityFramework/blob/dev/src/EntityFramework.Core/EntityFrameworkQueryableExtensions.cs
         public static IQueryable<T> IncludeString<T>(this IQueryable<T> query, string include) where T : class, new()

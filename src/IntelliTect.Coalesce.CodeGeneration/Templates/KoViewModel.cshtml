@@ -510,10 +510,10 @@ module @moduleName {
                 @:// See if self.@(prop.JsVariable) needs to be loaded.
                 @:if (self.@(prop.JsVariable)() == null && self.@(prop.ObjectIdProperty.JsVariable)() != null){
                     @:loadingCount++;
-                    @:var @(prop.JsVariable) = new @(prop.Object.ViewModelClassName)();
-                    @:@(prop.JsVariable).load(self.@(prop.ObjectIdProperty.JsVariable)(), function() {
+                    @:var @(prop.JsVariable)Obj = new @(prop.Object.ViewModelClassName)();
+                    @:@(prop.JsVariable)Obj.load(self.@(prop.ObjectIdProperty.JsVariable)(), function() {
                         @:loadingCount--;
-                        @:self.@(prop.JsVariable)(@(prop.JsVariable));
+                        @:self.@(prop.JsVariable)(@(prop.JsVariable)Obj);
                         @:if (loadingCount == 0 && $.isFunction(callback)){
                             @:callback();
                         @:}

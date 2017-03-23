@@ -65,7 +65,7 @@ module ViewModels {
         public isChecked: KnockoutObservable<boolean> = ko.observable(false);
         // Alternates the isExpanded flag. Use with a click binding for a button.
         public changeIsExpanded = (value?: boolean) => { // Call this with the edit button.
-            if (value !== true || value !== false) this.isExpanded(!this.isExpanded());
+            if (typeof (value) === "boolean") this.isExpanded(!this.isExpanded());
             else this.isExpanded(value === true); // Force boolean
         };
         // Flag to use to determine if this item is being edited. Only for convenience.

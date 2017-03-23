@@ -66,14 +66,12 @@ module ViewModels {
 
         public CasesAssignedListUrl: () => void; 
         public CasesReportedListUrl: () => void; 
-                public personStatsValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadPersonStatsValidValues: (callback?: any) => void;
-        public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
+                public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
-        public showPersonStatsEditor: () => void;
-        public showCompanyEditor: () => void;
+        public showEditor: (callback?: any) => void;
+        public showPersonStatsEditor: (callback?: any) => void;
+        public showCompanyEditor: (callback?: any) => void;
 
 
         public titleValues: EnumValue[] = [ 
@@ -231,10 +229,6 @@ module ViewModels {
 				    }else{
 					    self.personStats().loadFromDto(data.personStats);
 				    }
-                    if (self.parent && self.parent.myId == self.personStats().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.personStats()))
-                    {
-                        self.parent.loadFromDto(data.personStats, undefined, false);
-                    }
                 }
 				if (!data.company) { 
 					if (data.companyId != self.companyId()) {
@@ -398,30 +392,6 @@ module ViewModels {
             });
             // Create loading function for Valid Values
 
-            self.loadPersonStatsValidValues = function(callback) {
-                self.loadingValidValues++;
-                $.ajax({ method: "GET", url: self.areaUrl + "api/PersonStats/CustomList?Fields=PersonStatsId,PersonStatsId", xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.personStatsValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.showFailureAlerts)
-                        alert("Could not get Valid Values for PersonStats: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
             self.loadCompanyValidValues = function(callback) {
                 self.loadingValidValues++;
                 $.ajax({ method: "GET", url: self.areaUrl + "api/Company/CustomList?Fields=CompanyId,AltName", xhrFields: { withCredentials: true } })
@@ -446,24 +416,23 @@ module ViewModels {
                 });
             }
             
-            self.showCompanyEditor = function() {
+            self.showCompanyEditor = function(callback: any) {
                 if (!self.company()) {
                     self.company(new Company());
                 }
-                self.company().showEditor()
+                self.company().showEditor(callback)
             };
 
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
                 // See if self.company needs to be loaded.
                 if (self.company() == null && self.companyId() != null){
                     loadingCount++;
-                    obj = new Company();
-                    obj.load(self.companyId(), function() {
+                    var companyObj = new Company();
+                    companyObj.load(self.companyId(), function() {
                         loadingCount--;
-                        self.company(obj);
+                        self.company(companyObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }
@@ -479,7 +448,6 @@ module ViewModels {
             // Load all the valid values in parallel.
             self.loadValidValues = function(callback) {
                 self.loadingValidValues = 0;
-                self.loadPersonStatsValidValues(callback);
                 self.loadCompanyValidValues(callback);
             };
 

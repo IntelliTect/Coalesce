@@ -15,6 +15,10 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
     <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj" />

@@ -48,9 +48,9 @@
                 {
                     @:acaseDto.load('@ViewBag.Id');
                 }
-        @if (ViewBag.ParentIdName != null)
+        @foreach (var kvp in ViewBag.ParentIds)
                 {
-                    @:acaseDto.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+                    @:acaseDto.@(((string)(@kvp.Key)))(@kvp.Value);
                 }
 
         window.onbeforeunload = function(){

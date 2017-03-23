@@ -169,9 +169,9 @@
                 @:{
                     @:@@:@(obj).load('@@ViewBag.Id');
                 @:}
-        @:@@if (ViewBag.ParentIdName != null)
+        @:@@foreach (var kvp in ViewBag.ParentIds)
                 @:{
-                    @:@@:@(obj).@@(((string)(@@ViewBag.ParentIdName)))(@@ViewBag.ParentId);
+                    @:@@:@(obj).@@(((string)(@@kvp.Key)))(@@kvp.Value);
                 @:}
         }
 

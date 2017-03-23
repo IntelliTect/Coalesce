@@ -505,16 +505,15 @@ module @moduleName {
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && !f.IsInternalUse && !f.IsReadOnly))
             {
                 @:// See if self.@(prop.JsVariable) needs to be loaded.
                 @:if (self.@(prop.JsVariable)() == null && self.@(prop.ObjectIdProperty.JsVariable)() != null){
                     @:loadingCount++;
-                    @:obj = new @(prop.Object.ViewModelClassName)();
-                    @:obj.load(self.@(prop.ObjectIdProperty.JsVariable)(), function() {
+                    @:var @(prop.JsVariable)Obj = new @(prop.Object.ViewModelClassName)();
+                    @:@(prop.JsVariable)Obj.load(self.@(prop.ObjectIdProperty.JsVariable)(), function() {
                         @:loadingCount--;
-                        @:self.@(prop.JsVariable)(obj);
+                        @:self.@(prop.JsVariable)(@(prop.JsVariable)Obj);
                         @:if (loadingCount == 0 && $.isFunction(callback)){
                             @:callback();
                         @:}

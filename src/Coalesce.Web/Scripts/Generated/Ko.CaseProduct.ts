@@ -264,14 +264,13 @@ module ViewModels {
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
                 // See if self.case needs to be loaded.
                 if (self.case() == null && self.caseId() != null){
                     loadingCount++;
-                    obj = new Case();
-                    obj.load(self.caseId(), function() {
+                    var caseObj = new Case();
+                    caseObj.load(self.caseId(), function() {
                         loadingCount--;
-                        self.case(obj);
+                        self.case(caseObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }
@@ -280,10 +279,10 @@ module ViewModels {
                 // See if self.product needs to be loaded.
                 if (self.product() == null && self.productId() != null){
                     loadingCount++;
-                    obj = new Product();
-                    obj.load(self.productId(), function() {
+                    var productObj = new Product();
+                    productObj.load(self.productId(), function() {
                         loadingCount--;
-                        self.product(obj);
+                        self.product(productObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }

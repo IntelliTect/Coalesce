@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Data
                 {
                     var typeInfo = mi.GetParameters()[0].ParameterType.GenericTypeArguments[1].GetTypeInfo();
                     return typeInfo.IsGenericType
-                           && typeInfo.GetGenericTypeDefinition() == typeof(ICollection<>);
+                           && typeInfo.GetGenericTypeDefinition() == typeof(IEnumerable<>);
                 });
 
         }

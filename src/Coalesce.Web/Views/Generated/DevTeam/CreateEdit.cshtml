@@ -45,9 +45,9 @@
                 {
                     @:adevTeam.load('@ViewBag.Id');
                 }
-        @if (ViewBag.ParentIdName != null)
+        @foreach (var kvp in ViewBag.ParentIds)
                 {
-                    @:adevTeam.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
+                    @:adevTeam.@(((string)(@kvp.Key)))(@kvp.Value);
                 }
 
         window.onbeforeunload = function(){

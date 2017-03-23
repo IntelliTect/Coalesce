@@ -1,7 +1,17 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
+</style>
 <div style="padding: 10px 15px">
     <h1 style="display:inline-block">
         Case Product List
@@ -41,6 +51,8 @@
                     {
                     <a href="~/CaseProduct/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
                     }
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
         </div>
     </div>
 </div>
@@ -50,24 +62,31 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Case</th>
-                    <th>Product</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Case')}">
+                            Case
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Case', 'fa-caret-down': orderByDescending() == 'Case'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Product')}">
+                            Product
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Product', 'fa-caret-down': orderByDescending() == 'Product'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseProductId}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
-                    <td class="prop-product">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
+                        <td class="prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
+                        <td class="prop-product">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
                     }
                     else
                     {
-                    <td class="prop-case">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
-                    <td class="prop-product">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
+                        <td class="prop-case">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case, true))</td>
+                        <td class="prop-product">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product, true))</td>
                     }
                 <td>
 

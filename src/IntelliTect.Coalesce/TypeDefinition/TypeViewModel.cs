@@ -68,43 +68,45 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return Wrapper.IsA<T>();
         }
 
-        public string FullName { get { return $"{Wrapper.Namespace}.{Name}"; } }
+        public string FullName => $"{Wrapper.Namespace}.{Name}";
 
-        public string FullNamespace { get { return Wrapper.FullNamespace; } }
+        public string FullNamespace => Wrapper.FullNamespace;
 
-        public string NameWithTypeParams { get { return $"{Wrapper.NameWithTypeParams}"; } }
+        public string NameWithTypeParams => Wrapper.NameWithTypeParams;
+
+        public string FullyQualifiedNameWithTypeParams => Wrapper.FullyQualifiedNameWithTypeParams;
 
         /// <summary>
         /// Returns true if the property is an array.
         /// </summary>
-        public bool IsArray { get { return Wrapper.IsArray; } }
+        public bool IsArray => Wrapper.IsArray;
 
         /// <summary>
         /// Returns true if the property is a collection.
         /// </summary>
-        public bool IsCollection { get { return Wrapper.IsCollection; } }
+        public bool IsCollection => Wrapper.IsCollection;
 
         /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool { get { return Wrapper.IsBool; } }
+        public bool IsBool => Wrapper.IsBool;
 
         /// <summary>
         /// Returns true if the property is nullable.
         /// </summary>
-        public bool IsNullable { get { return Wrapper.IsNullable; } }
+        public bool IsNullable => Wrapper.IsNullable;
 
         /// <summary>
         /// Returns true if the property returns void.
         /// </summary>
-        public bool IsVoid { get { return Name == "Void"; } }
+        public bool IsVoid => Name == "Void";
 
         public bool IsPrimitive => Wrapper.IsPrimitive;
 
         /// <summary>
         /// Returns the first generic argument for a generic type.
         /// </summary>
-        public TypeViewModel FirstTypeArgument { get { return new TypeViewModel(Wrapper.FirstTypeArgument); } }
+        public TypeViewModel FirstTypeArgument => new TypeViewModel(Wrapper.FirstTypeArgument);
 
         /// <summary>
         /// Type used in knockout for the observable.

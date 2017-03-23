@@ -27,6 +27,29 @@
     namespaces.Add("System.Net");
     namespaces.Add("System.Threading.Tasks");
     namespaces.Add($"{namespaceName}.Models");
+
+    var createIf = "";
+    var editElseIf = "";
+    
+
+    // Check if creates/edits aren't allowed
+    @if (model.PrimaryKey.Type.IsString)
+    {
+        createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !_model.SecurityInfo.IsEditAllowed(User)) {{";
+    }
+    else if (model.IsDto)
+    {
+        createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !_model.SecurityInfo.IsEditAllowed(User)) {{";
+    }
+    else
+    {
+        createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {{";
+    }
+        
+
 }
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {
@@ -42,45 +65,45 @@
 }
 @foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)))
 {
-@:using @ns;
+    @:using @ns;
 }
 
 namespace @(namespaceName).Api
 {
-    @if (!string.IsNullOrWhiteSpace(Model.AreaName))
-    {
+@if (!string.IsNullOrWhiteSpace(Model.AreaName))
+{
     @:[Route("@Model.AreaName/api/[controller]")]
     }
-    else
-    {
+else
+{
     @:[Route("api/[controller]")]
     }
-    @(securityInfo.ClassAnnotation)
-    public partial class @(model.ControllerName)Controller 
-         : LocalBaseApiController<@(model.BaseViewModel.FullName), @(model.DtoName)> 
-    {
+@(securityInfo.ClassAnnotation)
+    public partial class @(model.ControllerName)Controller
+    : LocalBaseApiController<@(model.BaseViewModel.FullName), @(model.DtoName)>
+        {
         private ClassViewModel _model;
 
-        public @(model.ControllerName)Controller() 
-        { 
-             _model = ReflectionRepository.Models.Single(m => m.Name == "@(model.Name)");
+        public @(model.ControllerName)Controller()
+        {
+        _model = ReflectionRepository.Models.Single(m => m.Name == "@(model.Name)");
         }
-      
-        @if(securityInfo.IsReadAllowed())
-        { 
-        <text>
-        /// <summary>
-        /// Returns @(model.DtoName)
-        /// </summary>
-        [HttpGet("list")]
-        @(securityInfo.ReadAnnotation)
-        public virtual async Task<GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>> List(
-            string includes = null, 
+
+        @if (securityInfo.IsReadAllowed())
+        {
+            <text>
+            /// <summary>
+            /// Returns @(model.DtoName)
+            /// </summary>
+            [HttpGet("list")]
+            @(securityInfo.ReadAnnotation)
+            public virtual async Task<GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>> List(
+            string includes = null,
             string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, 
-            string where = null, 
-            string listDataSource = null, 
-            string search = null, 
+            int? page = null, int? pageSize = null,
+            string where = null,
+            string listDataSource = null,
+            string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
@@ -89,7 +112,7 @@ namespace @(namespaceName).Api
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." });
             }*@
-            
+
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
@@ -97,7 +120,7 @@ namespace @(namespaceName).Api
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
-        
+
             var listResult = await ListImplementation(parameters);
             return new GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>(listResult);
         }
@@ -108,13 +131,13 @@ namespace @(namespaceName).Api
         [HttpGet("customlist")]
         @(securityInfo.ReadAnnotation)
         public virtual async Task<ListResult> CustomList(
-            string fields = null, 
-            string includes = null, 
+            string fields = null,
+            string includes = null,
             string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, 
-            string where = null, 
-            string listDataSource = null, 
-            string search = null, 
+            int? page = null, int? pageSize = null,
+            string where = null,
+            string listDataSource = null,
+            string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
@@ -131,14 +154,14 @@ namespace @(namespaceName).Api
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
-        
+
             return await ListImplementation(parameters);
         }
 
         [HttpGet("count")]
         @(securityInfo.ReadAnnotation)
         public virtual async Task<int> Count(
-            string where = null, 
+            string where = null,
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
@@ -149,7 +172,7 @@ namespace @(namespaceName).Api
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return 0;
             }*@
-            
+
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
@@ -157,7 +180,7 @@ namespace @(namespaceName).Api
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
-            
+
             return await CountImplementation(parameters);
         }
 
@@ -170,7 +193,7 @@ namespace @(namespaceName).Api
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return null;
             }*@
-            
+
             return PropertyValuesImplementation(property, page, search);
         }
 
@@ -183,7 +206,7 @@ namespace @(namespaceName).Api
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return null;
             }*@
-            
+
             ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
@@ -192,7 +215,7 @@ namespace @(namespaceName).Api
         }
 
 
-        @if (securityInfo.IsDeleteAllowed()) { 
+        @if (securityInfo.IsDeleteAllowed()) {
         <text>
         [HttpPost("delete/{id}")]
         @(securityInfo.DeleteAnnotation)
@@ -203,7 +226,7 @@ namespace @(namespaceName).Api
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return false;
             }*@
-            
+
             return DeleteImplementation(id);
         }
         </text>
@@ -213,30 +236,9 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        public virtual SaveResult<@(model.DtoName)> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
-            @{
-                var createIf = "";
-                var editElseIf = "";
-            }
-            
-            // Check if creates/edits aren't allowed
-            @if (model.PrimaryKey.Type.IsString)
-            {
-                createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
-                editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !_model.SecurityInfo.IsEditAllowed(User)) {{";
-            }
-            else if (model.IsDto)
-            {
-                createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
-                editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !_model.SecurityInfo.IsEditAllowed(User)) {{";
-            }
-            else
-            {
-                createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
-                editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {{";
-            }
-            
+
             @(createIf)
                 var result = new SaveResult<@(model.DtoName)>();
                 result.WasSuccessful = false;
@@ -252,9 +254,9 @@ namespace @(namespaceName).Api
                 return result;
             }
 
-            return SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, includes, dataSource, returnObject);
         }
-        
+
         [HttpPost("AddToCollection")]
         @(securityInfo.EditAnnotation)
         public virtual SaveResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
@@ -269,6 +271,123 @@ namespace @(namespaceName).Api
         }
         </text>
         }
+
+        /// <summary>
+        /// Downloads CSV of @(model.DtoName)
+        /// </summary>
+        [HttpGet("csvDownload")]
+        @(securityInfo.ReadAnnotation)
+        public virtual async Task<FileResult> CsvDownload(
+            string orderBy = null, string orderByDescending = null,
+            int? page = 1, int? pageSize = 10000,
+            string where = null,
+            string listDataSource = null,
+            string search = null,
+            // Custom fields for this object.
+            @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            @foreach (PropertyViewModel prop in model.BaseViewModel.Properties.Where(f => f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+
+            var listResult = await ListImplementation(parameters);
+            var list = listResult.List.Cast<@(model.DtoName)>();
+            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
+
+            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
+            return File(bytes, "application/x-msdownload", "@(model.BaseViewModel.Name).csv");
+        }
+
+        /// <summary>
+        /// Returns CSV text of @(model.DtoName)
+        /// </summary>
+        [HttpGet("csvText")]
+        @(securityInfo.ReadAnnotation)
+        public virtual async Task<string> CsvText(
+            string orderBy = null, string orderByDescending = null,
+            int? page = 1, int? pageSize = 10000,
+            string where = null,
+            string listDataSource = null,
+            string search = null,
+            // Custom fields for this object.
+            @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        {
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+
+            // Add custom filters
+            @foreach (PropertyViewModel prop in model.BaseViewModel.Properties.Where(f => f.IsUrlParameter))
+            {
+            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
+            }
+
+            var listResult = await ListImplementation(parameters);
+            var list = listResult.List.Cast<@(model.DtoName)>();
+            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
+
+            return csv;
+        }
+
+
+        /// <summary>
+        /// Saves CSV data as an uploaded file
+        /// </summary>
+        [HttpPost("CsvUpload")]
+        @(securityInfo.ReadAnnotation)
+        public virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        {
+            if (file != null && file.Length > 0)
+            {
+                using (var stream = file.OpenReadStream())
+                {
+                    using (var reader = new System.IO.StreamReader(stream)) {
+                        var csv = reader.ReadToEnd();
+                        return await CsvSave(csv, hasHeader);
+                    }
+                }
+            }
+            throw new ArgumentException("No files uploaded");
+        }
+
+        /// <summary>
+        /// Saves CSV data as a posted string
+        /// </summary>
+        [HttpPost("CsvSave")]
+        @(securityInfo.ReadAnnotation)
+        public virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, bool hasHeader = true) 
+        {
+            // Get list from CSV
+            var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<@(model.DtoName)>(csv, hasHeader);
+            var resultList = new List<SaveResult<@(model.DtoName)>>();
+            foreach (var dto in list){
+                // Check if creates/edits aren't allowed
+                @(createIf)
+                    var result = new SaveResult<@(model.DtoName)>();
+                    result.WasSuccessful = false;
+                    result.Message = "Create not allowed on @(model.Name) objects.";
+                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    resultList.Add(result);
+                }
+                @(editElseIf)
+                    var result = new SaveResult<@(model.DtoName)>();
+                    result.WasSuccessful = false;
+                    result.Message = "Edit not allowed on @(model.Name) objects.";
+                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    resultList.Add(result);
+                }
+                else {
+                    var result = await SaveImplementation(dto, "none", null, false);
+                    resultList.Add(result);
+                }
+            }
+            return resultList;
+        }
+
+
+
 
         @(securityInfo.ReadAnnotation)
         protected override IQueryable<@(model.BaseViewModel.FullName)> GetListDataSource(ListParameters parameters)
@@ -296,11 +415,13 @@ namespace @(namespaceName).Api
             return base.GetListDataSource(parameters);
         }
 
-        // Methods
+        // Methods from data class exposed through API Controller.
         @foreach (var method in model.Methods.Where(m=>m.IsClientMethod))
         {
         <text>
-        // Method: @method.Name
+        /// <summary>
+        /// Method: @method.Name
+        /// </summary>
         [HttpPost("@(method.Name)")]
         @if (!string.IsNullOrEmpty(method.SecurityInfo.ExecuteAnnotation)) {
 @:        @(method.SecurityInfo.ExecuteAnnotation)
@@ -358,6 +479,6 @@ namespace @(namespaceName).Api
             return result;
         }
 </text>
-        }    
+        }
     }
 }

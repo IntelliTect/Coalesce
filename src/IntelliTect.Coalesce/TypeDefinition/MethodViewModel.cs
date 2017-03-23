@@ -158,14 +158,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
                 // When static add an id that specifies the object to work on.
                 string result = "";
                 if (!IsStatic)
                 {
                     result = $"{Parent.PrimaryKey.PureType.Name} id";
-                    if (ClientParameters.Any()) result += ", ";
+                    if (parameters.Any()) result += ", ";
                 }
-                result += string.Join(", ", ClientParameters.Select(f => f.Type.CsDeclaration(f.Name)));
+                result += string.Join(", ", parameters.Select(f => f.CsDeclaration));
                 return result;
             }
         }

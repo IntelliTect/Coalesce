@@ -10,10 +10,10 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
 {
     public static class IncludeTreeExtensions
     {
-        public static IncludeTree GetIncludeTree(this IQueryable queryable)
+        public static IncludeTree GetIncludeTree(this IQueryable queryable, string rootName = null)
         {
             var expression = queryable.Expression;
-            IncludeTree root = (queryable.Provider as IncludableQueryProvider)?.IncludeTree ?? new IncludeTree();
+            IncludeTree root = (queryable.Provider as IncludableQueryProvider)?.IncludeTree ?? new IncludeTree { PropertyName = rootName };
             IncludeTree currentNode = null;
 
             // When we get to the root of the queryable, it won't be a MethodCallExpression.

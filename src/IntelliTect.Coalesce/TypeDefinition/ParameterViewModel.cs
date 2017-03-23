@@ -1,4 +1,6 @@
-﻿using IntelliTect.Coalesce.Helpers.IncludeTree;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,46 +13,29 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class ParameterViewModel
     {
-        public string Name { get; }
-        public TypeViewModel Type { get; }
+        internal ParameterWrapper Wrapper { get; }
 
-        public ParameterViewModel(string name, TypeViewModel type)
+        public string Name => Wrapper.Name;
+
+        public TypeViewModel Type => Wrapper.Type;
+
+        internal ParameterViewModel(ParameterWrapper wrapper)
         {
-            Name = name;
-            Type = type;
+            Wrapper = wrapper;
         }
 
-        public bool IsDI
-        {
-            get
-            {
-                return IsAContext || IsAUser || IsAnIncludeTree;
-            }
-        }
+        public bool IsManualDI => IsAContext || IsAUser || IsAnIncludeTree;
 
-        public bool IsAContext
-        {
-            get
-            {
-                return Type.IsA<DbContext>();
-            }
-        }
+        public bool IsInjected => Wrapper.HasAttribute<InjectAttribute>();
 
-        public bool IsAUser
-        {
-            get
-            {
-                return Type.IsA<ClaimsPrincipal>();
-            }
-        }
+        public bool IsDI => IsManualDI || IsInjected;
 
-        public bool IsAnIncludeTree
-        {
-            get
-            {
-                return Type.IsA<IncludeTree>();
-            }
-        }
+
+        public bool IsAContext => Type.IsA<DbContext>();
+
+        public bool IsAUser => Type.IsA<ClaimsPrincipal>();
+
+        public bool IsAnIncludeTree => Type.IsA<IncludeTree>();
 
         /// <summary>
         /// Returns the parameter to pass to the actual method accounting for DI.
@@ -66,21 +51,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string PascalCaseName
-        {
-            get
-            {
-                return Name.ToPascalCase();
-            }
-        }
+        public string PascalCaseName => Name.ToPascalCase();
 
-        public bool ConvertsFromJsString
-        {
-            get
-            {
-                return Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
-            }
-        }
+        public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
+
+        public string CsDeclaration => $"{(IsInjected ? "[FromServices] " : "")}{Type.FullyQualifiedNameWithTypeParams} {Name.ToCamelCase()}";
 
         /// <summary>
         /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()

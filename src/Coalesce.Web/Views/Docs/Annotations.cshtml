@@ -24,6 +24,7 @@
     <li><a href="#Execute">Execute</a></li>
     <li><a href="#FileDownload">File Download</a></li>
     <li><a href="#Hidden">Hidden</a></li>
+    <li><a href="#Inject">Inject</a></li>
     <li><a href="#InternalUse">Internal Use</a></li>
     <li><a href="#ListGroup">List Group</a></li>
     <li><a href="#ListText">List Text</a></li>
@@ -352,6 +353,26 @@
         public string LastName { get; set; }
         [Hidden(HiddenAttribute.Areas.All)]
         public int? IncomeLevelId { get; set; }
+    }
+</code>
+</pre>
+<a name="Inject"></a>
+<h3>Inject</h3>
+<p>Used to mark a method parameter for depencency injection from the application's IServiceProvider.</p>
+<pre>
+<code class="language-html">
+    
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        public string GetFullName([Inject] ILogger&lt;Person&gt; logger)
+        {
+            logger.LogInformation(0, $"Person {PersonId}'s full name was requested");
+            return $"{FirstName} {LastName}";
+        }
     }
 </code>
 </pre>

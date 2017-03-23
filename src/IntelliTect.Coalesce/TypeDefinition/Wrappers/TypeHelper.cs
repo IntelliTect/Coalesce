@@ -13,9 +13,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="TAttribute"></typeparam>
         /// <returns></returns>
-        public static TAttribute GetAttribute<TAttribute>(this MemberInfo member) where TAttribute : Attribute
+        public static TAttribute GetAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
         {
-            return Attribute.GetCustomAttribute(member, typeof(TAttribute)) as TAttribute;
+            var attributes = member.GetCustomAttributes(typeof(TAttribute), true);
+            return attributes.FirstOrDefault() as TAttribute;
         }
 
         /// <summary>
@@ -23,12 +24,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="TAttribute"></typeparam>
         /// <returns></returns>
-        public static bool HasAttribute<TAttribute>(this MemberInfo member) where TAttribute : Attribute
+        public static bool HasAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
         {
             return member.GetAttribute<TAttribute>() != null;
         }
 
-        public static Object GetAttributeValue<TAttribute>(this MemberInfo member, string valueName) where TAttribute : Attribute
+        public static Object GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, string valueName) where TAttribute : Attribute
         {
             var attr = member.GetAttribute<TAttribute>();
             if (attr != null)

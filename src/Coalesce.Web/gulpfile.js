@@ -248,7 +248,8 @@ gulp.task('coalesce:build', shell.task
     { verbose: true }
 ));
 
-
+// Build is required every time because the templates are compiled into the dll.
+// Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
 gulp.task('coalesce', [/*'coalesce:build'*/], shell.task
     ([
         '"../IntelliTect.Coalesce.Cli/bin/Debug/net46/win7-x86/IntelliTect.Coalesce.Cli.exe" ' +

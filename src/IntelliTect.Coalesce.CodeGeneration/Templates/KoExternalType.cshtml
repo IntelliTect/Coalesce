@@ -59,7 +59,7 @@ module @moduleName {
             }
 
                 // Load the properties.
-        @foreach (PropertyViewModel prop in model.Properties)
+        @foreach (PropertyViewModel prop in model.Properties.Where(p => !p.IsInternalUse))
         {
             if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
             {

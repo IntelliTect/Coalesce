@@ -125,12 +125,27 @@ namespace IntelliTect.Coalesce.Controllers
                 var orderByParams = listParameters.OrderByList;
                 if (orderByParams.Any())
                 {
-                    result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{f.Key} {f.Value}")));
+                    foreach (var orderByParam in orderByParams)
+                    {
+                        string fieldName = orderByParam.Key;
+                        var prop = ClassViewModel.PropertyByName(fieldName);
+                        if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
+                        {
+                            string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
+                            clause = clause.Replace("ASC", orderByParam.Value.ToUpper());
+                            clause = clause.Replace("DESC", orderByParam.Value.ToUpper());
+                            result = result.OrderBy(clause);
+                        }
+                        else
+                        {
+                            result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{fieldName} {f.Value}")));
+                        }
+                    }
                 }
                 else
                 {
                     // Use the DefaultOrderBy attributes if available
-                    var defaultOrderBy = ClassViewModel.DefaultOrderByClause;
+                    var defaultOrderBy = ClassViewModel.DefaultOrderByClause();
                     if (defaultOrderBy != null)
                     {
                         result = result.OrderBy(defaultOrderBy);
@@ -266,96 +281,144 @@ namespace IntelliTect.Coalesce.Controllers
             // These search specified fields in the class
             if (!string.IsNullOrWhiteSpace(listParameters.Search))
             {
-                var completeSearchClauses = new List<string>();
-                // Handle the split on spaces first because it will be done differently with ands and ors.
-                if (ClassViewModel.SearchProperties().Any(f => f.Value.SearchIsSplitOnSpaces))
+                // See if the user has specified a field with a colon and search on that first
+                bool termFound = false;
+                if (listParameters.Search.Contains(":"))
                 {
-                    var splitSearchClauses = new List<string>();
-
-                    var clauses = listParameters.Search.Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var clause in clauses)
+                    var field = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[0];
+                    var prop = ClassViewModel.Properties.FirstOrDefault(f => string.Compare(f.Name, field, true) == 0 || string.Compare(f.DisplayName, field, true) == 0);
+                    var value = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[1].Trim();
+                    if (prop != null && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
                     {
-                        var searchClauses = new List<string>();
-                        foreach (var prop in ClassViewModel.SearchProperties().Where(f => f.Value.SearchIsSplitOnSpaces))
+                        value = value.Replace("\"", "\"\"");
+                        var expressions = new List<string>();
+                        foreach (var kvp in prop.SearchTerms(1))
                         {
-                            string expr;
+                            // Only strings work reliably
+                            if (kvp.Value.Type.IsString)
+                            {
+                                if (kvp.Key.Contains("[]."))
+                                {
+                                    var parts = kvp.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(kvp.Value.SearchMethodName, value)}";
+                                    expressions.Add(expr);
+                                }
+                                else if (prop.Type.IsString)
+                                {
+                                    var expr = $@"({kvp.Key} != null && {kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)})";
+                                   expressions.Add(expr);
+                                }
+                                else
+                                {
+                                    var expr = $@"{kvp.Key}.ToString().{string.Format(kvp.Value.SearchMethodName, value)}";
+                                    expressions.Add(expr);
+                                }
+                            }
+                        }
+                        // Join these together with an 'or'
+                        if (expressions.Any())
+                        {
+                            string finalSearchClause = string.Join(" || ", expressions);
+                            result = result.Where(finalSearchClause);
+                            termFound = true;
+                        }
+
+                    }
+                }
+
+                // This uses the default search properties based on the attributes and defaults (name and ID for example).
+                if (!termFound)
+                {
+                    var completeSearchClauses = new List<string>();
+                    // Handle the split on spaces first because it will be done differently with ands and ors.
+                    if (ClassViewModel.SearchProperties().Any(f => f.Value.SearchIsSplitOnSpaces))
+                    {
+                        var splitSearchClauses = new List<string>();
+
+                        var clauses = listParameters.Search.Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var clause in clauses)
+                        {
+                            var searchClauses = new List<string>();
+                            foreach (var prop in ClassViewModel.SearchProperties().Where(f => f.Value.SearchIsSplitOnSpaces))
+                            {
+                                string expr;
+                                if (prop.Value.PureType.IsString)
+                                {
+                                    if (prop.Key.Contains("[]."))
+                                    {
+                                        var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                        expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
+                                    }
+                                    else
+                                    {
+                                        expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)})";
+                                    }
+                                }
+                                else
+                                {
+                                    if (prop.Key.Contains("[]."))
+                                    {
+                                        var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
+                                        expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
+                                    }
+                                    else
+                                    {
+                                        expr = $@"{prop.Key}.ToString().{string.Format(prop.Value.SearchMethodName, clause)}";
+                                    }
+                                }
+                                searchClauses.Add(expr);
+                            }
+                            if (searchClauses.Count > 0)
+                            {
+                                splitSearchClauses.Add("( " + string.Join(" || ", searchClauses) + " )");
+                            }
+                        }
+                        completeSearchClauses.Add("( " + string.Join(" && ", splitSearchClauses) + " )");
+                    }
+
+                    // Handle not split on spaces with simple ors.
+                    if (ClassViewModel.SearchProperties().Any(f => !f.Value.SearchIsSplitOnSpaces))
+                    {
+                        foreach (var prop in ClassViewModel.SearchProperties().Where(f => !f.Value.SearchIsSplitOnSpaces))
+                        {
+                            int temp;
                             if (prop.Value.PureType.IsString)
                             {
+                                string expr;
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{clause}"")) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)}) > 0";
                                 }
                                 else
                                 {
-                                    expr = $"{prop.Key}.{prop.Value.SearchMethodName}(\"{clause}\")";
+                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)})";
                                 }
+                                completeSearchClauses.Add(expr);
                             }
-                            else
+                            else if (int.TryParse(listParameters.Search, out temp))
                             {
+                                string expr;
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.ToString().{prop.Value.SearchMethodName}(""{clause}"")) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]} = {listParameters.Search}) > 0";
                                 }
                                 else
                                 {
-                                    expr = $@"{prop.Key}.ToString().{prop.Value.SearchMethodName}(""{clause}"")";
+                                    expr = $"{prop.Key} = {listParameters.Search}";
                                 }
+                                completeSearchClauses.Add(expr);
                             }
-                            searchClauses.Add(expr);
-                        }
-                        if (searchClauses.Count > 0)
-                        {
-                            splitSearchClauses.Add("( " + string.Join(" || ", searchClauses) + " )");
                         }
                     }
-                    completeSearchClauses.Add("( " + string.Join(" && ", splitSearchClauses) + " )");
-                }
 
-                // Handle not split on spaces with simple ors.
-                if (ClassViewModel.SearchProperties().Any(f => !f.Value.SearchIsSplitOnSpaces))
-                {
-                    foreach (var prop in ClassViewModel.SearchProperties().Where(f => !f.Value.SearchIsSplitOnSpaces))
+                    if (completeSearchClauses.Any())
                     {
-                        int temp;
-                        if (prop.Value.PureType.IsString)
-                        {
-                            string expr;
-                            if (prop.Key.Contains("[]."))
-                            {
-                                var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                expr = $@"{parts[0]}.Count({parts[1]}.{prop.Value.SearchMethodName}(""{listParameters.Search}"")) > 0";
-                            }
-                            else
-                            {
-                                expr = $"{prop.Key}.{prop.Value.SearchMethodName}(\"{listParameters.Search}\")";
-                            }
-                            completeSearchClauses.Add(expr);
-                        }
-                        else if (int.TryParse(listParameters.Search, out temp))
-                        {
-                            string expr;
-                            if (prop.Key.Contains("[]."))
-                            {
-                                var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                expr = $@"{parts[0]}.Count({prop.Key} = {listParameters.Search}) > 0";
-                            }
-                            else
-                            {
-                                expr = $"{prop.Key} = {listParameters.Search}";
-                            }
-                            completeSearchClauses.Add(expr);
-                        }
+                        string finalSearchClause = string.Join(" || ", completeSearchClauses);
+                        result = result.Where(finalSearchClause);
                     }
                 }
-
-                if (completeSearchClauses.Any())
-                {
-                    string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                    result = result.Where(finalSearchClause);
-                }
-
             }
             return result;
 
@@ -411,7 +474,6 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
-        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         protected async Task<TDto> GetImplementation(string id, ListParameters listParameters)
         {
             var tuple = await GetUnmapped(id, listParameters);
@@ -425,6 +487,7 @@ namespace IntelliTect.Coalesce.Controllers
             return dto;
         }
 
+        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
         {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
@@ -460,7 +523,6 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 if (BeforeDelete(item))
                 {
-                    DataSource.Remove(item);
                     // Allow for other cascade deletes.
                     var validationInfo = new ValidateResult();
                     if (item is IBeforeDelete<TContext>)
@@ -469,6 +531,7 @@ namespace IntelliTect.Coalesce.Controllers
                     }
                     if (validationInfo.WasSuccessful)
                     {
+                        DataSource.Remove(item);
                         Db.SaveChanges();
                         if (item is IAfterDelete<TContext>)
                         {
@@ -487,7 +550,7 @@ namespace IntelliTect.Coalesce.Controllers
             return false;
         }
 
-        protected SaveResult<TDto> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
+        protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
             ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
 
@@ -500,7 +563,7 @@ namespace IntelliTect.Coalesce.Controllers
 
             if (idValue is int && (int)idValue != 0 || idValue is string && (string)idValue != "")
             {
-                item = DataSource.FindItem(idValue);
+                item = await DataSource.FindItemAsync(idValue);
                 if (item == null)
                 {
                     result.WasSuccessful = false;
@@ -560,12 +623,12 @@ namespace IntelliTect.Coalesce.Controllers
 
                         if (validateResult.WasSuccessful)
                         {
-                            Db.SaveChanges();
+                            await Db.SaveChangesAsync();
 
                             // Pull the object to get any changes.
                             var idString = IdValue(item).ToString();
                             listParams.AddFilter("id", idString);
-                            var itemResult = GetUnmapped(idString, listParams).Result;
+                            var itemResult = await GetUnmapped(idString, listParams);
                             item = itemResult.Item1;
                             includeTree = itemResult.Item2;
 
@@ -581,8 +644,8 @@ namespace IntelliTect.Coalesce.Controllers
 
                             if (reloadItem && returnObject)
                             {
-                                itemResult = GetUnmapped(idString, listParams).Result;
-                                item = itemResult.Item1;    
+                                itemResult = await GetUnmapped(idString, listParams);
+                                item = itemResult.Item1;
                                 includeTree = itemResult.Item2;
                             }
 

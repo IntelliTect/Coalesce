@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             get
             {
                 if (IsArray) return $"{PureType.FullNamespace}.{PureType.Name}[]";
-                if (IsGeneric) return $"{Name}<{PureType.FullNamespace}.{PureType.Name}>";
+                if (IsGeneric) return $"{FullNamespace}.{Name}<{PureType.FullNamespace}.{PureType.Name}>";
                 return $"{PureType.FullNamespace}.{Name}";
             }
         }

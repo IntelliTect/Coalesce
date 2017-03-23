@@ -33,6 +33,8 @@
         <div class="btn-group pull-right">
                     <a href="~/Case/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
         </div>
     </div>
 </div>
@@ -51,43 +53,43 @@
             <dl>
                     <dt>Title</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title, false))
                     </dd>
                     <dt>Description</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description, false))
                     </dd>
                     <dt>Opened At</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt, false))
                     </dd>
                     <dt>Assigned To</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo, false))
                     </dd>
                     <dt>Reported By</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, false))
                     </dd>
                     <dt>Attachment</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, false))
                     </dd>
                     <dt>Severity</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, false))
                     </dd>
                     <dt>Status</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, false))
                     </dd>
                     <dt>Case Products</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, false))
                     </dd>
                     <dt>Dev Team Assigned</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))
                     </dd>
 
             </dl>

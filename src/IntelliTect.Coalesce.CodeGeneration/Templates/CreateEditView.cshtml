@@ -15,7 +15,6 @@
         viewModelsNamespace = Model.ModulePrefix + "." + viewModelsNamespace;
     }
 }
-
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="btn-group pull-right">
@@ -24,9 +23,7 @@
         </div>
         <h1 class="clearfix" style="display:inline-block;">@(model.Name.ToProperCase())</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-
     </div>
-
     <div class="panel-body">
         <div class="form-horizontal">
             <div class="form-group btn-warning" data-bind="if: errorMessage()">
@@ -37,39 +34,47 @@
             </div>
             @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
             {
-            if (prop.IsComplexType)
-            {
-            <div class="panel panel-default" data-bind="with: @prop.JsVariable">
-                <div class="panel-heading">
-                    <h4>@prop.DisplayName</h4>
-                </div>
-                <div class="panel-body">
-                <!-- Properties  -->
-                @foreach (var subProp in prop.Object.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+                if (prop.IsComplexType)
                 {
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">@subProp.DisplayName</label>
-                        <div class="col-md-8">
-                            @Display.PropertyHelper(subProp, !subProp.IsReadOnly, Model.AreaName)
+                    <div class="panel panel-default" data-bind="with: @prop.JsVariable">
+                        <div class="panel-heading">
+                            <h4>@prop.DisplayName</h4>
+                        </div>
+                        <div class="panel-body">
+                            <!-- Properties  -->
+                            @foreach (var subProp in prop.Object.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+                            {
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">@subProp.DisplayName</label>
+                                    <div class="col-md-8">
+                                        @Display.PropertyHelper(subProp, !subProp.IsReadOnly, Model.AreaName)
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
-                </div>
-            </div>
-                }
                 else
                 {
-            <div class="form-group">
-                <label class="col-md-4 control-label">@prop.DisplayName</label>
-                    @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName)
-            </div>
-            }
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">@prop.DisplayName</label>
+                        @if (prop.IsPOCO && prop.PureTypeOnContext)
+                        {
+                            @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName, 7)
+                            <div class="col-md-1" data-bind="with: @prop.JsonName">
+                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
+                            </div>
+                        }
+                        else
+                        {
+                            @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName)
+                        }
+                    </div>
+                }
             }
         </div>
     </div>
-
     <div class="panel-body">
-
         @if (model.Methods.Any(f => !f.IsStatic && f.IsClientMethod))
         {
             <div class="panel panel-default">
@@ -85,28 +90,27 @@
                     </tr>
                     @foreach (MethodViewModel method in model.Methods.Where(f => !f.IsStatic && f.IsClientMethod))
                     {
-                    <tr>
-                        <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: @(method.JsVariableModal)">@method.DisplayName</button>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: @method.JsVariableResult"></span>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: @method.JsVariableWasSuccessful"></span>
-                            <span class="" data-bind="text: @method.JsVariableMessage"></span>
-                        </td>
-                        <td>
-                            <span class="label label-info" data-bind="fadeVisible: @(method.JsVariableIsLoading)()">Loading</span>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <button class="btn btn-default btn-xs" data-bind="click: @(method.JsVariableModal)">@method.DisplayName</button>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: @method.JsVariableResult"></span>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: @method.JsVariableWasSuccessful"></span>
+                                <span class="" data-bind="text: @method.JsVariableMessage"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: @(method.JsVariableIsLoading)()">Loading</span>
+                            </td>
+                        </tr>
                     }
                 </table>
             </div>
         }
     </div>
 </div>
-
 
 @foreach (var method in model.Methods.Where(f => !f.IsStatic && f.ClientParameters.Any() && f.IsClientMethod))
 {
@@ -140,10 +144,9 @@
 
 }
 
-
 @{
-@:@@section Scripts
-@:{
+    @:@@section Scripts
+    @:{
     <script>
         @{
             var obj = 'a' + model.ViewModelObjectName;
@@ -151,19 +154,29 @@
         var @(obj) = new @viewModelsNamespace.@(@model.ViewModelClassName)();
         @(obj).includes = "Editor";
 
+        @(obj).saveCallbacks.push(function(obj){
+            // If there is a new id, set the one for this page
+            if (!intellitect.utilities.GetUrlParameter('id')){
+                if (@(obj).myId){
+                    var newUrl = intellitect.utilities.SetUrlParameter(window.location.href, "id", @(obj).myId);
+                    window.history.replaceState(null, window.document.title, newUrl);
+                }
+            }
+        });
+
         @{
         @:@@if (ViewBag.Id != null)
-        @:{
-            @:@@:@(obj).load('@@ViewBag.Id');
-        @:}
-        @:@@if (ViewBag.ParentIdName != null)
-        @:{
-            @:@@:@(obj).@@(((string)(@@ViewBag.ParentIdName)))(@@ViewBag.ParentId);
-        @:}
+                @:{
+                    @:@@:@(obj).load('@@ViewBag.Id');
+                @:}
+        @:@@foreach (var kvp in ViewBag.ParentIds)
+                @:{
+                    @:@@:@(obj).@@(((string)(@@kvp.Key)))(@@kvp.Value);
+                @:}
         }
 
         window.onbeforeunload = function(){
-            @(obj).save();
+            if (@(obj).isDirty()) @(obj).save();
         }
 
         @(obj).isSavingAutomatically = false;
@@ -172,5 +185,5 @@
             @(obj).isSavingAutomatically = true;
         });
     </script>
-@:}
+    @:}
 }

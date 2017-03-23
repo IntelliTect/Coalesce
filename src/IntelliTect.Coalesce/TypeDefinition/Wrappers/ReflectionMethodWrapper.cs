@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
@@ -40,7 +41,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
                 var result = new List<ParameterViewModel>();
                 foreach (var parameter in Info.GetParameters())
                 {
-                    result.Add(new ParameterViewModel(parameter.Name, new TypeViewModel(new ReflectionTypeWrapper(parameter.ParameterType))));
+                    result.Add(new ParameterViewModel( new ReflectionParameterWrapper(parameter)));
                 }
                 return result;
             }

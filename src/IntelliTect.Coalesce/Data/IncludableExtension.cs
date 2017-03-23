@@ -100,7 +100,7 @@ namespace IntelliTect.Coalesce.Data
         /// <param name="query"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async static Task<T> FindItemAsync<T>(this IQueryable<T> query, string id)
+        public async static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id)
         {
             var classViewModel = ReflectionRepository.GetClassViewModel(typeof(T));
             if (classViewModel.PrimaryKey.Type.IsString)

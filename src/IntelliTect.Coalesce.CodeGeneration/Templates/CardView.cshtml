@@ -22,13 +22,15 @@
 
 
 <div style="padding: 10px 15px">
-    <h1 style="display:inline-block">
-        @(model.Name.ToProperCase()) List
-        @{
-            @:<span style="font-size: .5em; padding-left: 20px;"><a href="~/@(model.ControllerName)/Docs">API Docs</a></span>
-        }
-    </h1>
-    <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    <div class="clearfix">
+        <h1 style="display: inline-block">
+            @(model.Name.ToProperCase()) List
+            @{
+                @:<span style="font-size: .5em; padding-left: 20px;"><a href="~/@(model.ControllerName)/Docs">API Docs</a></span>
+            }
+        </h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    </div>
 
     <div class="clearfix">
         <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
@@ -58,7 +60,12 @@
                     @:<a href="~/@(model.ControllerName)/CreateEdit?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 }
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
-            }
+                @:<a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                if (model.SecurityInfo.IsCreateAllowed() && model.SecurityInfo.IsEditAllowed())
+                {
+                    @:<button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
+                }
+}
         </div>
     </div>
 </div>

@@ -604,7 +604,7 @@ namespace IntelliTect.Coalesce.Helpers
             return new HtmlString(result);
         }
 
-        public static HtmlString DisplayFor<T>(Expression<Func<T, object>> propertySelector)
+        public static HtmlString DisplayFor<T>(Expression<Func<T, object>> propertySelector, bool linkObject = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             HtmlString returnString;
@@ -627,7 +627,7 @@ namespace IntelliTect.Coalesce.Helpers
             }
             else if (propertyModel.IsPOCO && !propertyModel.IsComplexType)
             {
-                returnString = DisplayObject(propertyModel);
+                returnString = DisplayObject(propertyModel, linkObject);
             }
             else if (propertyModel.Type.IsEnum || (propertyModel.PureType.IsEnum && propertyModel.Type.IsNullable))
             {
@@ -641,16 +641,27 @@ namespace IntelliTect.Coalesce.Helpers
             return returnString;
         }
 
-        public static HtmlString DisplayObject(PropertyViewModel propertyModel)
+        public static HtmlString DisplayObject(PropertyViewModel propertyModel, bool linkObject = false)
         {
-            string result = string.Format(@"
-                <div data-bind=""if: {0}()"">
-                    <div class=""form-control-static"" data-bind=""text: {0}().{1}""></div>
-                </div>
-                <div data-bind=""if: !{0}()"">
+            string result = "";
+            result += $@"
+                <div data-bind=""if: {propertyModel.JsVariableForBinding}()"">";
+            if (linkObject && propertyModel.PureTypeOnContext)
+            {
+                result += $@"
+                    <a class=""form-control-static"" data-bind=""attr: {{href: {propertyModel.JsVariableForBinding}().editUrl()}}, text: {propertyModel.JsVariableForBinding}().{propertyModel.Object.ListTextProperty.JsVariable}""></a>";
+            }
+            else
+            {
+                result += $@"
+                    <div class=""form-control-static"" data-bind=""text: {propertyModel.JsVariableForBinding}().{propertyModel.Object.ListTextProperty.JsVariable}""></div>";
+            }
+            result += $@"
+                </div>";
+            result += $@"
+                <div data-bind=""if: !{propertyModel.JsVariableForBinding}()"">
                     <div class=""form-control-static"">None</div>
-                </div>",
-                propertyModel.JsVariableForBinding, propertyModel.Object.ListTextProperty.JsVariable);
+                </div>";
 
             return new HtmlString(result);
         }

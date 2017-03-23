@@ -47,9 +47,9 @@ module ViewModels {
         public productValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadProductValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
-        public showCaseEditor: () => void;
-        public showProductEditor: () => void;
+        public showEditor: (callback?: any) => void;
+        public showCaseEditor: (callback?: any) => void;
+        public showProductEditor: (callback?: any) => void;
 
 
 
@@ -248,30 +248,29 @@ module ViewModels {
                 });
             }
             
-            self.showCaseEditor = function() {
+            self.showCaseEditor = function(callback: any) {
                 if (!self.case()) {
                     self.case(new Case());
                 }
-                self.case().showEditor()
+                self.case().showEditor(callback)
             };
-            self.showProductEditor = function() {
+            self.showProductEditor = function(callback: any) {
                 if (!self.product()) {
                     self.product(new Product());
                 }
-                self.product().showEditor()
+                self.product().showEditor(callback)
             };
 
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
                 // See if self.case needs to be loaded.
                 if (self.case() == null && self.caseId() != null){
                     loadingCount++;
-                    obj = new Case();
-                    obj.load(self.caseId(), function() {
+                    var caseObj = new Case();
+                    caseObj.load(self.caseId(), function() {
                         loadingCount--;
-                        self.case(obj);
+                        self.case(caseObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }
@@ -280,10 +279,10 @@ module ViewModels {
                 // See if self.product needs to be loaded.
                 if (self.product() == null && self.productId() != null){
                     loadingCount++;
-                    obj = new Product();
-                    obj.load(self.productId(), function() {
+                    var productObj = new Product();
+                    productObj.load(self.productId(), function() {
                         loadingCount--;
-                        self.product(obj);
+                        self.product(productObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }

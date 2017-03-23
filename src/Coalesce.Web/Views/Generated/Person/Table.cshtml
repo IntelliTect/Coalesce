@@ -1,13 +1,25 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
+</style>
 <div style="padding: 10px 15px">
-    <h1 style="display:inline-block">
-        Person List
-            <span style="font-size: .5em; padding-left: 20px;"><a href="~/Person/Docs">API Docs</a></span>
-    </h1>
-    <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    <div>
+        <h1  style="display: inline-block">
+            Person List
+                <span style="font-size: .5em; padding-left: 20px;"><a href="~/Person/Docs">API Docs</a></span>
+        </h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    </div>
 
     <div class="clearfix">
         <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
@@ -41,6 +53,8 @@
                     {
                     <a href="~/Person/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
                     }
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
         </div>
     </div>
 </div>
@@ -50,48 +64,73 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Title</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Gender</th>
-                    <th>Cases Assigned</th>
-                    <th>Cases Reported</th>
-                    <th>Birth Date</th>
-                    <th>Name</th>
-                    <th>Company</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
+                            Title
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Title', 'fa-caret-down': orderByDescending() == 'Title'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('FirstName')}">
+                            First Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'FirstName', 'fa-caret-down': orderByDescending() == 'FirstName'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('LastName')}">
+                            Last Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'LastName', 'fa-caret-down': orderByDescending() == 'LastName'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Email')}">
+                            Email
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Email', 'fa-caret-down': orderByDescending() == 'Email'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Gender')}">
+                            Gender
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Gender', 'fa-caret-down': orderByDescending() == 'Gender'}"></i>
+                        </th>
+                        <th>Cases Assigned</th>
+                        <th>Cases Reported</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('BirthDate')}">
+                            Birth Date
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'BirthDate', 'fa-caret-down': orderByDescending() == 'BirthDate'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                            Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Company')}">
+                            Company
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Company', 'fa-caret-down': orderByDescending() == 'Company'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: personId}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
-                    <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
-                    <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
-                    <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
-                    <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
-                    <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
-                    <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</td>
-                    <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
+                        <td class="prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
+                        <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
+                        <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
+                        <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
+                        <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
+                        <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
+                        <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
+                        <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
                     }
                     else
                     {
-                    <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title))</td>
-                    <td class="prop-firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
-                    <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName))</td>
-                    <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email))</td>
-                    <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender))</td>
-                    <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                    <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
-                    <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</td>
-                    <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company))</td>
+                        <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title, true))</td>
+                        <td class="prop-firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName, true))</td>
+                        <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, true))</td>
+                        <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, true))</td>
+                        <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, true))</td>
+                        <td class="prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, true))</td>
+                        <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
+                        <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, true))</td>
                     }
                 <td>
 

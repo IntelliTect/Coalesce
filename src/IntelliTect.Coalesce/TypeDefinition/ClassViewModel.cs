@@ -273,29 +273,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get { return baseUrl + ControllerName; }
         }
 
-        public string DefaultOrderByClause
+        public string DefaultOrderByClause(string prependText = "")
         {
-            get
+            var defaultOrderBy = DefaultOrderBy.ToList();
+            if (defaultOrderBy.Any())
             {
-                var defaultOrderBy = DefaultOrderBy.ToList();
-                if (defaultOrderBy.Any())
+                var orderByClauseList = new List<string>();
+                foreach (var orderInfo in defaultOrderBy)
                 {
-                    var orderByClauseList = new List<string>();
-                    foreach (var orderInfo in defaultOrderBy)
+                    if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
                     {
-                        if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
-                        {
-                            orderByClauseList.Add($"{orderInfo.FieldName} ASC");
-                        }
-                        else
-                        {
-                            orderByClauseList.Add($"{orderInfo.FieldName} DESC");
-                        }
+                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
                     }
-                    return string.Join(",", orderByClauseList);
+                    else
+                    {
+                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
+                    }
                 }
-                return null;
+                return string.Join(",", orderByClauseList);
             }
+            return null;
+
         }
 
         /// <summary>
@@ -360,29 +358,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Process these items to make sure we have things we can search on.
                 foreach (var prop in searchProperties)
                 {
-                    if (prop.Type.PureType.HasClassViewModel)
+                    // Get all the child items
+                    foreach (var kvp in prop.SearchTerms(depth))
                     {
-                        // If we will exceed the depth don't try to query on an object.
-                        if (depth < 2)
-                        {
-                            // Remove this item and add the child's search items with a prepended property name
-                            var childResult = prop.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
-                            foreach (var childProp in childResult)
-                            {
-                                if (prop.Type.IsCollection)
-                                {
-                                    result.Add($"{prop.Name}[].{childProp.Key}", childProp.Value);
-                                }
-                                else
-                                {
-                                    result.Add($"{prop.Name}.{childProp.Key}", childProp.Value);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        result.Add(prop.Name, prop);
+                        result.Add(kvp.Key, kvp.Value);
                     }
                 }
             }
@@ -581,7 +560,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return "dbo." + Name;
             }
         }
-        
+
         public string ContextPropertyName { get; set; }
         public bool OnContext { get; set; }
 

@@ -65,10 +65,10 @@ module ViewModels {
         public devTeamAssignedValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadDevTeamAssignedValidValues: (callback?: any) => void;
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
-        public showAssignedToEditor: () => void;
-        public showReportedByEditor: () => void;
-        public showDevTeamAssignedEditor: () => void;
+        public showEditor: (callback?: any) => void;
+        public showAssignedToEditor: (callback?: any) => void;
+        public showReportedByEditor: (callback?: any) => void;
+        public showDevTeamAssignedEditor: (callback?: any) => void;
 
 
         public statusValues: EnumValue[] = [ 
@@ -403,30 +403,29 @@ module ViewModels {
                 });
             }
             
-            self.showAssignedToEditor = function() {
+            self.showAssignedToEditor = function(callback: any) {
                 if (!self.assignedTo()) {
                     self.assignedTo(new Person());
                 }
-                self.assignedTo().showEditor()
+                self.assignedTo().showEditor(callback)
             };
-            self.showReportedByEditor = function() {
+            self.showReportedByEditor = function(callback: any) {
                 if (!self.reportedBy()) {
                     self.reportedBy(new Person());
                 }
-                self.reportedBy().showEditor()
+                self.reportedBy().showEditor(callback)
             };
 
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
                 // See if self.assignedTo needs to be loaded.
                 if (self.assignedTo() == null && self.assignedToId() != null){
                     loadingCount++;
-                    obj = new Person();
-                    obj.load(self.assignedToId(), function() {
+                    var assignedToObj = new Person();
+                    assignedToObj.load(self.assignedToId(), function() {
                         loadingCount--;
-                        self.assignedTo(obj);
+                        self.assignedTo(assignedToObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }
@@ -435,10 +434,10 @@ module ViewModels {
                 // See if self.reportedBy needs to be loaded.
                 if (self.reportedBy() == null && self.reportedById() != null){
                     loadingCount++;
-                    obj = new Person();
-                    obj.load(self.reportedById(), function() {
+                    var reportedByObj = new Person();
+                    reportedByObj.load(self.reportedById(), function() {
                         loadingCount--;
-                        self.reportedBy(obj);
+                        self.reportedBy(reportedByObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }
@@ -447,10 +446,10 @@ module ViewModels {
                 // See if self.devTeamAssigned needs to be loaded.
                 if (self.devTeamAssigned() == null && self.devTeamAssignedId() != null){
                     loadingCount++;
-                    obj = new DevTeam();
-                    obj.load(self.devTeamAssignedId(), function() {
+                    var devTeamAssignedObj = new DevTeam();
+                    devTeamAssignedObj.load(self.devTeamAssignedId(), function() {
                         loadingCount--;
-                        self.devTeamAssigned(obj);
+                        self.devTeamAssigned(devTeamAssignedObj);
                         if (loadingCount == 0 && $.isFunction(callback)){
                             callback();
                         }

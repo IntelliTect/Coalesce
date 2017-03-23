@@ -3,7 +3,7 @@
 
 
 <div style="padding: 10px 15px">
-    <h1 style="display:inline-block">
+    <h1 >
         Company List
             <span style="font-size: .5em; padding-left: 20px;"><a href="~/Company/Docs">API Docs</a></span>
     </h1>
@@ -32,6 +32,7 @@
 
         <div class="btn-group pull-right">
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
         </div>
     </div>
 </div>
@@ -50,27 +51,27 @@
             <dl>
                     <dt>Name</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name, false))
                     </dd>
                     <dt>Address1</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, false))
                     </dd>
                     <dt>Address2</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, false))
                     </dd>
                     <dt>City</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.City))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.City, false))
                     </dd>
                     <dt>State</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, false))
                     </dd>
                     <dt>Zip Code</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, false))
                     </dd>
                     <dt>Employees</dt>
                     <dd>
@@ -78,7 +79,7 @@
                     </dd>
                     <dt>Alt Name</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, false))
                     </dd>
 
             </dl>

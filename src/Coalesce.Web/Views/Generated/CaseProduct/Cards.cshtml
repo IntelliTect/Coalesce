@@ -3,7 +3,7 @@
 
 
 <div style="padding: 10px 15px">
-    <h1 style="display:inline-block">
+    <h1 >
         Case Product List
             <span style="font-size: .5em; padding-left: 20px;"><a href="~/CaseProduct/Docs">API Docs</a></span>
     </h1>
@@ -33,6 +33,8 @@
         <div class="btn-group pull-right">
                     <a href="~/CaseProduct/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
         </div>
     </div>
 </div>
@@ -53,11 +55,11 @@
             <dl>
                     <dt>Case</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case))
+                        @(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case, false))
                     </dd>
                     <dt>Product</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product))
+                        @(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product, false))
                     </dd>
 
             </dl>

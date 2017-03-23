@@ -119,10 +119,10 @@ module @moduleName {
         @:public load@(prop.ValidValueListName): (callback?: any) => void;
         }
         // Pops up a stock editor for this object.
-        public showEditor: () => void;
+        public showEditor: (callback?: any) => void;
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsInternalUse))
         {
-        @:public show@(prop.Name)Editor: () => void;
+        @:public show@(prop.Name)Editor: (callback?: any) => void;
         }
 
 
@@ -294,10 +294,12 @@ module @moduleName {
 				    @:}else{
 					    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
 				    @:}
+                    @if (prop.Object.OnContext) { 
                     @:if (self.parent && self.parent.myId == self.@(prop.JsVariable)().myId && intellitect.utilities.getClassName(self.parent) == intellitect.utilities.getClassName(self.@(prop.JsVariable)()))
                     @:{
                         @:self.parent.loadFromDto(data.@prop.JsonName, undefined, false);
                     @:}
+                    }
                 @:}
                 }
 
@@ -492,27 +494,26 @@ module @moduleName {
 
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet && !f.IsInternalUse))
             {
-            @:self.show@(prop.Name)Editor = function() {
+            @:self.show@(prop.Name)Editor = function(callback: any) {
                 @:if (!self.@(prop.JsVariable)()) {
                     @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)());
                 @:}
-                @:self.@(prop.JsVariable)().showEditor()
+                @:self.@(prop.JsVariable)().showEditor(callback)
             @:};
             }
 
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && !f.IsInternalUse && !f.IsReadOnly))
             {
                 @:// See if self.@(prop.JsVariable) needs to be loaded.
                 @:if (self.@(prop.JsVariable)() == null && self.@(prop.ObjectIdProperty.JsVariable)() != null){
                     @:loadingCount++;
-                    @:obj = new @(prop.Object.ViewModelClassName)();
-                    @:obj.load(self.@(prop.ObjectIdProperty.JsVariable)(), function() {
+                    @:var @(prop.JsVariable)Obj = new @(prop.Object.ViewModelClassName)();
+                    @:@(prop.JsVariable)Obj.load(self.@(prop.ObjectIdProperty.JsVariable)(), function() {
                         @:loadingCount--;
-                        @:self.@(prop.JsVariable)(obj);
+                        @:self.@(prop.JsVariable)(@(prop.JsVariable)Obj);
                         @:if (loadingCount == 0 && $.isFunction(callback)){
                             @:callback();
                         @:}

@@ -40,8 +40,6 @@ module ListViewModels {
         public listDataSource: PersonDataSources = PersonDataSources.Default;
 
         // Valid values
-        public personStatsValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadPersonStatsValidValues: (callback: any) => void;
         public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback: any) => void;
             // Call server method (Add)

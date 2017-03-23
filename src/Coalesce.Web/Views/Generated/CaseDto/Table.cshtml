@@ -1,13 +1,25 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
+</style>
 <div style="padding: 10px 15px">
-    <h1 style="display:inline-block">
-        Case Dto List
-            <span style="font-size: .5em; padding-left: 20px;"><a href="~/CaseDto/Docs">API Docs</a></span>
-    </h1>
-    <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    <div>
+        <h1  style="display: inline-block">
+            Case Dto List
+                <span style="font-size: .5em; padding-left: 20px;"><a href="~/CaseDto/Docs">API Docs</a></span>
+        </h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    </div>
 
     <div class="clearfix">
         <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
@@ -41,6 +53,8 @@
                     {
                     <a href="~/CaseDto/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
                     }
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
         </div>
     </div>
 </div>
@@ -50,24 +64,31 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Title</th>
-                    <th>Assigned To Name</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
+                            Title
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Title', 'fa-caret-down': orderByDescending() == 'Title'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AssignedToName')}">
+                            Assigned To Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AssignedToName', 'fa-caret-down': orderByDescending() == 'AssignedToName'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseId}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDto>(p => p.Title))</td>
-                    <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName))</td>
+                        <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDto>(p => p.Title))</td>
+                        <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, true))</td>
                     }
                     else
                     {
-                    <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.Title))</td>
-                    <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName))</td>
+                        <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.Title, true))</td>
+                        <td class="prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, true))</td>
                     }
                 <td>
 

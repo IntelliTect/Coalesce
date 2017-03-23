@@ -451,6 +451,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (Object == null || !Object.OnContext) return null;
+
                 if (IsPOCO && !IsComplexType) return Name;
                 // TODO: Fix this so it is right. 
                 //if (IsGeneric)
@@ -529,6 +531,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var value = Wrapper.HasAttribute<RequiredAttribute>();
                 if (value) return true;
+
+                value = Wrapper.HasAttribute<ClientValidationAttribute>();
+                if (value && Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool? == false) return false;
 
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
                 if (IsForeignKey && !Type.IsNullable) return true;
@@ -613,10 +618,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 switch (SearchMethod)
                 {
                     case SearchAttribute.SearchMethods.Contains:
-                        return "Contains";
+                        // There isn't a good way to do case insensitive contains. This ends up being done on the client side.
+                        // Not sure how to get like '%abc%'
+                        // return @"IndexOf(""{0}"", System.StringComparison.OrdinalIgnoreCase) >= 0";
+                        return @"ToLower().IndexOf(""{0}"".ToLower()) >= 0";
                     case SearchAttribute.SearchMethods.BeginsWith:
                     default:
-                        return "StartsWith";
+                        return @"StartsWith(""{0}"")";
                 }
             }
         }
@@ -635,6 +643,45 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Returns the fields to search for this object. This could be just the field itself 
+        /// or a number of child fields if this is an object or collection.
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="maxDepth"></param>
+        /// <returns></returns>
+        public Dictionary<string, PropertyViewModel> SearchTerms(int depth, int maxDepth = 3)
+        {
+            var result = new Dictionary<string, PropertyViewModel>();
+            if (this.PureType.HasClassViewModel)
+            {
+
+                // If we will exceed the depth don't try to query on an object.
+                if (depth < maxDepth - 1)
+                {
+                    // Remove this item and add the child's search items with a prepended property name
+                    var childResult = this.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
+                    foreach (var childProp in childResult)
+                    {
+                        if (this.Type.IsCollection)
+                        {
+                            result.Add($"{this.Name}[].{childProp.Key}", childProp.Value);
+                        }
+                        else
+                        {
+                            result.Add($"{this.Name}.{childProp.Key}", childProp.Value);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // This is just a regular field, add it.
+                result.Add(this.Name, this);
+            }
+            return result;
         }
 
 
@@ -1117,7 +1164,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     sb.Append("                ");
                     sb.Append($"{objectName}.{Name} = obj.{Name}");
 
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause?.Replace("\"", "\\\"");
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.Replace("\"", "\\\"");
                     if (defaultOrderBy != null)
                     {
                         sb.Append($".OrderBy(\"{defaultOrderBy}\")");

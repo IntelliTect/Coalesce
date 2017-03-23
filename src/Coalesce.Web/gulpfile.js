@@ -36,9 +36,9 @@ paths.lib = paths.wwwroot + "/lib/";
 
 function getFolders(dir) {
     return fs.readdirSync(dir)
-		.filter(function (file) {
-		    return fs.statSync(path.join(dir, file)).isDirectory();
-		});
+        .filter(function (file) {
+            return fs.statSync(path.join(dir, file)).isDirectory();
+        });
 }
 
 gulp.task('clean-images', function (cb) {
@@ -79,8 +79,8 @@ gulp.task("copy-lib", ['clean-lib'], function () {
         "knockout": "knockout/dist/*.js",
         "knockout-validation": "knockout-validation/dist/*.js",
         "select2": "select2/dist/**/*.{css,js}",
-        "bootstrap-datetimepicker": "eonasdan-bootstrap-datetimepicker/build/**/*.{css,js}",
-    }
+        "bootstrap-datetimepicker": "eonasdan-bootstrap-datetimepicker/build/**/*.{css,js}"
+    };
 
     for (var destinationDir in bower) {
         gulp.src(paths.bower + bower[destinationDir])
@@ -169,7 +169,7 @@ gulp.task('ts', function () {
     //});
 
     // now compile the root individual page files
-    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
+    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
     var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{intellitect,Ko,ko}*.ts'])
     .pipe(sourcemaps.init())
     .pipe(typescriptCompiler(individualFileTypescriptProject));
@@ -243,15 +243,17 @@ gulp.task('nuget:publish:NLogExtensions',
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
 
-gulp.task('coalesce:build', shell.task
-    (['dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj"'],
-    { verbose: true }
+gulp.task('coalesce:build', shell.task([
+        //'if exist "%temp%/CoalesceExe" rmdir "%temp%/CoalesceExe" /s /q',
+        'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f net46'
+    ],{ verbose: true }
 ));
 
-
-gulp.task('coalesce', [/*'coalesce:build'*/], shell.task
+// Build is required every time because the templates are compiled into the dll.
+// Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
+gulp.task('coalesce', ['coalesce:build'], shell.task
     ([
-        '"../IntelliTect.Coalesce.Cli/bin/Debug/net46/win7-x86/IntelliTect.Coalesce.Cli.exe" ' +
+        '"%temp%/CoalesceExe/IntelliTect.Coalesce.Cli.exe" ' +
         '-dc AppDbContext -dp ..\\Coalesce.Domain -da Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web'
     ],
     { verbose: true }

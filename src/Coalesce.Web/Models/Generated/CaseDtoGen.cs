@@ -25,15 +25,15 @@ namespace Coalesce.Web.Models
         public System.String Title { get; set; }
         public System.String Description { get; set; }
         public DateTimeOffset? OpenedAt { get; set; }
-        public Nullable<System.Int32> AssignedToId { get; set; }
+        public System.Nullable<System.Int32> AssignedToId { get; set; }
         public PersonDtoGen AssignedTo { get; set; }
-        public Nullable<System.Int32> ReportedById { get; set; }
+        public System.Nullable<System.Int32> ReportedById { get; set; }
         public PersonDtoGen ReportedBy { get; set; }
         public System.Byte[] Attachment { get; set; }
         public System.String Severity { get; set; }
         public Statuses? Status { get; set; }
         public ICollection<CaseProductDtoGen> CaseProducts { get; set; }
-        public Nullable<System.Int32> DevTeamAssignedId { get; set; }
+        public System.Nullable<System.Int32> DevTeamAssignedId { get; set; }
         public DevTeamDtoGen DevTeamAssigned { get; set; }
 
         // Create a new version of this object or use it from the lookup.

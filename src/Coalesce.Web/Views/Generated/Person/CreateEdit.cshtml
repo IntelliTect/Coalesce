@@ -1,4 +1,3 @@
-
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="btn-group pull-right">
@@ -7,9 +6,7 @@
         </div>
         <h1 class="clearfix" style="display:inline-block;">Person</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-
     </div>
-
     <div class="panel-body">
         <div class="form-horizontal">
             <div class="form-group btn-warning" data-bind="if: errorMessage()">
@@ -18,51 +15,42 @@
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Title</label>
-                    <div class="col-md-8 prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">First Name</label>
-                    <div class="col-md-8 prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Last Name</label>
-                    <div class="col-md-8 prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Email</label>
-                    <div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Gender</label>
-                    <div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Cases Assigned</label>
-                    <div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Cases Reported</label>
-                    <div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Birth Date</label>
-                    <div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Name</label>
-                    <div class="col-md-8 prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Company</label>
-                    <div class="col-md-8 prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>
-            </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Title</label>
+<div class="col-md-8 prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">First Name</label>
+<div class="col-md-8 prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Last Name</label>
+<div class="col-md-8 prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Email</label>
+<div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Gender</label>
+<div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Cases Assigned</label>
+<div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Cases Reported</label>
+<div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Birth Date</label>
+<div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Name</label>
+<div class="col-md-8 prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))</div>                    </div>
+                    <div class="form-group">
+                        <label class="col-md-4 control-label">Company</label>
+<div class="col-md-7 prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>                            <div class="col-md-1" data-bind="with: company">
+                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
+                            </div>
+                    </div>
         </div>
     </div>
-
     <div class="panel-body">
-
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Actions</h4>
@@ -74,41 +62,40 @@
                         <th style="width:20%;">Successful</th>
                         <th style="width:10%;"></th>
                     </tr>
-                    <tr>
-                        <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: renameModal">Rename</button>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: renameResult"></span>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: renameWasSuccessful"></span>
-                            <span class="" data-bind="text: renameMessage"></span>
-                        </td>
-                        <td>
-                            <span class="label label-info" data-bind="fadeVisible: renameIsLoading()">Loading</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <button class="btn btn-default btn-xs" data-bind="click: changeSpacesToDashesInNameModal">Change Spaces To Dashes In Name</button>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: changeSpacesToDashesInNameResult"></span>
-                        </td>
-                        <td>
-                            <span class="" data-bind="text: changeSpacesToDashesInNameWasSuccessful"></span>
-                            <span class="" data-bind="text: changeSpacesToDashesInNameMessage"></span>
-                        </td>
-                        <td>
-                            <span class="label label-info" data-bind="fadeVisible: changeSpacesToDashesInNameIsLoading()">Loading</span>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <button class="btn btn-default btn-xs" data-bind="click: renameModal">Rename</button>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: renameResult"></span>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: renameWasSuccessful"></span>
+                                <span class="" data-bind="text: renameMessage"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: renameIsLoading()">Loading</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button class="btn btn-default btn-xs" data-bind="click: changeSpacesToDashesInNameModal">Change Spaces To Dashes In Name</button>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: changeSpacesToDashesInNameResult"></span>
+                            </td>
+                            <td>
+                                <span class="" data-bind="text: changeSpacesToDashesInNameWasSuccessful"></span>
+                                <span class="" data-bind="text: changeSpacesToDashesInNameMessage"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: changeSpacesToDashesInNameIsLoading()">Loading</span>
+                            </td>
+                        </tr>
                 </table>
             </div>
     </div>
 </div>
-
 
     <!-- Modal for method: Rename -->
     <div id='method-Rename' class="modal fade" tabindex="-1" role="dialog">
@@ -134,24 +121,33 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-
-@section Scripts
-{
+    @section Scripts
+    {
     <script>
         var aperson = new ViewModels.Person();
         aperson.includes = "Editor";
 
+        aperson.saveCallbacks.push(function(obj){
+            // If there is a new id, set the one for this page
+            if (!intellitect.utilities.GetUrlParameter('id')){
+                if (aperson.myId){
+                    var newUrl = intellitect.utilities.SetUrlParameter(window.location.href, "id", aperson.myId);
+                    window.history.replaceState(null, window.document.title, newUrl);
+                }
+            }
+        });
+
         @if (ViewBag.Id != null)
-        {
-            @:aperson.load('@ViewBag.Id');
-        }
-        @if (ViewBag.ParentIdName != null)
-        {
-            @:aperson.@(((string)(@ViewBag.ParentIdName)))(@ViewBag.ParentId);
-        }
+                {
+                    @:aperson.load('@ViewBag.Id');
+                }
+        @foreach (var kvp in ViewBag.ParentIds)
+                {
+                    @:aperson.@(((string)(@kvp.Key)))(@kvp.Value);
+                }
 
         window.onbeforeunload = function(){
-            aperson.save();
+            if (aperson.isDirty()) aperson.save();
         }
 
         aperson.isSavingAutomatically = false;
@@ -160,4 +156,4 @@
             aperson.isSavingAutomatically = true;
         });
     </script>
-}
+    }

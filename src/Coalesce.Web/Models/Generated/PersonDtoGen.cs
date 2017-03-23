@@ -29,10 +29,10 @@ namespace Coalesce.Web.Models
         public Genders? Gender { get; set; }
         public ICollection<CaseDtoGen> CasesAssigned { get; set; }
         public ICollection<CaseDtoGen> CasesReported { get; set; }
-        public Nullable<System.DateTime> BirthDate { get; set; }
-        public Nullable<System.DateTime> LastBath { get; set; }
-        public Nullable<System.DateTimeOffset> NextUpgrade { get; set; }
-        public Nullable<System.Int32> PersonStatsId { get; set; }
+        public System.Nullable<System.DateTime> BirthDate { get; set; }
+        public System.Nullable<System.DateTime> LastBath { get; set; }
+        public System.Nullable<System.DateTimeOffset> NextUpgrade { get; set; }
+        public System.Nullable<System.Int32> PersonStatsId { get; set; }
         public PersonStatsDtoGen PersonStats { get; set; }
         public System.TimeZoneInfo TimeZone { get; set; }
         public System.String Name { get; set; }

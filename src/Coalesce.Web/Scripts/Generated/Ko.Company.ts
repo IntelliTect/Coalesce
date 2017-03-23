@@ -49,7 +49,7 @@ module ViewModels {
 
         public EmployeesListUrl: () => void; 
                 // Pops up a stock editor for this object.
-        public showEditor: () => void;
+        public showEditor: (callback?: any) => void;
 
 
 
@@ -201,7 +201,6 @@ module ViewModels {
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-                var obj;
                 if (loadingCount == 0 && $.isFunction(callback)){
                     callback();
                 }

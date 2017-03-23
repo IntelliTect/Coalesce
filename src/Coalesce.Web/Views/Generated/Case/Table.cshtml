@@ -1,13 +1,25 @@
 @using IntelliTect.Coalesce.Helpers
 @{ ViewBag.Fluid = true; }
 
-
+<style>
+    td div a{
+        display: block;
+    }
+    th.sortable-header{
+        cursor: pointer;
+    }
+    th.sortable-header:hover{
+        background-color: #e6e6e6
+    }
+</style>
 <div style="padding: 10px 15px">
-    <h1 style="display:inline-block">
-        Case List
-            <span style="font-size: .5em; padding-left: 20px;"><a href="~/Case/Docs">API Docs</a></span>
-    </h1>
-    <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    <div>
+        <h1  style="display: inline-block">
+            Case List
+                <span style="font-size: .5em; padding-left: 20px;"><a href="~/Case/Docs">API Docs</a></span>
+        </h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    </div>
 
     <div class="clearfix">
         <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
@@ -41,6 +53,8 @@
                     {
                     <a href="~/Case/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
                     }
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
         </div>
     </div>
 </div>
@@ -50,48 +64,76 @@
             <table class="table @(ViewBag.Editable ? " editable" : "" )">
         <thead>
             <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Opened At</th>
-                    <th>Assigned To</th>
-                    <th>Reported By</th>
-                    <th>Attachment</th>
-                    <th>Severity</th>
-                    <th>Status</th>
-                    <th>Case Products</th>
-                    <th>Dev Team Assigned</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
+                            Title
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Title', 'fa-caret-down': orderByDescending() == 'Title'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Description')}">
+                            Description
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Description', 'fa-caret-down': orderByDescending() == 'Description'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('OpenedAt')}">
+                            Opened At
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'OpenedAt', 'fa-caret-down': orderByDescending() == 'OpenedAt'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AssignedTo')}">
+                            Assigned To
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AssignedTo', 'fa-caret-down': orderByDescending() == 'AssignedTo'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ReportedBy')}">
+                            Reported By
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ReportedBy', 'fa-caret-down': orderByDescending() == 'ReportedBy'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Attachment')}">
+                            Attachment
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Attachment', 'fa-caret-down': orderByDescending() == 'Attachment'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
+                            Severity
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Severity', 'fa-caret-down': orderByDescending() == 'Severity'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Status')}">
+                            Status
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Status', 'fa-caret-down': orderByDescending() == 'Status'}"></i>
+                        </th>
+                        <th>Case Products</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('DevTeamAssigned')}">
+                            Dev Team Assigned
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'DevTeamAssigned', 'fa-caret-down': orderByDescending() == 'DevTeamAssigned'}"></i>
+                        </th>
                 <th style="width: 1%">
                 </th>
             </tr>
+
         </thead>
         <tbody>
             <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}">
+            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseKey}">
                     @if (@ViewBag.Editable)
                     {
-                    <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</td>
-                    <td class="prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</td>
-                    <td class="prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
-                    <td class="prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
-                    <td class="prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
-                    <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
-                    <td class="prop-severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</td>
-                    <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
-                    <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
-                    <td class="prop-devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
+                        <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</td>
+                        <td class="prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</td>
+                        <td class="prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
+                        <td class="prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
+                        <td class="prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
+                        <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
+                        <td class="prop-severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</td>
+                        <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
+                        <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
+                        <td class="prop-devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
                     }
                     else
                     {
-                    <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title))</td>
-                    <td class="prop-description">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description))</td>
-                    <td class="prop-openedAt">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
-                    <td class="prop-assignedTo">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
-                    <td class="prop-reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
-                    <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
-                    <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity))</td>
-                    <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status))</td>
-                    <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
-                    <td class="prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
+                        <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title, true))</td>
+                        <td class="prop-description">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description, true))</td>
+                        <td class="prop-openedAt">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt, true))</td>
+                        <td class="prop-assignedTo">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo, true))</td>
+                        <td class="prop-reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, true))</td>
+                        <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, true))</td>
+                        <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, true))</td>
+                        <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, true))</td>
+                        <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>
+                        <td class="prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, true))</td>
                     }
                 <td>
 

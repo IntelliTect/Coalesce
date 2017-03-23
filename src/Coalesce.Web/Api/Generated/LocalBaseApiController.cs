@@ -1,8 +1,8 @@
 using IntelliTect.Coalesce.Controllers;
 // Model Namespaces
 using Coalesce.Web;
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
 using IntelliTect.Coalesce.Interfaces;
 
 namespace Coalesce.Web.Api

@@ -446,6 +446,8 @@ module ListViewModels {
         protected areaUrl: string;
         protected apiUrlBase: string;
         public dataSources: any;
+        public modelKeyName: string;
+        public itemClass: typeof ViewModels.BaseViewModel;
 
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public listDataSource: any;
@@ -480,15 +482,14 @@ module ListViewModels {
                          url: url,
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
-                    this.items.removeAll();
-                    for (var i in data.list) {
-                        var model = this.createItem(data.list[i]);
+
+                    RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
+                    $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                         model.onDelete((item) => {
                             this.items.remove(item);
                         });
-                        this.items.push(model);
-                    }
+                    });
                     this.count(data.list.length);
                     this.totalCount(data.totalCount);
                     this.pageCount(data.pageCount);

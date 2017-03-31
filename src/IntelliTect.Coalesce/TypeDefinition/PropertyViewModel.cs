@@ -1128,15 +1128,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        private string GetPropertySetterConditional(List<string> rolesList)
+        private string GetPropertySetterConditional(bool isForEdit)
         {
-            var roles = (SecurityInfo.IsSecuredProperty && rolesList.Count() > 0) ?
-                string.Join(" || ", rolesList.Select(s => $"is{s}")) : "";
+            var readRoles = (SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) ?
+                string.Join(" || ", SecurityInfo.ReadRolesList.Select(s => $"is{s}")) : "";
+            var editRoles = isForEdit && (SecurityInfo.IsSecuredProperty && SecurityInfo.EditRolesList.Count() > 0) ?
+                string.Join(" || ", SecurityInfo.EditRolesList.Select(s => $"is{s}")) : "";
             var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
             var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
 
             var statement = new List<string>();
-            if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
+            if (!string.IsNullOrEmpty(readRoles)) statement.Add($"({readRoles})");
+            if (!string.IsNullOrEmpty(editRoles)) statement.Add($"({editRoles})");
             if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
             if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
 
@@ -1216,7 +1219,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 setter = $"{objectName}.{Name} = obj.{Name};";
             }
 
-            var statement = GetPropertySetterConditional(SecurityInfo.ReadRolesList);
+            var statement = GetPropertySetterConditional(false);
             if (!string.IsNullOrWhiteSpace(statement))
             {
                 return $@"            if ({statement})
@@ -1247,8 +1250,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 var setter = $"entity.{Name} = {Type.ExplicitConversionType}{name};";
 
-                var editRolesList = SecurityInfo.EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                var statement = GetPropertySetterConditional(editRolesList);
+                var statement = GetPropertySetterConditional(true);
                 if (!string.IsNullOrWhiteSpace(statement))
                 {
                     return $@"          if ({statement})

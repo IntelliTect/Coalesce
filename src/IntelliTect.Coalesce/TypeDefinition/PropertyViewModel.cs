@@ -1216,10 +1216,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 setter = $"{objectName}.{Name} = obj.{Name};";
             }
 
-            if ((SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+            var statement = GetPropertySetterConditional(SecurityInfo.ReadRolesList);
+            if (!string.IsNullOrWhiteSpace(statement))
             {
-                var statement = GetPropertySetterConditional(SecurityInfo.ReadRolesList);
-
                 return $@"            if ({statement})
             {{
                 {setter}
@@ -1249,10 +1248,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var setter = $"entity.{Name} = {Type.ExplicitConversionType}{name};";
 
                 var editRolesList = SecurityInfo.EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                if ((SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+                var statement = GetPropertySetterConditional(editRolesList);
+                if (!string.IsNullOrWhiteSpace(statement))
                 {
-                    var statement = GetPropertySetterConditional(editRolesList);
-
                     return $@"          if ({statement})
             {{
                 {setter}

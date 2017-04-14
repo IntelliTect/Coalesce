@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         }
 
         public override bool IsGeneric { get { return Info.IsGenericType; } }
-        
+
         public override bool IsCollection { get { return Info.GetInterface("IEnumerable") != null && !IsArray && !IsString; } }
 
         public override bool IsArray { get { return Info.IsArray; } }
@@ -63,7 +63,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override string Namespace { get { return Info.Namespace; } }
 
-        public override string FullNamespace { get { throw new NotImplementedException(); } }
+        public override string FullNamespace { get { return Info.Namespace; } }
 
         public override TypeWrapper PureType
         {

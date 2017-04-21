@@ -702,8 +702,8 @@ module ListViewModels {
                     this.load();
                 }, 300);
             });
-            this.orderBy.subscribe(() => { this.delayedLoad(); });
-            this.orderByDescending.subscribe(() => { this.delayedLoad(); });
+            this.orderBy.subscribe(() => { if (this.isLoaded()) this.delayedLoad(); });
+            this.orderByDescending.subscribe(() => { if (this.isLoaded()) this.delayedLoad(); });
         }
     }
 }

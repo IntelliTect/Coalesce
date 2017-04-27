@@ -517,7 +517,7 @@ module ListViewModels {
                 search: this.search(),
                 orderBy: this.orderBy(),
                 orderByDescending: this.orderByDescending(),
-                listDataSource: typeof this.listDataSource === "string" ? this.listDataSource : this.dataSources[this.listDataSource]
+                listDataSource: this.dataSources[this.listDataSource]
             });
         }
         protected createItem: (newItem?: any, parent?: any) => TItem;
@@ -599,19 +599,19 @@ module ListViewModels {
         public orderByDescending: KnockoutObservable<string> = ko.observable("");
         // Set to field name to toggle ordering, ascending, descending, none.
         public orderByToggle = (field: string) => {
-        if (this.orderBy() == field && !this.orderByDescending()) {
-            this.orderBy('');
-            this.orderByDescending(field);
-        }
-        else if (!this.orderBy() && this.orderByDescending() == field) {
-            this.orderBy('');
-            this.orderByDescending('');
-        }
-        else {
-            this.orderBy(field);
-            this.orderByDescending('');
-        }
-    };
+            if (this.orderBy() == field && !this.orderByDescending()) {
+                this.orderBy('');
+                this.orderByDescending(field);
+            }
+            else if (!this.orderBy() && this.orderByDescending() == field) {
+                this.orderBy('');
+                this.orderByDescending('');
+            }
+            else {
+                this.orderBy(field);
+                this.orderByDescending('');
+            }
+        };
 
         // True once the data has been loaded.
         public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
@@ -620,7 +620,7 @@ module ListViewModels {
         public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
             var url = this.areaUrl + this.apiUrlBase + "/CsvDownload?" + this.queryParams(10000);
             return url;
-        });
+        }, null, { deferEvaluation: true });
         // Starts an upload of a CSV file
         public csvUploadUi = (callback?: any) => {
             // Remove the form if it exists.

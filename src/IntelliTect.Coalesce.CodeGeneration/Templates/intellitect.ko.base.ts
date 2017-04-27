@@ -472,9 +472,6 @@ module ListViewModels {
                 this.isLoading(true);
 
                 var url = this.areaUrl + this.apiUrlBase + "/List?" + this.queryParams();
-    
-                if (typeof this.listDataSource === "string") url += this.listDataSource;
-                else url += this.dataSources[this.listDataSource];
 
                 if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
 
@@ -513,11 +510,15 @@ module ListViewModels {
                 });
         };
         protected queryParams = (pageSize?: number) => {
-            var query = "includes=" + this.includes + "&page=" + this.page()
-            + "&pageSize=" + (pageSize || this.pageSize()) + "&search=" + this.search()
-            + "&orderBy=" + this.orderBy() + "&orderByDescending=" + this.orderByDescending()
-            + "&listDataSource=";
-            return query;
+            return $.param({
+                includes: this.includes,
+                page: this.page(),
+                pageSize: pageSize || this.pageSize(),
+                search: this.search(),
+                orderBy: this.orderBy(),
+                orderByDescending: this.orderByDescending(),
+                listDataSource: typeof this.listDataSource === "string" ? this.listDataSource : this.dataSources[this.listDataSource]
+            });
         }
         protected createItem: (newItem?: any, parent?: any) => TItem;
         // Adds a new item to the collection.

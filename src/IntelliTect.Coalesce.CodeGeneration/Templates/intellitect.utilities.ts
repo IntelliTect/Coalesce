@@ -80,7 +80,7 @@ module intellitect {
             for (var i = 0; i < sUrlVariables.length; i++) {
                 var sParameterName = sUrlVariables[i].split('=');
                 if (sParameterName[0] == sParam) {
-                    return sParameterName[1];
+                    return decodeURIComponent(sParameterName[1]);
                 }
             }
             if (sParam === "id" || sParam === "Id" || sParam === "ID") {
@@ -88,13 +88,14 @@ module intellitect {
                 var paths = window.location.pathname.split('/');
                 var lastPath = paths[paths.length - 1];
                 if ($.isNumeric(lastPath)) {
-                    return lastPath;
+                    return decodeURIComponent(lastPath);
                 }
             }
             return null;
         }
 
         export function SetUrlParameter(url: string, paramName: string, paramValue: string) {
+            paramValue = encodeURIComponent(paramValue);
             var hash = location.hash;
             url = url.replace(hash, '');
             if (url.indexOf(paramName + "=") >= 0) {

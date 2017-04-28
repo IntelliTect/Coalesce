@@ -1171,7 +1171,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     sb.Append("                ");
                     sb.Append($"{objectName}.{Name} = propVal{Name}");
 
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForLinqDynamic();
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
                     if (defaultOrderBy != null)
                     {
                         sb.Append($".OrderBy(\"{defaultOrderBy}\")");

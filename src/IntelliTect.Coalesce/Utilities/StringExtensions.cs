@@ -108,5 +108,9 @@ namespace IntelliTect.Coalesce.Utilities
         public static string EscapeStringLiteralForLinqDynamic(this string str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\"\"");
+
+        public static string EscapeStringLiteralForCSharp(this string str) => str?
+            .Replace(@"\", @"\\")
+            .Replace("\"", "\\\"");
     }
 }

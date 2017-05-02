@@ -19,6 +19,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Name = type.Name;
         }
 
+        public ContextInfo(string name, string nameSpace)
+        {
+            Namespace = nameSpace;
+            Name = name;
+        }
+
         public string Namespace { get; }
 
         public string Name { get; }

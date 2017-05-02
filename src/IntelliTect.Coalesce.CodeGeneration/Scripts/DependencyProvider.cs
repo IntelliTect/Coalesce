@@ -64,7 +64,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             configuration = "Release";
 #endif
 
-                return MsBuildProjectContextBuilder.Build(
+            return MsBuildProjectContextBuilder.Build(
                 foundProjectJsonPath,
                 foundProjectJsonFile,
                 "D:\\Work\\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
@@ -77,15 +77,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             var workspace = MSBuildWorkspace.Create();
             workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
             {
-                if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
-                    throw new Exception(e.Diagnostic.Message);
+                //if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+                    //throw new Exception(e.Diagnostic.Message);
             };
 
             var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
 
             //var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
 
-            return new ModelTypesLocator(workspace);
+            return new ModelTypesLocator(workspace, project);
         }
 
         public static CodeGeneratorActionsService CodeGeneratorActionsService(ProjectContext project)
@@ -124,17 +124,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
     public class ModelTypesLocator : IModelTypesLocator
     {
         private Workspace _projectWorkspace;
+        private ProjectContext _projectContext;
 
-        public ModelTypesLocator(
-            Workspace projectWorkspace)
+        public ModelTypesLocator(Workspace projectWorkspace, ProjectContext projectContext)
         {
-            _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
+            if (projectWorkspace == null)
+            {
+                throw new ArgumentNullException(nameof(projectWorkspace));
+            }
+
+            _projectWorkspace = projectWorkspace;
+            _projectContext = projectContext;
         }
 
         public IEnumerable<ModelType> GetAllTypes()
         {
             return _projectWorkspace.CurrentSolution.Projects
-                .Select(project => project.GetCompilationAsync().Result)
+                .Select(project => project
+                    .AddMetadataReferences(_projectContext.CompilationAssemblies.Select(rr => MetadataReference.CreateFromFile(rr.ResolvedPath)))
+                    .GetCompilationAsync().Result
+                )
                 .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
                 .Aggregate((col1, col2) => col1.Concat(col2).ToList())
                 .Distinct(new TypeSymbolEqualityComparer())
@@ -148,22 +157,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 throw new ArgumentNullException(nameof(typeName));
             }
 
-            var compilation = _projectWorkspace
-                .CurrentSolution.Projects.First().GetCompilationAsync().Result;
-
-            var exactTypesInAllProjects = _projectWorkspace
-                .CurrentSolution.Projects
-                .Select(project => project.GetCompilationAsync().Result)
-                .Select(comp => comp.Assembly.GetTypeByMetadataName(typeName) as ITypeSymbol)
-                .Where(type => type != null)
-                .Distinct(new TypeSymbolEqualityComparer());
-
-            if (exactTypesInAllProjects.Any())
-            {
-                return exactTypesInAllProjects.Select(ts => ModelType.FromITypeSymbol(ts));
-            }
-            //For short type names, we don't give special preference to types in current app,
-            //should we do that?
             return GetAllTypes()
                 .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
         }

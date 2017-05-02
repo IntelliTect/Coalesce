@@ -16,37 +16,27 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.ProjectModel;
-using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
     public class ScriptsGenerator : CommonGeneratorBase
     {
-        //public IModelTypesLocator ModelTypesLocator { get; }
-        //public IModelTypesLocator DataModelTypesLocator { get; }
-
+        public IModelTypesLocator ModelTypesLocator { get; }
+        public IModelTypesLocator DataModelTypesLocator { get; }
         protected ICodeGeneratorActionsService CodeGeneratorActionsService { get; }
 
         public const string ScriptsFolderName = "Scripts";
         public const string ThisAssemblyName = "IntelliTect.Coalesce.CodeGeneration";
 
         private ProjectContext _webProject;
-        private ProjectContext _dataProject;
 
         public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
             : base(PlatformServices.Default.Application)
         {
-            // Removed 3/14/2017 because of MS Build in 2017 going to CSPROJ.
-            // This gets the types that need to be loaded in to the cshtml compiler object so that the user can use custom helpers in their template modifications.
-            // Because Roslyn is broken (lots of workarounds) giving assembly data with MSBuild this is being removed at least temporarily.
-            //ModelTypesLocator = DependencyProvider.ModelTypesLocator(webProject);
-            // For the same reason as above, this code is commented out until Roslyn works well to get symbols back from a project
-            // Moving to reflection to get the model. This sacrifices
-            //DataModelTypesLocator = DependencyProvider.ModelTypesLocator(dataProject);
-
+            ModelTypesLocator = DependencyProvider.ModelTypesLocator(webProject);
+            DataModelTypesLocator = DependencyProvider.ModelTypesLocator(dataProject);
             CodeGeneratorActionsService = DependencyProvider.CodeGeneratorActionsService(webProject);
 
-            _dataProject = dataProject;
             _webProject = webProject;
         }
 
@@ -57,48 +47,33 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             using (StreamWriter streamWriter = new StreamWriter("output.txt", false))
             {
                 Console.WriteLine($"Starting Generator");
-                // This is now required because we can't read it from the web project GME: 2017-03-14
-                string targetNamespace = model.TargetNamespace;
-                //if (!string.IsNullOrEmpty(model.TargetNamespace))
-                //{
-                //    targetNamespace = model.TargetNamespace;
-                //}
-                //else
-                //{
-                //    targetNamespace = ValidationUtil.ValidateType("Startup", "", ModelTypesLocator, throwWhenNotFound: false).Namespace;
-                //}
-                Console.WriteLine($"Namespace: {targetNamespace}");
-
-                //GME: 2017 - 03 - 14
-                //ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator, throwWhenNotFound: false);
-                Type dataContext = _dataProject.Assembly.GetTypes().FirstOrDefault(f => f.Name == model.DataContextClass);
-
-                if (dataContext == null)
+                string targetNamespace;
+                if (!string.IsNullOrEmpty(model.TargetNamespace))
                 {
-                    Console.WriteLine($"Could not find a class that inherits from DbContext in {_dataProject.Assembly.FullName}");
-                    throw new ArgumentException($"Could not find a class that inherits from DbContext in {_dataProject.Assembly.FullName}");
-                }
-
-                if (model.ValidateOnly)
-                {
-                    // GME: 2017-03-14
-                    //Console.WriteLine($"Validating model for: {dataContext.FullName}");
-                    Console.WriteLine($"Validating model for: {_dataProject.Assembly.FullName}");
+                    targetNamespace = model.TargetNamespace;
                 }
                 else
                 {
-                    // GME: 2017-03-14
-                    //Console.WriteLine($"Building scripts for: {dataContext.FullName}");
-                    Console.WriteLine($"Building scripts for: {_dataProject.Assembly.FullName}");
+                    targetNamespace = ValidationUtil.ValidateType("Startup", "", ModelTypesLocator, throwWhenNotFound: false).Namespace;
+                }
+                Console.WriteLine($"Namespace: {targetNamespace}");
+
+                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataModelTypesLocator, throwWhenNotFound: false);
+
+                if (model.ValidateOnly)
+                {
+                    Console.WriteLine($"Validating model for: {dataContext.FullName}");
+                }
+                else
+                {
+                    Console.WriteLine($"Building scripts for: {dataContext.FullName}");
                 }
 
                 List<ClassViewModel> models = null;
                 try
                 {
                     models = ReflectionRepository
-                                    .AddContext(dataContext)
-                                    // GME: 2017-03-14
-                                    //.AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
+                                    .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
                                     //.Where(m => m.PrimaryKey != null)
                                     .ToList();
                 }
@@ -203,7 +178,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
                 else
                 {
-                    var contextInfo = new ContextInfo(dataContext, targetNamespace);
+                    var contextInfo = new ContextInfo(dataContext.Name, targetNamespace);
                     return GenerateScripts(model, models, contextInfo, targetNamespace);
                 }
             }
@@ -570,7 +545,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     sourcePath: "Templates/Views",
                     originalsPath: originalTemplatesPath,
                     destinationPath: activeTemplatesPath);
-            await Generate("_ViewImports.cshtml", destPath, "");
+            await Generate("_ViewImports.cshtml", destPath, null);
 
 
 
@@ -724,7 +699,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 {
                     Console.Write($"{model.Model.Name}  ");
 
-                    await output.Generate("ClassDto.cshtml", model.Model.Name + "DtoGen.cs", model);
+                    await output.Generate("ClassDto.cshtml", Path.Combine(modelOutputPath, model.Model.Name + "DtoGen.cs"), model);
                 }
                 Console.WriteLine();
             }
@@ -897,10 +872,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 if (!file.FullName.EndsWith(".d.ts"))
                 {
                     var reader = file.OpenText();
-                    var doc = new TypeScriptDocumentation()
-                    {
-                        TsFilename = file.Name
-                    };
+                    var doc = new TypeScriptDocumentation();
+                    doc.TsFilename = file.Name;
                     doc.Generate(await reader.ReadToEndAsync());
                     var serializer = Newtonsoft.Json.JsonSerializer.Create();
                     // Create the doc file.

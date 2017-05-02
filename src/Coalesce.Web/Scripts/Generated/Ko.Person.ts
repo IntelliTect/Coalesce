@@ -57,10 +57,10 @@ module ViewModels {
         public personStatsText: () => string;
         public companyText: () => string;
         
-        public addToCasesAssigned: () => Case;
+        public addToCasesAssigned: (autoSave?: boolean) => Case;
         // List Object model for CasesAssigned. Allows for loading subsets of data.
         public casesAssignedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
-        public addToCasesReported: () => Case;
+        public addToCasesReported: (autoSave?: boolean) => Case;
         // List Object model for CasesReported. Allows for loading subsets of data.
         public casesReportedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
 
@@ -308,8 +308,11 @@ module ViewModels {
 
             // Methods to add to child collections
 
-            self.addToCasesAssigned = function() {
+            self.addToCasesAssigned = function(autoSave = true) {
                 var newItem = new Case();
+                if (typeof(autoSave) == 'boolean'){
+                    newItem.isSavingAutomatically = autoSave;
+                }
                 newItem.parent = self;
                 newItem.parentCollection = self.casesAssigned;
                 newItem.isExpanded(true);
@@ -318,8 +321,11 @@ module ViewModels {
                 return newItem;
             }
             
-            self.addToCasesReported = function() {
+            self.addToCasesReported = function(autoSave = true) {
                 var newItem = new Case();
+                if (typeof(autoSave) == 'boolean'){
+                    newItem.isSavingAutomatically = autoSave;
+                }
                 newItem.parent = self;
                 newItem.parentCollection = self.casesReported;
                 newItem.isExpanded(true);

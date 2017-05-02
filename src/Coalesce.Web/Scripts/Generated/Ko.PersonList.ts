@@ -21,7 +21,9 @@ module ListViewModels {
         protected modelName = "Person";
         protected areaUrl = ((true) ? baseUrl : baseUrl + '/');
         protected apiUrlBase = "api/Person";
+        public modelKeyName = "personId";
         public dataSources = PersonDataSources;
+        public itemClass = ViewModels.Person;
 
         public query: {
             where?: string;

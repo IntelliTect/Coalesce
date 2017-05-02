@@ -96,7 +96,7 @@ module @moduleName {
         {
         @:// Add object to @(prop.JsVariable)
         }
-        @:public addTo@(prop.Name): () => @prop.PureType.ClassViewModel.Name;
+        @:public addTo@(prop.Name): (autoSave?: boolean) => @prop.PureType.ClassViewModel.Name;
         @:// List Object model for @(prop.Name). Allows for loading subsets of data.
         @:public @(prop.JsVariable)List: (loadImmediate?: boolean) => @(listModuleName).@(prop.Object.ListViewModelClassName);
         }
@@ -380,8 +380,11 @@ module @moduleName {
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             <text>
-            self.addTo@(prop.Name) = function() {
+            self.addTo@(prop.Name) = function(autoSave = true) {
                 var newItem = new @(prop.Object.ViewModelClassName)();
+                if (typeof(autoSave) == 'boolean'){
+                    newItem.isSavingAutomatically = autoSave;
+                }
                 newItem.parent = self;
                 newItem.parentCollection = self.@prop.JsVariable;
                 newItem.isExpanded(true);

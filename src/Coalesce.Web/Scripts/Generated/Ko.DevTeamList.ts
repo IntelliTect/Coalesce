@@ -19,7 +19,9 @@ module ListViewModels {
         protected modelName = "DevTeam";
         protected areaUrl = ((true) ? baseUrl : baseUrl + '/');
         protected apiUrlBase = "api/DevTeam";
+        public modelKeyName = "devTeamId";
         public dataSources = DevTeamDataSources;
+        public itemClass = ViewModels.DevTeam;
 
         public query: {
             where?: string;

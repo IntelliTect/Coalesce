@@ -70,9 +70,10 @@ namespace Coalesce.Web.Models
             newObject.State = obj.State;
             newObject.ZipCode = obj.ZipCode;
             newObject.AltName = obj.AltName;
-            if (obj.Employees != null && (tree == null || tree[nameof(newObject.Employees)] != null)) {
-                newObject.Employees = obj.Employees.OrderBy("PersonId ASC").Select(f => PersonDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.Employees)])).ToList();
-            } else if (obj.Employees == null && tree?[nameof(newObject.Employees)] != null) {
+            var propValEmployees = obj.Employees;
+            if (propValEmployees != null && (tree == null || tree[nameof(newObject.Employees)] != null)) {
+                newObject.Employees = propValEmployees.OrderBy("PersonId ASC").Select(f => PersonDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.Employees)])).ToList();
+            } else if (propValEmployees == null && tree?[nameof(newObject.Employees)] != null) {
                 newObject.Employees = new PersonDtoGen[0];
             }
 

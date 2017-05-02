@@ -20,7 +20,9 @@ module ListViewModels {
         protected modelName = "Case";
         protected areaUrl = ((true) ? baseUrl : baseUrl + '/');
         protected apiUrlBase = "api/Case";
+        public modelKeyName = "caseKey";
         public dataSources = CaseDataSources;
+        public itemClass = ViewModels.Case;
 
         public query: {
             where?: string;

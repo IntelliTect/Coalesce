@@ -43,7 +43,7 @@ module ViewModels {
        
         // Create computeds for display for objects
         
-        public addToEmployees: () => Person;
+        public addToEmployees: (autoSave?: boolean) => Person;
         // List Object model for Employees. Allows for loading subsets of data.
         public employeesList: (loadImmediate?: boolean) => ListViewModels.PersonList;
 
@@ -151,8 +151,11 @@ module ViewModels {
 
             // Methods to add to child collections
 
-            self.addToEmployees = function() {
+            self.addToEmployees = function(autoSave = true) {
                 var newItem = new Person();
+                if (typeof(autoSave) == 'boolean'){
+                    newItem.isSavingAutomatically = autoSave;
+                }
                 newItem.parent = self;
                 newItem.parentCollection = self.employees;
                 newItem.isExpanded(true);

@@ -19,7 +19,9 @@ module ListViewModels {
         protected modelName = "Product";
         protected areaUrl = ((true) ? baseUrl : baseUrl + '/');
         protected apiUrlBase = "api/Product";
+        public modelKeyName = "productId";
         public dataSources = ProductDataSources;
+        public itemClass = ViewModels.Product;
 
         public query: {
             where?: string;

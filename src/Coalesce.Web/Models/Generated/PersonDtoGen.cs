@@ -75,10 +75,7 @@ namespace Coalesce.Web.Models
             newObject.PersonId = obj.PersonId;
             newObject.Title = obj.Title;
             newObject.FirstName = obj.FirstName;
-            if ((isAdmin))
-            {
-                newObject.LastName = obj.LastName;
-            }
+            newObject.LastName = obj.LastName;
             newObject.Email = obj.Email;
             if ((isAdmin))
             {
@@ -91,15 +88,17 @@ namespace Coalesce.Web.Models
             newObject.TimeZone = obj.TimeZone;
             newObject.Name = obj.Name;
             newObject.CompanyId = obj.CompanyId;
-            if (obj.CasesAssigned != null && (tree == null || tree[nameof(newObject.CasesAssigned)] != null)) {
-                newObject.CasesAssigned = obj.CasesAssigned.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesAssigned)])).ToList();
-            } else if (obj.CasesAssigned == null && tree?[nameof(newObject.CasesAssigned)] != null) {
+            var propValCasesAssigned = obj.CasesAssigned;
+            if (propValCasesAssigned != null && (tree == null || tree[nameof(newObject.CasesAssigned)] != null)) {
+                newObject.CasesAssigned = propValCasesAssigned.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesAssigned)])).ToList();
+            } else if (propValCasesAssigned == null && tree?[nameof(newObject.CasesAssigned)] != null) {
                 newObject.CasesAssigned = new CaseDtoGen[0];
             }
 
-            if (obj.CasesReported != null && (tree == null || tree[nameof(newObject.CasesReported)] != null)) {
-                newObject.CasesReported = obj.CasesReported.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesReported)])).ToList();
-            } else if (obj.CasesReported == null && tree?[nameof(newObject.CasesReported)] != null) {
+            var propValCasesReported = obj.CasesReported;
+            if (propValCasesReported != null && (tree == null || tree[nameof(newObject.CasesReported)] != null)) {
+                newObject.CasesReported = propValCasesReported.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesReported)])).ToList();
+            } else if (propValCasesReported == null && tree?[nameof(newObject.CasesReported)] != null) {
                 newObject.CasesReported = new CaseDtoGen[0];
             }
 

@@ -55,7 +55,9 @@ module @moduleName {
         protected modelName = "@(model.Name)";
         protected areaUrl = ((@string.IsNullOrWhiteSpace(Model.AreaName).ToString().ToLower()) ? baseUrl : baseUrl + '@Model.AreaName/');
         protected apiUrlBase = "@(model.ApiUrl)";
+        public modelKeyName = "@(model.PrimaryKey.JsVariable)";
         public dataSources = @(model.Name)DataSources;
+        public itemClass = @viewModelModuleName.@(model.ViewModelClassName);
 
         public query: {
             where?: string;

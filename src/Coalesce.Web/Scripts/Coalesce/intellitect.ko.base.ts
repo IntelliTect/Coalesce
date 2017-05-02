@@ -446,6 +446,8 @@ module ListViewModels {
         protected areaUrl: string;
         protected apiUrlBase: string;
         public dataSources: any;
+        public modelKeyName: string;
+        public itemClass: typeof ViewModels.BaseViewModel;
 
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public listDataSource: any;
@@ -470,9 +472,6 @@ module ListViewModels {
                 this.isLoading(true);
 
                 var url = this.areaUrl + this.apiUrlBase + "/List?" + this.queryParams();
-    
-                if (typeof this.listDataSource === "string") url += this.listDataSource;
-                else url += this.dataSources[this.listDataSource];
 
                 if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
 
@@ -480,15 +479,14 @@ module ListViewModels {
                          url: url,
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
-                    this.items.removeAll();
-                    for (var i in data.list) {
-                        var model = this.createItem(data.list[i]);
+
+                    RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
+                    $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                         model.onDelete((item) => {
                             this.items.remove(item);
                         });
-                        this.items.push(model);
-                    }
+                    });
                     this.count(data.list.length);
                     this.totalCount(data.totalCount);
                     this.pageCount(data.pageCount);
@@ -512,11 +510,15 @@ module ListViewModels {
                 });
         };
         protected queryParams = (pageSize?: number) => {
-            var query = "includes=" + this.includes + "&page=" + this.page()
-            + "&pageSize=" + (pageSize || this.pageSize()) + "&search=" + this.search()
-            + "&orderBy=" + this.orderBy() + "&orderByDescending=" + this.orderByDescending()
-            + "&listDataSource=";
-            return query;
+            return $.param({
+                includes: this.includes,
+                page: this.page(),
+                pageSize: pageSize || this.pageSize(),
+                search: this.search(),
+                orderBy: this.orderBy(),
+                orderByDescending: this.orderByDescending(),
+                listDataSource: this.dataSources[this.listDataSource]
+            });
         }
         protected createItem: (newItem?: any, parent?: any) => TItem;
         // Adds a new item to the collection.
@@ -597,19 +599,19 @@ module ListViewModels {
         public orderByDescending: KnockoutObservable<string> = ko.observable("");
         // Set to field name to toggle ordering, ascending, descending, none.
         public orderByToggle = (field: string) => {
-        if (this.orderBy() == field && !this.orderByDescending()) {
-            this.orderBy('');
-            this.orderByDescending(field);
-        }
-        else if (!this.orderBy() && this.orderByDescending() == field) {
-            this.orderBy('');
-            this.orderByDescending('');
-        }
-        else {
-            this.orderBy(field);
-            this.orderByDescending('');
-        }
-    };
+            if (this.orderBy() == field && !this.orderByDescending()) {
+                this.orderBy('');
+                this.orderByDescending(field);
+            }
+            else if (!this.orderBy() && this.orderByDescending() == field) {
+                this.orderBy('');
+                this.orderByDescending('');
+            }
+            else {
+                this.orderBy(field);
+                this.orderByDescending('');
+            }
+        };
 
         // True once the data has been loaded.
         public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
@@ -618,7 +620,7 @@ module ListViewModels {
         public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
             var url = this.areaUrl + this.apiUrlBase + "/CsvDownload?" + this.queryParams(10000);
             return url;
-        });
+        }, null, { deferEvaluation: true });
         // Starts an upload of a CSV file
         public csvUploadUi = (callback?: any) => {
             // Remove the form if it exists.
@@ -701,8 +703,8 @@ module ListViewModels {
                     this.load();
                 }, 300);
             });
-            this.orderBy.subscribe(() => { this.delayedLoad(); });
-            this.orderByDescending.subscribe(() => { this.delayedLoad(); });
+            this.orderBy.subscribe(() => { if (this.isLoaded()) this.delayedLoad(); });
+            this.orderByDescending.subscribe(() => { if (this.isLoaded()) this.delayedLoad(); });
         }
     }
 }

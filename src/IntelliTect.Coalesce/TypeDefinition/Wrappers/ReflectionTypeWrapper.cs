@@ -63,13 +63,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override string Namespace { get { return Info.Namespace; } }
 
-        public override string FullNamespace
-        {
-            get
-            {
-                return Info.Namespace;
-            }
-        }
+        public override string FullNamespace { get { return Info.Namespace; } }
 
         public override TypeWrapper PureType
         {

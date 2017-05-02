@@ -621,7 +621,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         // There isn't a good way to do case insensitive contains. This ends up being done on the client side.
                         // Not sure how to get like '%abc%'
                         // return @"IndexOf(""{0}"", System.StringComparison.OrdinalIgnoreCase) >= 0";
-                        return @"ToLower().IndexOf(""{0}"".ToLower()) >= 0";
+                        return @"ToLower().IndexOf((""{0}"").ToLower()) >= 0";
                     case SearchAttribute.SearchMethods.BeginsWith:
                     default:
                         return @"StartsWith(""{0}"")";
@@ -1128,15 +1128,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        private string GetPropertySetterConditional(List<string> rolesList)
+        private string GetPropertySetterConditional(bool isForEdit)
         {
-            var roles = (SecurityInfo.IsSecuredProperty && rolesList.Count() > 0) ?
-                string.Join(" || ", rolesList.Select(s => $"is{s}")) : "";
+            var readRoles = (SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) ?
+                string.Join(" || ", SecurityInfo.ReadRolesList.Select(s => $"is{s}")) : "";
+            var editRoles = isForEdit && (SecurityInfo.IsSecuredProperty && SecurityInfo.EditRolesList.Count() > 0) ?
+                string.Join(" || ", SecurityInfo.EditRolesList.Select(s => $"is{s}")) : "";
             var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
             var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
 
             var statement = new List<string>();
-            if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
+            if (!string.IsNullOrEmpty(readRoles)) statement.Add($"({readRoles})");
+            if (!string.IsNullOrEmpty(editRoles)) statement.Add($"({editRoles})");
             if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
             if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
 
@@ -1154,7 +1157,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // Otherwise, this would break IncludesExternal.
                     var sb = new StringBuilder();
 
-                    sb.Append($"if (obj.{Name} != null");
+                    // Set this as a variable once and then use it below. This prevents multiple-evaluation of computed getter-only properties.
+                    sb.AppendLine($"var propVal{Name} = obj.{Name};");
+
+                    sb.Append("            ");
+                    sb.Append($"if (propVal{Name} != null");
                     if (PureType.ClassViewModel.HasDbSet)
                     {
                         sb.Append($" && (tree == null || tree[nameof({objectName}.{Name})] != null)");
@@ -1162,9 +1169,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     sb.Append(") {");
                     sb.AppendLine();
                     sb.Append("                ");
-                    sb.Append($"{objectName}.{Name} = obj.{Name}");
+                    sb.Append($"{objectName}.{Name} = propVal{Name}");
 
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.Replace("\"", "\\\"");
+                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
                     if (defaultOrderBy != null)
                     {
                         sb.Append($".OrderBy(\"{defaultOrderBy}\")");
@@ -1179,7 +1186,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         sb.Append("}");
                         // If we know for sure that we're loading these things (becuse the IncludeTree said so),
                         // but EF didn't load any, then add a blank collection so the client will delete any that already exist.
-                        sb.Append($" else if (obj.{Name} == null && tree?[nameof({objectName}.{Name})] != null)");
+                        sb.Append($" else if (propVal{Name} == null && tree?[nameof({objectName}.{Name})] != null)");
                         sb.Append(" {");
                         sb.AppendLine();
                         sb.Append("                ");
@@ -1216,10 +1223,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 setter = $"{objectName}.{Name} = obj.{Name};";
             }
 
-            if ((SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+            var statement = GetPropertySetterConditional(false);
+            if (!string.IsNullOrWhiteSpace(statement))
             {
-                var statement = GetPropertySetterConditional(SecurityInfo.ReadRolesList);
-
                 return $@"            if ({statement})
             {{
                 {setter}
@@ -1248,11 +1254,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 var setter = $"entity.{Name} = {Type.ExplicitConversionType}{name};";
 
-                var editRolesList = SecurityInfo.EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                if ((SecurityInfo.IsSecuredProperty && editRolesList.Count() > 0) || HasDtoExcludes || HasDtoIncludes)
+                var statement = GetPropertySetterConditional(true);
+                if (!string.IsNullOrWhiteSpace(statement))
                 {
-                    var statement = GetPropertySetterConditional(editRolesList);
-
                     return $@"          if ({statement})
             {{
                 {setter}

@@ -664,6 +664,18 @@ ko.bindingHandlers.formatNumberText = {
         ko.bindingHandlers.text.update(element, formatPhone);
     }
 };
+
+// http://xion.io/post/code/knockout-let-binding.html
+ko.bindingHandlers['let'] = {
+    init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        var innerContext = bindingContext.extend(valueAccessor);
+        ko.applyBindingsToDescendants(innerContext, element);
+        return { controlsDescendantBindings: true };
+    }
+};
+ko.virtualElements.allowedBindings['let'] = true;
+
+
 // Used from grahampcharles 
 // https://github.com/grahampcharles/moment-knockout/
 

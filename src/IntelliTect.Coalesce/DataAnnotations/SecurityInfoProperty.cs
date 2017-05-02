@@ -21,44 +21,32 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         public List<string> EditRolesList { get
             {
-                List<String> result = new List<string>();
                 if (!string.IsNullOrEmpty(EditRoles))
                 {
-                    var roles = EditRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (roles.Length > 0)
-                    {
-                        foreach (var item in roles)
-                        {
-                            if (!result.Contains(item)) result.AddUnique(RoleMapping.Map(item));
-                        }
-                    }
+                    return EditRoles
+                        .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .SelectMany(role => RoleMapping.Map(role))
+                        .Distinct()
+                        .ToList();
                 }
-                return result;
+                return new List<string>();
             }
         }
 
 
-        /// <summary>
-        /// This is the read plus the edit lists.
-        /// </summary>
         public List<string> ReadRolesList
         {
             get
             {
-                var result = EditRolesList;
-
                 if (!string.IsNullOrEmpty(ReadRoles))
                 {
-                    var roles = ReadRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (roles.Length > 0)
-                    {
-                        foreach (var item in roles)
-                        {
-                            if (!result.Contains(item)) result.AddUnique(RoleMapping.Map(item));
-                        }
-                    }
+                    return ReadRoles
+                        .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .SelectMany(role => RoleMapping.Map(role))
+                        .Distinct()
+                        .ToList();
                 }
-                return result;
+                return new List<string>();
             }
         }
 

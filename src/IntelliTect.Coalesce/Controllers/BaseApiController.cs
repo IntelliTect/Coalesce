@@ -22,6 +22,8 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Utilities;
+using System.Globalization;
 
 namespace IntelliTect.Coalesce.Controllers
 {
@@ -290,7 +292,7 @@ namespace IntelliTect.Coalesce.Controllers
                     var value = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[1].Trim();
                     if (prop != null && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
                     {
-                        value = value.Replace("\"", "\"\"");
+                        value = value.EscapeStringLiteralForLinqDynamic();
                         var expressions = new List<string>();
                         foreach (var kvp in prop.SearchTerms(1))
                         {
@@ -335,7 +337,10 @@ namespace IntelliTect.Coalesce.Controllers
                     {
                         var splitSearchClauses = new List<string>();
 
-                        var clauses = listParameters.Search.Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries);
+                        var clauses = listParameters.Search
+                            .Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(c => c.EscapeStringLiteralForLinqDynamic());
+
                         foreach (var clause in clauses)
                         {
                             var searchClauses = new List<string>();
@@ -379,6 +384,7 @@ namespace IntelliTect.Coalesce.Controllers
                     // Handle not split on spaces with simple ors.
                     if (ClassViewModel.SearchProperties().Any(f => !f.Value.SearchIsSplitOnSpaces))
                     {
+                        var clause = listParameters.Search.EscapeStringLiteralForLinqDynamic();
                         foreach (var prop in ClassViewModel.SearchProperties().Where(f => !f.Value.SearchIsSplitOnSpaces))
                         {
                             int temp;
@@ -388,25 +394,25 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)}) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
                                 }
                                 else
                                 {
-                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, listParameters.Search)})";
+                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)})";
                                 }
                                 completeSearchClauses.Add(expr);
                             }
-                            else if (int.TryParse(listParameters.Search, out temp))
+                            else if (int.TryParse(clause, NumberStyles.Integer, CultureInfo.CurrentCulture, out temp))
                             {
                                 string expr;
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]} = {listParameters.Search}) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]} = {clause}) > 0";
                                 }
                                 else
                                 {
-                                    expr = $"{prop.Key} = {listParameters.Search}";
+                                    expr = $"{prop.Key} = {clause}";
                                 }
                                 completeSearchClauses.Add(expr);
                             }

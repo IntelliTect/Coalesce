@@ -104,5 +104,13 @@ namespace IntelliTect.Coalesce.Utilities
         {
             if (!list.Contains(item)) list.Add(item);
         }
+
+        public static string EscapeStringLiteralForLinqDynamic(this string str) => str?
+            .Replace(@"\", @"\\")
+            .Replace("\"", "\"\"");
+
+        public static string EscapeStringLiteralForCSharp(this string str) => str?
+            .Replace(@"\", @"\\")
+            .Replace("\"", "\\\"");
     }
 }

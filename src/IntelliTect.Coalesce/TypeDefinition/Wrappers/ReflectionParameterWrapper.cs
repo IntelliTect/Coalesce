@@ -12,7 +12,11 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public ReflectionParameterWrapper(ParameterInfo info)
         {
             Info = info;
-            Type = new TypeViewModel(new ReflectionTypeWrapper(info.ParameterType));
+            if (info.ParameterType.IsByRef)
+                Type = new TypeViewModel(new ReflectionTypeWrapper(info.ParameterType.GetElementType()));
+            else
+                Type = new TypeViewModel(new ReflectionTypeWrapper(info.ParameterType));
+
         }
 
         public override string Name => Info.Name;

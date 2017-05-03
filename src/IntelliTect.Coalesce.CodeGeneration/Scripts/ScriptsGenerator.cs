@@ -193,23 +193,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         private void CopyToOriginalsAndDestinationIfNeeded(string fileName, string sourcePath, string originalsPath, string destinationPath, bool alertIfNoCopy = true)
         {
             string originalsFile = Path.Combine(originalsPath, fileName);
-            string destinationFile = Path.Combine(destinationPath, fileName);
+            string destinationFile = Path.Combine(destinationPath, fileName.Replace(".template", ""));
 
             if (FileCompare(originalsFile, destinationFile))
             {
                 // The original file and the active file are the same. Overwrite the active file with the new template.
-                CopyToDestination(fileName, sourcePath, destinationPath);
+                CopyToDestination(fileName, sourcePath, destinationPath, destinationIsTemplate: false);
             }
             else if (alertIfNoCopy)
             {
+                Console.WriteLine($"Skipping copy to {destinationFile.Replace(_webProject.ProjectFullPath, "")} because it has been modified from the original.");
                 if (!_hasExplainedCopying)
                 {
                     _hasExplainedCopying = true;
-                    Console.WriteLine("If you would like for your templates to be updated by the CLI, restore the copies of ");
-                    Console.WriteLine("your templates in Coalesce/Templates with those from Coalesce/Originals/Templates.");
-                    Console.WriteLine("If you experience issues with your templates, compare your template with the original to see what might need changing.");
+                    Console.WriteLine("    If you would like for your templates to be updated by the CLI, restore the copies of ");
+                    Console.WriteLine("    your templates in Coalesce/Templates with those from Coalesce/Originals/Templates.");
+                    Console.WriteLine("    If you experience issues with your templates, compare your template with the original to see what might need changing.");
                 }
-                Console.WriteLine($"Skipping copy to {destinationFile.Replace(_webProject.ProjectFullPath, "")} because it has been modified from the original.");
             }
 
             string originalFile = Path.Combine(originalsPath, fileName);
@@ -235,14 +235,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
         }
 
-        private void CopyToDestination(string fileName, string sourcePath, string destinationPath)
+        private void CopyToDestination(string fileName, string sourcePath, string destinationPath, bool destinationIsTemplate = true)
         {
             var assembly = Assembly.GetExecutingAssembly();
             string sourceFile = assembly.GetName().Name + "." + Path.Combine(sourcePath, fileName).Replace('/', '.').Replace('\\', '.');
 
             Directory.CreateDirectory(destinationPath);
 
-            string destinationFile = Path.Combine(destinationPath, fileName);
+            string destinationFile = destinationIsTemplate
+                ? Path.Combine(destinationPath, fileName)
+                : Path.Combine(destinationPath, fileName.Replace(".template", ""));
+
             var inputStream = assembly.GetManifestResourceStream(sourceFile);
             if (inputStream == null)
             {
@@ -385,14 +388,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "intellitect.ko.base.ts",
                     "intellitect.ko.bindings.ts",
                     "intellitect.ko.utilities.ts",
-                    "intellitect.ko.utilities.ts",
                     "intellitect.utilities.ts",
                 };
                 foreach (var fileName in intellitectScripts)
                 {
                     CopyToDestination(
                             fileName: fileName,
-                            sourcePath: "Templates",
+                            sourcePath: "Templates/Scripts/Coalesce",
                             destinationPath: scriptsOutputPath);
                 }
 
@@ -480,7 +482,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     ".bowerrc",
                     "gulpfile.js",
                     "package.json",
-                    "tsconfig.json",
+                    "tsconfig.template.json",
                     "tsd.json",
                 };
                 foreach (var fileName in configFiles)

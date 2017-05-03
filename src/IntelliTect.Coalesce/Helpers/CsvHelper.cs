@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.Helpers
             //http://stackoverflow.com/questions/1571022/how-would-i-know-if-a-property-is-a-generic-collection
             Type tColl = typeof(ICollection<>);
             foreach (var pm in map.PropertyMaps.Where(p => {
-                    Type t = p.Data.Property.PropertyType;
+                    Type t = p.Data.Member.MemberType();
                     return t.IsGenericType && tColl.IsAssignableFrom(t.GetGenericTypeDefinition()) ||
                         t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == tColl);
                 }).ToArray())

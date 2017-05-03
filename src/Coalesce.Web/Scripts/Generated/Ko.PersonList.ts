@@ -45,6 +45,7 @@ module ListViewModels {
         public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback: any) => void;
             // Call server method (Add)
+        // Adds two numbers.
         public add: (numberOne: number, numberTwo: number, callback?: any, reload?: boolean) => void;
         // Result of server method (Add) strongly typed in a observable.
         public addResult: KnockoutObservable<number> = ko.observable(null);
@@ -66,6 +67,7 @@ module ListViewModels {
         public addArgs = new PersonList.AddArgs(); 
         
         // Call server method (GetUser)
+        // Returns the user name
         public getUser: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetUser) strongly typed in a observable.
         public getUserResult: KnockoutObservable<string> = ko.observable(null);
@@ -84,6 +86,7 @@ module ListViewModels {
         // Variable for method arguments to allow for easy binding
         
         // Call server method (GetUserPublic)
+        // Returns the user name
         public getUserPublic: (callback?: any, reload?: boolean) => void;
         // Result of server method (GetUserPublic) strongly typed in a observable.
         public getUserPublicResult: KnockoutObservable<string> = ko.observable(null);
@@ -102,6 +105,7 @@ module ListViewModels {
         // Variable for method arguments to allow for easy binding
         
         // Call server method (NamesStartingWith)
+        // Gets all the first names starting with the characters.
         public namesStartingWith: (characters: String, callback?: any, reload?: boolean) => void;
         // Result of server method (NamesStartingWith) strongly typed in a observable.
         public namesStartingWithResult: KnockoutObservableArray<string> = ko.observableArray([]);
@@ -123,6 +127,7 @@ module ListViewModels {
         public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
         
         // Call server method (NamesStartingWithPublic)
+        // Gets all the first names starting with the characters.
         public namesStartingWithPublic: (characters: String, callback?: any, reload?: boolean) => void;
         // Result of server method (NamesStartingWithPublic) strongly typed in a observable.
         public namesStartingWithPublicResult: KnockoutObservableArray<string> = ko.observableArray([]);
@@ -162,6 +167,7 @@ module ListViewModels {
         // Variable for method arguments to allow for easy binding
         
         // Call server method (BorCPeople)
+        // People whose last name starts with B or c
         public borCPeople: (callback?: any, reload?: boolean) => void;
         // Result of server method (BorCPeople) strongly typed in a observable.
         public borCPeopleResult: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);

@@ -254,7 +254,7 @@ gulp.task('coalesce:build', shell.task([
 gulp.task('coalesce', ['coalesce:build'], shell.task
     ([
         '"%temp%/CoalesceExe/IntelliTect.Coalesce.Cli.exe" ' +
-        '-dc AppDbContext -dp ..\\Coalesce.Domain -da Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web'
+        '-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web'
     ],
     { verbose: true }
 ));

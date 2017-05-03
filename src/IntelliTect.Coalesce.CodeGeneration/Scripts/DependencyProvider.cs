@@ -64,11 +64,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             configuration = "Release";
 #endif
 
-            return MsBuildProjectContextBuilder.Build(
+            var tempFile = Path.GetTempFileName();
+            var assembly = Assembly.GetExecutingAssembly();
+            string sourceFile = assembly.GetName().Name + ".Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets";
+            var stream = assembly.GetManifestResourceStream(sourceFile);
+            var output = File.OpenWrite(tempFile);
+            stream.CopyTo(output);
+            output.Close();
+
+            var context = MsBuildProjectContextBuilder.Build(
                 foundProjectJsonPath,
                 foundProjectJsonFile,
-                "D:\\Work\\Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets",
+                tempFile,
                 configuration);
+
+            File.Delete(tempFile);
+
+            return context;
         }
 
 

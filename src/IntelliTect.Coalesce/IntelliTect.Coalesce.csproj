@@ -4,6 +4,7 @@
     <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>intelliTect</Authors>
     <TargetFramework>net46</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>

@@ -167,13 +167,12 @@ module ViewModels {
             });
 
             // SetupValidation {
-			self.firstName = self.firstName.extend({ minLength: 2 });
-			self.lastName = self.lastName.extend({ minLength: 3 });
-			self.birthDate = self.birthDate.extend({ moment: { unix: true } });
-			self.lastBath = self.lastBath.extend({ moment: { unix: true } });
-			self.nextUpgrade = self.nextUpgrade.extend({ moment: { unix: true } });
+			self.firstName = self.firstName.extend({ minLength: 2, maxLength: 75 });
+			self.lastName = self.lastName.extend({ minLength: 3, maxLength: 100 });
+			self.birthDate = self.birthDate.extend({ moment: { unix: true },  });
+			self.lastBath = self.lastBath.extend({ moment: { unix: true },  });
+			self.nextUpgrade = self.nextUpgrade.extend({ moment: { unix: true },  });
 			self.companyId = self.companyId.extend({ required: {params: true, message: "Company is required."} });
-            self.companyId = self.companyId.extend({ required: true });
             
             self.errors = ko.validation.group([
                 self.personId,

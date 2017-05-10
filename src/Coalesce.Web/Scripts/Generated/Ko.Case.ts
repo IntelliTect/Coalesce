@@ -105,8 +105,8 @@ module ViewModels {
             });
 
             // SetupValidation {
-            self.title = self.title.extend({ required: {params: true, message: "You must enter a title for the case."} });
-			self.openedAt = self.openedAt.extend({ moment: { unix: true } });
+			self.title = self.title.extend({ required: {params: true, message: "You must enter a title for the case."} });
+			self.openedAt = self.openedAt.extend({ moment: { unix: true },  });
             
             self.errors = ko.validation.group([
                 self.caseKey,

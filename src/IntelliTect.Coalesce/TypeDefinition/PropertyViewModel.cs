@@ -196,48 +196,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string BuiltInDataAnnotationsValidationKnockoutJs
-        {
-            get
-            {
-                string validationText = "";
-                if (IsRequired)
-                {
-                    string errorMessage = null;
-                    if (Wrapper.HasAttribute<RequiredAttribute>())
-                    {
-                        errorMessage = Wrapper.GetAttributeObject<RequiredAttribute, string>(nameof(RequiredAttribute.ErrorMessage));
-                    }
-                    if (string.IsNullOrWhiteSpace(errorMessage))
-                    {
-                        var name = (IdPropertyObjectProperty ?? this).DisplayName;
-                        errorMessage = $"{name} is required.";
-                    }
-
-                    validationText = $"required: {KoValidationOptions("true", errorMessage)}";
-                }
-                if (MaxLength.HasValue)
-                {
-                    string errorMessage = null;
-                    errorMessage = Wrapper.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
-                    validationText = $"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), errorMessage)}";
-                }
-                if (MinLength.HasValue)
-                {
-                    string errorMessage = null;
-                    errorMessage = Wrapper.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
-                    validationText = $"minLength: {KoValidationOptions(MinLength.Value.ToString(), errorMessage)}";
-                }
-                if (Range != null)
-                {
-                    string errorMessage = null;
-                    errorMessage = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
-                    validationText = $"minLength: {KoValidationOptions(Range.Item1.ToString(), errorMessage)}, maxLength: {KoValidationOptions(Range.Item2.ToString(), errorMessage)}";
-                }
-                return validationText;
-            }
-        }
-
         /// <summary>
         /// Gets the Knockout JS text for the validation.
         /// </summary>
@@ -245,7 +203,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (!HasClientValidation) { return ""; }
 
                 var isRequired = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool?;
                 var minValue = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinValue)) as double?;
@@ -268,22 +225,82 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
                 var validations = new List<string>();
-                if (isRequired.HasValue && isRequired.Value) validations.Add($"required: {KoValidationOptions("true", errorMessage)}");
-                if (minValue.HasValue && minValue.Value != double.MaxValue) validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
-                if (maxValue.HasValue && maxValue.Value != double.MinValue) validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
-                if (minLength.HasValue && minLength.Value != int.MaxValue) validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
-                if (maxLength.HasValue && maxLength.Value != int.MinValue) validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
-                if (pattern != null) validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
-                if (step.HasValue && step.Value != 0) validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
-                if (isEmail.HasValue && isEmail.Value) validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
-                if (isPhoneUs.HasValue && isPhoneUs.Value) validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
-                if (equal != null) validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");
-                if (notEqual != null) validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
-                if (isDate.HasValue && isDate.Value) validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");
-                if (isDateIso.HasValue && isDateIso.Value) validations.Add($"isDateISO: {KoValidationOptions("true", errorMessage)}");
-                if (isNumber.HasValue && isNumber.Value) validations.Add($"isNumber: {KoValidationOptions("true", errorMessage)}");
-                if (isDigit.HasValue && isDigit.Value) validations.Add($"isDigit: {KoValidationOptions("true", errorMessage)}");
-                if (!string.IsNullOrWhiteSpace(customName) && !string.IsNullOrWhiteSpace(customValue)) validations.Add($"{customName}: {customValue}");
+
+                if (isRequired.HasValue && isRequired.Value)
+                {
+                    validations.Add($"required: {KoValidationOptions("true", errorMessage ?? $"{(IdPropertyObjectProperty ?? this).DisplayName} is required.")}");
+                }
+                else if (IsRequired)
+                {
+                    string message = null;
+                    if (Wrapper.HasAttribute<RequiredAttribute>())
+                    {
+                        message = Wrapper.GetAttributeObject<RequiredAttribute, string>(nameof(RequiredAttribute.ErrorMessage));
+                    }
+                    if (string.IsNullOrWhiteSpace(message))
+                    {
+                        var name = (IdPropertyObjectProperty ?? this).DisplayName;
+                        message = $"{name} is required.";
+                    }
+
+                    validations.Add($"required: {KoValidationOptions("true", message)}");
+                }
+
+
+                if (Range != null)
+                {
+                    var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
+                    validations.Add($"minLength: {KoValidationOptions(Range.Item1.ToString(), message)}, maxLength: {KoValidationOptions(Range.Item2.ToString(), message)}");
+                }
+                else
+                {
+                    if (MinLength.HasValue)
+                    {
+                        var message = Wrapper.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
+                        validations.Add($"minLength: {KoValidationOptions(MinLength.Value.ToString(), message)}");
+                    }
+                    else if (minLength.HasValue && minLength.Value != int.MaxValue)
+                    {
+                        validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
+                    }
+
+                    if (MaxLength.HasValue)
+                    {
+                        var message = Wrapper.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
+                        validations.Add($"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), message)}");
+                    }
+                    else if (maxLength.HasValue && maxLength.Value != int.MinValue)
+                    {
+                        validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
+                    }
+                }
+
+                if (minValue.HasValue && minValue.Value != double.MaxValue)
+                    validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
+                if (maxValue.HasValue && maxValue.Value != double.MinValue)
+                    validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
+                if (pattern != null)
+                    validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
+                if (step.HasValue && step.Value != 0)
+                    validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
+                if (isEmail.HasValue && isEmail.Value)
+                    validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
+                if (isPhoneUs.HasValue && isPhoneUs.Value)
+                    validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
+                if (equal != null)
+                    validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");
+                if (notEqual != null)
+                    validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
+                if (isDate.HasValue && isDate.Value)
+                    validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");
+                if (isDateIso.HasValue && isDateIso.Value)
+                    validations.Add($"isDateISO: {KoValidationOptions("true", errorMessage)}");
+                if (isNumber.HasValue && isNumber.Value)
+                    validations.Add($"isNumber: {KoValidationOptions("true", errorMessage)}");
+                if (isDigit.HasValue && isDigit.Value)
+                    validations.Add($"isDigit: {KoValidationOptions("true", errorMessage)}");
+                if (!string.IsNullOrWhiteSpace(customName) && !string.IsNullOrWhiteSpace(customValue))
+                    validations.Add($"{customName}: {customValue}");
 
                 return string.Join(", ", validations);
             }
@@ -307,7 +324,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                return $"{{params: {value}}}";
+                return value;
             }
         }
 

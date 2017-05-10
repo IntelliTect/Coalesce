@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.DataAnnotations
 {
     /// <summary>
-    /// The Class or Property is read/write for the users and groups and not accessible to others.
+    /// Validation attributes to be applied on the client via KnockoutValidation.
     /// </summary>    
     [System.AttributeUsage(System.AttributeTargets.Property)]
     public class ClientValidationAttribute: System.Attribute

@@ -192,17 +192,10 @@ module @moduleName {
             // SetupValidation {
             @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))
             {
-                if (prop.Type.IsDate)
+                var validationProperties = prop.ClientValidationKnockoutJs;
+                if (validationProperties != string.Empty || prop.Type.IsDate)
                 {
-			@:self.@prop.JsVariable = self.@(prop.JsVariable).extend({ moment: { unix: true } });
-                }
-                if (prop.IsRequired || prop.MaxLength.HasValue || prop.MinLength.HasValue || prop.Range != null)
-                {
-			@:self.@prop.JsVariable = self.@(prop.JsVariable).extend({ @(prop.BuiltInDataAnnotationsValidationKnockoutJs) });
-                }
-            if (prop.HasClientValidation)
-                {
-            @:self.@prop.JsVariable = self.@(prop.JsVariable).extend({ @(prop.ClientValidationKnockoutJs) });
+			@:self.@prop.JsVariable = self.@(prop.JsVariable).extend({ @(prop.Type.IsDate ? "moment: { unix: true }, " : "")@prop.ClientValidationKnockoutJs });
                 }
             }
             

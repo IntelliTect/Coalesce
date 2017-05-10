@@ -260,12 +260,13 @@ namespace Coalesce.Domain
         public ValidateResult<Person> BeforeSave(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
         {
             // Check to make sure the name is a certain length after it has been saved.
-            if (PersonId >0 && FirstName != null && FirstName.Length < 3    )
+            if (PersonId >0 && FirstName != null && FirstName.Length < 2 )
             {
                 FirstName = original.FirstName;
                 return new ValidateResult<Domain.Person>(false, "First Name cannot be this short. Reverting.", this);
             }
-            return new ValidateResult<Domain.Person>();
+
+            return true;
         }
     }
 }

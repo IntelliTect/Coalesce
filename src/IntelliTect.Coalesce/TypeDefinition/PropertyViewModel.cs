@@ -307,7 +307,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                return value;
+                return $"{{params: {value}}}";
             }
         }
 

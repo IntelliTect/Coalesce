@@ -52,9 +52,9 @@ module ViewModels {
         public casesAssigned: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         // List of cases reported by the person.
         public casesReported: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
-        public birthDate: KnockoutObservable<any> = ko.observable(null);
-        public lastBath: KnockoutObservable<any> = ko.observable(null);
-        public nextUpgrade: KnockoutObservable<any> = ko.observable(null);
+        public birthDate: KnockoutObservable<moment.Moment> = ko.observable(null);
+        public lastBath: KnockoutObservable<moment.Moment> = ko.observable(null);
+        public nextUpgrade: KnockoutObservable<moment.Moment> = ko.observable(null);
         public personStatsId: KnockoutObservable<number> = ko.observable(null);
         public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
         public timeZone: KnockoutObservable<any> = ko.observable(null);
@@ -274,15 +274,15 @@ module ViewModels {
 				self.email(data.email);
 				self.gender(data.gender);
                 if (data.birthDate == null) self.birthDate(null);
-				else if (self.birthDate() == null || self.birthDate() == false || !self.birthDate().isSame(moment(data.birthDate))){
+				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.birthDate))){
 				    self.birthDate(moment(data.birthDate));
 				}
                 if (data.lastBath == null) self.lastBath(null);
-				else if (self.lastBath() == null || self.lastBath() == false || !self.lastBath().isSame(moment(data.lastBath))){
+				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.lastBath))){
 				    self.lastBath(moment(data.lastBath));
 				}
                 if (data.nextUpgrade == null) self.nextUpgrade(null);
-				else if (self.nextUpgrade() == null || self.nextUpgrade() == false || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
+				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
 				    self.nextUpgrade(moment(data.nextUpgrade));
 				}
 				self.personStatsId(data.personStatsId);

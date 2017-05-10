@@ -29,7 +29,7 @@ module ListViewModels {
             caseKey?:number;
             title?:String;
             description?:String;
-            openedAt?:any;
+            openedAt?:moment.Moment;
             assignedToId?:number;
             reportedById?:number;
             severity?:String;

@@ -117,7 +117,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (Wrapper.IsTimeZoneInfo) return "any";
                 if (IsBool) return "boolean";
-                if (IsDate) return "any"; // "moment.Moment";
+                if (IsDate) return "moment.Moment";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType + "[]";
                 if (IsPOCO) return $"ViewModels.{PureType.Name}";

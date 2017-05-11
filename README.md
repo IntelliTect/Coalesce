@@ -2,4 +2,6 @@
 Helping you quickly build amazing sites
 
 ## Note 
-We are in the process of converting to VS 2017. We are finding many broken parts with the new MSBuild integration.
+We have completed our Visual Studio 2017 migration and are using this in production ourselves. 
+
+You can find a sample app with documentation here: http://coalesce.intellitect.com/

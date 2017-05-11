@@ -245,6 +245,7 @@ gulp.task('nuget:publish:NLogExtensions',
 
 gulp.task('coalesce:build', shell.task([
         //'if exist "%temp%/CoalesceExe" rmdir "%temp%/CoalesceExe" /s /q',
+        'dotnet msbuild /t:restore /v:q "../../submodules/Coalesce/src/IntelliTect.Coalesce.Cli"',
         'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f net46'
     ],{ verbose: true }
 ));

@@ -54,7 +54,7 @@ Being early adopters of ASP.NET 5/Core, we took cues from the Microsoft team to 
 * Favor using convention over configuration so things just work, but always allow for configuration overrides
 * Use things like annotations and use the ones from products like EF seamlessly. For example for client side validation.
 * Make sure that the developer experience, especially with IntelliSense, is awesome
-* 
+
 
 ### Knockout
 Knockout is the default data binding mechanism for Coalesce. After using Knockout for the past few years, we really love it. It is a robust and well supported framework. Check out the amazing docs and tutorials here: http://knockoutjs.com/  Thank you to Steve Sanderson.

@@ -129,7 +129,7 @@ gulp.task('ts', function () {
     var intellitectTypescriptProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'intellitect.js' });
     var intellitectResult = gulp.src([paths.scripts + '/Coalesce/intellitect*.ts', '!' + paths.scripts + '/*.d.ts'])
     .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(intellitectTypescriptProject));
+    .pipe(intellitectTypescriptProject());
 
     intellitectResult.dts
         .pipe(gulp.dest(paths.js));
@@ -142,7 +142,7 @@ gulp.task('ts', function () {
     var rootAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
     var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/{Ko,ko}*.ts', '!' + paths.scripts + '/*.d.ts'])
     .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(rootAppJsProject));
+    .pipe(rootAppJsProject());
 
     rootApp.dts
         .pipe(gulp.dest(paths.js));
@@ -172,7 +172,7 @@ gulp.task('ts', function () {
     var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
     var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{intellitect,Ko,ko}*.ts'])
     .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(individualFileTypescriptProject));
+    .pipe(individualFileTypescriptProject());
 
     individualTsResult.dts.pipe(gulp.dest(paths.js));
 

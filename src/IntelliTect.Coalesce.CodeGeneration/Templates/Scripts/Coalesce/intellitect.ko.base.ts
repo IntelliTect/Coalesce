@@ -10,6 +10,26 @@ class EnumValue {
 }
 
 module Coalesce {
+    export class ViewModelConfiguration<T extends BaseViewModel<T>> {
+        private parentConfig: ViewModelConfiguration<any>;
+
+        constructor(parentConfig?: ViewModelConfiguration<any>) {
+            this.parentConfig = parentConfig;
+        }
+
+        private prop = <TProp>(name: keyof ViewModelConfiguration<any>): KnockoutComputed<TProp> => {
+            this["_" + name] = null;
+            return ko.computed<TProp>({
+                read: () => this["_" + name] == null ? this["_" + name] : this.parentConfig[name](),
+                write: (value) => this["_" + name] = value
+            });    
+        }
+
+        public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
+        public showFailureAlerts = this.prop<boolean>("showFailureAlerts");
+        public failureAlertHandler = this.prop<(object: T, message: string) => void>("failureAlertHandler");
+    }
+
 
     export class GlobalConfiguration {
         public static viewModel = new ViewModelConfiguration<BaseViewModel<any>>();
@@ -23,23 +43,6 @@ module Coalesce {
     GlobalConfiguration.initialize();
 
 
-
-    export class ViewModelConfiguration<T extends BaseViewModel<T>> {
-        private parentConfig: ViewModelConfiguration<T>;
-
-        private prop = <TProp>(name: keyof ViewModelConfiguration<any>): KnockoutComputed<TProp> => {
-            this["_" + name] = null;
-            return ko.computed<TProp>({
-                read: () => this["_" + name] == null ? this["_" + name] : this.parentConfig[name](),
-                write: (value) => this["_" + name] = value
-            });    
-        }
-
-        public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
-        public showFailureAlerts = this.prop<boolean>("showFailureAlerts");
-        public failureAlertHandler = this.prop<(object: T, message: string) => void>("failureAlertHandler");
-
-    }
 
     export class BaseViewModel<T extends BaseViewModel<T>> {
 

@@ -122,7 +122,6 @@ module @moduleName {
         @:public load@(prop.ValidValueListName): (callback?: any) => void;
         }
         // Pops up a stock editor for this object.
-        public showEditor: (callback?: any) => void;
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsInternalUse))
         {
         @:public show@(prop.Name)Editor: (callback?: any) => void;

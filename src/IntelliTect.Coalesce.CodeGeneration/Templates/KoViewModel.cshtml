@@ -37,7 +37,7 @@ var saveTimeoutInMs = saveTimeoutInMs || 500;
 
 module @moduleName {
 
-	export class @(model.ViewModelGeneratedClassName) extends BaseViewModel<@(model.ViewModelClassName)>
+	export class @(model.ViewModelGeneratedClassName) extends Coalesce.BaseViewModel<@(model.ViewModelClassName)>
     {
         protected modelName = "@(model.Name)";
         protected modelDisplayName = "@(model.DisplayName)";
@@ -51,6 +51,9 @@ module @moduleName {
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public dataSource: ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources.Default;
         
+
+        public static coalesceConfig = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.viewModel);
+        public coalesceConfig = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
     
         // Observables
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))

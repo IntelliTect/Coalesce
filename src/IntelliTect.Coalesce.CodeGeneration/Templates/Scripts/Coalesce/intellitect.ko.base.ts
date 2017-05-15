@@ -9,8 +9,39 @@ class EnumValue {
     value: string;
 }
 
-module ViewModels {
-    export class BaseViewModel<T extends BaseViewModel<any>> {
+module Coalesce {
+
+    export class GlobalConfiguration {
+        public static viewModel = new ViewModelConfiguration<BaseViewModel<any>>();
+
+        static initialize = () => {
+            GlobalConfiguration.viewModel.autoSaveEnabled(true);
+            GlobalConfiguration.viewModel.showFailureAlerts(true);
+            GlobalConfiguration.viewModel.failureAlertHandler(message => alert(message));
+        };
+    }
+    GlobalConfiguration.initialize();
+
+
+
+    export class ViewModelConfiguration<T extends BaseViewModel<T>> {
+        private parentConfig: ViewModelConfiguration<T>;
+
+        private prop = <TProp>(name: keyof ViewModelConfiguration<any>): KnockoutComputed<TProp> => {
+            this["_" + name] = null;
+            return ko.computed<TProp>({
+                read: () => this["_" + name] == null ? this["_" + name] : this.parentConfig[name](),
+                write: (value) => this["_" + name] = value
+            });    
+        }
+
+        public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
+        public showFailureAlerts = this.prop<boolean>("showFailureAlerts");
+        public failureAlertHandler = this.prop<(object: T, message: string) => void>("failureAlertHandler");
+
+    }
+
+    export class BaseViewModel<T extends BaseViewModel<T>> {
 
         protected modelName: string;
         protected modelDisplayName: string;
@@ -22,6 +53,8 @@ module ViewModels {
 
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public dataSource: any;
+
+        public coalesceConfig: ViewModelConfiguration<T> = null;
 
         protected loadingCount: number = 0;  // Stack for number of times loading has been called.
         protected saveTimeout: number = 0;   // Stores the return value of setInterval for automatic save delays.
@@ -55,6 +88,8 @@ module ViewModels {
         public validationIssues: any = ko.observableArray([]);
         // If this is true, all changes will be saved automatically.
         public isSavingAutomatically = true;
+
+
         // Flag to use to determine if this item is shown. Only for convenience.
         public isVisible: KnockoutObservable<boolean> = ko.observable(false);
         // Flag to use to determine if this item is expanded. Only for convenience.
@@ -186,7 +221,7 @@ module ViewModels {
                     if (typeof this.dataSource === "string") url += this.dataSource;
                     else url += this.dataSources[this.dataSource];
 
-                    $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
+                    return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data) => {
                             this.isDirty(false);
                             this.errorMessage('');
@@ -242,7 +277,7 @@ module ViewModels {
                 if (typeof this.dataSource === "string") url += this.dataSource;
                 else url += this.dataSources[this.dataSource];
 
-                $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
+                return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data) => {
                         this.loadFromDto(data, true);
                         this.isLoaded(true);
@@ -269,7 +304,7 @@ module ViewModels {
         public deleteItem = (callback?: (self: T) => void) => {
             var currentId = this[this.primaryKeyName]();
             if (currentId) {
-                $.ajax({ method: "POST", url: this.areaUrl + this.apiUrlBase + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
+                return $.ajax({ method: "POST", url: this.areaUrl + this.apiUrlBase + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
                     .done((data) => {
                         if (data) {
                             this.errorMessage('');
@@ -332,7 +367,7 @@ module ViewModels {
         public saveCollection = (propertyName: string, childId: any, operation: string) => {
             var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
             var currentId = this[this.primaryKeyName]();
-            $.ajax({ method: "POST", url: this.areaUrl + this.apiUrlBase + '/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
+            return $.ajax({ method: "POST", url: this.areaUrl + this.apiUrlBase + '/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done((data) => {
                     this.errorMessage('');
                     this.loadFromDto(data.object, true);
@@ -407,7 +442,7 @@ module ViewModels {
             $('#modal-dialog').modal('hide');
             // Get new modal content
             intellitect.utilities.showBusy();
-            $.ajax({ method: "GET", url: this.areaUrl + this.viewUrlBase + '/EditorHtml', data: { simple: true }, xhrFields: { withCredentials: true } })
+            return $.ajax({ method: "GET", url: this.areaUrl + this.viewUrlBase + '/EditorHtml', data: { simple: true }, xhrFields: { withCredentials: true } })
                 .done((data) => {
                     // Add to DOM
                     intellitect.webApi.setupModal('Edit ' + this.modelDisplayName, data, true, false);
@@ -437,17 +472,15 @@ module ViewModels {
             })
         }
     }
-}
 
-module ListViewModels {
-    export class BaseListViewModel<T, TItem extends ViewModels.BaseViewModel<any>> {
+    export class BaseListViewModel<T, TItem extends BaseViewModel<any>> {
 
         protected modelName: string;
         protected areaUrl: string;
         protected apiUrlBase: string;
         public dataSources: any;
         public modelKeyName: string;
-        public itemClass: typeof ViewModels.BaseViewModel;
+        public itemClass: typeof BaseViewModel;
 
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public listDataSource: any;
@@ -475,7 +508,7 @@ module ListViewModels {
 
                 if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
 
-                $.ajax({ method: "GET",
+                return $.ajax({ method: "GET",
                          url: url,
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
@@ -539,11 +572,11 @@ module ListViewModels {
             if (this.query) {
                 this.queryString = $.param(this.query);
             }
-            $.ajax({
+            return $.ajax({
                 method: "GET",
                 url: this.areaUrl + this.apiUrlBase + "/count?" + "listDataSource="
                     + this.dataSources[this.listDataSource] + "&" + this.queryString,
-                        xhrFields: { withCredentials: true } })
+                xhrFields: { withCredentials: true } })
             .done((data) => {
                 this.count(data);
                 if ($.isFunction(callback)) callback();

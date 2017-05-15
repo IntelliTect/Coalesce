@@ -51,7 +51,7 @@ module @moduleName {
             @:@method.Name,
             }
         }
-    export class @(model.ListViewModelClassName) extends BaseListViewModel<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)> {
+    export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)> {
         protected modelName = "@(model.Name)";
         protected areaUrl = ((@string.IsNullOrWhiteSpace(Model.AreaName).ToString().ToLower()) ? baseUrl : baseUrl + '@Model.AreaName/');
         protected apiUrlBase = "@(model.ApiUrl)";

@@ -340,10 +340,10 @@ namespace IntelliTect.Coalesce.Helpers
         {
             string result = string.Format(@"
                     <select class=""form-control"" 
-                        data-bind=""select2AjaxText: {0}, object: '{2}', property: '{3}'"" placeholder=""{1}"">
+                        data-bind=""select2AjaxText: {0}, url: coalesceConfig.baseApiUrl() + '/{2}', property: '{3}'"" placeholder=""{1}"">
                         <option></option>
                     </select >",
-                propertyModel.JsVariableForBinding, placeholder, propertyModel.Parent.Name, propertyModel.Name);
+                propertyModel.JsVariableForBinding, placeholder, propertyModel.Parent.Name + "/PropertyValues", propertyModel.Name);
             // TODO: this may be wrong? I don't know enough about the code yet to know.
             return new HtmlString(result);
         }

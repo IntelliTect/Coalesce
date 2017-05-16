@@ -21,23 +21,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         internal ClassWrapper Wrapper { get; }
         private string _controllerName;
         private string _apiName;
+
         /// <summary>
         /// Has a DbSet property in the Context.
         /// </summary>
         public bool HasDbSet { get; }
-        // <summary>
-        // If true, this object doesn't exist in the database and is only used in methods.
-        // This will just generate minimal typescript for this object.
-        // </summary>
-        //public bool IsUnMapped { get; }
-        //  TODO: Get base URL
-        protected string baseUrl = "";
-
+        
         protected ICollection<PropertyViewModel> _Properties;
         protected ICollection<MethodViewModel> _Methods;
 
         public ClassViewModel(TypeViewModel type, string controllerName, string apiName, bool hasDbSet)
-    : this(controllerName, apiName, hasDbSet)
+            : this(controllerName, apiName, hasDbSet)
         {
             if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
             {
@@ -266,11 +260,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string ApiUrl
         {
-            get { return baseUrl + @"api/" + ApiName; }
+            get { return ApiName; }
         }
+
         public string ViewUrl
         {
-            get { return baseUrl + ControllerName; }
+            get { return ControllerName; }
         }
 
         public string DefaultOrderByClause(string prependText = "")

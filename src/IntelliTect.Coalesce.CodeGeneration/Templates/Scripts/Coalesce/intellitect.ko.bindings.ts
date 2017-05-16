@@ -25,7 +25,6 @@ interface KnockoutBindingHandlers {
     select2AjaxText: KnockoutBindingHandler;
     datePicker: KnockoutBindingHandler;
     select2: KnockoutBindingHandler;
-    saveImmediately: KnockoutBindingHandler;
     delaySave: KnockoutBindingHandler;
     tooltip: KnockoutBindingHandler;
     fadeVisible: KnockoutBindingHandler;
@@ -42,7 +41,6 @@ ko.bindingHandlers.select2Ajax = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var saveImmediately = allBindings.get('saveImmediately') || false;
         var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
         var object = allBindings.has('object') ? allBindings.get('object') : null;
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
@@ -107,10 +105,6 @@ ko.bindingHandlers.select2Ajax = {
                 // Code to update knockout
                 var value = $(element).val();
                 if (valueAccessor()() != value && (valueAccessor()() || value)) {
-                    var oldValue = saveTimeoutInMs;
-                    if (saveImmediately) {
-                        saveTimeoutInMs = 0;
-                    }
                     // Set the ID.
                     if (value) {
                         valueAccessor()(value);
@@ -131,9 +125,6 @@ ko.bindingHandlers.select2Ajax = {
                         } else {
                             object(null);
                         }
-                    }
-                    if (saveImmediately) {
-                        saveTimeoutInMs = oldValue;
                     }
                 }
             });
@@ -193,7 +184,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var saveImmediately = allBindings.get('saveImmediately') || false;
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
         var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('idFieldName'));
         var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('textFieldName'));
@@ -258,10 +248,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     var selectedItems = $(element).select2("data");
                     var values = valueAccessor();
                     if (values() && selectedItems && values().length != selectedItems.length) {
-                        var oldValue = saveTimeoutInMs;
-                        if (saveImmediately) {
-                            saveTimeoutInMs = 0;
-                        }
                         // Add the items to the observable array.
                         if (selectedItems.length > values().length) {
                             // Item was added.
@@ -296,9 +282,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             // Nothing changed.
                         }
 
-                        if (saveImmediately) {
-                            saveTimeoutInMs = oldValue;
-                        }
                     }
                     updating = false;
                 }
@@ -310,7 +293,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
         }
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var saveImmediately = allBindings.get('saveImmediately') || false;
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
         var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
         var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
@@ -347,8 +329,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
 // Select2 binding for a string value to show a list of other values
 ko.bindingHandlers.select2AjaxText = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var saveImmediately = allBindings.get('saveImmediately') || false;
-        var url = baseUrl + "api/" + allBindings.get('object') + "/PropertyValues";
+        var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.get('allowClear') || true
@@ -406,17 +387,10 @@ ko.bindingHandlers.select2AjaxText = {
                 // Code to update knockout
                 var value = $(element).val();
                 if (valueAccessor()() !== value) {
-                    var oldValue = saveTimeoutInMs;
-                    if (saveImmediately) {
-                        saveTimeoutInMs = 0;
-                    }
                     if (value) {
                         valueAccessor()(value);
                     } else {
                         valueAccessor()(null);
-                    }
-                    if (saveImmediately) {
-                        saveTimeoutInMs = oldValue;
                     }
                 }
             });
@@ -538,21 +512,18 @@ ko.bindingHandlers.datePicker = {
 };
 
 
-
-
-
 ko.bindingHandlers.saveImmediately = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        if (!viewModel.coalesceConfig) return;
+
         // Set up to save immediately when the cursor enters and return to a regular state when it leaves.
         var oldValue;
         $(element).on("focus", function () {
-            oldValue = saveTimeoutInMs;
-            if (saveImmediately) {
-                saveTimeoutInMs = 0;
-            }
+            oldValue = viewModel.coalesceConfig.saveTimeoutMs.raw();
+            viewModel.coalesceConfig.saveTimeoutMs(0);
         });
         $(element).on("blur", function () {
-            saveTimeoutInMs = oldValue;
+            viewModel.coalesceConfig.saveTimeoutMs(oldValue);
         });
     }
 };

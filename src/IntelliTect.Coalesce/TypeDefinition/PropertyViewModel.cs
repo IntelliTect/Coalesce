@@ -913,7 +913,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (InverseIdProperty == null) { return null; }
-                return string.Format("{0}/table?{1}=", Object.ApiUrl.Replace("api/", ""), InverseIdProperty.JsonName);
+                return string.Format("{0}/Table?{1}=", Object.ControllerName, InverseIdProperty.JsonName);
             }
         }
         /// <summary>

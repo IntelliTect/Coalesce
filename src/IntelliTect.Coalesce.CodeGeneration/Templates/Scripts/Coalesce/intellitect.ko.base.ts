@@ -19,17 +19,18 @@ module Coalesce {
 
         protected prop = <TProp>(name: keyof ViewModelConfiguration<any>): ComputedConfiguration<TProp> => {
             var k = "_" + name;
-            this[k] = null;
+            var raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
             computed = ko.computed<TProp>({
                 deferEvaluation: true, // This is essential. If not deferred, the observable will be immediately evaluated without parentConfig being set.
-                read: () => this[k] !== null ? this[k] : (this.parentConfig && this.parentConfig[name] ? this.parentConfig[name]() : null),
-                write: (value) => {
-                    this[k] = value;
-                    (<any>computed).evaluateImmediate()
-                }
+                read: () => {
+                    var rawValue = raw();
+                    if (rawValue !== null) return rawValue;
+                    return this.parentConfig && this.parentConfig[name] ? this.parentConfig[name]() : null
+                },
+                write: raw
             }) as any as ComputedConfiguration<TProp>;
-            computed.raw = () => this[k];
+            computed.raw = raw;
             return computed;
         }
 

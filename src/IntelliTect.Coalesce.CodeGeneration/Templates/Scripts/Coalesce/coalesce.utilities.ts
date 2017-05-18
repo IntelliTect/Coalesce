@@ -1,13 +1,12 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
-// IntelliTect.Utilities
+// Coalesce.Utilities
 
 // Turn off AJAX Caching
 $.ajaxSetup({ cache: false });
 
-// Add to the IntelliTect namespace or create it.
-module intellitect {
+module Coalesce {
     // Create a sub namespace.
-    export module utilities {
+    export module Utilities {
         var busyOverlayTimeout = 0;
         var busyDepth = 0;
         var _isBusyEnabled = true;
@@ -55,10 +54,6 @@ module intellitect {
             //clearTimeout(busyOverlayFailureTimeout);
             //busyOverlayFailureTimeout = setTimeout(busyFailed, busyOverlayFailureTimeoutInSeconds * 1000);
         }
-
-
-
-
 
         // Load a Web API JSON object as a script. This returns the object that the URL returns.
         // It runs synchronously.
@@ -114,12 +109,12 @@ module intellitect {
             return url + hash;
         }
 
-        export function capitalizeFirstLetter(string) {
+        export function capitalizeFirstLetter(string: string) {
             if (string) return string.charAt(0).toUpperCase() + string.slice(1);
             else return string;
         }
 
-        export function lowerFirstLetter(string) {
+        export function lowerFirstLetter(string: string) {
             if (string) return string.charAt(0).toLowerCase() + string.slice(1);
             else return string;
         }
@@ -131,28 +126,7 @@ module intellitect {
                 }
             }
         }
-
-
-
-        export module pin {
-            var pinTimeoutInSeconds: number = 0;
-            var pinUrlIndex: string;
-            var pinTimeout: number;
-
-            export function setPinTimer(): void {
-                if (pinTimeout !== 0) {
-                    clearTimeout(pinTimeout);
-                }
-                if (this.pinTimeoutInSectons) {
-                    pinTimeout = setTimeout(goToPinPage, this.pinTimeoutInSeconds * 1000);
-                }
-            }
-
-            function goToPinPage() {
-                pinTimeout = 0;
-                document.location.href = this.pinUrlIndex + "?returnUrl=" + document.location.href;
-            }
-        }
+        
 
         // Saves the values of inputs into the DOM element.
         // This is used to serialize the DOM for storage with the values.
@@ -172,13 +146,10 @@ module intellitect {
                     $(item).removeAttr('checked');
                 }
             });
-
         }
-
     }
 
-
-    export module webApi {
+    export module ModalHelpers {
         export function setupPlainModal(content: string): void {
             content = '\
                 <div id="modal-dialog" class="modal fade">\
@@ -218,10 +189,7 @@ module intellitect {
             ';
 
             setupPlainModal(content);
-
         }
-
-
     }
 }
 

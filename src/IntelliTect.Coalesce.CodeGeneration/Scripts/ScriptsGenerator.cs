@@ -385,11 +385,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 string[] intellitectScripts =
                 {
-                    "intellitect.ko.base.ts",
-                    "intellitect.ko.bindings.ts",
-                    "intellitect.ko.utilities.ts",
-                    "intellitect.utilities.ts",
+                    "coalesce.ko.base.ts",
+                    "coalesce.ko.bindings.ts",
+                    "coalesce.ko.utilities.ts",
+                    "coalesce.utilities.ts",
                 };
+                // These were renamed from intellitect.* to coalesce.*. Delete the old ones.
+                foreach (var oldName in Directory.EnumerateFiles(scriptsOutputPath, "intellitect.*"))
+                {
+                    File.Delete(oldName);
+                }
                 foreach (var fileName in intellitectScripts)
                 {
                     CopyToDestination(
@@ -495,37 +500,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                             destinationPath: _webProject.ProjectFullPath);
                 }
 
-                if (!commandLineGeneratorModel.OnlyGenerateFiles)
-                {
-                    if (File.Exists(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd"))
-                    {
-                        Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd", "install").WaitForExit();
-                    }
-                    if (File.Exists(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\bower.cmd"))
-                    {
-                        Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\bower.cmd", "install").WaitForExit();
-                    }
-
-                    // TODO
-                    //if (!File.Exists(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd"))
-                    //{
-                    //    Console.WriteLine("Installing TSD");
-                    //    // install it
-                    //    ProcessStartInfo info = new ProcessStartInfo(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\npm.cmd");
-                    //    info.UseShellExecute = true;
-                    //    info.Verb = "runas";
-                    //    info.Arguments = "install tsd -g";
-                    //    Process.Start(info).WaitForExit();
-                    //}
-                    // only run the init command if the tsd.json file does not already exist. We most likely will never have this run since we copy our own version earlier, but putting it here for completeness
-                    //Console.WriteLine("Installing TypeScript Definitions");
-                    //if (!File.Exists(Path.Combine(_webProject.ProjectFullPath, "tsd.json")))
-                    //{
-                    //    Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "init").WaitForExit();
-                    //}
-                    //Process.Start(@"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\Web Tools\External\node\tsd.cmd", "reinstall").WaitForExit();
-                }
-
                 CopyToDestination(
                         fileName: "CoalesceScaffoldingReadme.txt",
                         sourcePath: "Templates",
@@ -533,13 +507,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
 
 
-
             CopyToDestination(
                     fileName: "CoalesceScaffoldingReadme.txt",
                     sourcePath: "Templates",
                     destinationPath: _webProject.ProjectFullPath);
-
-
 
             string destPath = Path.Combine(_webProject.ProjectFullPath, areaLocation, "Views", "_ViewImports.cshtml");
             CopyToOriginalsAndDestinationIfNeeded(
@@ -857,7 +828,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             //await layoutDependencyInstaller.InstallDependencies();
 
             var tsReferenceOutputPath = Path.Combine(_webProject.ProjectFullPath, ScriptsFolderName);
-            GenerateTSReferenceFile(tsReferenceOutputPath);
+            GenerateTSReferenceFiles(tsReferenceOutputPath);
 
             //await GenerateTypeScriptDocs(scriptOutputPath);
 
@@ -906,14 +877,37 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             }
         }
 
-        private void GenerateTSReferenceFile(string path)
+        private void GenerateTSReferenceFiles(string path)
         {
-            List<string> fileContents = new List<string>
+            var generateDeps = Path.Combine(path, "coalesce.dependencies.d.ts");
+            if (!File.Exists(generateDeps))
+            {
+                var contents = new List<string>
+                {
+                    "\n\n",
+                    "// This file is NOT regenerated - it is only generated once initially.",
+                    "// Its purpose is to provide all of the reference paths needed by the generated Typescript files.",
+                    "// If you move the dependencies of the generated typescript files, modify this file to reflect their new location.",
+                    "// This file must remain in place relative to the generated scripts.",
+                    "\n\n",
+                    "/// <reference path=\"../typings/tsd.d.ts\" />",
+                    "/// <reference path=\"Coalesce/coalesce.utilities.ts\" />",
+                    "/// <reference path=\"Coalesce/coalesce.ko.base.ts\" />",
+                    "/// <reference path=\"Coalesce/coalesce.ko.utilities.ts\" />",
+                    "/// <reference path=\"Coalesce/coalesce.ko.bindings.ts\" />"
+                };
+
+                File.WriteAllLines(generateDeps, contents);
+            }
+
+
+            var fileContents = new List<string>
             {
                 "\n\n",
                 "// This file is automatically generated.",
                 "// It is not in the generated folder for ease-of-use (no relative paths).",
                 "\n\n",
+                $"/// <reference path=\"coalesce.dependencies.d.ts\" />"
             };
 
             var dir = new DirectoryInfo(path + "\\Coalesce");
@@ -947,8 +941,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
             }
 
+            var old = Path.Combine(path, "intellitect.references.d.ts");
+            if (File.Exists(old)) File.Delete(old);
             // Write the file with the array list of content.
-            File.WriteAllLines(Path.Combine(path, "intellitect.references.d.ts"), fileContents);
+            File.WriteAllLines(Path.Combine(path, "viewmodels.generated.d.ts"), fileContents);
         }
 
         /// <summary>

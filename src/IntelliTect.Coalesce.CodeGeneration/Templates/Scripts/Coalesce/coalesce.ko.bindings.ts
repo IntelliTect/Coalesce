@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="intellitect.ko.base.ts" />
-/// <reference path="intellitect.utilities.ts" />
+/// <reference path="coalesce.ko.base.ts" />
+/// <reference path="coalesce.utilities.ts" />
 
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {
@@ -47,8 +47,8 @@ ko.bindingHandlers.select2Ajax = {
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
         var placeholder = $(element).attr('placeholder') || "select";
-        var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
-        var idField = intellitect.utilities.lowerFirstLetter(allBindings.get('idField'));
+        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
+        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
         var pageSize = allBindings.get('pageSize') || 25;
 
         // Create the Select2
@@ -157,7 +157,7 @@ ko.bindingHandlers.select2Ajax = {
                 // Unless we make it all the way through this section, don't set the value.
                 setValue = false;
                 // Add it based on the object.
-                var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
+                var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
                 if (allBindings.has('object')) {
                     var object = allBindings.get('object')();
                     if (object != null && object.hasOwnProperty(textField)) {
@@ -185,8 +185,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('idFieldName'));
-        var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('textFieldName'));
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName'));
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName'));
         var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
@@ -294,8 +294,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
-        var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
 
         // See if the value exists. If not, we haven't loaded it from the server yet.
         var value = valueAccessor()();
@@ -548,7 +548,6 @@ ko.bindingHandlers.delaySave = {
 };
 
 
-
 // Binding for Bootstrap ToolTips
 // Format: tooltip: {title:note}  (where note is the observable with the value you want)
 // Format: tooltip: {title:note, placement: 'bottom', animation: false}  (where note is the observable with the value you want)
@@ -567,7 +566,15 @@ ko.bindingHandlers.tooltip = {
     update: function (element, valueAccessor) {
         var $element = $(element);
         var value = ko.unwrap(valueAccessor());
-        var options = unwrapProperties(value);
+        var options = {};
+
+        if (value === null || typeof value !== 'object') {
+            options = value;
+        } else {
+            ko.utils.objectForEach(value, function (propertyName, propertyValue) {
+                options[propertyName] = ko.unwrap(propertyValue);
+            });
+        }
 
         if (typeof options !== 'object') {
             options = { title: value }

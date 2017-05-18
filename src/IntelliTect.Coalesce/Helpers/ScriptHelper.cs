@@ -28,7 +28,7 @@ namespace IntelliTect.Coalesce.Helpers
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search'];
         $.each(urlVariables, function(){{
-            var param = intellitect.utilities.GetUrlParameter(this);
+            var param = Coalesce.Utilities.GetUrlParameter(this);
             if (param) {{{model.ListViewModelObjectName}[this](param);}}
         }})
         { model.ListViewModelObjectName}.isLoading.subscribe(function(){{
@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Helpers
             
             $.each(urlVariables, function(){{
                 var param = {model.ListViewModelObjectName}[this]();
-                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+                newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             }})
             history.replaceState(null, document.title, newUrl);
         }});

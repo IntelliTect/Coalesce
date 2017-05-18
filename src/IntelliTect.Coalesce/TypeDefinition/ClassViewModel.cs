@@ -146,8 +146,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool ApiRouted => Wrapper.GetAttributeValue<RoutedAttribute, bool>(nameof(RoutedAttribute.ApiRouted)) ?? true;
 
-        public bool ViewsRouted => Wrapper.GetAttributeValue<RoutedAttribute, bool>(nameof(RoutedAttribute.ViewsRouted)) ?? true;
-
         public string Namespace { get { return Wrapper.Namespace; } }
 
         /// <summary>

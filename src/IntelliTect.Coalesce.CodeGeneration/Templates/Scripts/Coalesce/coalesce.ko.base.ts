@@ -70,8 +70,8 @@ module Coalesce {
     GlobalConfiguration.baseViewUrl("/");
     GlobalConfiguration.showFailureAlerts(true);
     GlobalConfiguration.onFailure((obj, message) => alert(message));
-    GlobalConfiguration.onStartBusy(obj => intellitect.utilities.showBusy());
-    GlobalConfiguration.onFinishBusy(obj => intellitect.utilities.hideBusy());
+    GlobalConfiguration.onStartBusy(obj => Coalesce.Utilities.showBusy());
+    GlobalConfiguration.onFinishBusy(obj => Coalesce.Utilities.hideBusy());
 
     GlobalConfiguration.viewModel.saveTimeoutMs(500);
     GlobalConfiguration.viewModel.autoSaveEnabled(true);
@@ -502,7 +502,7 @@ module Coalesce {
             })
                 .done((data) => {
                     // Add to DOM
-                    intellitect.webApi.setupModal('Edit ' + this.modelDisplayName, data, true, false);
+                    Coalesce.ModalHelpers.setupModal('Edit ' + this.modelDisplayName, data, true, false);
                     // Data bind
                     var lastValue = this.coalesceConfig.autoSaveEnabled.raw();
                     this.coalesceConfig.autoSaveEnabled(false);
@@ -577,7 +577,7 @@ module Coalesce {
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
 
-                    RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
+                    Coalesce.KnockoutUtilities.RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
                     $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                         model.onDelete((item) => {

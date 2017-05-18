@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="intellitect.ko.base.ts" />
-/// <reference path="intellitect.utilities.ts" />
+/// <reference path="coalesce.ko.base.ts" />
+/// <reference path="coalesce.utilities.ts" />
 
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {
@@ -25,7 +25,6 @@ interface KnockoutBindingHandlers {
     select2AjaxText: KnockoutBindingHandler;
     datePicker: KnockoutBindingHandler;
     select2: KnockoutBindingHandler;
-    saveImmediately: KnockoutBindingHandler;
     delaySave: KnockoutBindingHandler;
     tooltip: KnockoutBindingHandler;
     fadeVisible: KnockoutBindingHandler;
@@ -42,15 +41,14 @@ ko.bindingHandlers.select2Ajax = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var saveImmediately = allBindings.get('saveImmediately') || false;
         var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
         var object = allBindings.has('object') ? allBindings.get('object') : null;
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
         var placeholder = $(element).attr('placeholder') || "select";
-        var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
-        var idField = intellitect.utilities.lowerFirstLetter(allBindings.get('idField'));
+        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
+        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
         var pageSize = allBindings.get('pageSize') || 25;
 
         // Create the Select2
@@ -107,10 +105,6 @@ ko.bindingHandlers.select2Ajax = {
                 // Code to update knockout
                 var value = $(element).val();
                 if (valueAccessor()() != value && (valueAccessor()() || value)) {
-                    var oldValue = saveTimeoutInMs;
-                    if (saveImmediately) {
-                        saveTimeoutInMs = 0;
-                    }
                     // Set the ID.
                     if (value) {
                         valueAccessor()(value);
@@ -131,9 +125,6 @@ ko.bindingHandlers.select2Ajax = {
                         } else {
                             object(null);
                         }
-                    }
-                    if (saveImmediately) {
-                        saveTimeoutInMs = oldValue;
                     }
                 }
             });
@@ -166,7 +157,7 @@ ko.bindingHandlers.select2Ajax = {
                 // Unless we make it all the way through this section, don't set the value.
                 setValue = false;
                 // Add it based on the object.
-                var textField = intellitect.utilities.lowerFirstLetter(allBindings.get('textField'));
+                var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
                 if (allBindings.has('object')) {
                     var object = allBindings.get('object')();
                     if (object != null && object.hasOwnProperty(textField)) {
@@ -193,10 +184,9 @@ ko.bindingHandlers.select2AjaxMultiple = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var saveImmediately = allBindings.get('saveImmediately') || false;
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('idFieldName'));
-        var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.get('textFieldName'));
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName'));
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName'));
         var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
@@ -258,10 +248,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     var selectedItems = $(element).select2("data");
                     var values = valueAccessor();
                     if (values() && selectedItems && values().length != selectedItems.length) {
-                        var oldValue = saveTimeoutInMs;
-                        if (saveImmediately) {
-                            saveTimeoutInMs = 0;
-                        }
                         // Add the items to the observable array.
                         if (selectedItems.length > values().length) {
                             // Item was added.
@@ -296,9 +282,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             // Nothing changed.
                         }
 
-                        if (saveImmediately) {
-                            saveTimeoutInMs = oldValue;
-                        }
                     }
                     updating = false;
                 }
@@ -310,10 +293,9 @@ ko.bindingHandlers.select2AjaxMultiple = {
         }
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var saveImmediately = allBindings.get('saveImmediately') || false;
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
-        var textFieldName = intellitect.utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
 
         // See if the value exists. If not, we haven't loaded it from the server yet.
         var value = valueAccessor()();
@@ -347,8 +329,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
 // Select2 binding for a string value to show a list of other values
 ko.bindingHandlers.select2AjaxText = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var saveImmediately = allBindings.get('saveImmediately') || false;
-        var url = baseUrl + "api/" + allBindings.get('object') + "/PropertyValues";
+        var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.get('allowClear') || true
@@ -406,17 +387,10 @@ ko.bindingHandlers.select2AjaxText = {
                 // Code to update knockout
                 var value = $(element).val();
                 if (valueAccessor()() !== value) {
-                    var oldValue = saveTimeoutInMs;
-                    if (saveImmediately) {
-                        saveTimeoutInMs = 0;
-                    }
                     if (value) {
                         valueAccessor()(value);
                     } else {
                         valueAccessor()(null);
-                    }
-                    if (saveImmediately) {
-                        saveTimeoutInMs = oldValue;
                     }
                 }
             });
@@ -538,21 +512,18 @@ ko.bindingHandlers.datePicker = {
 };
 
 
-
-
-
 ko.bindingHandlers.saveImmediately = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        if (!viewModel.coalesceConfig) return;
+
         // Set up to save immediately when the cursor enters and return to a regular state when it leaves.
         var oldValue;
         $(element).on("focus", function () {
-            oldValue = saveTimeoutInMs;
-            if (saveImmediately) {
-                saveTimeoutInMs = 0;
-            }
+            oldValue = viewModel.coalesceConfig.saveTimeoutMs.raw();
+            viewModel.coalesceConfig.saveTimeoutMs(0);
         });
         $(element).on("blur", function () {
-            saveTimeoutInMs = oldValue;
+            viewModel.coalesceConfig.saveTimeoutMs(oldValue);
         });
     }
 };
@@ -577,7 +548,6 @@ ko.bindingHandlers.delaySave = {
 };
 
 
-
 // Binding for Bootstrap ToolTips
 // Format: tooltip: {title:note}  (where note is the observable with the value you want)
 // Format: tooltip: {title:note, placement: 'bottom', animation: false}  (where note is the observable with the value you want)
@@ -596,7 +566,15 @@ ko.bindingHandlers.tooltip = {
     update: function (element, valueAccessor) {
         var $element = $(element);
         var value = ko.unwrap(valueAccessor());
-        var options = unwrapProperties(value);
+        var options = {};
+
+        if (value === null || typeof value !== 'object') {
+            options = value;
+        } else {
+            ko.utils.objectForEach(value, function (propertyName, propertyValue) {
+                options[propertyName] = ko.unwrap(propertyValue);
+            });
+        }
 
         if (typeof options !== 'object') {
             options = { title: value }

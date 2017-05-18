@@ -1,6 +1,5 @@
-/// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="../Coalesce/intellitect.utilities.ts" />
-/// <reference path="../Coalesce/intellitect.ko.utilities.ts" />
+
+/// <reference path="../coalesce.dependencies.d.ts" />
 
 module ViewModels {
     // *** External Type PersonStats

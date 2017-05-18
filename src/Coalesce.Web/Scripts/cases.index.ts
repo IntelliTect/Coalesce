@@ -1,9 +1,8 @@
-﻿/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="intellitect.references.d.ts" />
+﻿/// <reference path="viewmodels.generated.d.ts" />
 
 module Cases {
     var viewModel: CaseDetailModel;
-    var status: string = intellitect.utilities.GetUrlParameter("status");
+    var status: string = Coalesce.Utilities.GetUrlParameter("status");
 
     $(function () {
         viewModel = new CaseDetailModel();

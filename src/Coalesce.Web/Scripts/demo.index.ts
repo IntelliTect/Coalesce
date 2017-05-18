@@ -1,5 +1,4 @@
-﻿/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="intellitect.references.d.ts" />
+﻿/// <reference path="viewmodels.generated.d.ts" />
 
 module Demo {
     $(function () {

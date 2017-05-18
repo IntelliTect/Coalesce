@@ -1,9 +1,8 @@
-﻿/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="intellitect.references.d.ts" />
+﻿/// <reference path="viewmodels.generated.d.ts" />
 
 module People {
     var viewModel: PeopleModel;
-    var id: string = intellitect.utilities.GetUrlParameter("id");
+    var id: string = Coalesce.Utilities.GetUrlParameter("id");
 
     $(function () {
         viewModel = new PeopleModel();

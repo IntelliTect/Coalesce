@@ -1,27 +1,99 @@
 ﻿/// <reference path="../../typings/tsd.d.ts" />
 
-var baseUrl = baseUrl || "/";
-var saveTimeoutInMs = saveTimeoutInMs || 500;
-var saveImmediately: boolean;
-
 class EnumValue {
     id: number;
     value: string;
 }
 
-module ViewModels {
-    export class BaseViewModel<T extends BaseViewModel<any>> {
+module Coalesce {
+    interface ComputedConfiguration<T> extends KnockoutComputed<T> {
+        raw: () => T
+    };
+
+    class CoalesceConfiguration<T> {
+        protected parentConfig: CoalesceConfiguration<any>;
+
+        constructor(parentConfig?: CoalesceConfiguration<any>) {
+            this.parentConfig = parentConfig;
+        }
+
+        protected prop = <TProp>(name: keyof ViewModelConfiguration<any>): ComputedConfiguration<TProp> => {
+            var k = "_" + name;
+            var raw = this[k] = ko.observable<TProp>(null);
+            var computed: ComputedConfiguration<TProp>;
+            computed = ko.computed<TProp>({
+                deferEvaluation: true, // This is essential. If not deferred, the observable will be immediately evaluated without parentConfig being set.
+                read: () => {
+                    var rawValue = raw();
+                    if (rawValue !== null) return rawValue;
+                    return this.parentConfig && this.parentConfig[name] ? this.parentConfig[name]() : null
+                },
+                write: raw
+            }) as any as ComputedConfiguration<TProp>;
+            computed.raw = raw;
+            return computed;
+        }
+
+        public baseApiUrl = this.prop<string>("baseApiUrl");
+        public baseViewUrl = this.prop<string>("baseViewUrl");
+        public showFailureAlerts = this.prop<boolean>("showFailureAlerts");
+
+        public onFailure = this.prop<(object: T, message: string) => void>("onFailure");
+        public onStartBusy = this.prop<(object: T) => void>("onStartBusy");
+        public onFinishBusy = this.prop<(object: T) => void>("onFinishBusy");
+    }
+
+    export class ViewModelConfiguration<T extends BaseViewModel<T>> extends CoalesceConfiguration<T> {
+        public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
+        public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
+        public autoSaveCollectionsEnabled = this.prop<boolean>("autoSaveCollectionsEnabled");
+        public showBusyWhenSaving = this.prop<boolean>("showBusyWhenSaving");
+
+        public raw = (name: keyof ViewModelConfiguration<T>) => {
+            return this["_" + name];
+        }
+    }
+
+    export class ListViewModelConfiguration<T extends BaseListViewModel<T, TItem>, TItem extends BaseViewModel<TItem>> extends CoalesceConfiguration<T> {
+        public raw = (name: keyof ListViewModelConfiguration<T, TItem>) => {
+            return this["_" + name];
+        }
+    }
+
+    class RootConfig extends CoalesceConfiguration<any> {
+        public viewModel = new ViewModelConfiguration<BaseViewModel<any>>(this);
+        public listViewModel = new ListViewModelConfiguration<BaseListViewModel<any, BaseViewModel<any>>, BaseViewModel<any>>(this);
+    }
+
+    export var GlobalConfiguration = new RootConfig();
+    GlobalConfiguration.baseApiUrl("/api");
+    GlobalConfiguration.baseViewUrl("/");
+    GlobalConfiguration.showFailureAlerts(true);
+    GlobalConfiguration.onFailure((obj, message) => alert(message));
+    GlobalConfiguration.onStartBusy(obj => Coalesce.Utilities.showBusy());
+    GlobalConfiguration.onFinishBusy(obj => Coalesce.Utilities.hideBusy());
+
+    GlobalConfiguration.viewModel.saveTimeoutMs(500);
+    GlobalConfiguration.viewModel.autoSaveEnabled(true);
+    GlobalConfiguration.viewModel.autoSaveCollectionsEnabled(true);
+    GlobalConfiguration.viewModel.showBusyWhenSaving(false);
+
+
+    export class BaseViewModel<T extends BaseViewModel<T>> {
 
         protected modelName: string;
         protected modelDisplayName: string;
-        protected areaUrl: string;
         protected primaryKeyName: string;
-        protected apiUrlBase: string;
-        protected viewUrlBase: string;
+
+        protected apiController: string;
+        protected viewController: string;
+
         public dataSources: any;
 
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public dataSource: any;
+
+        public coalesceConfig: ViewModelConfiguration<BaseViewModel<T>> = null;
 
         protected loadingCount: number = 0;  // Stack for number of times loading has been called.
         protected saveTimeout: number = 0;   // Stores the return value of setInterval for automatic save delays.
@@ -34,11 +106,19 @@ module ViewModels {
         // String that defines what data should be included with the returned object.
         public includes = null;
 
+        /**
+            If true, the busy indicator is shown when loading.
+            @deprecated Use coalesceConfig.showBusyWhenSaving instead.
+        */
+        get showBusyWhenSaving() { return this.coalesceConfig.showBusyWhenSaving() }
+        set showBusyWhenSaving(value) { this.coalesceConfig.showBusyWhenSaving(value) }
 
-        // If true, the busy indicator is shown when loading.
-        public showBusyWhenSaving = false;  // If true a busy indicator shows when saving.
-        // Whether or not alerts should be shown when loading fails.
-        public showFailureAlerts: boolean = true;
+        /**
+            Whether or not alerts should be shown when loading fails.
+            @deprecated Use coalesceConfig.showFailureAlerts instead.
+        */
+        get showFailureAlerts() { return this.coalesceConfig.showFailureAlerts() }
+        set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
 
         // Parent of this object.
         public parent = null;
@@ -53,8 +133,15 @@ module ViewModels {
         public errorMessage: KnockoutObservable<string> = ko.observable(null);
         // ValidationIssues returned from database when trying to persist data
         public validationIssues: any = ko.observableArray([]);
-        // If this is true, all changes will be saved automatically.
-        public isSavingAutomatically = true;
+
+        /**
+            If this is true, all changes will be saved automatically.
+            @deprecated Use coalesceConfig.autoSaveEnabled instead.
+        */
+        get isSavingAutomatically() { return this.coalesceConfig.autoSaveEnabled() }
+        set isSavingAutomatically(value) { this.coalesceConfig.autoSaveEnabled(value) }
+
+
         // Flag to use to determine if this item is shown. Only for convenience.
         public isVisible: KnockoutObservable<boolean> = ko.observable(false);
         // Flag to use to determine if this item is expanded. Only for convenience.
@@ -178,15 +265,15 @@ module ViewModels {
         public save = (callback?: (self: T) => void) => {
             if (!this.isLoading()) {
                 if (this.validate()) {
-                    if (this.showBusyWhenSaving) intellitect.utilities.showBusy();
+                    if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
                     this.isSaving(true);
 
 
-                    var url = this.areaUrl + this.apiUrlBase + "/Save?includes=" + this.includes + '&dataSource=';
+                    var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/Save?includes=" + this.includes + '&dataSource=';
                     if (typeof this.dataSource === "string") url += this.dataSource;
                     else url += this.dataSources[this.dataSource];
 
-                    $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
+                    return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data) => {
                             this.isDirty(false);
                             this.errorMessage('');
@@ -209,15 +296,15 @@ module ViewModels {
                             if (xhr.responseJSON && xhr.responseJSON.object) {
                                 this.loadFromDto(xhr.responseJSON.object, true);
                             }
-                            if (this.showFailureAlerts)
-                                alert("Could not save the item: " + errorMsg);
+                            if (this.coalesceConfig.showFailureAlerts())
+                                this.coalesceConfig.onFailure()(this, "Could not save the item: " + errorMsg);
                         })
                         .always(() => {
                             this.isSaving(false);
                             if ($.isFunction(callback)) {
                                 callback(this as any as T);
                             }
-                            if (this.showBusyWhenSaving) intellitect.utilities.hideBusy();
+                            if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onFinishBusy()(this);
                         });
                 }
                 else {
@@ -236,13 +323,13 @@ module ViewModels {
             }
             if (id) {
                 this.isLoading(true);
-                intellitect.utilities.showBusy();
+                this.coalesceConfig.onStartBusy()(this);
 
-                var url = this.areaUrl + this.apiUrlBase + "/Get/" + id + '?includes=' + this.includes + '&dataSource=';
+                var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/Get/" + id + '?includes=' + this.includes + '&dataSource=';
                 if (typeof this.dataSource === "string") url += this.dataSource;
                 else url += this.dataSources[this.dataSource];
 
-                $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
+                return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data) => {
                         this.loadFromDto(data, true);
                         this.isLoaded(true);
@@ -250,11 +337,11 @@ module ViewModels {
                     })
                     .fail(() => {
                         this.isLoaded(false);
-                        if (this.showFailureAlerts)
-                            alert("Could not get " + this.modelName + " with id = " + id);
+                        if (this.coalesceConfig.showFailureAlerts())
+                            this.coalesceConfig.onFailure()(this, "Could not get " + this.modelName + " with id = " + id);
                     })
                     .always(() => {
-                        intellitect.utilities.hideBusy();
+                        this.coalesceConfig.onFinishBusy()(this);
                         this.isLoading(false);
                     });
             }
@@ -269,7 +356,7 @@ module ViewModels {
         public deleteItem = (callback?: (self: T) => void) => {
             var currentId = this[this.primaryKeyName]();
             if (currentId) {
-                $.ajax({ method: "POST", url: this.areaUrl + this.apiUrlBase + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
+                return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
                     .done((data) => {
                         if (data) {
                             this.errorMessage('');
@@ -288,8 +375,8 @@ module ViewModels {
                         }
                     })
                     .fail(() => {
-                        if (this.showFailureAlerts)
-                            alert("Could not delete the item.");
+                        if (this.coalesceConfig.showFailureAlerts())
+                            this.coalesceConfig.onFailure()(this, "Could not delete the item");
                     })
                     .always(() => {
                         if ($.isFunction(callback)) {
@@ -332,7 +419,7 @@ module ViewModels {
         public saveCollection = (propertyName: string, childId: any, operation: string) => {
             var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
             var currentId = this[this.primaryKeyName]();
-            $.ajax({ method: "POST", url: this.areaUrl + this.apiUrlBase + '/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
+            return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + '/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
                 .done((data) => {
                     this.errorMessage('');
                     this.loadFromDto(data.object, true);
@@ -349,8 +436,8 @@ module ViewModels {
                     this.errorMessage(errorMsg);
                     this.validationIssues(validationIssues);
 
-                    if (this.showFailureAlerts)
-                        alert("Could not save the item: " + errorMsg);
+                    if (this.coalesceConfig.showFailureAlerts())
+                        this.coalesceConfig.onFailure()(this, "Could not save the item: " + errorMsg);
                 })
                 .always(() => {
                     // Nothing here yet.
@@ -368,11 +455,11 @@ module ViewModels {
             if ($.isFunction(fn)) this.saveCallbacks.push(fn);
         };
 
-        // Saves the object is isSavingAutomatically is true.
+        // Saves the object is coalesceConfig.autoSaveEnabled is true.
         public autoSave = () => {
             if (!this.isLoading()) {
                 this.isDirty(true);
-                if (this.isSavingAutomatically) {
+                if (this.coalesceConfig.autoSaveEnabled()) {
                     // Batch saves.
                     if (!this.saveTimeout) {
                         this.saveTimeout = setTimeout(() => {
@@ -380,18 +467,18 @@ module ViewModels {
                             // If we have a save in progress, wait...
                             if (this.isSaving()) {
                                 this.autoSave();
-                            } else {
+                            } else if (this.coalesceConfig.autoSaveEnabled()) {
                                 this.save();
                             }
-                        }, saveTimeoutInMs);
+                        }, this.coalesceConfig.saveTimeoutMs());
                     }
                 }
             }
         }
 
-        // Saves many to many collections if isSavingAutomatically is true.
+        // Saves many to many collections if autoSaveEnabled is true.
         public autoSaveCollection = (property: string, id: any, changeStatus: string) => {
-            if (!this.isLoading()) {
+            if (!this.isLoading() && this.coalesceConfig.autoSaveCollectionsEnabled()) {
                 // TODO: Eventually Batch saves for many-to-many collections.
                 if (changeStatus === 'added') {
                     this.saveCollection(property, id, "added");
@@ -401,21 +488,26 @@ module ViewModels {
             }
         }
 
-        // Supply methods to pop up a model editor
+        // Supply methods to pop up a modal editor
         public showEditor = (callback?: any) => {
             // Close any existing modal
             $('#modal-dialog').modal('hide');
             // Get new modal content
-            intellitect.utilities.showBusy();
-            $.ajax({ method: "GET", url: this.areaUrl + this.viewUrlBase + '/EditorHtml', data: { simple: true }, xhrFields: { withCredentials: true } })
+            this.coalesceConfig.onStartBusy()(this);
+            return $.ajax({
+                method: "GET",
+                url: this.coalesceConfig.baseViewUrl() + this.viewController + '/EditorHtml',
+                data: { simple: true },
+                xhrFields: { withCredentials: true }
+            })
                 .done((data) => {
                     // Add to DOM
-                    intellitect.webApi.setupModal('Edit ' + this.modelDisplayName, data, true, false);
+                    Coalesce.ModalHelpers.setupModal('Edit ' + this.modelDisplayName, data, true, false);
                     // Data bind
-                    var lastValue = this.isSavingAutomatically;
-                    this.isSavingAutomatically = false;
+                    var lastValue = this.coalesceConfig.autoSaveEnabled.raw();
+                    this.coalesceConfig.autoSaveEnabled(false);
                     ko.applyBindings(this, document.getElementById("modal-dialog"));
-                    this.isSavingAutomatically = lastValue;
+                    this.coalesceConfig.autoSaveEnabled(lastValue);
                     // Show the dialog
                     $('#modal-dialog').modal('show');
                     // Make the callback when the form closes.
@@ -424,7 +516,7 @@ module ViewModels {
                     });
                 })
                 .always(() => {
-                    intellitect.utilities.hideBusy();
+                    this.coalesceConfig.onFinishBusy()(this);
                 });
         }
 
@@ -437,17 +529,18 @@ module ViewModels {
             })
         }
     }
-}
 
-module ListViewModels {
-    export class BaseListViewModel<T, TItem extends ViewModels.BaseViewModel<any>> {
+    export class BaseListViewModel<T, TItem extends BaseViewModel<any>> {
 
         protected modelName: string;
-        protected areaUrl: string;
-        protected apiUrlBase: string;
+
+        protected apiController: string;
+
         public dataSources: any;
         public modelKeyName: string;
-        public itemClass: typeof ViewModels.BaseViewModel;
+        public itemClass: typeof BaseViewModel;
+
+        public coalesceConfig: ListViewModelConfiguration<BaseListViewModel<T, TItem>, TItem> = null;
 
         // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public listDataSource: any;
@@ -459,28 +552,32 @@ module ListViewModels {
 
         // String the represents the child object to load 
         public includes: string = "";
+
+        // Deprecated. Use coalesceConfig.showFailureAlerts instead.
         // Whether or not alerts should be shown when loading fails.
-        public showFailureAlerts: boolean = true;
+        get showFailureAlerts() { return this.coalesceConfig.showFailureAlerts() }
+        set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
+
         // List of items. This the main collection.
         public items: KnockoutObservableArray<TItem> = ko.observableArray([]);
         // Load the list.
         public load = (callback?: any) => {
-                intellitect.utilities.showBusy();
+                this.coalesceConfig.onStartBusy()(this);
                 if (this.query) {
                     this.queryString = $.param(this.query);
                 }
                 this.isLoading(true);
 
-                var url = this.areaUrl + this.apiUrlBase + "/List?" + this.queryParams();
+                var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/List?" + this.queryParams();
 
                 if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
 
-                $.ajax({ method: "GET",
+                return $.ajax({ method: "GET",
                          url: url,
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
 
-                    RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
+                    Coalesce.KnockoutUtilities.RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
                     $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                         model.onDelete((item) => {
@@ -500,12 +597,12 @@ module ListViewModels {
                     if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
                     this.message(errorMsg);
                     this.isLoaded(false);
-                    
-                    if (this.showFailureAlerts)
-                        alert("Could not get list of " + this.modelName + " items: " + errorMsg);
+
+                    if (this.coalesceConfig.showFailureAlerts())
+                        this.coalesceConfig.onFailure()(this, "Could not get list of " + this.modelName + " items: " + errorMsg);
                 })
                 .always(() => {
-                    intellitect.utilities.hideBusy();
+                    this.coalesceConfig.onFinishBusy()(this);
                     this.isLoading(false);
                 });
         };
@@ -535,25 +632,25 @@ module ListViewModels {
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Gets the count of items without getting all the items. Data put into count.
         public getCount = (callback?: any) => {
-            intellitect.utilities.showBusy();
+            this.coalesceConfig.onStartBusy()(this);
             if (this.query) {
                 this.queryString = $.param(this.query);
             }
-            $.ajax({
+            return $.ajax({
                 method: "GET",
-                url: this.areaUrl + this.apiUrlBase + "/count?" + "listDataSource="
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + "listDataSource="
                     + this.dataSources[this.listDataSource] + "&" + this.queryString,
-                        xhrFields: { withCredentials: true } })
+                xhrFields: { withCredentials: true } })
             .done((data) => {
                 this.count(data);
                 if ($.isFunction(callback)) callback();
             })
             .fail(() => {
-                if (this.showFailureAlerts)
-                    alert("Could not get count of " + this.modelName + " items.");
+                if (this.coalesceConfig.showFailureAlerts())
+                    this.coalesceConfig.onFailure()(this, "Could not get count of " + this.modelName + " items.");
             })
             .always(() => {
-                intellitect.utilities.hideBusy();
+                this.coalesceConfig.onFinishBusy()(this);
             });
         };
         // The result of getCount() or the total on this page.
@@ -618,7 +715,7 @@ module ListViewModels {
 
         // Gets a URL to download a CSV for the current list with all elements.
         public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
-            var url = this.areaUrl + this.apiUrlBase + "/CsvDownload?" + this.queryParams(10000);
+            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvDownload?" + this.queryParams(10000);
             return url;
         }, null, { deferEvaluation: true });
         // Starts an upload of a CSV file
@@ -629,36 +726,37 @@ module ListViewModels {
             $('body')
                 .append('<form id="csv-upload" display="none"></form>'); 
             $('#csv-upload')
-                .attr("action", this.areaUrl + this.apiUrlBase + "/CsvUpload").attr("method", "post")
+                .attr("action", this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvUpload").attr("method", "post")
                 .append('<input type="file" style="visibility: hidden;" name="file"/>');
-            var self = this; // The next call messes up 'this' for TypeScript...
+
             // Set up the click callback.
-            $('#csv-upload input[type=file]').change(function () {
+            $('#csv-upload input[type=file]').change(() => {
                 // Get the files
                 var fileInput = $('#csv-upload input[type=file]')[0] as any;
                 var file = fileInput.files[0];
                 if (file) {
                     var formData = new FormData();
                     formData.append('file', file);
-                    intellitect.utilities.showBusy();
-                    self.isLoading(true);
+                    this.coalesceConfig.onStartBusy()(this);
+                    this.isLoading(true);
                     $.ajax({
-                        url: self.areaUrl + self.apiUrlBase + "/CsvUpload",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvUpload",
                         data: formData,
                         processData: false,
                         contentType: false,
                         type: 'POST'
                     } as any)
-                    .done(function (data) {
-                        self.isLoading(false);
+                    .done((data) => {
+                        this.isLoading(false);
                         if ($.isFunction(callback)) callback(data);
                     })
-                    .fail(function (data) {
-                        alert("CSV Upload Failed");
+                    .fail((data) => {
+                        if (this.coalesceConfig.showFailureAlerts())
+                            this.coalesceConfig.onFailure()(this, "CSV Upload Failed");
                     })
-                    .always(function () {
-                        self.load();
-                        intellitect.utilities.hideBusy();
+                    .always(() => {
+                        this.load();
+                        this.coalesceConfig.onFinishBusy()(this);
                     });
                 }
                 // Remove the form

@@ -70,14 +70,16 @@
 
 namespace @(namespaceName).Api
 {
-@if (!string.IsNullOrWhiteSpace(Model.AreaName))
-{
+@if (model.ApiRouted) {
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
     @:[Route("@Model.AreaName/api/[controller]")]
     }
-else
-{
+    else
+    {
     @:[Route("api/[controller]")]
     }
+}
 @(securityInfo.ClassAnnotation)
     public partial class @(model.ControllerName)Controller
     : LocalBaseApiController<@(model.BaseViewModel.FullName), @(model.DtoName)>

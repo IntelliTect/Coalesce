@@ -89,28 +89,30 @@ gulp.task("sass", function () {
 });
 
 gulp.task('sass:watch', function () {
-    gulp.watch([paths.styles + '/*.scss', 'Areas/**/Styles/*.scss'], ['sass']);
+    gulp.watch([paths.styles + '/*.scss'], ['sass']);
 });
 
-gulp.task('ts', function () {
-    // compile the intellitect code into an intellitect.js file
-    var intellitectTypescriptProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'intellitect.js' });
-    var intellitectResult = gulp.src([paths.scripts + '/Coalesce/intellitect*.ts', '!' + paths.scripts + '/*.d.ts'])
+
+gulp.task('ts:local', function () {
+    // now compile the individual page files
+    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
+    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{coalesce,Ko,ko}*.ts'])
     .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(intellitectTypescriptProject));
+    .pipe(individualFileTypescriptProject());
 
-    intellitectResult.dts
+    individualTsResult.dts.pipe(gulp.dest(paths.js));
+
+    individualTsResult.js
+    .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
+});
 
-    intellitectResult.js
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(paths.js));
-
+gulp.task('ts', ['ts:local'], function () {
     // compile the root generated code into an app.js file
     var rootAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/{Ko,ko}*.ts', '!' + paths.scripts + '/*.d.ts'])
+    var rootApp = gulp.src([paths.scripts + 'viewmodels.generated.d.ts'])
     .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(rootAppJsProject));
+    .pipe(rootAppJsProject());
 
     rootApp.dts
         .pipe(gulp.dest(paths.js));
@@ -118,52 +120,6 @@ gulp.task('ts', function () {
     rootApp.js
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
-
-    // compile the area generated code into an app.js file
-    var folders = getFolders('Areas');
-
-    folders.map(function (folder) {
-        var areaAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-        var areaApp = gulp.src([path.join('Areas', folder, 'Scripts', '**/{Ko,ko}*.ts'), path.join('!Areas', folder, '**/*.d.ts')])
-		.pipe(sourcemaps.init())
-		.pipe(typescriptCompiler(areaAppJsProject));
-
-        areaApp.dts
-			.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-
-        areaApp.js
-			.pipe(sourcemaps.write('.'))
-			.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-    });
-
-    // now compile the individual page files
-    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
-    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{intellitect,Ko,ko}*.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(individualFileTypescriptProject));
-
-    individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    individualTsResult.js
-    .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(paths.js));
-
-    // now compile the areas individual page files
-    individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
-    individualTsResult = gulp.src(['Areas/**/Scripts/*.ts', '!Areas/**/Scripts/**/{intellitect,Ko,ko}*.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(individualFileTypescriptProject));
-
-    individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    individualTsResult.js
-    .pipe(sourcemaps.write('.'))
-        .pipe(flatten({ includeParents: 1 }))
-        .pipe(rename(function (path) {
-            var originalPath = path.dirname;
-            path.dirname += '/js';
-        }))
-        .pipe(gulp.dest(paths.wwwroot));
 });
 
 gulp.task("copy-ts", ['ts'], function () {
@@ -172,7 +128,8 @@ gulp.task("copy-ts", ['ts'], function () {
 });
 
 gulp.task('ts:watch', function () {
-    gulp.watch([paths.scripts + '/**/*.ts', 'Areas/**/Scripts/**/*.ts'], ['ts']);
+    gulp.watch([paths.scripts + '/**/*.ts'], ['ts:local']);
+    gulp.watch([paths.scripts + '/Partials/*.ts'], ['ts']);
 });
 
 gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch'], function () {

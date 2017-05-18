@@ -124,25 +124,26 @@ gulp.task('sass:watch', function () {
 });
 
 
-gulp.task('ts', function () {
-    // compile the intellitect code into an intellitect.js file
-    var intellitectTypescriptProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'intellitect.js' });
-    var intellitectResult = gulp.src([paths.scripts + '/Coalesce/intellitect*.ts', '!' + paths.scripts + '/*.d.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(intellitectTypescriptProject());
+gulp.task('ts:local', function () {
+    // now compile the individual page files
+    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
+    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{coalesce,Ko,ko}*.ts'])
+        .pipe(sourcemaps.init())
+        .pipe(individualFileTypescriptProject());
 
-    intellitectResult.dts
-        .pipe(gulp.dest(paths.js));
+    individualTsResult.dts.pipe(gulp.dest(paths.js));
 
-    intellitectResult.js
+    individualTsResult.js
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
+});
 
+gulp.task('ts', ['ts:local'], function () {
     // compile the root generated code into an app.js file
     var rootAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/{Ko,ko}*.ts', '!' + paths.scripts + '/*.d.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(rootAppJsProject());
+    var rootApp = gulp.src([paths.scripts + 'viewmodels.generated.d.ts'])
+        .pipe(sourcemaps.init())
+        .pipe(rootAppJsProject());
 
     rootApp.dts
         .pipe(gulp.dest(paths.js));
@@ -150,52 +151,6 @@ gulp.task('ts', function () {
     rootApp.js
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
-
-    // compile the area generated code into an app.js file
-    //var folders = getFolders('Areas');
-
-    //folders.map(function (folder) {
-    //    var areaAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    //    var areaApp = gulp.src([path.join('Areas', folder, 'Scripts', '**/{Ko,ko}*.ts'), path.join('!Areas', folder, '**/*.d.ts')])
-	//	.pipe(sourcemaps.init())
-	//	.pipe(typescriptCompiler(areaAppJsProject));
-
-    //    areaApp.dts
-	//		.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-
-    //    areaApp.js
-	//		.pipe(sourcemaps.write('.'))
-	//		.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-    //});
-
-    // now compile the root individual page files
-    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
-    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{intellitect,Ko,ko}*.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(individualFileTypescriptProject());
-
-    individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    individualTsResult.js
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.js));
-
-    //// now compile the areas individual page files
-    //var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
-    //var individualTsResult = gulp.src(['Areas/**/Scripts/*.ts', '!Areas/**/Scripts/**/{intellitect,Ko,ko}*.ts'])
-    //.pipe(sourcemaps.init())
-    //.pipe(typescriptCompiler(individualFileTypescriptProject));
-
-    //individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    //individualTsResult.js
-    //.pipe(sourcemaps.write('.'))
-    //    .pipe(flatten({ includeParents: 1 }))
-    //    .pipe(rename(function (path) {
-    //        var originalPath = path.dirname;
-    //        path.dirname += '/js';
-    //    }))
-    //    .pipe(gulp.dest(paths.wwwroot));
 });
 
 gulp.task("copy-ts", ['ts'], function () {
@@ -204,8 +159,8 @@ gulp.task("copy-ts", ['ts'], function () {
 });
 
 gulp.task('ts:watch', function () {
-    gulp.watch([paths.scripts + '*.ts'], ['ts']);
-    //gulp.watch([paths.scripts + '*.ts', 'Areas/**/Scripts/*.ts'], ['ts']);
+    gulp.watch([paths.scripts + '/**/*.ts'], ['ts:local']);
+    gulp.watch([paths.scripts + '/Partials/*.ts'], ['ts']);
 });
 
 gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
@@ -214,6 +169,7 @@ gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function
 gulp.task('default', ['copy-lib', 'sass', 'ts', 'watch'], function () {
 });
 
+/*
 
 var componentModelVersion = "1.1.0";
 var codeGeneratorsMvcVersion = componentModelVersion;
@@ -243,9 +199,14 @@ gulp.task('nuget:publish:NLogExtensions',
         '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
 );
 
+gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);
+
+*/
+
+
 gulp.task('coalesce:build', shell.task([
         //'if exist "%temp%/CoalesceExe" rmdir "%temp%/CoalesceExe" /s /q',
-        'dotnet msbuild /t:restore /v:q "../../submodules/Coalesce/src/IntelliTect.Coalesce.Cli"',
+        'dotnet msbuild /t:restore /v:q "../IntelliTect.Coalesce.Cli"',
         'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f net46'
     ],{ verbose: true }
 ));
@@ -259,25 +220,3 @@ gulp.task('coalesce', ['coalesce:build'], shell.task
     ],
     { verbose: true }
 ));
-
-
-
-//gulp.task('coalesce:area', ['coalesce:build'], function (cb) {
-//    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
-//        console.log(stdout);
-//        console.log(stderr);
-//        console.log(err);
-//        cb(err);
-//    });
-//});
-
-//gulp.task('coalesce:area-all', ['coalesce'], function (cb) {
-//    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
-//        console.log(stdout);
-//        console.log(stderr);
-//        console.log(err);
-//        cb(err);
-//    });
-//});
-
-gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);

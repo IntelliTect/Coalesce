@@ -104,7 +104,7 @@
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search'];
         $.each(urlVariables, function(){
-            var param = intellitect.utilities.GetUrlParameter(this);
+            var param = Coalesce.Utilities.GetUrlParameter(this);
             if (param) {caseDtoList[this](param);}
         })
         caseDtoList.isLoading.subscribe(function(){
@@ -112,7 +112,7 @@
             
             $.each(urlVariables, function(){
                 var param = caseDtoList[this]();
-                newUrl = intellitect.utilities.SetUrlParameter(newUrl, this, param);
+                newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });

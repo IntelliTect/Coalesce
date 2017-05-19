@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <Description>IntelliTect.Coalesce.Tests Class Library</Description>
-    <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>IntelliTect</Authors>
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>IntelliTect.Coalesce.Tests</AssemblyName>

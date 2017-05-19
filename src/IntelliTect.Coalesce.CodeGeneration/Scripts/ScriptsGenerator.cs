@@ -787,7 +787,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 // Generate model api controllers
                 foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext))
                 {
-                    await output.Generate("ApiController.cshtml", model.Model.Name + "ApiControllerGen.cs", model);
+                    await output.Generate("ApiController.cshtml", model.Model.Name + "ControllerGen.cs", model);
                 }
             }
 

@@ -912,7 +912,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             };
 
             // Do files in the Generated folder.
-            dir = new DirectoryInfo(path + "\\Generated");
+            var dir = new DirectoryInfo(path + "\\Generated");
             foreach (var file in dir.GetFiles("*.ts"))
             {
                 if ((file.Name.StartsWith("intellitect", true, CultureInfo.InvariantCulture) || file.Name.StartsWith("ko.", true, CultureInfo.InvariantCulture)) &&

@@ -67,7 +67,7 @@ module Coalesce {
 
     export var GlobalConfiguration = new RootConfig();
     GlobalConfiguration.baseApiUrl("/api");
-    GlobalConfiguration.baseViewUrl("/");
+    GlobalConfiguration.baseViewUrl("");
     GlobalConfiguration.showFailureAlerts(true);
     GlobalConfiguration.onFailure((obj, message) => alert(message));
     GlobalConfiguration.onStartBusy(obj => Coalesce.Utilities.showBusy());

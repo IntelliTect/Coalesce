@@ -85,6 +85,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return Name;
             }
         }
+
+        public string ApiControllerClassName
+        {
+            get
+            {
+                var overrideName = Wrapper.GetAttributeObject<ControllerAttribute, string>(nameof(ControllerAttribute.ApiControllerName));
+                if (!string.IsNullOrWhiteSpace(overrideName)) return overrideName;
+
+                var suffix = Wrapper.GetAttributeObject<ControllerAttribute, string>(nameof(ControllerAttribute.ApiControllerSuffix));
+                if (!string.IsNullOrWhiteSpace(suffix)) return $"{ControllerName}Controller{suffix}";
+
+                return $"{ControllerName}Controller";
+            }
+        }
+
+        public string ApiActionAccessModifier =>
+            (Wrapper.GetAttributeValue<ControllerAttribute, bool>(nameof(ControllerAttribute.ApiActionsProtected)) ?? false) ? "protected" : "public";
+
         public string ApiName
         {
             get
@@ -144,7 +162,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public bool ApiRouted => Wrapper.GetAttributeValue<RoutedAttribute, bool>(nameof(RoutedAttribute.ApiRouted)) ?? true;
+        public bool ApiRouted => Wrapper.GetAttributeValue<ControllerAttribute, bool>(nameof(ControllerAttribute.ApiRouted)) ?? true;
+
 
         public string Namespace { get { return Wrapper.Namespace; } }
 

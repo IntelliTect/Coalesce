@@ -35,18 +35,18 @@
     // Check if creates/edits aren't allowed
     @if (model.PrimaryKey.Type.IsString)
     {
-        createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !_model.SecurityInfo.IsEditAllowed(User)) {{";
+        createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !Model.SecurityInfo.IsEditAllowed(User)) {{";
     }
     else if (model.IsDto)
     {
-        createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !_model.SecurityInfo.IsEditAllowed(User)) {{";
+        createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !Model.SecurityInfo.IsEditAllowed(User)) {{";
     }
     else
     {
-        createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {{";
+        createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {{";
     }
         
 
@@ -80,26 +80,26 @@ namespace @(namespaceName).Api
     @:[Route("api/[controller]")]
     }
 }
-@(securityInfo.ClassAnnotation)
-    public partial class @(model.ControllerName)Controller
+    @(securityInfo.ClassAnnotation)
+    public partial class @(model.ApiControllerClassName)
     : LocalBaseApiController<@(model.BaseViewModel.FullName), @(model.DtoName)>
-        {
-        private ClassViewModel _model;
+    {
+        protected ClassViewModel Model;
 
-        public @(model.ControllerName)Controller()
+        public @(model.ApiControllerClassName)()
         {
-        _model = ReflectionRepository.Models.Single(m => m.Name == "@(model.Name)");
+            Model = ReflectionRepository.Models.Single(m => m.Name == "@(model.Name)");
         }
 
         @if (securityInfo.IsReadAllowed())
         {
-            <text>
-            /// <summary>
-            /// Returns @(model.DtoName)
-            /// </summary>
-            [HttpGet("list")]
-            @(securityInfo.ReadAnnotation)
-            public virtual async Task<GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>> List(
+        <text>
+        /// <summary>
+        /// Returns @(model.DtoName)
+        /// </summary>
+        [HttpGet("list")]
+        @(securityInfo.ReadAnnotation)
+        @(model.ApiActionAccessModifier) virtual async Task<GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -109,7 +109,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            @*if (!_model.SecurityInfo.IsReadAllowed(User))
+            @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." });
@@ -132,7 +132,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("customlist")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<ListResult> CustomList(
+        @(model.ApiActionAccessModifier) virtual async Task<ListResult> CustomList(
             string fields = null,
             string includes = null,
             string orderBy = null, string orderByDescending = null,
@@ -143,7 +143,7 @@ namespace @(namespaceName).Api
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            @*if (!_model.SecurityInfo.IsReadAllowed(User))
+            @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." };
@@ -162,14 +162,14 @@ namespace @(namespaceName).Api
 
         [HttpGet("count")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<int> Count(
+        @(model.ApiActionAccessModifier) virtual async Task<int> Count(
             string where = null,
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            @*if (!_model.SecurityInfo.IsReadAllowed(User))
+            @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return 0;
@@ -188,9 +188,9 @@ namespace @(namespaceName).Api
 
         [HttpGet("propertyValues")]
         @(securityInfo.ReadAnnotation)
-        public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
+        @(model.ApiActionAccessModifier) virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
         {
-            @*if (!_model.SecurityInfo.IsReadAllowed(User))
+            @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return null;
@@ -201,9 +201,9 @@ namespace @(namespaceName).Api
 
         [HttpGet("get/{id}")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<@(model.DtoName)> Get(string id, string includes = null, string dataSource = null)
+        @(model.ApiActionAccessModifier) virtual async Task<@(model.DtoName)> Get(string id, string includes = null, string dataSource = null)
         {
-            @*if (!_model.SecurityInfo.IsReadAllowed(User))
+            @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return null;
@@ -221,9 +221,9 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("delete/{id}")]
         @(securityInfo.DeleteAnnotation)
-        public virtual bool Delete(string id)
+        @(model.ApiActionAccessModifier) virtual bool Delete(string id)
         {
-            @*if (!_model.SecurityInfo.IsDeleteAllowed(User))
+            @*if (!Model.SecurityInfo.IsDeleteAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return false;
@@ -238,7 +238,7 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        public virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
+        @(model.ApiActionAccessModifier) virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
             @(createIf)
@@ -261,13 +261,13 @@ namespace @(namespaceName).Api
 
         [HttpPost("AddToCollection")]
         @(securityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
+        @(model.ApiActionAccessModifier) virtual SaveResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         @(securityInfo.EditAnnotation)
-        public virtual SaveResult<@(model.DtoName)> RemoveFromCollection(int id, string propertyName, int childId)
+        @(model.ApiActionAccessModifier) virtual SaveResult<@(model.DtoName)> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -279,7 +279,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("csvDownload")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<FileResult> CsvDownload(
+        @(model.ApiActionAccessModifier) virtual async Task<FileResult> CsvDownload(
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
@@ -309,7 +309,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("csvText")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<string> CsvText(
+        @(model.ApiActionAccessModifier) virtual async Task<string> CsvText(
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
@@ -339,7 +339,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvUpload")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
         {
             if (file != null && file.Length > 0)
             {
@@ -359,7 +359,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvSave")]
         @(securityInfo.ReadAnnotation)
-        public virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, bool hasHeader = true) 
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<@(model.DtoName)>(csv, hasHeader);
@@ -428,7 +428,7 @@ namespace @(namespaceName).Api
         @if (!string.IsNullOrEmpty(method.SecurityInfo.ExecuteAnnotation)) {
 @:        @(method.SecurityInfo.ExecuteAnnotation)
         }
-        public virtual SaveResult<@method.ReturnTypeNameForApi> @method.Name (@method.CsParameters){
+        @(model.ApiActionAccessModifier) virtual SaveResult<@method.ReturnTypeNameForApi> @method.Name (@method.CsParameters){
             @if (method.SecurityInfo.IsExecute) {
             @:if (!ClassViewModel.MethodByName("@method.Name").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             }

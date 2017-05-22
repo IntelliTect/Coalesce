@@ -2,7 +2,7 @@
 
 namespace IntelliTect.Coalesce.Helpers
 {
-    public class SecurityAttribute : Attribute
+    public abstract class SecurityAttribute : Attribute
     {
         public virtual SecurityPermissionLevels PermissionLevel { get; set; } = SecurityPermissionLevels.AllowAuthorized;
 

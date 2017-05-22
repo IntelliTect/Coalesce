@@ -31,6 +31,10 @@ namespace IntelliTect.Coalesce.Cli
 
             app.OnExecute(async () =>
             {
+                Console.WriteLine("Staring Coalesce");
+                Console.WriteLine("https://github.com/IntelliTect/Coalesce");
+                Console.WriteLine();
+
                 var model = new CommandLineGeneratorModel
                 {
                     DataContextClass = dataContextClass.Value() ?? "",
@@ -43,6 +47,7 @@ namespace IntelliTect.Coalesce.Cli
                     TargetNamespace = targetNamespace.Value() ?? ""
                 };
 
+                Console.WriteLine("Loading Projects");
                 // Find the web project
                 ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
                 if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");

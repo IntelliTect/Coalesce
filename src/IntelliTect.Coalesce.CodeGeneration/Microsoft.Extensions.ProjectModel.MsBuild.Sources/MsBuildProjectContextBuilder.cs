@@ -246,7 +246,7 @@ namespace Microsoft.Extensions.ProjectModel
             var errors = new List<string>();
             var tmpFile = Path.GetTempFileName();
 
-            Console.WriteLine($"{Path.GetFileName(projectFile)}: Restoring packages");
+            Console.WriteLine($"   {Path.GetFileName(projectFile)}: Restoring packages");
             var result = Command.CreateDotNet(
                 "msbuild",
                 new string[]
@@ -259,7 +259,7 @@ namespace Microsoft.Extensions.ProjectModel
                 .OnErrorLine(e => errors.Add(e))
                 .Execute();
 
-            Console.WriteLine($"{Path.GetFileName(projectFile)}: Evaluating & building dependencies");
+            Console.WriteLine($"   {Path.GetFileName(projectFile)}: Evaluating & building dependencies");
             result = Command.CreateDotNet(
                 "msbuild",
                 new string[]

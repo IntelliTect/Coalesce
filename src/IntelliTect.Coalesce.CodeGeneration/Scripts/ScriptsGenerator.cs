@@ -391,9 +391,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "coalesce.utilities.ts",
                 };
                 // These were renamed from intellitect.* to coalesce.*. Delete the old ones.
-                foreach (var oldName in Directory.EnumerateFiles(scriptsOutputPath, "intellitect.*"))
+                if (System.IO.Directory.Exists(scriptsOutputPath))
                 {
-                    File.Delete(oldName);
+                    foreach (var oldName in Directory.EnumerateFiles(scriptsOutputPath, "intellitect.*"))
+                    {
+                        File.Delete(oldName);
+                    }
                 }
                 foreach (var fileName in intellitectScripts)
                 {
@@ -708,27 +711,28 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
 
 
-
-                Console.WriteLine("-- Generating External Types");
-                Console.Write("   ");
-                foreach (var externalType in apiModels.ViewModelsForTemplates.Where(f => !f.Model.OnContext))
+                if (apiModels.ViewModelsForTemplates.Any(f => !f.Model.OnContext))
                 {
-                    var fileName = "Ko";
-                    if (!string.IsNullOrWhiteSpace(externalType.ModulePrefix)) fileName += "." + externalType.ModulePrefix;
-                    fileName += "." + externalType.Model.Name;
-                    if (externalType.Model.HasTypeScriptPartial) fileName += ".Partial";
-                    fileName += ".ts";
-                    await output.Generate("KoExternalType.cshtml", fileName, externalType);
+                    Console.WriteLine("-- Generating External Types");
+                    Console.Write("   ");
+                    foreach (var externalType in apiModels.ViewModelsForTemplates.Where(f => !f.Model.OnContext))
+                    {
+                        var fileName = "Ko";
+                        if (!string.IsNullOrWhiteSpace(externalType.ModulePrefix)) fileName += "." + externalType.ModulePrefix;
+                        fileName += "." + externalType.Model.Name;
+                        if (externalType.Model.HasTypeScriptPartial) fileName += ".Partial";
+                        fileName += ".ts";
+                        await output.Generate("KoExternalType.cshtml", fileName, externalType);
 
-                    Console.Write(externalType.Model.Name + "  ");
+                        Console.Write(externalType.Model.Name + "  ");
+                    }
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
 
 
 
 
 
-                Console.WriteLine("-- Generating Complex Types");
                 ViewModelForTemplates complexTypes = new ViewModelForTemplates
                 {
                     Models = ComplexTypes(models),
@@ -736,35 +740,42 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     Namespace = targetNamespace,
                     AreaName = controllerGeneratorModel.AreaLocation
                 };
-                foreach (var complexType in complexTypes.ViewModelsForTemplates)
+                if (complexTypes.ViewModelsForTemplates.Any())
                 {
-                    var fileName = (string.IsNullOrWhiteSpace(complexType.ModulePrefix)) ? $"Ko.{complexType.Model.Name}.ts" : $"Ko.{complexType.ModulePrefix}.{complexType.Model.Name}.ts";
+                    Console.WriteLine("-- Generating Complex Types");
+                    foreach (var complexType in complexTypes.ViewModelsForTemplates)
+                    {
+                        var fileName = (string.IsNullOrWhiteSpace(complexType.ModulePrefix)) ? $"Ko.{complexType.Model.Name}.ts" : $"Ko.{complexType.ModulePrefix}.{complexType.Model.Name}.ts";
 
-                    var path = Path.Combine(scriptOutputPath, fileName);
-                    await output.Generate("KoComplexType.cshtml", fileName, complexType);
+                        var path = Path.Combine(scriptOutputPath, fileName);
+                        await output.Generate("KoComplexType.cshtml", fileName, complexType);
 
-                    Console.WriteLine("   Added: " + path);
+                        Console.WriteLine("   Added: " + path);
+                    }
                 }
             }
 
 
-            string partialOutputPath = Path.Combine(
-                    _webProject.ProjectFullPath,
-                    areaLocation,
-                    ScriptsFolderName, "Partials");
-            foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.HasTypeScriptPartial))
+            if (apiModels.ViewModelsForTemplates.Any(f => f.Model.HasTypeScriptPartial))
             {
-                var fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.Name}.partial.ts" : $"Ko.{model.ModulePrefix}.{model.Model.Name}.partial.ts";
-                var fullName = Path.Combine(partialOutputPath, fileName);
-
-                if (!File.Exists(fullName))
+                string partialOutputPath = Path.Combine(
+                        _webProject.ProjectFullPath,
+                        areaLocation,
+                        ScriptsFolderName, "Partials");
+                foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.HasTypeScriptPartial))
                 {
-                    await Generate("KoViewModelPartial.cshtml", fullName, model);
+                    var fileName = (string.IsNullOrWhiteSpace(model.ModulePrefix)) ? $"Ko.{model.Model.Name}.partial.ts" : $"Ko.{model.ModulePrefix}.{model.Model.Name}.partial.ts";
+                    var fullName = Path.Combine(partialOutputPath, fileName);
 
-                    Console.Write($"    Generated Partial stub for {model.Model.Name}  ");
+                    if (!File.Exists(fullName))
+                    {
+                        await Generate("KoViewModelPartial.cshtml", fullName, model);
+
+                        Console.Write($"    Generated Partial stub for {model.Model.Name}  ");
+                    }
                 }
+                Console.WriteLine();
             }
-            Console.WriteLine();
 
 
 

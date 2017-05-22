@@ -1,0 +1,7 @@
+{
+    "restructuredtext.builtDocumentationPath" : "_build/html",
+    "restructuredtext.makefilePath"           : ".",
+    "restructuredtext.updateOnTextChanged"    : "true",
+    "restructuredtext.sphinxBuildPath": null,
+    "python.linting.pylintEnabled": false
+}

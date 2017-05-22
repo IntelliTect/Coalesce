@@ -195,9 +195,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             string originalsFile = Path.Combine(originalsPath, fileName);
             string destinationFile = Path.Combine(destinationPath, fileName.Replace(".template", ""));
 
-            if (FileCompare(originalsFile, destinationFile))
+            if ((File.Exists(originalsFile) || !File.Exists(destinationFile)) && FileCompare(originalsFile, destinationFile))
             {
-                // The original file and the active file are the same. Overwrite the active file with the new template.
+                // The original file and the active file are the same,
+                // and either the original does exist, or the destination doesn't. (this prevents overwriting of an existing destination file when the original doesn't exist).
+                // Overwrite the active file with the new template.
                 CopyToDestination(fileName, sourcePath, destinationPath, destinationIsTemplate: false);
             }
             else if (alertIfNoCopy)

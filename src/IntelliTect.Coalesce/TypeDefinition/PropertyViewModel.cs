@@ -146,13 +146,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public bool IsStatic
-        {
-            get
-            {
-                return Wrapper.IsStatic;
-            }
-        }
+        public bool IsStatic => Wrapper.IsStatic;
 
         /// <summary>
         /// Returns true if this property is a complex type.
@@ -331,13 +325,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the name of the collection to map as a direct many-to-many collection
         /// </summary>
-        public string ManyToManyCollectionName
-        {
-            get
-            {
-                return Wrapper.GetAttributeValue<ManyToManyAttribute>(nameof(ManyToManyAttribute.CollectionName)) as string;
-            }
-        }
+        public string ManyToManyCollectionName => Wrapper.GetAttributeValue<ManyToManyAttribute>(nameof(ManyToManyAttribute.CollectionName)) as string;
 
         /// <summary>
         /// Property on the other side of the many-to-many relationship.
@@ -361,44 +349,32 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property has the InternalUse Attribute 
         /// </summary>
-        public bool IsInternalUse
-        {
-            get
-            {
-                return Wrapper.HasAttribute<InternalUseAttribute>();
-            }
-        }
+        public bool IsInternalUse => Wrapper.HasAttribute<InternalUseAttribute>();
 
         /// <summary>
         /// Returns true if this property has the FileDownload Attribute.
         /// </summary>
-        public bool IsFileDownload
-        {
-            get
-            {
-                return Wrapper.HasAttribute<FileDownloadAttribute>();
-            }
-        }
-
+        public bool IsFileDownload => Wrapper.HasAttribute<FileDownloadAttribute>();
 
         /// <summary>
         /// Only available on reflected types, not during Roslyn compile.
         /// </summary>
-        public PropertyInfo PropertyInfo { get { return Wrapper.PropertyInfo; } }
-
+        public PropertyInfo PropertyInfo => Wrapper.PropertyInfo;
 
         /// <summary>
         /// True if the property is read only.
         /// </summary>
-        public bool IsReadOnly { get { return !CanWrite && CanRead; } }
+        public bool IsReadOnly => !CanWrite && CanRead;
+
         /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool CanWrite { get { return Wrapper.CanWrite && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute; } }
+        public bool CanWrite => Wrapper.HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute;
+
         /// <summary>
         /// True if the property can be read.
         /// </summary>
-        public bool CanRead { get { return Wrapper.CanRead; } }
+        public bool CanRead => Wrapper.HasGetter;
 
 
         /// <summary>
@@ -417,20 +393,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string DateFormat
-        {
-            get
-            {
-                if (IsDateOnly)
-                {
-                    return "M/D/YYYY";
-                }
-                else
-                {
-                    return "M/D/YYYY h:mm a";
-                }
-            }
-        }
+        public string DateFormat => IsDateOnly ? "M/D/YYYY" : "M/D/YYYY h:mm a";
 
         /// <summary>
         /// Returns the DisplayName Attribute or 
@@ -448,18 +411,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string DisplayNameLabel(string labelOverride)
-        {
-            return labelOverride ?? DisplayName;
-        }
+        public string DisplayNameLabel(string labelOverride) => labelOverride ?? DisplayName;
 
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
-        public bool HasValidValues
-        {
-            get { return IsManytoManyCollection || ApiController != null; }
-        }
+        public bool HasValidValues => IsManytoManyCollection || ApiController != null;
 
         /// <summary>
         /// If this is an object, the name of the API controller serving this data. Or null if none.
@@ -502,42 +459,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return false;
         }
 
+        public string ListGroup => Wrapper.GetAttributeObject<ListGroupAttribute, string>(nameof(ListGroupAttribute.Group));
 
-        /// <summary>
-        /// For the specified area, returns true if the property has a hidden attribute.
-        /// </summary>
-        /// <returns></returns>
-        public string ListGroup
-        {
-            get
-            {
-                return (string)Wrapper.GetAttributeValue<ListGroupAttribute>(nameof(ListGroupAttribute.Group));
-            }
-        }
+        public bool HasReadOnlyAttribute => Wrapper.HasAttribute<ReadOnlyAttribute>();
 
-        /// <summary>
-        /// True if the property has the ReadOnly attribute.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReadOnlyAttribute
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ReadOnlyAttribute>();
-            }
-        }
-
-        /// <summary>
-        /// True if the property has the ReadonlyApi attribute.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReadOnlyApiAttribute
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ReadOnlyApiAttribute>();
-            }
-        }
+        public bool HasReadOnlyApiAttribute => Wrapper.HasAttribute<ReadOnlyApiAttribute>();
 
         /// <summary>
         /// True if the property has the Required attribute, or if the value type is not nullable.
@@ -566,24 +492,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the MinLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MinLength
-        {
-            get
-            {
-                return (int?)Wrapper.GetAttributeValue<MinLengthAttribute>(nameof(MinLengthAttribute.Length));
-            }
-        }
+        public int? MinLength => Wrapper.GetAttributeValue<MinLengthAttribute, int>(nameof(MinLengthAttribute.Length));
+        
         /// <summary>
         /// Returns the MaxLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MaxLength
-        {
-            get
-            {
-                return (int?)Wrapper.GetAttributeValue<MaxLengthAttribute>(nameof(MaxLengthAttribute.Length));
-            }
-        }
-
+        public int? MaxLength => Wrapper.GetAttributeValue<MaxLengthAttribute, int>(nameof(MaxLengthAttribute.Length));
+        
         /// <summary>
         /// Returns the range of valid values or null if they don't exist. (min, max)
         /// </summary>
@@ -601,13 +516,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.
         /// </summary>
-        public bool IsSearch
-        {
-            get
-            {
-                return Wrapper.HasAttribute<SearchAttribute>();
-            }
-        }
+        public bool IsSearch => Wrapper.HasAttribute<SearchAttribute>();
 
         /// <summary>
         /// Now to search for the string when this is a search property.
@@ -705,21 +614,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is the field to be used for list text and marked with the ListText Attribute.
         /// </summary>
-        public bool IsListText
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ListTextAttribute>();
-            }
-        }
+        public bool IsListText => Wrapper.HasAttribute<ListTextAttribute>();
 
         /// <summary>
         /// Returns true if this property is a primary or foreign key.
         /// </summary>
-        public bool IsId
-        {
-            get { return IsPrimaryKey || IsForeignKey; }
-        }
+        public bool IsId => IsPrimaryKey || IsForeignKey;
 
 
         /// <summary>
@@ -797,29 +697,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this is an object, returns the property that holds the ID. 
         /// </summary>
-        public PropertyViewModel ObjectIdProperty
-        {
-            get
-            {
-                return Parent.PropertyByName(ObjectIdPropertyName);
-            }
-        }
+        public PropertyViewModel ObjectIdProperty => Parent.PropertyByName(ObjectIdPropertyName);
 
 
-        public string IdFieldCollection
-        {
-            get
-            {
-                if (IsManytoManyCollection)
-                {
-                    return PureType + "Ids";
-                }
-                else
-                {
-                    return PureType + "Id";
-                }
-            }
-        }
+        public string IdFieldCollection => PureType + (IsManytoManyCollection ? "Ids" : "Id");
 
         /// <summary>
         /// Gets the name of the property that this ID property points to.
@@ -916,13 +797,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return string.Format("{0}/Table?{1}=", Object.ControllerName, InverseIdProperty.JsonName);
             }
         }
+
         /// <summary>
         /// Returns the core URL for the List Editor.
         /// </summary>
-        public string ListEditorUrlName
-        {
-            get { return string.Format("{0}ListUrl", Name); }
-        }
+        public string ListEditorUrlName => string.Format("{0}ListUrl", Name);
 
         public bool HasViewModelProperty
         {
@@ -938,10 +817,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public bool HasInverseProperty
-        {
-            get { return Wrapper.HasAttribute<InversePropertyAttribute>(); }
-        }
+        public bool HasInverseProperty => Wrapper.HasAttribute<InversePropertyAttribute>();
 
         /// <summary>
         /// For a many to many collection this is the reference to this object from the contained object.
@@ -984,25 +860,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Name of the database column
         /// </summary>
-        public string ColumnName
-        {
-            get
-            {
-                //TODO: Make this more robust
-                return Name;
-            }
-        }
+        //TODO: Make this more robust
+        public string ColumnName => Name;
 
-        public override string ToString()
-        {
-            return $"{Name} : {TypeName}";
-        }
+        public override string ToString() => $"{Name} : {TypeName}";
 
         public string SecurityToString()
         {
 
             return $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
         }
+
         public string SecurityEditToString()
         {
             if (IsInternalUse) return "None";
@@ -1048,67 +916,35 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Object is not in the database, but hyndrated via other means.
         /// </summary>
-        public bool IsExternal
-        {
-            get
-            {
-                return IsPOCO && ObjectIdProperty != null && HasNotMapped;
-            }
-        }
+        public bool IsExternal => IsPOCO && ObjectIdProperty != null && HasNotMapped;
 
 
         /// <summary>
         /// Has the NotMapped attribute.
         /// </summary>
-        public bool HasNotMapped
-        {
-            get
-            {
-                return Wrapper.HasAttribute<NotMappedAttribute>();
-            }
-        }
+        public bool HasNotMapped => Wrapper.HasAttribute<NotMappedAttribute>();
 
         /// <summary>
         /// If true, this property should be searchable on the URL line. 
         /// </summary>
-        public bool IsUrlParameter
-        {
-            get
-            {
-                return !IsComplexType && (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
-            }
-        }
+        public bool IsUrlParameter =>
+            !IsComplexType && (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
 
         /// <summary>
         /// List of words already used in the API for other things.
         /// </summary>
-        private static string ReservedUrlParameterNames =
-            "fields,include,includes,orderby,orderbydescending,page,pagesize,where,listdatasource,case,params,if,this,base";
+        private static readonly string[] ReservedUrlParameterNames = new[] {
+            "fields","include","includes","orderby","orderbydescending","page","pagesize","where","listdatasource","case","params","if","this","base"};
+
         /// <summary>
         /// Name of the field to use in the API. If this is in ReservedUrlParameterNames, then my is added to the name.
         /// </summary>
-        public string UrlParameterName
-        {
-            get
-            {
-                if (ReservedUrlParameterNames.Contains(Name.ToLower()))
-                {
-                    return "my" + Name;
-                }
-                return Name.ToCamelCase();
-            }
-        }
+        public string UrlParameterName => ReservedUrlParameterNames.Contains(Name.ToLower()) ? "my" + Name : Name.ToCamelCase();
 
         /// <summary>
         /// True if this property has the Includes Attribute
         /// </summary>
-        public bool HasDtoIncludes
-        {
-            get
-            {
-                return Wrapper.HasAttribute<DtoIncludesAttribute>();
-            }
-        }
+        public bool HasDtoIncludes => Wrapper.HasAttribute<DtoIncludesAttribute>();
 
         /// <summary>
         /// Returns a list of content views from the Includes attribute
@@ -1125,13 +961,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this property has the Excludes Attribute
         /// </summary>
-        public bool HasDtoExcludes
-        {
-            get
-            {
-                return Wrapper.HasAttribute<DtoExcludesAttribute>();
-            }
-        }
+        public bool HasDtoExcludes => Wrapper.HasAttribute<DtoExcludesAttribute>();
 
         /// <summary>
         /// Returns a list of content views from the Excludes attribute
@@ -1299,37 +1129,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     IsInternalUse;
             }
         }
-
-        //foreach (var prop in _sourceVm.Properties.Where(f => f.IsReadOnly))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForSourceMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Don't assign objects, only their IDs.
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsPOCO && !f.IsComplexType))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Remove many to many relationships.
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsManytoManyCollection))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Remove collections.
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.Type.IsCollection))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Remove internal use
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsInternalUse))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //        //objToDtoMap = objToDtoMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-
-        //    // Set up incoming security
-        //    foreach (var prop in _sourceVm.Properties.Where(f => !f.SecurityInfo.IsEditable(_user)))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
     }
 }

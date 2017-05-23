@@ -197,36 +197,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public bool HasClassViewModel
-        {
-            get
-            {
-                return ClassViewModel != null;
-            }
-        }
+        public bool HasClassViewModel => ClassViewModel != null;
 
-        public ClassViewModel ClassViewModel
-        {
-            get
-            {
-                if (PureType.IsPOCO) return PureType.Wrapper.ClassViewModel;
-                return null;
-            }
-        }
-
-
+        public ClassViewModel ClassViewModel => PureType.IsPOCO ? PureType.Wrapper.ClassViewModel : null;
 
 
         /// <summary>
         /// Returns true if this is a complex type.
         /// </summary>
-        public bool IsComplexType
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ComplexTypeAttribute>();
-            }
-        }
+        public bool IsComplexType => Wrapper.HasAttribute<ComplexTypeAttribute>();
 
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.

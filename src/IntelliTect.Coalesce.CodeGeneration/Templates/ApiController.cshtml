@@ -333,12 +333,15 @@ namespace @(namespaceName).Api
             return csv;
         }
 
-
+    
+        @if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
+        {
+        <text>
         /// <summary>
         /// Saves CSV data as an uploaded file
         /// </summary>
         [HttpPost("CsvUpload")]
-        @(securityInfo.ReadAnnotation)
+        @(securityInfo.SaveAnnotation)
         @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
         {
             if (file != null && file.Length > 0)
@@ -358,7 +361,7 @@ namespace @(namespaceName).Api
         /// Saves CSV data as a posted string
         /// </summary>
         [HttpPost("CsvSave")]
-        @(securityInfo.ReadAnnotation)
+        @(securityInfo.SaveAnnotation)
         @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, bool hasHeader = true) 
         {
             // Get list from CSV
@@ -387,11 +390,9 @@ namespace @(namespaceName).Api
             }
             return resultList;
         }
+        </text>
+        }
 
-
-
-
-        @(securityInfo.ReadAnnotation)
         protected override IQueryable<@(model.BaseViewModel.FullName)> GetListDataSource(ListParameters parameters)
         {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && m.IsClientMethod))

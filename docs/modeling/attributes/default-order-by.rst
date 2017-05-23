@@ -4,6 +4,10 @@ Default Order By
 
 Allows setting of the default manner in which the data returned to the client will be sorted. Multiple fields can be used to sort an object by specifying an index.
 
+This affects the sort order both when requesting a list of the model itself, as well as when the model appears as a child collection off of a navigation property of another object.
+
+In the first case (a list of the model itself), this can be overridden by setting the :ts:`orderBy` or :ts:`orderByDescending` property on the TypeScript :ts:`ListViewModel`.
+
 Example Usage
 -------------
 

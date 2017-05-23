@@ -8,7 +8,7 @@ Mark an property as hidden from the edit, List or All areas.
    
         This attribute is **not a security attribute** - it only affects the HTML of the generated views. It has no impact on data visibility in the API.
 
-        Do not use it to keep certain data private - use the SecurityAttribute_ family of attributes for that.
+        Do not use it to keep certain data private - use the SecurityAttribute_ family of attributes for that. Learn more about security in Coalesce at Security_.
    
 
 Example Usage

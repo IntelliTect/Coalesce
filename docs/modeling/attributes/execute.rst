@@ -1,8 +1,12 @@
 
+.. _ExecuteAttribute:
+
 Execute
 =======
 
 Controls permissions for executing of a static or instance method through the API.
+
+For other security controls, see Security_ and SecurityAttribute_.
 
 Example Usage
 -------------

@@ -13,9 +13,8 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public abstract string Comment { get; }
 
-        public abstract bool CanRead { get; }
-        public abstract bool CanWrite { get; }
-        public abstract bool IsReadOnly { get; }
+        public abstract bool HasGetter { get; }
+        public abstract bool HasSetter { get; }
 
         // Exposed only on the reflection version.
         public abstract PropertyInfo PropertyInfo { get; }

@@ -200,7 +200,7 @@ module ListViewModels {
                 self.addMessage('');
                 self.addWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/Add",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/Add",
                          data: {
                         numberOne: numberOne, 
                         numberTwo: numberTwo
@@ -258,7 +258,7 @@ module ListViewModels {
                 self.getUserMessage('');
                 self.getUserWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/GetUser",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/GetUser",
                          data: {
 
                     },
@@ -301,7 +301,7 @@ module ListViewModels {
                 self.getUserPublicMessage('');
                 self.getUserPublicWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/GetUserPublic",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/GetUserPublic",
                          data: {
 
                     },
@@ -344,7 +344,7 @@ module ListViewModels {
                 self.namesStartingWithMessage('');
                 self.namesStartingWithWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/NamesStartingWith",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWith",
                          data: {
                         characters: characters
                     },
@@ -400,7 +400,7 @@ module ListViewModels {
                 self.namesStartingWithPublicMessage('');
                 self.namesStartingWithPublicWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/NamesStartingWithPublic",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithPublic",
                          data: {
                         characters: characters
                     },
@@ -456,7 +456,7 @@ module ListViewModels {
                 self.namesStartingWithAWithCasesMessage('');
                 self.namesStartingWithAWithCasesWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/NamesStartingWithAWithCases",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithAWithCases",
                          data: {
 
                     },
@@ -501,7 +501,7 @@ module ListViewModels {
                 self.borCPeopleMessage('');
                 self.borCPeopleWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Person/BorCPeople",
+                         url: self.coalesceConfig.baseApiUrl() + "/Person/BorCPeople",
                          data: {
 
                     },

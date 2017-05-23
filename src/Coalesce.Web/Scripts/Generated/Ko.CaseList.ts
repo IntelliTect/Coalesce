@@ -137,7 +137,7 @@ module ListViewModels {
                 self.getAllOpenCasesCountMessage('');
                 self.getAllOpenCasesCountWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Case/GetAllOpenCasesCount",
+                         url: self.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCasesCount",
                          data: {
 
                     },
@@ -180,7 +180,7 @@ module ListViewModels {
                 self.randomizeDatesAndStatusMessage('');
                 self.randomizeDatesAndStatusWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Case/RandomizeDatesAndStatus",
+                         url: self.coalesceConfig.baseApiUrl() + "/Case/RandomizeDatesAndStatus",
                          data: {
 
                     },
@@ -223,7 +223,7 @@ module ListViewModels {
                 self.getAllOpenCasesMessage('');
                 self.getAllOpenCasesWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Case/GetAllOpenCases",
+                         url: self.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCases",
                          data: {
 
                     },
@@ -268,7 +268,7 @@ module ListViewModels {
                 self.getCaseSummaryMessage('');
                 self.getCaseSummaryWasSuccessful(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "Case/GetCaseSummary",
+                         url: self.coalesceConfig.baseApiUrl() + "/Case/GetCaseSummary",
                          data: {
 
                     },

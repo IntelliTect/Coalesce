@@ -67,7 +67,7 @@ module Coalesce {
 
     export var GlobalConfiguration = new RootConfig();
     GlobalConfiguration.baseApiUrl("/api");
-    GlobalConfiguration.baseViewUrl("/");
+    GlobalConfiguration.baseViewUrl("");
     GlobalConfiguration.showFailureAlerts(true);
     GlobalConfiguration.onFailure((obj, message) => alert(message));
     GlobalConfiguration.onStartBusy(obj => Coalesce.Utilities.showBusy());
@@ -163,9 +163,9 @@ module Coalesce {
             else this.isEditing(value === true);  // Force boolean
         };
         // List of errors found during validation.
-        public errors: any = ko.observableArray([]);
+        public errors: KnockoutValidationErrors = null;
         // List of warnings found during validation. These allow a save.
-        public warnings: any = ko.observableArray([]);
+        public warnings: KnockoutValidationErrors = null;
         // Custom Field that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel
         public customField1: KnockoutObservable<any> = ko.observable();
         // Custom Field 2 that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel

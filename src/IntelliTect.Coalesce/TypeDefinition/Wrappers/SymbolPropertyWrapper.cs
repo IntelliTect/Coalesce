@@ -31,11 +31,9 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override TypeWrapper Type { get { return new SymbolTypeWrapper(Symbol.Type); } }
 
-        public override bool CanRead { get { return !Symbol.IsWriteOnly; } }
+        public override bool HasGetter { get { return !Symbol.IsWriteOnly; } }
 
-        public override bool CanWrite { get { return !Symbol.IsReadOnly; } }
-
-        public override bool IsReadOnly { get { return Symbol.IsReadOnly; } }
+        public override bool HasSetter { get { return !Symbol.IsReadOnly; } }
 
         public override PropertyInfo PropertyInfo { get { throw new NullReferenceException("Symbol based types do not have a PropertyInfo."); } }
 

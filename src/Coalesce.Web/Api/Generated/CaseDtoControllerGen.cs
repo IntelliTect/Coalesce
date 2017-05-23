@@ -19,24 +19,24 @@
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
-[Authorize]
+    [Authorize]
     public partial class CaseDtoController
     : LocalBaseApiController<Coalesce.Domain.Case, CaseDto>
-        {
-        private ClassViewModel _model;
+    {
+        protected ClassViewModel Model;
 
         public CaseDtoController()
         {
-        _model = ReflectionRepository.Models.Single(m => m.Name == "CaseDto");
+            Model = ReflectionRepository.Models.Single(m => m.Name == "CaseDto");
         }
 
 
-            /// <summary>
-            /// Returns CaseDto
-            /// </summary>
-            [HttpGet("list")]
-            [Authorize]
-            public virtual async Task<GenericListResult<Coalesce.Domain.Case, CaseDto>> List(
+        /// <summary>
+        /// Returns CaseDto
+        /// </summary>
+        [HttpGet("list")]
+        [Authorize]
+        public virtual async Task<GenericListResult<Coalesce.Domain.Case, CaseDto>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -145,14 +145,14 @@ namespace Coalesce.Web.Api
         public virtual async Task<SaveResult<CaseDto>> Save(CaseDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
-            if (dto.CaseId == 0 && !_model.SecurityInfo.IsCreateAllowed(User)) {
+            if (dto.CaseId == 0 && !Model.SecurityInfo.IsCreateAllowed(User)) {
                 var result = new SaveResult<CaseDto>();
                 result.WasSuccessful = false;
                 result.Message = "Create not allowed on CaseDto objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.CaseId != 0 && !_model.SecurityInfo.IsEditAllowed(User)) {
+            else if (dto.CaseId != 0 && !Model.SecurityInfo.IsEditAllowed(User)) {
                 var result = new SaveResult<CaseDto>();
                 result.WasSuccessful = false;
                 result.Message = "Edit not allowed on CaseDto objects.";
@@ -245,6 +245,7 @@ namespace Coalesce.Web.Api
             return csv;
         }
 
+    
 
         /// <summary>
         /// Saves CSV data as an uploaded file
@@ -278,14 +279,14 @@ namespace Coalesce.Web.Api
             var resultList = new List<SaveResult<CaseDto>>();
             foreach (var dto in list){
                 // Check if creates/edits aren't allowed
-                if (dto.CaseId == 0 && !_model.SecurityInfo.IsCreateAllowed(User)) {
+                if (dto.CaseId == 0 && !Model.SecurityInfo.IsCreateAllowed(User)) {
                     var result = new SaveResult<CaseDto>();
                     result.WasSuccessful = false;
                     result.Message = "Create not allowed on CaseDto objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.CaseId != 0 && !_model.SecurityInfo.IsEditAllowed(User)) {
+                else if (dto.CaseId != 0 && !Model.SecurityInfo.IsEditAllowed(User)) {
                     var result = new SaveResult<CaseDto>();
                     result.WasSuccessful = false;
                     result.Message = "Edit not allowed on CaseDto objects.";
@@ -299,11 +300,7 @@ namespace Coalesce.Web.Api
             }
             return resultList;
         }
-
-
-
-
-        [Authorize]
+        
         protected override IQueryable<Coalesce.Domain.Case> GetListDataSource(ListParameters parameters)
         {
 

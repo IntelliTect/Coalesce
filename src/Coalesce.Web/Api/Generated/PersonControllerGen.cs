@@ -19,24 +19,24 @@
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
-[Authorize]
+    [Authorize]
     public partial class PersonController
     : LocalBaseApiController<Coalesce.Domain.Person, PersonDtoGen>
-        {
-        private ClassViewModel _model;
+    {
+        protected ClassViewModel Model;
 
         public PersonController()
         {
-        _model = ReflectionRepository.Models.Single(m => m.Name == "Person");
+            Model = ReflectionRepository.Models.Single(m => m.Name == "Person");
         }
 
 
-            /// <summary>
-            /// Returns PersonDtoGen
-            /// </summary>
-            [HttpGet("list")]
-            [AllowAnonymous]
-            public virtual async Task<GenericListResult<Coalesce.Domain.Person, PersonDtoGen>> List(
+        /// <summary>
+        /// Returns PersonDtoGen
+        /// </summary>
+        [HttpGet("list")]
+        [AllowAnonymous]
+        public virtual async Task<GenericListResult<Coalesce.Domain.Person, PersonDtoGen>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -157,14 +157,14 @@ namespace Coalesce.Web.Api
         public virtual async Task<SaveResult<PersonDtoGen>> Save(PersonDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
-            if (!dto.PersonId.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
+            if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
                 var result = new SaveResult<PersonDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Create not allowed on Person objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.PersonId.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
+            else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
                 var result = new SaveResult<PersonDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Edit not allowed on Person objects.";
@@ -257,6 +257,7 @@ namespace Coalesce.Web.Api
             return csv;
         }
 
+    
 
         /// <summary>
         /// Saves CSV data as an uploaded file
@@ -290,14 +291,14 @@ namespace Coalesce.Web.Api
             var resultList = new List<SaveResult<PersonDtoGen>>();
             foreach (var dto in list){
                 // Check if creates/edits aren't allowed
-                if (!dto.PersonId.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
+                if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
                     var result = new SaveResult<PersonDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Create not allowed on Person objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.PersonId.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
+                else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
                     var result = new SaveResult<PersonDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Edit not allowed on Person objects.";
@@ -311,11 +312,7 @@ namespace Coalesce.Web.Api
             }
             return resultList;
         }
-
-
-
-
-        [AllowAnonymous]
+        
         protected override IQueryable<Coalesce.Domain.Person> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "NamesStartingWithAWithCases")

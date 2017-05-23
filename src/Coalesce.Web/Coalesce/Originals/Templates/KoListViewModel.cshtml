@@ -113,7 +113,7 @@ module @moduleName {
                 self.@(method.JsVariableMessage)('');
                 self.@(method.JsVariableWasSuccessful)(null);
                 $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "@(method.ApiUrl)",
+                         url: self.coalesceConfig.baseApiUrl() + "/@(method.ApiUrl)",
                          data: @method.JsPostObject,
                          xhrFields: { withCredentials: true } })
 				.done(function(data) {

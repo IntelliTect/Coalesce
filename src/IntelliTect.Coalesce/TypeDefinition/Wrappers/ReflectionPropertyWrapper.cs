@@ -37,11 +37,9 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
-        public override bool CanRead { get { return Info.CanRead; } }
+        public override bool HasGetter { get { return Info.CanRead; } }
 
-        public override bool CanWrite { get { return Info.CanWrite; } }
-
-        public override bool IsReadOnly { get { return Info.CanRead && !Info.CanWrite; } }
+        public override bool HasSetter { get { return Info.CanWrite; } }
 
         public override PropertyInfo PropertyInfo { get { return Info; } }
 

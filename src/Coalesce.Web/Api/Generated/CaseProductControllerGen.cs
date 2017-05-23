@@ -19,24 +19,24 @@
 namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
-[Authorize]
-    public partial class CompanyController
-    : LocalBaseApiController<Coalesce.Domain.Company, CompanyDtoGen>
-        {
-        private ClassViewModel _model;
+    [Authorize]
+    public partial class CaseProductController
+    : LocalBaseApiController<Coalesce.Domain.CaseProduct, CaseProductDtoGen>
+    {
+        protected ClassViewModel Model;
 
-        public CompanyController()
+        public CaseProductController()
         {
-        _model = ReflectionRepository.Models.Single(m => m.Name == "Company");
+            Model = ReflectionRepository.Models.Single(m => m.Name == "CaseProduct");
         }
 
 
-            /// <summary>
-            /// Returns CompanyDtoGen
-            /// </summary>
-            [HttpGet("list")]
-            [Authorize]
-            public virtual async Task<GenericListResult<Coalesce.Domain.Company, CompanyDtoGen>> List(
+        /// <summary>
+        /// Returns CaseProductDtoGen
+        /// </summary>
+        [HttpGet("list")]
+        [Authorize]
+        public virtual async Task<GenericListResult<Coalesce.Domain.CaseProduct, CaseProductDtoGen>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -44,23 +44,18 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseProductId = null,string caseId = null,string productId = null)
         {
 
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseProductId", caseProductId);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("ProductId", productId);
 
             var listResult = await ListImplementation(parameters);
-            return new GenericListResult<Coalesce.Domain.Company, CompanyDtoGen>(listResult);
+            return new GenericListResult<Coalesce.Domain.CaseProduct, CaseProductDtoGen>(listResult);
         }
 
         /// <summary>
@@ -77,20 +72,15 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseProductId = null,string caseId = null,string productId = null)
         {
 
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseProductId", caseProductId);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("ProductId", productId);
 
             return await ListImplementation(parameters);
         }
@@ -102,20 +92,15 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseProductId = null,string caseId = null,string productId = null)
         {
 
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseProductId", caseProductId);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("ProductId", productId);
 
             return await CountImplementation(parameters);
         }
@@ -130,7 +115,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<CompanyDtoGen> Get(string id, string includes = null, string dataSource = null)
+        public virtual async Task<CaseProductDtoGen> Get(string id, string includes = null, string dataSource = null)
         {
 
             ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
@@ -151,20 +136,20 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual async Task<SaveResult<CompanyDtoGen>> Save(CompanyDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<CaseProductDtoGen>> Save(CaseProductDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
-            if (!dto.CompanyId.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
-                var result = new SaveResult<CompanyDtoGen>();
+            if (!dto.CaseProductId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+                var result = new SaveResult<CaseProductDtoGen>();
                 result.WasSuccessful = false;
-                result.Message = "Create not allowed on Company objects.";
+                result.Message = "Create not allowed on CaseProduct objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.CompanyId.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
-                var result = new SaveResult<CompanyDtoGen>();
+            else if (dto.CaseProductId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+                var result = new SaveResult<CaseProductDtoGen>();
                 result.WasSuccessful = false;
-                result.Message = "Edit not allowed on Company objects.";
+                result.Message = "Edit not allowed on CaseProduct objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
@@ -174,19 +159,19 @@ namespace Coalesce.Web.Api
 
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CaseProductDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<CaseProductDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
         
         /// <summary>
-        /// Downloads CSV of CompanyDtoGen
+        /// Downloads CSV of CaseProductDtoGen
         /// </summary>
         [HttpGet("csvDownload")]
         [Authorize]
@@ -197,30 +182,25 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseProductId = null,string caseId = null,string productId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseProductId", caseProductId);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("ProductId", productId);
 
             var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<CompanyDtoGen>();
+            var list = listResult.List.Cast<CaseProductDtoGen>();
             var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
 
             byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
-            return File(bytes, "application/x-msdownload", "Company.csv");
+            return File(bytes, "application/x-msdownload", "CaseProduct.csv");
         }
 
         /// <summary>
-        /// Returns CSV text of CompanyDtoGen
+        /// Returns CSV text of CaseProductDtoGen
         /// </summary>
         [HttpGet("csvText")]
         [Authorize]
@@ -231,34 +211,30 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string companyId = null,string name = null,string address1 = null,string address2 = null,string city = null,string state = null,string zipCode = null,string altName = null)
+            string caseProductId = null,string caseId = null,string productId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
             // Add custom filters
-            parameters.AddFilter("CompanyId", companyId);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("Address1", address1);
-            parameters.AddFilter("Address2", address2);
-            parameters.AddFilter("City", city);
-            parameters.AddFilter("State", state);
-            parameters.AddFilter("ZipCode", zipCode);
-            parameters.AddFilter("AltName", altName);
+            parameters.AddFilter("CaseProductId", caseProductId);
+            parameters.AddFilter("CaseId", caseId);
+            parameters.AddFilter("ProductId", productId);
 
             var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<CompanyDtoGen>();
+            var list = listResult.List.Cast<CaseProductDtoGen>();
             var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
 
             return csv;
         }
 
+    
 
         /// <summary>
         /// Saves CSV data as an uploaded file
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CompanyDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<CaseProductDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
         {
             if (file != null && file.Length > 0)
             {
@@ -278,24 +254,24 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CompanyDtoGen>>> CsvSave(string csv, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<CaseProductDtoGen>>> CsvSave(string csv, bool hasHeader = true) 
         {
             // Get list from CSV
-            var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CompanyDtoGen>(csv, hasHeader);
-            var resultList = new List<SaveResult<CompanyDtoGen>>();
+            var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CaseProductDtoGen>(csv, hasHeader);
+            var resultList = new List<SaveResult<CaseProductDtoGen>>();
             foreach (var dto in list){
                 // Check if creates/edits aren't allowed
-                if (!dto.CompanyId.HasValue && !_model.SecurityInfo.IsCreateAllowed(User)) {
-                    var result = new SaveResult<CompanyDtoGen>();
+                if (!dto.CaseProductId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+                    var result = new SaveResult<CaseProductDtoGen>();
                     result.WasSuccessful = false;
-                    result.Message = "Create not allowed on Company objects.";
+                    result.Message = "Create not allowed on CaseProduct objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.CompanyId.HasValue && !_model.SecurityInfo.IsEditAllowed(User)) {
-                    var result = new SaveResult<CompanyDtoGen>();
+                else if (dto.CaseProductId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+                    var result = new SaveResult<CaseProductDtoGen>();
                     result.WasSuccessful = false;
-                    result.Message = "Edit not allowed on Company objects.";
+                    result.Message = "Edit not allowed on CaseProduct objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
@@ -306,12 +282,8 @@ namespace Coalesce.Web.Api
             }
             return resultList;
         }
-
-
-
-
-        [Authorize]
-        protected override IQueryable<Coalesce.Domain.Company> GetListDataSource(ListParameters parameters)
+        
+        protected override IQueryable<Coalesce.Domain.CaseProduct> GetListDataSource(ListParameters parameters)
         {
 
             return base.GetListDataSource(parameters);

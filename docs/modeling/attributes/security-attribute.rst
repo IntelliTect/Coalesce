@@ -43,6 +43,8 @@ Read
 
 Controls permissions for reading of objects and properties through the API.
 
+For **property-level** security only, if a :csharp:`[Read]` attribute is present without an :csharp:`[Edit]` attribute, the property is read-only. See Security_ for more info.
+
 Example Usage
 .............
 
@@ -65,7 +67,7 @@ Edit
 
 Controls permissions for editing of objects and properties through the API.
 
-For **property-level** security only , if a :csharp:`[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified for the :csharp:`[Edit]` attribute.
+For **property-level** security only, if a :csharp:`[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified (if any) for the :csharp:`[Edit]` attribute. See Security_ for more info.
 
 Example Usage
 .............

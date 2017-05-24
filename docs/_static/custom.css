@@ -26,6 +26,7 @@ span.ctor-param::before {
 
 .rst-content code.literal {
     font-size: 12px;
+    padding: 1px 3px;
 }
 .rst-content code.literal[class~="c#"],
 .rst-content code.literal.typescript {

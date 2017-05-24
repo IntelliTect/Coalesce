@@ -40,6 +40,16 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsNotNull(prop.JsVariableForBinding, $"JS Variable for binding not found.");
                         assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type not found.");
                         assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type not found.");
+
+                        assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.ReadAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
+                            "Property-level security doesn't support the PermissionLevel property");
+                        assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.EditAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
+                            "Property-level security doesn't support the PermissionLevel property");
+                        assert.isFalse(prop.Wrapper.HasAttribute<DataAnnotations.CreateAttribute>(),
+                            "Property-level security doesn't support CreateAttribute");
+                        assert.isFalse(prop.Wrapper.HasAttribute<DataAnnotations.DeleteAttribute>(),
+                            "Property-level security doesn't support CreateAttribute");
+
                         if (prop.IsPOCO && !prop.IsComplexType)
                         {
                             assert.IsNotNull(prop.Object, "The target object for the property was not found. Make sure naming is consistent.");

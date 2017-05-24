@@ -290,7 +290,7 @@ namespace IntelliTect.Coalesce.Controllers
                     var field = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[0];
                     var prop = ClassViewModel.Properties.FirstOrDefault(f => string.Compare(f.Name, field, true) == 0 || string.Compare(f.DisplayName, field, true) == 0);
                     var value = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[1].Trim();
-                    if (prop != null && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
+                    if (prop != null && prop.SecurityInfo.IsReadable(User) && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
                     {
                         value = value.EscapeStringLiteralForLinqDynamic();
                         var expressions = new List<string>();
@@ -331,9 +331,14 @@ namespace IntelliTect.Coalesce.Controllers
                 // This uses the default search properties based on the attributes and defaults (name and ID for example).
                 if (!termFound)
                 {
+                    var searchableProperties = ClassViewModel
+                        .SearchProperties()
+                        .Where(f => f.Value.SecurityInfo.IsReadable(User))
+                        .ToList();
+
                     var completeSearchClauses = new List<string>();
                     // Handle the split on spaces first because it will be done differently with ands and ors.
-                    if (ClassViewModel.SearchProperties().Any(f => f.Value.SearchIsSplitOnSpaces))
+                    if (searchableProperties.Any(f => f.Value.SearchIsSplitOnSpaces))
                     {
                         var splitSearchClauses = new List<string>();
 
@@ -344,7 +349,7 @@ namespace IntelliTect.Coalesce.Controllers
                         foreach (var clause in clauses)
                         {
                             var searchClauses = new List<string>();
-                            foreach (var prop in ClassViewModel.SearchProperties().Where(f => f.Value.SearchIsSplitOnSpaces))
+                            foreach (var prop in searchableProperties.Where(f => f.Value.SearchIsSplitOnSpaces))
                             {
                                 string expr;
                                 if (prop.Value.PureType.IsString)
@@ -382,10 +387,10 @@ namespace IntelliTect.Coalesce.Controllers
                     }
 
                     // Handle not split on spaces with simple ors.
-                    if (ClassViewModel.SearchProperties().Any(f => !f.Value.SearchIsSplitOnSpaces))
+                    if (searchableProperties.Any(f => !f.Value.SearchIsSplitOnSpaces))
                     {
                         var clause = listParameters.Search.EscapeStringLiteralForLinqDynamic();
-                        foreach (var prop in ClassViewModel.SearchProperties().Where(f => !f.Value.SearchIsSplitOnSpaces))
+                        foreach (var prop in searchableProperties.Where(f => !f.Value.SearchIsSplitOnSpaces))
                         {
                             int temp;
                             if (prop.Value.PureType.IsString)

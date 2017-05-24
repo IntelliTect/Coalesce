@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.Data
     {
     }
 
-        public interface IBeforeDelete<TContext> where TContext : DbContext
+    public interface IBeforeDelete<TContext> where TContext : DbContext
     {
         /// <summary>
         /// In this method remove related items from the context before the save.
@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.Data
         ValidateResult BeforeDelete(TContext db, ClaimsPrincipal user);
     }
 
-        public interface IAfterDelete<TContext> where TContext : DbContext
+    public interface IAfterDelete<TContext> where TContext : DbContext
     {
         /// <summary>
         /// In this method do any cleanup necessary after delete.

@@ -13,6 +13,6 @@ namespace IntelliTect.Coalesce.Data
     /// <typeparam name="T"></typeparam>
     public interface IIncludable<T>
     {
-        IQueryable<T> Include(IQueryable<T> entities, string include = null);
+        IQueryable<T> Include(IQueryable<T> entities, string includes = null);
     }
 }

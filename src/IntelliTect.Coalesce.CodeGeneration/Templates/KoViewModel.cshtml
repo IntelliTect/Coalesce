@@ -317,7 +317,7 @@ module @moduleName {
 				var dto: any = {};
 				dto.@(model.Properties.First(f=>f.IsPrimaryKey).JsonName) = self.@(model.Properties.First(f=>f.IsPrimaryKey).JsVariable)();
 
-                @foreach (PropertyViewModel prop in model.Properties.Where(f => f.CanWrite && !f.IsPOCO && !f.HasReadOnlyAttribute && !f.HasReadOnlyApiAttribute && f.HasViewModelProperty || f.IsComplexType))
+                @foreach (PropertyViewModel prop in model.Properties.Where(f => f.CanWrite && !f.IsPOCO && f.HasViewModelProperty || f.IsComplexType))
                 {
                 if (prop.Type.IsDateTimeOffset)
                 {

@@ -104,7 +104,7 @@ module Coalesce {
         protected loadingValidValues: number = 0;
 
         // String that defines what data should be included with the returned object.
-        public includes = null;
+        public includes = "";
 
         /**
             If true, the busy indicator is shown when loading.

@@ -369,7 +369,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool CanWrite => Wrapper.HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute;
+        public bool CanWrite => Wrapper.HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
 
         /// <summary>
         /// True if the property can be read.
@@ -463,7 +463,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool HasReadOnlyAttribute => Wrapper.HasAttribute<ReadOnlyAttribute>();
 
+#pragma warning disable CS0618 // Type or member is obsolete
         public bool HasReadOnlyApiAttribute => Wrapper.HasAttribute<ReadOnlyApiAttribute>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// True if the property has the Required attribute, or if the value type is not nullable.
@@ -1121,7 +1123,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                return (SecurityInfo.IsSecuredProperty && string.IsNullOrEmpty(SecurityInfo.EditRoles)) ||
+                return 
                     IsReadOnly ||
                     (IsPOCO && !IsComplexType) ||
                     IsManytoManyCollection ||

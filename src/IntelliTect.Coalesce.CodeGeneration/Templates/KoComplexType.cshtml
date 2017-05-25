@@ -2,13 +2,9 @@
 @using IntelliTect.Coalesce.TypeDefinition
 @{
     ClassViewModel model = Model.Model;
-    string typingReferencePath = "../..";
-    string intellitectUtilitiesPath = "..";
     string moduleName = "ViewModels";
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
     {
-        typingReferencePath = "../../../..";
-        intellitectUtilitiesPath = "../../../../scripts";
         moduleName = Model.AreaName + "." + moduleName;
     }
     if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
@@ -16,11 +12,8 @@
         moduleName = Model.ModulePrefix + "." + moduleName;
     }
 }
-@{
-@:/// <reference path="@typingReferencePath/typings/tsd.d.ts" />
-@:/// <reference path="@intellitectUtilitiesPath/Coalesce/intellitect.utilities.ts" />
-@:/// <reference path="@intellitectUtilitiesPath/Coalesce/intellitect.ko.utilities.ts" />
-}
+
+/// <reference path="../coalesce.dependencies.d.ts" />
 
 module @moduleName {
     // *** Complex Type @(model.Name)

@@ -467,7 +467,7 @@ namespace @(namespaceName).Api
                 }
                 else if (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection)
                 {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
                 }
                 else
                 {

@@ -112,7 +112,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 string result = ReturnType.NameWithTypeParams;
                 if (result == "Void") return "object";
                 result = result.Replace("IQueryable", "IEnumerable");
-                result = result.Replace("ICollection", "IEnumerable");
                 if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
                 {
                     var name = ReturnType.PureType.ClassViewModel.Name;
@@ -146,7 +145,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 string result = "";
                 result = string.Join(", ", ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
                 if (!string.IsNullOrWhiteSpace(result)) result = result + ", ";
-                result = result + "callback?: any, reload?: boolean";
+                result = result + "callback: () => void = null, reload: boolean = true";
                 return result;
             }
         }
@@ -213,15 +212,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var result = "{" + Environment.NewLine;
+                var result = "{ ";
                 if (!IsStatic)
                 {
-                    result = result + "                        id: self.myId";
-                    if (Parameters.Any()) result = result + ", " + Environment.NewLine;
+                    result = result + "id: this.myId";
+                    if (Parameters.Any()) result = result + ", ";
                 }
 
-                result += string.Join(", " + Environment.NewLine, ClientParameters.Select(f => $"                        {f.Name}: {f.TsConversion(f.Name)}"));
-                result += Environment.NewLine + "                    }";
+                result += string.Join(", ", ClientParameters.Select(f => $"{f.Name}: {f.TsConversion(f.Name)}"));
+                result += " }";
                 return result;
 
             }

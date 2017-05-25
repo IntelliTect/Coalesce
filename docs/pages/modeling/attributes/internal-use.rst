@@ -1,4 +1,6 @@
 
+.. _InternalUse:
+
 Internal Use
 ============
 

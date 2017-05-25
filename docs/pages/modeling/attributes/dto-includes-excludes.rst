@@ -20,7 +20,7 @@ When the database entries are returned to the client they will be trimmed based 
 It is important to note that the value of the includes string will match against these attributes on *any* of your models that appears in the object graph being mapped to DTOs - it is not limited only to the model type of the root object.
 
 Example Usage
--------------
+.............
 
     .. code-block:: c#
 
@@ -64,15 +64,15 @@ Example Usage
 
 
 Properties
-----------
+..........
 
     :csharp:`public string ContentViews { get; set; }` :ctor:`1`
-        A comma-delimited list of possible values of :ts:`includes` on which to operate.
+        A comma-delimited list of values of :ts:`includes` on which to operate.
 
-        For :csharp:`DtoIncludes`, this will be the possible values of :ts:`includes` for which this property will be allowed to be serialized and sent to the client.
+        For :csharp:`DtoIncludes`, this will be the values of :ts:`includes` for which this property will be allowed to be serialized and sent to the client.
 
         .. important::
         
             :csharp:`DtoIncludes` does not ensure that specific data will be loaded from the database. Only data loaded into current EF DbContext can possibly be returned from the API. See :ref:`ControllingLoading` for more information.
 
-        For :csharp:`DtoExcludes`, this will be the possible values of :ts:`includes` for which this property will **never** be serialized and sent to the client.
+        For :csharp:`DtoExcludes`, this will be the values of :ts:`includes` for which this property will **never** be serialized and sent to the client.

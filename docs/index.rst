@@ -10,6 +10,11 @@ Welcome to Coalesce's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. toctree::
+   :maxdepth: 4
+   :caption: Modeling
+
+   pages/modeling.rst
 
 
 Indices and tables

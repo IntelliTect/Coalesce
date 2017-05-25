@@ -6,6 +6,12 @@ Includes
 
 Coalesce provides a number of extension points for loading & serialization which make use of a concept called an "includes string" (also referred to as "include string" or just "includes").
 
+
+.. contents:: Contents
+    :local:
+    
+    
+
 Includes String
 ---------------
 
@@ -26,6 +32,9 @@ Special Values
 
     There are a few values of :ts:`includes` that are either set by default in the auto-generated views, or otherwise have special meaning:
 
+        :code:`none`
+            Setting :ts:`includes` to ``none`` prevents :csharp:`IIncludable.Include` (see below) from being called, and also suppresses the :ref:`Default Loading Behavior`. The resulting data will be the requested object (or list of objects) and nothing more.
+
         :code:`Editor`
             Used when loading an object in the generated CreateEdit views.
             
@@ -33,12 +42,10 @@ Special Values
             Used when loading a list of objects in the generated Table and Cards views.
             For example, :code:`PersonListGen`
 
-        :code:`none`
-            Setting :ts:`includes` to ``none`` prevents :csharp:`IIncludable.Include` from being called, and also prevents the the :ref:`Default Loading Behavior` is suppressed. The resulting data will be the requested object (or list of objects) and nothing more.
+|
 
 .. _IIncludable:
 
-|
 IIncludable
 -----------
 
@@ -49,7 +56,7 @@ The :csharp:`IIncludable` interface offers a way to control loading very similar
     
     :ref:`CustomDataSources` are more modular and more discoverable than functionality tucked away inside the :csharp:`Include` method.
 
-Instead of defining separate methods for each loading technique as one does when using :ref:`CustomDataSources`, :csharp:`IIncludable` provides a single method to define all potential ways of loading data. It is passed the :ts:`include` string.
+Instead of using :ref:`CustomDataSources` and defining separate methods for each loading technique, :csharp:`IIncludable` provides a single method to define all potential ways of loading data. It is passed the :ts:`include` string.
 
     .. code-block:: c#
 

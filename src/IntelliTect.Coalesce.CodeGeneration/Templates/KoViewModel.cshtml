@@ -227,7 +227,7 @@ module @moduleName {
         {
             @:var @param.Name: @param.Type.TsType = null;
         }
-            @:this.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
+            @:return this.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
         @:}
         @:// Presents a modal with input boxes to call the server method (@method.Name)
         @:public @method.JsVariableModal = (callback: () => void = null, reload: boolean = true) => {
@@ -250,7 +250,7 @@ module @moduleName {
         {
         @:public @method.JsVariableWithArgs = (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback: () => void = null, reload: boolean = true) => {
             @:if (!args) args = this.@(method.JsVariableArgs);
-            @:this.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
+            @:return this.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
         @:}
         @:// Object that can be easily bound to fields to allow data entry for the method
         @:public @(method.JsVariableArgs) = new @(model.ViewModelGeneratedClassName).@(method.ArgsName)(); 

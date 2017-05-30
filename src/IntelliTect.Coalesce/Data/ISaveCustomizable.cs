@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Data
     /// and the save to be canceled.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IBeforeSave<T, TContext> where TContext: DbContext where T: class
+    public interface IBeforeSave<T, TContext> where TContext: DbContext where T : class
     {
         /// <summary>
         /// Called after the object is mapped and before it is saved. Allows for returning validation information.

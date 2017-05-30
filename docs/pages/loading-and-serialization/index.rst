@@ -13,7 +13,7 @@ Controlling Loading
 
 Coalesce is based on :ref:`Entity Framework Core`. As a result, it is subjected to all of the rules and conventions that EF imposes. Chief among these is lazy loading - EF Core does not support lazy loading.
 
-.. _`Default Loading Behavior`:
+.. _`DefaultLoadingBehavior`:
 Default Loading Behavior
 ........................
 

@@ -1,8 +1,8 @@
 
 .. _ControllingLoading:
 
-Data Loading and Serialization
-==============================
+Intro to Loading and Serialization
+==================================
 
    
 Coalesce provides a few different ways to control what data is pulled out of the database and sent back to the client.
@@ -57,6 +57,6 @@ Read :ref:`IncludeTree` to learn more.
 DtoIncludes & DtoExcludes
 .........................
 
-The :csharp:`DtoIncludes` and :csharp:`DtoExcludes` attributes allow specific properties to be conditionally whitelisted or blacklisted for/from inclusion into the DTO, and ultimately, serialization to JSON and transmission to the client.
+The :csharp:`DtoIncludes` and :csharp:`DtoExcludes` attributes allow specific properties to be conditionally whitelisted or blacklisted for/from inclusion into the :ref:`DTOs`, and ultimately, serialization to JSON and transmission to the client.
 
 Read :ref:`Includes` and :ref:`DtoIncludesExcludesAttr` to learn more.

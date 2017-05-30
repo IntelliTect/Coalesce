@@ -6,15 +6,40 @@
 Welcome to Coalesce's documentation!
 ====================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Modeling
+    :maxdepth: 2
+    :glob:
+    :caption: Coalesce
 
-   pages/modeling.rst
+    pages/getting-started/*
+
+.. toctree::
+    :maxdepth: 3
+    :caption: Modeling
+
+    pages/modeling/index
+    pages/modeling/properties
+    pages/modeling/attributes
+    pages/modeling/interfaces
+    pages/modeling/methods
+
+.. toctree::
+    :maxdepth: 3
+    :caption: Data Loading & Serialization
+
+    pages/loading-and-serialization/index
+    pages/loading-and-serialization/dtos
+    pages/loading-and-serialization/data-sources
+    pages/loading-and-serialization/include-tree
+    pages/loading-and-serialization/includes
+
+.. toctree::
+    :maxdepth: 2
+    :glob:
+    :caption: Topics
+
+    pages/topics/*
 
 
 Indices and tables

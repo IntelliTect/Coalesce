@@ -1,12 +1,10 @@
-@{ ViewBag.Title = "Coalesce"; Layout = "\_DocsLayout"; }
+
+.. _DTOs:
 
 Data Transfer Objects (DTOs)
 ----------------------------
 
-DTO Overview
-~~~~~~~~~~~~
-
-Data Transfer Objects, commonly known as DTOs, allow for transformations
+Data Transfer Objects, or DTOs, allow for transformations
 of data from the data store into a format more suited for transfer and
 use on the client side. This often means trimming properties and
 flattening structures to provide a leaner over-the-wire experience. The
@@ -15,7 +13,7 @@ goal for Coalesce is to support this as seamlessly as possible.
 Coalesce supports several types of DTOs:
 
 -  DTOs that are automatically generated for each POCO database object.
-   These are controlled via annotations on the POCO.
+   These are controlled via :ref:`ModelAttributes` on the POCO.
 -  DTOs that support the standard ViewModels.
 -  DTOs that are created with IClassDto and create unique ViewModels.
 -  DTOs based on database views.
@@ -25,21 +23,10 @@ Automatically Generated DTOs
 
 Every POCO database class in Coalesce gets a DTO. These DTOs are used to
 shuttle data back and forth to the client. They are generated classes
-that have nullable versions of all the properties on the POCO class.
-Annotations and the Include infrastructure can be used to indicate which
-properties should be transferred to the client in which cases. By using
-the JSON serializer setting that does not serialize null properties, it
-allows for easily limiting the amount of traffic on the wire.
+that have nullable versions of all the properties on the POCO class, and are the mechanism by which almost all the techniques described in :ref:`ControllingLoading` function.
 
-Use this approach when you want to slightly modify an existing object
-either by including a new property or excluding a property. This is
-handy for situations where you want to consistently flatten the object
-model. For example going from a reference to a user in a ChangedBy
-property to a ChangedByName string. In this case only the ChangeByName
-string would be transferred, but the ChangeBy property would still be
-pulled from the database in order to fill the property.
+:ref:`DtoIncludesExcludesAttr` and the :ref:`Includes` infrastructure can be used to indicate which properties should be transferred to the client in which cases, and :ref:`IncludeTree` is used to dictate how these DTOs are constructed from POCOs populated from the database.
 
-See DtoExcludes and DtoIncludes in the Annotations section for examples.
 
 DTOs with Standard View Models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,7 +59,7 @@ includes parameter.
 
 The CreateInstance method creates the DTO from the database object.
 Again you have the user and includes properties. However, this time you
-also ahve a collection of objects. The purpose of this object is to
+also have a collection of objects. The purpose of this object is to
 track what has already been serialized. This same interface is used for
 the automatically generated DTOs. This serves two purposes.
 
@@ -89,7 +76,7 @@ impact the database. This may be replaced by other less obtrusive
 methods in the future.
 
 ListDataSource is supported from the POCO database object, but it
-transfered to the DTO. All querying must be done on the original object
+transferred to the DTO. All querying must be done on the original object
 and not the DTO since only fields in the database can be queried via
 Entity Framework.
 
@@ -127,24 +114,6 @@ Methods are not yet supported on DTOs.
             }
         }
             
-
-IncludeTree
-~~~~~~~~~~~
-
-When a DTO is created by one of the API methods that Coalesce provides,
-such as List, CustomList, Save, or Get, the CreateInstance method will
-be passed an IncludeTree object. This object represents all of
-EntityFramework .Include() calls that have been made against the source
-IQueryable that will apply to the children of the object that the DTO is
-being constructed for. The purpose of this is so that only DTOs that
-line up with the structure of the .Include() calls are created, thus
-avoiding circular references which can cause the size of serialized
-output to balloon out of control. To see how this is used in practice,
-take a look at one of the generated DTOs in the Models folder of your
-web project. If no IncludeTree is given, circular references will be
-reconstructed as they exist among the source entities. IncludeTrees only
-apply to objects and properties that exist in the database.
-
 Database Views
 ~~~~~~~~~~~~~~
 

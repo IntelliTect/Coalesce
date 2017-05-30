@@ -1,6 +1,7 @@
 
-Data Modeling
-=============
+Intro to Modeling
+=================
+
 
 Overview
 --------
@@ -35,14 +36,11 @@ Once you have built out a simple POCO data model, you can get started on the fun
 Coalesce includes a number of ways in which you can cutomize your data model. Cutomizations affect the generated API and the generated views.
 
 
-.. toctree::
-    :maxdepth: 2
-
-    properties
-    attributes
-    interfaces
-    methods
-    loading-and-serialization
+TODO: INSERT LINKS TO THESE PAGES IN SMALL INTRO SECTIONS IN THIS DOC LIKE I DID WITH LOADING-AND-SERIALIZATION.RST
+    modeling/properties
+    modeling/attributes
+    modeling/interfaces
+    modeling/methods
 
 
 
@@ -63,32 +61,6 @@ Full validation documentation is in the Annotations section
 
 | 
 
-Display and Order
-^^^^^^^^^^^^^^^^^
-
-The `display </Docs/Annotations#Display>`__ name of a field can be set
-via the DisplayName attribute. The display name and field order can be
-set via the Display attribute using the Name and Order properties. This
-only impacts the order of fields in the admin pages and pop-up editors.
-By default, the fields will be in the order they are found in the class.
-
-::
-
-
-        [Display(Name = "Name", Order = 1)]
-        public string TheFullName { get; set; }
-
-| 
-
-
-| 
-
-Calculated Fields
-^^^^^^^^^^^^^^^^^
-
-Calculated fields can be easily added to your model. These do not get
-stored in the database and should be marked with the [NotMapped]
-attribute. See example above.
 
 | 
 
@@ -96,4 +68,4 @@ Security
 ^^^^^^^^
 
 Security is handled via attributes on the class, properties, and
-methods.
+methods. See :ref:`Security` for more information.

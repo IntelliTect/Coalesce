@@ -1,14 +1,22 @@
 
+.. _ModelMethods:
+
 Methods
 =======
 
 Any public methods you place on your POCO classes that are not annotated with the :ref:`InternalUse` attribute will get built into your TypeScript ViewModels and ListViewModels, and API endpoints will be created for these methods to be called. Both instance methods and static methods are supported.
 
+.. contents:: Contents
+    :local:
+
+
 Parameters
 ----------
 
-The following additional parameters can be added to your methods:
+The following parameters can be added to your methods:
 
+    Primitives & Dates
+        Only primitive values and dates are accepted as parameters to be passed from the client to the method call. Complex objects or collections are not supported at this time.
     :csharp:`<YourDbContext> db`
         If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method.
     :csharp:`ClaimsPrincipal user`
@@ -18,7 +26,7 @@ The following additional parameters can be added to your methods:
     :csharp:`out IncludeTree includeTree`
         If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`ControllingLoading` and :ref:`IncludeTree` for more information about this.
 
-
+|
 Return Values
 -------------
 
@@ -40,7 +48,7 @@ You can return virtually anything from these methods:
         
 
 
-
+|
 Generated TypeScript
 --------------------
 
@@ -55,91 +63,54 @@ Here's an example for a method called Move that takes a single parameter 'int fe
             return "I moved " + feet.ToString();
         }
 
-:ts:`public move: (<method parameters>, callback: () => void = null, reload: boolean = false)`
-    Function that takes a number and a callback. This callback function
-    is called when the call is complete.
-:ts:`moveWithArgs`
+:ts:`public move: (feet: number, callback: () => void = null, reload: boolean = true) => JQueryPromise<any>`
+    Function that takes all the method parameters and a callback. If :ts:`reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
+:ts:`public moveArgs: Person.MoveArgs`
+    Instance of a generated class that contains observable fields for each parameter that the method takes.
+:ts:`public moveWithArgs: (args?: Person.MoveArgs, callback: () => void = null, reload: boolean = true) => JQueryPromise<any>`
     Function that takes an object that contains all the parameters.
-    Object is of type [Name]Args which is included as a sub-class on
-    this class. If null, the built in instance of this class will be
-    used. This is named [name]Args
-:ts:`moveResult`
-    Observable with the result of the method call. This can be data
-    bound to show the result.
-:ts:`moveResultRaw`
-    Observable with the result of the method call. This can be data
-    bound to show the result.
-:ts:`moveIsLoading`
-    Observable boolean which is true while the call to the server is
-    happening.
-:ts:`moveMessage`
-    If the method was not successful, this contains exception
-    information.
-:ts:`moveWasSuccessful`
-    Observable boolean with true if the method was successful, or false
-    if an exception occurred.
-:ts:`moveUi`
+    Object is of type [Name]Args which is included as a nested class on the ViewModel.
+    If null, the built in instance of this class named [name]Args will be used.
+:ts:`public moveResult: KnockoutObservable<string>`
+    Observable that will contain the results of the method call after it is complete.
+:ts:`public moveResultRaw: KnockoutObservable<any>`
+    Observable with the raw, deserialized JSON result of the method call. If the method call returns an object, this will contain the deserialized JSON object from the server before it has been loaded into ViewModels and its properties loaded into observables.
+:ts:`public moveIsLoading: KnockoutObservable<boolean>`
+    Observable boolean which is true while the call to the server is pending.
+:ts:`public moveMessage: KnockoutObservable<string>`
+    If the method was not successful, this contains exception information.
+:ts:`public moveWasSuccessful: KnockoutObservable<boolean>`
+    Observable boolean that indicates whether the method call was successful or not.
+:ts:`public moveUi: (callback: () => void = null, reload: boolean = true) => JQueryPromise<any>`
     Simple interface using JavaScript input boxes to prompt the user for
     the required data for the method call. The call is then made with
     the data provided.
-:ts:`moveModal`
-    Simple modal interface to prompt the user for the required data for
+:ts:`public moveModal: (callback: () => void = null, reload: boolean = true) => void`
+    Shows a modal with HTML ``id="method-Move"`` to prompt the user for the required data for
     the method call. The call is then made with the data provided.
+    The generated modal only exists on the generated editor views. If you need it elsewhere, you should copy it from the generated HTML for the editor and place it in your custom page.
 
-
+|
 Instance Methods
 ----------------
 
-Instance methods can use information contained in the object during the execution of the method. These methods are created as functions on the object's TypeScript ViewModel. 
+Instance methods can use information contained in the object during the execution of the method. These methods generate the members above on the TypeScript ViewModel.
 
 The model instance that the method is called on will be loaded according to the following rules:
 
 - :ref:`CustomDataSources` are not used - even if one is set, it is not passed to the server in the API call, and will not be considered. If you would like to load additional data using one of your :ref:`CustomDataSources`, you'll need to manually call it inside your method.
 - If your model implements :ref:`IIncludable`, the :csharp:`Include` method will be called with a includes string of :csharp:`null`. 
-- Otherwise, the model is loaded according to the :ref:`Default Loading Behavior`.
+- Otherwise, the model is loaded according to the :ref:`DefaultLoadingBehavior`.
 
 | 
-
 Static Methods
 --------------
 
-Static methods exist on a class without respect to an instance of that
-class. These methods are created as functions on the object's **list**
-view model on the client side. The example below is for a method called
-NameStartingWith that takes a single parameter 'string characters' and
-returns a list of strings. The DbContext parameter is injected
-automatically by the controller.
+Static methods are created as functions on the TypeScript ListViewModel.
 
-::
+.. code-block:: c#
 
-        public static IEnumerable<string> NamesStartingWith(string characters, DbContext db)
-        {
-            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
-        }
-
-namesStartingWith
-    Function that takes a string and a callback. This callback function
-    is called when the call is complete.
-namesStartingWithWithArgs
-    Function that takes an object that contains all the parameters.
-    Object is of type [Name]Args which is included as a sub-class on
-    this class. If null, the built in instance of this class will be
-    used. This is named [name]Args
-namesStartingWithResult
-    Observable with the result of the method call. This can be data
-    bound to show the result.
-namesStartingWithIsLoading
-    Observable boolean which is true while the call to the server is
-    happening.
-namesStartingWithMessage
-    If the method was not successful, this contains exception
-    information.
-namesStartingWithWasSuccessful
-    Observable boolean with true if the method was successful, or false
-    if an exception occurred.
-namesStartingWithUi
-    Simple interface to prompt the user for the required data for the
-    method call. The call is then made with the data provided.
-namesStartingWithModal
-    Simple modal interface to prompt the user for the required data for
-    the method call. The call is then made with the data provided.
+    public static IEnumerable<string> NamesStartingWith(string characters, DbContext db)
+    {
+        return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
+    }

@@ -49,7 +49,7 @@ The TypeScript viewmodels have a property called :ts:`dataSource`, and the list 
     list.listDataSource = list.dataSources.NamesStartingWithA;
     list.load();
 
-When a custom data source is used, the :ref:`Default Loading Behavior` is suppressed. To get this behavior easily inside your data source, call the :csharp:`IQueryable<T>.IncludeChildren()` extension method (:csharp:`using IntelliTect.Coalesce.Data;`).
+When a custom data source is used, the :ref:`DefaultLoadingBehavior` is suppressed. To get this behavior easily inside your data source, call the :csharp:`IQueryable<T>.IncludeChildren()` extension method (:csharp:`using IntelliTect.Coalesce.Data;`).
 
 Additionally, when a custom data source is used on a model that implements :csharp:`IIncludable` (see :ref:`Includes`), the :csharp:`IIncludable.Include` method will not be called. 
 

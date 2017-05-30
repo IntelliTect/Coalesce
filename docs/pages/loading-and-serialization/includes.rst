@@ -33,7 +33,7 @@ Special Values
     There are a few values of :ts:`includes` that are either set by default in the auto-generated views, or otherwise have special meaning:
 
         :code:`none`
-            Setting :ts:`includes` to ``none`` prevents :csharp:`IIncludable.Include` (see below) from being called, and also suppresses the :ref:`Default Loading Behavior`. The resulting data will be the requested object (or list of objects) and nothing more.
+            Setting :ts:`includes` to ``none`` prevents :csharp:`IIncludable.Include` (see below) from being called, and also suppresses the :ref:`DefaultLoadingBehavior`. The resulting data will be the requested object (or list of objects) and nothing more.
 
         :code:`Editor`
             Used when loading an object in the generated CreateEdit views.
@@ -79,7 +79,7 @@ Instead of using :ref:`CustomDataSources` and defining separate methods for each
 
 In cases where :ref:`CustomDataSources` are used to control loading, the :csharp:`IIncludable.Include` method will not be called. 
 
-When :csharp:`IIncludable` is used, the :ref:`Default Loading Behavior` is suppressed. To get this behavior easily inside your :csharp:`IIncludable.Include` implementation, call the :csharp:`IQueryable<T>.IncludeChildren()` extension method (:csharp:`using IntelliTect.Coalesce.Data;`).
+When :csharp:`IIncludable` is used, the :ref:`DefaultLoadingBehavior` is suppressed. To get this behavior easily inside your :csharp:`IIncludable.Include` implementation, call the :csharp:`IQueryable<T>.IncludeChildren()` extension method (:csharp:`using IntelliTect.Coalesce.Data;`).
 
     
 |
@@ -90,5 +90,5 @@ Main document: :ref:`DtoIncludesExcludesAttr`.
 
 There are two C# attributes, :csharp:`DtoIncludes` and :csharp:`DtoExcludes`, that can be used to annotate your data model in order to control what data gets put into the DTOs and ultimately serialized to JSON and sent out to the client.
 
-.. include:: ../attributes/dto-includes-excludes.rst
+.. include:: ../modeling/attributes/dto-includes-excludes.rst
     :start-after: see :ref:`Includes`.

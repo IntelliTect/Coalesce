@@ -9,7 +9,8 @@ Include Tree
 When Coalesce maps from the your POCO objects that are returned from EF Core queries, it will follow a structure called an :csharp:`IncludeTree` to determine what relationships to follow and how deep to go in re-creating that structure in the mapped DTOs.
 
 
-.. contents::
+.. contents:: Contents
+    :local:
 
 Purpose
 -------
@@ -214,3 +215,13 @@ If you wanted to get even simpler, you could simply set the :csharp:`out include
             - District Supervisor
             - VP
             - CEO
+
+
+Caveats
+.......
+
+One important point remains regarding :csharp:`IncludeTree` - it is not used to control the serialization of objects which are not mapped to the database. Objects of types that are not mapped to the database are always put into the DTOs when encountered, with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
+
+By not filtering unmapped properties, you as the developer don't need to account for them in every place throughout your application where they appear - instead, they 'just work' and show up on the client as expected.
+
+Note also that this statement does not apply to database-mapped objects that hang off of unmapped objects - any time a database-mapped object appears, it will be controlled by your include tree. If no include tree is present (because nothing was specified for the unmapped property), these mapped objects hanging off of unmapped objects will be serialized freely and with all circular references, unless you include some calls to :csharp:`.IncludedSeparately(m => m.MyUnmappedProperty.MyMappedProperty)` to limit those objects down.

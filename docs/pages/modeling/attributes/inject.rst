@@ -6,6 +6,8 @@ Inject
 
 Used to mark a method parameter for dependency injection from the application's :csharp:`IServiceProvider`.
 
+See :ref:`ModelMethods` for more.
+
 This gets translated to a :csharp:`Microsoft.AspNetCore.Mvc.FromServicesAttribute` in the generated API controller's action.
 
 

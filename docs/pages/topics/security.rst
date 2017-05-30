@@ -1,4 +1,5 @@
-@{ ViewBag.Title = "Coalesce"; Layout = "\_DocsLayout"; }
+
+.. _Security:
 
 Security
 --------

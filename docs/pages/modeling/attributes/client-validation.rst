@@ -2,6 +2,8 @@
 
 .. _Knockout-Validation: https://github.com/Knockout-Contrib/Knockout-Validation/
 
+.. _ClientValidation:
+
 Client Validation
 =================
 

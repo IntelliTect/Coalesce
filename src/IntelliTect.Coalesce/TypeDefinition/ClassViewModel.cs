@@ -482,9 +482,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return propInfo;
         }
 
-        /// <summary>
-        /// Returns true if this is a complex type.
-        /// </summary>
         public bool IsOneToOne
         {
             get
@@ -497,13 +494,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this is a complex type.
         /// </summary>
-        public bool IsComplexType
-        {
-            get
-            {
-                return HasAttribute<ComplexTypeAttribute>();
-            }
-        }
+        public bool IsComplexType => HasAttribute<ComplexTypeAttribute>();
 
         /// <summary>
         /// Returns true if this class has a partial typescript file.

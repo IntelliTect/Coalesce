@@ -14,8 +14,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public abstract string Comment { get; }
 
-        public abstract bool IsComplexType { get; }
-
         /// <summary>
         /// If this class implements IClassDto, return true.
         /// </summary>

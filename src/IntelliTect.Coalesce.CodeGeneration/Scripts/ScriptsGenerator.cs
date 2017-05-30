@@ -118,7 +118,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     Console.WriteLine("Model validated successfully");
                 }
 
-                streamWriter.WriteLine($" {"Name",-15}  {"Type",-15}  {"Pure Type",-15} {"Col",-5} {"Array",-5} {"Key",-5} {"Complex",-7} {"DisplayName",-15} {"Null?",-5} {"Many",-5} {"Internal",-5} {"FileDL",-5} {"IsNum",-5} {"IsDT",-5} {"IsDTO",-5} {"IsBool",-5} {"IsStr",-5} {"IsEnum",-8} {"JsKoType",-25} {"TsKoType",-50} {"TsType",-15} {"DateOnly",-10} {"Hidden",-8} {"Required",-8} {"KeyName",-15} {"MinLength",-8} {"MaxLength",-10} {"Range",-10}");
+                streamWriter.WriteLine($" {"Name",-15}  {"Type",-15}  {"Pure Type",-15} {"Col",-5} {"Array",-5} {"Key",-5} {"DisplayName",-15} {"Null?",-5} {"Many",-5} {"Internal",-5} {"FileDL",-5} {"IsNum",-5} {"IsDT",-5} {"IsDTO",-5} {"IsBool",-5} {"IsStr",-5} {"IsEnum",-8} {"JsKoType",-25} {"TsKoType",-50} {"TsType",-15} {"DateOnly",-10} {"Hidden",-8} {"Required",-8} {"KeyName",-15} {"MinLength",-8} {"MaxLength",-10} {"Range",-10}");
 
                 foreach (var obj in models.Where(p => p.HasDbSet || p.IsDto))
                 {
@@ -127,7 +127,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                     foreach (var prop in obj.Properties.Where(f => !f.IsInternalUse))
                     {
-                        streamWriter.WriteLine($@" {prop.Name,-15}  {prop.TypeName,-15}  {prop.PureType.Name,-15} {prop.Type.IsCollection,-5} {prop.Type.IsArray,-5} {prop.IsPrimaryKey,-5} {prop.IsComplexType,-7} {prop.DisplayName,-15} {prop.Type.IsNullable,-5} {prop.IsManytoManyCollection,-5} {prop.IsInternalUse,-5}    {prop.IsFileDownload,-5}  {prop.Type.IsNumber,-5} {prop.Type.IsDateTime,-5} {prop.Type.IsDateTimeOffset,-5} {prop.Type.IsBool,-5}  {prop.Type.IsString,-5} {prop.Type.IsEnum,-8} {prop.Type.JsKnockoutType,-25} {prop.Type.TsKnockoutType,-50} {prop.Type.TsType,-15} {prop.IsDateOnly,-10} {prop.IsHidden(HiddenAttribute.Areas.Edit),-8}  {prop.IsRequired,-8} {prop.ObjectIdPropertyName,-15} {prop.MinLength,-8} {prop.MaxLength,-10} {prop.Range?.Item1 + " " + prop.Range?.Item2,-10}");
+                        streamWriter.WriteLine($@" {prop.Name,-15}  {prop.TypeName,-15}  {prop.PureType.Name,-15} {prop.Type.IsCollection,-5} {prop.Type.IsArray,-5} {prop.IsPrimaryKey,-5} {prop.DisplayName,-15} {prop.Type.IsNullable,-5} {prop.IsManytoManyCollection,-5} {prop.IsInternalUse,-5}    {prop.IsFileDownload,-5}  {prop.Type.IsNumber,-5} {prop.Type.IsDateTime,-5} {prop.Type.IsDateTimeOffset,-5} {prop.Type.IsBool,-5}  {prop.Type.IsString,-5} {prop.Type.IsEnum,-8} {prop.Type.JsKnockoutType,-25} {prop.Type.TsKnockoutType,-50} {prop.Type.TsType,-15} {prop.IsDateOnly,-10} {prop.IsHidden(HiddenAttribute.Areas.Edit),-8}  {prop.IsRequired,-8} {prop.ObjectIdPropertyName,-15} {prop.MinLength,-8} {prop.MaxLength,-10} {prop.Range?.Item1 + " " + prop.Range?.Item2,-10}");
                         if (prop.Type.IsEnum && !enumValues.ContainsKey(prop.Name))
                         {
                             enumValues.Add(prop.Name, prop.Type.EnumValues);
@@ -139,16 +139,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                         streamWriter.WriteLine($@" {method.Name,-15}  {method.ReturnType.Name,-15}  {method.ReturnType.PureType.Name,-15} {method.ReturnType.IsCollection,-5} {method.ReturnType.IsArray,-5} {null,-5} {null,-7} {method.DisplayName,-15} {method.ReturnType.IsNullable,-5} {null,-5} {null,-5}    {null,-5}  {method.ReturnType.IsNumber,-5} {method.ReturnType.IsDateTime,-5} {method.ReturnType.IsDateTimeOffset,-5} {method.ReturnType.IsBool,-5}  {method.ReturnType.IsString,-5} {method.ReturnType.IsEnum,-8} {method.ReturnType.JsKnockoutType,-25} {method.ReturnType.TsKnockoutType,-50} {method.ReturnType.TsType,-15} {null,-10} {method.IsHidden(HiddenAttribute.Areas.Edit),-8}  {null,-8} {null,-15} {null,-8} {null,-10} {"",-10}");
                     }
 
-                }
-
-                streamWriter.WriteLine("-------- Complex Types --------");
-                foreach (var ct in ComplexTypes(models))
-                {
-                    streamWriter.WriteLine(ct.Name);
-                    foreach (var prop in ct.Properties)
-                    {
-                        streamWriter.WriteLine($"    {prop.Name}");
-                    }
                 }
 
                 streamWriter.WriteLine("-------- Enumerations --------");
@@ -451,7 +441,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "CardView.cshtml",
                     "ClassDto.cshtml",
                     "CreateEditView.cshtml",
-                    "KoComplexType.cshtml",
                     "KoExternalType.cshtml",
                     "KoListViewModel.cshtml",
                     "KoViewModel.cshtml",
@@ -731,30 +720,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     Console.WriteLine();
                 }
 
-
-
-
-
-                ViewModelForTemplates complexTypes = new ViewModelForTemplates
-                {
-                    Models = ComplexTypes(models),
-                    ContextInfo = dataContext,
-                    Namespace = targetNamespace,
-                    AreaName = controllerGeneratorModel.AreaLocation
-                };
-                if (complexTypes.ViewModelsForTemplates.Any())
-                {
-                    Console.WriteLine("-- Generating Complex Types");
-                    foreach (var complexType in complexTypes.ViewModelsForTemplates)
-                    {
-                        var fileName = (string.IsNullOrWhiteSpace(complexType.ModulePrefix)) ? $"Ko.{complexType.Model.Name}.ts" : $"Ko.{complexType.ModulePrefix}.{complexType.Model.Name}.ts";
-
-                        var path = Path.Combine(scriptOutputPath, fileName);
-                        await output.Generate("KoComplexType.cshtml", fileName, complexType);
-
-                        Console.WriteLine("   Added: " + path);
-                    }
-                }
             }
 
 
@@ -950,30 +915,5 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             // Write the file with the array list of content.
             File.WriteAllLines(Path.Combine(path, "viewmodels.generated.d.ts"), fileContents);
         }
-
-        /// <summary>
-        /// Gets a list of all the complex types used in the models.
-        /// </summary>
-        /// <param name="models"></param>
-        /// <returns></returns>
-        public IEnumerable<ClassViewModel> ComplexTypes(List<ClassViewModel> models)
-        {
-            Dictionary<string, ClassViewModel> complexTypes = new Dictionary<string, ClassViewModel>();
-
-            foreach (var model in models)
-            {
-                foreach (var prop in model.Properties.Where(f => f.IsComplexType))
-                {
-                    if (!complexTypes.ContainsKey(prop.Name))
-                    {
-                        var ctModel = ReflectionRepository.GetClassViewModel(prop.Type);
-                        complexTypes.Add(prop.Name, ctModel);
-                    }
-                }
-            }
-
-            return complexTypes.Values;
-        }
-
     }
 }

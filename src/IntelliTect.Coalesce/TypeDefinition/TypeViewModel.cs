@@ -205,7 +205,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this is a complex type.
         /// </summary>
-        public bool IsComplexType => Wrapper.HasAttribute<ComplexTypeAttribute>();
+        public bool IsComplexType => false;
 
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.

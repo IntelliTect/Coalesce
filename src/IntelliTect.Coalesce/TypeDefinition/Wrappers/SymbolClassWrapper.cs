@@ -102,14 +102,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
-        public override bool IsComplexType
-        {
-            get
-            {
-                return HasAttribute<ComplexTypeAttribute>();
-            }
-        }
-
         public override bool IsDto
         {
             get

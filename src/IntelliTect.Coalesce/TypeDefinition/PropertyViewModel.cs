@@ -428,18 +428,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (Object == null || !Object.OnContext) return null;
 
                 if (IsPOCO && !IsComplexType) return Name;
-                // TODO: Fix this so it is right. 
-                //if (IsGeneric)
-                //{
-                //    if (MvcHelper.GetApiControllerNames().Contains(ContainedType.Name + "Controller"))
-                //    {
-                //        return ContainedType.Name + "Controller";
-                //    }
-                //}
-                //if (MvcHelper.GetApiControllerNames().Contains(TypeName + "Controller"))
-                //{
-                //    return TypeName + "Controller";
-                //}
+
                 return null;
             }
         }

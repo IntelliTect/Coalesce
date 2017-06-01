@@ -331,6 +331,7 @@ module @moduleName {
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.@(model.PrimaryKey.JsonName);
+				self.@(model.PrimaryKey.JsVariable)(data.@(model.PrimaryKey.JsonName));
 				// Load the lists of other objects
             @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
             { 
@@ -397,16 +398,10 @@ module @moduleName {
 				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsonName))){
 				    @:self.@(prop.JsVariable)(moment(data.@prop.JsonName));
 				@:}
-                } else if (!prop.IsPOCO) {
+                } else if (!prop.IsPOCO && !prop.IsPrimaryKey) {
 				@:self.@(prop.JsVariable)(data.@prop.JsonName);
-                }else if (prop.IsComplexType) {
-                // Complex Type: @prop.JsonName
-                @foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
-                {
-				@:self.@(prop.JsVariable)().@(subProp.JsVariable)(data.@(prop.JsonName).@(subProp.JsonName));
                 }
-            }
-         }
+                }
                 if (self.afterLoadFromDto){
                     self.afterLoadFromDto();
                 }

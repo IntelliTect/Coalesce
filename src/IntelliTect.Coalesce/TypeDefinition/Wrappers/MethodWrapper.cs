@@ -6,7 +6,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal abstract class MethodWrapper: Wrapper
+    internal abstract class MethodWrapper : Wrapper
     {
         public abstract bool IsStatic { get; }
 
@@ -16,12 +16,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
-        public bool IsInternalUse
-        {
-            get
-            {
-                return HasAttribute<InternalUseAttribute>();
-            }
-        }
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
     }
 }

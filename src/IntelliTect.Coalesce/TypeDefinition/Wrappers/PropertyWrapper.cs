@@ -20,14 +20,10 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public abstract PropertyInfo PropertyInfo { get; }
 
         public abstract bool IsVirtual { get; }
+
         public abstract bool IsStatic { get; }
 
-        public bool IsInternalUse { get
-            {
-                return HasAttribute<InternalUseAttribute>();
-            }
-        }
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
+
     }
-
-
 }

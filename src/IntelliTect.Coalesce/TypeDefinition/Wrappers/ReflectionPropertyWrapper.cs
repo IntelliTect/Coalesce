@@ -17,77 +17,29 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         }
 
 
-        public override string Name
-        {
-            get
-            {
-                return Info.Name;
-            }
-        }
+        public override string Name => Info.Name;
 
-        public override string Comment { get { return ""; } }
+        public override string Comment => "";
+        
+        public override TypeWrapper Type => new ReflectionTypeWrapper(Info.PropertyType);
 
+        public override bool HasGetter => Info.CanRead;
 
+        public override bool HasSetter => Info.CanWrite;
 
-        public override TypeWrapper Type
-        {
-            get
-            {
-                return new ReflectionTypeWrapper(Info.PropertyType);
-            }
-        }
+        public override PropertyInfo PropertyInfo => Info;
+        
+        public override bool IsVirtual => Info.GetGetMethod()?.IsVirtual ?? Info.GetSetMethod()?.IsVirtual ?? false;
 
-        public override bool HasGetter { get { return Info.CanRead; } }
+        public override bool IsStatic => Info.GetGetMethod()?.IsStatic ?? Info.GetSetMethod()?.IsStatic ?? false;
 
-        public override bool HasSetter { get { return Info.CanWrite; } }
-
-        public override PropertyInfo PropertyInfo { get { return Info; } }
-
-        public override bool IsVirtual
-        {
-            get
-            {
-                var getter = Info.GetGetMethod();
-                if (getter != null)
-                {
-                    return getter.IsVirtual;
-                }
-
-                var setter = Info.GetSetMethod();
-                if (setter != null)
-                {
-                    return setter.IsVirtual;
-                }
-                return false;
-            }
-        }
-
-        public override bool IsStatic
-        {
-            get
-            {
-                var getter = Info.GetGetMethod();
-                if (getter != null)
-                {
-                    return getter.IsStatic;
-                }
-
-                var setter = Info.GetSetMethod();
-                if (setter != null)
-                {
-                    return setter.IsStatic;
-                }
-                return false;
-            }
-        }
+        public override bool IsInternalUse => base.IsInternalUse || !Info.GetGetMethod(true).IsPublic;
 
         public override object GetAttributeValue<TAttribute>(string valueName)
-        {
-            return Info.GetAttributeValue<TAttribute>(valueName);
-        }
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Info.HasAttribute<TAttribute>();
-        }
+            => Info.GetAttributeValue<TAttribute>(valueName);
+        
+        public override bool HasAttribute<TAttribute>() =>
+            Info.HasAttribute<TAttribute>();
+        
     }
 }

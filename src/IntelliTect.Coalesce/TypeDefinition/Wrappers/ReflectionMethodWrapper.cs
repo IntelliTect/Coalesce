@@ -17,22 +17,20 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             Info = methodInfo;
         }
 
-        public override string Name { get { return Info.Name; } }
+        public override string Name => Info.Name;
 
-        public override string Comment { get { return ""; } }
+        public override string Comment => "";
 
-        public override object GetAttributeValue<TAttribute>(string valueName)
-        {
-            return Info.GetAttributeValue<TAttribute>(valueName);
-        }
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Info.HasAttribute<TAttribute>();
-        }
+        public override object GetAttributeValue<TAttribute>(string valueName) =>
+            Info.GetAttributeValue<TAttribute>(valueName);
+        
+        public override bool HasAttribute<TAttribute>() => Info.HasAttribute<TAttribute>();
 
-        public override bool IsStatic { get { return Info.IsStatic; } }
+        public override bool IsStatic => Info.IsStatic;
 
-        public override TypeWrapper ReturnType { get { return new ReflectionTypeWrapper(Info.ReturnType); } }
+        public override TypeWrapper ReturnType => new ReflectionTypeWrapper(Info.ReturnType);
+
+        public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
 
         public override IEnumerable<ParameterViewModel> Parameters
         {

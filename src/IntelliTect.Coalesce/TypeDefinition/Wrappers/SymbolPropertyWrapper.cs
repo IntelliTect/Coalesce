@@ -16,40 +16,29 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             Symbol = symbol;
         }
 
-        public override string Name { get { return Symbol.Name; } }
+        public override string Name => Symbol.Name;
 
-        public override string Comment { get { return SymbolHelper.ExtractXmlComments(Symbol); } }
+        public override string Comment => SymbolHelper.ExtractXmlComments(Symbol);
 
-        public override object GetAttributeValue<TAttribute>(string valueName)
-        {
-            return (Symbol).GetAttributeValue<TAttribute>(valueName);
-        }
-        public override bool HasAttribute<TAttribute>()
-        {
-            return ((IPropertySymbol)Symbol).HasAttribute<TAttribute>();
-        }
+        public override object GetAttributeValue<TAttribute>(string valueName) =>
+            Symbol.GetAttributeValue<TAttribute>(valueName);
+        
+        public override bool HasAttribute<TAttribute>() => Symbol.HasAttribute<TAttribute>();
+        
 
-        public override TypeWrapper Type { get { return new SymbolTypeWrapper(Symbol.Type); } }
+        public override TypeWrapper Type => new SymbolTypeWrapper(Symbol.Type);
 
-        public override bool HasGetter { get { return !Symbol.IsWriteOnly; } }
+        public override bool HasGetter => !Symbol.IsWriteOnly;
 
-        public override bool HasSetter { get { return !Symbol.IsReadOnly; } }
+        public override bool HasSetter => !Symbol.IsReadOnly;
 
-        public override PropertyInfo PropertyInfo { get { throw new NullReferenceException("Symbol based types do not have a PropertyInfo."); } }
+        public override PropertyInfo PropertyInfo => throw new NullReferenceException("Symbol based types do not have a PropertyInfo.");
 
-        public override bool IsStatic
-        {
-            get
-            {
-                return Symbol.IsStatic;
-            }
-        }
-        public override bool IsVirtual
-        {
-            get
-            {
-                return Symbol.IsVirtual;
-            }
-        }
+        public override bool IsStatic => Symbol.IsStatic;
+
+        public override bool IsVirtual => Symbol.IsVirtual;
+
+        public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
+
     }
 }

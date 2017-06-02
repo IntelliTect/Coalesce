@@ -290,13 +290,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this method is marked as InternalUse. Not exposed through the API
         /// </summary>
-        public bool IsInternalUse
-        {
-            get
-            {
-                return Wrapper.HasAttribute<InternalUseAttribute>();
-            }
-        }
+        public bool IsInternalUse => Wrapper.IsInternalUse;
 
         /// <summary>
         /// If true, this is a client side method.

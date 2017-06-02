@@ -15,40 +15,20 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             Symbol = symbol;
         }
 
-        public override string Name
-        {
-            get
-            {
-                return Symbol.Name;
-            }
-        }
+        public override string Name => Symbol.Name;
 
-        public override string Comment { get { return SymbolHelper.ExtractXmlComments(Symbol) ; } }
+        public override string Comment => SymbolHelper.ExtractXmlComments(Symbol);
 
-        public override object GetAttributeValue<TAttribute>(string valueName) 
-        {
-            return Symbol.GetAttributeValue<TAttribute>(valueName);
-        }
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Symbol.HasAttribute<TAttribute>();
-        }
+        public override object GetAttributeValue<TAttribute>(string valueName) =>
+            Symbol.GetAttributeValue<TAttribute>(valueName);
+        
+        public override bool HasAttribute<TAttribute>() => Symbol.HasAttribute<TAttribute>();
+        
+        public override bool IsStatic => Symbol.IsStatic;
 
-        public override bool IsStatic
-        {
-            get
-            {
-                return Symbol.IsStatic;
-            }
-        }
+        public override TypeWrapper ReturnType => new SymbolTypeWrapper(Symbol.ReturnType);
 
-        public override TypeWrapper ReturnType
-        {
-            get
-            {
-                return new SymbolTypeWrapper(Symbol.ReturnType);
-            }
-        }
+        public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
 
         public override IEnumerable<ParameterViewModel> Parameters
         {

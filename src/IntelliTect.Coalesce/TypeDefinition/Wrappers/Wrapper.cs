@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Helpers;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers;
 using System;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
@@ -8,7 +9,9 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public abstract string Name { get; }
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+
         public T? GetAttributeValue<TAttribute, T>(string valueName) where TAttribute : Attribute where T : struct
         {
             var result = GetAttributeValue<TAttribute>(valueName);
@@ -18,6 +21,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
             return new Nullable<T>((T)result);
         }
+
         public T GetAttributeObject<TAttribute, T>(string valueName) where TAttribute : Attribute where T : class
         {
             return GetAttributeValue<TAttribute>(valueName) as T;

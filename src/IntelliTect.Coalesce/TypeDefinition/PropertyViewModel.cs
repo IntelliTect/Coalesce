@@ -349,7 +349,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property has the InternalUse Attribute 
         /// </summary>
-        public bool IsInternalUse => Wrapper.HasAttribute<InternalUseAttribute>();
+        public bool IsInternalUse => Wrapper.IsInternalUse;
 
         /// <summary>
         /// Returns true if this property has the FileDownload Attribute.

@@ -12,6 +12,8 @@ Internal Use
     - Not present in the generated editor or list views.
 
     Effectively, an Internal Use member is invisible to Coalesce.
+	
+	Note that this only needs to be used on members that are public. Non-public members are always invisible to Coalesce.
 
 
 Example Usage

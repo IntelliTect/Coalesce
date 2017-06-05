@@ -461,17 +461,16 @@ module Coalesce {
                 this.isDirty(true);
                 if (this.coalesceConfig.autoSaveEnabled()) {
                     // Batch saves.
-                    if (!this.saveTimeout) {
-                        this.saveTimeout = setTimeout(() => {
-                            this.saveTimeout = 0;
-                            // If we have a save in progress, wait...
-                            if (this.isSaving()) {
-                                this.autoSave();
-                            } else if (this.coalesceConfig.autoSaveEnabled()) {
-                                this.save();
-                            }
-                        }, this.coalesceConfig.saveTimeoutMs());
-                    }
+                    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+                    this.saveTimeout = setTimeout(() => {
+                        this.saveTimeout = 0;
+                        // If we have a save in progress, wait...
+                        if (this.isSaving()) {
+                            this.autoSave();
+                        } else if (this.coalesceConfig.autoSaveEnabled()) {
+                            this.save();
+                        }
+                    }, this.coalesceConfig.saveTimeoutMs());
                 }
             }
         }

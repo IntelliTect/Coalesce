@@ -447,6 +447,11 @@ namespace IntelliTect.Coalesce.Helpers
         }
         public static HtmlString SelectForManyToMany(PropertyViewModel propertyModel, string placeholder = "", string prefix = "", string areaName = "")
         {
+            if (string.IsNullOrWhiteSpace(propertyModel.ManyToManyCollectionName))
+            {
+                throw new ArgumentException($"Property {propertyModel.Parent.Name}.{propertyModel.Name} is not marked as [ManyToMany], or has no name specified for the attribute.");
+            }
+
             string result = string.Format(@"
                 <select data-bind = ""select2AjaxMultiple: {0}{1}, itemViewModel: {6}ViewModels.{2}, 
                     idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist'""

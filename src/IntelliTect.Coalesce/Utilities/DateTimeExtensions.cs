@@ -150,6 +150,25 @@ namespace IntelliTect.Coalesce.Utilities
                 return TimeZoneHawaii;
             return prefix + " Standard Time";
         }
+        /// <summary>
+        /// Helpful when trying to create a date on UTC server correctly
+        /// </summary>
+        /// <param name="timeZoneId"></param>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="day"></param>
+        /// <param name="hour"></param>
+        /// <param name="minutes"></param>
+        /// <param name="seconds"></param>
+        /// <returns></returns>
+        public static DateTimeOffset CreateTimeForTimeZone(this DateTimeOffset dateTimeOffset, string timeZoneId, int year, int month, int day, int hour, 
+            int minutes, int seconds)
+        {
+            var tz = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            DateTimeOffset ret = new DateTimeOffset(year, month, day, hour,
+                minutes, seconds, tz.GetUtcOffset(dateTimeOffset));
+            return ret;
+        }
 
         public static string TimeZonePrefix(int? timeZoneOffset, bool? observeDaylightSavingsTime)
         {

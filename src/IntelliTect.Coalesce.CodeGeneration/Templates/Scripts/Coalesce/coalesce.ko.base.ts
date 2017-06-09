@@ -338,7 +338,7 @@ module Coalesce {
                     .fail(() => {
                         this.isLoaded(false);
                         if (this.coalesceConfig.showFailureAlerts())
-                            this.coalesceConfig.onFailure()(this, "Could not get " + this.modelName + " with id = " + id);
+                            this.coalesceConfig.onFailure()(this, "Could not load " + this.modelName + " with ID = " + id);
                     })
                     .always(() => {
                         this.coalesceConfig.onFinishBusy()(this);

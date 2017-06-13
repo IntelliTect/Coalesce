@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,22 +32,34 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         {
             if (attributeData == null) return defaultValue;
             var namedArgument = attributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
-            var constructorArgument = attributeData.ConstructorArguments.FirstOrDefault();
 
-            if (namedArgument.Key == null && constructorArgument.IsNull) return defaultValue;
+            if (namedArgument.Key != null)
+            {
+                return namedArgument.Value.Value;
+            }
 
-            var propertyValue = namedArgument.Key != null ? namedArgument.Value : constructorArgument;
+            TypedConstant constructorArgument = attributeData
+                .AttributeConstructor.Parameters
+                .Zip(attributeData.ConstructorArguments, Tuple.Create)
+                // Look for ctor params with a matching name (case insensitive)
+                .FirstOrDefault(t => t.Item1.Name.ToLowerInvariant() == propertyName.ToLowerInvariant())
+                ?.Item2
+                // If we didn't find one, see if there is just a single ctor param. If so, this is almost certainly what we were looking for.
+                ?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default(TypedConstant));
 
-            return propertyValue.Value;
+            if (constructorArgument.IsNull) return defaultValue;
+
+            return constructorArgument.Value;
         }
 
         // Not sure if these even work...
-        public static Nullable<T> GetAttributeValue<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector) where TAttribute : Attribute where T : struct
+        public static T? GetAttributeValue<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector) where TAttribute : Attribute where T : struct
         {
             var result = symbol.GetAttributeValue<TAttribute>(propertySelector.Name);
 
             return (T)result;
         }
+
         public static T GetAttributeObject<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector) where TAttribute : Attribute where T : class
         {
             var result = symbol.GetAttributeValue<TAttribute>(propertySelector.Name);

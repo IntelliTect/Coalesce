@@ -210,36 +210,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
-        public bool IsDate { get { return Wrapper.IsDate; } }
+        public bool IsDate => Wrapper.IsDate;
 
         /// <summary>
         /// True if the property is a string.
         /// </summary>
-        public bool IsString { get { return Wrapper.IsString; } }
+        public bool IsString => Wrapper.IsString;
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
         /// </summary>
-        public bool IsDateTime { get { return Wrapper.IsDateTime; } }
+        public bool IsDateTime => Wrapper.IsDateTime;
 
         /// <summary>
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
-        public bool IsDateTimeOffset { get { return Wrapper.IsDateTimeOffset; } }
+        public bool IsDateTimeOffset => Wrapper.IsDateTimeOffset;
 
         /// <summary>
         /// Returns true if class is a Byte
         /// </summary>
-        public bool IsByteArray
-        {
-            get
-            {
-                return PureType.Name == "Byte" && IsArray;
-            }
-        }
+        public bool IsByteArray => PureType.Name == "Byte" && IsArray;
 
         /// <summary>
-        /// Returns true if the class is an enum.
+        /// Returns true if the class is a number.
         /// </summary>
         public bool IsNumber
         {
@@ -248,75 +242,53 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 switch (PureType.Name)
                 {
                     case nameof(Byte):
+                    case nameof(Int16):
+                    case nameof(UInt16):
                     case nameof(Int32):
+                    case nameof(UInt32):
+                    case nameof(Int64):
+                    case nameof(UInt64):
                     case nameof(Single):
                     case nameof(Double):
                     case nameof(Decimal):
                         return true;
+                    default:
+                        return false;
                 }
-                return false;
             }
         }
 
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
-        public TypeViewModel PureType
-        {
-            get
-            {
-                return new TypeViewModel(Wrapper.PureType);
-            }
-        }
+        public TypeViewModel PureType => new TypeViewModel(Wrapper.PureType);
 
         /// <summary>
         /// Returns true if the property type is a class.
         /// </summary>
-        public bool IsClass { get { return Wrapper.IsClass; } }
+        public bool IsClass => Wrapper.IsClass;
 
         /// <summary>
         /// Returns true if the property is class outside the system NameSpace, but is not a string, array, or filedownload
         /// </summary>
-        public bool IsPOCO
-        {
-            get
-            {
-                return
-                    !IsArray && !IsCollection &&
-                    !FullName.StartsWith("System") && 
-                    Wrapper.IsClass;
-                // && IsFileDownload;
-            }
-        }
+        public bool IsPOCO => !IsArray && !IsCollection && !FullName.StartsWith("System") && Wrapper.IsClass;
 
-        public bool IsGeneric { get { return Wrapper.IsGeneric; } }
+        public bool IsGeneric => Wrapper.IsGeneric;
 
 
-        public bool IsEnum { get { return Wrapper.IsEnum; } }
+        public bool IsEnum => Wrapper.IsEnum;
 
-        public string TsDeclaration
-        {
-            get
-            {
-                return $"{Name}: {TsType}";
-            }
-        }
-        public string TsDeclarationPlain(string parameterName)
-        {
-            return $"{parameterName}: {TsTypePlain}";
-        }
+        public string TsDeclaration => $"{Name}: {TsType}";
 
-        public string CsDeclaration(string parameterName)
-        {
-            return $"{NameWithTypeParams} {parameterName.ToCamelCase()}";
-        }
+        public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
 
+        public string CsDeclaration(string parameterName) => $"{NameWithTypeParams} {parameterName.ToCamelCase()}";
 
 
         /// <summary>
         /// Returns all the possible enumeration values.
         /// </summary>
-        public Dictionary<int, string> EnumValues { get { return Wrapper.EnumValues; } }
+        public Dictionary<int, string> EnumValues => Wrapper.EnumValues;
 
         // This doesn't work correctly, but we will probably need it at some point.
         //public string FullType { get

@@ -240,39 +240,52 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     validations.Add($"required: {KoValidationOptions("true", message)}");
                 }
 
-
-                if (Range != null)
+                if (Type.IsString)
                 {
-                    var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
-                    validations.Add($"minLength: {KoValidationOptions(Range.Item1.ToString(), message)}, maxLength: {KoValidationOptions(Range.Item2.ToString(), message)}");
+                    if (Range != null)
+                    {
+                        var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
+                        validations.Add($"minLength: {KoValidationOptions(Range.Item1.ToString(), message)}, maxLength: {KoValidationOptions(Range.Item2.ToString(), message)}");
+                    }
+                    else
+                    {
+                        if (MinLength.HasValue)
+                        {
+                            var message = Wrapper.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
+                            validations.Add($"minLength: {KoValidationOptions(MinLength.Value.ToString(), message)}");
+                        }
+                        else if (minLength.HasValue && minLength.Value != int.MaxValue)
+                        {
+                            validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
+                        }
+
+                        if (MaxLength.HasValue)
+                        {
+                            var message = Wrapper.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
+                            validations.Add($"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), message)}");
+                        }
+                        else if (maxLength.HasValue && maxLength.Value != int.MinValue)
+                        {
+                            validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
+                        }
+                    }
                 }
-                else
+                else if (Type.IsNumber)
                 {
-                    if (MinLength.HasValue)
+                    if (Range != null)
                     {
-                        var message = Wrapper.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
-                        validations.Add($"minLength: {KoValidationOptions(MinLength.Value.ToString(), message)}");
+                        var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
+                        validations.Add($"min: {KoValidationOptions(Range.Item1.ToString(), message)}, max: {KoValidationOptions(Range.Item2.ToString(), message)}");
                     }
-                    else if (minLength.HasValue && minLength.Value != int.MaxValue)
+                    else
                     {
-                        validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
-                    }
-
-                    if (MaxLength.HasValue)
-                    {
-                        var message = Wrapper.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
-                        validations.Add($"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), message)}");
-                    }
-                    else if (maxLength.HasValue && maxLength.Value != int.MinValue)
-                    {
-                        validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
+                        if (minValue.HasValue && minValue.Value != double.MaxValue)
+                            validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
+                        if (maxValue.HasValue && maxValue.Value != double.MinValue)
+                            validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
                     }
                 }
 
-                if (minValue.HasValue && minValue.Value != double.MaxValue)
-                    validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
-                if (maxValue.HasValue && maxValue.Value != double.MinValue)
-                    validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
                 if (pattern != null)
                     validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
                 if (step.HasValue && step.Value != 0)

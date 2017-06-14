@@ -244,19 +244,33 @@ namespace Microsoft.Extensions.ProjectModel
         public static ProjectContext Build(string projectPath, string projectFile, string targetsLocation, string configuration = "Debug")
         {
             var errors = new List<string>();
-            var output = new List<string>();
             var tmpFile = Path.GetTempFileName();
+
+            Console.WriteLine($"{Path.GetFileName(projectFile)}: Restoring packages");
             var result = Command.CreateDotNet(
                 "msbuild",
                 new string[]
                 {
                     projectPath,
-                    $"/v:n",
-                    $"/t:EvaluateProjectInfoForCodeGeneration",
-                    $"/p:OutputFile={tmpFile};CustomBeforeMicrosoftCSharpTargets={targetsLocation};Configuration={configuration};BuildProjectReferences=false"
+                    "/nologo",
+                    "/v:q", // Can't call 'dotnet restore' because it ignores verbosity: https://github.com/dotnet/cli/issues/5989
+                    "/t:restore"
                 })
                 .OnErrorLine(e => errors.Add(e))
-                .OnOutputLine(o => output.Add(o))
+                .Execute();
+
+            Console.WriteLine($"{Path.GetFileName(projectFile)}: Evaluating & building dependencies");
+            result = Command.CreateDotNet(
+                "msbuild",
+                new string[]
+                {
+                    projectPath,
+                    "/nologo",
+                    "/v:q",
+                    "/t:EvaluateProjectInfoForCodeGeneration",
+                    $"/p:OutputFile={tmpFile};CustomBeforeMicrosoftCSharpTargets={targetsLocation};Configuration={configuration};BuildProjectReferences=true"
+                })
+                .OnErrorLine(e => errors.Add(e))
                 .Execute();
 
             if (result.ExitCode != 0)

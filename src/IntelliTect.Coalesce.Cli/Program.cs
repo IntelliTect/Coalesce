@@ -51,6 +51,8 @@ namespace IntelliTect.Coalesce.Cli
                 ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
+                Console.WriteLine("");
+
                 CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);
 
                 await generator.GenerateCode(model);

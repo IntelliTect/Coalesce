@@ -480,7 +480,7 @@ module ListViewModels {
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
 
-                    RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
+                    RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, this, true);
                     $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                         model.onDelete((item) => {

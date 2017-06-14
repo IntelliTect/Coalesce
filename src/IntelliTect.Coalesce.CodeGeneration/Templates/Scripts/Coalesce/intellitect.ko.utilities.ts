@@ -58,7 +58,7 @@ function RebuildArray(observableArray, incomingArray, idField, viewModelClass, p
         // Note that this used to only re-insert items that are dirty,
         // but that didn't make any sense, and there was no comment that said why it was done that way.
         // So, we're just going to add in everything from originalContent.
-        newArray.unshift(originalContent);
+        newArray.unshift(...originalContent);
     }
 
     observableArray(newArray);

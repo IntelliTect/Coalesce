@@ -12,6 +12,13 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
     {
         public static IncludeTree GetIncludeTree(this IQueryable queryable, string rootName = null)
         {
+            if (!(queryable.Provider is IncludableQueryProvider) && !(queryable.Provider is EntityQueryProvider))
+            {
+                throw new ArgumentException(
+                    $"Can't get an IncludeTree from an IQueryable with an IQueryProvider of type {queryable.Provider.GetType().Name}. "
+                    + "Try using .IncludedSeparately(...) and .ThenIncluded(...) to capture includes.");
+            }
+
             var expression = queryable.Expression;
             IncludeTree root = (queryable.Provider as IncludableQueryProvider)?.IncludeTree ?? new IncludeTree { PropertyName = rootName };
             IncludeTree currentNode = null;

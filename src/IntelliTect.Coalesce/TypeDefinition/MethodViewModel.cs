@@ -115,12 +115,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 result = result.Replace("ICollection", "IEnumerable");
                 if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
                 {
-                    var name = ReturnType.PureType.ClassViewModel.Name;
-                    result = result.Replace($"<{name}>", $"<{name}DtoGen>");
+                    result = result.Replace($"<{ReturnType.PureType.ClassViewModel.Name}>", $"<{ReturnType.PureType.ClassViewModel.DtoName}>");
                 }
                 else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
                 {
-                    result = $"{result}DtoGen";
+                    result = $"{ReturnType.ClassViewModel.DtoName}";
                 }
                 return result;
             }

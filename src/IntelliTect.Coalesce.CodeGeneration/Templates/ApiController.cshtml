@@ -461,18 +461,37 @@ namespace @(namespaceName).Api
                 }
                 @:Db.SaveChanges();
                 }
-@if (method.ReturnType.HasClassViewModel && !method.ReturnType.IsCollection)
-                {
-                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
-                }
-                else if (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection)
-                {
+        @if (method.ReturnType.IsCollection)
+        {
+            if (method.ReturnType.PureType.ClassViewModel?.IsDto ?? false)
+            {
+                @:result.Object = objResult.ToList();
+            }
+            else if (method.ReturnType.PureType.HasClassViewModel)
+            {
                 @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-                }
-                else
-                {
+            }
+            else
+            {
                 @:result.Object = objResult;
-                }
+            }
+        }
+        else
+        {
+            if (method.ReturnType.ClassViewModel?.IsDto ?? false)
+            {
+                @:result.Object = objResult;
+            }
+            else if (method.ReturnType.HasClassViewModel)
+            {
+                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
+            }
+            else
+            {
+                @:result.Object = objResult;
+            }
+        }
+
                 result.WasSuccessful = true;
                 result.Message = null;
             }catch(Exception ex){

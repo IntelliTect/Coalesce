@@ -102,7 +102,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     templateResult.ProcessingException.Message));
             }
 
-            using (var sourceStream = new MemoryStream(Encoding.UTF8.GetBytes(templateResult.GeneratedText)))
+            var result = templateResult.GeneratedText;
+            if (outputPath.EndsWith(".cs"))
+            {
+                var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(result);
+                var root = syntaxTree.GetRoot();
+                root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.Create());
+                result = root.ToFullString();
+            }
+
+            using (var sourceStream = new MemoryStream(Encoding.UTF8.GetBytes(result)))
             {
                 await AddFileHelper(outputPath, sourceStream);
             }

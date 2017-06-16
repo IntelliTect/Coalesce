@@ -436,16 +436,16 @@ namespace IntelliTect.Coalesce.Helpers
             return new HtmlString(result);
         }
 
-        public static HtmlString SelectForManyToMany<T>(Expression<Func<T, object>> propertySelector, string placeholder = "", string prefix = "", string areaName = "")
+        public static HtmlString SelectForManyToMany<T>(Expression<Func<T, object>> propertySelector, string placeholder = "", string prefix = "", string areaName = "", int pageSize=25)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             if (propertyModel != null)
             {
-                return SelectForManyToMany(propertyModel, placeholder, prefix, areaName);
+                return SelectForManyToMany(propertyModel, placeholder, prefix, areaName, pageSize);
             }
             return HtmlString.Empty;
         }
-        public static HtmlString SelectForManyToMany(PropertyViewModel propertyModel, string placeholder = "", string prefix = "", string areaName = "")
+        public static HtmlString SelectForManyToMany(PropertyViewModel propertyModel, string placeholder = "", string prefix = "", string areaName = "", int pageSize = 25)
         {
             if (string.IsNullOrWhiteSpace(propertyModel.ManyToManyCollectionName))
             {
@@ -454,13 +454,15 @@ namespace IntelliTect.Coalesce.Helpers
 
             string result = string.Format(@"
                 <select data-bind = ""select2AjaxMultiple: {0}{1}, itemViewModel: {6}ViewModels.{2}, 
-                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist'""
+                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist', pageSize: '{7}',""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
                 prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
                 propertyModel.ManyToManyCollectionProperty.Object.PrimaryKey.Name,
                 propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name, propertyModel.ManyToManyCollectionProperty.Object.Name,
-                (string.IsNullOrWhiteSpace(areaName) ? "" : $"{areaName}."));
+                (string.IsNullOrWhiteSpace(areaName) ? "" : $"{areaName}."),
+                pageSize
+                );
             return new HtmlString(result);
         }
 

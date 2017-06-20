@@ -591,7 +591,7 @@ module @moduleName {
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && !f.IsInternalUse && !f.IsReadOnly))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && !f.IsInternalUse && !f.IsReadOnly && !f.HasNotMapped))
             {
                 @:// See if self.@(prop.JsVariable) needs to be loaded.
                 @:if (self.@(prop.JsVariable)() == null && self.@(prop.ObjectIdProperty.JsVariable)() != null){

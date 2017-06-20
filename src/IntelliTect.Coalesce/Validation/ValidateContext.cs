@@ -54,7 +54,7 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.IsNotNull(prop.Object, "The target object for the property was not found. Make sure naming is consistent.");
                             assert.IsNotNull(prop.Object.ListTextProperty, "The target object for the property has no discernable list text. Add a [ListTextAttribute] to one of its properties.");
-                            if (!prop.IsReadOnly)
+                            if (!prop.IsReadOnly && !prop.HasNotMapped)
                             {
                                 assert.IsNotNull(prop.ObjectIdPropertyName, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
                                 if (!prop.Object.IsOneToOne)

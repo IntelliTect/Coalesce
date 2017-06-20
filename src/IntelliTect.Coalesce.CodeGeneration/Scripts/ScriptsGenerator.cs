@@ -678,7 +678,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     ScriptsFolderName, "Generated");
             using (var output = new GenerationOutputContext(this, scriptOutputPath))
             {
-                Console.WriteLine("-- Generating Models");
+                Console.WriteLine("-- Generating TypeScript Models");
                 Console.Write("   ");
                 foreach (var model in apiModels.ViewModelsForTemplates.Where(f => f.Model.OnContext || f.Model.IsDto))
                 {
@@ -704,7 +704,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
                 if (apiModels.ViewModelsForTemplates.Any(f => !f.Model.OnContext))
                 {
-                    Console.WriteLine("-- Generating External Types");
+                    Console.WriteLine("-- Generating TypeScript External Types");
                     Console.Write("   ");
                     foreach (var externalType in apiModels.ViewModelsForTemplates.Where(f => !f.Model.OnContext))
                     {

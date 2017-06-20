@@ -127,20 +127,23 @@ namespace IntelliTect.Coalesce.Controllers
                 var orderByParams = listParameters.OrderByList;
                 if (orderByParams.Any())
                 {
-                    foreach (var orderByParam in orderByParams)
+                    if (!orderByParams.Any(p => p.Key == "none"))
                     {
-                        string fieldName = orderByParam.Key;
-                        var prop = ClassViewModel.PropertyByName(fieldName);
-                        if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
+                        foreach (var orderByParam in orderByParams)
                         {
-                            string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
-                            clause = clause.Replace("ASC", orderByParam.Value.ToUpper());
-                            clause = clause.Replace("DESC", orderByParam.Value.ToUpper());
-                            result = result.OrderBy(clause);
-                        }
-                        else
-                        {
-                            result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{fieldName} {f.Value}")));
+                            string fieldName = orderByParam.Key;
+                            var prop = ClassViewModel.PropertyByName(fieldName);
+                            if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
+                            {
+                                string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
+                                clause = clause.Replace("ASC", orderByParam.Value.ToUpper());
+                                clause = clause.Replace("DESC", orderByParam.Value.ToUpper());
+                                result = result.OrderBy(clause);
+                            }
+                            else
+                            {
+                                result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{fieldName} {f.Value}")));
+                            }
                         }
                     }
                 }

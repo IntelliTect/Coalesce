@@ -193,6 +193,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var allowClear = allBindings.get('allowClear') || true
         var placeholder = $(element).attr('placeholder') || "select";
         var updating = false;
+        var pageSize = allBindings.get('pageSize') || 25;
 
         // Create the Select2
         $(element)
@@ -207,11 +208,17 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             page: params.page
                         };
                     },
-                    processResults: function (data, page) {
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
                         for (var i in data.list) {
                             data.list[i].id = data.list[i][idFieldName];
                         }
-                        return { results: data.list };
+                        return {
+                            results: data.list,
+                            pagination: {
+                                more:(params.page*pageSize) < data.totalCount
+                            }
+                        };
                     },
                     cache: "true" //(allBindings.get('cache') || false).toString(),
                 },

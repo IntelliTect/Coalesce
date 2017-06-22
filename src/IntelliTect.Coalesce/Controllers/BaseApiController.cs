@@ -311,7 +311,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 else if (prop.Type.IsString)
                                 {
                                     var expr = $@"({kvp.Key} != null && {kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)})";
-                                   expressions.Add(expr);
+                                    expressions.Add(expr);
                                 }
                                 else
                                 {
@@ -360,7 +360,7 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
+                                        expr = $@"{parts[0]}.Count({parts[1]} != null && {parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
                                     }
                                     else
                                     {

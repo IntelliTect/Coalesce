@@ -107,7 +107,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected ActionResult DocsImplementation()
         {
             // Load TypeScript docs
-            var baseClassPath = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Coalesce", "intellitect.ko.base.ts");
+            var baseClassPath = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Coalesce", "coalesce.ko.base.ts");
             var path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ViewModelClassName}.ts");
 
             ViewBag.ObjDoc = GenerateTypeScriptDocs(path, classViewModel.ViewModelClassName);

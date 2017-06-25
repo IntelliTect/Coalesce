@@ -253,6 +253,15 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
+        public DateTimeOffset ConvertToUserTimeZone(DateTimeOffset dt)
+        {
+            return TimeZoneInfo.ConvertTime(dt, CurrentTimeZone);
+        }
+
+        public DateTimeOffset ConvertToUserTimeZone(DateTime dt)
+        {
+            return TimeZoneInfo.ConvertTime(dt, CurrentTimeZone);
+        }
 
         protected IQueryable<T> AddFilters(IQueryable<T> result, ListParameters listParameters)
         {
@@ -556,6 +565,8 @@ namespace IntelliTect.Coalesce.Controllers
             return false;
         }
 
+
+
         protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
             ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
@@ -598,7 +609,7 @@ namespace IntelliTect.Coalesce.Controllers
                     if (value != null)
                     {
                         dto.GetType().InvokeMember(prop.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
-                            Type.DefaultBinder, dto, new object[] { TimeZoneInfo.ConvertTime(value.Value, CurrentTimeZone) });
+                            Type.DefaultBinder, dto, new object[] { ConvertToUserTimeZone(value.Value) });
                     }
                 }
             }
@@ -936,7 +947,7 @@ namespace IntelliTect.Coalesce.Controllers
                     // Correct offset.
                     if (prop.Type.IsDateTimeOffset)
                     {
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
+                        DateTimeOffset dateTimeOffset = ConvertToUserTimeZone(parsedValue);
                         if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
                             !value.Contains(':'))
                         {

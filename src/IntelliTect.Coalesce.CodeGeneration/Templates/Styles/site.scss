@@ -52,6 +52,10 @@ span.select2-container--default .select2-selection--single .select2-selection__a
     height: 30px;
 }
 
+span.select2.select2-container {
+    width: 100% !important;
+}
+
 
 dd:not(:last-of-type) {
     padding-bottom: 10px;

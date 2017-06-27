@@ -788,7 +788,7 @@ module Coalesce {
             });
             this.page.subscribe(() => {
                 if (this.isLoaded() && !this.isLoading()) {
-                    this.load();
+                    this.delayedLoad(300);
                 }
             });
             this.search.subscribe(() => {

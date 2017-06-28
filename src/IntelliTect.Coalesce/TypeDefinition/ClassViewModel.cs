@@ -362,12 +362,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public Dictionary<string, PropertyViewModel> SearchProperties(int depth = 0)
+        public Dictionary<string, PropertyViewModel> SearchProperties(string rootModelName = null, int depth = 0)
         {
             // Only go down three levels.
             if (depth == 3) return new Dictionary<string, PropertyViewModel>();
 
-            var searchProperties = Properties.Where(f => f.IsSearch).ToList();
+            var searchProperties = Properties.Where(f => f.IsSearchable(rootModelName)).ToList();
             var result = new Dictionary<string, PropertyViewModel>();
             if (searchProperties.Any())
             {
@@ -375,7 +375,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 foreach (var prop in searchProperties)
                 {
                     // Get all the child items
-                    foreach (var kvp in prop.SearchTerms(depth))
+                    foreach (var kvp in prop.SearchTerms(rootModelName, depth))
                     {
                         result.Add(kvp.Key, kvp.Value);
                     }
@@ -437,59 +437,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
         {
-            PropertyInfo propInfo = GetPropertyInfo<T, TProperty>(propertySelector);
+            PropertyInfo propInfo = GetPropertyInfo(propertySelector);
             if (propInfo == null) throw new ArgumentException("Could not find property");
             return PropertyByName(propInfo.Name);
         }
 
 
         // http://stackoverflow.com/questions/671968/retrieving-property-name-from-lambda-expression
-        private PropertyInfo GetPropertyInfo<TSource, TProperty>(Expression<Func<TSource, TProperty>> propertyLambda)
+        internal PropertyInfo GetPropertyInfo(LambdaExpression propertyLambda)
         {
-            Type type = typeof(TSource);
-            MemberExpression member;
-
-            // Check to see if the node type is a Convert type (this is the case with enums)
-            if (propertyLambda.Body.NodeType == ExpressionType.Convert)
-            {
-                member = ((UnaryExpression)propertyLambda.Body).Operand as MemberExpression;
-            }
-            else
-            {
-                member = propertyLambda.Body as MemberExpression;
-            }
-            if (member == null)
-            {
-                // Handle the case of a nullable.
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a method, not a property.",
-                    propertyLambda.ToString()));
-            }
-
-            PropertyInfo propInfo = member.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, not a property.",
-                    propertyLambda.ToString()));
-
-            if (type != propInfo.ReflectedType &&
-                !type.IsSubclassOf(propInfo.ReflectedType))
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a property that is not from type {1}.",
-                    propertyLambda.ToString(),
-                    type));
-
-            return propInfo;
+            return propertyLambda.GetExpressedProperty(Type);
         }
 
-        public bool IsOneToOne
-        {
-            get
-            {
-                if (PrimaryKey == null) return false;
-                return PrimaryKey.IsForeignKey;
-            }
-        }
+        public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
         /// <summary>
         /// Returns true if this is a complex type.
@@ -507,10 +467,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="TAttribute"></typeparam>
         /// <returns></returns>
-        public bool HasAttribute<TAttribute>() where TAttribute : Attribute
-        {
-            return Wrapper.HasAttribute<TAttribute>();
-        }
+        public bool HasAttribute<TAttribute>() where TAttribute : Attribute => Wrapper.HasAttribute<TAttribute>();
 
         public bool WillCreateViewController
         {

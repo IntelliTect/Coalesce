@@ -1,6 +1,8 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Utilities;
 using System;
+using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
@@ -21,10 +23,21 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
             return new Nullable<T>((T)result);
         }
+        
+        public T? GetAttributeValue<TAttribute, T>(Expression<Func<TAttribute, T>> propertyExpression) where TAttribute : Attribute where T : struct
+        {
+            return GetAttributeValue<TAttribute, T>(propertyExpression.GetExpressedProperty().Name);
+        }
 
+        
         public T GetAttributeObject<TAttribute, T>(string valueName) where TAttribute : Attribute where T : class
         {
             return GetAttributeValue<TAttribute>(valueName) as T;
+        }
+
+        public T GetAttributeObject<TAttribute, T>(Expression<Func<TAttribute, T>> propertyExpression) where TAttribute : Attribute where T : class
+        {
+            return GetAttributeObject<TAttribute, T>(propertyExpression.GetExpressedProperty().Name);
         }
 
         public virtual AttributeWrapper GetSecurityAttribute<TAttribute>() where TAttribute : SecurityAttribute

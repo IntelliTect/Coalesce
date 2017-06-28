@@ -41,6 +41,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClassFieldOrder = classFieldOrder;
         }
 
+        public static implicit operator PropertyViewModel(System.Linq.Expressions.LambdaExpression e)
+        {
+            return ReflectionRepository.PropertyBySelector(e);
+        }
+
         public TypeViewModel Type => new TypeViewModel(Wrapper.Type);
 
         /// <summary>
@@ -520,60 +525,46 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.
         /// </summary>
-        public bool IsSearch => Wrapper.HasAttribute<SearchAttribute>();
+        public bool IsSearchable(string rootModelName)
+        {
+            if (!Wrapper.HasAttribute<SearchAttribute>()) return false;
+
+            if (rootModelName == null) return true;
+
+            var whitelist = Wrapper.GetAttributeObject<SearchAttribute, string>(a => a.RootWhitelist);
+            if (!string.IsNullOrWhiteSpace(whitelist))
+            {
+                return whitelist.Split(',').Contains(rootModelName);
+            }
+
+            var blacklist = Wrapper.GetAttributeObject<SearchAttribute, string>(a => a.RootBlacklist);
+            if (!string.IsNullOrWhiteSpace(blacklist))
+            {
+                return !blacklist.Split(',').Contains(rootModelName);
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Now to search for the string when this is a search property.
         /// </summary>
-        public SearchAttribute.SearchMethods SearchMethod
-        {
-            get
-            {
-                var searchMethod = Wrapper.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(nameof(SearchAttribute.SearchMethod));
-                if (searchMethod != null)
-                {
-                    return searchMethod.Value;
-                }
-                return SearchAttribute.SearchMethods.BeginsWith;
-            }
-        }
+        public SearchAttribute.SearchMethods SearchMethod =>
+            Wrapper.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(a => a.SearchMethod)
+            ?? SearchAttribute.SearchMethods.BeginsWith;
 
         /// <summary>
-        /// Returns the actual name of the method to use for searching.
+        /// Returns the Linq.Dynamic-interpretable string representation of the method invocation that will perform search on the property.
         /// </summary>
-        public string SearchMethodName
-        {
-            get
-            {
-                switch (SearchMethod)
-                {
-                    case SearchAttribute.SearchMethods.Contains:
-                        // There isn't a good way to do case insensitive contains. This ends up being done on the client side.
-                        // Not sure how to get like '%abc%'
-                        // return @"IndexOf(""{0}"", System.StringComparison.OrdinalIgnoreCase) >= 0";
-                        return @"ToLower().IndexOf((""{0}"").ToLower()) >= 0";
-                    case SearchAttribute.SearchMethods.BeginsWith:
-                    default:
-                        return @"StartsWith(""{0}"")";
-                }
-            }
-        }
+        public string SearchMethodCall => SearchMethod == SearchAttribute.SearchMethods.Contains
+            ? @"ToLower().IndexOf((""{0}"").ToLower()) >= 0"
+            : @"StartsWith(""{0}"")";
 
         /// <summary>
         /// True if the search term should be split on spaces and evaluated individually with or.
         /// </summary>
-        public bool SearchIsSplitOnSpaces
-        {
-            get
-            {
-                var isSplitOnSpaces = Wrapper.GetAttributeValue<SearchAttribute, bool>(nameof(SearchAttribute.IsSplitOnSpaces));
-                if (isSplitOnSpaces != null)
-                {
-                    return isSplitOnSpaces.Value;
-                }
-                return false;
-            }
-        }
+        public bool SearchIsSplitOnSpaces =>
+            Wrapper.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? false;
 
         /// <summary>
         /// Returns the fields to search for this object. This could be just the field itself 
@@ -582,7 +573,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <param name="depth"></param>
         /// <param name="maxDepth"></param>
         /// <returns></returns>
-        public Dictionary<string, PropertyViewModel> SearchTerms(int depth, int maxDepth = 3)
+        public Dictionary<string, PropertyViewModel> SearchTerms(string rootModelName, int depth, int maxDepth = 3)
         {
             var result = new Dictionary<string, PropertyViewModel>();
             if (this.PureType.HasClassViewModel)
@@ -592,7 +583,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (depth < maxDepth - 1)
                 {
                     // Remove this item and add the child's search items with a prepended property name
-                    var childResult = this.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
+                    var childResult = this.Type.PureType.ClassViewModel.SearchProperties(rootModelName, depth + 1);
                     foreach (var childProp in childResult)
                     {
                         if (this.Type.IsCollection)

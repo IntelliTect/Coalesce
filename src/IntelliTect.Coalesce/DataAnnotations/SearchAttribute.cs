@@ -19,7 +19,21 @@ namespace IntelliTect.Coalesce.DataAnnotations
         };
 
         public bool IsSplitOnSpaces { get; set; } = true;
+
         public SearchMethods SearchMethod { get; set; } = SearchMethods.BeginsWith;
 
+        /// <summary>
+        /// A comma-delimited list of model class names that, if set,
+        /// will restrict the targeted property from being searched unless the
+        /// root object of the API call was one of the specified class names.
+        /// </summary>
+        public string RootWhitelist { get; set; }
+        
+        /// <summary>
+        /// A comma-delimited list of model class names that, if set,
+        /// will restrict the targeted property from being searched if
+        /// the root object of the API call was one of the specified class names.
+        /// </summary>
+        public string RootBlacklist { get; set; }
     }
 }

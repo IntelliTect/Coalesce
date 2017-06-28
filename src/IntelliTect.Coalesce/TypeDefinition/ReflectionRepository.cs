@@ -9,6 +9,7 @@ using System.Reflection;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -102,6 +103,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             var objModel = GetClassViewModel<T>();
             return objModel.PropertyBySelector(propertySelector);
+        }
+
+        public static PropertyViewModel PropertyBySelector(LambdaExpression propertySelector)
+        {
+            var objModel = GetClassViewModel(propertySelector.Parameters.First().Type);
+            return objModel.PropertyByName(propertySelector.GetExpressedProperty(objModel.Type).Name);
         }
 
         public static bool IsValidViewModelClass(string name)

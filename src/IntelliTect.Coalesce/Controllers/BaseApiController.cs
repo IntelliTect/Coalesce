@@ -297,7 +297,7 @@ namespace IntelliTect.Coalesce.Controllers
                     {
                         value = value.EscapeStringLiteralForLinqDynamic();
                         var expressions = new List<string>();
-                        foreach (var kvp in prop.SearchTerms(1))
+                        foreach (var kvp in prop.SearchTerms(ClassViewModel.Name, 1))
                         {
                             // Only strings work reliably
                             if (kvp.Value.Type.IsString)
@@ -305,17 +305,17 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (kvp.Key.Contains("[]."))
                                 {
                                     var parts = kvp.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(kvp.Value.SearchMethodName, value)}";
+                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(kvp.Value.SearchMethodCall, value)}";
                                     expressions.Add(expr);
                                 }
                                 else if (prop.Type.IsString)
                                 {
-                                    var expr = $@"({kvp.Key} != null && {kvp.Key}.{string.Format(kvp.Value.SearchMethodName, value)})";
+                                    var expr = $@"({kvp.Key} != null && {kvp.Key}.{string.Format(kvp.Value.SearchMethodCall, value)})";
                                     expressions.Add(expr);
                                 }
                                 else
                                 {
-                                    var expr = $@"{kvp.Key}.ToString().{string.Format(kvp.Value.SearchMethodName, value)}";
+                                    var expr = $@"{kvp.Key}.ToString().{string.Format(kvp.Value.SearchMethodCall, value)}";
                                     expressions.Add(expr);
                                 }
                             }
@@ -335,7 +335,7 @@ namespace IntelliTect.Coalesce.Controllers
                 if (!termFound)
                 {
                     var searchableProperties = ClassViewModel
-                        .SearchProperties()
+                        .SearchProperties(ClassViewModel.Name)
                         .Where(f => f.Value.SecurityInfo.IsReadable(User))
                         .ToList();
 
@@ -360,11 +360,11 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]} != null && {parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
+                                        expr = $@"{parts[0]}.Count({parts[1]} != null && {parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)}) > 0";
                                     }
                                     else
                                     {
-                                        expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)})";
+                                        expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodCall, clause)})";
                                     }
                                 }
                                 else
@@ -372,11 +372,11 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
+                                        expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodCall, clause)}) > 0";
                                     }
                                     else
                                     {
-                                        expr = $@"{prop.Key}.ToString().{string.Format(prop.Value.SearchMethodName, clause)}";
+                                        expr = $@"{prop.Key}.ToString().{string.Format(prop.Value.SearchMethodCall, clause)}";
                                     }
                                 }
                                 searchClauses.Add(expr);
@@ -402,11 +402,11 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodName, clause)}) > 0";
+                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)}) > 0";
                                 }
                                 else
                                 {
-                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodName, clause)})";
+                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodCall, clause)})";
                                 }
                                 completeSearchClauses.Add(expr);
                             }

@@ -63,7 +63,7 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
 
         internal static IQueryable<T> CaptureSeparateIncludes<T>(this IQueryable<T> queryable)
         {
-            return new IncludableQueryProvider.WrappedProviderQueryable<T>(queryable, new IncludableQueryProvider(queryable.Provider as EntityQueryProvider));
+            return new IncludableQueryProvider.WrappedProviderQueryable<T>(queryable, new IncludableQueryProvider(queryable.Provider as IQueryProvider));
         }
 
         /// <summary>

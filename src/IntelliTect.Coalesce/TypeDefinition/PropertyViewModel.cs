@@ -558,7 +558,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string SearchMethodCall => SearchMethod == SearchAttribute.SearchMethods.Contains
             ? @"ToLower().IndexOf((""{0}"").ToLower()) >= 0"
-            : @"StartsWith(""{0}"")";
+            : @"ToLower().StartsWith((""{0}"").ToLower())";
 
         /// <summary>
         /// True if the search term should be split on spaces and evaluated individually with or.

@@ -29,7 +29,7 @@
 <div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Gender</label>
-<div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>                    </div>
+<div class="col-md-8 prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, false))</div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Cases Assigned</label>
 <div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
@@ -129,9 +129,9 @@
 
         aperson.saveCallbacks.push(function(obj){
             // If there is a new id, set the one for this page
-            if (!intellitect.utilities.GetUrlParameter('id')){
+            if (!Coalesce.Utilities.GetUrlParameter('id')){
                 if (aperson.myId){
-                    var newUrl = intellitect.utilities.SetUrlParameter(window.location.href, "id", aperson.myId);
+                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", aperson.myId);
                     window.history.replaceState(null, window.document.title, newUrl);
                 }
             }

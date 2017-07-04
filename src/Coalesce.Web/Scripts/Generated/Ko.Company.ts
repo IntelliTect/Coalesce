@@ -104,6 +104,7 @@ module ViewModels {
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.companyId;
+				self.companyId(data.companyId);
 				// Load the lists of other objects
                 if (data.employees != null) {
 				    // Merge the incoming array
@@ -113,7 +114,6 @@ module ViewModels {
 				// This handles the issue with populating select lists with correct data because we now have the object.
 
 				// The rest of the objects are loaded now.
-				self.companyId(data.companyId);
 				self.name(data.name);
 				self.address1(data.address1);
 				self.address2(data.address2);
@@ -205,17 +205,12 @@ module ViewModels {
             };
 
 
-
             // Load all the valid values in parallel.
             self.loadValidValues = function(callback) {
                 if ($.isFunction(callback)) callback();
             };
 
             // Enumeration Lookups.
-
-
-            // Method Implementations
-
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
@@ -227,9 +222,6 @@ module ViewModels {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);
             }
-
-
-
         }
     }
 

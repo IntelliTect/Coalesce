@@ -50,11 +50,43 @@ module ListViewModels {
         public loadCaseProductsValidValues: (callback: any) => void;
         public devTeamAssignedValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadDevTeamAssignedValidValues: (callback: any) => void;
-            // Call server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCount: (callback?: any, reload?: boolean) => void;
+    
+        // Call server method (GetAllOpenCasesCount)
+        public getAllOpenCasesCount = (callback: () => void = null, reload: boolean = true) => {
+            this.getAllOpenCasesCountIsLoading(true);
+            this.getAllOpenCasesCountMessage('');
+            this.getAllOpenCasesCountWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCasesCount",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.getAllOpenCasesCountResultRaw(data.object);
+                this.getAllOpenCasesCountMessage('');
+                this.getAllOpenCasesCountWasSuccessful(true);
+                this.getAllOpenCasesCountResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.getAllOpenCasesCountWasSuccessful(false);
+                this.getAllOpenCasesCountMessage(errorMsg);
+
+                //alert("Could not call method getAllOpenCasesCount: " + errorMsg);
+            })
+            .always(() => {
+                this.getAllOpenCasesCountIsLoading(false);
+            });
+        } 
         // Result of server method (GetAllOpenCasesCount) strongly typed in a observable.
         public getAllOpenCasesCountResult: KnockoutObservable<number> = ko.observable(null);
-        // Result of server method (GetAllOpenCasesCount) simply wrapped in an observable.
+        // Raw result object of server method (GetAllOpenCasesCount) simply wrapped in an observable.
         public getAllOpenCasesCountResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCasesCount) is being called
         public getAllOpenCasesCountIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -63,16 +95,51 @@ module ListViewModels {
         // True if the server method (GetAllOpenCasesCount) was successful.
         public getAllOpenCasesCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountUi: (callback?: any) => void;
+        public getAllOpenCasesCountUi = (callback: () => void = null) => {
+            this.getAllOpenCasesCount(callback);
+        }
         // Presents a modal with input boxes to call the server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public getAllOpenCasesCountModal = (callback: () => void = null) => {
+            this.getAllOpenCasesCountUi(callback);
+        }
         
+
         // Call server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatus: (callback?: any, reload?: boolean) => void;
+        public randomizeDatesAndStatus = (callback: () => void = null, reload: boolean = true) => {
+            this.randomizeDatesAndStatusIsLoading(true);
+            this.randomizeDatesAndStatusMessage('');
+            this.randomizeDatesAndStatusWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Case/RandomizeDatesAndStatus",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.randomizeDatesAndStatusResultRaw(data.object);
+                this.randomizeDatesAndStatusMessage('');
+                this.randomizeDatesAndStatusWasSuccessful(true);
+                this.randomizeDatesAndStatusResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.randomizeDatesAndStatusWasSuccessful(false);
+                this.randomizeDatesAndStatusMessage(errorMsg);
+
+                //alert("Could not call method randomizeDatesAndStatus: " + errorMsg);
+            })
+            .always(() => {
+                this.randomizeDatesAndStatusIsLoading(false);
+            });
+        } 
         // Result of server method (RandomizeDatesAndStatus) strongly typed in a observable.
         public randomizeDatesAndStatusResult: KnockoutObservable<any> = ko.observable(null);
-        // Result of server method (RandomizeDatesAndStatus) simply wrapped in an observable.
+        // Raw result object of server method (RandomizeDatesAndStatus) simply wrapped in an observable.
         public randomizeDatesAndStatusResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (RandomizeDatesAndStatus) is being called
         public randomizeDatesAndStatusIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -81,16 +148,53 @@ module ListViewModels {
         // True if the server method (RandomizeDatesAndStatus) was successful.
         public randomizeDatesAndStatusWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatusUi: (callback?: any) => void;
+        public randomizeDatesAndStatusUi = (callback: () => void = null) => {
+            this.randomizeDatesAndStatus(callback);
+        }
         // Presents a modal with input boxes to call the server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatusModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public randomizeDatesAndStatusModal = (callback: () => void = null) => {
+            this.randomizeDatesAndStatusUi(callback);
+        }
         
+
         // Call server method (GetAllOpenCases)
-        public getAllOpenCases: (callback?: any, reload?: boolean) => void;
+        public getAllOpenCases = (callback: () => void = null, reload: boolean = true) => {
+            this.getAllOpenCasesIsLoading(true);
+            this.getAllOpenCasesMessage('');
+            this.getAllOpenCasesWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCases",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.getAllOpenCasesResultRaw(data.object);
+                this.getAllOpenCasesMessage('');
+                this.getAllOpenCasesWasSuccessful(true);
+                if (this.getAllOpenCasesResult()){
+                    Coalesce.KnockoutUtilities.RebuildArray(this.getAllOpenCasesResult, data.object, 'caseKey', ViewModels.Case, this, true);
+                }
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.getAllOpenCasesWasSuccessful(false);
+                this.getAllOpenCasesMessage(errorMsg);
+
+                //alert("Could not call method getAllOpenCases: " + errorMsg);
+            })
+            .always(() => {
+                this.getAllOpenCasesIsLoading(false);
+            });
+        } 
         // Result of server method (GetAllOpenCases) strongly typed in a observable.
         public getAllOpenCasesResult: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
-        // Result of server method (GetAllOpenCases) simply wrapped in an observable.
+        // Raw result object of server method (GetAllOpenCases) simply wrapped in an observable.
         public getAllOpenCasesResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetAllOpenCases) is being called
         public getAllOpenCasesIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -99,17 +203,55 @@ module ListViewModels {
         // True if the server method (GetAllOpenCases) was successful.
         public getAllOpenCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetAllOpenCases)
-        public getAllOpenCasesUi: (callback?: any) => void;
+        public getAllOpenCasesUi = (callback: () => void = null) => {
+            this.getAllOpenCases(callback);
+        }
         // Presents a modal with input boxes to call the server method (GetAllOpenCases)
-        public getAllOpenCasesModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public getAllOpenCasesModal = (callback: () => void = null) => {
+            this.getAllOpenCasesUi(callback);
+        }
         
+
         // Call server method (GetCaseSummary)
         // Returns a list of summary information about Cases
-        public getCaseSummary: (callback?: any, reload?: boolean) => void;
+        public getCaseSummary = (callback: () => void = null, reload: boolean = true) => {
+            this.getCaseSummaryIsLoading(true);
+            this.getCaseSummaryMessage('');
+            this.getCaseSummaryWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Case/GetCaseSummary",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.getCaseSummaryResultRaw(data.object);
+                this.getCaseSummaryMessage('');
+                this.getCaseSummaryWasSuccessful(true);
+                if (!this.getCaseSummaryResult()){
+                    this.getCaseSummaryResult(new ViewModels.CaseSummary());
+                }
+                this.getCaseSummaryResult().loadFromDto(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.getCaseSummaryWasSuccessful(false);
+                this.getCaseSummaryMessage(errorMsg);
+
+                //alert("Could not call method getCaseSummary: " + errorMsg);
+            })
+            .always(() => {
+                this.getCaseSummaryIsLoading(false);
+            });
+        } 
         // Result of server method (GetCaseSummary) strongly typed in a observable.
         public getCaseSummaryResult: KnockoutObservable<ViewModels.CaseSummary> = ko.observable(null);
-        // Result of server method (GetCaseSummary) simply wrapped in an observable.
+        // Raw result object of server method (GetCaseSummary) simply wrapped in an observable.
         public getCaseSummaryResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetCaseSummary) is being called
         public getCaseSummaryIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -118,197 +260,20 @@ module ListViewModels {
         // True if the server method (GetCaseSummary) was successful.
         public getCaseSummaryWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetCaseSummary)
-        public getCaseSummaryUi: (callback?: any) => void;
+        public getCaseSummaryUi = (callback: () => void = null) => {
+            this.getCaseSummary(callback);
+        }
         // Presents a modal with input boxes to call the server method (GetCaseSummary)
-        public getCaseSummaryModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public getCaseSummaryModal = (callback: () => void = null) => {
+            this.getCaseSummaryUi(callback);
+        }
         
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Case(newItem, parent);
 
         constructor() {
             super();
-            var self = this; 
-
-        // Method Implementations
-
-            self.getAllOpenCasesCount = function(callback?: any, reload: boolean = true){
-                self.getAllOpenCasesCountIsLoading(true);
-                self.getAllOpenCasesCountMessage('');
-                self.getAllOpenCasesCountWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCasesCount",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.getAllOpenCasesCountResultRaw(data.object);
-                    self.getAllOpenCasesCountResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.getAllOpenCasesCountWasSuccessful(false);
-                    self.getAllOpenCasesCountMessage(errorMsg);
-
-					//alert("Could not call method getAllOpenCasesCount: " + errorMsg);
-				})
-				.always(function() {
-                    self.getAllOpenCasesCountIsLoading(false);
-				});
-            }
-
-            self.getAllOpenCasesCountUi = function(callback?: any) {
-                                self.getAllOpenCasesCount(callback);
-            }
-
-            self.getAllOpenCasesCountModal = function(callback?: any) {
-                    self.getAllOpenCasesCountUi(callback);
-            }
-            
-
-            
-            self.randomizeDatesAndStatus = function(callback?: any, reload: boolean = true){
-                self.randomizeDatesAndStatusIsLoading(true);
-                self.randomizeDatesAndStatusMessage('');
-                self.randomizeDatesAndStatusWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Case/RandomizeDatesAndStatus",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.randomizeDatesAndStatusResultRaw(data.object);
-                    self.randomizeDatesAndStatusResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.randomizeDatesAndStatusWasSuccessful(false);
-                    self.randomizeDatesAndStatusMessage(errorMsg);
-
-					//alert("Could not call method randomizeDatesAndStatus: " + errorMsg);
-				})
-				.always(function() {
-                    self.randomizeDatesAndStatusIsLoading(false);
-				});
-            }
-
-            self.randomizeDatesAndStatusUi = function(callback?: any) {
-                                self.randomizeDatesAndStatus(callback);
-            }
-
-            self.randomizeDatesAndStatusModal = function(callback?: any) {
-                    self.randomizeDatesAndStatusUi(callback);
-            }
-            
-
-            
-            self.getAllOpenCases = function(callback?: any, reload: boolean = true){
-                self.getAllOpenCasesIsLoading(true);
-                self.getAllOpenCasesMessage('');
-                self.getAllOpenCasesWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCases",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.getAllOpenCasesResultRaw(data.object);
-                    if (self.getAllOpenCasesResult()){
-                            Coalesce.KnockoutUtilities.RebuildArray(self.getAllOpenCasesResult, data.object, 'caseKey', ViewModels.Case, self, true);
-                    }
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.getAllOpenCasesWasSuccessful(false);
-                    self.getAllOpenCasesMessage(errorMsg);
-
-					//alert("Could not call method getAllOpenCases: " + errorMsg);
-				})
-				.always(function() {
-                    self.getAllOpenCasesIsLoading(false);
-				});
-            }
-
-            self.getAllOpenCasesUi = function(callback?: any) {
-                                self.getAllOpenCases(callback);
-            }
-
-            self.getAllOpenCasesModal = function(callback?: any) {
-                    self.getAllOpenCasesUi(callback);
-            }
-            
-
-            
-            self.getCaseSummary = function(callback?: any, reload: boolean = true){
-                self.getCaseSummaryIsLoading(true);
-                self.getCaseSummaryMessage('');
-                self.getCaseSummaryWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Case/GetCaseSummary",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.getCaseSummaryResultRaw(data.object);
-                    if (!self.getCaseSummaryResult()){
-                        self.getCaseSummaryResult(new ViewModels.CaseSummary());
-                    }
-                    self.getCaseSummaryResult().loadFromDto(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.getCaseSummaryWasSuccessful(false);
-                    self.getCaseSummaryMessage(errorMsg);
-
-					//alert("Could not call method getCaseSummary: " + errorMsg);
-				})
-				.always(function() {
-                    self.getCaseSummaryIsLoading(false);
-				});
-            }
-
-            self.getCaseSummaryUi = function(callback?: any) {
-                                self.getCaseSummary(callback);
-            }
-
-            self.getCaseSummaryModal = function(callback?: any) {
-                    self.getCaseSummaryUi(callback);
-            }
-            
-
-                    }
+        }
     }
 
     export namespace CaseList {

@@ -86,12 +86,12 @@ module ViewModels {
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.productId;
+				self.productId(data.productId);
 				// Load the lists of other objects
 				// Objects are loaded first so that they are available when the IDs get loaded.
 				// This handles the issue with populating select lists with correct data because we now have the object.
 
 				// The rest of the objects are loaded now.
-				self.productId(data.productId);
 				self.name(data.name);
                 if (self.afterLoadFromDto){
                     self.afterLoadFromDto();
@@ -132,17 +132,12 @@ module ViewModels {
             };
 
 
-
             // Load all the valid values in parallel.
             self.loadValidValues = function(callback) {
                 if ($.isFunction(callback)) callback();
             };
 
             // Enumeration Lookups.
-
-
-            // Method Implementations
-
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
@@ -154,9 +149,6 @@ module ViewModels {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);
             }
-
-
-
         }
     }
 

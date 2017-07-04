@@ -9,42 +9,46 @@ using Coalesce.Domain.External;
 namespace Coalesce.Web.Controllers
 {
     [Authorize]
-    public partial class ProductController 
-        : BaseViewController<Coalesce.Domain.Product, AppDbContext> 
-    { 
+    public partial class ProductController
+        : BaseViewController<Coalesce.Domain.Product, AppDbContext>
+    {
         public ProductController() : base() { }
 
         [Authorize]
-        public ActionResult Cards(){
+        public ActionResult Cards()
+        {
             return IndexImplementation(false, @"~/Views/Generated/Product/Cards.cshtml");
         }
 
         [Authorize]
-        public ActionResult Table(){
+        public ActionResult Table()
+        {
             return IndexImplementation(false, @"~/Views/Generated/Product/Table.cshtml");
         }
 
 
-        [Authorize(Roles="Admin")]
-        public ActionResult TableEdit(){
+        [Authorize(Roles = "Admin")]
+        public ActionResult TableEdit()
+        {
             return IndexImplementation(true, @"~/Views/Generated/Product/Table.cshtml");
         }
 
-        [Authorize(Roles="Admin")]
-        public ActionResult CreateEdit(){
+        [Authorize(Roles = "Admin")]
+        public ActionResult CreateEdit()
+        {
             return CreateEditImplementation(@"~/Views/Generated/Product/CreateEdit.cshtml");
         }
-                      
-        [Authorize(Roles="Admin")]
+
+        [Authorize(Roles = "Admin")]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
         }
-                              
-        [Authorize(Roles="Admin")]
+
+        [Authorize(Roles = "Admin")]
         public ActionResult Docs()
         {
             return DocsImplementation();
-        }    
+        }
     }
 }

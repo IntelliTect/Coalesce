@@ -9,42 +9,46 @@ using Coalesce.Domain.External;
 namespace Coalesce.Web.Controllers
 {
     [Authorize]
-    public partial class CaseDtoController 
-        : BaseViewController<Coalesce.Domain.CaseDto, AppDbContext> 
-    { 
+    public partial class CaseDtoController
+        : BaseViewController<Coalesce.Domain.CaseDto, AppDbContext>
+    {
         public CaseDtoController() : base() { }
 
         [Authorize]
-        public ActionResult Cards(){
+        public ActionResult Cards()
+        {
             return IndexImplementation(false, @"~/Views/Generated/CaseDto/Cards.cshtml");
         }
 
         [Authorize]
-        public ActionResult Table(){
+        public ActionResult Table()
+        {
             return IndexImplementation(false, @"~/Views/Generated/CaseDto/Table.cshtml");
         }
 
 
         [Authorize]
-        public ActionResult TableEdit(){
+        public ActionResult TableEdit()
+        {
             return IndexImplementation(true, @"~/Views/Generated/CaseDto/Table.cshtml");
         }
 
         [Authorize]
-        public ActionResult CreateEdit(){
+        public ActionResult CreateEdit()
+        {
             return CreateEditImplementation(@"~/Views/Generated/CaseDto/CreateEdit.cshtml");
         }
-                      
+
         [Authorize]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
         }
-                              
+
         [Authorize]
         public ActionResult Docs()
         {
             return DocsImplementation();
-        }    
+        }
     }
 }

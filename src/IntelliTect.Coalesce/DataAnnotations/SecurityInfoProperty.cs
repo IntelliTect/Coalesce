@@ -112,8 +112,8 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public override string ToString()
         {
             string result = "";
-            if (IsRead) { result += $"Read: {ReadRolesExternal} "; }
-            if (IsEdit) { result += $"Edit: {EditRolesExternal} "; }
+            if (IsRead) { result += $"Read: {ReadRoles} "; }
+            if (IsEdit) { result += $"Edit: {EditRoles} "; }
             if (result == "") result = "None";
             return result;
         }

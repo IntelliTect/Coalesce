@@ -45,12 +45,44 @@ module ListViewModels {
         // Valid values
         public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
         public loadCompanyValidValues: (callback: any) => void;
-            // Call server method (Add)
+    
+        // Call server method (Add)
         // Adds two numbers.
-        public add: (numberOne: number, numberTwo: number, callback?: any, reload?: boolean) => void;
+        public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true) => {
+            this.addIsLoading(true);
+            this.addMessage('');
+            this.addWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/Add",
+                     data: { numberOne: numberOne, numberTwo: numberTwo },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.addResultRaw(data.object);
+                this.addMessage('');
+                this.addWasSuccessful(true);
+                this.addResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.addWasSuccessful(false);
+                this.addMessage(errorMsg);
+
+                //alert("Could not call method add: " + errorMsg);
+            })
+            .always(() => {
+                this.addIsLoading(false);
+            });
+        } 
         // Result of server method (Add) strongly typed in a observable.
         public addResult: KnockoutObservable<number> = ko.observable(null);
-        // Result of server method (Add) simply wrapped in an observable.
+        // Raw result object of server method (Add) simply wrapped in an observable.
         public addResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (Add) is being called
         public addIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -59,20 +91,67 @@ module ListViewModels {
         // True if the server method (Add) was successful.
         public addWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Add)
-        public addUi: (callback?: any) => void;
+        public addUi = (callback: () => void = null) => {
+            var numberOne: number = parseFloat(prompt('Number One'));
+            var numberTwo: number = parseFloat(prompt('Number Two'));
+            this.add(numberOne, numberTwo, callback);
+        }
         // Presents a modal with input boxes to call the server method (Add)
-        public addModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
-        public addWithArgs: (args?: PersonList.AddArgs, callback?: any) => void;
-        
+        public addModal = (callback: () => void = null) => {
+            $('#method-Add').modal();
+            $('#method-Add').on('shown.bs.modal', () => {
+                $('#method-Add .btn-ok').unbind('click');
+                $('#method-Add .btn-ok').click(() => {
+                    this.addWithArgs(null, callback);
+                    $('#method-Add').modal('hide');
+                });
+            });
+        }
+            // Variable for method arguments to allow for easy binding
+        public addWithArgs = (args?: PersonList.AddArgs, callback: () => void = null) => {
+            if (!args) args = this.addArgs;
+            this.add(args.numberOne(), args.numberTwo(), callback);
+        }
         public addArgs = new PersonList.AddArgs(); 
         
+
         // Call server method (GetUser)
         // Returns the user name
-        public getUser: (callback?: any, reload?: boolean) => void;
+        public getUser = (callback: () => void = null, reload: boolean = true) => {
+            this.getUserIsLoading(true);
+            this.getUserMessage('');
+            this.getUserWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/GetUser",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.getUserResultRaw(data.object);
+                this.getUserMessage('');
+                this.getUserWasSuccessful(true);
+                this.getUserResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.getUserWasSuccessful(false);
+                this.getUserMessage(errorMsg);
+
+                //alert("Could not call method getUser: " + errorMsg);
+            })
+            .always(() => {
+                this.getUserIsLoading(false);
+            });
+        } 
         // Result of server method (GetUser) strongly typed in a observable.
         public getUserResult: KnockoutObservable<string> = ko.observable(null);
-        // Result of server method (GetUser) simply wrapped in an observable.
+        // Raw result object of server method (GetUser) simply wrapped in an observable.
         public getUserResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetUser) is being called
         public getUserIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -81,17 +160,52 @@ module ListViewModels {
         // True if the server method (GetUser) was successful.
         public getUserWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetUser)
-        public getUserUi: (callback?: any) => void;
+        public getUserUi = (callback: () => void = null) => {
+            this.getUser(callback);
+        }
         // Presents a modal with input boxes to call the server method (GetUser)
-        public getUserModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public getUserModal = (callback: () => void = null) => {
+            this.getUserUi(callback);
+        }
         
+
         // Call server method (GetUserPublic)
         // Returns the user name
-        public getUserPublic: (callback?: any, reload?: boolean) => void;
+        public getUserPublic = (callback: () => void = null, reload: boolean = true) => {
+            this.getUserPublicIsLoading(true);
+            this.getUserPublicMessage('');
+            this.getUserPublicWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/GetUserPublic",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.getUserPublicResultRaw(data.object);
+                this.getUserPublicMessage('');
+                this.getUserPublicWasSuccessful(true);
+                this.getUserPublicResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.getUserPublicWasSuccessful(false);
+                this.getUserPublicMessage(errorMsg);
+
+                //alert("Could not call method getUserPublic: " + errorMsg);
+            })
+            .always(() => {
+                this.getUserPublicIsLoading(false);
+            });
+        } 
         // Result of server method (GetUserPublic) strongly typed in a observable.
         public getUserPublicResult: KnockoutObservable<string> = ko.observable(null);
-        // Result of server method (GetUserPublic) simply wrapped in an observable.
+        // Raw result object of server method (GetUserPublic) simply wrapped in an observable.
         public getUserPublicResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (GetUserPublic) is being called
         public getUserPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -100,17 +214,52 @@ module ListViewModels {
         // True if the server method (GetUserPublic) was successful.
         public getUserPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (GetUserPublic)
-        public getUserPublicUi: (callback?: any) => void;
+        public getUserPublicUi = (callback: () => void = null) => {
+            this.getUserPublic(callback);
+        }
         // Presents a modal with input boxes to call the server method (GetUserPublic)
-        public getUserPublicModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public getUserPublicModal = (callback: () => void = null) => {
+            this.getUserPublicUi(callback);
+        }
         
+
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
-        public namesStartingWith: (characters: String, callback?: any, reload?: boolean) => void;
+        public namesStartingWith = (characters: String, callback: () => void = null, reload: boolean = true) => {
+            this.namesStartingWithIsLoading(true);
+            this.namesStartingWithMessage('');
+            this.namesStartingWithWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWith",
+                     data: { characters: characters },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.namesStartingWithResultRaw(data.object);
+                this.namesStartingWithMessage('');
+                this.namesStartingWithWasSuccessful(true);
+                this.namesStartingWithResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.namesStartingWithWasSuccessful(false);
+                this.namesStartingWithMessage(errorMsg);
+
+                //alert("Could not call method namesStartingWith: " + errorMsg);
+            })
+            .always(() => {
+                this.namesStartingWithIsLoading(false);
+            });
+        } 
         // Result of server method (NamesStartingWith) strongly typed in a observable.
         public namesStartingWithResult: KnockoutObservableArray<string> = ko.observableArray([]);
-        // Result of server method (NamesStartingWith) simply wrapped in an observable.
+        // Raw result object of server method (NamesStartingWith) simply wrapped in an observable.
         public namesStartingWithResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWith) is being called
         public namesStartingWithIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -119,20 +268,66 @@ module ListViewModels {
         // True if the server method (NamesStartingWith) was successful.
         public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWith)
-        public namesStartingWithUi: (callback?: any) => void;
+        public namesStartingWithUi = (callback: () => void = null) => {
+            var characters: String = prompt('Characters');
+            this.namesStartingWith(characters, callback);
+        }
         // Presents a modal with input boxes to call the server method (NamesStartingWith)
-        public namesStartingWithModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
-        public namesStartingWithWithArgs: (args?: PersonList.NamesStartingWithArgs, callback?: any) => void;
-        
+        public namesStartingWithModal = (callback: () => void = null) => {
+            $('#method-NamesStartingWith').modal();
+            $('#method-NamesStartingWith').on('shown.bs.modal', () => {
+                $('#method-NamesStartingWith .btn-ok').unbind('click');
+                $('#method-NamesStartingWith .btn-ok').click(() => {
+                    this.namesStartingWithWithArgs(null, callback);
+                    $('#method-NamesStartingWith').modal('hide');
+                });
+            });
+        }
+            // Variable for method arguments to allow for easy binding
+        public namesStartingWithWithArgs = (args?: PersonList.NamesStartingWithArgs, callback: () => void = null) => {
+            if (!args) args = this.namesStartingWithArgs;
+            this.namesStartingWith(args.characters(), callback);
+        }
         public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
         
+
         // Call server method (NamesStartingWithPublic)
         // Gets all the first names starting with the characters.
-        public namesStartingWithPublic: (characters: String, callback?: any, reload?: boolean) => void;
+        public namesStartingWithPublic = (characters: String, callback: () => void = null, reload: boolean = true) => {
+            this.namesStartingWithPublicIsLoading(true);
+            this.namesStartingWithPublicMessage('');
+            this.namesStartingWithPublicWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithPublic",
+                     data: { characters: characters },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.namesStartingWithPublicResultRaw(data.object);
+                this.namesStartingWithPublicMessage('');
+                this.namesStartingWithPublicWasSuccessful(true);
+                this.namesStartingWithPublicResult(data.object);
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.namesStartingWithPublicWasSuccessful(false);
+                this.namesStartingWithPublicMessage(errorMsg);
+
+                //alert("Could not call method namesStartingWithPublic: " + errorMsg);
+            })
+            .always(() => {
+                this.namesStartingWithPublicIsLoading(false);
+            });
+        } 
         // Result of server method (NamesStartingWithPublic) strongly typed in a observable.
         public namesStartingWithPublicResult: KnockoutObservableArray<string> = ko.observableArray([]);
-        // Result of server method (NamesStartingWithPublic) simply wrapped in an observable.
+        // Raw result object of server method (NamesStartingWithPublic) simply wrapped in an observable.
         public namesStartingWithPublicResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWithPublic) is being called
         public namesStartingWithPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -141,19 +336,67 @@ module ListViewModels {
         // True if the server method (NamesStartingWithPublic) was successful.
         public namesStartingWithPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWithPublic)
-        public namesStartingWithPublicUi: (callback?: any) => void;
+        public namesStartingWithPublicUi = (callback: () => void = null) => {
+            var characters: String = prompt('Characters');
+            this.namesStartingWithPublic(characters, callback);
+        }
         // Presents a modal with input boxes to call the server method (NamesStartingWithPublic)
-        public namesStartingWithPublicModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
-        public namesStartingWithPublicWithArgs: (args?: PersonList.NamesStartingWithPublicArgs, callback?: any) => void;
-        
+        public namesStartingWithPublicModal = (callback: () => void = null) => {
+            $('#method-NamesStartingWithPublic').modal();
+            $('#method-NamesStartingWithPublic').on('shown.bs.modal', () => {
+                $('#method-NamesStartingWithPublic .btn-ok').unbind('click');
+                $('#method-NamesStartingWithPublic .btn-ok').click(() => {
+                    this.namesStartingWithPublicWithArgs(null, callback);
+                    $('#method-NamesStartingWithPublic').modal('hide');
+                });
+            });
+        }
+            // Variable for method arguments to allow for easy binding
+        public namesStartingWithPublicWithArgs = (args?: PersonList.NamesStartingWithPublicArgs, callback: () => void = null) => {
+            if (!args) args = this.namesStartingWithPublicArgs;
+            this.namesStartingWithPublic(args.characters(), callback);
+        }
         public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
         
+
         // Call server method (NamesStartingWithAWithCases)
-        public namesStartingWithAWithCases: (callback?: any, reload?: boolean) => void;
+        public namesStartingWithAWithCases = (callback: () => void = null, reload: boolean = true) => {
+            this.namesStartingWithAWithCasesIsLoading(true);
+            this.namesStartingWithAWithCasesMessage('');
+            this.namesStartingWithAWithCasesWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithAWithCases",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.namesStartingWithAWithCasesResultRaw(data.object);
+                this.namesStartingWithAWithCasesMessage('');
+                this.namesStartingWithAWithCasesWasSuccessful(true);
+                if (this.namesStartingWithAWithCasesResult()){
+                    Coalesce.KnockoutUtilities.RebuildArray(this.namesStartingWithAWithCasesResult, data.object, 'personId', ViewModels.Person, this, true);
+                }
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.namesStartingWithAWithCasesWasSuccessful(false);
+                this.namesStartingWithAWithCasesMessage(errorMsg);
+
+                //alert("Could not call method namesStartingWithAWithCases: " + errorMsg);
+            })
+            .always(() => {
+                this.namesStartingWithAWithCasesIsLoading(false);
+            });
+        } 
         // Result of server method (NamesStartingWithAWithCases) strongly typed in a observable.
         public namesStartingWithAWithCasesResult: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
-        // Result of server method (NamesStartingWithAWithCases) simply wrapped in an observable.
+        // Raw result object of server method (NamesStartingWithAWithCases) simply wrapped in an observable.
         public namesStartingWithAWithCasesResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (NamesStartingWithAWithCases) is being called
         public namesStartingWithAWithCasesIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -162,17 +405,54 @@ module ListViewModels {
         // True if the server method (NamesStartingWithAWithCases) was successful.
         public namesStartingWithAWithCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWithAWithCases)
-        public namesStartingWithAWithCasesUi: (callback?: any) => void;
+        public namesStartingWithAWithCasesUi = (callback: () => void = null) => {
+            this.namesStartingWithAWithCases(callback);
+        }
         // Presents a modal with input boxes to call the server method (NamesStartingWithAWithCases)
-        public namesStartingWithAWithCasesModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public namesStartingWithAWithCasesModal = (callback: () => void = null) => {
+            this.namesStartingWithAWithCasesUi(callback);
+        }
         
+
         // Call server method (BorCPeople)
         // People whose last name starts with B or c
-        public borCPeople: (callback?: any, reload?: boolean) => void;
+        public borCPeople = (callback: () => void = null, reload: boolean = true) => {
+            this.borCPeopleIsLoading(true);
+            this.borCPeopleMessage('');
+            this.borCPeopleWasSuccessful(null);
+            $.ajax({ method: "POST",
+                     url: this.coalesceConfig.baseApiUrl() + "/Person/BorCPeople",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.borCPeopleResultRaw(data.object);
+                this.borCPeopleMessage('');
+                this.borCPeopleWasSuccessful(true);
+                if (this.borCPeopleResult()){
+                    Coalesce.KnockoutUtilities.RebuildArray(this.borCPeopleResult, data.object, 'personId', ViewModels.Person, this, true);
+                }
+        
+                if (reload) {
+                    this.load(callback);
+                } else if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.borCPeopleWasSuccessful(false);
+                this.borCPeopleMessage(errorMsg);
+
+                //alert("Could not call method borCPeople: " + errorMsg);
+            })
+            .always(() => {
+                this.borCPeopleIsLoading(false);
+            });
+        } 
         // Result of server method (BorCPeople) strongly typed in a observable.
         public borCPeopleResult: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
-        // Result of server method (BorCPeople) simply wrapped in an observable.
+        // Raw result object of server method (BorCPeople) simply wrapped in an observable.
         public borCPeopleResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (BorCPeople) is being called
         public borCPeopleIsLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -181,366 +461,20 @@ module ListViewModels {
         // True if the server method (BorCPeople) was successful.
         public borCPeopleWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (BorCPeople)
-        public borCPeopleUi: (callback?: any) => void;
+        public borCPeopleUi = (callback: () => void = null) => {
+            this.borCPeople(callback);
+        }
         // Presents a modal with input boxes to call the server method (BorCPeople)
-        public borCPeopleModal: (callback?: any) => void;
-        // Variable for method arguments to allow for easy binding
+        public borCPeopleModal = (callback: () => void = null) => {
+            this.borCPeopleUi(callback);
+        }
         
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Person(newItem, parent);
 
         constructor() {
             super();
-            var self = this; 
-
-        // Method Implementations
-
-            self.add = function(numberOne: number, numberTwo: number, callback?: any, reload: boolean = true){
-                self.addIsLoading(true);
-                self.addMessage('');
-                self.addWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/Add",
-                         data: {
-                        numberOne: numberOne, 
-                        numberTwo: numberTwo
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.addResultRaw(data.object);
-                    self.addResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.addWasSuccessful(false);
-                    self.addMessage(errorMsg);
-
-					//alert("Could not call method add: " + errorMsg);
-				})
-				.always(function() {
-                    self.addIsLoading(false);
-				});
-            }
-
-            self.addUi = function(callback?: any) {
-                var numberOne: number = parseFloat(prompt('Number One'));
-                var numberTwo: number = parseFloat(prompt('Number Two'));
-                                self.add(numberOne, numberTwo, callback);
-            }
-
-            self.addModal = function(callback?: any) {
-                $('#method-Add').modal();
-                $('#method-Add').on('shown.bs.modal', function() {
-                    $('#method-Add .btn-ok').unbind('click');
-                    $('#method-Add .btn-ok').click(function()
-                    {
-                        self.addWithArgs(null, callback);
-                        $('#method-Add').modal('hide');
-                    });
-                });
-            }
-            
-            self.addWithArgs = function(args?: PersonList.AddArgs, callback?: any) {
-                if (!args) args = self.addArgs;
-                self.add(args.numberOne(), args.numberTwo(), callback);
-            }
-
-            
-            self.getUser = function(callback?: any, reload: boolean = true){
-                self.getUserIsLoading(true);
-                self.getUserMessage('');
-                self.getUserWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/GetUser",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.getUserResultRaw(data.object);
-                    self.getUserResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.getUserWasSuccessful(false);
-                    self.getUserMessage(errorMsg);
-
-					//alert("Could not call method getUser: " + errorMsg);
-				})
-				.always(function() {
-                    self.getUserIsLoading(false);
-				});
-            }
-
-            self.getUserUi = function(callback?: any) {
-                                self.getUser(callback);
-            }
-
-            self.getUserModal = function(callback?: any) {
-                    self.getUserUi(callback);
-            }
-            
-
-            
-            self.getUserPublic = function(callback?: any, reload: boolean = true){
-                self.getUserPublicIsLoading(true);
-                self.getUserPublicMessage('');
-                self.getUserPublicWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/GetUserPublic",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.getUserPublicResultRaw(data.object);
-                    self.getUserPublicResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.getUserPublicWasSuccessful(false);
-                    self.getUserPublicMessage(errorMsg);
-
-					//alert("Could not call method getUserPublic: " + errorMsg);
-				})
-				.always(function() {
-                    self.getUserPublicIsLoading(false);
-				});
-            }
-
-            self.getUserPublicUi = function(callback?: any) {
-                                self.getUserPublic(callback);
-            }
-
-            self.getUserPublicModal = function(callback?: any) {
-                    self.getUserPublicUi(callback);
-            }
-            
-
-            
-            self.namesStartingWith = function(characters: String, callback?: any, reload: boolean = true){
-                self.namesStartingWithIsLoading(true);
-                self.namesStartingWithMessage('');
-                self.namesStartingWithWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWith",
-                         data: {
-                        characters: characters
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.namesStartingWithResultRaw(data.object);
-                    self.namesStartingWithResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.namesStartingWithWasSuccessful(false);
-                    self.namesStartingWithMessage(errorMsg);
-
-					//alert("Could not call method namesStartingWith: " + errorMsg);
-				})
-				.always(function() {
-                    self.namesStartingWithIsLoading(false);
-				});
-            }
-
-            self.namesStartingWithUi = function(callback?: any) {
-                var characters: String = prompt('Characters');
-                                self.namesStartingWith(characters, callback);
-            }
-
-            self.namesStartingWithModal = function(callback?: any) {
-                $('#method-NamesStartingWith').modal();
-                $('#method-NamesStartingWith').on('shown.bs.modal', function() {
-                    $('#method-NamesStartingWith .btn-ok').unbind('click');
-                    $('#method-NamesStartingWith .btn-ok').click(function()
-                    {
-                        self.namesStartingWithWithArgs(null, callback);
-                        $('#method-NamesStartingWith').modal('hide');
-                    });
-                });
-            }
-            
-            self.namesStartingWithWithArgs = function(args?: PersonList.NamesStartingWithArgs, callback?: any) {
-                if (!args) args = self.namesStartingWithArgs;
-                self.namesStartingWith(args.characters(), callback);
-            }
-
-            
-            self.namesStartingWithPublic = function(characters: String, callback?: any, reload: boolean = true){
-                self.namesStartingWithPublicIsLoading(true);
-                self.namesStartingWithPublicMessage('');
-                self.namesStartingWithPublicWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithPublic",
-                         data: {
-                        characters: characters
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.namesStartingWithPublicResultRaw(data.object);
-                    self.namesStartingWithPublicResult(data.object);
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.namesStartingWithPublicWasSuccessful(false);
-                    self.namesStartingWithPublicMessage(errorMsg);
-
-					//alert("Could not call method namesStartingWithPublic: " + errorMsg);
-				})
-				.always(function() {
-                    self.namesStartingWithPublicIsLoading(false);
-				});
-            }
-
-            self.namesStartingWithPublicUi = function(callback?: any) {
-                var characters: String = prompt('Characters');
-                                self.namesStartingWithPublic(characters, callback);
-            }
-
-            self.namesStartingWithPublicModal = function(callback?: any) {
-                $('#method-NamesStartingWithPublic').modal();
-                $('#method-NamesStartingWithPublic').on('shown.bs.modal', function() {
-                    $('#method-NamesStartingWithPublic .btn-ok').unbind('click');
-                    $('#method-NamesStartingWithPublic .btn-ok').click(function()
-                    {
-                        self.namesStartingWithPublicWithArgs(null, callback);
-                        $('#method-NamesStartingWithPublic').modal('hide');
-                    });
-                });
-            }
-            
-            self.namesStartingWithPublicWithArgs = function(args?: PersonList.NamesStartingWithPublicArgs, callback?: any) {
-                if (!args) args = self.namesStartingWithPublicArgs;
-                self.namesStartingWithPublic(args.characters(), callback);
-            }
-
-            
-            self.namesStartingWithAWithCases = function(callback?: any, reload: boolean = true){
-                self.namesStartingWithAWithCasesIsLoading(true);
-                self.namesStartingWithAWithCasesMessage('');
-                self.namesStartingWithAWithCasesWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithAWithCases",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.namesStartingWithAWithCasesResultRaw(data.object);
-                    if (self.namesStartingWithAWithCasesResult()){
-                            Coalesce.KnockoutUtilities.RebuildArray(self.namesStartingWithAWithCasesResult, data.object, 'personId', ViewModels.Person, self, true);
-                    }
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.namesStartingWithAWithCasesWasSuccessful(false);
-                    self.namesStartingWithAWithCasesMessage(errorMsg);
-
-					//alert("Could not call method namesStartingWithAWithCases: " + errorMsg);
-				})
-				.always(function() {
-                    self.namesStartingWithAWithCasesIsLoading(false);
-				});
-            }
-
-            self.namesStartingWithAWithCasesUi = function(callback?: any) {
-                                self.namesStartingWithAWithCases(callback);
-            }
-
-            self.namesStartingWithAWithCasesModal = function(callback?: any) {
-                    self.namesStartingWithAWithCasesUi(callback);
-            }
-            
-
-            
-            self.borCPeople = function(callback?: any, reload: boolean = true){
-                self.borCPeopleIsLoading(true);
-                self.borCPeopleMessage('');
-                self.borCPeopleWasSuccessful(null);
-                $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/BorCPeople",
-                         data: {
-
-                    },
-                         xhrFields: { withCredentials: true } })
-				.done(function(data) {
-					self.borCPeopleResultRaw(data.object);
-                    if (self.borCPeopleResult()){
-                            Coalesce.KnockoutUtilities.RebuildArray(self.borCPeopleResult, data.object, 'personId', ViewModels.Person, self, true);
-                    }
-                    
-                    if (reload) {
-                      self.load(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-				})
-				.fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.borCPeopleWasSuccessful(false);
-                    self.borCPeopleMessage(errorMsg);
-
-					//alert("Could not call method borCPeople: " + errorMsg);
-				})
-				.always(function() {
-                    self.borCPeopleIsLoading(false);
-				});
-            }
-
-            self.borCPeopleUi = function(callback?: any) {
-                                self.borCPeople(callback);
-            }
-
-            self.borCPeopleModal = function(callback?: any) {
-                    self.borCPeopleUi(callback);
-            }
-            
-
-                    }
+        }
     }
 
     export namespace PersonList {

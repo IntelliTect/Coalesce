@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Coalesce.Web\Coalesce.Web.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
 
@@ -42,12 +43,16 @@
   </ItemGroup>
 
   <Target Name="PrecompileScript" BeforeTargets="BeforeBuild">
-    <Exec Command="taskkill /IM Coalesce.Web.exe /F" />
+    <Exec Command="taskkill /IM Coalesce.Web.exe /F" IgnoreExitCode="true" />
   </Target>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
 </Project>

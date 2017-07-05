@@ -3,7 +3,6 @@ using IntelliTect.Coalesce.CodeGeneration;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using System;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 using Xunit;
 
 namespace Coalesce.Web.Tests

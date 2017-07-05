@@ -205,3 +205,4 @@ project.lock.json
 # Don't source control the CLI Launch Settings because they differ from project to project.
 /src/IntelliTect.Coalesce.Cli/Properties/launchSettings.json
 *.stackdump
+src/Coalesce.Web/output.txt

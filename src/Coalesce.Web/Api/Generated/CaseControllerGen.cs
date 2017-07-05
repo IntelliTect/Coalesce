@@ -1,20 +1,20 @@
-    using IntelliTect.Coalesce.Controllers;
-    using IntelliTect.Coalesce.Data;
-    using IntelliTect.Coalesce.Mapping;
-    using IntelliTect.Coalesce.Helpers.IncludeTree;
-    using IntelliTect.Coalesce.Models;
-    using IntelliTect.Coalesce.TypeDefinition;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Coalesce.Web.Models;
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Threading.Tasks;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Api
 {
@@ -44,7 +44,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
+            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
 
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
@@ -78,7 +78,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
+            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
 
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
@@ -104,7 +104,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
+            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
 
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
@@ -140,7 +140,7 @@ namespace Coalesce.Web.Api
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
-        
+
 
 
         [HttpPost("delete/{id}")]
@@ -150,21 +150,23 @@ namespace Coalesce.Web.Api
 
             return DeleteImplementation(id);
         }
-        
+
 
         [HttpPost("save")]
         [AllowAnonymous]
         public virtual async Task<SaveResult<CaseDtoGen>> Save(CaseDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
-            if (!dto.CaseKey.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+            if (!dto.CaseKey.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+            {
                 var result = new SaveResult<CaseDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Create not allowed on Case objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.CaseKey.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+            else if (dto.CaseKey.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+            {
                 var result = new SaveResult<CaseDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Edit not allowed on Case objects.";
@@ -187,7 +189,7 @@ namespace Coalesce.Web.Api
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
+
         /// <summary>
         /// Downloads CSV of CaseDtoGen
         /// </summary>
@@ -200,7 +202,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
+            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -235,7 +237,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string caseKey = null,string title = null,string description = null,string openedAt = null,string assignedToId = null,string reportedById = null,string severity = null,string status = null,string devTeamAssignedId = null)
+            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -257,20 +259,21 @@ namespace Coalesce.Web.Api
             return csv;
         }
 
-    
+
 
         /// <summary>
         /// Saves CSV data as an uploaded file
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<CaseDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<CaseDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
         {
             if (file != null && file.Length > 0)
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    using (var reader = new System.IO.StreamReader(stream)) {
+                    using (var reader = new System.IO.StreamReader(stream))
+                    {
                         var csv = reader.ReadToEnd();
                         return await CsvSave(csv, hasHeader);
                     }
@@ -284,35 +287,39 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<CaseDtoGen>>> CsvSave(string csv, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<CaseDtoGen>>> CsvSave(string csv, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CaseDtoGen>(csv, hasHeader);
             var resultList = new List<SaveResult<CaseDtoGen>>();
-            foreach (var dto in list){
+            foreach (var dto in list)
+            {
                 // Check if creates/edits aren't allowed
-                if (!dto.CaseKey.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+                if (!dto.CaseKey.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+                {
                     var result = new SaveResult<CaseDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Create not allowed on Case objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.CaseKey.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+                else if (dto.CaseKey.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+                {
                     var result = new SaveResult<CaseDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Edit not allowed on Case objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else {
+                else
+                {
                     var result = await SaveImplementation(dto, "none", null, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
         }
-        
+
         protected override IQueryable<Coalesce.Domain.Case> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "GetAllOpenCases")
@@ -329,14 +336,19 @@ namespace Coalesce.Web.Api
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
-        public virtual SaveResult<Int32> GetAllOpenCasesCount (){
+        public virtual SaveResult<Int32> GetAllOpenCasesCount()
+        {
             var result = new SaveResult<Int32>();
-            try{
+            try
+            {
                 var objResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -347,15 +359,20 @@ namespace Coalesce.Web.Api
         /// Method: RandomizeDatesAndStatus
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
-        public virtual SaveResult<object> RandomizeDatesAndStatus (){
+        public virtual SaveResult<object> RandomizeDatesAndStatus()
+        {
             var result = new SaveResult<object>();
-            try{
-                                object objResult = null;
+            try
+            {
+                object objResult = null;
                 Case.RandomizeDatesAndStatus(Db);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -366,15 +383,20 @@ namespace Coalesce.Web.Api
         /// Method: GetAllOpenCases
         /// </summary>
         [HttpPost("GetAllOpenCases")]
-        public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases (){
+        public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases()
+        {
             var result = new SaveResult<IEnumerable<CaseDtoGen>>();
-            try{
+            try
+            {
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetAllOpenCases(Db);
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -385,15 +407,20 @@ namespace Coalesce.Web.Api
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]
-        public virtual SaveResult<CaseSummaryDtoGen> GetCaseSummary (){
+        public virtual SaveResult<CaseSummaryDtoGen> GetCaseSummary()
+        {
             var result = new SaveResult<CaseSummaryDtoGen>();
-            try{
+            try
+            {
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetCaseSummary(Db);
                 result.Object = Mapper<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>.ObjToDtoMapper(objResult, User, "", includeTree);
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }

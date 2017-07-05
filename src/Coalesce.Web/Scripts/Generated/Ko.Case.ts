@@ -162,6 +162,7 @@ module ViewModels {
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.caseKey;
+				self.caseKey(data.caseKey);
 				// Load the lists of other objects
                 if (data.caseProducts != null) {
 				    // Merge the incoming array
@@ -224,7 +225,6 @@ module ViewModels {
                 }
 
 				// The rest of the objects are loaded now.
-				self.caseKey(data.caseKey);
 				self.title(data.title);
 				self.description(data.description);
                 if (data.openedAt == null) self.openedAt(null);
@@ -469,7 +469,6 @@ module ViewModels {
             };
 
 
-
             // Load all the valid values in parallel.
             self.loadValidValues = function(callback) {
                 self.loadingValidValues = 0;
@@ -488,10 +487,6 @@ module ViewModels {
                 }
             });
 
-
-            // Method Implementations
-
-
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
@@ -502,9 +497,6 @@ module ViewModels {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);
             }
-
-
-
         }
     }
 

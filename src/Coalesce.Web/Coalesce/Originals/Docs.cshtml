@@ -1,6 +1,7 @@
 ﻿@model IntelliTect.Coalesce.TypeDefinition.ClassViewModel
 @using IntelliTect.Coalesce.TypeDefinition
 @using IntelliTect.Coalesce.Models
+@using IntelliTect.Coalesce.Utilities
 @{ Layout = "_Master"; }
 @{
     ClassViewModel vm = Model;
@@ -32,8 +33,26 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Security: @vm.SecurityInfo.ToString()</h4>
+                <h3>Security</h3>
             </div>
+            <table class="table">
+                <tr>
+                    <th style="width: 150px;">Create</th>
+                    <td>@vm.SecurityInfo.Create.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Read</th>
+                    <td>@vm.SecurityInfo.Read.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Edit</th>
+                    <td>@vm.SecurityInfo.Edit.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Delete</th>
+                    <td>@vm.SecurityInfo.Delete.ToString()</td>
+                </tr>
+            </table>
         </div>
 
 
@@ -45,9 +64,11 @@
                 <tr>
                     <th>Name</th>
                     <th>Type</th>
-                    <th>Required</th>
-                    <th>Read Only</th>
-                    <th>Has Valid Values</th>
+                    <th class="text-center">Exposed</th>
+                    <th class="text-center">Required</th>
+                    <th class="text-center">Read Only</th>
+                    <th class="text-center">Has Valid Values</th>
+                    <th class="text-center">Client Validation</th>
                     <th>Security</th>
                 </tr>
                 @foreach (var prop in vm.Properties)
@@ -63,14 +84,65 @@
                             {
                                 <a href="/@prop.PureType.Name/docs">List of @prop.PureType.Name</a>
                             }
+                            else if (prop.Type.IsEnum)
+                            {
+                                <span>@prop.PureType.Name (Enum)</span>
+                            }
                             else
                             {
                                 <span>@prop.PureType.Name</span>
                             }
                         </td>
-                        <td>@prop.IsRequired</td>
-                        <td>@prop.IsReadOnly</td>
-                        <td>@prop.HasValidValues</td>
+                        <td class="text-center">
+                            @if (!prop.IsInternalUse)
+                            {
+                            <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                            <span class="glyphicon glyphicon-remove" style="color:red;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.IsRequired)
+                            {
+                                <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.IsReadOnly)
+                            {
+                                <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.HasValidValues || prop.Type.IsEnum)
+                            {
+                            <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                            <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.HasClientValidation)
+                            {
+                                <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
                         <td>@prop.SecurityInfo.ToString()</td>
                     </tr>
                 }
@@ -92,7 +164,7 @@
                     <tr>
                         <th>@prop.Key</th>
                         <td>@prop.Value.SearchIsSplitOnSpaces</td>
-                        <td>@prop.Value.SearchMethodName</td>
+                        <td>@prop.Value.SearchMethod.ToString().ToProperCase()</td>
                     </tr>
                 }
 
@@ -111,7 +183,7 @@
                     <th>TypeScript Parameters</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var method in vm.Methods.Where(m=>m.IsClientMethod))
+                @foreach (var method in vm.Methods.Where(m => m.IsClientMethod))
                 {
                     <tr>
                         <th>@method.Name</th>
@@ -124,7 +196,7 @@
                         <td>
                             @method.TsParameters
                         </td>
-                       <td>@method.SecurityInfo.ToString()</td>
+                        <td>@method.SecurityInfo.ToString()</td>
                     </tr>
                 }
             </table>
@@ -137,14 +209,14 @@
             </div>
             @if (vm.Methods.Any(m => m.IsIQueryableOfParent && m.IsClientMethod))
             {
-            <ul>
-                @foreach (var method in vm.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod))
+                <ul class="list-group">
+                    @foreach (var method in vm.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod))
                 {
-                    <li>
-                        @method.Name
-                    </li>
-                }
-            </ul>
+                        <li class="list-group-item">
+                            @method.Name
+                        </li>
+                    }
+                </ul>
             }
             else
             {
@@ -212,8 +284,10 @@
                 <tr>
                     <th>CustomList</th>
                     <td>
-                        <p>Almost the same as List, but allows for specifying a list of fields that will be returned.  On the server
-                            the standard generated DTO is created, then all properties not in the list of fields will be set to null.</p>
+                        <p>
+                            Almost the same as List, but allows for specifying a list of fields that will be returned.  On the server
+                            the standard generated DTO is created, then all properties not in the list of fields will be set to null.
+                        </p>
                         <dl>
                             <dt>All parameters from List apply to CustomList, except Dto.</dt>
                             <dd>&nbsp;</dd>
@@ -272,7 +346,7 @@
                                 <dt>Filter</dt>
                                 <dd>Free form SQL filter with the syntax [field][operator][value]. eg. name='test', price>10</dd>
                             </dl>
-                       </p>
+                        </p>
                 </tr>
                 <tr>
                     <th>Delete</th>
@@ -324,7 +398,7 @@
                 </thead>
 
                 <tbody>
-                    @foreach (var f in objDoc.Functions.OrderBy(f=>f.Name))
+                    @foreach (var f in objDoc.Functions.OrderBy(f => f.Name))
                     {
                         <tr>
                             <td>@f.Name</td>
@@ -388,4 +462,3 @@
         </div>
     </div>
 </div>
-

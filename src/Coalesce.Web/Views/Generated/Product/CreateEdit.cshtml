@@ -33,9 +33,9 @@
 
         aproduct.saveCallbacks.push(function(obj){
             // If there is a new id, set the one for this page
-            if (!intellitect.utilities.GetUrlParameter('id')){
+            if (!Coalesce.Utilities.GetUrlParameter('id')){
                 if (aproduct.myId){
-                    var newUrl = intellitect.utilities.SetUrlParameter(window.location.href, "id", aproduct.myId);
+                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", aproduct.myId);
                     window.history.replaceState(null, window.document.title, newUrl);
                 }
             }

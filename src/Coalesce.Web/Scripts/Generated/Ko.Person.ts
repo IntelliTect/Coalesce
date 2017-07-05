@@ -102,9 +102,49 @@ module ViewModels {
 
         // Call server method (Rename)
         // Adds the text to the first name.
-        public rename: (addition: String, callback?: any, reload?: boolean) => JQueryPromise<any>;
-        // Result of server method (Rename)
+        public rename = (addition: String, callback: () => void = null, reload: boolean = true) => {
+
+            this.renameIsLoading(true);
+            this.renameMessage('');
+            this.renameWasSuccessful(null);
+            return $.ajax({ method: "POST",
+                        url: this.coalesceConfig.baseApiUrl() + "/Person/Rename",
+                        data: { id: this.myId, addition: addition },
+                        xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.isDirty(false);
+				this.renameResultRaw(data.object);
+                this.renameMessage('');
+                this.renameWasSuccessful(true);
+                if (!this.renameResult()){
+                    this.renameResult(new Person(data.object));
+                } else {
+                    this.renameResult().loadFromDto(data.object);
+                }
+
+                // The return type is the type of the object, load it.
+                this.loadFromDto(data.object, true)
+                if ($.isFunction(callback)) {
+                    callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.renameWasSuccessful(false);
+                this.renameMessage(errorMsg);
+    
+                if (this.coalesceConfig.showFailureAlerts())
+                    this.coalesceConfig.onFailure()(this as any, "Could not call method rename: " + errorMsg);
+            })
+            .always(() => {
+                this.renameIsLoading(false);
+            });
+        } 
+        // Result of server method (Rename) strongly typed in a observable.
         public renameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
+        // Raw result object of server method (Rename) simply wrapped in an observable.
+        public renameResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (Rename) is being called
         public renameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (Rename) if it fails.
@@ -112,19 +152,69 @@ module ViewModels {
         // True if the server method (Rename) was successful.
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (Rename)
-        public renameUi: (callback?: any, reload?: boolean) => void;
+        public renameUi = (callback: () => void = null, reload: boolean = true) => {
+            var addition: String = prompt('Addition');
+            return this.rename(addition, callback, reload);
+        }
         // Presents a modal with input boxes to call the server method (Rename)
-        public renameModal: (callback?: any, reload?: boolean) => void;
-        // Variable for method arguments to allow for easy binding
-        public renameWithArgs: (args?: Person.RenameArgs, callback?: any, reload?: boolean) => void;
+        public renameModal = (callback: () => void = null, reload: boolean = true) => {
+            $('#method-Rename').modal();
+            $('#method-Rename').on('shown.bs.modal', () => {
+                $('#method-Rename .btn-ok').unbind('click');
+                $('#method-Rename .btn-ok').click(() => {
+                    this.renameWithArgs(null, callback, reload);
+                    $('#method-Rename').modal('hide');
+                });
+            });
+        }
+        public renameWithArgs = (args?: Person.RenameArgs, callback: () => void = null, reload: boolean = true) => {
+            if (!args) args = this.renameArgs;
+            return this.rename(args.addition(), callback, reload);
+        }
         // Object that can be easily bound to fields to allow data entry for the method
         public renameArgs = new Person.RenameArgs(); 
         
         // Call server method (ChangeSpacesToDashesInName)
         // Removes spaces from the name and puts in dashes
-        public changeSpacesToDashesInName: (callback?: any, reload?: boolean) => JQueryPromise<any>;
-        // Result of server method (ChangeSpacesToDashesInName)
+        public changeSpacesToDashesInName = (callback: () => void = null, reload: boolean = true) => {
+
+            this.changeSpacesToDashesInNameIsLoading(true);
+            this.changeSpacesToDashesInNameMessage('');
+            this.changeSpacesToDashesInNameWasSuccessful(null);
+            return $.ajax({ method: "POST",
+                        url: this.coalesceConfig.baseApiUrl() + "/Person/ChangeSpacesToDashesInName",
+                        data: { id: this.myId },
+                        xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.isDirty(false);
+				this.changeSpacesToDashesInNameResultRaw(data.object);
+                this.changeSpacesToDashesInNameMessage('');
+                this.changeSpacesToDashesInNameWasSuccessful(true);
+                this.changeSpacesToDashesInNameResult(data.object);
+
+                if (reload) {
+                  this.reload(callback);
+                } else if ($.isFunction(callback)) {
+                  callback();
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.changeSpacesToDashesInNameWasSuccessful(false);
+                this.changeSpacesToDashesInNameMessage(errorMsg);
+    
+                if (this.coalesceConfig.showFailureAlerts())
+                    this.coalesceConfig.onFailure()(this as any, "Could not call method changeSpacesToDashesInName: " + errorMsg);
+            })
+            .always(() => {
+                this.changeSpacesToDashesInNameIsLoading(false);
+            });
+        } 
+        // Result of server method (ChangeSpacesToDashesInName) strongly typed in a observable.
         public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable(null);
+        // Raw result object of server method (ChangeSpacesToDashesInName) simply wrapped in an observable.
+        public changeSpacesToDashesInNameResultRaw: KnockoutObservable<any> = ko.observable();
         // True while the server method (ChangeSpacesToDashesInName) is being called
         public changeSpacesToDashesInNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
         // Error message for server method (ChangeSpacesToDashesInName) if it fails.
@@ -132,10 +222,13 @@ module ViewModels {
         // True if the server method (ChangeSpacesToDashesInName) was successful.
         public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameUi: (callback?: any, reload?: boolean) => void;
+        public changeSpacesToDashesInNameUi = (callback: () => void = null, reload: boolean = true) => {
+            return this.changeSpacesToDashesInName(callback, reload);
+        }
         // Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameModal: (callback?: any, reload?: boolean) => void;
-        // Variable for method arguments to allow for easy binding
+        public changeSpacesToDashesInNameModal = (callback: () => void = null, reload: boolean = true) => {
+            this.changeSpacesToDashesInNameUi(callback, reload);
+        }
         
         
         public originalData: KnockoutObservable<any> = ko.observable(null);
@@ -223,6 +316,7 @@ module ViewModels {
 				self.isLoading(true);
 				// Set the ID 
 				self.myId = data.personId;
+				self.personId(data.personId);
 				// Load the lists of other objects
                 if (data.casesAssigned != null) {
 				    // Merge the incoming array
@@ -262,7 +356,6 @@ module ViewModels {
                 }
 
 				// The rest of the objects are loaded now.
-				self.personId(data.personId);
 				self.title(data.title);
 				self.firstName(data.firstName);
 				self.lastName(data.lastName);
@@ -301,7 +394,6 @@ module ViewModels {
     	        dto.firstName = self.firstName();
     	        dto.lastName = self.lastName();
     	        dto.email = self.email();
-    	        dto.gender = self.gender();
                 if (!self.birthDate()) dto.BirthDate = null;
 				else dto.birthDate = self.birthDate().format('YYYY-MM-DDTHH:mm:ss');
                 if (!self.lastBath()) dto.LastBath = null;
@@ -388,7 +480,6 @@ module ViewModels {
                 self.firstName.subscribe(self.autoSave);
                 self.lastName.subscribe(self.autoSave);
                 self.email.subscribe(self.autoSave);
-                self.gender.subscribe(self.autoSave);
                 self.birthDate.subscribe(self.autoSave);
                 self.lastBath.subscribe(self.autoSave);
                 self.nextUpgrade.subscribe(self.autoSave);
@@ -468,7 +559,6 @@ module ViewModels {
             };
 
 
-
             // Load all the valid values in parallel.
             self.loadValidValues = function(callback) {
                 self.loadingValidValues = 0;
@@ -491,110 +581,6 @@ module ViewModels {
                 }
             });
 
-
-            // Method Implementations
-
-            self.rename = function(addition: String, callback?: any, reload: boolean = true){
-                self.renameIsLoading(true);
-                return $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/Rename",
-                         data: {
-                        id: self.myId, 
-                        addition: addition
-                    },
-                         xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isDirty(false);
-                    self.renameMessage('');
-                    self.renameWasSuccessful(true);
-                    if (!self.renameResult()){
-                        self.renameResult(new Person(data.object));
-                    }else{
-                        self.renameResult().loadFromDto(data.object);
-                    }
-
-                    // The return type is the type of the object, load it.
-                    self.loadFromDto(data.object, true)
-                    if ($.isFunction(callback)) {
-                        callback();
-                    }
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.renameWasSuccessful(false);
-                    self.renameMessage(errorMsg);
-    
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not call method rename: " + errorMsg);
-                })
-                .always(function() {
-                    self.renameIsLoading(false);
-                });
-            }
-            
-            self.renameUi = function(callback?: any, reload: boolean = true) {
-                var addition: String = prompt('Addition');
-                self.rename(addition, callback, reload);
-            }
-            self.renameModal = function(callback?: any, reload: boolean = true) {
-                $('#method-Rename').modal();
-                $('#method-Rename').on('shown.bs.modal', function() {
-                    $('#method-Rename .btn-ok').unbind('click');
-                    $('#method-Rename .btn-ok').click(function()
-                    {
-                        self.renameWithArgs(null, callback, reload);
-                        $('#method-Rename').modal('hide');
-                    });
-                });
-            }
-            self.renameWithArgs = function(args?: Person.RenameArgs, callback?: any, reload: boolean = true) {
-                if (!args) args = self.renameArgs;
-                self.rename(args.addition(), callback, reload);
-            }
-
-            self.changeSpacesToDashesInName = function(callback?: any, reload: boolean = true){
-                self.changeSpacesToDashesInNameIsLoading(true);
-                return $.ajax({ method: "POST",
-                         url: self.coalesceConfig.baseApiUrl() + "/Person/ChangeSpacesToDashesInName",
-                         data: {
-                        id: self.myId
-                    },
-                         xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isDirty(false);
-                    self.changeSpacesToDashesInNameMessage('');
-                    self.changeSpacesToDashesInNameWasSuccessful(true);
-                    self.changeSpacesToDashesInNameResult(data.object);
-
-                    if (reload) {
-                      self.reload(callback);
-                    } else if ($.isFunction(callback)) {
-                      callback(data);
-                    }
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.changeSpacesToDashesInNameWasSuccessful(false);
-                    self.changeSpacesToDashesInNameMessage(errorMsg);
-    
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not call method changeSpacesToDashesInName: " + errorMsg);
-                })
-                .always(function() {
-                    self.changeSpacesToDashesInNameIsLoading(false);
-                });
-            }
-            
-            self.changeSpacesToDashesInNameUi = function(callback?: any, reload: boolean = true) {
-                self.changeSpacesToDashesInName(callback, reload);
-            }
-            self.changeSpacesToDashesInNameModal = function(callback?: any, reload: boolean = true) {
-                    self.changeSpacesToDashesInNameUi(callback, reload);
-            }
-
-
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
@@ -605,9 +591,6 @@ module ViewModels {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);
             }
-
-
-
         }
     }
 

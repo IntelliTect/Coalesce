@@ -1,16 +1,16 @@
-    using IntelliTect.Coalesce.Interfaces;
-    using IntelliTect.Coalesce.Mapping;
-    using IntelliTect.Coalesce.Models;
-    using IntelliTect.Coalesce.Helpers.IncludeTree;
-    using Newtonsoft.Json;
-    using System;
-    using System.Linq;
-    using System.Linq.Dynamic;
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using Coalesce.Web.Models;
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Linq.Dynamic;
+using System.Collections.Generic;
+using System.Security.Claims;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
 
 using static Coalesce.Domain.Company;
 
@@ -18,7 +18,7 @@ namespace Coalesce.Web.Models
 {
     public partial class CompanyDtoGen : GeneratedDto<Coalesce.Domain.Company, CompanyDtoGen>
         , IClassDto<Coalesce.Domain.Company, CompanyDtoGen>
-        {
+    {
         public CompanyDtoGen() { }
 
         public Int32? CompanyId { get; set; }
@@ -33,30 +33,31 @@ namespace Coalesce.Web.Models
 
         // Create a new version of this object or use it from the lookup.
         public static CompanyDtoGen Create(Coalesce.Domain.Company obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<object, object> objects = null, IncludeTree tree = null) {
+                                   Dictionary<object, object> objects = null, IncludeTree tree = null)
+        {
             // Return null of the object is null;
             if (obj == null) return null;
-                        
+
             if (objects == null) objects = new Dictionary<object, object>();
 
             includes = includes ?? "";
 
             // Applicable includes for Company
-            
+
 
             // Applicable excludes for Company
-            
+
 
             // Applicable roles for Company
             if (user != null)
-			{
-			}
+            {
+            }
 
 
 
             // See if the object is already created, but only if we aren't restricting by an includes tree.
             // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
-            if (tree == null && objects.ContainsKey(obj)) 
+            if (tree == null && objects.ContainsKey(obj))
                 return (CompanyDtoGen)objects[obj];
 
             var newObject = new CompanyDtoGen();
@@ -71,9 +72,12 @@ namespace Coalesce.Web.Models
             newObject.ZipCode = obj.ZipCode;
             newObject.AltName = obj.AltName;
             var propValEmployees = obj.Employees;
-            if (propValEmployees != null && (tree == null || tree[nameof(newObject.Employees)] != null)) {
+            if (propValEmployees != null && (tree == null || tree[nameof(newObject.Employees)] != null))
+            {
                 newObject.Employees = propValEmployees.OrderBy("PersonId ASC").Select(f => PersonDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.Employees)])).ToList();
-            } else if (propValEmployees == null && tree?[nameof(newObject.Employees)] != null) {
+            }
+            else if (propValEmployees == null && tree?[nameof(newObject.Employees)] != null)
+            {
                 newObject.Employees = new PersonDtoGen[0];
             }
 
@@ -82,7 +86,8 @@ namespace Coalesce.Web.Models
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
         public CompanyDtoGen CreateInstance(Coalesce.Domain.Company obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<object, object> objects = null, IncludeTree tree = null) {
+                                Dictionary<object, object> objects = null, IncludeTree tree = null)
+        {
             return Create(obj, user, includes, objects, tree);
         }
 
@@ -94,23 +99,23 @@ namespace Coalesce.Web.Models
             if (OnUpdate(entity, user, includes)) return;
 
             // Applicable includes for Company
-            
+
 
             // Applicable excludes for Company
-            
+
 
             // Applicable roles for Company
             if (user != null)
-			{
-			}
+            {
+            }
 
-			entity.Name = Name;
-			entity.Address1 = Address1;
-			entity.Address2 = Address2;
-			entity.City = City;
-			entity.State = State;
-			entity.ZipCode = ZipCode;
+            entity.Name = Name;
+            entity.Address1 = Address1;
+            entity.Address2 = Address2;
+            entity.City = City;
+            entity.State = State;
+            entity.ZipCode = ZipCode;
         }
 
-	}
+    }
 }

@@ -11,11 +11,11 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
 {
     public class IncludableQueryProvider : EntityQueryProvider
     {
-        private readonly EntityQueryProvider _baseProvider;
+        private readonly IQueryProvider _baseProvider;
 
         internal IncludeTree IncludeTree { get; } = new IncludeTree();
 
-        public IncludableQueryProvider(EntityQueryProvider baseProvider)
+        public IncludableQueryProvider(IQueryProvider baseProvider)
             // Passing null is fine here because we override all the execute methods to use our wrapped object,
             // so the underlying class won't care if the _queryCompiler is missing.
             // IMPORTANT: Don't override the CreateQuery methods to use the baseProvider - we want the provider used there to be ourself.
@@ -36,16 +36,26 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
 
         public override TResult Execute<TResult>(Expression expression)
         {
-            return ((IAsyncQueryProvider)_baseProvider).Execute<TResult>(expression);
+            return (_baseProvider).Execute<TResult>(expression);
         }
 
         public override IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
         {
+            if (!(_baseProvider is IAsyncQueryProvider))
+            {
+                throw new ArgumentException("Underlying provider for .IncludedSeparately calls was not of type IAsyncQueryProvider");
+            }
+
             return ((IAsyncQueryProvider)_baseProvider).ExecuteAsync<TResult>(expression);
         }
 
         public override Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {
+            if (!(_baseProvider is IAsyncQueryProvider))
+            {
+                throw new ArgumentException("Underlying provider for .IncludedSeparately calls was not of type IAsyncQueryProvider");
+            }
+
             return ((IAsyncQueryProvider)_baseProvider).ExecuteAsync<TResult>(expression, cancellationToken);
         }
 

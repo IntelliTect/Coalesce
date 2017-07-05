@@ -360,7 +360,7 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]} != null && {parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)}) > 0";
+                                        expr = $@"{parts[0]}.Any({parts[1]} != null && {parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)})";
                                     }
                                     else
                                     {
@@ -372,7 +372,7 @@ namespace IntelliTect.Coalesce.Controllers
                                     if (prop.Key.Contains("[]."))
                                     {
                                         var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodCall, clause)}) > 0";
+                                        expr = $@"{parts[0]}.Any({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodCall, clause)})";
                                     }
                                     else
                                     {
@@ -402,7 +402,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)}) > 0";
+                                    expr = $@"{parts[0]}.Any({parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)})";
                                 }
                                 else
                                 {
@@ -416,7 +416,7 @@ namespace IntelliTect.Coalesce.Controllers
                                 if (prop.Key.Contains("[]."))
                                 {
                                     var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Count({parts[1]} = {clause}) > 0";
+                                    expr = $@"{parts[0]}.Any({parts[1]} = {clause})";
                                 }
                                 else
                                 {

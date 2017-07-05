@@ -1,24 +1,27 @@
-﻿
+﻿/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="coalesce.utilities.ts" />
+/// <reference path="coalesce.ko.base.ts" />
+
 module Coalesce {
     export module KnockoutUtilities {
 
         // Function to marge two arrays based on data from the server
-        export function RebuildArray(observableArray, incomingArray, idField, viewModelClass, parent, allowCollectionDeletes: boolean = true) {
+        export function RebuildArray<T>(observableArray: KnockoutObservableArray<T>, incomingArray: T[], idField: string, viewModelClass, parent, allowCollectionDeletes: boolean = true) {
 
-            var originalContent: Array<any> = observableArray();
+            var originalContent: Array<T> = observableArray();
             // We're going to build a new array from scratch.
             // If we spliced and pushed the existing one row at a time as needed,
             // it performs much more slowly, and also rebuilds the DOM in realtime as that happens.
             // Knockout is smart enough when we update the value of observableArray with newArray
             // to figure out exactly what changed, and will only rebuild the DOM as needed,
             // instead of rebuilding the entire thing: http://stackoverflow.com/a/18050443
-            var newArray = [];
+            var newArray: Array<T> = [];
 
             // Can't do for (var i in array) because IE sees new methods added on to the prototype as keys
             for (var i = 0; i < incomingArray.length; i++) {
                 var newItem;
                 var inItem = incomingArray[i];
-                var key = inItem[idField] || inItem.id;
+                var key = inItem[idField] || inItem["id"];
                 var matchingItems = idField ? originalContent.filter(
                     function (value) {
                         return value[Coalesce.Utilities.lowerFirstLetter(idField)]() == key;
@@ -38,8 +41,8 @@ module Coalesce {
 
                     // Only reload the item if it is not dirty. If it is dirty, there are user-made changes
                     // that aren't yet saved that we shouldn't be overwriting.
-                    if (typeof(matchingItems[0].isDirty) === 'undefined' || !matchingItems[0].isDirty()) {
-                        matchingItems[0].loadFromDto(inItem);
+                    if (typeof((<any>matchingItems[0]).isDirty) === 'undefined' || !(<any>matchingItems[0]).isDirty()) {
+                        (<any>matchingItems[0]).loadFromDto(inItem);
                     }
 
                     if (!allowCollectionDeletes) {
@@ -62,21 +65,21 @@ module Coalesce {
                 // Note that this used to only re-insert items that are dirty,
                 // but that didn't make any sense, and there was no comment that said why it was done that way.
                 // So, we're just going to add in everything from originalContent.
-                newArray.unshift(originalContent);
+                newArray.unshift(...originalContent);
             }
 
             observableArray(newArray);
         }
 
 
-        export function RebuildArrayInPlace(existingArray, incomingArray, idField) {
+        export function RebuildArrayInPlace<T>(existingArray: KnockoutObservableArray<T>, incomingArray: T[] | KnockoutObservableArray<T>, idField: string) {
             var incomingArrayUnwrapped = ko.unwrap(incomingArray);
             var existingArrayCopy = existingArray().slice();
 
             for (var i in incomingArrayUnwrapped) {
                 var newItem;
                 var inItem = incomingArrayUnwrapped[i];
-                var key = inItem[idField] || inItem.id;
+                var key = inItem[idField] || inItem["id"];
                 var matchingItems = idField ? existingArrayCopy.filter(
                     function (value) {
                         return value[Coalesce.Utilities.lowerFirstLetter(idField)]() == ko.utils.unwrapObservable(key);

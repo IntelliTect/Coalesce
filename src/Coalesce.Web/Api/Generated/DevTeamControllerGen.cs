@@ -1,20 +1,20 @@
-    using IntelliTect.Coalesce.Controllers;
-    using IntelliTect.Coalesce.Data;
-    using IntelliTect.Coalesce.Mapping;
-    using IntelliTect.Coalesce.Helpers.IncludeTree;
-    using IntelliTect.Coalesce.Models;
-    using IntelliTect.Coalesce.TypeDefinition;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Coalesce.Web.Models;
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Threading.Tasks;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Api
 {
@@ -44,7 +44,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string devTeamId = null,string name = null)
+            string devTeamId = null, string name = null)
         {
 
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
@@ -71,7 +71,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string devTeamId = null,string name = null)
+            string devTeamId = null, string name = null)
         {
 
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
@@ -90,7 +90,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string devTeamId = null,string name = null)
+            string devTeamId = null, string name = null)
         {
 
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
@@ -119,7 +119,7 @@ namespace Coalesce.Web.Api
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
-        
+
 
 
         [HttpPost("delete/{id}")]
@@ -129,21 +129,23 @@ namespace Coalesce.Web.Api
 
             return DeleteImplementation(id);
         }
-        
+
 
         [HttpPost("save")]
         [Authorize]
         public virtual async Task<SaveResult<DevTeamDtoGen>> Save(DevTeamDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
-            if (!dto.DevTeamId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+            if (!dto.DevTeamId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+            {
                 var result = new SaveResult<DevTeamDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Create not allowed on DevTeam objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.DevTeamId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+            else if (dto.DevTeamId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+            {
                 var result = new SaveResult<DevTeamDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Edit not allowed on DevTeam objects.";
@@ -166,7 +168,7 @@ namespace Coalesce.Web.Api
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
+
         /// <summary>
         /// Downloads CSV of DevTeamDtoGen
         /// </summary>
@@ -179,7 +181,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string devTeamId = null,string name = null)
+            string devTeamId = null, string name = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -207,7 +209,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string devTeamId = null,string name = null)
+            string devTeamId = null, string name = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -222,20 +224,21 @@ namespace Coalesce.Web.Api
             return csv;
         }
 
-    
+
 
         /// <summary>
         /// Saves CSV data as an uploaded file
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<DevTeamDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<DevTeamDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
         {
             if (file != null && file.Length > 0)
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    using (var reader = new System.IO.StreamReader(stream)) {
+                    using (var reader = new System.IO.StreamReader(stream))
+                    {
                         var csv = reader.ReadToEnd();
                         return await CsvSave(csv, hasHeader);
                     }
@@ -249,35 +252,39 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<DevTeamDtoGen>>> CsvSave(string csv, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<DevTeamDtoGen>>> CsvSave(string csv, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<DevTeamDtoGen>(csv, hasHeader);
             var resultList = new List<SaveResult<DevTeamDtoGen>>();
-            foreach (var dto in list){
+            foreach (var dto in list)
+            {
                 // Check if creates/edits aren't allowed
-                if (!dto.DevTeamId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+                if (!dto.DevTeamId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+                {
                     var result = new SaveResult<DevTeamDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Create not allowed on DevTeam objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.DevTeamId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+                else if (dto.DevTeamId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+                {
                     var result = new SaveResult<DevTeamDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Edit not allowed on DevTeam objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else {
+                else
+                {
                     var result = await SaveImplementation(dto, "none", null, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
         }
-        
+
         protected override IQueryable<Coalesce.Domain.External.DevTeam> GetListDataSource(ListParameters parameters)
         {
 

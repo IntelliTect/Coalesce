@@ -1,20 +1,20 @@
-    using IntelliTect.Coalesce.Controllers;
-    using IntelliTect.Coalesce.Data;
-    using IntelliTect.Coalesce.Mapping;
-    using IntelliTect.Coalesce.Helpers.IncludeTree;
-    using IntelliTect.Coalesce.Models;
-    using IntelliTect.Coalesce.TypeDefinition;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Coalesce.Web.Models;
-    using Coalesce.Domain;
-    using Coalesce.Domain.External;
+using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Threading.Tasks;
+using Coalesce.Web.Models;
+using Coalesce.Domain;
+using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Api
 {
@@ -44,7 +44,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
 
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
@@ -78,7 +78,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
 
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
@@ -104,7 +104,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
 
             ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
@@ -140,7 +140,7 @@ namespace Coalesce.Web.Api
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
-        
+
 
 
         [HttpPost("delete/{id}")]
@@ -150,21 +150,23 @@ namespace Coalesce.Web.Api
 
             return DeleteImplementation(id);
         }
-        
+
 
         [HttpPost("save")]
         [AllowAnonymous]
         public virtual async Task<SaveResult<PersonDtoGen>> Save(PersonDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
-            if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+            if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+            {
                 var result = new SaveResult<PersonDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Create not allowed on Person objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+            else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+            {
                 var result = new SaveResult<PersonDtoGen>();
                 result.WasSuccessful = false;
                 result.Message = "Edit not allowed on Person objects.";
@@ -187,7 +189,7 @@ namespace Coalesce.Web.Api
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
-        
+
         /// <summary>
         /// Downloads CSV of PersonDtoGen
         /// </summary>
@@ -200,7 +202,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -235,7 +237,7 @@ namespace Coalesce.Web.Api
             string listDataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null,string title = null,string firstName = null,string lastName = null,string email = null,string gender = null,string personStatsId = null,string name = null,string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
 
@@ -257,20 +259,21 @@ namespace Coalesce.Web.Api
             return csv;
         }
 
-    
+
 
         /// <summary>
         /// Saves CSV data as an uploaded file
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
         {
             if (file != null && file.Length > 0)
             {
                 using (var stream = file.OpenReadStream())
                 {
-                    using (var reader = new System.IO.StreamReader(stream)) {
+                    using (var reader = new System.IO.StreamReader(stream))
+                    {
                         var csv = reader.ReadToEnd();
                         return await CsvSave(csv, hasHeader);
                     }
@@ -284,35 +287,39 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvSave(string csv, bool hasHeader = true) 
+        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvSave(string csv, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<PersonDtoGen>(csv, hasHeader);
             var resultList = new List<SaveResult<PersonDtoGen>>();
-            foreach (var dto in list){
+            foreach (var dto in list)
+            {
                 // Check if creates/edits aren't allowed
-                if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {
+                if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+                {
                     var result = new SaveResult<PersonDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Create not allowed on Person objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {
+                else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+                {
                     var result = new SaveResult<PersonDtoGen>();
                     result.WasSuccessful = false;
                     result.Message = "Edit not allowed on Person objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else {
+                else
+                {
                     var result = await SaveImplementation(dto, "none", null, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
         }
-        
+
         protected override IQueryable<Coalesce.Domain.Person> GetListDataSource(ListParameters parameters)
         {
             if (parameters.ListDataSource == "NamesStartingWithAWithCases")
@@ -333,17 +340,22 @@ namespace Coalesce.Web.Api
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]
-        public virtual SaveResult<PersonDtoGen> Rename (Int32 id, System.String addition){
+        public virtual SaveResult<PersonDtoGen> Rename(Int32 id, System.String addition)
+        {
             var result = new SaveResult<PersonDtoGen>();
-            try{
+            try
+            {
                 IncludeTree includeTree = null;
                 var item = DataSource.Includes().FindItem(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
                 result.Object = Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(objResult, User, "", includeTree);
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -354,17 +366,22 @@ namespace Coalesce.Web.Api
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
-        public virtual SaveResult<object> ChangeSpacesToDashesInName (Int32 id){
+        public virtual SaveResult<object> ChangeSpacesToDashesInName(Int32 id)
+        {
             var result = new SaveResult<object>();
-            try{
+            try
+            {
                 var item = DataSource.Includes().FindItem(id);
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -375,14 +392,19 @@ namespace Coalesce.Web.Api
         /// Method: Add
         /// </summary>
         [HttpPost("Add")]
-        public virtual SaveResult<Int32> Add (System.Int32 numberOne, System.Int32 numberTwo){
+        public virtual SaveResult<Int32> Add(System.Int32 numberOne, System.Int32 numberTwo)
+        {
             var result = new SaveResult<Int32>();
-            try{
+            try
+            {
                 var objResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -394,15 +416,20 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUser")]
         [Authorize]
-        public virtual SaveResult<String> GetUser (){
+        public virtual SaveResult<String> GetUser()
+        {
             if (!ClassViewModel.MethodByName("GetUser").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             var result = new SaveResult<String>();
-            try{
+            try
+            {
                 var objResult = Coalesce.Domain.Person.GetUser(User);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -413,14 +440,19 @@ namespace Coalesce.Web.Api
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]
-        public virtual SaveResult<String> GetUserPublic (){
+        public virtual SaveResult<String> GetUserPublic()
+        {
             var result = new SaveResult<String>();
-            try{
+            try
+            {
                 var objResult = Coalesce.Domain.Person.GetUserPublic(User);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -432,15 +464,20 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWith (System.String characters){
+        public virtual SaveResult<IEnumerable<String>> NamesStartingWith(System.String characters)
+        {
             if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             var result = new SaveResult<IEnumerable<String>>();
-            try{
+            try
+            {
                 var objResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -451,14 +488,19 @@ namespace Coalesce.Web.Api
         /// Method: NamesStartingWithPublic
         /// </summary>
         [HttpPost("NamesStartingWithPublic")]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic (System.String characters){
+        public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic(System.String characters)
+        {
             var result = new SaveResult<IEnumerable<String>>();
-            try{
+            try
+            {
                 var objResult = Coalesce.Domain.Person.NamesStartingWithPublic(characters, Db);
                 result.Object = objResult;
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -469,15 +511,20 @@ namespace Coalesce.Web.Api
         /// Method: NamesStartingWithAWithCases
         /// </summary>
         [HttpPost("NamesStartingWithAWithCases")]
-        public virtual SaveResult<IEnumerable<PersonDtoGen>> NamesStartingWithAWithCases (){
+        public virtual SaveResult<IEnumerable<PersonDtoGen>> NamesStartingWithAWithCases()
+        {
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
-            try{
+            try
+            {
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }
@@ -488,15 +535,20 @@ namespace Coalesce.Web.Api
         /// Method: BorCPeople
         /// </summary>
         [HttpPost("BorCPeople")]
-        public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople (){
+        public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople()
+        {
             var result = new SaveResult<IEnumerable<PersonDtoGen>>();
-            try{
+            try
+            {
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Person.BorCPeople(Db);
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree));
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+
                 result.WasSuccessful = true;
                 result.Message = null;
-            }catch(Exception ex){
+            }
+            catch (Exception ex)
+            {
                 result.WasSuccessful = false;
                 result.Message = ex.Message;
             }

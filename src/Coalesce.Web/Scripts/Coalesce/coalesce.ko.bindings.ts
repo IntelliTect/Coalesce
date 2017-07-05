@@ -193,6 +193,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var allowClear = allBindings.get('allowClear') || true
         var placeholder = $(element).attr('placeholder') || "select";
         var updating = false;
+        var pageSize = allBindings.get('pageSize') || 25;
 
         // Create the Select2
         $(element)
@@ -207,11 +208,17 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             page: params.page
                         };
                     },
-                    processResults: function (data, page) {
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
                         for (var i in data.list) {
                             data.list[i].id = data.list[i][idFieldName];
                         }
-                        return { results: data.list };
+                        return {
+                            results: data.list,
+                            pagination: {
+                                more:(params.page*pageSize) < data.totalCount
+                            }
+                        };
                     },
                     cache: "true" //(allBindings.get('cache') || false).toString(),
                 },
@@ -491,12 +498,18 @@ ko.bindingHandlers.datePicker = {
                     var newTime = moment.duration(e.date.format('HH:mm:ss'));
                     newValue = moment(unwrappedValue.format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
                 }
+
+                // The control represents blank values as false for some reason. Really, guys?
+                if (!newValue) newValue = null;
+
                 // Set the value if it has changed.
                 if (!valueAccessor()() || !newValue || newValue.format() != valueAccessor()().format()) {
                     valueAccessor()(newValue);
                 }
 
-            });
+            })
+            .on('click', e => e.stopPropagation())
+            .on('dblclick', e => e.stopPropagation());
         // Add the validation message
         ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
         // The validation message needs to go after the input group with the button.

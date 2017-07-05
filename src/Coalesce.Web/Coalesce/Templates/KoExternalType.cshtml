@@ -78,8 +78,11 @@ module @moduleName {
             }
             else if (prop.IsPOCO)
             {
-                @:self.@(prop.JsVariable)(new @(prop.PureType.Name)());
-                @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsVariable);
+                @:if (!self.@(prop.JsVariable)()){
+                    @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
+                @:}else{
+                    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
+                @:}
             }
             else
             {

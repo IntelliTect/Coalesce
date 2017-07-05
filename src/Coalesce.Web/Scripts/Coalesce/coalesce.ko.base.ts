@@ -104,7 +104,7 @@ module Coalesce {
         protected loadingValidValues: number = 0;
 
         // String that defines what data should be included with the returned object.
-        public includes = null;
+        public includes = "";
 
         /**
             If true, the busy indicator is shown when loading.
@@ -338,7 +338,7 @@ module Coalesce {
                     .fail(() => {
                         this.isLoaded(false);
                         if (this.coalesceConfig.showFailureAlerts())
-                            this.coalesceConfig.onFailure()(this, "Could not get " + this.modelName + " with id = " + id);
+                            this.coalesceConfig.onFailure()(this, "Could not load " + this.modelName + " with ID = " + id);
                     })
                     .always(() => {
                         this.coalesceConfig.onFinishBusy()(this);
@@ -461,17 +461,16 @@ module Coalesce {
                 this.isDirty(true);
                 if (this.coalesceConfig.autoSaveEnabled()) {
                     // Batch saves.
-                    if (!this.saveTimeout) {
-                        this.saveTimeout = setTimeout(() => {
-                            this.saveTimeout = 0;
-                            // If we have a save in progress, wait...
-                            if (this.isSaving()) {
-                                this.autoSave();
-                            } else if (this.coalesceConfig.autoSaveEnabled()) {
-                                this.save();
-                            }
-                        }, this.coalesceConfig.saveTimeoutMs());
-                    }
+                    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+                    this.saveTimeout = setTimeout(() => {
+                        this.saveTimeout = 0;
+                        // If we have a save in progress, wait...
+                        if (this.isSaving()) {
+                            this.autoSave();
+                        } else if (this.coalesceConfig.autoSaveEnabled()) {
+                            this.save();
+                        }
+                    }, this.coalesceConfig.saveTimeoutMs());
                 }
             }
         }
@@ -577,7 +576,7 @@ module Coalesce {
                         xhrFields: { withCredentials: true } })
                 .done((data) => {
 
-                    Coalesce.KnockoutUtilities.RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, self, true);
+                    Coalesce.KnockoutUtilities.RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, this, true);
                     $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                         model.onDelete((item) => {
@@ -789,7 +788,7 @@ module Coalesce {
             });
             this.page.subscribe(() => {
                 if (this.isLoaded() && !this.isLoading()) {
-                    this.load();
+                    this.delayedLoad(300);
                 }
             });
             this.search.subscribe(() => {

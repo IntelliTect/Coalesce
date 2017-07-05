@@ -45,9 +45,6 @@ module ListViewModels {
 
         constructor() {
             super();
-            var self = this; 
-
-        // Method Implementations
         }
     }
 

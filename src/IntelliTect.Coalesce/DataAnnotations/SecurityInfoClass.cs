@@ -197,7 +197,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         public override string ToString()
         {
-            return Read.ToString() + Edit.ToString() + Delete.ToString() + Create.ToString();
+            return $"Read: {Read.ToString()}  Edit:{Edit.ToString()}  Delete: {Delete.ToString()} + Create: {Create.ToString()}";
         }
 
     }

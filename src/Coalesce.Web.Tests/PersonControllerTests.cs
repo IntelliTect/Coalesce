@@ -149,8 +149,8 @@ namespace Coalesce.Web.Tests
             person.FirstName = "Sweet";
             var result = _pc.Save(person);
             // Make sure it saved.
-            Assert.True(result.WasSuccessful);
-            Assert.Equal("Sweet", result.Object.FirstName);
+            Assert.True(result.Result.WasSuccessful);
+            Assert.Equal("Sweet", result.Result.Object.FirstName);
             // Get the new item.
             person = await _pc.Get(1.ToString());
             Assert.Equal("Sweet", person.FirstName);
@@ -158,8 +158,8 @@ namespace Coalesce.Web.Tests
             person.FirstName = "Joseph";
             result = _pc.Save(person);
             // Make sure it saved.
-            Assert.True(result.WasSuccessful);
-            Assert.Equal("Joseph", result.Object.FirstName);
+            Assert.True(result.Result.WasSuccessful);
+            Assert.Equal("Joseph", result.Result.Object.FirstName);
             // Get it again and make sure it stayed saved.
             person = await _pc.Get(1.ToString());
             Assert.Equal("Joseph", person.FirstName);
@@ -222,8 +222,8 @@ namespace Coalesce.Web.Tests
             person.FirstName = "Joseph";
             var result2 = _pc.Save(person);
             // Make sure it saved.
-            Assert.True(result2.WasSuccessful);
-            Assert.Equal("Joseph", result2.Object.FirstName);
+            Assert.True(result2.Result.WasSuccessful);
+            Assert.Equal("Joseph", result2.Result.Object.FirstName);
         }
 
 

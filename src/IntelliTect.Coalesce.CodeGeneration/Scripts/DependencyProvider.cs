@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 #if NET451
 using System.ComponentModel;
 #endif
@@ -17,6 +18,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.CodeGeneration.Common;
+using Microsoft.Build.Exceptions;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -89,8 +91,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             var workspace = MSBuildWorkspace.Create();
             workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
             {
-                //if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
-                    //throw new Exception(e.Diagnostic.Message);
+                if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+                {
+                    // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
+                    //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
+                    //     Therefore we must ignore an empty error message.
+                    Debug.WriteLine(e.Diagnostic.Message);
+                    if (e.Diagnostic.Message.EndsWith(".csproj'", StringComparison.OrdinalIgnoreCase) == false)
+                    {
+                        throw new InvalidProjectFileException(e.Diagnostic.Message);
+                    }
+                }
             };
 
             var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;

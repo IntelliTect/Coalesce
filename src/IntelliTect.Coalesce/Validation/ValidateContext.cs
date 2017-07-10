@@ -42,13 +42,13 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type not found.");
 
                         assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.ReadAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
-                            "Property-level security doesn't support the PermissionLevel property");
+                            "Property-level ReadAttribute security doesn't support the PermissionLevel property");
                         assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.EditAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
-                            "Property-level security doesn't support the PermissionLevel property");
+                            "Property-level EditAttribute security doesn't support the PermissionLevel property");
                         assert.isFalse(prop.Wrapper.HasAttribute<DataAnnotations.CreateAttribute>(),
                             "Property-level security doesn't support CreateAttribute");
                         assert.isFalse(prop.Wrapper.HasAttribute<DataAnnotations.DeleteAttribute>(),
-                            "Property-level security doesn't support CreateAttribute");
+                            "Property-level security doesn't support DeleteAttribute");
 
                         if (prop.IsPOCO && !prop.IsComplexType)
                         {

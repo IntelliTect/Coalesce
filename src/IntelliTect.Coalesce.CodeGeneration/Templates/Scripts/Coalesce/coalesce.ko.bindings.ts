@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 /// <reference path="coalesce.ko.base.ts" />
 /// <reference path="coalesce.utilities.ts" />
 

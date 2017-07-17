@@ -1,0 +1,12 @@
+{
+  "name": "ASP.NET",
+  "globalDependencies": {
+    "bootstrap": "github:DefinitelyTyped/DefinitelyTyped/bootstrap/bootstrap.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
+    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
+    "bootstrap.v3.datetimepicker": "github:DefinitelyTyped/DefinitelyTyped/bootstrap.v3.datetimepicker/bootstrap.v3.datetimepicker.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
+    "moment": "github:DefinitelyTyped/DefinitelyTyped/moment/moment.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
+    "moment-node": "github:DefinitelyTyped/DefinitelyTyped/moment/moment-node.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
+    "knockout.validation": "github:DefinitelyTyped/DefinitelyTyped/knockout.validation/knockout.validation.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
+    "knockout": "github:DefinitelyTyped/DefinitelyTyped/knockout/knockout.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38"
+  }
+}

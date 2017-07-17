@@ -403,7 +403,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     // Only copy the typings on a brand new project. Never attempt to update them, since the end user
                     // may want to update their libraries, get rid of some (well, you probably can't), or update versions.
                     CopyToDestination(
-                        fileName: "tsd.d.ts",
+                        fileName: "index.d.ts",
                         sourcePath: "Templates/typings",
                         destinationPath: Path.Combine(_webProject.ProjectFullPath, "typings"));
 
@@ -868,7 +868,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "// If you move the dependencies of the generated typescript files, modify this file to reflect their new location.",
                     "// This file must remain in place relative to the generated scripts (<WebProject>/Scripts/Generated).",
                     "\n",
-                    "/// <reference path=\"../typings/tsd.d.ts\" />",
+                    "/// <reference path=\"../typings/index.d.ts\" />",
                     "/// <reference path=\"Coalesce/coalesce.utilities.ts\" />",
                     "/// <reference path=\"Coalesce/coalesce.ko.base.ts\" />",
                     "/// <reference path=\"Coalesce/coalesce.ko.utilities.ts\" />",

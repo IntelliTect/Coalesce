@@ -1,6 +1,4 @@
-/// <reference path="../../typings/index.d.ts" />
-/// <reference path="coalesce.ko.base.ts" />
-/// <reference path="coalesce.utilities.ts" />
+/// <reference path="../coalesce.dependencies.d.ts" />
 
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {

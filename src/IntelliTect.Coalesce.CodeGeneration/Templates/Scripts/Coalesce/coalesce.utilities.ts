@@ -1,4 +1,4 @@
-﻿/// <reference path="../../typings/index.d.ts" />
+﻿/// <reference path="../coalesce.dependencies.d.ts" />
 // Coalesce.Utilities
 
 // Turn off AJAX Caching

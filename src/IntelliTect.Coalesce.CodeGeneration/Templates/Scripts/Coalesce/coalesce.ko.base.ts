@@ -1,4 +1,4 @@
-﻿/// <reference path="../../typings/tsd.d.ts" />
+﻿/// <reference path="../coalesce.dependencies.d.ts" />
 
 class EnumValue {
     id: number;

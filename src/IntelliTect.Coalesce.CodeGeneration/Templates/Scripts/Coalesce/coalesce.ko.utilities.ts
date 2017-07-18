@@ -1,6 +1,4 @@
-﻿/// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="coalesce.utilities.ts" />
-/// <reference path="coalesce.ko.base.ts" />
+﻿/// <reference path="../coalesce.dependencies.d.ts" />
 
 module Coalesce {
     export module KnockoutUtilities {

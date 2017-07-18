@@ -6,7 +6,7 @@
 // This file must remain in place relative to the generated scripts (<WebProject>/Scripts/Generated).
 
 
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../typings/index.d.ts" />
 /// <reference path="Coalesce/coalesce.utilities.ts" />
 /// <reference path="Coalesce/coalesce.ko.base.ts" />
 /// <reference path="Coalesce/coalesce.ko.utilities.ts" />

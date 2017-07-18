@@ -1,6 +1,4 @@
-/// <reference path="../../typings/index.d.ts" />
-/// <reference path="coalesce.ko.base.ts" />
-/// <reference path="coalesce.utilities.ts" />
+/// <reference path="../coalesce.dependencies.d.ts" />
 
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {
@@ -479,7 +477,7 @@ ko.bindingHandlers.datePicker = {
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
             sideBySide: allBindings.get('sideBySide') || false,
-            timeZone: allBindings.get('timeZone') || null,
+            timeZone: allBindings.get('timeZone') || "",
             keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
         })
             .on("dp.change", function (e) {

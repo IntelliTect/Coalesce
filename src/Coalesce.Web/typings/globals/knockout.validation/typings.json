@@ -1,8 +1,8 @@
 {
   "resolution": "main",
   "tree": {
-    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38/knockout.validation/knockout.validation.d.ts",
-    "raw": "github:DefinitelyTyped/DefinitelyTyped/knockout.validation/knockout.validation.d.ts#fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38",
-    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38/knockout.validation/knockout.validation.d.ts"
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/347311a5f0c374a05b43b98286933ccc03542f8b/knockout.validation/index.d.ts",
+    "raw": "registry:dt/knockout.validation#0.0.0+20160725212620",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/347311a5f0c374a05b43b98286933ccc03542f8b/knockout.validation/index.d.ts"
   }
 }

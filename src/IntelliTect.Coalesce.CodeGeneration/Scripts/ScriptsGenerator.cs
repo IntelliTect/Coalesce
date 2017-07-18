@@ -482,7 +482,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "gulpfile.js",
                     "package.json",
                     "tsconfig.template.json",
-                    "tsd.json",
+                    "typings.json",
                 };
                 foreach (var fileName in configFiles)
                 {

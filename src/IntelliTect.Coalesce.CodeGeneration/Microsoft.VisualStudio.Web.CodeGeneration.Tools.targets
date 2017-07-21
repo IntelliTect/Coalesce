@@ -21,9 +21,6 @@ Outputs the Project Information needed for CodeGeneration to a file.
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
 
-  <UsingTask TaskName="ProjectContextWriter"
-             AssemblyFile="D:\Work\Coalesce.VS2017RC3.15.0.26116.0.D15REL\src\IntelliTect.Coalesce.CodeGeneration\bin\Debug\net46\IntelliTect.Coalesce.CodeGeneration.dll" />
-
   <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
 
     <WriteLinesToFile  

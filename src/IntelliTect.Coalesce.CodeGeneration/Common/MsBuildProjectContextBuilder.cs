@@ -16,7 +16,7 @@ using System.Text;
 using Microsoft.Extensions.ProjectModel.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Common;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace IntelliTect.Coalesce.CodeGeneration.Common
 {
     public static class ArgumentEscaper
     {

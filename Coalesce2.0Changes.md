@@ -14,6 +14,7 @@
 * Namespace intellitect.utilities is now Coalesce.Utilities
 * Namespace intellitect.webApi is now Coalesce.ModalHelpers
 * Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within.
+* <ModelName>ListUrl properties on generated ViewModels is now correctly camelCased.
 
 ## Deprications in Coalesce 2..0"
 

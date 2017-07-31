@@ -796,7 +796,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the core URL for the List Editor.
         /// </summary>
-        public string ListEditorUrlName => string.Format("{0}ListUrl", Name);
+        public string ListEditorUrlName => string.Format("{0}ListUrl", JsVariable);
 
         public bool HasViewModelProperty
         {

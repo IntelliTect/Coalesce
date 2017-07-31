@@ -2,6 +2,9 @@
 
 .. role:: csharp(code)
    :language: c#
+   
+.. role:: cs(code)
+   :language: c#
 
 .. role:: ts(code)
    :language: typescript

@@ -18,8 +18,14 @@ namespace IntelliTect.Coalesce.DataAnnotations
             Contains = 2
         };
 
+        /// <summary>
+        /// If set to true (the default), each word in the search terms will be searched for in each searchable field independently.
+        /// </summary>
         public bool IsSplitOnSpaces { get; set; } = true;
 
+        /// <summary>
+        /// Specifies whether the value of the field will be checked using 'Contains' or using 'BeginsWith'.
+        /// </summary>
         public SearchMethods SearchMethod { get; set; } = SearchMethods.BeginsWith;
 
         /// <summary>

@@ -4,8 +4,7 @@
 Custom Data Sources
 -------------------
 
-Static methods on your model that return an IQueryable of the same type as the class
-are treated specially. These methods, called custom data sources, are used to form queries that will fetch the data needed for the ViewModels and ListViewModels.
+Static methods on your model that return an IQueryable of the same type as the class are treated specially. These methods, called custom data sources, are used to form queries that will fetch the data needed for the ViewModels and ListViewModels.
 
 The structure of the :csharp:`IQueryable` returned by a custom data source is used to shape and trim the structure of the DTO as it is serialized and sent out to the client. See :ref:`IncludeTree` for more information on how this works.
 

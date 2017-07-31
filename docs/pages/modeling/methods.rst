@@ -18,9 +18,9 @@ The following parameters can be added to your methods:
     Primitives & Dates
         Only primitive values and dates are accepted as parameters to be passed from the client to the method call. Complex objects or collections are not supported at this time.
     :csharp:`<YourDbContext> db`
-        If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method.
+        If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method call.
     :csharp:`ClaimsPrincipal user`
-        If the method has a parameter of type ClaimsPrincipal, the current user will be added to the method call automatically. This does not appear on the client side.
+        If the method has a parameter of type ClaimsPrincipal, the current user will be passed to the method call.
     :csharp:`[Inject] <anything>`
         If a parameter is marked with the :ref:`InjectAttribute` attribute, it will be injected from the application's :csharp:`IServiceProvider`.
     :csharp:`out IncludeTree includeTree`
@@ -36,19 +36,22 @@ You can return virtually anything from these methods:
         Any primitive data types may be returned - :csharp:`string`, :csharp:`int`, etc.
     Model Types
         Any of the types of your models may be returned. The generated TypeScript for calling the method will use the generated TypeScript ViewModels of your models to store the returned value.
+
+        If the return type is the same as the type that the method is defined on, and the method is not static, then the results of the method call will be loaded into the calling TypeScript object.
     Custom Types
-        Any custom type you define may also be returned from a method. Corresponding TypeScript ViewModels will be created for these types.
+        Any custom type you define may also be returned from a method. Corresponding TypeScript ViewModels will be created for these types. See :ref:`ExternalTypes`.
 
         .. warning::
-            When returning custom types from methods, be careful of the types of the properties. As Coalesce generates the TypeScript ViewModels for your custom type (:ref:`ExternalTypes`), it will also generate ViewModels for the types of any of its properties, and so on down the tree. If something like :csharp:`System.Threading.Timer`, for example, is encountered as a property, these generated types will get out of hand extremely quickly.
+            When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your custom type (:ref:`ExternalTypes`), it will also generate ViewModels for the types of any of its properties, and so on down the tree. If something like :csharp:`System.Threading.Timer`, for example, is encountered as a property, these generated types will get out of hand extremely quickly.
 
-            Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute.
+            Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier.
     :csharp:`IEnumerable<T>`
         Enumerables and collections of any of the valid return types above may be returned. Any derived type of :csharp:`IEnumerable<T>` is valid in the signature, but :csharp:`ICollection<T>` is recommended where possible.
         
 
 
 |
+.. _ModelMethodTypeScript:
 Generated TypeScript
 --------------------
 
@@ -86,17 +89,16 @@ Here's an example for a method called Move that takes a single parameter 'int fe
     the required data for the method call. The call is then made with
     the data provided.
 :ts:`public moveModal: (callback: () => void = null, reload: boolean = true) => void`
-    Shows a modal with HTML ``id="method-Move"`` to prompt the user for the required data for
-    the method call. The call is then made with the data provided.
+    Shows a Bootstrap modal with HTML ``id="method-Move"`` to prompt the user for the required data for the method call. The call is then made with the data provided.
     The generated modal only exists on the generated editor views. If you need it elsewhere, you should copy it from the generated HTML for the editor and place it in your custom page.
 
 |
 Instance Methods
 ----------------
 
-Instance methods can use information contained in the object during the execution of the method. These methods generate the members above on the TypeScript ViewModel.
+Instance methods generate the members above on the TypeScript ViewModel.
 
-The model instance that the method is called on will be loaded according to the following rules:
+The model POCO instance that the method is called on will be loaded according to the following rules:
 
 - :ref:`CustomDataSources` are not used - even if one is set, it is not passed to the server in the API call, and will not be considered. If you would like to load additional data using one of your :ref:`CustomDataSources`, you'll need to manually call it inside your method.
 - If your model implements :ref:`IIncludable`, the :csharp:`Include` method will be called with a includes string of :csharp:`null`. 
@@ -106,7 +108,7 @@ The model instance that the method is called on will be loaded according to the 
 Static Methods
 --------------
 
-Static methods are created as functions on the TypeScript ListViewModel.
+Static methods are created as functions on the TypeScript ListViewModel. All of the same members that are generated for instance methods are also generated for static methods.
 
 .. code-block:: c#
 

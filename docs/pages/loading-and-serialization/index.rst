@@ -13,13 +13,13 @@ Controlling Loading
 
 Coalesce is based on :ref:`Entity Framework Core`. As a result, it is subjected to all of the rules and conventions that EF imposes. Chief among these is lazy loading - EF Core does not support lazy loading.
 
-.. _`DefaultLoadingBehavior`:
+.. _DefaultLoadingBehavior:
 Default Loading Behavior
 ........................
 
 When an object or list of objects is requested, the default behavior of Coalesce is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of many-to-many relationships.
 
-In most cases, however, you'll probably want more or less data than what the default behavior provides. 
+In most cases, however, you'll probably want more or less data than what the default behavior provides. You can achieve this by using the methods outlined below.
 
 
 
@@ -28,7 +28,7 @@ Custom Data Sources
 
 :ref:`CustomDataSources` are the recommended way of controlling loading and serialization in Coalesce.
 
-They allow for simple customization of the EF query, or more advanced loading and definition of the structure of the serialized output data.
+They allow for simple customization of an EF query, or more advanced loading and definition of the structure of the serialized output data.
 
 Read :ref:`CustomDataSources` to learn all about them.
 
@@ -36,7 +36,7 @@ Read :ref:`CustomDataSources` to learn all about them.
 IIncludable
 ...........
 
-The :csharp:`IIncludable` interface offers a way to control loading very similar to :ref:`CustomDataSources`.
+The :csharp:`IIncludable` interface offers a way to control loading very similar to :ref:`CustomDataSources`. It is a bit more limited in its capabilities, but is also simpler to implement and use.
 
 Read :ref:`Includes`/:ref:`IIncludable` to learn more.
 

@@ -60,13 +60,7 @@ module @moduleName {
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(@(model.ListViewModelClassName).coalesceConfig);
 
-        // Valid values
-    @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasValidValues))
-        {
-        @:public @(prop.ValidValueListName.ToCamelCase()): KnockoutObservableArray<any> = ko.observableArray([]);
-        @:public load@(prop.ValidValueListName): (callback: any) => void;
-        }
-    @foreach(var method in model.Methods.Where(m => m.IsStatic && m.IsClientMethod))
+        @foreach(var method in model.Methods.Where(m => m.IsStatic && m.IsClientMethod))
         {
         <text>
         // Call server method (@method.Name)

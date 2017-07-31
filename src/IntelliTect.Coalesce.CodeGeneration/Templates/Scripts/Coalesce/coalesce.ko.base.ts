@@ -17,7 +17,7 @@ module Coalesce {
             this.parentConfig = parentConfig;
         }
 
-        protected prop = <TProp>(name: keyof ViewModelConfiguration<any>): ComputedConfiguration<TProp> => {
+        protected prop = <TProp>(name: string): ComputedConfiguration<TProp> => {
             var k = "_" + name;
             var raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
@@ -88,22 +88,26 @@ module Coalesce {
         protected apiController: string;
         protected viewController: string;
 
+        // Generic definitions of properties that are generated for each implementation of BaseViewModel with more specific typing.
         public dataSources: any;
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
         public dataSource: any;
-
         public coalesceConfig: ViewModelConfiguration<BaseViewModel<T>> = null;
 
-        protected loadingCount: number = 0;  // Stack for number of times loading has been called.
-        protected saveTimeout: number = 0;   // Stores the return value of setInterval for automatic save delays.
-        // Callbacks to call after a delete.
-        public deleteCallbacks: { (self: T): void; }[] = [];
-        // Callbacks to call after a save.
-        public saveCallbacks: { (self: T): void; }[] = [];
+        /** Stack for number of times loading has been called. */
+        protected loadingCount: number = 0;
+        /** Stack for number of loadValid___Values calls in progress . */
         protected loadingValidValues: number = 0;
+        /** Stores the return value of setInterval for automatic save delays. */
+        protected saveTimeout: number = 0;
 
-        // String that defines what data should be included with the returned object.
+        /** Callbacks to call after a delete. */
+        public deleteCallbacks: { (self: T): void; }[] = [];
+        /** Callbacks to call after a save. */
+        public saveCallbacks: { (self: T): void; }[] = [];
+
+        /**
+            String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable.
+        */
         public includes = "";
 
         /**
@@ -120,18 +124,21 @@ module Coalesce {
         get showFailureAlerts() { return this.coalesceConfig.showFailureAlerts() }
         set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
 
-        // Parent of this object.
+        /** Parent of this object, if this object was loaded as part of a hierarchy. */
         public parent = null;
-        // Collection that this object is a part of.
+        /** Parent of this object, if this object was loaded as part of list of objects. */
         public parentCollection = null;
-        // ID of the object.
+        /**
+            Primary Key of the object.
+            @deprecated Use the strongly-typed property of the key for this model whenever possible. This property will be removed once Coalesce supports composite keys.
+        */
         public myId: any = 0;
 
-        // Dirty Flag
+        /** Dirty Flag. Set when a value on the model changes. Reset when the model is saved or reloaded. */
         public isDirty: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for the page
+        /** Contains the error message from the last failed call to the server. */
         public errorMessage: KnockoutObservable<string> = ko.observable(null);
-        // ValidationIssues returned from database when trying to persist data
+        /** ValidationIssues returned from the server when trying to persist data */
         public validationIssues: any = ko.observableArray([]);
 
         /**
@@ -142,42 +149,52 @@ module Coalesce {
         set isSavingAutomatically(value) { this.coalesceConfig.autoSaveEnabled(value) }
 
 
-        // Flag to use to determine if this item is shown. Only for convenience.
+        /** Flag to use to determine if this item is shown. Provided for convenience. */
         public isVisible: KnockoutObservable<boolean> = ko.observable(false);
-        // Flag to use to determine if this item is expanded. Only for convenience.
+        /** Flag to use to determine if this item is expanded. Provided for convenience. */
         public isExpanded: KnockoutObservable<boolean> = ko.observable(false);
-        // Flag to use to determine if this item is selected. Only for convenience.
+        /** Flag to use to determine if this item is selected. Provided for convenience. */
         public isSelected: KnockoutObservable<boolean> = ko.observable(false);
-        // Flag to use to determine if this item is checked. Only for convenience.
+        /** Flag to use to determine if this item is checked. Provided for convenience. */
         public isChecked: KnockoutObservable<boolean> = ko.observable(false);
-        // Alternates the isExpanded flag. Use with a click binding for a button.
-        public changeIsExpanded = (value?: boolean) => { // Call this with the edit button.
+        /** Flag to use to determine if this item is being edited. Only for convenience. */
+        public isEditing = ko.observable(false);
+
+        /** Alternates the isExpanded flag. Use with a click binding for a button. */
+        public changeIsExpanded = (value?: boolean) => {
             if (typeof (value) !== "boolean") this.isExpanded(!this.isExpanded());
             else this.isExpanded(value === true); // Force boolean
         };
-        // Flag to use to determine if this item is being edited. Only for convenience.
-        public isEditing = ko.observable(false);
-        // Alternates the isEditing flag. Use with a click binding for a button.
-        public changeIsEditing = (value) => {  // Call this with the edit button.
+        /** Alternates the isEditing flag. Use with a click binding for a button. */
+        public changeIsEditing = (value) => {
             if (typeof (value) !== "boolean") this.isEditing(!this.isEditing());
             else this.isEditing(value === true);  // Force boolean
         };
-        // List of errors found during validation.
+
+        /** List of errors found during validation. Any errors present will prevent saving. */
         public errors: KnockoutValidationErrors = null;
-        // List of warnings found during validation. These allow a save.
+        /** List of warnings found during validation. Saving is still allowed with warnings present. */
         public warnings: KnockoutValidationErrors = null;
-        // Custom Field that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel
+        /**
+            Custom Field that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel.
+            @deprecated Annotate your POCO with [TypeScriptPartial] and add custom fields to the 'partial' class instead.
+        */
         public customField1: KnockoutObservable<any> = ko.observable();
-        // Custom Field 2 that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel
+        /**
+            Custom Field 2 that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel.
+            @deprecated Annotate your POCO with [TypeScriptPartial] and add custom fields to the 'partial' class instead.
+        */
         public customField2: KnockoutObservable<any> = ko.observable();
-        // Custom Field 3 that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel
+        /**
+            Custom Field 3 that can be used via scripts. This allows for setting observables via scripts and using them without modifying the ViewModel.
+            @deprecated Annotate your POCO with [TypeScriptPartial] and add custom fields to the 'partial' class instead.
+        */
         public customField3: KnockoutObservable<any> = ko.observable();
 
-
-        // True if the object is currently saving.
+        /** True if the object is currently saving. */
         public isSaving: KnockoutObservable<boolean> = ko.observable(false);
-        // Internal count of child objects that are saving.
-        public savingChildCount: KnockoutObservable<number> = ko.observable(0);
+        /** Internal count of child objects that are saving. */
+        protected savingChildCount: KnockoutObservable<number> = ko.observable(0);
 
         // Set this false when editing a field that saves periodically while the user is typing. 
         // By default(null), isDataFromSaveLoadedComputed will check the parent's value. 

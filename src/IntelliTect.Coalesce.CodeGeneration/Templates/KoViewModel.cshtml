@@ -31,10 +31,16 @@ module @moduleName {
 
         protected apiController = "/@(model.ApiName)";
         protected viewController = "/@(model.ControllerName)";
+    
+        /** 
+            The enumeration of all possible values of this.dataSource.
+        */
         public dataSources = ListViewModels.@(model.Name)DataSources;
 
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The data source on the server to use when retrieving the object.
+            Valid values are in this.dataSources.
+        */
         public dataSource: ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources.Default;
 
         public static coalesceConfig
@@ -57,7 +63,13 @@ module @moduleName {
         {
         @:// @(prop.Comment)
         }
-        @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.computed<string>(() => "");
+        @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.computed(() => {
+            @:for(var i = 0; i < this.@(prop.JsVariable)Values.length; i++){
+                @:if (this.@(prop.JsVariable)Values[i].id == this.@(prop.JsVariable)()){
+                    @:return this.@(prop.JsVariable)Values[i].value;
+                @:}
+            @:}
+        @:});
         }
         if (prop.IsManytoManyCollection)
         {
@@ -77,7 +89,7 @@ module @moduleName {
         {
         @:// @(prop.Comment)
         }
-        @:public @prop.JsTextPropertyName: () => string;
+        @:public @prop.JsTextPropertyName: KnockoutComputed<string>;
         }
         
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
@@ -627,18 +639,6 @@ module @moduleName {
                 @:if ($.isFunction(callback)) callback();
                 }
             };
-
-            // Enumeration Lookups.
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => (f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)) && !f.IsInternalUse))
-            {
-            @:self.@(prop.JsTextPropertyName) = ko.computed(function() {
-                @:for(var i=0;i < self.@(prop.JsVariable)Values.length; i++){
-                    @:if (self.@(prop.JsVariable)Values[i].id == self.@(prop.JsVariable)()){
-                        @:return self.@(prop.JsVariable)Values[i].value;
-                    @:}
-                @:}
-            @:});
-            }
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables

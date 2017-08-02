@@ -60,13 +60,6 @@ Model-Specific Members
     Reference Navigation Property Helpers
         For each reference navigation property on the POCO, the following members will be created:
 
-        - A method that will load from the server a list of the first 25 possible values of the navigation property, and a :ts:`KnockoutObservableArray<any>` that will store the results. The contents of this array are raw JavaScript objects that contain one property for the primary key of the object, and one property for the evaluated :ref:`ListTextAttribute` of that object.
-    
-            .. code-block:: typescript
-
-                public loadCompanyValidValues: (callback?: any) => JQueryPromise<any>;
-                public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-
         - A method that will call :ts:`showEditor` on that current value of the navigation property, or on a new instance if the current value is null.
     
             .. code-block:: typescript

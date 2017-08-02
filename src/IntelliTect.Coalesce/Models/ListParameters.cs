@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.Models
         /// <summary>
         /// Data source to use for the list.
         /// </summary>
-        public string ListDataSource { get; set; }
+        public string DataSource { get; set; }
         /// <summary>
         /// CSV list of fields to return
         /// </summary>
@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.Models
         public ListParameters(string fields = null,
             string includes = null, string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null, string where = null,
-            string listDataSource = null, string search = null)
+            string dataSource = null, string search = null)
         {
             Fields = fields;
             Includes = includes;
@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce.Models
             Page = page;
             PageSize = pageSize;
             Where = where;
-            ListDataSource = listDataSource;
+            DataSource = dataSource;
             Search = search;
             Filters = new Dictionary<string, string>();
         }

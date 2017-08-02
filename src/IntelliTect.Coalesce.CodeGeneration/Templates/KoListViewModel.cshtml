@@ -55,7 +55,7 @@ module @moduleName {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: @(model.Name)DataSources = @(model.Name)DataSources.Default;
+        public dataSource: @(model.Name)DataSources = @(model.Name)DataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(@(model.ListViewModelClassName).coalesceConfig);

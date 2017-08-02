@@ -929,7 +929,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// List of words already used in the API for other things.
         /// </summary>
         private static readonly string[] ReservedUrlParameterNames = new[] {
-            "fields","include","includes","orderby","orderbydescending","page","pagesize","where","listdatasource","case","params","if","this","base"};
+            "fields","include","includes","orderby","orderbydescending","page","pagesize","where","dataSource","case","params","if","this","base"};
 
         /// <summary>
         /// Name of the field to use in the API. If this is in ReservedUrlParameterNames, then my is added to the name.

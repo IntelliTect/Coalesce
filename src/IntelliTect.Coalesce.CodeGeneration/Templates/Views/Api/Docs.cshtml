@@ -205,7 +205,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3>@vm.Name Alternate List Data Sources</h3>
-                <div>These can be accessed via the list view model's listDataSource via an enumeration.</div>
+                <div>These can be accessed via the list view model's dataSource via an enumeration.</div>
             </div>
             @if (vm.Methods.Any(m => m.IsIQueryableOfParent && m.IsClientMethod))
             {

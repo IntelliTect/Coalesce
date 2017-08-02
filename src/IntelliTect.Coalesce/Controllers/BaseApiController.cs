@@ -88,12 +88,12 @@ namespace IntelliTect.Coalesce.Controllers
             get { return this.GetType().Name.Replace("Controller", ""); }
         }
 
-        protected virtual IQueryable<T> GetListDataSource(ListParameters listParameters)
+        protected virtual IQueryable<T> GetDataSource(ListParameters listParameters)
         {
-            if (!string.IsNullOrWhiteSpace(listParameters.ListDataSource) && listParameters.ListDataSource != "Default")
+            if (!string.IsNullOrWhiteSpace(listParameters.DataSource) && listParameters.DataSource != "Default")
             {
                 // find the IQueryable if we can
-                var method = typeof(T).GetMethod(listParameters.ListDataSource);
+                var method = typeof(T).GetMethod(listParameters.DataSource);
                 if (method != null)
                 {
                     return (IQueryable<T>)method.Invoke(null, new object[] { Db, User });
@@ -106,7 +106,7 @@ namespace IntelliTect.Coalesce.Controllers
         {
             try
             {
-                IQueryable<T> result = GetListDataSource(listParameters);
+                IQueryable<T> result = GetDataSource(listParameters);
 
                 // Add the Include statements to the result to grab the right object graph. Passing "" gets the standard set.
                 if ((result is DbSet<T>) && string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
@@ -236,7 +236,7 @@ namespace IntelliTect.Coalesce.Controllers
         {
             try
             {
-                IQueryable<T> result = GetListDataSource(listParameters);
+                IQueryable<T> result = GetDataSource(listParameters);
 
                 result = AddFilters(result, listParameters);
 
@@ -505,7 +505,7 @@ namespace IntelliTect.Coalesce.Controllers
         private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
         {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
-            IQueryable<T> source = GetListDataSource(listParameters);
+            IQueryable<T> source = GetDataSource(listParameters);
 
             // Get the item and get external data.
             if ((source is DbSet<T>) && string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
@@ -566,7 +566,7 @@ namespace IntelliTect.Coalesce.Controllers
 
         protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
-            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
 
             var result = new SaveResult<TDto>();
 

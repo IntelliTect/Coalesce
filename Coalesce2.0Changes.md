@@ -15,6 +15,17 @@
 * Namespace intellitect.webApi is now Coalesce.ModalHelpers
 * Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within.
 * <ModelName>ListUrl properties on generated ViewModels is now correctly camelCased.
+* BaseViewModel<T>:
+	* deleteCallbacks have been removed.
+	* customField1, 2, & 3 have been removed.
+	* isDataFromSaveLoaded has been changed to BaseViewModel<T>.coalesceConfig.loadResponseFromSaves
+	* afterLoadFromDto has been changed to BaseViewModel<T>.coalesceConfig.onLoadFromDto
+	* loadValidValues is gone, as are the other model-specific methods and collections of a similar nature.
+	* isSavingWithChildren is now named isThisOrChildSaving.
+	* reload has been removed - it was redundant with .load().
+	* changeIsExpanded is now named toggleIsExpanded, and no longer takes a parameter.
+	* changeIsEditing is now named toggleIsEditing, and no longer takes a parameter.
+	* isSelectedToggle is now named toggleIsSelected
 
 ## Deprications in Coalesce 2..0"
 
@@ -28,7 +39,7 @@
   * Many points of configuration for ViewModels and ListViewModels are done via a hierarchical configuration system.
   * All configuration properties are observables. Getters will set the property at that level, causing it cascade down until it reaches an instance, or until it is overridden at a lower level.
   * Setting a configuration property to null will reset it back to inheriting from an ancestor. Setting the global defaults to null will probably cause errors.
-  * Configuration defaults can be found around like 68 of coalesce.ko.base.ts.
+  * Configuration defaults can be found around line 68 of coalesce.ko.base.ts.
   * A global object, Coalesce.GlobalConfiguration, has most of the default configuration.
   * Two more global configuration objects exist as properties on Coalesce.GlobalConfiguration. These are `.viewModel` and `.listViewModel`, and they control the defaults for ViewModels and ListViewModels, respectively. There are some properties on these that are specific to one type or the other that don't appear on Coalesce.GlobalConfiguration itself.
   * On each ViewModel and ListViewModel class, there is a class-level configuration object named `coalesceConfig`. For example, `ViewModels.User.coalesceConfig`. These objects control settings for all instances of their type.

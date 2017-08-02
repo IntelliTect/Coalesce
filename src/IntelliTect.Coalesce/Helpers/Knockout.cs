@@ -454,7 +454,7 @@ namespace IntelliTect.Coalesce.Helpers
 
             string result = string.Format(@"
                 <select data-bind = ""select2AjaxMultiple: {0}{1}, itemViewModel: {6}ViewModels.{2}, 
-                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist'""
+                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist?includes=none'""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
                 prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
@@ -516,7 +516,7 @@ namespace IntelliTect.Coalesce.Helpers
         public static HtmlString ExpandButton(double size = 2)
         {
             string result = string.Format(@"
-                <div class=""pull-right"" data-bind=""click: changeIsExpanded"" style=""font-size: {0}em; cursor:pointer;"">
+                <div class=""pull-right"" data-bind=""click: toggleIsExpanded"" style=""font-size: {0}em; cursor:pointer;"">
                          <i class=""fa fa-minus-circle"" data-bind=""visible: isExpanded()""></i>
                     <i class=""fa fa-plus-circle"" data-bind=""visible: !isExpanded()""></i>
                 </div>", size);

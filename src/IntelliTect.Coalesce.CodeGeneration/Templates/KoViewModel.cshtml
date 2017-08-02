@@ -53,17 +53,17 @@ module @moduleName {
         {
         if (prop.Comment.Length > 0)
         {
-        @:// @(prop.Comment)
+        @:/** @(prop.Comment) */
         }
         @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType) = @(prop.Type.JsKnockoutType);
         if (prop.Type.IsEnum || (prop.Type.IsNullable && prop.PureType.IsEnum))
         {
-        @:// Text value for enumeration @prop.Name
+        @:/** Text value for enumeration @prop.Name */
         if (prop.Comment.Length > 0)
         {
         @:// @(prop.Comment)
         }
-        @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.computed(() => {
+        @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.pureComputed(() => {
             @:for(var i = 0; i < this.@(prop.JsVariable)Values.length; i++){
                 @:if (this.@(prop.JsVariable)Values[i].id == this.@(prop.JsVariable)()){
                     @:return this.@(prop.JsVariable)Values[i].value;
@@ -110,15 +110,6 @@ module @moduleName {
         @:// @(prop.Comment)
         }
         @:public @(prop.ListEditorUrlName): () => void; 
-        }
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasValidValues && !f.IsInternalUse))
-        {
-        if (prop.Comment.Length > 0)
-        {
-        @:// @(prop.Comment)
-        }
-        @:public @(prop.ValidValueListName.ToCamelCase()): KnockoutObservableArray<any> = ko.observableArray([]);
-        @:public load@(prop.ValidValueListName): (callback?: any) => JQueryPromise<any>;
         }
         // Pops up a stock editor for this object.
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsInternalUse))
@@ -200,7 +191,7 @@ module @moduleName {
                 else
                 {
                 @:if (reload) {
-                @:  this.reload(callback);
+                @:  this.load(null, callback);
                 @:} else if ($.isFunction(callback)) {
                 @:  callback();
                 @:}
@@ -414,8 +405,8 @@ module @moduleName {
 				@:self.@(prop.JsVariable)(data.@prop.JsonName);
                 }
                 }
-                if (self.afterLoadFromDto){
-                    self.afterLoadFromDto();
+                if (self.coalesceConfig.onLoadFromDto()){
+                    self.coalesceConfig.onLoadFromDto()(self as any);
                 }
 				self.isLoading(false);
 				self.isDirty(false);
@@ -557,38 +548,6 @@ module @moduleName {
                 @:deferEvaluation: true
             @:});
             }
-            // Create loading function for Valid Values
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasValidValues && !f.IsInternalUse))
-            {
-            <text>
-            self.load@(prop.ValidValueListName) = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/@(prop.Object.ApiUrl)/CustomList?Fields=@(prop.Object.PrimaryKey.Name),@(prop.Object.ListTextProperty.Name)",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.@(prop.ValidValueListName.ToCamelCase())(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for @(prop.Name): " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            </text>
-            }
 
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet && !f.IsInternalUse))
             {
@@ -620,23 +579,6 @@ module @moduleName {
                 }
                 if (loadingCount == 0 && $.isFunction(callback)){
                     callback();
-                }
-            };
-
-
-            // Load all the valid values in parallel.
-            self.loadValidValues = function(callback) {
-                @if (model.Properties.Any(f => f.HasValidValues && !f.IsInternalUse))
-                {
-                @:self.loadingValidValues = 0;
-                foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasValidValues && !f.IsInternalUse))
-                {
-                @:self.load@(prop.ValidValueListName)(callback);
-                }
-                }
-                else
-                {
-                @:if ($.isFunction(callback)) callback();
                 }
             };
 

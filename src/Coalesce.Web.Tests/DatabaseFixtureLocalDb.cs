@@ -9,11 +9,10 @@ namespace Coalesce.Web.Tests
     public class DatabaseFixtureLocalDb : IDisposable
     {
         private const string ConnectionString =
-            "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceWebTest;Trusted_Connection=True;";
+            "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceWebTest;Integrated Security=True;";
 
         public DatabaseFixtureLocalDb()
         {
-            ReflectionRepository.AddContext<DbContext>();
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseSqlServer(ConnectionString);
             Db = new AppDbContext(dbOptionBuilder.Options);
@@ -22,6 +21,8 @@ namespace Coalesce.Web.Tests
             Db.Database.EnsureDeleted();
             // Add some data to it.
             SampleData.Initialize(Db);
+
+            ReflectionRepository.AddContext<DbContext>();
         }
 
 

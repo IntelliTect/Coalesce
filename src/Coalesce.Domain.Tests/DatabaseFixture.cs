@@ -1,4 +1,5 @@
 ﻿using System;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 
 namespace Coalesce.Domain.Tests
@@ -9,13 +10,15 @@ namespace Coalesce.Domain.Tests
         {
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseSqlServer(
-                "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDomainTest;Trusted_Connection=True;"
+                "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDomainTest;Integrated Security=True;"
             );
             Db = new AppDbContext(dbOptionBuilder.Options);
             // Wipe the database out first;
             Db.Database.EnsureDeleted();
             // Add some data to it.
             SampleData.Initialize(Db);
+
+            ReflectionRepository.AddContext<DbContext>();
         }
 
         public AppDbContext Db { get; }

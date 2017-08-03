@@ -34,13 +34,12 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: CompanyDataSources = CompanyDataSources.Default;
+        public dataSource: CompanyDataSources = CompanyDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<CompanyList, ViewModels.Company>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<CompanyList, ViewModels.Company>(CompanyList.coalesceConfig);
 
-        // Valid values
-    
+
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Company(newItem, parent);
 
         constructor() {

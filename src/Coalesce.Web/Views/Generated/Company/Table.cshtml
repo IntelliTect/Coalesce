@@ -107,7 +107,7 @@
                         <td class="prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</td>
                         <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
                         <td class="prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</td>
-                        <td class="prop-employees"><a data-bind='attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                         <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
                     }
                     else
@@ -118,7 +118,7 @@
                         <td class="prop-city">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.City, true))</td>
                         <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
                         <td class="prop-zipCode">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, true))</td>
-                        <td class="prop-employees"><a data-bind='attr: {href: EmployeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                        <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                         <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
                     }
                 <td>

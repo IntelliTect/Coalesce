@@ -14,10 +14,16 @@ module ViewModels {
 
         protected apiController = "/CaseProduct";
         protected viewController = "/CaseProduct";
+    
+        /** 
+            The enumeration of all possible values of this.dataSource.
+        */
         public dataSources = ListViewModels.CaseProductDataSources;
 
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The data source on the server to use when retrieving the object.
+            Valid values are in this.dataSources.
+        */
         public dataSource: ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources.Default;
 
         public static coalesceConfig
@@ -34,14 +40,10 @@ module ViewModels {
 
        
         // Create computeds for display for objects
-        public caseText: () => string;
-        public productText: () => string;
+        public caseText: KnockoutComputed<string>;
+        public productText: KnockoutComputed<string>;
         
 
-                public caseValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCaseValidValues: (callback?: any) => JQueryPromise<any>;
-        public productValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadProductValidValues: (callback?: any) => JQueryPromise<any>;
         // Pops up a stock editor for this object.
         public showCaseEditor: (callback?: any) => void;
         public showProductEditor: (callback?: any) => void;
@@ -156,8 +158,8 @@ module ViewModels {
 				// The rest of the objects are loaded now.
 				self.caseId(data.caseId);
 				self.productId(data.productId);
-                if (self.afterLoadFromDto){
-                    self.afterLoadFromDto();
+                if (self.coalesceConfig.onLoadFromDto()){
+                    self.coalesceConfig.onLoadFromDto()(self as any);
                 }
 				self.isLoading(false);
 				self.isDirty(false);
@@ -193,62 +195,7 @@ module ViewModels {
             }  
 
             // Create variables for ListEditorApiUrls
-            // Create loading function for Valid Values
 
-            self.loadCaseValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/Case/CustomList?Fields=CaseKey,CaseKey",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.caseValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for Case: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
-            self.loadProductValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/Product/CustomList?Fields=ProductId,Name",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.productValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for Product: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
             self.showCaseEditor = function(callback: any) {
                 if (!self.case()) {
                     self.case(new Case());
@@ -293,16 +240,6 @@ module ViewModels {
                     callback();
                 }
             };
-
-
-            // Load all the valid values in parallel.
-            self.loadValidValues = function(callback) {
-                self.loadingValidValues = 0;
-                self.loadCaseValidValues(callback);
-                self.loadProductValidValues(callback);
-            };
-
-            // Enumeration Lookups.
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables

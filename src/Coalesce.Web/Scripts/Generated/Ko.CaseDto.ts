@@ -14,10 +14,16 @@ module ViewModels {
 
         protected apiController = "/CaseDto";
         protected viewController = "/CaseDto";
+    
+        /** 
+            The enumeration of all possible values of this.dataSource.
+        */
         public dataSources = ListViewModels.CaseDtoDataSources;
 
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The data source on the server to use when retrieving the object.
+            Valid values are in this.dataSources.
+        */
         public dataSource: ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources.Default;
 
         public static coalesceConfig
@@ -34,7 +40,7 @@ module ViewModels {
         // Create computeds for display for objects
         
 
-                // Pops up a stock editor for this object.
+        // Pops up a stock editor for this object.
 
 
 
@@ -96,8 +102,8 @@ module ViewModels {
 				// The rest of the objects are loaded now.
 				self.title(data.title);
 				self.assignedToName(data.assignedToName);
-                if (self.afterLoadFromDto){
-                    self.afterLoadFromDto();
+                if (self.coalesceConfig.onLoadFromDto()){
+                    self.coalesceConfig.onLoadFromDto()(self as any);
                 }
 				self.isLoading(false);
 				self.isDirty(false);
@@ -123,7 +129,6 @@ module ViewModels {
             }  
 
             // Create variables for ListEditorApiUrls
-            // Create loading function for Valid Values
 
 
             // Load all child objects that are not loaded.
@@ -133,14 +138,6 @@ module ViewModels {
                     callback();
                 }
             };
-
-
-            // Load all the valid values in parallel.
-            self.loadValidValues = function(callback) {
-                if ($.isFunction(callback)) callback();
-            };
-
-            // Enumeration Lookups.
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables

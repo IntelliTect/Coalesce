@@ -1,6 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="coalesce.ko.base.ts" />
-/// <reference path="coalesce.utilities.ts" />
+/// <reference path="../coalesce.dependencies.d.ts" />
 
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {
@@ -249,49 +247,53 @@ ko.bindingHandlers.select2AjaxMultiple = {
                 },
             })
             .on("change", function (e) {
-                if (!updating) {
-                    updating = true;
-                    // Code to update knockout
-                    var selectedItems = $(element).select2("data");
-                    var values = valueAccessor();
-                    if (values() && selectedItems && values().length != selectedItems.length) {
-                        // Add the items to the observable array.
-                        if (selectedItems.length > values().length) {
-                            // Item was added.
-                            for (var i = 0; i < selectedItems.length; i++) {
-                                var selectedItem = selectedItems[i];
-                                var found = false;
-                                for (var j = 0; j < values().length; j++) {
-                                    var value = values()[j];
-                                    found = found || (value.myId == selectedItem.id);
-                                }
-                                if (!found) {
-                                    // This is the missing one.
-                                    values.push(new itemViewModel(selectedItem));
-                                }
-                            }
-                        } else if (selectedItems.length < values().length) {
-                            // Item was removed
-                            for (var i = 0; i < values().length; i++) {
-                                var value = values()[i];
-                                var found = false;
-                                for (var j = 0; j < selectedItems.length; j++) {
-                                    var selectedItem = selectedItems[j];
-                                    found = found || (value.myId == selectedItem.id);
-                                }
-                                if (!found) {
-                                    // This is the missing one. Remove it
-                                    values.splice(i, 1);
-                                }
-                            }
+                if ($(element).data("select2-ajax-updating")) return;
+                $(element).data("select2-ajax-updating", true);
 
-                        } else {
-                            // Nothing changed.
+                // Code to update knockout
+                var selectedItems = $(element).select2("data");
+                var values = valueAccessor();
+                if (values() && selectedItems && values().length != selectedItems.length) {
+                    // Add the items to the observable array.
+                    if (selectedItems.length > values().length) {
+                        // Item was added.
+                        for (var i = 0; i < selectedItems.length; i++) {
+                            var selectedItem = selectedItems[i];
+                            var found = false;
+                            for (var j = 0; j < values().length; j++) {
+                                var value = values()[j];
+                                found = found || (value.myId == selectedItem.id);
+                            }
+                            if (!found) {
+                                // This is the missing one.
+                                values.push(new itemViewModel(selectedItem));
+                            }
+                        }
+                    } else if (selectedItems.length < values().length) {
+                        // Item was removed
+                        for (var i = 0; i < values().length; i++) {
+                            var value = values()[i];
+                            var found = false;
+                            for (var j = 0; j < selectedItems.length; j++) {
+                                var selectedItem = selectedItems[j];
+                                found = found || (value.myId == selectedItem.id);
+                            }
+                            if (!found) {
+                                // This is the missing one. Remove it.
+                                values.splice(i, 1);
+
+                                // Also remove the corresponding option element, if there is one.
+                                // See the wall of text in the update handler of this binding below for an explanation why.
+                                $(element).find("option").filter((_, e) => e.getAttribute("value") == value.myId).remove();
+                            }
                         }
 
+                    } else {
+                        // Nothing changed.
                     }
-                    updating = false;
                 }
+
+                $(element).data("select2-ajax-updating", false);
             });
         if (openOnFocus) {
             $.data(element).select2.on("focus", function (e) {
@@ -300,35 +302,43 @@ ko.bindingHandlers.select2AjaxMultiple = {
         }
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        if ($(element).data("select2-ajax-updating")) return;
+        $(element).data("select2-ajax-updating", true);
+
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
         var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
         var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
 
         // See if the value exists. If not, we haven't loaded it from the server yet.
-        var value = valueAccessor()();
+        var value: Array<any> = valueAccessor()();
         var select2Value = $(element).val();
         if (!select2Value) select2Value = [];
         var selectedIds = [];
         // Convert the field names to js variables.
         textFieldName = textFieldName.charAt(0).toLowerCase() + textFieldName.slice(1);
         idFieldName = idFieldName.charAt(0).toLowerCase() + idFieldName.slice(1);
-        // Add all the items to the options and select them.
-        var changed = false;
+
+        // Remove all of the temporary option elements that we had to create.
+        // These option elements are created so that select2 can display items that are
+        // part of the collection of selected objects, but were not added to the list via select2 -
+        // they came either with the initial data load, or were manually added to the undelying collection programtically.
+        // We have to remove these options because if we don't,
+        // and the user decides to remove an option from the selection box and then re-select it,
+        // select2 won't use the fully hydrated object from its ajax call -
+        // it will use a fake object that it made that contains only and 'id' and 'text' property.
+        $(element).find("option").remove();
+
         for (var i in value) {
             var item = value[i];
             var text = item[textFieldName]();
             var id = item[idFieldName]();
-            if (id && text && select2Value.indexOf(id) == -1 && select2Value.indexOf(id.toString()) == -1) {
-                var option = new Option(text, id, true, true);
-                $(element).append(option);
-                changed = true;
-            }
+            var option = new Option(text, id, true, true);
+            $(element).append(option);
             selectedIds.push(id);
         }
-        // Set the element based on the value in the model.
-        if (changed) {
-            $(element).val(selectedIds).trigger('change');
-        }
+
+        $(element).val(selectedIds).trigger('change');
+        $(element).data("select2-ajax-updating", false);
     }
 };
 
@@ -479,7 +489,7 @@ ko.bindingHandlers.datePicker = {
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
             sideBySide: allBindings.get('sideBySide') || false,
-            timeZone: allBindings.get('timeZone') || null,
+            timeZone: allBindings.get('timeZone') || "",
             keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
         })
             .on("dp.change", function (e) {

@@ -36,13 +36,12 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: CaseDtoDataSources = CaseDtoDataSources.Default;
+        public dataSource: CaseDtoDataSources = CaseDtoDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseDtoList, ViewModels.CaseDto>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseDtoList, ViewModels.CaseDto>(CaseDtoList.coalesceConfig);
 
-        // Valid values
-    
+
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.CaseDto(newItem, parent);
 
         constructor() {

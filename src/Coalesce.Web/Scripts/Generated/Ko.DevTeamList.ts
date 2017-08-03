@@ -28,13 +28,12 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: DevTeamDataSources = DevTeamDataSources.Default;
+        public dataSource: DevTeamDataSources = DevTeamDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<DevTeamList, ViewModels.DevTeam>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<DevTeamList, ViewModels.DevTeam>(DevTeamList.coalesceConfig);
 
-        // Valid values
-    
+
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.DevTeam(newItem, parent);
 
         constructor() {

@@ -104,7 +104,7 @@ namespace @(namespaceName).Api
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
@@ -115,7 +115,7 @@ namespace @(namespaceName).Api
                 return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." });
             }*@
 
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.BaseViewModel.Properties.Where(f => f.IsUrlParameter))
@@ -138,7 +138,7 @@ namespace @(namespaceName).Api
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
@@ -149,7 +149,7 @@ namespace @(namespaceName).Api
                 return new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." };
             }*@
 
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsUrlParameter))
@@ -164,7 +164,7 @@ namespace @(namespaceName).Api
         @(securityInfo.ReadAnnotation)
         @(model.ApiActionAccessModifier) virtual async Task<int> Count(
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
@@ -175,7 +175,7 @@ namespace @(namespaceName).Api
                 return 0;
             }*@
 
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
+            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
 
             // Add custom filters
             @foreach(PropertyViewModel prop in model.Properties.Where(f=>f.IsUrlParameter))
@@ -209,7 +209,7 @@ namespace @(namespaceName).Api
                 return null;
             }*@
 
-            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
@@ -283,12 +283,12 @@ namespace @(namespaceName).Api
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.BaseViewModel.Properties.Where(f => f.IsUrlParameter))
@@ -313,12 +313,12 @@ namespace @(namespaceName).Api
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             @(string.Join(",",model.BaseViewModel.Properties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             @foreach (PropertyViewModel prop in model.BaseViewModel.Properties.Where(f => f.IsUrlParameter))
@@ -393,11 +393,11 @@ namespace @(namespaceName).Api
         </text>
         }
 
-        protected override IQueryable<@(model.BaseViewModel.FullName)> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<@(model.BaseViewModel.FullName)> GetDataSource(ListParameters parameters)
         {
             @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && m.IsClientMethod))
             {
-            @:if (parameters.ListDataSource == "@(method.Name)")
+            @:if (parameters.DataSource == "@(method.Name)")
             @:{
             foreach (var parameter in method.Parameters.Where(p => !p.IsDI))
                 {
@@ -415,7 +415,7 @@ namespace @(namespaceName).Api
             @:}
             }
 
-            return base.GetListDataSource(parameters);
+            return base.GetDataSource(parameters);
         }
 
         // Methods from data class exposed through API Controller.

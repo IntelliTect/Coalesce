@@ -41,13 +41,13 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
 
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -75,13 +75,13 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
 
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -101,13 +101,13 @@ namespace Coalesce.Web.Api
         [AllowAnonymous]
         public virtual async Task<int> Count(
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
 
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
+            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -136,7 +136,7 @@ namespace Coalesce.Web.Api
         public virtual async Task<CaseDtoGen> Get(string id, string includes = null, string dataSource = null)
         {
 
-            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
@@ -199,12 +199,12 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -234,12 +234,12 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("CaseKey", caseKey);
@@ -320,14 +320,14 @@ namespace Coalesce.Web.Api
             return resultList;
         }
 
-        protected override IQueryable<Coalesce.Domain.Case> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Coalesce.Domain.Case> GetDataSource(ListParameters parameters)
         {
-            if (parameters.ListDataSource == "GetAllOpenCases")
+            if (parameters.DataSource == "GetAllOpenCases")
             {
                 return Coalesce.Domain.Case.GetAllOpenCases(Db);
             }
 
-            return base.GetListDataSource(parameters);
+            return base.GetDataSource(parameters);
         }
 
         // Methods from data class exposed through API Controller.

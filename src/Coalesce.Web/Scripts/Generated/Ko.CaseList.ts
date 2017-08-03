@@ -36,21 +36,12 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: CaseDataSources = CaseDataSources.Default;
+        public dataSource: CaseDataSources = CaseDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(CaseList.coalesceConfig);
 
-        // Valid values
-        public assignedToValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadAssignedToValidValues: (callback: any) => void;
-        public reportedByValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadReportedByValidValues: (callback: any) => void;
-        public caseProductsValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCaseProductsValidValues: (callback: any) => void;
-        public devTeamAssignedValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadDevTeamAssignedValidValues: (callback: any) => void;
-    
+
         // Call server method (GetAllOpenCasesCount)
         public getAllOpenCasesCount = (callback: () => void = null, reload: boolean = true) => {
             this.getAllOpenCasesCountIsLoading(true);

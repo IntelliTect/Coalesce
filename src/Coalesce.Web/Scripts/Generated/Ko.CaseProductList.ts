@@ -29,17 +29,12 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: CaseProductDataSources = CaseProductDataSources.Default;
+        public dataSource: CaseProductDataSources = CaseProductDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseProductList, ViewModels.CaseProduct>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseProductList, ViewModels.CaseProduct>(CaseProductList.coalesceConfig);
 
-        // Valid values
-        public caseValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCaseValidValues: (callback: any) => void;
-        public productValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadProductValidValues: (callback: any) => void;
-    
+
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.CaseProduct(newItem, parent);
 
         constructor() {

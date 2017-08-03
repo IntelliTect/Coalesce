@@ -32,10 +32,10 @@
 <div class="col-md-8 prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, false))</div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Cases Assigned</label>
-<div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
+<div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Cases Reported</label>
-<div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
+<div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Birth Date</label>
 <div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>                    </div>

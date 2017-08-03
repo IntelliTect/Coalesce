@@ -41,13 +41,13 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
 
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -75,13 +75,13 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
 
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -101,13 +101,13 @@ namespace Coalesce.Web.Api
         [AllowAnonymous]
         public virtual async Task<int> Count(
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
 
-            ListParameters parameters = new ListParameters(where: where, listDataSource: listDataSource, search: search, fields: null);
+            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -136,7 +136,7 @@ namespace Coalesce.Web.Api
         public virtual async Task<PersonDtoGen> Get(string id, string includes = null, string dataSource = null)
         {
 
-            ListParameters listParams = new ListParameters(includes: includes, listDataSource: dataSource);
+            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
             listParams.AddFilter("id", id);
             return await GetImplementation(id, listParams);
         }
@@ -199,12 +199,12 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -234,12 +234,12 @@ namespace Coalesce.Web.Api
             string orderBy = null, string orderByDescending = null,
             int? page = 1, int? pageSize = 10000,
             string where = null,
-            string listDataSource = null,
+            string dataSource = null,
             string search = null,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, listDataSource, search);
+            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -320,18 +320,18 @@ namespace Coalesce.Web.Api
             return resultList;
         }
 
-        protected override IQueryable<Coalesce.Domain.Person> GetListDataSource(ListParameters parameters)
+        protected override IQueryable<Coalesce.Domain.Person> GetDataSource(ListParameters parameters)
         {
-            if (parameters.ListDataSource == "NamesStartingWithAWithCases")
+            if (parameters.DataSource == "NamesStartingWithAWithCases")
             {
                 return Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
             }
-            if (parameters.ListDataSource == "BorCPeople")
+            if (parameters.DataSource == "BorCPeople")
             {
                 return Coalesce.Domain.Person.BorCPeople(Db);
             }
 
-            return base.GetListDataSource(parameters);
+            return base.GetDataSource(parameters);
         }
 
         // Methods from data class exposed through API Controller.

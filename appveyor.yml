@@ -1,0 +1,22 @@
+version: 2.0.{build}
+image: Visual Studio 2017
+configuration: Debug
+platform: Any CPU
+before_build:
+- cmd: >-
+    nuget restore
+
+    cd src\Coalesce.Web
+
+    npm install
+
+    npm -g install gulp-cli
+
+    gulp coalesce
+
+    cd ..\Coalesce.Domain
+
+    dotnet ef database update
+build:
+  project: Coalesce.sln
+  verbosity: minimal

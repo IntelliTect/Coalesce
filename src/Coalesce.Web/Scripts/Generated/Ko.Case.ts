@@ -14,10 +14,16 @@ module ViewModels {
 
         protected apiController = "/Case";
         protected viewController = "/Case";
+    
+        /** 
+            The enumeration of all possible values of this.dataSource.
+        */
         public dataSources = ListViewModels.CaseDataSources;
 
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The data source on the server to use when retrieving the object.
+            Valid values are in this.dataSources.
+        */
         public dataSource: ListViewModels.CaseDataSources = ListViewModels.CaseDataSources.Default;
 
         public static coalesceConfig
@@ -26,7 +32,7 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<Case>(Case.coalesceConfig);
     
         // Observables
-        // The Primary key for the Case object
+        /** The Primary key for the Case object */
         public caseKey: KnockoutObservable<number> = ko.observable(null);
         public title: KnockoutObservable<string> = ko.observable(null);
         public description: KnockoutObservable<string> = ko.observable(null);
@@ -38,8 +44,14 @@ module ViewModels {
         public attachment: KnockoutObservable<string> = ko.observable(null);
         public severity: KnockoutObservable<string> = ko.observable(null);
         public status: KnockoutObservable<number> = ko.observable(null);
-        // Text value for enumeration Status
-        public statusText: KnockoutComputed<string> = ko.computed<string>(() => "");
+        /** Text value for enumeration Status */
+        public statusText: KnockoutComputed<string> = ko.pureComputed(() => {
+            for(var i = 0; i < this.statusValues.length; i++){
+                if (this.statusValues[i].id == this.status()){
+                    return this.statusValues[i].value;
+                }
+            }
+        });
         public caseProducts: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);  // Many to Many Collection
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
@@ -47,20 +59,12 @@ module ViewModels {
 
        
         // Create computeds for display for objects
-        public assignedToText: () => string;
-        public reportedByText: () => string;
-        public devTeamAssignedText: () => string;
+        public assignedToText: KnockoutComputed<string>;
+        public reportedByText: KnockoutComputed<string>;
+        public devTeamAssignedText: KnockoutComputed<string>;
         
 
-        public CaseProductsListUrl: () => void; 
-                public assignedToValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadAssignedToValidValues: (callback?: any) => JQueryPromise<any>;
-        public reportedByValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadReportedByValidValues: (callback?: any) => JQueryPromise<any>;
-        public caseProductsValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCaseProductsValidValues: (callback?: any) => JQueryPromise<any>;
-        public devTeamAssignedValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadDevTeamAssignedValidValues: (callback?: any) => JQueryPromise<any>;
+        public caseProductsListUrl: () => void; 
         // Pops up a stock editor for this object.
         public showAssignedToEditor: (callback?: any) => void;
         public showReportedByEditor: (callback?: any) => void;
@@ -237,8 +241,8 @@ module ViewModels {
 				self.severity(data.severity);
 				self.status(data.status);
 				self.devTeamAssignedId(data.devTeamAssignedId);
-                if (self.afterLoadFromDto){
-                    self.afterLoadFromDto();
+                if (self.coalesceConfig.onLoadFromDto()){
+                    self.coalesceConfig.onLoadFromDto()(self as any);
                 }
 				self.isLoading(false);
 				self.isDirty(false);
@@ -301,116 +305,7 @@ module ViewModels {
 }  
 
             // Create variables for ListEditorApiUrls
-            // Create loading function for Valid Values
 
-            self.loadAssignedToValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/Person/CustomList?Fields=PersonId,Name",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.assignedToValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for AssignedTo: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
-            self.loadReportedByValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/Person/CustomList?Fields=PersonId,Name",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.reportedByValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for ReportedBy: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
-            self.loadCaseProductsValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/CaseProduct/CustomList?Fields=CaseProductId,CaseProductId",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.caseProductsValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for CaseProducts: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
-            self.loadDevTeamAssignedValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/DevTeam/CustomList?Fields=DevTeamId,Name",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.devTeamAssignedValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for DevTeamAssigned: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
             self.showAssignedToEditor = function(callback: any) {
                 if (!self.assignedTo()) {
                     self.assignedTo(new Person());
@@ -467,25 +362,6 @@ module ViewModels {
                     callback();
                 }
             };
-
-
-            // Load all the valid values in parallel.
-            self.loadValidValues = function(callback) {
-                self.loadingValidValues = 0;
-                self.loadAssignedToValidValues(callback);
-                self.loadReportedByValidValues(callback);
-                self.loadCaseProductsValidValues(callback);
-                self.loadDevTeamAssignedValidValues(callback);
-            };
-
-            // Enumeration Lookups.
-            self.statusText = ko.computed(function() {
-                for(var i=0;i < self.statusValues.length; i++){
-                    if (self.statusValues[i].id == self.status()){
-                        return self.statusValues[i].value;
-                    }
-                }
-            });
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables

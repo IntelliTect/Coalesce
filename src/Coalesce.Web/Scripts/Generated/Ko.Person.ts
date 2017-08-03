@@ -14,10 +14,16 @@ module ViewModels {
 
         protected apiController = "/Person";
         protected viewController = "/Person";
+    
+        /** 
+            The enumeration of all possible values of this.dataSource.
+        */
         public dataSources = ListViewModels.PersonDataSources;
 
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The data source on the server to use when retrieving the object.
+            Valid values are in this.dataSources.
+        */
         public dataSource: ListViewModels.PersonDataSources = ListViewModels.PersonDataSources.Default;
 
         public static coalesceConfig
@@ -26,27 +32,39 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
     
         // Observables
-        // ID for the person object.
+        /** ID for the person object. */
         public personId: KnockoutObservable<number> = ko.observable(null);
-        // Title of the person, Mr. Mrs, etc.
+        /** Title of the person, Mr. Mrs, etc. */
         public title: KnockoutObservable<number> = ko.observable(null);
-        // Text value for enumeration Title
+        /** Text value for enumeration Title */
         // Title of the person, Mr. Mrs, etc.
-        public titleText: KnockoutComputed<string> = ko.computed<string>(() => "");
-        // First name of the person.
+        public titleText: KnockoutComputed<string> = ko.pureComputed(() => {
+            for(var i = 0; i < this.titleValues.length; i++){
+                if (this.titleValues[i].id == this.title()){
+                    return this.titleValues[i].value;
+                }
+            }
+        });
+        /** First name of the person. */
         public firstName: KnockoutObservable<string> = ko.observable(null);
-        // Last name of the person
+        /** Last name of the person */
         public lastName: KnockoutObservable<string> = ko.observable(null);
-        // Email address of the person
+        /** Email address of the person */
         public email: KnockoutObservable<string> = ko.observable(null);
-        // Genetic Gender of the person.
+        /** Genetic Gender of the person. */
         public gender: KnockoutObservable<number> = ko.observable(null);
-        // Text value for enumeration Gender
+        /** Text value for enumeration Gender */
         // Genetic Gender of the person.
-        public genderText: KnockoutComputed<string> = ko.computed<string>(() => "");
-        // List of cases assigned to the person
+        public genderText: KnockoutComputed<string> = ko.pureComputed(() => {
+            for(var i = 0; i < this.genderValues.length; i++){
+                if (this.genderValues[i].id == this.gender()){
+                    return this.genderValues[i].value;
+                }
+            }
+        });
+        /** List of cases assigned to the person */
         public casesAssigned: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
-        // List of cases reported by the person.
+        /** List of cases reported by the person. */
         public casesReported: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         public birthDate: KnockoutObservable<moment.Moment> = ko.observable(null);
         public lastBath: KnockoutObservable<moment.Moment> = ko.observable(null);
@@ -54,18 +72,18 @@ module ViewModels {
         public personStatsId: KnockoutObservable<number> = ko.observable(null);
         public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
         public timeZone: KnockoutObservable<any> = ko.observable(null);
-        // Calculated name of the person. eg., Mr. Michael Stokesbary.
+        /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
         public name: KnockoutObservable<string> = ko.observable(null);
-        // Company ID this person is employed by
+        /** Company ID this person is employed by */
         public companyId: KnockoutObservable<number> = ko.observable(null);
-        // Company loaded from the Company ID
+        /** Company loaded from the Company ID */
         public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
 
        
         // Create computeds for display for objects
-        public personStatsText: () => string;
+        public personStatsText: KnockoutComputed<string>;
         // Company loaded from the Company ID
-        public companyText: () => string;
+        public companyText: KnockoutComputed<string>;
         
         // Add object to casesAssigned
         public addToCasesAssigned: (autoSave?: boolean) => Case;
@@ -77,12 +95,9 @@ module ViewModels {
         public casesReportedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
 
         // List of cases assigned to the person
-        public CasesAssignedListUrl: () => void; 
+        public casesAssignedListUrl: () => void; 
         // List of cases reported by the person.
-        public CasesReportedListUrl: () => void; 
-                // Company loaded from the Company ID
-        public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCompanyValidValues: (callback?: any) => JQueryPromise<any>;
+        public casesReportedListUrl: () => void; 
         // Pops up a stock editor for this object.
         public showPersonStatsEditor: (callback?: any) => void;
         public showCompanyEditor: (callback?: any) => void;
@@ -193,7 +208,7 @@ module ViewModels {
                 this.changeSpacesToDashesInNameResult(data.object);
 
                 if (reload) {
-                  this.reload(callback);
+                  this.load(null, callback);
                 } else if ($.isFunction(callback)) {
                   callback();
                 }
@@ -377,8 +392,8 @@ module ViewModels {
 				self.timeZone(data.timeZone);
 				self.name(data.name);
 				self.companyId(data.companyId);
-                if (self.afterLoadFromDto){
-                    self.afterLoadFromDto();
+                if (self.coalesceConfig.onLoadFromDto()){
+                    self.coalesceConfig.onLoadFromDto()(self as any);
                 }
 				self.isLoading(false);
 				self.isDirty(false);
@@ -490,47 +505,19 @@ module ViewModels {
             }  
 
             // Create variables for ListEditorApiUrls
-            self.CasesAssignedListUrl = ko.computed({
+            self.casesAssignedListUrl = ko.computed({
                 read: function() {
                          return self.coalesceConfig.baseViewUrl() + '/Case/Table?assignedToId=' + self.personId();
                 },
                 deferEvaluation: true
             });
-            self.CasesReportedListUrl = ko.computed({
+            self.casesReportedListUrl = ko.computed({
                 read: function() {
                          return self.coalesceConfig.baseViewUrl() + '/Case/Table?reportedById=' + self.personId();
                 },
                 deferEvaluation: true
             });
-            // Create loading function for Valid Values
 
-            self.loadCompanyValidValues = function(callback) {
-                self.loadingValidValues++;
-                return $.ajax({
-                    method: "GET",
-                    url: self.coalesceConfig.baseApiUrl() + "/Company/CustomList?Fields=CompanyId,AltName",
-                    xhrFields: { withCredentials: true } })
-                .done(function(data) {
-                    self.isLoading(true);
-                    self.companyValidValues(data.list);
-                    self.isLoading(false);
-                })
-                .fail(function(xhr) {
-                    var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    self.isLoading(false);
-
-                    if (self.coalesceConfig.showFailureAlerts())
-                        self.coalesceConfig.onFailure()(this, "Could not get Valid Values for Company: " + errorMsg);
-                })
-                .always(function(){
-                    self.loadingValidValues--;
-                    if (self.loadingValidValues === 0) {
-                        if ($.isFunction(callback)) {callback();}
-                    }
-                });
-            }
-            
             self.showCompanyEditor = function(callback: any) {
                 if (!self.company()) {
                     self.company(new Company());
@@ -557,29 +544,6 @@ module ViewModels {
                     callback();
                 }
             };
-
-
-            // Load all the valid values in parallel.
-            self.loadValidValues = function(callback) {
-                self.loadingValidValues = 0;
-                self.loadCompanyValidValues(callback);
-            };
-
-            // Enumeration Lookups.
-            self.titleText = ko.computed(function() {
-                for(var i=0;i < self.titleValues.length; i++){
-                    if (self.titleValues[i].id == self.title()){
-                        return self.titleValues[i].value;
-                    }
-                }
-            });
-            self.genderText = ko.computed(function() {
-                for(var i=0;i < self.genderValues.length; i++){
-                    if (self.genderValues[i].id == self.gender()){
-                        return self.genderValues[i].value;
-                    }
-                }
-            });
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables

@@ -37,15 +37,12 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public listDataSource: PersonDataSources = PersonDataSources.Default;
+        public dataSource: PersonDataSources = PersonDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
 
-        // Valid values
-        public companyValidValues: KnockoutObservableArray<any> = ko.observableArray([]);
-        public loadCompanyValidValues: (callback: any) => void;
-    
+
         // Call server method (Add)
         // Adds two numbers.
         public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true) => {

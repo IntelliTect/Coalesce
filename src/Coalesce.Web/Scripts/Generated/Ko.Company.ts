@@ -14,10 +14,16 @@ module ViewModels {
 
         protected apiController = "/Company";
         protected viewController = "/Company";
+    
+        /** 
+            The enumeration of all possible values of this.dataSource.
+        */
         public dataSources = ListViewModels.CompanyDataSources;
 
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The data source on the server to use when retrieving the object.
+            Valid values are in this.dataSources.
+        */
         public dataSource: ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources.Default;
 
         public static coalesceConfig
@@ -43,8 +49,8 @@ module ViewModels {
         // List Object model for Employees. Allows for loading subsets of data.
         public employeesList: (loadImmediate?: boolean) => ListViewModels.PersonList;
 
-        public EmployeesListUrl: () => void; 
-                // Pops up a stock editor for this object.
+        public employeesListUrl: () => void; 
+        // Pops up a stock editor for this object.
 
 
 
@@ -121,8 +127,8 @@ module ViewModels {
 				self.state(data.state);
 				self.zipCode(data.zipCode);
 				self.altName(data.altName);
-                if (self.afterLoadFromDto){
-                    self.afterLoadFromDto();
+                if (self.coalesceConfig.onLoadFromDto()){
+                    self.coalesceConfig.onLoadFromDto()(self as any);
                 }
 				self.isLoading(false);
 				self.isDirty(false);
@@ -187,13 +193,12 @@ module ViewModels {
             }  
 
             // Create variables for ListEditorApiUrls
-            self.EmployeesListUrl = ko.computed({
+            self.employeesListUrl = ko.computed({
                 read: function() {
                          return self.coalesceConfig.baseViewUrl() + '/Person/Table?companyId=' + self.companyId();
                 },
                 deferEvaluation: true
             });
-            // Create loading function for Valid Values
 
 
             // Load all child objects that are not loaded.
@@ -203,14 +208,6 @@ module ViewModels {
                     callback();
                 }
             };
-
-
-            // Load all the valid values in parallel.
-            self.loadValidValues = function(callback) {
-                if ($.isFunction(callback)) callback();
-            };
-
-            // Enumeration Lookups.
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables

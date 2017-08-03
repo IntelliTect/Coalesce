@@ -267,7 +267,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public async void CountOfBorC()
         {
-            var result = await _pc.Count(listDataSource: "BorCPeople");
+            var result = await _pc.Count("BorCPeople");
             Assert.Equal(14, result);
         }
     }

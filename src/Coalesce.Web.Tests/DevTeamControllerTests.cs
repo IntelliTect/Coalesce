@@ -1,64 +1,66 @@
-﻿using Coalesce.Domain;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Coalesce.Domain.External;
 using Coalesce.Web.Api;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic;
-using System.Threading.Tasks;
+using Coalesce.Web.Models;
+using IntelliTect.Coalesce.Models;
 using Xunit;
 
 namespace Coalesce.Web.Tests
 {
+    [Collection("Database collection")]
     public class DevTeamControllerTests : IClassFixture<DatabaseFixtureLocalDb>
     {
-        private DevTeamController _pc;
-
         public DevTeamControllerTests(DatabaseFixtureLocalDb dbFixture)
         {
             DbFixture = dbFixture;
             _pc = new DevTeamController();
             _pc.Db = DbFixture.Db;
         }
-        private DatabaseFixtureLocalDb DbFixture { get; set; }
+
+        private readonly DevTeamController _pc;
+        private DatabaseFixtureLocalDb DbFixture { get; }
 
         [Fact]
-        public async void ListGeneral()
+        public async Task Count()
+        {
+            int result = await _pc.Count();
+            Assert.Equal(4, result);
+        }
+
+        [Fact]
+        public async Task ListGeneral()
         {
             Assert.NotNull(_pc.ReadOnlyDataSource);
 
-            var result = await _pc.List(null, null, null, null, null, null, null, null, null, null);
+            GenericListResult<DevTeam, DevTeamDtoGen> result =
+                await _pc.List();
             Assert.Equal(4, result.List.Count());
             Assert.Equal(4, result.TotalCount);
             Assert.Equal(1, result.PageCount);
-            var person = result.List.First();
+            DevTeamDtoGen person = result.List.First();
             Assert.Equal("Office", person.Name);
         }
+
         [Fact]
-        public async void ListPaging()
+        public async Task ListOrderByName()
         {
-            var result = await _pc.List(null, null, null, 2, 2, null, null, null, null, null);
+            GenericListResult<DevTeam, DevTeamDtoGen> result =
+                await _pc.List(null, "Name");
+            DevTeamDtoGen person = result.List.First();
+            Assert.Equal("Office", person.Name);
+            Assert.Equal(4, result.List.Count());
+        }
+
+        [Fact]
+        public async Task ListPaging()
+        {
+            GenericListResult<DevTeam, DevTeamDtoGen> result =
+                await _pc.List(null, null, null, 2, 2);
             Assert.Equal(result.List.Count(), 2);
             Assert.Equal(result.Page, 2);
             Assert.Equal(result.TotalCount, 4);
             Assert.Equal(result.PageCount, 2);
         }
-
-        [Fact]
-        public async void ListOrderByName()
-        {
-            var result = await _pc.List(null, "Name", null, null, null, null, null, null, null, null);
-            var person = result.List.First();
-            Assert.Equal("Office", person.Name);
-            Assert.Equal(4, result.List.Count());
-        }
-
-        [Fact]
-        public async void Count()
-        {
-            var result = await _pc.Count();
-            Assert.Equal(4, result);
-        }
-
     }
 }

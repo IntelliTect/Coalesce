@@ -64,7 +64,6 @@ namespace Coalesce.Domain
         [Display(Order = 3)]
         [MinLength(length: 3)]
         [MaxLength(100)]
-        [Edit(Roles = "Admin")]
         [Search]
         public string LastName { get; set; }
 
@@ -76,7 +75,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Genetic Gender of the person. 
         /// </summary>
-        [Read(Roles = "Admin")]
         public Genders Gender { get; set; }
 
         /// <summary>

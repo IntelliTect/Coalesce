@@ -147,10 +147,7 @@ namespace Coalesce.Web.Models
 
             entity.Title = (Titles)(Title ?? 0);
             entity.FirstName = FirstName;
-            if ((isAdmin))
-            {
-                entity.LastName = LastName;
-            }
+            entity.LastName = LastName;
             entity.Email = Email;
             entity.BirthDate = BirthDate;
             entity.LastBath = LastBath;

@@ -1,15 +1,10 @@
-﻿using Coalesce.Domain;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Coalesce.Domain.Tests
 {
-    public class DatabaseFixture
+    public class DatabaseFixture : IDisposable
     {
-        public AppDbContext Db { get; private set; }
-
         public DatabaseFixture()
         {
             var dbOptionBuilder = new DbContextOptionsBuilder();
@@ -21,6 +16,15 @@ namespace Coalesce.Domain.Tests
             Db.Database.EnsureDeleted();
             // Add some data to it.
             SampleData.Initialize(Db);
+        }
+
+        public AppDbContext Db { get; }
+
+        public void Dispose()
+        {
+            if (Db == null) return;
+            Db.Database.EnsureDeleted();
+            Db.Dispose();
         }
     }
 }

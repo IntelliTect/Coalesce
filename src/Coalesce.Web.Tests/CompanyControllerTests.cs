@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Coalesce.Web.Tests
 {
+    [Collection("Database collection")]
     public class CompanyControllerTests : IClassFixture<DatabaseFixtureLocalDb>
     {
         public CompanyControllerTests(DatabaseFixtureLocalDb dbFixture)

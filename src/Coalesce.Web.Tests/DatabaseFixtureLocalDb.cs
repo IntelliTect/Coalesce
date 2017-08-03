@@ -1,21 +1,15 @@
-﻿using Coalesce.Domain;
+﻿using System;
+using Coalesce.Domain;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace Coalesce.Web.Tests
 {
-    public class DatabaseFixtureLocalDb
+    public class DatabaseFixtureLocalDb : IDisposable
     {
-        private static object _lock = new object();
-        public static bool IsInitialized = false;
-
-        public AppDbContext Db { get; private set; }
-
-        public const string ConnectionString = "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceWebTest;Trusted_Connection=True;";
+        private const string ConnectionString =
+            "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceWebTest;Trusted_Connection=True;";
 
         public DatabaseFixtureLocalDb()
         {
@@ -24,30 +18,29 @@ namespace Coalesce.Web.Tests
             dbOptionBuilder.UseSqlServer(ConnectionString);
             Db = new AppDbContext(dbOptionBuilder.Options);
 
-            // Only set the database up once for all the tests.
-            // Make sure we don't try to set it up at the same time.
-            lock (_lock)
-            {
-                if (!IsInitialized)
-                {
-                    // Wipe the database out first;
-                    Db.Database.EnsureDeleted();
-                    // Add some data to it.
-                    SampleData.Initialize(Db);
-                    IsInitialized = true;
-                }
-            }
+            // Wipe the database out first;
+            Db.Database.EnsureDeleted();
+            // Add some data to it.
+            SampleData.Initialize(Db);
         }
 
-        /// <summary>
-        /// Get a new context.
-        /// </summary>
-        /// <returns></returns>
-        public AppDbContext FreshDb()
+
+        public AppDbContext Db { get; }
+
+        public void Dispose()
         {
-            var dbOptionBuilder = new DbContextOptionsBuilder();
-            dbOptionBuilder.UseSqlServer(ConnectionString);
-            return new AppDbContext(dbOptionBuilder.Options);
+            if (Db == null) return;
+            Db.Database.EnsureDeleted();
+            Db.Dispose();
         }
+    }
+
+
+    [CollectionDefinition("Database collection")]
+    public class DatabaseCollection : ICollectionFixture<DatabaseFixtureLocalDb>
+    {
+        // This class has no code, and is never created. Its purpose is simply
+        // to be the place to apply [CollectionDefinition] and all the
+        // ICollectionFixture<> interfaces.
     }
 }

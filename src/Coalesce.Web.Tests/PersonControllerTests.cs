@@ -11,6 +11,7 @@ using Xunit;
 
 namespace Coalesce.Web.Tests
 {
+    [Collection("Database collection")]
     public class PersonControllerTests : IClassFixture<DatabaseFixtureLocalDb>
     {
         private PersonController _pc;
@@ -267,7 +268,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public async void CountOfBorC()
         {
-            var result = await _pc.Count("BorCPeople");
+            var result = await _pc.Count(null, "BorCPeople");
             Assert.Equal(14, result);
         }
     }

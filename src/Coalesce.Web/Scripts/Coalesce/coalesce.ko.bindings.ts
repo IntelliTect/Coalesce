@@ -477,7 +477,7 @@ ko.bindingHandlers.datePicker = {
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
             sideBySide: allBindings.get('sideBySide') || false,
-            timeZone: allBindings.get('timeZone') || "",
+            timeZone: allBindings.get('timeZone') || null,
             keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
         })
             .on("dp.change", function (e) {

@@ -5,7 +5,11 @@ Designed to help you quickly build amazing sites, Coalesce is a rapid-developmen
   * EF Core
   * TypeScript
   * Visual Studio 2017
-  
+
+Branch 2.0: [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/2.0?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/2.0)
+
+Branch master: [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/master?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/master)
+
 ## Bottom Line
 Projects that used to take us a three weeks now take one week. 
 

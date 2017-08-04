@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Coalesce.Domain.Tests
 {
+    [Collection("Domain Test Database Collection")]
     public class ExternalIncludeTests : IClassFixture<DatabaseFixture>
     {
         public ExternalIncludeTests(DatabaseFixture dbFixture)

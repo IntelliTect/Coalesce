@@ -24,3 +24,11 @@ before_build:
 build:
   project: Coalesce.sln
   verbosity: minimal
+deploy:
+  provider: NuGet
+  api_key:
+    secure: g3Dms5GNcFV0iAs60oLF6AWOGa3gCWlwgUn8FbMklYI14LrmRdnBFTW6dmsyJQmc
+  skip_symbols: true
+  artifact: /.*\.nupkg/
+  on:
+    appveyor_repo_tag: true

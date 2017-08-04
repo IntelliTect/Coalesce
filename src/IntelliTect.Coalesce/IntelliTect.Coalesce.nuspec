@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>IntelliTect</authors>
+    <owners>IntelliTect-Nuget</owners>
+    <licenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</licenseUrl>
+    <projectUrl>https://github.com/IntelliTect/Coalesce</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright IntelliTect © 2017, All Rights Reserved.</copyright>
+    <tags>IntelliTect Coalesce MVC Framework</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.6">
+        <dependency id="Microsoft.EntityFrameworkCore" version="1.1.2" exclude="Build,Analyzers" />
+        <dependency id="Remotion.Linq" version="2.2.0-alpha-002" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.CodeAnalysis" version="2.1.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.ViewFeatures" version="1.1.3" exclude="Build,Analyzers" />
+        <dependency id="CsvHelper" version="3.0.0-chi02" exclude="Build,Analyzers" />
+        <dependency id="gitlink" version="3.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.Http" version="4.3.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.TagHelpers" version="1.1.3" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.EntityFrameworkCore.Relational" version="1.1.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.CodeAnalysis.Common" version="2.1.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.VisualStudio.Web.CodeGeneration" version="1.1.1" exclude="Build,Analyzers" />
+        <dependency id="System.Linq.Dynamic" version="1.0.7" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Identity" version="1.1.2" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <packageTypes>
+      <packageType name="Dependency" />
+    </packageTypes>
+  </metadata>
+  <files>
+    <file src="lib\net46\IntelliTect.Coalesce.dll" target="lib\net46\IntelliTect.Coalesce.dll" />
+  </files>
+</package>

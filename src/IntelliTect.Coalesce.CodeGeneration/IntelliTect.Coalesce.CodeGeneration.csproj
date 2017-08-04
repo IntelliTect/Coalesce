@@ -15,14 +15,20 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <OutputType>Library</OutputType>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <DebugType>full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Templates\**;*.targets" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="gitlink" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />

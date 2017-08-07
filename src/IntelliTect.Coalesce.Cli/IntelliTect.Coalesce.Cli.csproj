@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionSuffix>rc1</VersionSuffix>
     <TargetFramework>net46</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce.Cli</AssemblyName>

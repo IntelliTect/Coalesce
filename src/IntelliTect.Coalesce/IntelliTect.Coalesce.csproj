@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Description>IntelliTect.Coalesce Class Library</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <Authors>intelliTect</Authors>
+    <VersionSuffix>rc1</VersionSuffix>
     <TargetFramework>net46</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce</AssemblyName>

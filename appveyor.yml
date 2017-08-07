@@ -3,9 +3,12 @@ branches:
   only:
   - master
   - 2.0
+  - Add-Nuget-Publish
 image: Visual Studio 2017
 configuration: Debug
 platform: Any CPU
+nuget:
+  disable_publish_on_pr: true
 before_build:
 - cmd: >-
     nuget restore
@@ -23,6 +26,7 @@ before_build:
     dotnet ef database update
 build:
   project: Coalesce.sln
+  publish_nuget: true
   verbosity: minimal
 deploy:
   provider: NuGet

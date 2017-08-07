@@ -6,6 +6,17 @@
     <AssemblyName>IntelliTect.Coalesce.Cli</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>IntelliTect.Coalesce.Cli</PackageId>
+    <Authors>IntelliTect-Nuget</Authors>
+    <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
+    <PackageProjectUrl>http://coalesce.intellitect.com/</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
+    <PackageTags>IntelliTect Coalesce MVC Framework</PackageTags>
+    <IncludeContentInPack>false</IncludeContentInPack>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IsTool>true</IsTool>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

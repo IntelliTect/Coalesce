@@ -6,7 +6,6 @@ branches:
   - Add-Nuget-Publish
 image: Visual Studio 2017
 configuration: Debug
-platform: Any CPU
 nuget:
   disable_publish_on_pr: true
 before_build:

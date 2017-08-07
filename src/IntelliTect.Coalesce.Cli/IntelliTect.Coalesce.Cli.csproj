@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <Description>IntelliTect Coalesce code generation CLI tool.</Description>
+    <Version>2.0.0</Version>
+    <PackageVersion>2.0.0</PackageVersion>
     <TargetFramework>net46</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce.Cli</AssemblyName>

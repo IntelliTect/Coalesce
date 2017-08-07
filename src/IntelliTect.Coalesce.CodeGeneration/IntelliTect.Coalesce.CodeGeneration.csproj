@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <Description>IntelliTect.Coalesce.CodeGeneration Class Library</Description>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <Description>IntelliTect Coalesce code generation templates and parsers.</Description>
+    <Version>2.0.0</Version>
+    <PackageVersion>2.0.0</PackageVersion>
     <TargetFramework>net46</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce.CodeGeneration</AssemblyName>

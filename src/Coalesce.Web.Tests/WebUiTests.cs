@@ -59,7 +59,7 @@ namespace Coalesce.Web.Tests
 
             IWebElement personLink = driver.FindElement(By.PartialLinkText("Person"));
             personLink.Click();
-            driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
             IWebElement editLink = driver.FindElement(By.CssSelector(@"table tbody tr:nth-child(1) td:nth-child(11) > div > a"));
             editLink.Click();

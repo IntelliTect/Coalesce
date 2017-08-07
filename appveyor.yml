@@ -13,9 +13,9 @@ dotnet_csproj:
   version: '{version}'
   package_version: '{version}'
 cache: 
-  - src\Coalesce.Web\node_modules -> **\package.json     # local npm modules
-  - '%APPDATA%\npm\node_modules -> **\package.json'      # npm global cached modules
-  - '%USERPROFILE%\.nuget\packages -> **\*.csproj'                     # Nuget package cache
+  - src\Coalesce.Web\node_modules     # local npm modules
+  - '%APPDATA%\npm\node_modules'      # npm global cached modules
+  - '%USERPROFILE%\.nuget\packages'   # Nuget package cache
 nuget:
   disable_publish_on_pr: true
 before_build:

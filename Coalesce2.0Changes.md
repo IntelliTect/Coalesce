@@ -26,6 +26,9 @@
 	* changeIsExpanded is now named toggleIsExpanded, and no longer takes a parameter.
 	* changeIsEditing is now named toggleIsEditing, and no longer takes a parameter.
 	* isSelectedToggle is now named toggleIsSelected
+* Generated ViewModels:
+	* public originalData: KnockoutObservable<any> has been removed.
+    * public init() has been removed.
 
 ## Deprications in Coalesce 2..0"
 

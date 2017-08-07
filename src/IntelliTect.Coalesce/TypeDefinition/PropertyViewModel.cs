@@ -547,7 +547,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Now to search for the string when this is a search property.
+        /// How to search for the string when this is a search property.
         /// </summary>
         public SearchAttribute.SearchMethods SearchMethod =>
             Wrapper.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(a => a.SearchMethod)

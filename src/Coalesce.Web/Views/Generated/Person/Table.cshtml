@@ -112,7 +112,7 @@
                         <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
                         <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
                         <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
-                        <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, true))</td>
+                        <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
                         <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                         <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                         <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>

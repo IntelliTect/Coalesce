@@ -15,7 +15,7 @@
     <dependencies>
       <group targetFramework=".NETFramework4.6">
         <dependency id="Microsoft.EntityFrameworkCore" version="1.1.2" exclude="Build,Analyzers" />
-        <dependency id="Remotion.Linq" version="2.2.0-alpha-002" exclude="Build,Analyzers" />
+        <dependency id="Remotion.Linq" version="2.1.2" exclude="Build,Analyzers" />
         <dependency id="Microsoft.CodeAnalysis" version="2.1.0" exclude="Build,Analyzers" />
         <dependency id="Microsoft.AspNetCore.Mvc.ViewFeatures" version="1.1.3" exclude="Build,Analyzers" />
         <dependency id="CsvHelper" version="3.0.0-chi02" exclude="Build,Analyzers" />

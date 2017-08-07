@@ -2,7 +2,6 @@
   <PropertyGroup>
     <Description>IntelliTect.Coalesce Class Library</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <VersionSuffix>rc1</VersionSuffix>
     <TargetFramework>net46</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce</AssemblyName>
@@ -26,7 +25,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis" Version="2.1.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.1" />
-    <PackageReference Include="Remotion.Linq" Version="2.2.0-alpha-002" />
+    <PackageReference Include="Remotion.Linq" Version="2.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.2" />

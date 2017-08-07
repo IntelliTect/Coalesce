@@ -9,7 +9,7 @@
     <PackageId>IntelliTect.Coalesce.CodeGeneration</PackageId>
     <Authors>IntelliTect-Nuget</Authors>
     <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
-    <PackageProjectUrl>http://coalesce.intellitect.com/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
     <PackageTags>IntelliTect Coalesce MVC Framework</PackageTags>

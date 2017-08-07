@@ -5,7 +5,7 @@ branches:
   - 2.0
   - Add-Nuget-Publish
 image: Visual Studio 2017
-configuration: Debug
+configuration: Release
 platform: Any CPU
 nuget:
   disable_publish_on_pr: true
@@ -21,13 +21,14 @@ before_build:
 
     gulp coalesce
 
-    cd ..\Coalesce.Domain
-
-    dotnet ef database update
+    cd ..\..
 build:
+  parallel: true
   project: Coalesce.sln
   publish_nuget: true
   verbosity: minimal
+artifacts:
+  - path: '**\*.nupkg'
 deploy:
   provider: NuGet
   api_key:

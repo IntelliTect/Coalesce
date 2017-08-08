@@ -43,9 +43,8 @@ artifacts:
 - path: artifacts\**\*.*
 deploy:
   provider: NuGet
+  server: https://ci.appveyor.com/nuget/intellitect-jamnmeof65y0
   api_key:
-    secure: g3Dms5GNcFV0iAs60oLF6AWOGa3gCWlwgUn8FbMklYI14LrmRdnBFTW6dmsyJQmc
-  skip_symbols: true
+    secure: 6BCd6W92HLY2RV4bTQSKNue9eoB7ETEYbvihtXy8T5k=
+  skip_symbols: false
   artifact: /.*\.nupkg/
-  on:
-    appveyor_repo_tag: true

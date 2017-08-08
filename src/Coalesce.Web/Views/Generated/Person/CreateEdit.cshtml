@@ -29,7 +29,7 @@
 <div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Gender</label>
-<div class="col-md-8 prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, false))</div>                    </div>
+<div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label">Cases Assigned</label>
 <div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>

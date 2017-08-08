@@ -409,6 +409,7 @@ module ViewModels {
     	        dto.firstName = self.firstName();
     	        dto.lastName = self.lastName();
     	        dto.email = self.email();
+    	        dto.gender = self.gender();
                 if (!self.birthDate()) dto.BirthDate = null;
 				else dto.birthDate = self.birthDate().format('YYYY-MM-DDTHH:mm:ss');
                 if (!self.lastBath()) dto.LastBath = null;
@@ -495,6 +496,7 @@ module ViewModels {
                 self.firstName.subscribe(self.autoSave);
                 self.lastName.subscribe(self.autoSave);
                 self.email.subscribe(self.autoSave);
+                self.gender.subscribe(self.autoSave);
                 self.birthDate.subscribe(self.autoSave);
                 self.lastBath.subscribe(self.autoSave);
                 self.nextUpgrade.subscribe(self.autoSave);

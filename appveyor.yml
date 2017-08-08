@@ -1,14 +1,26 @@
 version: 2.0.{build}
-branches:
-  only:
-  - master
-  - 2.0
 image: Visual Studio 2017
 configuration: Debug
-platform: Any CPU
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+cache: 
+  - src\Coalesce.Web\node_modules     # local npm modules
+  - '%APPDATA%\npm-cache'             # npm cache
+  - '%USERPROFILE%\.nuget\packages'   # Nuget package cache
+nuget:
+  disable_publish_on_pr: true
 before_build:
 - cmd: >-
-    nuget restore
+    dotnet restore
 
     cd src\Coalesce.Web
 
@@ -18,9 +30,22 @@ before_build:
 
     gulp coalesce
 
-    cd ..\Coalesce.Domain
-
-    dotnet ef database update
+    cd ..\..
 build:
+  parallel: true
   project: Coalesce.sln
   verbosity: minimal
+after_build:
+  - dotnet pack "src\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" -c %CONFIGURATION% --no-build --include-symbols --output "%APPVEYOR_BUILD_FOLDER%\artifacts"
+  - dotnet pack "src\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" -c %CONFIGURATION% --no-build --include-symbols --output "%APPVEYOR_BUILD_FOLDER%\artifacts"
+  - dotnet pack "src\IntelliTect.Coalesce.Cli\IntelliTect.Coalesce.Cli.csproj" -c %CONFIGURATION% --no-build --include-symbols --output "%APPVEYOR_BUILD_FOLDER%\artifacts"
+artifacts:
+- path: artifacts\**\*.*
+deploy:
+  provider: NuGet
+  server: https://ci.appveyor.com/nuget/intellitect-jamnmeof65y0/api/v2/package 
+  symbol_server: https://ci.appveyor.com/nuget/intellitect-jamnmeof65y0/api/v2/package
+  api_key:
+    secure: 6BCd6W92HLY2RV4bTQSKNue9eoB7ETEYbvihtXy8T5k=
+  skip_symbols: false
+  artifact: /.*\.nupkg/

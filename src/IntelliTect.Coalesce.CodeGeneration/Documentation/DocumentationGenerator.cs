@@ -1,18 +1,15 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Common;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.Extensions.WebEncoders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.ProjectModel;
+using Microsoft.VisualStudio.Web.CodeGeneration;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Documentation
 {
@@ -30,12 +27,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
         public IEnumerable<string> Methods { get; set; }
         public IEnumerable<string> Properties { get; set; }
     }
+
     public class BaseControllerInfo
     {
         public string Name { get; set; }
         public IEnumerable<string> Methods { get; set; }
         public IEnumerable<string> Properties { get; set; }
     }
+
     public class ModelInfo
     {
         public string Name { get; set; }
@@ -50,29 +49,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
         public List<BaseControllerInfo> BaseControllers { get; set; }
         public List<ModelInfo> Models { get; set; }
     }
+
     public class DocumentationGenerator : CommonGeneratorBase
     {
         public const string ThisAssemblyName = "IntelliTect.Coalesce.CodeGeneration";
-        public IModelTypesLocator ModelTypesLocator { get; }
-        protected IProjectContext ProjectContext { get; }
-        protected IServiceProvider ServiceProvider { get; }
-        protected ICodeGeneratorActionsService CodeGeneratorActionsService { get; }
-        public IEnumerable<string> TemplateFolders
-        {
-            get
-            {
-                return Microsoft.VisualStudio.Web.CodeGeneration.TemplateFoldersUtilities.GetTemplateFolders(
-                    containingProject: ThisAssemblyName,
-                    applicationBasePath: ApplicationEnvironment.ApplicationBasePath,
-                    baseFolders: new[] { "" },
-                    projectContext: ProjectContext);
-            }
-        }
+
         public DocumentationGenerator(
             IModelTypesLocator modelTypesLocator,
             ICodeGeneratorActionsService codeGeneratorActionsService,
             IServiceProvider serviceProvider,
-            Microsoft.Extensions.Logging.ILogger logger)
+            ILogger logger)
             : base(PlatformServices.Default.Application)
         {
             ModelTypesLocator = modelTypesLocator;
@@ -80,9 +66,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
             CodeGeneratorActionsService = codeGeneratorActionsService;
         }
 
+        public IModelTypesLocator ModelTypesLocator { get; }
+        protected IProjectContext ProjectContext { get; }
+        protected IServiceProvider ServiceProvider { get; }
+        protected ICodeGeneratorActionsService CodeGeneratorActionsService { get; }
+
+        public IEnumerable<string> TemplateFolders => TemplateFoldersUtilities.GetTemplateFolders(
+            ThisAssemblyName,
+            ApplicationEnvironment.ApplicationBasePath,
+            new[] {""},
+            ProjectContext);
+
         internal async Task Generate(CommandLineGeneratorModel model)
         {
-            DocumentationViewModel viewModel = new DocumentationViewModel();
+            var viewModel = new DocumentationViewModel();
 
             viewModel.Attributes = new List<AttributeInfo>();
             viewModel.Interfaces = new List<InterfaceInfo>();
@@ -94,24 +91,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
             ParseBaseControllers(viewModel);
             ParseModels(viewModel);
 
-            var viewOutputPath = Path.Combine(
-                    ApplicationEnvironment.ApplicationBasePath,
-                    "Views",
-                    "Home",
-                    "Documentation.cshtml");
+            string viewOutputPath = Path.Combine(
+                ApplicationEnvironment.ApplicationBasePath,
+                "Views",
+                "Home",
+                "Documentation.cshtml");
             await CodeGeneratorActionsService.AddFileFromTemplateAsync(viewOutputPath,
-                    "StaticDocumentationBuilder.cshtml", TemplateFolders, viewModel);
+                "StaticDocumentationBuilder.cshtml", TemplateFolders, viewModel);
         }
+
         private void ParseAttributes(DocumentationViewModel viewModel)
         {
             AttributeInfo attributeInfo;
 
-            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes().Where(t => t.FullName.StartsWith("IntelliTect.Coalesce") && t.TypeSymbol.BaseType != null && t.TypeSymbol.BaseType.Name == "Attribute"))
+            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes()
+                .Where(t => t.FullName.StartsWith("IntelliTect.Coalesce") && t.TypeSymbol.BaseType != null &&
+                            t.TypeSymbol.BaseType.Name == "Attribute"))
             {
                 attributeInfo = new AttributeInfo();
 
-                attributeInfo.Name = modelType.Name.EndsWith("Attribute") ? modelType.Name.Substring(0, (modelType.Name.Length - "Attribute".Length)) : modelType.Name;
-                foreach (var constructor in ((INamedTypeSymbol)modelType.TypeSymbol).Constructors)
+                attributeInfo.Name = modelType.Name.EndsWith("Attribute")
+                    ? modelType.Name.Substring(0, modelType.Name.Length - "Attribute".Length)
+                    : modelType.Name;
+                foreach (IMethodSymbol constructor in ((INamedTypeSymbol) modelType.TypeSymbol).Constructors)
                 {
                     attributeInfo.Signature = RetrieveMethodSignature(constructor);
                     attributeInfo.ValidValues = RetrieveValidEnumValues(constructor);
@@ -122,100 +124,105 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
                 viewModel.Attributes.Add(attributeInfo);
             }
         }
+
         private void ParseInterfaces(DocumentationViewModel viewModel)
         {
             InterfaceInfo interfaceInfo;
 
-            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes().Where(t => t.FullName.StartsWith("IntelliTect.Coalesce") && t.TypeSymbol.TypeKind == TypeKind.Interface))
+            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes()
+                .Where(t => t.FullName.StartsWith("IntelliTect.Coalesce") &&
+                            t.TypeSymbol.TypeKind == TypeKind.Interface))
             {
                 // get the interface declaration
                 interfaceInfo = new InterfaceInfo();
-                interfaceInfo.Name = HtmlEncoder.Default.HtmlEncode(GetClassDefinition(modelType));
+                interfaceInfo.Name = HtmlEncoder.Default.Encode(GetClassDefinition(modelType));
 
-                interfaceInfo.Properties = RetrieveProperties(modelType.TypeSymbol as INamedTypeSymbol).Select(p => HtmlEncoder.Default.HtmlEncode(p));
-                interfaceInfo.Methods = RetrieveMethods(modelType.TypeSymbol as INamedTypeSymbol).Select(m => HtmlEncoder.Default.HtmlEncode(m));
+                interfaceInfo.Properties = RetrieveProperties(modelType.TypeSymbol as INamedTypeSymbol)
+                    .Select(p => HtmlEncoder.Default.Encode(p));
+                interfaceInfo.Methods = RetrieveMethods(modelType.TypeSymbol as INamedTypeSymbol)
+                    .Select(m => HtmlEncoder.Default.Encode(m));
 
                 viewModel.Interfaces.Add(interfaceInfo);
             }
         }
+
         private void ParseBaseControllers(DocumentationViewModel viewModel)
         {
             BaseControllerInfo baseControllerInfo;
 
-            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes().Where(t => t.FullName.StartsWith("IntelliTect.Coalesce.Controllers")))
+            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes()
+                .Where(t => t.FullName.StartsWith("IntelliTect.Coalesce.Controllers")))
             {
                 baseControllerInfo = new BaseControllerInfo();
-                baseControllerInfo.Name = HtmlEncoder.Default.HtmlEncode(GetClassDefinition(modelType));
+                baseControllerInfo.Name = HtmlEncoder.Default.Encode(GetClassDefinition(modelType));
 
-                baseControllerInfo.Properties = RetrieveProperties(modelType.TypeSymbol as INamedTypeSymbol).Select(p => HtmlEncoder.Default.HtmlEncode(p));
-                baseControllerInfo.Methods = RetrieveMethods(modelType.TypeSymbol as INamedTypeSymbol).Select(m => HtmlEncoder.Default.HtmlEncode(m));
+                baseControllerInfo.Properties = RetrieveProperties(modelType.TypeSymbol as INamedTypeSymbol)
+                    .Select(p => HtmlEncoder.Default.Encode(p));
+                baseControllerInfo.Methods = RetrieveMethods(modelType.TypeSymbol as INamedTypeSymbol)
+                    .Select(m => HtmlEncoder.Default.Encode(m));
 
                 viewModel.BaseControllers.Add(baseControllerInfo);
             }
         }
+
         private void ParseModels(DocumentationViewModel viewModel)
         {
-            List<string> modelsWeCareAbout = new List<string> { "ListResult", "SaveResult", "ValidationIssue" };
+            var modelsWeCareAbout = new List<string> {"ListResult", "SaveResult", "ValidationIssue"};
             ModelInfo modelInfo;
 
-            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes().Where(t => t.FullName.StartsWith("IntelliTect.Coalesce.Models")))
-            {
+            foreach (ModelType modelType in ModelTypesLocator.GetAllTypes()
+                .Where(t => t.FullName.StartsWith("IntelliTect.Coalesce.Models")))
                 if (modelsWeCareAbout.Contains(modelType.Name))
                 {
                     modelInfo = new ModelInfo();
-                    modelInfo.Name = HtmlEncoder.Default.HtmlEncode(GetClassDefinition(modelType));
+                    modelInfo.Name = HtmlEncoder.Default.Encode(GetClassDefinition(modelType));
 
-                    modelInfo.Properties = RetrieveProperties(modelType.TypeSymbol as INamedTypeSymbol).Select(p => HtmlEncoder.Default.HtmlEncode(p));
-                    modelInfo.Methods = RetrieveMethods(modelType.TypeSymbol as INamedTypeSymbol).Select(m => HtmlEncoder.Default.HtmlEncode(m));
+                    modelInfo.Properties = RetrieveProperties(modelType.TypeSymbol as INamedTypeSymbol)
+                        .Select(p => HtmlEncoder.Default.Encode(p));
+                    modelInfo.Methods = RetrieveMethods(modelType.TypeSymbol as INamedTypeSymbol)
+                        .Select(m => HtmlEncoder.Default.Encode(m));
 
                     viewModel.Models.Add(modelInfo);
                 }
-            }
         }
 
         #region Helpers
+
         public static string RetrieveValidEnumValues(IMethodSymbol methodSymbol)
         {
             string validValues = null;
 
-            foreach (var parameter in methodSymbol.Parameters)
-            {
+            foreach (IParameterSymbol parameter in methodSymbol.Parameters)
                 if (parameter.Type.TypeKind == TypeKind.Enum)
-                {
-                    foreach (var memberName in ((INamedTypeSymbol)parameter.Type).MemberNames)
+                    foreach (string memberName in ((INamedTypeSymbol) parameter.Type).MemberNames)
                     {
-                        if (string.IsNullOrWhiteSpace(validValues)) { validValues = ""; } else { validValues += ", "; }
+                        if (string.IsNullOrWhiteSpace(validValues)) validValues = "";
+                        else validValues += ", ";
                         validValues += $"{parameter.Type.MetadataName}.{memberName}";
                     }
-                }
-            }
 
             return validValues;
         }
+
         public static string RetrieveMethodSignature(IMethodSymbol methodSymbol)
         {
-            string signature = "(";
+            var signature = "(";
             string parameterType;
-            foreach (var parameter in methodSymbol.Parameters)
+            foreach (IParameterSymbol parameter in methodSymbol.Parameters)
             {
                 if (parameter.Type.TypeKind == TypeKind.Enum)
-                {
                     parameterType = parameter.Type.MetadataName;
-                }
                 else
-                {
                     parameterType = parameter.Type.ToString();
-                }
 
                 if (signature.Length > 1)
-                {
                     signature += ", ";
-                }
                 if (parameter.HasExplicitDefaultValue)
-                {
                     if (parameter.Type.TypeKind == TypeKind.Enum)
                     {
-                        var member = ((INamedTypeSymbol)parameter.Type).GetMembers().SingleOrDefault(m => m is IFieldSymbol && ((IFieldSymbol)m).ConstantValue == parameter.ExplicitDefaultValue);
+                        ISymbol member = ((INamedTypeSymbol) parameter.Type).GetMembers()
+                            .SingleOrDefault(m => m is IFieldSymbol &&
+                                                  ((IFieldSymbol) m).ConstantValue == parameter.ExplicitDefaultValue);
                         signature += $"{parameterType} {parameter.Name} = {parameterType}.{member.Name}";
                     }
                     else if (parameter.ExplicitDefaultValue == null)
@@ -226,26 +233,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
                     {
                         signature += $"{parameterType} {parameter.Name} = {parameter.ExplicitDefaultValue}";
                     }
-                }
                 else
-                {
                     signature += $"{parameterType} {parameter.Name}";
-                }
             }
             signature += ")";
 
             return signature;
         }
+
         public static string ExtractXmlComments(ISymbol symbol)
         {
-            XmlDocument xmlDocumentation = new XmlDocument();
+            var xmlDocumentation = new XmlDocument();
             xmlDocumentation.LoadXml(symbol.GetDocumentationCommentXml());
             return xmlDocumentation.SelectSingleNode("/member/summary").InnerText.Trim();
         }
+
         public static string GetClassDefinition(ModelType modelType)
         {
             string classDefinition = modelType.Name;
-            var namedTypeSymbol = (INamedTypeSymbol)modelType.TypeSymbol;
+            var namedTypeSymbol = (INamedTypeSymbol) modelType.TypeSymbol;
 
             if (namedTypeSymbol.IsGenericType)
             {
@@ -253,9 +259,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
                 foreach (ITypeSymbol genericType in namedTypeSymbol.TypeArguments)
                 {
                     if (!classDefinition.EndsWith("<"))
-                    {
                         classDefinition += ", ";
-                    }
                     classDefinition += genericType.Name;
                 }
                 classDefinition += ">";
@@ -263,34 +267,33 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
 
             return classDefinition;
         }
+
         public static List<string> RetrieveProperties(INamedTypeSymbol namedTypeSymbol)
         {
-            List<string> properties = new List<string>();
+            var properties = new List<string>();
 
-            foreach (IPropertySymbol propertyInfo in namedTypeSymbol.GetMembers().Where(m => m.Kind == SymbolKind.Property))
-            {
+            foreach (IPropertySymbol propertyInfo in namedTypeSymbol.GetMembers()
+                .Where(m => m.Kind == SymbolKind.Property))
                 properties.Add($"{propertyInfo.Type.Name} {propertyInfo.Name}");
-            }
 
             return properties;
         }
+
         public static List<string> RetrieveMethods(INamedTypeSymbol namedTypeSymbol)
         {
-            List<string> methods = new List<string>();
+            var methods = new List<string>();
 
             foreach (IMethodSymbol methodInfo in namedTypeSymbol.GetMembers().Where(m => m.Kind == SymbolKind.Method))
-            {
                 if (methodInfo.MethodKind != MethodKind.PropertyGet && methodInfo.MethodKind != MethodKind.PropertySet)
-                {
                     methods.Add($"{methodInfo.ReturnType} {methodInfo.Name}{RetrieveMethodSignature(methodInfo)}");
-                }
-            }
 
             return methods;
         }
+
         #endregion
 
         #region junkCodeButKeepingItAroundForFutureReference
+
         //// get the syntax tree
         //var syntaxTree = modelType.TypeSymbol.DeclaringSyntaxReferences[0].SyntaxTree;
         //methodSpans = new List<int>();
@@ -356,6 +359,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Documentation
         //        Console.WriteLine($"\t\t{attribute.AttributeClass.Name}");
         //    }
         //}
+
         #endregion
     }
 }

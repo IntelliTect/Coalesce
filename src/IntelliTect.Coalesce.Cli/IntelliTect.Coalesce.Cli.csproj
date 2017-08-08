@@ -1,11 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <Description>IntelliTect Coalesce code generation CLI tool.</Description>
+    <Version>2.0.0</Version>
+    <PackageVersion>2.0.0</PackageVersion>
     <TargetFramework>net46</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce.Cli</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>IntelliTect.Coalesce.Cli</PackageId>
+    <Authors>IntelliTect-Nuget</Authors>
+    <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
+    <PackageTags>IntelliTect Coalesce MVC Framework</PackageTags>
+    <IncludeContentInPack>false</IncludeContentInPack>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IsTool>true</IsTool>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

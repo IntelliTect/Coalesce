@@ -57,10 +57,8 @@ namespace Coalesce.Web.Models
 
 
             // Applicable roles for Person
-            bool isAdmin = false;
             if (user != null)
             {
-                isAdmin = user.IsInRole("Admin");
             }
 
 
@@ -78,10 +76,7 @@ namespace Coalesce.Web.Models
             newObject.FirstName = obj.FirstName;
             newObject.LastName = obj.LastName;
             newObject.Email = obj.Email;
-            if ((isAdmin))
-            {
-                newObject.Gender = obj.Gender;
-            }
+            newObject.Gender = obj.Gender;
             newObject.BirthDate = obj.BirthDate;
             newObject.LastBath = obj.LastBath;
             newObject.NextUpgrade = obj.NextUpgrade;
@@ -139,16 +134,15 @@ namespace Coalesce.Web.Models
 
 
             // Applicable roles for Person
-            bool isAdmin = false;
             if (user != null)
             {
-                isAdmin = user.IsInRole("Admin");
             }
 
             entity.Title = (Titles)(Title ?? 0);
             entity.FirstName = FirstName;
             entity.LastName = LastName;
             entity.Email = Email;
+            entity.Gender = (Genders)(Gender ?? 0);
             entity.BirthDate = BirthDate;
             entity.LastBath = LastBath;
             entity.NextUpgrade = NextUpgrade;

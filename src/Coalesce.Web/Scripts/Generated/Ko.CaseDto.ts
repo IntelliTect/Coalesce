@@ -18,7 +18,7 @@ module ViewModels {
         /** 
             The enumeration of all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.CaseDtoDataSources;
+        public dataSources: typeof ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
@@ -26,8 +26,11 @@ module ViewModels {
         */
         public dataSource: ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources.Default;
 
-        public static coalesceConfig
+        /** Behavioral configuration for all instances of CaseDto. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseDto>
             = new Coalesce.ViewModelConfiguration<CaseDto>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current CaseDto instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<CaseDto>
             = new Coalesce.ViewModelConfiguration<CaseDto>(CaseDto.coalesceConfig);
     
@@ -37,28 +40,55 @@ module ViewModels {
         public assignedToName: KnockoutObservable<string> = ko.observable(null);
 
        
-        // Create computeds for display for objects
         
 
-        // Pops up a stock editor for this object.
 
 
 
-        
-        public originalData: KnockoutObservable<any> = ko.observable(null);
-        
-        // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: CaseDto) {};
+
+
+        /** 
+            Load the ViewModel object from the DTO. 
+            @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        */
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+            if (!data || (!force && this.isLoading())) return;
+            this.isLoading(true);
+            // Set the ID 
+            this.myId = data.caseId;
+            this.caseId(data.caseId);
+            // Load the lists of other objects
+            // Objects are loaded first so that they are available when the IDs get loaded.
+            // This handles the issue with populating select lists with correct data because we now have the object.
+
+            // The rest of the objects are loaded now.
+            this.title(data.title);
+            this.assignedToName(data.assignedToName);
+            if (this.coalesceConfig.onLoadFromDto()){
+                this.coalesceConfig.onLoadFromDto()(this as any);
+            }
+            this.isLoading(false);
+            this.isDirty(false);
+            this.validate();
+        };
+
+        /** Save the object into a DTO */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.caseId = this.caseId();
+
+            dto.title = this.title();
+
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            // Call an init function that allows for proper inheritance.
-            if ($.isFunction(self.init)){
-                self.init(self);
-            }
             
             ko.validation.init({
                 grouping: {
@@ -85,50 +115,8 @@ module ViewModels {
 
             // Create computeds for display for objects
 
+    
 
-            // Load the ViewModel object from the DTO. 
-            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
-            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
-			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
-				if (!data || (!force && self.isLoading())) return;
-				self.isLoading(true);
-				// Set the ID 
-				self.myId = data.caseId;
-				self.caseId(data.caseId);
-				// Load the lists of other objects
-				// Objects are loaded first so that they are available when the IDs get loaded.
-				// This handles the issue with populating select lists with correct data because we now have the object.
-
-				// The rest of the objects are loaded now.
-				self.title(data.title);
-				self.assignedToName(data.assignedToName);
-                if (self.coalesceConfig.onLoadFromDto()){
-                    self.coalesceConfig.onLoadFromDto()(self as any);
-                }
-				self.isLoading(false);
-				self.isDirty(false);
-                self.validate();
-			};
-
-    	    // Save the object into a DTO
-			self.saveToDto = function() {
-				var dto: any = {};
-				dto.caseId = self.caseId();
-
-    	        dto.title = self.title();
-
-				return dto;
-			}
-
-            // Methods to add to child collections
-
-
-            // Save on changes
-            function setupSubscriptions() {
-                self.title.subscribe(self.autoSave);
-            }  
-
-            // Create variables for ListEditorApiUrls
 
 
             // Load all child objects that are not loaded.
@@ -142,9 +130,8 @@ module ViewModels {
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-            // Make sure everything is defined before we call this.
-            setupSubscriptions();
-
+            self.title.subscribe(self.autoSave);
+        
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);

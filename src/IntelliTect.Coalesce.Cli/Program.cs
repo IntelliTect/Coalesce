@@ -49,17 +49,16 @@ namespace IntelliTect.Coalesce.Cli
 
                 Console.WriteLine("Loading Projects");
                 // Find the web project
-                ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
+                ProjectContext webContext = MsBuildProjectContextBuilder.CreateContext(webProject.Value());
                 if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
 
                 // Find the data project
-                ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
+                ProjectContext dataContext = MsBuildProjectContextBuilder.CreateContext(dataProject.Value());
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
                 Console.WriteLine("");
 
                 CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);
-
                 await generator.GenerateCode(model);
 
                 return 0;

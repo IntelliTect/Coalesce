@@ -19,7 +19,47 @@
     <DebugSymbols>True</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Templates\**;*.targets" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <EmbeddedResource Include="Templates\ApiController.cshtml" />
+    <EmbeddedResource Include="Templates\CardView.cshtml" />
+    <EmbeddedResource Include="Templates\ClassDto.cshtml" />
+    <EmbeddedResource Include="Templates\CoalesceScaffoldingReadme.txt" />
+    <EmbeddedResource Include="Templates\CreateEditView.cshtml" />
+    <EmbeddedResource Include="Templates\KoComplexType.cshtml" />
+    <EmbeddedResource Include="Templates\KoExternalType.cshtml" />
+    <EmbeddedResource Include="Templates\KoListViewModel.cshtml" />
+    <EmbeddedResource Include="Templates\KoViewModel.cshtml" />
+    <EmbeddedResource Include="Templates\KoViewModelPartial.cshtml" />
+    <EmbeddedResource Include="Templates\LocalBaseApiController.cshtml" />
+    <EmbeddedResource Include="Templates\ProjectConfig\.bowerrc" />
+    <EmbeddedResource Include="Templates\ProjectConfig\bower.json" />
+    <EmbeddedResource Include="Templates\ProjectConfig\gulpfile.js" />
+    <EmbeddedResource Include="Templates\ProjectConfig\package.json" />
+    <EmbeddedResource Include="Templates\ProjectConfig\tsconfig.template.json" />
+    <EmbeddedResource Include="Templates\ProjectConfig\tsd.json" />
+    <EmbeddedResource Include="Templates\Scripts\coalesce.dependencies.d.ts" />
+    <EmbeddedResource Include="Templates\Scripts\Coalesce\coalesce.ko.base.ts" />
+    <EmbeddedResource Include="Templates\Scripts\Coalesce\coalesce.ko.bindings.ts" />
+    <EmbeddedResource Include="Templates\Scripts\Coalesce\coalesce.ko.utilities.ts" />
+    <EmbeddedResource Include="Templates\Scripts\Coalesce\coalesce.utilities.ts" />
+    <EmbeddedResource Include="Templates\Styles\site.scss" />
+    <EmbeddedResource Include="Templates\TableView.cshtml" />
+    <EmbeddedResource Include="Templates\typings\bootstrap.v3.datetimepicker\bootstrap.v3.datetimepicker.d.ts" />
+    <EmbeddedResource Include="Templates\typings\bootstrap\bootstrap.d.ts" />
+    <EmbeddedResource Include="Templates\typings\jquery\jquery.d.ts" />
+    <EmbeddedResource Include="Templates\typings\knockout.validation\knockout.validation.d.ts" />
+    <EmbeddedResource Include="Templates\typings\knockout\knockout.d.ts" />
+    <EmbeddedResource Include="Templates\typings\moment\moment-node.d.ts" />
+    <EmbeddedResource Include="Templates\typings\moment\moment.d.ts" />
+    <EmbeddedResource Include="Templates\typings\tsd.d.ts" />
+    <EmbeddedResource Include="Templates\ViewController.cshtml" />
+    <EmbeddedResource Include="Templates\Views\Api\Docs.cshtml" />
+    <EmbeddedResource Include="Templates\Views\Shared\_AdminLayout.cshtml" />
+    <EmbeddedResource Include="Templates\Views\Shared\_EditorHtml.cshtml" />
+    <EmbeddedResource Include="Templates\Views\Shared\_Layout.cshtml" />
+    <EmbeddedResource Include="Templates\Views\Shared\_Master.cshtml" />
+    <EmbeddedResource Include="Templates\Views\_ViewImports.cshtml" />
+    <EmbeddedResource Include="Templates\Views\_ViewStart.cshtml" />
+    <EmbeddedResource Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
@@ -35,6 +75,7 @@
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
     <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.WebEncoders.Core" Version="1.0.0-rc1-final" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="1.1.3" />

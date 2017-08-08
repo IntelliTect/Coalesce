@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+﻿@inherits IntelliTect.Coalesce.Templating.CoalesceTemplate
 @using IntelliTect.Coalesce.TypeDefinition
 @using IntelliTect.Coalesce.Utilities
 @{
@@ -35,7 +35,7 @@ module @moduleName {
         /** 
             The enumeration of all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.@(model.Name)DataSources;
+        public dataSources: typeof ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources;
 
         /**
             The data source on the server to use when retrieving the object.
@@ -43,8 +43,11 @@ module @moduleName {
         */
         public dataSource: ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources.Default;
 
-        public static coalesceConfig
+        /** Behavioral configuration for all instances of @(model.ViewModelClassName). Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
             = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current @(model.ViewModelClassName) instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
             = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
     
@@ -59,10 +62,6 @@ module @moduleName {
         if (prop.Type.IsEnum || (prop.Type.IsNullable && prop.PureType.IsEnum))
         {
         @:/** Text value for enumeration @prop.Name */
-        if (prop.Comment.Length > 0)
-        {
-        @:// @(prop.Comment)
-        }
         @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.pureComputed(() => {
             @:for(var i = 0; i < this.@(prop.JsVariable)Values.length; i++){
                 @:if (this.@(prop.JsVariable)Values[i].id == this.@(prop.JsVariable)()){
@@ -75,51 +74,76 @@ module @moduleName {
         {
         if (prop.Comment.Length > 0)
         {
-        @:// @(prop.Comment)
+        @:/** Collection of related objects for many-to-many relationship @prop.ManyToManyCollectionName via @prop.Name */
         }
-        @:public @(prop.ManyToManyCollectionName.ToCamelCase()): KnockoutObservableArray<ViewModels.@(prop.ManyToManyCollectionProperty.Object.ViewModelClassName)> = ko.observableArray([]);  // Many to Many Collection
+        @:public @(prop.ManyToManyCollectionName.ToCamelCase()): KnockoutObservableArray<ViewModels.@(prop.ManyToManyCollectionProperty.Object.ViewModelClassName)> = ko.observableArray([]);
         }
         }
 
        
-        // Create computeds for display for objects
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.IsInternalUse))
         {
-        if (prop.Comment.Length > 0)
-        {
-        @:// @(prop.Comment)
-        }
+        @:/** Display text for @(prop.Name) */
         @:public @prop.JsTextPropertyName: KnockoutComputed<string>;
         }
         
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
         {
-        if (prop.Comment.Length > 0)
-        {
-        @:// Add object to @(prop.JsVariable)
-        }
-        @:public addTo@(prop.Name): (autoSave?: boolean) => @prop.PureType.ClassViewModel.Name;
-        @:// List Object model for @(prop.Name). Allows for loading subsets of data.
-        @:public @(prop.JsVariable)List: (loadImmediate?: boolean) => @(listModuleName).@(prop.Object.ListViewModelClassName);
+        <text>
+        /** Add object to @(prop.JsVariable) */
+        public addTo@(prop.Name) = (autoSave = true): @prop.PureType.ClassViewModel.Name => {
+            var newItem = new @(prop.Object.ViewModelClassName)();
+            if (typeof(autoSave) == 'boolean'){
+                newItem.coalesceConfig.autoSaveEnabled(autoSave);
+            }
+            newItem.parent = this;
+            newItem.parentCollection = this.@prop.JsVariable;
+            newItem.isExpanded(true);
+            @if (prop.HasInverseProperty)
+            {
+            @:newItem.@(prop.InverseIdProperty.JsVariable)(this.@(model.PrimaryKey.JsVariable)());
+            }
+            else if (prop.Object.PropertyByName(model.PrimaryKey.JsVariable) != null)
+            {
+            @:newItem.@(model.PrimaryKey.JsVariable)(this.@(model.PrimaryKey.JsVariable)());
+            }
+            this.@(prop.JsVariable).push(newItem);
+            return newItem;
+        };
+
+        /** ListViewModel for @(prop.Name). Allows for loading subsets of data. */
+        public @(prop.JsVariable)List: (loadImmediate?: boolean) => @(listModuleName).@(prop.Object.ListViewModelClassName);
+        </text>
         }
 
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsInternalUse && f.PureTypeOnContext))
         {
-        if (prop.Comment.Length > 0)
-        {
-        @:// @(prop.Comment)
+        @:/** Url for a table view of all members of collection @prop.Name for the current object. */
+        @:public @(prop.ListEditorUrlName): KnockoutComputed<string> = ko.computed({
+            @:read: () => {
+                if (prop.ListEditorUrl == null)
+                {
+                    @:return "Inverse property not set on @(model.Name) for property @(prop.Name)";
+                }
+                else
+                {
+                    @: return this.coalesceConfig.baseViewUrl() + '/@(prop.ListEditorUrl)' + this.@(model.PrimaryKey.JsVariable)();
+                }
+            @:},
+            @:deferEvaluation: true
+        @:});
         }
-        @:public @(prop.ListEditorUrlName): () => void; 
-        }
-        // Pops up a stock editor for this object.
+
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsInternalUse))
         {
+        @:/** Pops up a stock editor for object @prop.JsVariable */
         @:public show@(prop.Name)Editor: (callback?: any) => void;
         }
 
 
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
         {
+        @:/** Array of all possible names & values of enum @prop.JsVariable */
         @:public @(prop.JsVariable)Values: EnumValue[] = [ 
         @foreach (var kvp in prop.Type.EnumValues)
         {
@@ -128,14 +152,18 @@ module @moduleName {
         @:];
         }
 
-        @foreach(var method in model.Methods.Where(m => m.IsClientMethod && (!m.IsStatic || m.ReturnType.Name == model.Name)))
+        @foreach (var method in model.Methods.Where(m => m.IsClientMethod && (!m.IsStatic || m.ReturnType.Name == model.Name)))
         {
-        @:// Call server method (@method.Name)
+        @:
+        @:
+        @:/**
+        @:    Invoke server method @method.Name.
         if (method.Comment.Length > 0)
         {
-        @:// @(method.Comment)
+        @:    @(method.Comment)
         }
-        @:public @method.JsVariable = (@method.TsParameters) => {
+        @:*/
+        @:public @method.JsVariable = (@method.TsParameters): JQueryPromise<any> => {
         <text>
             this.@(method.JsVariableIsLoading)(true);
             this.@(method.JsVariableMessage)('');
@@ -210,18 +238,18 @@ module @moduleName {
                 this.@(method.JsVariableIsLoading)(false);
             });
         } </text>
-        @:// Result of server method (@method.Name) strongly typed in a observable.
+        @:/** Result of server method (@method.Name) strongly typed in a observable. */
         @:public @method.JsVariableResult: @method.ReturnType.TsKnockoutType = @method.ReturnType.JsKnockoutType;
-        @:// Raw result object of server method (@method.Name) simply wrapped in an observable.
+        @:/** Raw result object of server method (@method.Name) simply wrapped in an observable. */
         @:public @method.JsVariableResultRaw: KnockoutObservable<any> = ko.observable();
-        @:// True while the server method (@method.Name) is being called
+        @:/** True while the server method (@method.Name) is being called */
         @:public @method.JsVariableIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        @:// Error message for server method (@method.Name) if it fails.
+        @:/** Error message for server method (@method.Name) if it fails. */
         @:public @method.JsVariableMessage: KnockoutObservable<string> = ko.observable(null);
-        @:// True if the server method (@method.Name) was successful.
+        @:/** True if the server method (@method.Name) was successful. */
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        @:// Presents a series of input boxes to call the server method (@method.Name)
-        @:public @method.JsVariableUi = (callback: () => void = null, reload: boolean = true) => {
+        @:/** Presents a series of input boxes to call the server method (@method.Name) */
+        @:public @method.JsVariableUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
         @foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
         {
             @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
@@ -232,7 +260,7 @@ module @moduleName {
         }
             @:return this.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
         @:}
-        @:// Presents a modal with input boxes to call the server method (@method.Name)
+        @:/** Presents a modal with input boxes to call the server method (@method.Name). Depends on a modal existing with id #method-@method.Name. */
         @:public @method.JsVariableModal = (callback: () => void = null, reload: boolean = true) => {
             @if (method.ClientParameters.Any()) {
             @:$('#method-@method.Name').modal();
@@ -251,30 +279,158 @@ module @moduleName {
         @:}
         @if (method.ClientParameters.Any())
         {
-        @:public @method.JsVariableWithArgs = (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback: () => void = null, reload: boolean = true) => {
+        @:/** Calls server method (@method.Name) with an instance of @(model.ViewModelGeneratedClassName).@(method.ArgsName), or the value of @(method.JsVariableArgs) if not specified. */
+        @:public @method.JsVariableWithArgs = (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback?: () => void, reload: boolean = true) => {
             @:if (!args) args = this.@(method.JsVariableArgs);
             @:return this.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
         @:}
-        @:// Object that can be easily bound to fields to allow data entry for the method
+        @:/** Object that can be easily bound to fields to allow data entry for the method */
         @:public @(method.JsVariableArgs) = new @(model.ViewModelGeneratedClassName).@(method.ArgsName)(); 
         }
         @:
         }
-        
-        public originalData: KnockoutObservable<any> = ko.observable(null);
-        
-        // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: @(model.ViewModelGeneratedClassName)) {};
+
+        /** 
+            Load the ViewModel object from the DTO. 
+            @@param force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            @@param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        */
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+            if (!data || (!force && this.isLoading())) return;
+            this.isLoading(true);
+            // Set the ID 
+            this.myId = data.@(model.PrimaryKey.JsonName);
+            this.@(model.PrimaryKey.JsVariable)(data.@(model.PrimaryKey.JsonName));
+            // Load the lists of other objects
+        @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
+        { 
+            @:if (data.@prop.JsonName != null) {
+            @if (prop.Object.PrimaryKey != null)
+            {
+                @:// Merge the incoming array
+                @:Coalesce.KnockoutUtilities.RebuildArray(this.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, this, allowCollectionDeletes);
+                if (prop.IsManytoManyCollection)
+                {
+                @:// Add many-to-many collection
+                @:var objs = [];
+                @:$.each(data.@prop.JsonName, (index, item) => {
+                    @:if (item.@prop.ManyToManyCollectionProperty.JsonName){
+                        @:objs.push(item.@prop.ManyToManyCollectionProperty.JsonName);
+                    @:}
+                @:});
+                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, this, allowCollectionDeletes);
+                }
+            }
+            else if (prop.PureType.IsPrimitive)
+            {
+                @:this.@(prop.JsVariable)(data.@prop.JsVariable);
+            }
+            else
+            {
+                @:Coalesce.KnockoutUtilities.RebuildArray(this.@prop.JsVariable, data.@prop.JsonName, null, @prop.Object.ViewModelClassName, this, allowCollectionDeletes);
+            }
+            @:} 
+        }
+            // Objects are loaded first so that they are available when the IDs get loaded.
+            // This handles the issue with populating select lists with correct data because we now have the object.
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
+            {
+            @:if (!data.@prop.JsonName) { 
+                if (prop.ObjectIdProperty != null) {
+                @:if (data.@prop.ObjectIdProperty.JsonName != this.@(prop.ObjectIdProperty.JsVariable)()) {
+                    @:this.@(prop.JsVariable)(null);
+                @:}
+                }else{
+                @:this.@(prop.JsVariable)(null);
+                }
+            @:}else {
+                @:if (!this.@(prop.JsVariable)()){
+                    @:this.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, this));
+                @:}else{
+                    @:this.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
+                @:}
+                @if (prop.Object.OnContext) { 
+                @:if (this.parent && this.parent.myId == this.@(prop.JsVariable)().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.@(prop.JsVariable)()))
+                @:{
+                    @:this.parent.loadFromDto(data.@prop.JsonName, undefined, false);
+                @:}
+                }
+            @:}
+            }
+
+            // The rest of the objects are loaded now.
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
+            {
+            if (prop.Type.IsDate)
+            { 
+            @:if (data.@prop.JsonName == null) this.@(prop.JsVariable)(null);
+            @:else if (this.@(prop.JsVariable)() == null || !this.@(prop.JsVariable)().isSame(moment(data.@prop.JsonName))){
+                @:this.@(prop.JsVariable)(moment(data.@prop.JsonName));
+            @:}
+            } else if (!prop.IsPOCO && !prop.IsPrimaryKey) {
+            @:this.@(prop.JsVariable)(data.@prop.JsonName);
+            }
+            }
+            if (this.coalesceConfig.onLoadFromDto()){
+                this.coalesceConfig.onLoadFromDto()(this as any);
+            }
+            this.isLoading(false);
+            this.isDirty(false);
+            this.validate();
+        };
+
+        /** Save the object into a DTO */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.@(model.Properties.First(f=>f.IsPrimaryKey).JsonName) = this.@(model.Properties.First(f=>f.IsPrimaryKey).JsVariable)();
+
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.CanWrite && !f.IsPOCO && f.HasViewModelProperty || f.IsComplexType))
+            {
+            if (prop.Type.IsDateTimeOffset)
+            {
+            @:if (!this.@(prop.JsVariable)()) dto.@prop.Name = null;
+            @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ssZZ');
+            }
+            else if (prop.Type.IsDateTime)
+            { 
+            @:if (!this.@(prop.JsVariable)()) dto.@prop.Name = null;
+            @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss');
+            }
+            else if (prop.IsComplexType) 
+            {
+            @:// Complex Type: @prop.Name>
+            @:dto.@(prop.JsonName)={};
+            foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
+            {
+            @:dto.@(prop.JsonName).@(subProp.JsonName) = this.@(prop.JsVariable)().@(subProp.JsVariable)();
+            }
+            }
+            else if (prop.IsForeignKey)
+            {
+            @:dto.@prop.JsonName = this.@(prop.JsVariable)();
+            if (prop.IdPropertyObjectProperty != null && !prop.IsPrimaryKey)
+            {
+            // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact. 
+            @:if (!dto.@prop.JsonName && this.@(prop.IdPropertyObjectProperty.JsVariable)()) {
+                @:dto.@prop.JsonName = this.@(prop.IdPropertyObjectProperty.JsVariable)().@(prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable)();
+            @:}
+            }
+            }
+            else if (!prop.Type.IsCollection)
+            {
+            @:dto.@prop.JsonName = this.@(prop.JsVariable)();
+            }
+            }
+
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            // Call an init function that allows for proper inheritance.
-            if ($.isFunction(self.init)){
-                self.init(self);
-            }
             
             ko.validation.init({
                 grouping: {
@@ -325,166 +481,7 @@ module @moduleName {
 			@:});
             }
 
-
-            // Load the ViewModel object from the DTO. 
-            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
-            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
-			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
-				if (!data || (!force && self.isLoading())) return;
-				self.isLoading(true);
-				// Set the ID 
-				self.myId = data.@(model.PrimaryKey.JsonName);
-				self.@(model.PrimaryKey.JsVariable)(data.@(model.PrimaryKey.JsonName));
-				// Load the lists of other objects
-            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.Type.IsCollection && p.HasViewModel))
-            { 
-                @:if (data.@prop.JsonName != null) {
-                @if (prop.Object.PrimaryKey != null)
-                {
-				    @:// Merge the incoming array
-				    @:Coalesce.KnockoutUtilities.RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, '@prop.Object.PrimaryKey.JsonName', @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
-                    if (prop.IsManytoManyCollection)
-                    {
-                    @:// Add many-to-many collection
-                    @:var objs = [];
-                    @:$.each(data.@prop.JsonName, function(index, item) {
-                        @:if (item.@prop.ManyToManyCollectionProperty.JsonName){
-                            @:objs.push(item.@prop.ManyToManyCollectionProperty.JsonName);
-                        @:}
-                    @:});
-				    @:Coalesce.KnockoutUtilities.RebuildArray(self.@(prop.ManyToManyCollectionName.ToCamelCase()), objs, '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable', @prop.ManyToManyCollectionProperty.Object.ViewModelClassName, self, allowCollectionDeletes);
-                    }
-                }
-                else if (prop.PureType.IsPrimitive)
-                {
-                    @:self.@(prop.JsVariable)(data.@prop.JsVariable);
-                }
-                else
-                {
-                    @:Coalesce.KnockoutUtilities.RebuildArray(self.@prop.JsVariable, data.@prop.JsonName, null, @prop.Object.ViewModelClassName, self, allowCollectionDeletes);
-                }
-				@:} 
-            }
-				// Objects are loaded first so that they are available when the IDs get loaded.
-				// This handles the issue with populating select lists with correct data because we now have the object.
-                @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
-	            {
-				@:if (!data.@prop.JsonName) { 
-                    if (prop.ObjectIdProperty != null) {
-					@:if (data.@prop.ObjectIdProperty.JsonName != self.@(prop.ObjectIdProperty.JsVariable)()) {
-                        @:self.@(prop.JsVariable)(null);
-                    @:}
-                    }else{
-					@:self.@(prop.JsVariable)(null);
-                    }
-                @:}else {
-                    @:if (!self.@(prop.JsVariable)()){
-					    @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
-				    @:}else{
-					    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
-				    @:}
-                    @if (prop.Object.OnContext) { 
-                    @:if (self.parent && self.parent.myId == self.@(prop.JsVariable)().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.@(prop.JsVariable)()))
-                    @:{
-                        @:self.parent.loadFromDto(data.@prop.JsonName, undefined, false);
-                    @:}
-                    }
-                @:}
-                }
-
-				// The rest of the objects are loaded now.
-                @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
-                {
-                if (prop.Type.IsDate)
-                { 
-                @:if (data.@prop.JsonName == null) self.@(prop.JsVariable)(null);
-				@:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsonName))){
-				    @:self.@(prop.JsVariable)(moment(data.@prop.JsonName));
-				@:}
-                } else if (!prop.IsPOCO && !prop.IsPrimaryKey) {
-				@:self.@(prop.JsVariable)(data.@prop.JsonName);
-                }
-                }
-                if (self.coalesceConfig.onLoadFromDto()){
-                    self.coalesceConfig.onLoadFromDto()(self as any);
-                }
-				self.isLoading(false);
-				self.isDirty(false);
-                self.validate();
-			};
-
-    	    // Save the object into a DTO
-			self.saveToDto = function() {
-				var dto: any = {};
-				dto.@(model.Properties.First(f=>f.IsPrimaryKey).JsonName) = self.@(model.Properties.First(f=>f.IsPrimaryKey).JsVariable)();
-
-                @foreach (PropertyViewModel prop in model.Properties.Where(f => f.CanWrite && !f.IsPOCO && f.HasViewModelProperty || f.IsComplexType))
-                {
-                if (prop.Type.IsDateTimeOffset)
-                {
-				@:if (!self.@(prop.JsVariable)()) dto.@prop.Name = null;
-				@:else dto.@prop.JsonName = self.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ssZZ');
-                }
-                else if (prop.Type.IsDateTime)
-                { 
-                @:if (!self.@(prop.JsVariable)()) dto.@prop.Name = null;
-				@:else dto.@prop.JsonName = self.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss');
-                }
-                else if (prop.IsComplexType) 
-                {
-                @:// Complex Type: @prop.Name>
-				@:dto.@(prop.JsonName)={};
-                    foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
-                    {
-				@:dto.@(prop.JsonName).@(subProp.JsonName) = self.@(prop.JsVariable)().@(subProp.JsVariable)();
-                    }
-                }
-                else if (prop.IsForeignKey)
-                {
-				@:dto.@prop.JsonName = self.@(prop.JsVariable)();
-                    if (prop.IdPropertyObjectProperty != null && !prop.IsPrimaryKey)
-                    {
-				// If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact. 
-				@:if (!dto.@prop.JsonName && self.@(prop.IdPropertyObjectProperty.JsVariable)()) {
-				    @:dto.@prop.JsonName = self.@(prop.IdPropertyObjectProperty.JsVariable)().@(prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable)();
-				@:}
-                }
-                }
-                else if (!prop.Type.IsCollection)
-                {
-    	        @:dto.@prop.JsonName = self.@(prop.JsVariable)();
-                }
-                }
-
-				return dto;
-			}
-
-            // Methods to add to child collections
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
-            {
-            <text>
-            self.addTo@(prop.Name) = function(autoSave = true) {
-                var newItem = new @(prop.Object.ViewModelClassName)();
-                if (typeof(autoSave) == 'boolean'){
-                    newItem.coalesceConfig.autoSaveEnabled(autoSave);
-                }
-                newItem.parent = self;
-                newItem.parentCollection = self.@prop.JsVariable;
-                newItem.isExpanded(true);
-                @if (prop.HasInverseProperty)
-                {
-                @:newItem.@(prop.InverseIdProperty.JsVariable)(self.@(model.PrimaryKey.JsVariable)());
-                }
-                else if (prop.Object.PropertyByName(model.PrimaryKey.JsVariable) != null)
-                {
-                @:newItem.@(model.PrimaryKey.JsVariable)(self.@(model.PrimaryKey.JsVariable)());
-                }
-                self.@(prop.JsVariable).push(newItem);
-                return newItem;
-            }
-            </text>
-            }
-
+    
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && f.HasViewModelProperty && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             @:// List Object model for @(prop.Name). Allows for loading subsets of data.
@@ -512,42 +509,6 @@ module @moduleName {
             @:}
             }
 
-            // Save on changes
-            function setupSubscriptions() {
-            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
-            {
-                @:self.@(prop.JsVariable).subscribe(self.autoSave);
-            }
-            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.IsManytoManyCollection && !p.IsInternalUse))
-            {
-                @:self.@(prop.ManyToManyCollectionName.ToCamelCase()).subscribe(function(changes){
-                    @:if (!self.isLoading() && changes.length > 0){
-                        @:for (var i in changes){
-                            @:var change:any = changes[i];
-                            @:self.autoSaveCollection('@(prop.ManyToManyCollectionName.ToCamelCase())', change.value.@(prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable)(), change.status);
-                        @:}
-                    @:}
-                @:}, null, "arrayChange");
-            }
-}  
-
-            // Create variables for ListEditorApiUrls
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && !f.IsInternalUse && f.PureTypeOnContext))
-            {
-            @:self.@prop.ListEditorUrlName = ko.computed({
-                @:read: function() {
-                    if (prop.ListEditorUrl == null)
-                    {
-                        @:return "Inverse property not set on @(model.Name) for property @(prop.Name)";
-                    }
-                    else
-                    {
-                        @: return self.coalesceConfig.baseViewUrl() + '/@(prop.ListEditorUrl)' + self.@(model.PrimaryKey.JsVariable)();
-                    }
-                @:},
-                @:deferEvaluation: true
-            @:});
-            }
 
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet && !f.IsInternalUse))
             {
@@ -589,8 +550,23 @@ module @moduleName {
             @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(self));
             }
 
-            // Make sure everything is defined before we call this.
-            setupSubscriptions();
+        @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
+        {
+            @:self.@(prop.JsVariable).subscribe(self.autoSave);
+        }
+        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.IsManytoManyCollection && !p.IsInternalUse))
+        {
+            <text>
+            self.@(prop.ManyToManyCollectionName.ToCamelCase()).subscribe(function(changes){
+                if (!self.isLoading() && changes.length > 0){
+                    for (var i in changes){
+                        var change:any = changes[i];
+                        self.autoSaveCollection('@(prop.ManyToManyCollectionName.ToCamelCase())', change.value.@(prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable)(), change.status);
+                    }
+                }
+            }, null, "arrayChange");
+            </text>
+        }
 
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);

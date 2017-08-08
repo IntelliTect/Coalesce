@@ -18,7 +18,7 @@ module ViewModels {
         /** 
             The enumeration of all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.CompanyDataSources;
+        public dataSources: typeof ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
@@ -26,8 +26,11 @@ module ViewModels {
         */
         public dataSource: ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources.Default;
 
-        public static coalesceConfig
+        /** Behavioral configuration for all instances of Company. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<Company>
             = new Coalesce.ViewModelConfiguration<Company>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current Company instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<Company>
             = new Coalesce.ViewModelConfiguration<Company>(Company.coalesceConfig);
     
@@ -43,32 +46,93 @@ module ViewModels {
         public altName: KnockoutObservable<string> = ko.observable(null);
 
        
-        // Create computeds for display for objects
         
-        public addToEmployees: (autoSave?: boolean) => Person;
-        // List Object model for Employees. Allows for loading subsets of data.
+
+        /** Add object to employees */
+        public addToEmployees = (autoSave = true): Person => {
+            var newItem = new Person();
+            if (typeof(autoSave) == 'boolean'){
+                newItem.coalesceConfig.autoSaveEnabled(autoSave);
+            }
+            newItem.parent = this;
+            newItem.parentCollection = this.employees;
+            newItem.isExpanded(true);
+            newItem.companyId(this.companyId());
+            this.employees.push(newItem);
+            return newItem;
+        };
+
+        /** ListViewModel for Employees. Allows for loading subsets of data. */
         public employeesList: (loadImmediate?: boolean) => ListViewModels.PersonList;
-
-        public employeesListUrl: () => void; 
-        // Pops up a stock editor for this object.
-
-
-
         
-        public originalData: KnockoutObservable<any> = ko.observable(null);
-        
-        // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: Company) {};
+        /** Url for a table view of all members of collection Employees for the current object. */
+        public employeesListUrl: KnockoutComputed<string> = ko.computed({
+            read: () => {
+                     return this.coalesceConfig.baseViewUrl() + '/Person/Table?companyId=' + this.companyId();
+            },
+            deferEvaluation: true
+        });
+
+
+
+
+
+        /** 
+            Load the ViewModel object from the DTO. 
+            @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        */
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+            if (!data || (!force && this.isLoading())) return;
+            this.isLoading(true);
+            // Set the ID 
+            this.myId = data.companyId;
+            this.companyId(data.companyId);
+            // Load the lists of other objects
+            if (data.employees != null) {
+                // Merge the incoming array
+                Coalesce.KnockoutUtilities.RebuildArray(this.employees, data.employees, 'personId', Person, this, allowCollectionDeletes);
+            } 
+            // Objects are loaded first so that they are available when the IDs get loaded.
+            // This handles the issue with populating select lists with correct data because we now have the object.
+
+            // The rest of the objects are loaded now.
+            this.name(data.name);
+            this.address1(data.address1);
+            this.address2(data.address2);
+            this.city(data.city);
+            this.state(data.state);
+            this.zipCode(data.zipCode);
+            this.altName(data.altName);
+            if (this.coalesceConfig.onLoadFromDto()){
+                this.coalesceConfig.onLoadFromDto()(this as any);
+            }
+            this.isLoading(false);
+            this.isDirty(false);
+            this.validate();
+        };
+
+        /** Save the object into a DTO */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.companyId = this.companyId();
+
+            dto.name = this.name();
+            dto.address1 = this.address1();
+            dto.address2 = this.address2();
+            dto.city = this.city();
+            dto.state = this.state();
+            dto.zipCode = this.zipCode();
+
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            // Call an init function that allows for proper inheritance.
-            if ($.isFunction(self.init)){
-                self.init(self);
-            }
             
             ko.validation.init({
                 grouping: {
@@ -101,70 +165,7 @@ module ViewModels {
 
             // Create computeds for display for objects
 
-
-            // Load the ViewModel object from the DTO. 
-            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
-            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
-			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
-				if (!data || (!force && self.isLoading())) return;
-				self.isLoading(true);
-				// Set the ID 
-				self.myId = data.companyId;
-				self.companyId(data.companyId);
-				// Load the lists of other objects
-                if (data.employees != null) {
-				    // Merge the incoming array
-				    Coalesce.KnockoutUtilities.RebuildArray(self.employees, data.employees, 'personId', Person, self, allowCollectionDeletes);
-				} 
-				// Objects are loaded first so that they are available when the IDs get loaded.
-				// This handles the issue with populating select lists with correct data because we now have the object.
-
-				// The rest of the objects are loaded now.
-				self.name(data.name);
-				self.address1(data.address1);
-				self.address2(data.address2);
-				self.city(data.city);
-				self.state(data.state);
-				self.zipCode(data.zipCode);
-				self.altName(data.altName);
-                if (self.coalesceConfig.onLoadFromDto()){
-                    self.coalesceConfig.onLoadFromDto()(self as any);
-                }
-				self.isLoading(false);
-				self.isDirty(false);
-                self.validate();
-			};
-
-    	    // Save the object into a DTO
-			self.saveToDto = function() {
-				var dto: any = {};
-				dto.companyId = self.companyId();
-
-    	        dto.name = self.name();
-    	        dto.address1 = self.address1();
-    	        dto.address2 = self.address2();
-    	        dto.city = self.city();
-    	        dto.state = self.state();
-    	        dto.zipCode = self.zipCode();
-
-				return dto;
-			}
-
-            // Methods to add to child collections
-
-            self.addToEmployees = function(autoSave = true) {
-                var newItem = new Person();
-                if (typeof(autoSave) == 'boolean'){
-                    newItem.coalesceConfig.autoSaveEnabled(autoSave);
-                }
-                newItem.parent = self;
-                newItem.parentCollection = self.employees;
-                newItem.isExpanded(true);
-                newItem.companyId(self.companyId());
-                self.employees.push(newItem);
-                return newItem;
-            }
-            
+    
             // List Object model for Employees. Allows for loading subsets of data.
             var _employeesList: ListViewModels.PersonList = null;
             self.employeesList = function(loadImmediate = true) {
@@ -182,23 +183,6 @@ module ViewModels {
                 }
             }
 
-            // Save on changes
-            function setupSubscriptions() {
-                self.name.subscribe(self.autoSave);
-                self.address1.subscribe(self.autoSave);
-                self.address2.subscribe(self.autoSave);
-                self.city.subscribe(self.autoSave);
-                self.state.subscribe(self.autoSave);
-                self.zipCode.subscribe(self.autoSave);
-            }  
-
-            // Create variables for ListEditorApiUrls
-            self.employeesListUrl = ko.computed({
-                read: function() {
-                         return self.coalesceConfig.baseViewUrl() + '/Person/Table?companyId=' + self.companyId();
-                },
-                deferEvaluation: true
-            });
 
 
             // Load all child objects that are not loaded.
@@ -212,9 +196,13 @@ module ViewModels {
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-            // Make sure everything is defined before we call this.
-            setupSubscriptions();
-
+            self.name.subscribe(self.autoSave);
+            self.address1.subscribe(self.autoSave);
+            self.address2.subscribe(self.autoSave);
+            self.city.subscribe(self.autoSave);
+            self.state.subscribe(self.autoSave);
+            self.zipCode.subscribe(self.autoSave);
+        
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);

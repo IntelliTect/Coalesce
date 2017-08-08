@@ -93,9 +93,19 @@ module Coalesce {
         protected apiController: string;
         protected viewController: string;
 
-        // Generic definitions of properties that are generated for each implementation of BaseViewModel with more specific typing.
+        /**
+            List of all possible data sources that can be set on the dataSource property.
+        */
         public dataSources: any;
+
+        /**
+            The custom data source that will be invoked on the server to provide the data for this list.
+        */
         public dataSource: any;
+
+        /**
+            Properties which determine how this object behaves.
+        */
         public coalesceConfig: ViewModelConfiguration<BaseViewModel<T>> = null;
 
         /** Stack for number of times loading has been called. */
@@ -105,12 +115,12 @@ module Coalesce {
 
      
         /** Callbacks to call after a save. */
-        protected saveCallbacks: { (self: T): void; }[] = [];
+        protected saveCallbacks: Array<(self: T) => void> = [];
         
         /**
             String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable.
         */
-        public includes = "";
+        public includes: string = "";
 
         /**
             If true, the busy indicator is shown when loading.
@@ -127,9 +137,9 @@ module Coalesce {
         set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
 
         /** Parent of this object, if this object was loaded as part of a hierarchy. */
-        public parent = null;
+        public parent: any = null;
         /** Parent of this object, if this object was loaded as part of list of objects. */
-        public parentCollection = null;
+        public parentCollection: KnockoutObservableArray<T> = null;
         /**
             Primary Key of the object.
             @deprecated Use the strongly-typed property of the key for this model whenever possible. This property will be removed once Coalesce supports composite keys.
@@ -163,17 +173,19 @@ module Coalesce {
         public isEditing: KnockoutObservable<boolean> = ko.observable(false);
 
         /** Toggles the isExpanded flag. Use with a click binding for a button. */
-        public toggleIsExpanded = () => this.isExpanded(!this.isExpanded());
+        public toggleIsExpanded = (): void => this.isExpanded(!this.isExpanded());
 
         /** Toggles the isEditing flag. Use with a click binding for a button. */
-        public toggleIsEditing = () => this.isEditing(!this.isEditing());
+        public toggleIsEditing = (): void => this.isEditing(!this.isEditing());
 
         /** Toggles the isSelected flag. Use with a click binding for a button. */
-        public toggleIsSelected = () => this.isSelected(!this.isSelected());
+        public toggleIsSelected = (): void => this.isSelected(!this.isSelected());
 
-        // Sets isSelected(true) on this object and clears on the rest of the items in the parentCollection.
-        // Returns true to bubble additional click events.
-        public selectSingle = () => {
+        /**
+            Sets isSelected(true) on this object and clears on the rest of the items in the parent collection.
+            @returns true to bubble additional click events.
+        */
+        public selectSingle = (): boolean => {
             if (this.parentCollection()) {
                 $.each(this.parentCollection(), (i, obj) => {
                     obj.isSelected(false);
@@ -198,33 +210,22 @@ module Coalesce {
             Returns true if there are no client-side validation issues.
             Saves will be prevented if this returns false.
         */
-        public isValid = () => this.errors().length == 0;
+        public isValid = (): boolean => this.errors().length == 0;
 
         /**
             Triggers any validation messages to be shown, and returns a bool that indicates if there are any validation errors.
         */
-        public validate = () => {
+        public validate = (): boolean => {
             this.errors.showAllMessages();
             this.warnings.showAllMessages();
             return this.isValid();
         };
 
-
-        /** Deletes the object after a confirmation box. */
-        public deleteItemWithConfirmation = (callback?: () => void, message?: string) => {
-            if (typeof message != 'string') {
-                message = "Delete this item?";
-            }
-            if (confirm(message)) {
-                this.deleteItem(callback);
-            }
-        };
-
-        // True if the object is loading.
+        /** True if the object is loading. */
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // True once the data has been loaded.
+        /**  True once the data has been loaded. */
         public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
-        // URL to a stock editor for this object.
+        /** URL to a stock editor for this object. */
         public editUrl: KnockoutComputed<string>;
 
 
@@ -239,13 +240,15 @@ module Coalesce {
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto: () => any;
 
-        // Loads any children that have an ID but have not been loaded. 
-        // This is useful when creating an object that has a parent object and the ID is set on the new child.
+        /**
+            Loads any child objects that have an ID set, but not the full object.
+            This is useful when creating an object that has a parent object and the ID is set on the new child.
+        */
         public loadChildren: (callback?: () => void) => void;
 
 
         /** Returns true if the current object, or any of its children, are saving. */
-        public isThisOrChildSaving = ko.computed(() => {
+        public isThisOrChildSaving: KnockoutComputed<boolean> = ko.computed(() => {
             if (this.isSaving()) return true;
             if (this.savingChildCount() > 0) return true;
             return false;
@@ -253,7 +256,7 @@ module Coalesce {
 
         // Handle children that are saving.
         // Internally used member to count the number of saving children.
-        protected onSavingChildChange = (isSaving: boolean) => {
+        protected onSavingChildChange = (isSaving: boolean): void => {
             if (isSaving)
                 this.savingChildCount(this.savingChildCount() + 1);
             else
@@ -264,8 +267,11 @@ module Coalesce {
             }
         };
 
-        // Saves the object to the server and then calls the callback.
-        public save = (callback?: (self: T) => void) => {
+        /**
+            Saves the object to the server and then calls a callback.
+            Returns false if there are validation errors.
+        */
+        public save = (callback?: (self: T) => void): JQueryPromise<any> | boolean | undefined => {
             if (!this.isLoading()) {
                 if (this.validate()) {
                     if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
@@ -313,13 +319,14 @@ module Coalesce {
                     // If validation fails, we still want to try and load any child objects which may have just been set.
                     // Normally, we get these from the result of the save.
                     this.loadChildren();
+                    return false;
                 }
             }
         }
 
 
-        // Loads the object from the server based on the id specified. Once complete calls the callback.
-        public load = (id: any, callback?: (self: T) => void) => {
+        /** Loads the object from the server based on the id specified. If no id is specified, the current id, is used if one is set. */
+        public load = (id: any, callback?: (self: T) => void): JQueryPromise<any> | undefined => {
             if (!id) {
                 id = this[this.primaryKeyName]();
             }
@@ -349,8 +356,8 @@ module Coalesce {
             }
         };
 
-        // Deletes the object without confirmation.
-        public deleteItem = (callback?: (self: T) => void) => {
+        /** Deletes the object without any prompt for confirmation. */
+        public deleteItem = (callback?: (self: T) => void): JQueryPromise<any> | undefined => {
             var currentId = this[this.primaryKeyName]();
             if (currentId) {
                 return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
@@ -361,7 +368,7 @@ module Coalesce {
                             // Remove it from the parent collection
                             if (this.parentCollection && this.parent) {
                                 this.parent.isLoading(true);
-                                this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
+                                this.parentCollection.splice(this.parentCollection().indexOf(this as any as T), 1);
                                 this.parent.isLoading(false);
                             }
                         } else {
@@ -381,7 +388,7 @@ module Coalesce {
                 // No ID has been assigned yet, just remove it.
                 if (this.parentCollection && this.parent) {
                     this.parent.isLoading(true);
-                    this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
+                    this.parentCollection.splice(this.parentCollection().indexOf(this as any as T), 1);
                     this.parent.isLoading(false);
                 }
                 if ($.isFunction(callback)) {
@@ -390,8 +397,20 @@ module Coalesce {
             }
         };
 
-        // Saves a many-to-many collection change. This is done automatically and doesn't need to be called.
-        protected saveCollection = (propertyName: string, childId: any, operation: string) => {
+        /**
+            Deletes the object if a prompt for confirmation is answered affirmatively.
+        */
+        public deleteItemWithConfirmation = (callback?: () => void, message?: string): JQueryPromise<any> | undefined => {
+            if (typeof message != 'string') {
+                message = "Delete this item?";
+            }
+            if (confirm(message)) {
+                return this.deleteItem(callback);
+            }
+        };
+
+        /** Saves a many-to-many collection change. This is done automatically and doesn't need to be called. */
+        protected saveCollection = (propertyName: string, childId: any, operation: string): JQueryPromise<any> => {
             var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
             var currentId = this[this.primaryKeyName]();
             return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + '/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
@@ -419,7 +438,7 @@ module Coalesce {
                 });
         };
 
-        // Saves many to many collections if autoSaveEnabled is true.
+        /** Saves a many to many collection if coalesceConfig.autoSaveCollectionsEnabled is true. */
         protected autoSaveCollection = (property: string, id: any, changeStatus: string) => {
             if (!this.isLoading() && this.coalesceConfig.autoSaveCollectionsEnabled()) {
                 // TODO: Eventually Batch saves for many-to-many collections.
@@ -432,13 +451,20 @@ module Coalesce {
         };
 
         
-        /** Register a callback to be called when a save is done. */
-        public onSave = (fn) => {
-            if ($.isFunction(fn)) this.saveCallbacks.push(fn);
+        /**
+            Register a callback to be called when a save is done.
+            @returns true if the callback was registered. false if the callback was already registered. 
+        */
+        public onSave = (callback: (self: T) => void): boolean => {
+            if ($.isFunction(callback) && !this.saveCallbacks.filter(c => c == callback).length) {
+                this.saveCallbacks.push(callback);
+                return true;
+            }
+            return false;
         };
 
-        // Saves the object is coalesceConfig.autoSaveEnabled is true.
-        protected autoSave = () => {
+        /** Saves the object is coalesceConfig.autoSaveEnabled is true. */
+        protected autoSave = (): void => {
             if (!this.isLoading()) {
                 this.isDirty(true);
                 if (this.coalesceConfig.autoSaveEnabled()) {
@@ -457,8 +483,10 @@ module Coalesce {
             }
         }
 
-        // Supply methods to pop up a modal editor
-        public showEditor = (callback?: any) => {
+        /**
+            Displays an editor for the object in a modal dialog.
+        */
+        public showEditor = (callback?: any): JQueryPromise<any> => {
             // Close any existing modal
             $('#modal-dialog').modal('hide');
             // Get new modal content
@@ -505,45 +533,72 @@ module Coalesce {
 
         protected apiController: string;
 
+        /**
+            List of all possible data sources that can be set on the dataSource property.
+        */
         public dataSources: any;
-        public modelKeyName: string;
-        public itemClass: typeof BaseViewModel;
 
-        public coalesceConfig: ListViewModelConfiguration<BaseListViewModel<T, TItem>, TItem> = null;
-
-        // The custom code to run in order to pull the initial datasource to use for the object that should be returned
+        /**
+            The custom data source that will be invoked on the server to provide the data for this list.
+        */
         public dataSource: any;
 
-        // Query string to limit the list of items.
+        /**
+            Name of the primary key of the model that this list represents.
+        */
+        public modelKeyName: string;
+
+        // Reference to the class which this list represents.
+        protected itemClass: typeof BaseViewModel;
+
+        /**
+            Properties which determine how this object behaves.
+        */
+        public coalesceConfig: ListViewModelConfiguration<BaseListViewModel<T, TItem>, TItem> = null;
+
+        /**
+            Query string to append to the API call when loading the list of items.
+        */
         public queryString: string = "";
-        // Object that is passed as the query parameters.
+        /**
+            Object that will be serialized to a query string and passed to the API call.
+            Supercedes queryString if set.
+        */
         public query: any = null;
 
-        // String the represents the child object to load 
+        /** String that is used to control loading and serialization on the server. */
         public includes: string = "";
 
-        // Deprecated. Use coalesceConfig.showFailureAlerts instead.
-        // Whether or not alerts should be shown when loading fails.
+        /**
+            Whether or not alerts should be shown when loading fails.
+            @deprecated Use coalesceConfig.showFailureAlerts instead.
+        */
         get showFailureAlerts() { return this.coalesceConfig.showFailureAlerts() }
         set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
 
-        // List of items. This the main collection.
+        /** The collection of items that have been loaded from the server. */
         public items: KnockoutObservableArray<TItem> = ko.observableArray([]);
-        // Load the list.
-        public load = (callback?: any) => {
-                this.coalesceConfig.onStartBusy()(this);
-                if (this.query) {
-                    this.queryString = $.param(this.query);
-                }
-                this.isLoading(true);
 
-                var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/List?" + this.queryParams();
+        /**
+            Load the list using current parameters for paging, searching, etc
+            Result is placed into the items property.
+        */
+        public load = (callback?: any): JQueryPromise<any> => {
+            this.coalesceConfig.onStartBusy()(this);
+            if (this.query) {
+                this.queryString = $.param(this.query);
+            }
+            this.isLoading(true);
 
-                if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
+            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/List?" + this.queryParams();
 
-                return $.ajax({ method: "GET",
-                         url: url,
-                        xhrFields: { withCredentials: true } })
+            if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
+
+            return $.ajax({
+                    method: "GET",
+                    url: url,
+                    xhrFields: { withCredentials: true }
+            })
                 .done((data) => {
 
                     Coalesce.KnockoutUtilities.RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, this, true);
@@ -572,7 +627,10 @@ module Coalesce {
                     this.isLoading(false);
                 });
         };
-        protected queryParams = (pageSize?: number) => {
+
+
+        /** Returns a query string built from the list's `query` parameter. */
+        protected queryParams = (pageSize?: number): string => {
             return $.param({
                 includes: this.includes,
                 page: this.page(),
@@ -582,22 +640,31 @@ module Coalesce {
                 orderByDescending: this.orderByDescending(),
                 dataSource: this.dataSources[this.dataSource]
             });
-        }
+        };
+
+        /** Method which will instantiate a new item of the list's model type. */
         protected createItem: (newItem?: any, parent?: any) => TItem;
-        // Adds a new item to the collection.
-        public addNewItem = () => {
+
+        /** Adds a new item to the collection. */
+        public addNewItem = (): TItem => {
             var item = this.createItem();
             this.items.push(item);
             return item;
-        };;
-        // Deletes an item.
-        public deleteItem = (item: TItem) => {
-            item.deleteItem();
-        };;
-        // True if the collection is loading.
+        };
+
+        /** Deletes an item. */
+        public deleteItem = (item: TItem): JQueryPromise<any> => {
+            return item.deleteItem();
+        };
+
+        /** True if the list is loading. */
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Gets the count of items without getting all the items. Data put into count.
-        public getCount = (callback?: any) => {
+
+        /** True once the list has been loaded. */
+        public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
+
+        /** Gets the count of items without getting all the items. Result is placed into the count property. */
+        public getCount = (callback?: any): JQueryPromise<any> => {
             this.coalesceConfig.onStartBusy()(this);
             if (this.query) {
                 this.queryString = $.param(this.query);
@@ -619,47 +686,51 @@ module Coalesce {
                 this.coalesceConfig.onFinishBusy()(this);
             });
         };
-        // The result of getCount() or the total on this page.
+
+        /** The result of getCount() or the total on this page. */
         public count: KnockoutObservable<number> = ko.observable(null);
-        // Total count of items, even ones that are not on the page.
+        /** Total count of items, even ones that are not on the page. */
         public totalCount: KnockoutObservable<number> = ko.observable(null);
-        // Total page count
+        /** Total page count */
         public pageCount: KnockoutObservable<number> = ko.observable(null);
-        // Page number. This can be set to get a new page.
+        /** Page number. This can be set to get a new page. */
         public page: KnockoutObservable<number> = ko.observable(1);
-        // Number of items on a page.
+        /** Number of items on a page. */
         public pageSize: KnockoutObservable<number> = ko.observable(10);
-        // If a load failed, this is a message about why it failed.
+        /** If a load failed, this is a message about why it failed. */
         public message: KnockoutObservable<string> = ko.observable(null);
-        // Search criteria for the list. This can be exposed as a text box for searching.
+        /** Search criteria for the list. This can be exposed as a text box for searching. */
         public search: KnockoutObservable<string> = ko.observable("");
 
-        // If there is another page, this is true.
-        public nextPageEnabled = ko.computed(() => this.page() < this.pageCount());
+        /** True if there is another page after the current page. */
+        public nextPageEnabled: KnockoutComputed<boolean> = ko.computed(() => this.page() < this.pageCount());
 
-        // If there is a previous page, this is true.
-        public previousPageEnabled = ko.computed(() => this.page() > 1);
+        /** True if there is another page before the current page. */
+        public previousPageEnabled: KnockoutComputed<boolean> = ko.computed(() => this.page() > 1);
 
-        // Gets the next page.
-        public nextPage = () => {
+        /** Change to the next page */
+        public nextPage = (): void => {
             if (this.nextPageEnabled()) {
                 this.page(this.page() + 1);
             }
         };
-        // Gets the previous page.
-        public previousPage = () => {
+
+        /** Change to the previous page */
+        public previousPage = (): void => {
             if (this.previousPageEnabled()) {
                 this.page(this.page() - 1);
             }
         };
 
-        // Control order of results
-        // Set to field name to order by ascending.
+
+        /** Name of a field by which this list will be loaded in ascending order */
         public orderBy: KnockoutObservable<string> = ko.observable("");
-        // Set to field name to order by descending.
+
+        /** Name of a field by which this list will be loaded in descending order */
         public orderByDescending: KnockoutObservable<string> = ko.observable("");
-        // Set to field name to toggle ordering, ascending, descending, none.
-        public orderByToggle = (field: string) => {
+
+        /** Toggles sorting between ascending, descending, and no order on the specified field. */
+        public orderByToggle = (field: string): void => {
             if (this.orderBy() == field && !this.orderByDescending()) {
                 this.orderBy('');
                 this.orderByDescending(field);
@@ -674,16 +745,14 @@ module Coalesce {
             }
         };
 
-        // True once the data has been loaded.
-        public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
-
-        // Gets a URL to download a CSV for the current list with all elements.
+        /** Returns URL to download a CSV for the current list with all items. */
         public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
             var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvDownload?" + this.queryParams(10000);
             return url;
         }, null, { deferEvaluation: true });
-        // Starts an upload of a CSV file
-        public csvUploadUi = (callback?: any) => {
+
+        /** Prompts to the user for a file to upload as a CSV. */
+        public csvUploadUi = (callback?: () => void): void => {
             // Remove the form if it exists.
             $('#csv-upload').remove();
             // Add the form to the page to take the input
@@ -712,7 +781,7 @@ module Coalesce {
                     } as any)
                     .done((data) => {
                         this.isLoading(false);
-                        if ($.isFunction(callback)) callback(data);
+                        if ($.isFunction(callback)) callback();
                     })
                     .fail((data) => {
                         if (this.coalesceConfig.showFailureAlerts())
@@ -731,8 +800,9 @@ module Coalesce {
         };
 
         private loadTimeout: number = 0;
-        // reloads the page after a slight delay (100ms default) to ensure that all changes are made.
-        private delayedLoad = (milliseconds?: number) => {
+
+        /** reloads the list after a slight delay (100ms default) to ensure that all changes are made. */
+        private delayedLoad = (milliseconds?: number): void => {
             if(this.loadTimeout) {
                 clearTimeout(this.loadTimeout);
             }
@@ -741,7 +811,6 @@ module Coalesce {
                 this.load();
             }, milliseconds || 100);
         }
-
 
         public constructor() {
             var searchTimeout: number = 0;

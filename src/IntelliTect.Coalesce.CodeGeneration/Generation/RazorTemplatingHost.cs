@@ -29,18 +29,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             DefaultBaseClass = baseType.FullName;
 
-            //ToDo: Why Do I need templateTypeName? Do I need other parameters?
-            GeneratedClassContext = new GeneratedClassContext(
-                executeMethodName: "ExecuteAsync",
-                writeMethodName: "Write",
-                writeLiteralMethodName: "WriteLiteral",
-                writeToMethodName: "WriteTo",
-                writeLiteralToMethodName: "WriteLiteralTo",
-                templateTypeName: "",
-                generatedTagHelperContext: new GeneratedTagHelperContext())
-            {
-            };
-
             foreach (var ns in _defaultNamespaces)
             {
                 NamespaceImports.Add(ns);

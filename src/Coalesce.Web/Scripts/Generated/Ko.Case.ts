@@ -18,7 +18,7 @@ module ViewModels {
         /** 
             The enumeration of all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.CaseDataSources;
+        public dataSources: typeof ListViewModels.CaseDataSources = ListViewModels.CaseDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
@@ -26,8 +26,11 @@ module ViewModels {
         */
         public dataSource: ListViewModels.CaseDataSources = ListViewModels.CaseDataSources.Default;
 
-        public static coalesceConfig
+        /** Behavioral configuration for all instances of Case. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<Case>
             = new Coalesce.ViewModelConfiguration<Case>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current Case instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<Case>
             = new Coalesce.ViewModelConfiguration<Case>(Case.coalesceConfig);
     
@@ -53,24 +56,36 @@ module ViewModels {
             }
         });
         public caseProducts: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
-        public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);  // Many to Many Collection
+        public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
         public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam> = ko.observable(null);
 
        
-        // Create computeds for display for objects
+        /** Display text for AssignedTo */
         public assignedToText: KnockoutComputed<string>;
+        /** Display text for ReportedBy */
         public reportedByText: KnockoutComputed<string>;
+        /** Display text for DevTeamAssigned */
         public devTeamAssignedText: KnockoutComputed<string>;
         
 
-        public caseProductsListUrl: () => void; 
-        // Pops up a stock editor for this object.
+        /** Url for a table view of all members of collection CaseProducts for the current object. */
+        public caseProductsListUrl: KnockoutComputed<string> = ko.computed({
+            read: () => {
+                     return this.coalesceConfig.baseViewUrl() + '/CaseProduct/Table?caseId=' + this.caseKey();
+            },
+            deferEvaluation: true
+        });
+
+        /** Pops up a stock editor for object assignedTo */
         public showAssignedToEditor: (callback?: any) => void;
+        /** Pops up a stock editor for object reportedBy */
         public showReportedByEditor: (callback?: any) => void;
+        /** Pops up a stock editor for object devTeamAssigned */
         public showDevTeamAssignedEditor: (callback?: any) => void;
 
 
+        /** Array of all possible names & values of enum status */
         public statusValues: EnumValue[] = [ 
             { id: 0, value: 'Open' },
             { id: 1, value: 'In Progress' },
@@ -79,21 +94,134 @@ module ViewModels {
             { id: 4, value: 'Cancelled' },
         ];
 
-        
-        public originalData: KnockoutObservable<any> = ko.observable(null);
-        
-        // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: Case) {};
+
+        /** 
+            Load the ViewModel object from the DTO. 
+            @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        */
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+            if (!data || (!force && this.isLoading())) return;
+            this.isLoading(true);
+            // Set the ID 
+            this.myId = data.caseKey;
+            this.caseKey(data.caseKey);
+            // Load the lists of other objects
+            if (data.caseProducts != null) {
+                // Merge the incoming array
+                Coalesce.KnockoutUtilities.RebuildArray(this.caseProducts, data.caseProducts, 'caseProductId', CaseProduct, this, allowCollectionDeletes);
+                // Add many-to-many collection
+                var objs = [];
+                $.each(data.caseProducts, (index, item) => {
+                    if (item.product){
+                        objs.push(item.product);
+                    }
+                });
+                Coalesce.KnockoutUtilities.RebuildArray(this.products, objs, 'productId', Product, this, allowCollectionDeletes);
+            } 
+            // Objects are loaded first so that they are available when the IDs get loaded.
+            // This handles the issue with populating select lists with correct data because we now have the object.
+            if (!data.assignedTo) { 
+                if (data.assignedToId != this.assignedToId()) {
+                    this.assignedTo(null);
+                }
+            }else {
+                if (!this.assignedTo()){
+                    this.assignedTo(new Person(data.assignedTo, this));
+                }else{
+                    this.assignedTo().loadFromDto(data.assignedTo);
+                }
+                if (this.parent && this.parent.myId == this.assignedTo().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.assignedTo()))
+                {
+                    this.parent.loadFromDto(data.assignedTo, undefined, false);
+                }
+            }
+            if (!data.reportedBy) { 
+                if (data.reportedById != this.reportedById()) {
+                    this.reportedBy(null);
+                }
+            }else {
+                if (!this.reportedBy()){
+                    this.reportedBy(new Person(data.reportedBy, this));
+                }else{
+                    this.reportedBy().loadFromDto(data.reportedBy);
+                }
+                if (this.parent && this.parent.myId == this.reportedBy().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.reportedBy()))
+                {
+                    this.parent.loadFromDto(data.reportedBy, undefined, false);
+                }
+            }
+            if (!data.devTeamAssigned) { 
+                if (data.devTeamAssignedId != this.devTeamAssignedId()) {
+                    this.devTeamAssigned(null);
+                }
+            }else {
+                if (!this.devTeamAssigned()){
+                    this.devTeamAssigned(new DevTeam(data.devTeamAssigned, this));
+                }else{
+                    this.devTeamAssigned().loadFromDto(data.devTeamAssigned);
+                }
+                if (this.parent && this.parent.myId == this.devTeamAssigned().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.devTeamAssigned()))
+                {
+                    this.parent.loadFromDto(data.devTeamAssigned, undefined, false);
+                }
+            }
+
+            // The rest of the objects are loaded now.
+            this.title(data.title);
+            this.description(data.description);
+            if (data.openedAt == null) this.openedAt(null);
+            else if (this.openedAt() == null || !this.openedAt().isSame(moment(data.openedAt))){
+                this.openedAt(moment(data.openedAt));
+            }
+            this.assignedToId(data.assignedToId);
+            this.reportedById(data.reportedById);
+            this.attachment(data.attachment);
+            this.severity(data.severity);
+            this.status(data.status);
+            this.devTeamAssignedId(data.devTeamAssignedId);
+            if (this.coalesceConfig.onLoadFromDto()){
+                this.coalesceConfig.onLoadFromDto()(this as any);
+            }
+            this.isLoading(false);
+            this.isDirty(false);
+            this.validate();
+        };
+
+        /** Save the object into a DTO */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.caseKey = this.caseKey();
+
+            dto.title = this.title();
+            dto.description = this.description();
+            if (!this.openedAt()) dto.OpenedAt = null;
+            else dto.openedAt = this.openedAt().format('YYYY-MM-DDTHH:mm:ssZZ');
+            dto.assignedToId = this.assignedToId();
+            if (!dto.assignedToId && this.assignedTo()) {
+                dto.assignedToId = this.assignedTo().personId();
+            }
+            dto.reportedById = this.reportedById();
+            if (!dto.reportedById && this.reportedBy()) {
+                dto.reportedById = this.reportedBy().personId();
+            }
+            dto.attachment = this.attachment();
+            dto.severity = this.severity();
+            dto.status = this.status();
+            dto.devTeamAssignedId = this.devTeamAssignedId();
+            if (!dto.devTeamAssignedId && this.devTeamAssigned()) {
+                dto.devTeamAssignedId = this.devTeamAssigned().devTeamId();
+            }
+
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            // Call an init function that allows for proper inheritance.
-            if ($.isFunction(self.init)){
-                self.init(self);
-            }
             
             ko.validation.init({
                 grouping: {
@@ -157,154 +285,8 @@ module ViewModels {
 				}
 			});
 
+    
 
-            // Load the ViewModel object from the DTO. 
-            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
-            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
-			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
-				if (!data || (!force && self.isLoading())) return;
-				self.isLoading(true);
-				// Set the ID 
-				self.myId = data.caseKey;
-				self.caseKey(data.caseKey);
-				// Load the lists of other objects
-                if (data.caseProducts != null) {
-				    // Merge the incoming array
-				    Coalesce.KnockoutUtilities.RebuildArray(self.caseProducts, data.caseProducts, 'caseProductId', CaseProduct, self, allowCollectionDeletes);
-                    // Add many-to-many collection
-                    var objs = [];
-                    $.each(data.caseProducts, function(index, item) {
-                        if (item.product){
-                            objs.push(item.product);
-                        }
-                    });
-				    Coalesce.KnockoutUtilities.RebuildArray(self.products, objs, 'productId', Product, self, allowCollectionDeletes);
-				} 
-				// Objects are loaded first so that they are available when the IDs get loaded.
-				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.assignedTo) { 
-					if (data.assignedToId != self.assignedToId()) {
-                        self.assignedTo(null);
-                    }
-                }else {
-                    if (!self.assignedTo()){
-					    self.assignedTo(new Person(data.assignedTo, self));
-				    }else{
-					    self.assignedTo().loadFromDto(data.assignedTo);
-				    }
-                    if (self.parent && self.parent.myId == self.assignedTo().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.assignedTo()))
-                    {
-                        self.parent.loadFromDto(data.assignedTo, undefined, false);
-                    }
-                }
-				if (!data.reportedBy) { 
-					if (data.reportedById != self.reportedById()) {
-                        self.reportedBy(null);
-                    }
-                }else {
-                    if (!self.reportedBy()){
-					    self.reportedBy(new Person(data.reportedBy, self));
-				    }else{
-					    self.reportedBy().loadFromDto(data.reportedBy);
-				    }
-                    if (self.parent && self.parent.myId == self.reportedBy().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.reportedBy()))
-                    {
-                        self.parent.loadFromDto(data.reportedBy, undefined, false);
-                    }
-                }
-				if (!data.devTeamAssigned) { 
-					if (data.devTeamAssignedId != self.devTeamAssignedId()) {
-                        self.devTeamAssigned(null);
-                    }
-                }else {
-                    if (!self.devTeamAssigned()){
-					    self.devTeamAssigned(new DevTeam(data.devTeamAssigned, self));
-				    }else{
-					    self.devTeamAssigned().loadFromDto(data.devTeamAssigned);
-				    }
-                    if (self.parent && self.parent.myId == self.devTeamAssigned().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.devTeamAssigned()))
-                    {
-                        self.parent.loadFromDto(data.devTeamAssigned, undefined, false);
-                    }
-                }
-
-				// The rest of the objects are loaded now.
-				self.title(data.title);
-				self.description(data.description);
-                if (data.openedAt == null) self.openedAt(null);
-				else if (self.openedAt() == null || !self.openedAt().isSame(moment(data.openedAt))){
-				    self.openedAt(moment(data.openedAt));
-				}
-				self.assignedToId(data.assignedToId);
-				self.reportedById(data.reportedById);
-				self.attachment(data.attachment);
-				self.severity(data.severity);
-				self.status(data.status);
-				self.devTeamAssignedId(data.devTeamAssignedId);
-                if (self.coalesceConfig.onLoadFromDto()){
-                    self.coalesceConfig.onLoadFromDto()(self as any);
-                }
-				self.isLoading(false);
-				self.isDirty(false);
-                self.validate();
-			};
-
-    	    // Save the object into a DTO
-			self.saveToDto = function() {
-				var dto: any = {};
-				dto.caseKey = self.caseKey();
-
-    	        dto.title = self.title();
-    	        dto.description = self.description();
-				if (!self.openedAt()) dto.OpenedAt = null;
-				else dto.openedAt = self.openedAt().format('YYYY-MM-DDTHH:mm:ssZZ');
-				dto.assignedToId = self.assignedToId();
-				if (!dto.assignedToId && self.assignedTo()) {
-				    dto.assignedToId = self.assignedTo().personId();
-				}
-				dto.reportedById = self.reportedById();
-				if (!dto.reportedById && self.reportedBy()) {
-				    dto.reportedById = self.reportedBy().personId();
-				}
-    	        dto.attachment = self.attachment();
-    	        dto.severity = self.severity();
-    	        dto.status = self.status();
-				dto.devTeamAssignedId = self.devTeamAssignedId();
-				if (!dto.devTeamAssignedId && self.devTeamAssigned()) {
-				    dto.devTeamAssignedId = self.devTeamAssigned().devTeamId();
-				}
-
-				return dto;
-			}
-
-            // Methods to add to child collections
-
-
-            // Save on changes
-            function setupSubscriptions() {
-                self.title.subscribe(self.autoSave);
-                self.description.subscribe(self.autoSave);
-                self.openedAt.subscribe(self.autoSave);
-                self.assignedToId.subscribe(self.autoSave);
-                self.assignedTo.subscribe(self.autoSave);
-                self.reportedById.subscribe(self.autoSave);
-                self.reportedBy.subscribe(self.autoSave);
-                self.attachment.subscribe(self.autoSave);
-                self.severity.subscribe(self.autoSave);
-                self.status.subscribe(self.autoSave);
-                self.devTeamAssignedId.subscribe(self.autoSave);
-                self.devTeamAssigned.subscribe(self.autoSave);
-                            self.products.subscribe(function(changes){
-                    if (!self.isLoading() && changes.length > 0){
-                        for (var i in changes){
-                            var change:any = changes[i];
-                            self.autoSaveCollection('products', change.value.productId(), change.status);
-                        }
-                    }
-                }, null, "arrayChange");
-}  
-
-            // Create variables for ListEditorApiUrls
 
             self.showAssignedToEditor = function(callback: any) {
                 if (!self.assignedTo()) {
@@ -366,9 +348,28 @@ module ViewModels {
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-            // Make sure everything is defined before we call this.
-            setupSubscriptions();
-
+            self.title.subscribe(self.autoSave);
+            self.description.subscribe(self.autoSave);
+            self.openedAt.subscribe(self.autoSave);
+            self.assignedToId.subscribe(self.autoSave);
+            self.assignedTo.subscribe(self.autoSave);
+            self.reportedById.subscribe(self.autoSave);
+            self.reportedBy.subscribe(self.autoSave);
+            self.attachment.subscribe(self.autoSave);
+            self.severity.subscribe(self.autoSave);
+            self.status.subscribe(self.autoSave);
+            self.devTeamAssignedId.subscribe(self.autoSave);
+            self.devTeamAssigned.subscribe(self.autoSave);
+        
+            self.products.subscribe(function(changes){
+                if (!self.isLoading() && changes.length > 0){
+                    for (var i in changes){
+                        var change:any = changes[i];
+                        self.autoSaveCollection('products', change.value.productId(), change.status);
+                    }
+                }
+            }, null, "arrayChange");
+            
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);

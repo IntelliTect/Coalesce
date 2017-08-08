@@ -18,7 +18,7 @@ module ViewModels {
         /** 
             The enumeration of all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.PersonDataSources;
+        public dataSources: typeof ListViewModels.PersonDataSources = ListViewModels.PersonDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
@@ -26,8 +26,11 @@ module ViewModels {
         */
         public dataSource: ListViewModels.PersonDataSources = ListViewModels.PersonDataSources.Default;
 
-        public static coalesceConfig
+        /** Behavioral configuration for all instances of Person. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
             = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current Person instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
             = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
     
@@ -37,7 +40,6 @@ module ViewModels {
         /** Title of the person, Mr. Mrs, etc. */
         public title: KnockoutObservable<number> = ko.observable(null);
         /** Text value for enumeration Title */
-        // Title of the person, Mr. Mrs, etc.
         public titleText: KnockoutComputed<string> = ko.pureComputed(() => {
             for(var i = 0; i < this.titleValues.length; i++){
                 if (this.titleValues[i].id == this.title()){
@@ -54,7 +56,6 @@ module ViewModels {
         /** Genetic Gender of the person. */
         public gender: KnockoutObservable<number> = ko.observable(null);
         /** Text value for enumeration Gender */
-        // Genetic Gender of the person.
         public genderText: KnockoutComputed<string> = ko.pureComputed(() => {
             for(var i = 0; i < this.genderValues.length; i++){
                 if (this.genderValues[i].id == this.gender()){
@@ -80,44 +81,88 @@ module ViewModels {
         public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
 
        
-        // Create computeds for display for objects
+        /** Display text for PersonStats */
         public personStatsText: KnockoutComputed<string>;
-        // Company loaded from the Company ID
+        /** Display text for Company */
         public companyText: KnockoutComputed<string>;
         
-        // Add object to casesAssigned
-        public addToCasesAssigned: (autoSave?: boolean) => Case;
-        // List Object model for CasesAssigned. Allows for loading subsets of data.
-        public casesAssignedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
-        // Add object to casesReported
-        public addToCasesReported: (autoSave?: boolean) => Case;
-        // List Object model for CasesReported. Allows for loading subsets of data.
-        public casesReportedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
 
-        // List of cases assigned to the person
-        public casesAssignedListUrl: () => void; 
-        // List of cases reported by the person.
-        public casesReportedListUrl: () => void; 
-        // Pops up a stock editor for this object.
+        /** Add object to casesAssigned */
+        public addToCasesAssigned = (autoSave = true): Case => {
+            var newItem = new Case();
+            if (typeof(autoSave) == 'boolean'){
+                newItem.coalesceConfig.autoSaveEnabled(autoSave);
+            }
+            newItem.parent = this;
+            newItem.parentCollection = this.casesAssigned;
+            newItem.isExpanded(true);
+            newItem.assignedToId(this.personId());
+            this.casesAssigned.push(newItem);
+            return newItem;
+        };
+
+        /** ListViewModel for CasesAssigned. Allows for loading subsets of data. */
+        public casesAssignedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
+        
+        /** Add object to casesReported */
+        public addToCasesReported = (autoSave = true): Case => {
+            var newItem = new Case();
+            if (typeof(autoSave) == 'boolean'){
+                newItem.coalesceConfig.autoSaveEnabled(autoSave);
+            }
+            newItem.parent = this;
+            newItem.parentCollection = this.casesReported;
+            newItem.isExpanded(true);
+            newItem.reportedById(this.personId());
+            this.casesReported.push(newItem);
+            return newItem;
+        };
+
+        /** ListViewModel for CasesReported. Allows for loading subsets of data. */
+        public casesReportedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
+        
+        /** Url for a table view of all members of collection CasesAssigned for the current object. */
+        public casesAssignedListUrl: KnockoutComputed<string> = ko.computed({
+            read: () => {
+                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?assignedToId=' + this.personId();
+            },
+            deferEvaluation: true
+        });
+        /** Url for a table view of all members of collection CasesReported for the current object. */
+        public casesReportedListUrl: KnockoutComputed<string> = ko.computed({
+            read: () => {
+                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?reportedById=' + this.personId();
+            },
+            deferEvaluation: true
+        });
+
+        /** Pops up a stock editor for object personStats */
         public showPersonStatsEditor: (callback?: any) => void;
+        /** Pops up a stock editor for object company */
         public showCompanyEditor: (callback?: any) => void;
 
 
+        /** Array of all possible names & values of enum title */
         public titleValues: EnumValue[] = [ 
             { id: 0, value: 'Mr' },
             { id: 1, value: 'Ms' },
             { id: 2, value: 'Mrs' },
             { id: 4, value: 'Miss' },
         ];
+        /** Array of all possible names & values of enum gender */
         public genderValues: EnumValue[] = [ 
             { id: 0, value: 'Non Specified' },
             { id: 1, value: 'Male' },
             { id: 2, value: 'Female' },
         ];
 
-        // Call server method (Rename)
-        // Adds the text to the first name.
-        public rename = (addition: String, callback: () => void = null, reload: boolean = true) => {
+        
+        
+        /**
+            Invoke server method Rename.
+            Adds the text to the first name.
+        */
+        public rename = (addition: String, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
 
             this.renameIsLoading(true);
             this.renameMessage('');
@@ -156,22 +201,22 @@ module ViewModels {
                 this.renameIsLoading(false);
             });
         } 
-        // Result of server method (Rename) strongly typed in a observable.
+        /** Result of server method (Rename) strongly typed in a observable. */
         public renameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
-        // Raw result object of server method (Rename) simply wrapped in an observable.
+        /** Raw result object of server method (Rename) simply wrapped in an observable. */
         public renameResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (Rename) is being called
+        /** True while the server method (Rename) is being called */
         public renameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (Rename) if it fails.
+        /** Error message for server method (Rename) if it fails. */
         public renameMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (Rename) was successful.
+        /** True if the server method (Rename) was successful. */
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (Rename)
-        public renameUi = (callback: () => void = null, reload: boolean = true) => {
+        /** Presents a series of input boxes to call the server method (Rename) */
+        public renameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             var addition: String = prompt('Addition');
             return this.rename(addition, callback, reload);
         }
-        // Presents a modal with input boxes to call the server method (Rename)
+        /** Presents a modal with input boxes to call the server method (Rename). Depends on a modal existing with id #method-Rename. */
         public renameModal = (callback: () => void = null, reload: boolean = true) => {
             $('#method-Rename').modal();
             $('#method-Rename').on('shown.bs.modal', () => {
@@ -182,16 +227,21 @@ module ViewModels {
                 });
             });
         }
-        public renameWithArgs = (args?: Person.RenameArgs, callback: () => void = null, reload: boolean = true) => {
+        /** Calls server method (Rename) with an instance of Person.RenameArgs, or the value of renameArgs if not specified. */
+        public renameWithArgs = (args?: Person.RenameArgs, callback?: () => void, reload: boolean = true) => {
             if (!args) args = this.renameArgs;
             return this.rename(args.addition(), callback, reload);
         }
-        // Object that can be easily bound to fields to allow data entry for the method
+        /** Object that can be easily bound to fields to allow data entry for the method */
         public renameArgs = new Person.RenameArgs(); 
         
-        // Call server method (ChangeSpacesToDashesInName)
-        // Removes spaces from the name and puts in dashes
-        public changeSpacesToDashesInName = (callback: () => void = null, reload: boolean = true) => {
+        
+        
+        /**
+            Invoke server method ChangeSpacesToDashesInName.
+            Removes spaces from the name and puts in dashes
+        */
+        public changeSpacesToDashesInName = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
 
             this.changeSpacesToDashesInNameIsLoading(true);
             this.changeSpacesToDashesInNameMessage('');
@@ -226,40 +276,140 @@ module ViewModels {
                 this.changeSpacesToDashesInNameIsLoading(false);
             });
         } 
-        // Result of server method (ChangeSpacesToDashesInName) strongly typed in a observable.
+        /** Result of server method (ChangeSpacesToDashesInName) strongly typed in a observable. */
         public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable(null);
-        // Raw result object of server method (ChangeSpacesToDashesInName) simply wrapped in an observable.
+        /** Raw result object of server method (ChangeSpacesToDashesInName) simply wrapped in an observable. */
         public changeSpacesToDashesInNameResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (ChangeSpacesToDashesInName) is being called
+        /** True while the server method (ChangeSpacesToDashesInName) is being called */
         public changeSpacesToDashesInNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (ChangeSpacesToDashesInName) if it fails.
+        /** Error message for server method (ChangeSpacesToDashesInName) if it fails. */
         public changeSpacesToDashesInNameMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (ChangeSpacesToDashesInName) was successful.
+        /** True if the server method (ChangeSpacesToDashesInName) was successful. */
         public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName)
-        public changeSpacesToDashesInNameUi = (callback: () => void = null, reload: boolean = true) => {
+        /** Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName) */
+        public changeSpacesToDashesInNameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             return this.changeSpacesToDashesInName(callback, reload);
         }
-        // Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName)
+        /** Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName). Depends on a modal existing with id #method-ChangeSpacesToDashesInName. */
         public changeSpacesToDashesInNameModal = (callback: () => void = null, reload: boolean = true) => {
             this.changeSpacesToDashesInNameUi(callback, reload);
         }
         
-        
-        public originalData: KnockoutObservable<any> = ko.observable(null);
-        
-        // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: Person) {};
+
+        /** 
+            Load the ViewModel object from the DTO. 
+            @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        */
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+            if (!data || (!force && this.isLoading())) return;
+            this.isLoading(true);
+            // Set the ID 
+            this.myId = data.personId;
+            this.personId(data.personId);
+            // Load the lists of other objects
+            if (data.casesAssigned != null) {
+                // Merge the incoming array
+                Coalesce.KnockoutUtilities.RebuildArray(this.casesAssigned, data.casesAssigned, 'caseKey', Case, this, allowCollectionDeletes);
+            } 
+            if (data.casesReported != null) {
+                // Merge the incoming array
+                Coalesce.KnockoutUtilities.RebuildArray(this.casesReported, data.casesReported, 'caseKey', Case, this, allowCollectionDeletes);
+            } 
+            // Objects are loaded first so that they are available when the IDs get loaded.
+            // This handles the issue with populating select lists with correct data because we now have the object.
+            if (!data.personStats) { 
+                if (data.personStatsId != this.personStatsId()) {
+                    this.personStats(null);
+                }
+            }else {
+                if (!this.personStats()){
+                    this.personStats(new PersonStats(data.personStats, this));
+                }else{
+                    this.personStats().loadFromDto(data.personStats);
+                }
+            }
+            if (!data.company) { 
+                if (data.companyId != this.companyId()) {
+                    this.company(null);
+                }
+            }else {
+                if (!this.company()){
+                    this.company(new Company(data.company, this));
+                }else{
+                    this.company().loadFromDto(data.company);
+                }
+                if (this.parent && this.parent.myId == this.company().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.company()))
+                {
+                    this.parent.loadFromDto(data.company, undefined, false);
+                }
+            }
+
+            // The rest of the objects are loaded now.
+            this.title(data.title);
+            this.firstName(data.firstName);
+            this.lastName(data.lastName);
+            this.email(data.email);
+            this.gender(data.gender);
+            if (data.birthDate == null) this.birthDate(null);
+            else if (this.birthDate() == null || !this.birthDate().isSame(moment(data.birthDate))){
+                this.birthDate(moment(data.birthDate));
+            }
+            if (data.lastBath == null) this.lastBath(null);
+            else if (this.lastBath() == null || !this.lastBath().isSame(moment(data.lastBath))){
+                this.lastBath(moment(data.lastBath));
+            }
+            if (data.nextUpgrade == null) this.nextUpgrade(null);
+            else if (this.nextUpgrade() == null || !this.nextUpgrade().isSame(moment(data.nextUpgrade))){
+                this.nextUpgrade(moment(data.nextUpgrade));
+            }
+            this.personStatsId(data.personStatsId);
+            this.timeZone(data.timeZone);
+            this.name(data.name);
+            this.companyId(data.companyId);
+            if (this.coalesceConfig.onLoadFromDto()){
+                this.coalesceConfig.onLoadFromDto()(this as any);
+            }
+            this.isLoading(false);
+            this.isDirty(false);
+            this.validate();
+        };
+
+        /** Save the object into a DTO */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.personId = this.personId();
+
+            dto.title = this.title();
+            dto.firstName = this.firstName();
+            dto.lastName = this.lastName();
+            dto.email = this.email();
+            dto.gender = this.gender();
+            if (!this.birthDate()) dto.BirthDate = null;
+            else dto.birthDate = this.birthDate().format('YYYY-MM-DDTHH:mm:ss');
+            if (!this.lastBath()) dto.LastBath = null;
+            else dto.lastBath = this.lastBath().format('YYYY-MM-DDTHH:mm:ss');
+            if (!this.nextUpgrade()) dto.NextUpgrade = null;
+            else dto.nextUpgrade = this.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
+            dto.personStatsId = this.personStatsId();
+            if (!dto.personStatsId && this.personStats()) {
+                dto.personStatsId = this.personStats().personStatsId();
+            }
+            dto.timeZone = this.timeZone();
+            dto.companyId = this.companyId();
+            if (!dto.companyId && this.company()) {
+                dto.companyId = this.company().companyId();
+            }
+
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            // Call an init function that allows for proper inheritance.
-            if ($.isFunction(self.init)){
-                self.init(self);
-            }
             
             ko.validation.init({
                 grouping: {
@@ -322,140 +472,7 @@ module ViewModels {
 				}
 			});
 
-
-            // Load the ViewModel object from the DTO. 
-            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
-            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
-			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
-				if (!data || (!force && self.isLoading())) return;
-				self.isLoading(true);
-				// Set the ID 
-				self.myId = data.personId;
-				self.personId(data.personId);
-				// Load the lists of other objects
-                if (data.casesAssigned != null) {
-				    // Merge the incoming array
-				    Coalesce.KnockoutUtilities.RebuildArray(self.casesAssigned, data.casesAssigned, 'caseKey', Case, self, allowCollectionDeletes);
-				} 
-                if (data.casesReported != null) {
-				    // Merge the incoming array
-				    Coalesce.KnockoutUtilities.RebuildArray(self.casesReported, data.casesReported, 'caseKey', Case, self, allowCollectionDeletes);
-				} 
-				// Objects are loaded first so that they are available when the IDs get loaded.
-				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.personStats) { 
-					if (data.personStatsId != self.personStatsId()) {
-                        self.personStats(null);
-                    }
-                }else {
-                    if (!self.personStats()){
-					    self.personStats(new PersonStats(data.personStats, self));
-				    }else{
-					    self.personStats().loadFromDto(data.personStats);
-				    }
-                }
-				if (!data.company) { 
-					if (data.companyId != self.companyId()) {
-                        self.company(null);
-                    }
-                }else {
-                    if (!self.company()){
-					    self.company(new Company(data.company, self));
-				    }else{
-					    self.company().loadFromDto(data.company);
-				    }
-                    if (self.parent && self.parent.myId == self.company().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.company()))
-                    {
-                        self.parent.loadFromDto(data.company, undefined, false);
-                    }
-                }
-
-				// The rest of the objects are loaded now.
-				self.title(data.title);
-				self.firstName(data.firstName);
-				self.lastName(data.lastName);
-				self.email(data.email);
-				self.gender(data.gender);
-                if (data.birthDate == null) self.birthDate(null);
-				else if (self.birthDate() == null || !self.birthDate().isSame(moment(data.birthDate))){
-				    self.birthDate(moment(data.birthDate));
-				}
-                if (data.lastBath == null) self.lastBath(null);
-				else if (self.lastBath() == null || !self.lastBath().isSame(moment(data.lastBath))){
-				    self.lastBath(moment(data.lastBath));
-				}
-                if (data.nextUpgrade == null) self.nextUpgrade(null);
-				else if (self.nextUpgrade() == null || !self.nextUpgrade().isSame(moment(data.nextUpgrade))){
-				    self.nextUpgrade(moment(data.nextUpgrade));
-				}
-				self.personStatsId(data.personStatsId);
-				self.timeZone(data.timeZone);
-				self.name(data.name);
-				self.companyId(data.companyId);
-                if (self.coalesceConfig.onLoadFromDto()){
-                    self.coalesceConfig.onLoadFromDto()(self as any);
-                }
-				self.isLoading(false);
-				self.isDirty(false);
-                self.validate();
-			};
-
-    	    // Save the object into a DTO
-			self.saveToDto = function() {
-				var dto: any = {};
-				dto.personId = self.personId();
-
-    	        dto.title = self.title();
-    	        dto.firstName = self.firstName();
-    	        dto.lastName = self.lastName();
-    	        dto.email = self.email();
-                if (!self.birthDate()) dto.BirthDate = null;
-				else dto.birthDate = self.birthDate().format('YYYY-MM-DDTHH:mm:ss');
-                if (!self.lastBath()) dto.LastBath = null;
-				else dto.lastBath = self.lastBath().format('YYYY-MM-DDTHH:mm:ss');
-				if (!self.nextUpgrade()) dto.NextUpgrade = null;
-				else dto.nextUpgrade = self.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
-				dto.personStatsId = self.personStatsId();
-				if (!dto.personStatsId && self.personStats()) {
-				    dto.personStatsId = self.personStats().personStatsId();
-				}
-    	        dto.timeZone = self.timeZone();
-				dto.companyId = self.companyId();
-				if (!dto.companyId && self.company()) {
-				    dto.companyId = self.company().companyId();
-				}
-
-				return dto;
-			}
-
-            // Methods to add to child collections
-
-            self.addToCasesAssigned = function(autoSave = true) {
-                var newItem = new Case();
-                if (typeof(autoSave) == 'boolean'){
-                    newItem.coalesceConfig.autoSaveEnabled(autoSave);
-                }
-                newItem.parent = self;
-                newItem.parentCollection = self.casesAssigned;
-                newItem.isExpanded(true);
-                newItem.assignedToId(self.personId());
-                self.casesAssigned.push(newItem);
-                return newItem;
-            }
-            
-            self.addToCasesReported = function(autoSave = true) {
-                var newItem = new Case();
-                if (typeof(autoSave) == 'boolean'){
-                    newItem.coalesceConfig.autoSaveEnabled(autoSave);
-                }
-                newItem.parent = self;
-                newItem.parentCollection = self.casesReported;
-                newItem.isExpanded(true);
-                newItem.reportedById(self.personId());
-                self.casesReported.push(newItem);
-                return newItem;
-            }
-            
+    
             // List Object model for CasesAssigned. Allows for loading subsets of data.
             var _casesAssignedList: ListViewModels.CaseList = null;
             self.casesAssignedList = function(loadImmediate = true) {
@@ -489,34 +506,6 @@ module ViewModels {
                 }
             }
 
-            // Save on changes
-            function setupSubscriptions() {
-                self.title.subscribe(self.autoSave);
-                self.firstName.subscribe(self.autoSave);
-                self.lastName.subscribe(self.autoSave);
-                self.email.subscribe(self.autoSave);
-                self.birthDate.subscribe(self.autoSave);
-                self.lastBath.subscribe(self.autoSave);
-                self.nextUpgrade.subscribe(self.autoSave);
-                self.personStatsId.subscribe(self.autoSave);
-                self.timeZone.subscribe(self.autoSave);
-                self.companyId.subscribe(self.autoSave);
-                self.company.subscribe(self.autoSave);
-            }  
-
-            // Create variables for ListEditorApiUrls
-            self.casesAssignedListUrl = ko.computed({
-                read: function() {
-                         return self.coalesceConfig.baseViewUrl() + '/Case/Table?assignedToId=' + self.personId();
-                },
-                deferEvaluation: true
-            });
-            self.casesReportedListUrl = ko.computed({
-                read: function() {
-                         return self.coalesceConfig.baseViewUrl() + '/Case/Table?reportedById=' + self.personId();
-                },
-                deferEvaluation: true
-            });
 
             self.showCompanyEditor = function(callback: any) {
                 if (!self.company()) {
@@ -548,9 +537,19 @@ module ViewModels {
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-            // Make sure everything is defined before we call this.
-            setupSubscriptions();
-
+            self.title.subscribe(self.autoSave);
+            self.firstName.subscribe(self.autoSave);
+            self.lastName.subscribe(self.autoSave);
+            self.email.subscribe(self.autoSave);
+            self.gender.subscribe(self.autoSave);
+            self.birthDate.subscribe(self.autoSave);
+            self.lastBath.subscribe(self.autoSave);
+            self.nextUpgrade.subscribe(self.autoSave);
+            self.personStatsId.subscribe(self.autoSave);
+            self.timeZone.subscribe(self.autoSave);
+            self.companyId.subscribe(self.autoSave);
+            self.company.subscribe(self.autoSave);
+        
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);

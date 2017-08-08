@@ -18,7 +18,7 @@ module ViewModels {
         /** 
             The enumeration of all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.CaseProductDataSources;
+        public dataSources: typeof ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
@@ -26,8 +26,11 @@ module ViewModels {
         */
         public dataSource: ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources.Default;
 
-        public static coalesceConfig
+        /** Behavioral configuration for all instances of CaseProduct. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
             = new Coalesce.ViewModelConfiguration<CaseProduct>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current CaseProduct instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
             = new Coalesce.ViewModelConfiguration<CaseProduct>(CaseProduct.coalesceConfig);
     
@@ -39,32 +42,100 @@ module ViewModels {
         public product: KnockoutObservable<ViewModels.Product> = ko.observable(null);
 
        
-        // Create computeds for display for objects
+        /** Display text for Case */
         public caseText: KnockoutComputed<string>;
+        /** Display text for Product */
         public productText: KnockoutComputed<string>;
         
 
-        // Pops up a stock editor for this object.
+
+        /** Pops up a stock editor for object case */
         public showCaseEditor: (callback?: any) => void;
+        /** Pops up a stock editor for object product */
         public showProductEditor: (callback?: any) => void;
 
 
 
-        
-        public originalData: KnockoutObservable<any> = ko.observable(null);
-        
-        // This method gets called during the constructor. This allows injecting new methods into the class that use the self variable.
-        public init(myself: CaseProduct) {};
+
+        /** 
+            Load the ViewModel object from the DTO. 
+            @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
+            @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+        */
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+            if (!data || (!force && this.isLoading())) return;
+            this.isLoading(true);
+            // Set the ID 
+            this.myId = data.caseProductId;
+            this.caseProductId(data.caseProductId);
+            // Load the lists of other objects
+            // Objects are loaded first so that they are available when the IDs get loaded.
+            // This handles the issue with populating select lists with correct data because we now have the object.
+            if (!data.case) { 
+                if (data.caseId != this.caseId()) {
+                    this.case(null);
+                }
+            }else {
+                if (!this.case()){
+                    this.case(new Case(data.case, this));
+                }else{
+                    this.case().loadFromDto(data.case);
+                }
+                if (this.parent && this.parent.myId == this.case().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.case()))
+                {
+                    this.parent.loadFromDto(data.case, undefined, false);
+                }
+            }
+            if (!data.product) { 
+                if (data.productId != this.productId()) {
+                    this.product(null);
+                }
+            }else {
+                if (!this.product()){
+                    this.product(new Product(data.product, this));
+                }else{
+                    this.product().loadFromDto(data.product);
+                }
+                if (this.parent && this.parent.myId == this.product().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.product()))
+                {
+                    this.parent.loadFromDto(data.product, undefined, false);
+                }
+            }
+
+            // The rest of the objects are loaded now.
+            this.caseId(data.caseId);
+            this.productId(data.productId);
+            if (this.coalesceConfig.onLoadFromDto()){
+                this.coalesceConfig.onLoadFromDto()(this as any);
+            }
+            this.isLoading(false);
+            this.isDirty(false);
+            this.validate();
+        };
+
+        /** Save the object into a DTO */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.caseProductId = this.caseProductId();
+
+            dto.caseId = this.caseId();
+            if (!dto.caseId && this.case()) {
+                dto.caseId = this.case().caseKey();
+            }
+            dto.productId = this.productId();
+            if (!dto.productId && this.product()) {
+                dto.productId = this.product().productId();
+            }
+
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            // Call an init function that allows for proper inheritance.
-            if ($.isFunction(self.init)){
-                self.init(self);
-            }
             
             ko.validation.init({
                 grouping: {
@@ -111,90 +182,8 @@ module ViewModels {
 				}
 			});
 
+    
 
-            // Load the ViewModel object from the DTO. 
-            // Force: Will override the check against isLoading that is done to prevent recursion. False is default.
-            // AllowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
-			self.loadFromDto = function(data: any, force: boolean = false, allowCollectionDeletes: boolean = true) {
-				if (!data || (!force && self.isLoading())) return;
-				self.isLoading(true);
-				// Set the ID 
-				self.myId = data.caseProductId;
-				self.caseProductId(data.caseProductId);
-				// Load the lists of other objects
-				// Objects are loaded first so that they are available when the IDs get loaded.
-				// This handles the issue with populating select lists with correct data because we now have the object.
-				if (!data.case) { 
-					if (data.caseId != self.caseId()) {
-                        self.case(null);
-                    }
-                }else {
-                    if (!self.case()){
-					    self.case(new Case(data.case, self));
-				    }else{
-					    self.case().loadFromDto(data.case);
-				    }
-                    if (self.parent && self.parent.myId == self.case().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.case()))
-                    {
-                        self.parent.loadFromDto(data.case, undefined, false);
-                    }
-                }
-				if (!data.product) { 
-					if (data.productId != self.productId()) {
-                        self.product(null);
-                    }
-                }else {
-                    if (!self.product()){
-					    self.product(new Product(data.product, self));
-				    }else{
-					    self.product().loadFromDto(data.product);
-				    }
-                    if (self.parent && self.parent.myId == self.product().myId && Coalesce.Utilities.getClassName(self.parent) == Coalesce.Utilities.getClassName(self.product()))
-                    {
-                        self.parent.loadFromDto(data.product, undefined, false);
-                    }
-                }
-
-				// The rest of the objects are loaded now.
-				self.caseId(data.caseId);
-				self.productId(data.productId);
-                if (self.coalesceConfig.onLoadFromDto()){
-                    self.coalesceConfig.onLoadFromDto()(self as any);
-                }
-				self.isLoading(false);
-				self.isDirty(false);
-                self.validate();
-			};
-
-    	    // Save the object into a DTO
-			self.saveToDto = function() {
-				var dto: any = {};
-				dto.caseProductId = self.caseProductId();
-
-				dto.caseId = self.caseId();
-				if (!dto.caseId && self.case()) {
-				    dto.caseId = self.case().caseKey();
-				}
-				dto.productId = self.productId();
-				if (!dto.productId && self.product()) {
-				    dto.productId = self.product().productId();
-				}
-
-				return dto;
-			}
-
-            // Methods to add to child collections
-
-
-            // Save on changes
-            function setupSubscriptions() {
-                self.caseId.subscribe(self.autoSave);
-                self.case.subscribe(self.autoSave);
-                self.productId.subscribe(self.autoSave);
-                self.product.subscribe(self.autoSave);
-            }  
-
-            // Create variables for ListEditorApiUrls
 
             self.showCaseEditor = function(callback: any) {
                 if (!self.case()) {
@@ -244,9 +233,11 @@ module ViewModels {
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
 
-            // Make sure everything is defined before we call this.
-            setupSubscriptions();
-
+            self.caseId.subscribe(self.autoSave);
+            self.case.subscribe(self.autoSave);
+            self.productId.subscribe(self.autoSave);
+            self.product.subscribe(self.autoSave);
+        
             if (newItem) {
                 if ($.isNumeric(newItem)) self.load(newItem);
                 else self.loadFromDto(newItem, true);

@@ -483,9 +483,6 @@ module ListViewModels {
                     RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, this, true);
                     $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
-                        model.onDelete((item) => {
-                            this.items.remove(item);
-                        });
                     });
                     this.count(data.list.length);
                     this.totalCount(data.totalCount);

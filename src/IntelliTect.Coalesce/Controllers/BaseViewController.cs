@@ -27,18 +27,9 @@ namespace IntelliTect.Coalesce.Controllers
     {
         protected ClassViewModel classViewModel;
 
-        /// <summary>
-        /// Override this method to set the API name.
-        /// </summary>
-        protected virtual string ApiName
-        {
-            get { return ControllerName; }
-        }
-
-
         protected BaseViewController()
         {
-            classViewModel = ReflectionRepository.GetClassViewModel(typeof(T), this.GetType().Name, ApiName);
+            classViewModel = ReflectionRepository.GetClassViewModel<T>();
         }
 
         // Page Listing the items in the collection.
@@ -59,8 +50,8 @@ namespace IntelliTect.Coalesce.Controllers
             ViewBag.Query = ViewBag.Query == "" ? null : new HtmlString( ViewBag.Query );
 
             @ViewBag.Title = typeof(T).Name + " List";
-            var model = ReflectionRepository.GetClassViewModel(typeof(T), this.GetType().Name, ApiName);
-            return View(viewName, model);
+
+            return View(viewName, classViewModel);
         }
 
         // GET: Editing page

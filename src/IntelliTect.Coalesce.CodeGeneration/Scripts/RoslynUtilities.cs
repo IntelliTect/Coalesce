@@ -10,21 +10,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
     internal static class RoslynUtilities
     {
-        public static IEnumerable<ITypeSymbol> GetDirectTypesInCompilation(Compilation compilation)
+        public static IEnumerable<INamedTypeSymbol> GetDirectTypesInCompilation(Compilation compilation)
         {
             if (compilation == null)
             {
                 throw new ArgumentNullException(nameof(compilation));
             }
 
-            var types = new List<ITypeSymbol>();
+            var types = new List<INamedTypeSymbol>();
             CollectTypes(compilation.Assembly.GlobalNamespace, types);
             return types;
         }
 
-        private static void CollectTypes(INamespaceSymbol ns, List<ITypeSymbol> types)
+        private static void CollectTypes(INamespaceSymbol ns, List<INamedTypeSymbol> types)
         {
-            types.AddRange(ns.GetTypeMembers().Cast<ITypeSymbol>());
+            types.AddRange(ns.GetTypeMembers());
 
             foreach (var nestedNs in ns.GetNamespaceMembers())
             {

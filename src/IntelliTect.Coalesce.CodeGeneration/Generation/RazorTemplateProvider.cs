@@ -143,12 +143,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 }
 
                 // Remove read only flag, if it exists.
-                // Commented out because I don't know why we do this.
+                // Commented out because I don't know why we do this. If something is read only, its probably that way on purpose.
                 // File.SetAttributes(outputPath, File.GetAttributes(outputPath) & ~FileAttributes.ReadOnly);
             }
 
             using (FileStream fileStream = new FileStream(outputPath, FileMode.Truncate, FileAccess.Write))
             {
+                contentsStream.Seek(0, SeekOrigin.Begin);
                 await contentsStream.CopyToAsync(fileStream);
             };
         }

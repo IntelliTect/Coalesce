@@ -10,88 +10,50 @@ using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
+using System.Collections.Concurrent;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
     public static class ReflectionRepository
     {
-        private static Dictionary<string, ClassViewModel> _models = new Dictionary<string, ClassViewModel>();
+        private static ConcurrentDictionary<string, ClassViewModel> _models = new ConcurrentDictionary<string, ClassViewModel>();
         private static object _lock = new object();
         private static string _contextNamespace;
 
 
-        public static ClassViewModel GetClassViewModel(TypeViewModel classType, string controllerName = null,
-            string apiName = null, bool hasDbSet = false, string area = "")
+        public static ClassViewModel GetClassViewModel(TypeViewModel classType)
         {
             if (classType.Wrapper is ReflectionTypeWrapper)
             {
-                return GetClassViewModel(classType.Wrapper.Info, controllerName, apiName, hasDbSet, area);
+                return GetClassViewModel(classType.Wrapper.Info);
             }
             else
             {
-                return GetClassViewModel((INamedTypeSymbol)classType.Wrapper.Symbol, controllerName, apiName, hasDbSet, area);
+                return GetClassViewModel((INamedTypeSymbol)classType.Wrapper.Symbol);
             }
         }
 
-        public static ClassViewModel GetClassViewModel(Type classType, string controllerName = null,
-            string apiName = null, bool hasDbSet = false, string area = "")
+        public static ClassViewModel GetClassViewModel(Type classType)
         {
-            // Set defaults
-            if (controllerName == null) controllerName = classType.Name;
-            if (apiName == null) apiName = classType.Name;
-
-            if (!IsValidViewModelClass(apiName)) return null;
-
-            // Get a unique key
-            //TODO: The apiName probably don't need to be specified here, can cause problems where it isn't available.
-            string key = GetKey(classType);
-            // Create it if is doesn't exist.
-            // TODO: This could be better multi-threading code
-            lock (_models)
-            {
-                if (!_models.ContainsKey(key))
-                {
-                    _models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
-                }
-            }
-            // Return the class requested.
-            return _models[key];
+            return _models.GetOrAdd(GetKey(classType), _ => new ClassViewModel(classType));
         }
 
-        public static ClassViewModel GetClassViewModel(INamedTypeSymbol classType, string controllerName = null,
-            string apiName = null, bool hasDbSet = false, string area = "")
+        public static ClassViewModel GetClassViewModel(INamedTypeSymbol classType)
         {
-            // Set defaults
-            if (controllerName == null) controllerName = classType.Name;
-            if (apiName == null) apiName = classType.Name;
-
-            if (!IsValidViewModelClass(apiName)) return null;
-
-            // Get a unique key
-            string key = GetKey(classType);
-            // Create it if is doesn't exist.
-            // TODO: This could be better multi-threading code
-            lock (_models)
-            {
-                if (!_models.ContainsKey(key))
-                {
-                    _models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
-                }
-            }
-            // Return the class requested.
-            return _models[key];
+            return _models.GetOrAdd(GetKey(classType), _ => new ClassViewModel(classType));
         }
-
-
+        
 
         public static ClassViewModel GetClassViewModel(string className)
         {
-            return _models.FirstOrDefault(f => f.Value.Name == className).Value;
+            return _models.Values.FirstOrDefault(f => f.Name == className);
         }
+
         public static ClassViewModel GetClassViewModel<T>()
         {
             return GetClassViewModel(typeof(T));
         }
+
         /// <summary>
         /// Gets a propertyViewModel based on the property selector.
         /// </summary>
@@ -173,22 +135,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return string.Format("{0}", $"{fullNamespace}.{classType.Name}");
         }
 
-        public static IEnumerable<ClassViewModel> Models
-        {
-            get
-            {
-                return _models.Values;
-            }
-        }
+        public static IEnumerable<ClassViewModel> Models => _models.Values;
 
         /// <summary>
         /// Adds a context to the reflection repository. Do this on startup with all the contexts.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static List<ClassViewModel> AddContext<T>(string area = "") where T : DbContext
+        public static List<ClassViewModel> AddContext<T>() where T : DbContext
         {
-            return AddContext(typeof(T), area);
+            return AddContext(typeof(T));
         }
 
 
@@ -197,20 +153,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="t">Type of DbContext to add.</typeparam>
         /// <returns></returns>
-        public static List<ClassViewModel> AddContext(Type t, string area = "")
+        public static List<ClassViewModel> AddContext(Type t)
         {
-            var context = new ClassViewModel(t, null, null, false);
-            return AddContext(context, area);
+            var context = new ClassViewModel(t);
+            return AddContext(context);
         }
 
-        public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol, string area = "") // where T: AppDbContext
+        public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) // where T: AppDbContext
         {
-            var context = new ClassViewModel(contextSymbol, null, null, false);
+            var context = new ClassViewModel(contextSymbol);
             // Reflect on the AppDbContext
-            return AddContext(context, area);
+            return AddContext(context);
         }
 
-        public static List<ClassViewModel> AddContext(ClassViewModel context, string area = "")
+        public static List<ClassViewModel> AddContext(ClassViewModel context)
         {
             _contextNamespace = context.Namespace;
             // Lock so that parallel execution only uses this once at a time.
@@ -223,9 +179,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         && IsValidViewModelClass(prop.PureType.Name)
                         && !prop.IsInternalUse)
                     {
-                        var model = ReflectionRepository.GetClassViewModel(classType: prop.PureType, hasDbSet: prop.IsDbSet);
+                        var model = ReflectionRepository.GetClassViewModel(prop.PureType);
+
                         if (model != null)
                         {
+                            model.HasDbSet = prop.IsDbSet;
                             model.ContextPropertyName = prop.Name;
                             model.OnContext = true;
                             model.ContextPropertyName = prop.Name;
@@ -257,13 +215,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             foreach (var method in model.Methods.Where(p => !p.IsInternalUse && !p.ReturnType.IsVoid && p.ReturnType.PureType.IsPOCO))
             {
-                // Get a unique key
-                string key = GetKey(method.ReturnType.PureType);
                 lock (models)
                 {
                     if (!models.Any(f => f.Name == method.ReturnType.PureType.Name))
                     {
-                        var methodModel = new ClassViewModel(method.ReturnType.PureType, "", "", false);
+                        var methodModel = new ClassViewModel(method.ReturnType.PureType);
                         models.Add(methodModel);
                         AddChildModels(models, methodModel);
                     }
@@ -276,7 +232,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         if (!models.Any(f => f.Name == arg.Type.Name))
                         {
-                            var argModel = new ClassViewModel(arg.Type, "", "", false);
+                            var argModel = new ClassViewModel(arg.Type);
                             models.Add(argModel);
                             AddChildModels(models, argModel);
                         }
@@ -299,5 +255,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+    }
+
+    internal class ClassViewModelComparer : IEqualityComparer<ClassViewModel>
+    {
+        public bool Equals(ClassViewModel x, ClassViewModel y)
+        {
+            if (x == y) return true;
+            return x?.FullName.Equals(y?.FullName) ?? false;
+        }
+
+        public int GetHashCode(ClassViewModel obj)
+        {
+            return obj.FullName.GetHashCode();
+        }
     }
 }

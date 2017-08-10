@@ -19,19 +19,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
     public class ClassViewModel
     {
         internal ClassWrapper Wrapper { get; }
-        private string _controllerName;
-        private string _apiName;
 
         /// <summary>
         /// Has a DbSet property in the Context.
         /// </summary>
-        public bool HasDbSet { get; }
+        public bool HasDbSet { get; internal set; }
         
         protected ICollection<PropertyViewModel> _Properties;
         protected ICollection<MethodViewModel> _Methods;
 
-        public ClassViewModel(TypeViewModel type, string controllerName, string apiName, bool hasDbSet)
-            : this(controllerName, apiName, hasDbSet)
+        public ClassViewModel(TypeViewModel type)
         {
             if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
             {
@@ -43,48 +40,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public ClassViewModel(Type type, string controllerName, string apiName, bool hasDbSet)
-            : this(controllerName, apiName, hasDbSet)
+        public ClassViewModel(Type type)
         {
             Wrapper = new ReflectionClassWrapper(type);
         }
 
-        public ClassViewModel(ITypeSymbol classSymbol, string controllerName, string apiName, bool hasDbSet) : this(controllerName, apiName, hasDbSet)
+        public ClassViewModel(ITypeSymbol classSymbol)
         {
             Wrapper = new SymbolClassWrapper(classSymbol);
         }
 
-        private ClassViewModel(string controllerName, string apiName, bool hasDbSet)
-        {
-            if (!string.IsNullOrWhiteSpace(controllerName))
-            {
-                _controllerName = controllerName.Replace("Controller", "");
-            }
-            _apiName = apiName;
-            HasDbSet = hasDbSet;
+        public string Name => Wrapper.Name;
 
-        }
+        public string FullName => Wrapper.Namespace + "." + Wrapper.Name;
 
-        public string Name
-        {
-            get { return Wrapper.Name; }
-        }
+        public string Comment => Wrapper.Comment;
 
-        public string FullName
-        {
-            get { return Wrapper.Namespace + "." + Wrapper.Name; }
-        }
-
-        public string Comment { get { return Wrapper.Comment; } }
-
-        public string ControllerName
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(_controllerName)) return _controllerName;
-                return Name;
-            }
-        }
+        public string ControllerName => Name;
 
         public string ApiControllerClassName
         {
@@ -103,35 +75,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string ApiActionAccessModifier =>
             (Wrapper.GetAttributeValue<ControllerAttribute, bool>(nameof(ControllerAttribute.ApiActionsProtected)) ?? false) ? "protected" : "public";
 
-        public string ApiName
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(_apiName)) return _apiName;
-                return Name;
-            }
-        }
-        public string DtoName
-        {
-            get
-            {
-                if (IsDto) return Name;
-                return $"{Name}DtoGen";
-            }
-        }
+        public string ApiName => Name;
 
-        public ClassViewModel BaseViewModel
-        {
-            get
-            {
-                if (IsDto) return DtoBaseViewModel;
-                return this;
-            }
-        }
+        public string DtoName => IsDto ? Name : $"{Name}DtoGen";
+
+        public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel : this;
+
         /// <summary>
         /// Returns true if this is a DTO that uses another underlying type specifed in DtoBaseViewModel.
         /// </summary>
-        public bool IsDto { get { return Wrapper.IsDto; } }
+        public bool IsDto => Wrapper.IsDto;
 
         /// <summary>
         /// The ClassViewModel this DTO is based on.
@@ -142,10 +95,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Name of the ViewModelClass
         /// </summary>
-        public string ViewModelClassName
-        {
-            get { return Name; }
-        }
+        public string ViewModelClassName => Name;
 
         public string ViewModelGeneratedClassName
         {
@@ -165,29 +115,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool ApiRouted => Wrapper.GetAttributeValue<ControllerAttribute, bool>(nameof(ControllerAttribute.ApiRouted)) ?? true;
 
 
-        public string Namespace { get { return Wrapper.Namespace; } }
+        public string Namespace => Wrapper.Namespace;
 
         /// <summary>
         /// Name of an instance of the ViewModelClass
         /// </summary>
-        public string ViewModelObjectName
-        {
-            get { return ViewModelClassName.ToCamelCase(); }
-        }
+        public string ViewModelObjectName => ViewModelClassName.ToCamelCase();
+
         /// <summary>
         /// Name of the List ViewModelClass
         /// </summary>
-        public string ListViewModelClassName
-        {
-            get { return Name + "List"; }
-        }
+        public string ListViewModelClassName => Name + "List";
+
         /// <summary>
         /// Name of an instance of the List ViewModelClass
         /// </summary>
-        public string ListViewModelObjectName
-        {
-            get { return ListViewModelClassName.ToCamelCase(); }
-        }
+        public string ListViewModelObjectName => ListViewModelClassName.ToCamelCase();
 
         /// <summary>
         /// All properties for the object
@@ -254,10 +197,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the property ID field.
         /// </summary>
-        public PropertyViewModel PrimaryKey
-        {
-            get { return Properties.FirstOrDefault(f => f.IsPrimaryKey); }
-        }
+        public PropertyViewModel PrimaryKey => Properties.FirstOrDefault(f => f.IsPrimaryKey);
 
         /// <summary>
         /// Use the ListText Attribute first, then Name and then ID.
@@ -279,15 +219,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
 
-        public string ApiUrl
-        {
-            get { return ApiName; }
-        }
+        public string ApiUrl => ApiName;
 
-        public string ViewUrl
-        {
-            get { return ControllerName; }
-        }
+        public string ViewUrl => ControllerName;
 
         public string DefaultOrderByClause(string prependText = "")
         {
@@ -490,27 +424,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                return Regex.Replace(Name, "[A-Z]", " $0").Trim();
-            }
-        }
+        public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
-        public bool HasViewModel
-        {
-            get
-            {
-                if (Name == "IdentityRole") return false;
-                return true;
-            }
-        }
+        public bool HasViewModel => Name != "IdentityRole";
 
-        public override string ToString()
-        {
-            return $"{Name} : {Wrapper}";
-        }
+        public override string ToString() => $"{Name} : {Wrapper}";
 
         public string TableName
         {

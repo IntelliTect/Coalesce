@@ -35,14 +35,14 @@ namespace IntelliTect.Coalesce.Controllers
         protected BaseApiController()
         {
             // Set up a ViewModel so we can check out this object.
-            ClassViewModel = ReflectionRepository.GetClassViewModel(typeof(T), null, ApiName);
+            ClassViewModel = ReflectionRepository.GetClassViewModel<T>();
             if (typeof(T) == typeof(TDto) || typeof(TDto).Name.EndsWith("DtoGen"))
             {
                 DtoViewModel = ClassViewModel;
             }
             else
             {
-                DtoViewModel = ReflectionRepository.GetClassViewModel(typeof(TDto), null, ApiName);
+                DtoViewModel = ReflectionRepository.GetClassViewModel<TDto>();
             }
 
         }
@@ -81,11 +81,6 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 _timeZone = value;
             }
-        }
-
-        protected string ApiName
-        {
-            get { return this.GetType().Name.Replace("Controller", ""); }
         }
 
         protected virtual IQueryable<T> GetDataSource(ListParameters listParameters)

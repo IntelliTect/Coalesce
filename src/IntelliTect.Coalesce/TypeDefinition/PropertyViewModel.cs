@@ -675,7 +675,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (value != null) return value;
                 // See if this is a one-to-one using the parent's key
                 // Look up the other object and check the key
-                var vm = ReflectionRepository.GetClassViewModel(PureType.Name);
+                var vm = PureType.ClassViewModel;
                 if (vm != null)
                 {
                     if (vm.IsOneToOne)

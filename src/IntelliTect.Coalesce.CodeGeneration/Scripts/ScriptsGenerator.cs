@@ -51,26 +51,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
                 else
                 {
-                    targetNamespace = ValidationUtil.ValidateType("Startup", "", WebProject.TypeLocator, throwWhenNotFound: false).Namespace;
+                    var startupSymbol = ValidationUtil.ValidateType("Startup", "", WebProject.TypeLocator, throwWhenNotFound: false);
+                    targetNamespace = startupSymbol.ContainingNamespace.ToDisplayString();
                 }
                 Console.WriteLine($"Namespace: {targetNamespace}");
 
-                ModelType dataContext = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataProject.TypeLocator, throwWhenNotFound: false);
+                var dataContextSymbol = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataProject.TypeLocator, throwWhenNotFound: false);
+
+                // var assembly = DataProject.TypeLocator.GetAssembly();
 
                 if (model.ValidateOnly)
                 {
-                    Console.WriteLine($"Validating model for: {dataContext.FullName}");
+                    Console.WriteLine($"Validating model for: {dataContextSymbol.ToDisplayString()}");
                 }
                 else
                 {
-                    Console.WriteLine($"Building scripts for: {dataContext.FullName}");
+                    Console.WriteLine($"Building scripts for: {dataContextSymbol.ToDisplayString()}");
                 }
 
                 List<ClassViewModel> models = null;
                 try
                 {
                     models = ReflectionRepository
-                                    .AddContext((INamedTypeSymbol)dataContext.TypeSymbol)
+                                    .AddContext(dataContextSymbol)
                                     //.Where(m => m.PrimaryKey != null)
                                     .ToList();
                 }
@@ -165,7 +168,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
                 else
                 {
-                    var contextInfo = new ContextInfo(dataContext.Name, targetNamespace);
+                    var contextInfo = new ContextInfo(dataContextSymbol.Name, targetNamespace);
                     return GenerateScripts(model, models, contextInfo, targetNamespace);
                 }
             }

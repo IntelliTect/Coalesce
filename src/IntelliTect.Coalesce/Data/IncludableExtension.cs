@@ -102,7 +102,7 @@ namespace IntelliTect.Coalesce.Data
         /// <returns></returns>
         public async static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id)
         {
-            var classViewModel = ReflectionRepository.GetClassViewModel(typeof(T));
+            var classViewModel = ReflectionRepository.GetClassViewModel<T>();
             if (classViewModel.PrimaryKey.Type.IsString)
             {
                 return await query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").FirstAsync();
@@ -122,7 +122,7 @@ namespace IntelliTect.Coalesce.Data
         /// <returns></returns>
         public static T FindItem<T>(this IQueryable<T> query, object id)
         {
-            var classViewModel = ReflectionRepository.GetClassViewModel(typeof(T));
+            var classViewModel = ReflectionRepository.GetClassViewModel<T>();
             if (classViewModel.PrimaryKey.Type.IsString)
             {
                 return query.Where(string.Format("{0} = \"{1}\"", classViewModel.PrimaryKey.Name, id)).First();

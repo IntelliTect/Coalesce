@@ -4,15 +4,15 @@
 using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration;
+using IntelliTect.Coalesce.CodeGeneration.Scripts;
 
 namespace IntelliTect.Coalesce.CodeGeneration
 {
     public class ValidationUtil
     {
-        public static ModelType ValidateType(string typeName,
+        public static INamedTypeSymbol ValidateType(string typeName,
             string argumentName,
-            IModelTypesLocator modelTypesLocator,
+            ModelTypesLocator modelTypesLocator,
             bool throwWhenNotFound = true)
         {
             if (string.IsNullOrEmpty(typeName))

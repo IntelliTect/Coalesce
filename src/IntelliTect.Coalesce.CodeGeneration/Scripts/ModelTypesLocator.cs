@@ -10,15 +10,17 @@ using IntelliTect.Coalesce.CodeGeneration.Common;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Build.Exceptions;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
-    public class ModelTypesLocator : IModelTypesLocator
+    public class ModelTypesLocator
     {
         private Workspace _projectWorkspace;
         private ProjectContext _projectContext;
 
-        private IEnumerable<ModelType> _types;
+        private Compilation _compilation;
 
         public ModelTypesLocator(Workspace projectWorkspace, ProjectContext projectContext)
         {
@@ -31,20 +33,94 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             _projectContext = projectContext;
         }
 
-        public IEnumerable<ModelType> GetAllTypes()
+        private Compilation GetProjectCompilation()
         {
-            return _types = _types ?? _projectWorkspace.CurrentSolution.Projects
-                .Select(project => project
-                    .AddMetadataReferences(_projectContext.CompilationAssemblies.Select(rr => MetadataReference.CreateFromFile(rr.ResolvedPath)))
-                    .GetCompilationAsync().Result
-                )
-                .Select(comp => RoslynUtilities.GetDirectTypesInCompilation(comp))
-                .Aggregate((col1, col2) => col1.Concat(col2).ToList())
-                .Distinct(new TypeSymbolEqualityComparer())
-                .Select(ts => ModelType.FromITypeSymbol(ts));
+            if (_compilation != null) return _compilation;
+
+            var projectFileName = Path.GetFileName(_projectContext.ProjectFilePath);
+            var project = _projectWorkspace.CurrentSolution.Projects
+                .SingleOrDefault(p => Path.GetFileName(p.FilePath) == projectFileName);
+
+            if (project == null)
+            {
+                throw new FileNotFoundException($"Couldn't find project in workspace with project file name {projectFileName}");
+            }
+
+            return _compilation = project
+                .AddMetadataReferences(_projectContext.CompilationAssemblies.Select(rr => MetadataReference.CreateFromFile(rr.ResolvedPath)))
+                .GetCompilationAsync().Result;
         }
 
-        public IEnumerable<ModelType> GetType(string typeName)
+        public IEnumerable<INamedTypeSymbol> GetAllTypes()
+        {
+            return RoslynUtilities.GetDirectTypesInCompilation(GetProjectCompilation());
+        }
+
+        /*
+         * This is currently quite flawed - getting missing method exceptions for methods that clearly exist
+         * when trying to instantiate types in the loaded assembly.
+         * The intent behind this was to instantiate the DbContext to get EF's model metadata and use that
+         * for code generation, since its going to be more correct & consistent than our guesses about the data model.
+         
+        public Assembly GetAssembly()
+        {
+            //return null;
+            var projectFileName = Path.GetFileName(_projectContext.ProjectFilePath);
+            var project = _projectWorkspace.CurrentSolution.Projects
+                .SingleOrDefault(p => Path.GetFileName(p.FilePath) == projectFileName);
+            
+            using (var assemblyStream = new MemoryStream())
+            {
+                using (var pdbStream = new MemoryStream())
+                {
+                    var result = GetProjectCompilation().Emit(
+                        assemblyStream,
+                        pdbStream);
+
+                    if (!result.Success)
+                    {
+                        throw new TypeLoadException($"Couldn't emit assembly for project {_projectContext.ProjectFilePath}");
+                    }
+
+                    assemblyStream.Seek(0, SeekOrigin.Begin);
+                    pdbStream.Seek(0, SeekOrigin.Begin);
+
+                    //var domain = AppDomain.CreateDomain($"{_projectContext.ProjectFilePath}-compilation");
+                    //domain.ExecuteAssembly(project.OutputFilePath);
+                    //foreach (var file in _projectContext.CompilationAssemblies)
+                    //{
+                    //    try
+                    //    {
+                    //        domain.Load(AssemblyName.GetAssemblyName(file.ResolvedPath));
+                    //    }
+                    //    catch { }
+                    //}
+
+                    AppDomain.CurrentDomain.AssemblyLoad += (sender, args) => Console.WriteLine(args.LoadedAssembly.ToString());
+
+                    AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+                    {
+                        var name = new AssemblyName(args.Name);
+                        var match = _projectContext.CompilationAssemblies.FirstOrDefault(a => AssemblyName.GetAssemblyName(a.ResolvedPath).Name == name.Name);
+                        if (match != null)
+                        {
+                            return Assembly.LoadFrom(match.ResolvedPath);
+                        }
+                        return null;
+                    };
+
+                    var assembly = Assembly.Load(assemblyStream.ToArray(), pdbStream.ToArray());
+                    //var assembly = Assembly.LoadFrom(project.OutputFilePath);
+                    var contextType = assembly.GetType("Intellitect.Myriad.Data.AppDbContext");
+                    var instance = Activator.CreateInstance(contextType);
+
+                    return assembly;
+                }
+            }
+        }
+        */
+
+        public IEnumerable<INamedTypeSymbol> GetType(string typeName)
         {
             if (typeName == null)
             {

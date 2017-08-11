@@ -147,7 +147,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 // File.SetAttributes(outputPath, File.GetAttributes(outputPath) & ~FileAttributes.ReadOnly);
             }
 
-            using (FileStream fileStream = new FileStream(outputPath, FileMode.Truncate, FileAccess.Write))
+            using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
             {
                 contentsStream.Seek(0, SeekOrigin.Begin);
                 await contentsStream.CopyToAsync(fileStream);

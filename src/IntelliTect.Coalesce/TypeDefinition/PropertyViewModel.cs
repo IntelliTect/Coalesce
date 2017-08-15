@@ -11,6 +11,7 @@ using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Text;
+using IntelliTect.Coalesce.Helpers.Search;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -573,36 +574,32 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <param name="depth"></param>
         /// <param name="maxDepth"></param>
         /// <returns></returns>
-        public Dictionary<string, PropertyViewModel> SearchTerms(string rootModelName, int depth, int maxDepth = 3)
+        public IEnumerable<SearchableProperty> SearchProperties(string rootModelName, int depth = 0, int maxDepth = 2)
         {
-            var result = new Dictionary<string, PropertyViewModel>();
+            if (!IsSearchable(rootModelName)) yield break;
+
             if (this.PureType.HasClassViewModel)
             {
-
                 // If we will exceed the depth don't try to query on an object.
-                if (depth < maxDepth - 1)
+                if (depth < maxDepth)
                 {
                     // Remove this item and add the child's search items with a prepended property name
-                    var childResult = this.Type.PureType.ClassViewModel.SearchProperties(rootModelName, depth + 1);
-                    foreach (var childProp in childResult)
+                    var childProperties = this.Type.PureType.ClassViewModel.SearchProperties(rootModelName, depth + 1, maxDepth);
+
+                    if (this.Type.IsCollection)
                     {
-                        if (this.Type.IsCollection)
-                        {
-                            result.Add($"{this.Name}[].{childProp.Key}", childProp.Value);
-                        }
-                        else
-                        {
-                            result.Add($"{this.Name}.{childProp.Key}", childProp.Value);
-                        }
+                        yield return new SearchableCollectionProperty(this, childProperties);
+                    }
+                    else
+                    {
+                        yield return new SearchableObjectProperty(this, childProperties);
                     }
                 }
             }
             else
             {
-                // This is just a regular field, add it.
-                result.Add(this.Name, this);
+                yield return new SearchableValueProperty(this);
             }
-            return result;
         }
 
 

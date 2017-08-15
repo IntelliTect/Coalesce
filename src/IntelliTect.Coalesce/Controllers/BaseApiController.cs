@@ -277,6 +277,19 @@ namespace IntelliTect.Coalesce.Controllers
                 result = result.Where(listParameters.Where);
             }
 
+            if (!string.IsNullOrWhiteSpace(listParameters.Search))
+            {
+
+                var searchableProperties = ClassViewModel
+                    .SearchProperties(ClassViewModel.Name)
+                    .Where(f => f.Property.SecurityInfo.IsReadable(User))
+                    .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, listParameters.Search))
+                    .ToList();
+
+                Console.WriteLine(searchableProperties);
+            }
+
+            /*
             // Add general search filters.
             // These search specified fields in the class
             if (!string.IsNullOrWhiteSpace(listParameters.Search))
@@ -292,10 +305,10 @@ namespace IntelliTect.Coalesce.Controllers
                     {
                         value = value.EscapeStringLiteralForLinqDynamic();
                         var expressions = new List<string>();
-                        foreach (var kvp in prop.SearchTerms(ClassViewModel.Name, 1))
+                        foreach (var searchableProp in prop.SearchProperties(ClassViewModel.Name, maxDepth: 1))
                         {
                             // Only strings work reliably
-                            if (kvp.Value.Type.IsString)
+                            if (searchableProp.Property.Type.IsString)
                             {
                                 if (kvp.Key.Contains("[]."))
                                 {
@@ -331,7 +344,7 @@ namespace IntelliTect.Coalesce.Controllers
                 {
                     var searchableProperties = ClassViewModel
                         .SearchProperties(ClassViewModel.Name)
-                        .Where(f => f.Value.SecurityInfo.IsReadable(User))
+                        .Where(f => f.Property.SecurityInfo.IsReadable(User))
                         .ToList();
 
                     var completeSearchClauses = new List<string>();
@@ -429,6 +442,7 @@ namespace IntelliTect.Coalesce.Controllers
                     }
                 }
             }
+    */
             return result;
 
 

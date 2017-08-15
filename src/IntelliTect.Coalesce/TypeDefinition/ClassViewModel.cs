@@ -13,6 +13,7 @@ using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Helpers.Search;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -296,10 +297,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public Dictionary<string, PropertyViewModel> SearchProperties(string rootModelName = null, int depth = 0)
+        public IEnumerable<SearchableProperty> SearchProperties(string rootModelName = null, int depth = 0, int maxDepth = 2)
         {
             // Only go down three levels.
-            if (depth == 3) return new Dictionary<string, PropertyViewModel>();
+            if (depth == 3) yield break;
 
             var searchProperties = Properties.Where(f => f.IsSearchable(rootModelName)).ToList();
             var result = new Dictionary<string, PropertyViewModel>();
@@ -309,9 +310,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 foreach (var prop in searchProperties)
                 {
                     // Get all the child items
-                    foreach (var kvp in prop.SearchTerms(rootModelName, depth))
+                    foreach (var searchProperty in prop.SearchProperties(rootModelName, depth, maxDepth))
                     {
-                        result.Add(kvp.Key, kvp.Value);
+                        yield return searchProperty;
                     }
                 }
             }
@@ -321,7 +322,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
                 if (prop != null)
                 {
-                    result.Add(prop.Name, prop);
+                    yield return new SearchableValueProperty(prop);
                 }
             }
             if (!result.Any())
@@ -330,7 +331,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
                 if (prop != null)
                 {
-                    result.Add(prop.Name, prop);
+                    yield return new SearchableValueProperty(prop);
                 }
             }
             if (!result.Any())
@@ -338,10 +339,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var prop = Properties.FirstOrDefault(f => f.IsPrimaryKey);
                 if (prop != null)
                 {
-                    result.Add(prop.Name, prop);
+                    yield return new SearchableValueProperty(prop);
                 }
             }
-            return result;
         }
 
         /// <summary>

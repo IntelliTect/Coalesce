@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
         {
         }
 
-        public override IEnumerable<(PropertyViewModel, string)> GetLinqDynamicSearchStatements(ClaimsPrincipal user, string propertyParent, string rawSearchTerm)
+        public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(ClaimsPrincipal user, string propertyParent, string rawSearchTerm)
         {
             if (!Property.SecurityInfo.IsReadable(user))
             {

@@ -277,175 +277,97 @@ namespace IntelliTect.Coalesce.Controllers
                 result = result.Where(listParameters.Where);
             }
 
-            if (!string.IsNullOrWhiteSpace(listParameters.Search))
-            {
-
-                var searchableProperties = ClassViewModel
-                    .SearchProperties(ClassViewModel.Name)
-                    .Where(f => f.Property.SecurityInfo.IsReadable(User))
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, listParameters.Search))
-                    .ToList();
-
-                Console.WriteLine(searchableProperties);
-            }
-
-            /*
             // Add general search filters.
             // These search specified fields in the class
             if (!string.IsNullOrWhiteSpace(listParameters.Search))
             {
                 // See if the user has specified a field with a colon and search on that first
-                bool termFound = false;
                 if (listParameters.Search.Contains(":"))
                 {
-                    var field = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[0];
-                    var prop = ClassViewModel.Properties.FirstOrDefault(f => string.Compare(f.Name, field, true) == 0 || string.Compare(f.DisplayName, field, true) == 0);
-                    var value = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None)[1].Trim();
+                    var fieldValueParts = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None);
+
+                    var field = fieldValueParts[0].Trim();
+                    var value = fieldValueParts[1].Trim();
+
+                    var prop = ClassViewModel.Properties.FirstOrDefault(f => 
+                        string.Compare(f.Name, field, true) == 0 ||
+                        string.Compare(f.DisplayName, field, true) == 0);
+
                     if (prop != null && prop.SecurityInfo.IsReadable(User) && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
                     {
-                        value = value.EscapeStringLiteralForLinqDynamic();
-                        var expressions = new List<string>();
-                        foreach (var searchableProp in prop.SearchProperties(ClassViewModel.Name, maxDepth: 1))
-                        {
-                            // Only strings work reliably
-                            if (searchableProp.Property.Type.IsString)
-                            {
-                                if (kvp.Key.Contains("[]."))
-                                {
-                                    var parts = kvp.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    var expr = $@"{parts[0]}.Count({parts[1]}.ToString().{string.Format(kvp.Value.SearchMethodCall, value)}";
-                                    expressions.Add(expr);
-                                }
-                                else if (prop.Type.IsString)
-                                {
-                                    var expr = $@"({kvp.Key} != null && {kvp.Key}.{string.Format(kvp.Value.SearchMethodCall, value)})";
-                                    expressions.Add(expr);
-                                }
-                                else
-                                {
-                                    var expr = $@"{kvp.Key}.ToString().{string.Format(kvp.Value.SearchMethodCall, value)}";
-                                    expressions.Add(expr);
-                                }
-                            }
-                        }
+                        var expressions = prop
+                            .SearchProperties(ClassViewModel.Name, maxDepth: 1)
+                            .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, value))
+                            .Select(t => t.statement)
+                            .ToList();
+
                         // Join these together with an 'or'
                         if (expressions.Any())
                         {
                             string finalSearchClause = string.Join(" || ", expressions);
-                            result = result.Where(finalSearchClause);
-                            termFound = true;
+                            return result.Where(finalSearchClause);
                         }
 
                     }
                 }
 
                 // This uses the default search properties based on the attributes and defaults (name and ID for example).
-                if (!termFound)
+                var terms = listParameters.Search
+                        .Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries);
+
+                var completeSearchClauses = new List<string>();
+
+
+
+
+                // For all searchable properties where SearchIsSplitOnSpaces is true,
+                // we require that each word in the search terms yields at least one match.
+                // This allows search results to become more refined as more words are typed in.
+                // For example, when searching on properties (FirstName, LastName) with input "steve steverson",
+                // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
+                // of the same records. This will yield people named "steve steverson" or "steverson steve".
+                var splitOnStringTermClauses = new List<string>();
+                foreach (var termWord in terms)
                 {
-                    var searchableProperties = ClassViewModel
+                    var splitOnStringClauses = ClassViewModel
                         .SearchProperties(ClassViewModel.Name)
-                        .Where(f => f.Property.SecurityInfo.IsReadable(User))
+                        .Where(f => f.Property.SearchIsSplitOnSpaces)
+                        .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, termWord))
+                        .Select(t => t.statement)
                         .ToList();
 
-                    var completeSearchClauses = new List<string>();
-                    // Handle the split on spaces first because it will be done differently with ands and ors.
-                    if (searchableProperties.Any(f => f.Value.SearchIsSplitOnSpaces))
-                    {
-                        var splitSearchClauses = new List<string>();
+                    // For the given term word, allow any of the properties (so we join clauses with OR)
+                    // to match the term word.
+                    splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+                }
+                // Require each "word clause"
+                completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
 
-                        var clauses = listParameters.Search
-                            .Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(c => c.EscapeStringLiteralForLinqDynamic());
 
-                        foreach (var clause in clauses)
-                        {
-                            var searchClauses = new List<string>();
-                            foreach (var prop in searchableProperties.Where(f => f.Value.SearchIsSplitOnSpaces))
-                            {
-                                string expr;
-                                if (prop.Value.PureType.IsString)
-                                {
-                                    if (prop.Key.Contains("[]."))
-                                    {
-                                        var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Any({parts[1]} != null && {parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)})";
-                                    }
-                                    else
-                                    {
-                                        expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodCall, clause)})";
-                                    }
-                                }
-                                else
-                                {
-                                    if (prop.Key.Contains("[]."))
-                                    {
-                                        var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                        expr = $@"{parts[0]}.Any({parts[1]}.ToString().{string.Format(prop.Value.SearchMethodCall, clause)})";
-                                    }
-                                    else
-                                    {
-                                        expr = $@"{prop.Key}.ToString().{string.Format(prop.Value.SearchMethodCall, clause)}";
-                                    }
-                                }
-                                searchClauses.Add(expr);
-                            }
-                            if (searchClauses.Count > 0)
-                            {
-                                splitSearchClauses.Add("( " + string.Join(" || ", searchClauses) + " )");
-                            }
-                        }
-                        completeSearchClauses.Add("( " + string.Join(" && ", splitSearchClauses) + " )");
-                    }
 
-                    // Handle not split on spaces with simple ors.
-                    if (searchableProperties.Any(f => !f.Value.SearchIsSplitOnSpaces))
-                    {
-                        var clause = listParameters.Search.EscapeStringLiteralForLinqDynamic();
-                        foreach (var prop in searchableProperties.Where(f => !f.Value.SearchIsSplitOnSpaces))
-                        {
-                            int temp;
-                            if (prop.Value.PureType.IsString)
-                            {
-                                string expr;
-                                if (prop.Key.Contains("[]."))
-                                {
-                                    var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Any({parts[1]}.{string.Format(prop.Value.SearchMethodCall, clause)})";
-                                }
-                                else
-                                {
-                                    expr = $"({prop.Key} != null && {prop.Key}.{string.Format(prop.Value.SearchMethodCall, clause)})";
-                                }
-                                completeSearchClauses.Add(expr);
-                            }
-                            else if (int.TryParse(clause, NumberStyles.Integer, CultureInfo.CurrentCulture, out temp))
-                            {
-                                string expr;
-                                if (prop.Key.Contains("[]."))
-                                {
-                                    var parts = prop.Key.Split(new[] { "[]." }, StringSplitOptions.RemoveEmptyEntries);
-                                    expr = $@"{parts[0]}.Any({parts[1]} = {clause})";
-                                }
-                                else
-                                {
-                                    expr = $"{prop.Key} = {clause}";
-                                }
-                                completeSearchClauses.Add(expr);
-                            }
-                        }
-                    }
 
-                    if (completeSearchClauses.Any())
-                    {
-                        string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                        result = result.Where(finalSearchClause);
-                    }
+                // For all searchable properties where SearchIsSplitOnSpaces is false,
+                // we only require that the entire search term match at least one of these properties.
+                var searchClauses = ClassViewModel
+                    .SearchProperties(ClassViewModel.Name)
+                    .Where(f => !f.Property.SearchIsSplitOnSpaces)
+                    .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, listParameters.Search))
+                    .Select(t => t.statement)
+                    .ToList();
+                completeSearchClauses.AddRange(searchClauses);
+                
+
+                if (completeSearchClauses.Any())
+                {
+                    string finalSearchClause = string.Join(" || ", completeSearchClauses);
+                    result = result.Where(finalSearchClause);
                 }
             }
-    */
+
+            // Don't put anything after the searches. The property:value search handling returns early
+            // if it finds a match. If you need code down here, refactor that part.
+
             return result;
-
-
         }
 
         /// <summary>

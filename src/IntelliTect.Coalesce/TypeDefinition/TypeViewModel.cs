@@ -230,7 +230,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if class is a Byte
         /// </summary>
-        public bool IsByteArray => PureType.Name == "Byte" && IsArray;
+        public bool IsByteArray => PureType.Name == nameof(Byte) && IsArray;
 
         /// <summary>
         /// Returns true if the class is a number.

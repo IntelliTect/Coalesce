@@ -67,8 +67,10 @@ namespace IntelliTect.Coalesce.Controllers
         private ILogger _Logger = null;
 
         public static int DefaultPageSizeAll { get; set; } = 25;
+
         private int? _defaultPageSize = null;
         public int DefaultPageSize { get { return _defaultPageSize ?? DefaultPageSizeAll; } set { _defaultPageSize = value; } }
+        public int MaxSearchTerms { get; set; } = 6;
 
         private static TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
         public static TimeZoneInfo CurrentTimeZone
@@ -255,7 +257,6 @@ namespace IntelliTect.Coalesce.Controllers
         protected IQueryable<T> AddFilters(IQueryable<T> result, ListParameters listParameters)
         {
             // Add key value pairs where = is used.
-            // TODO: Fix for SQL Injection
             foreach (var clause in listParameters.Filters)
             {
                 var prop = ClassViewModel.PropertyByName(clause.Key);
@@ -268,10 +269,11 @@ namespace IntelliTect.Coalesce.Controllers
                     // This property was not recognized as a valid property name for this object.
                     // TODO: Do something about this.
                 }
-
             }
+
             // Add more free form filters.
-            // TODO: Fix for SQL Injection
+            // Because this is processed through LINQ Dynamic,
+            // there's no chance for SQL injection here.
             if (!string.IsNullOrWhiteSpace(listParameters.Where))
             {
                 result = result.Where(listParameters.Where);
@@ -293,7 +295,7 @@ namespace IntelliTect.Coalesce.Controllers
                         string.Compare(f.Name, field, true) == 0 ||
                         string.Compare(f.DisplayName, field, true) == 0);
 
-                    if (prop != null && prop.SecurityInfo.IsReadable(User) && !string.IsNullOrWhiteSpace(value) && !prop.Type.IsEnum) // Search not supported on enum.
+                    if (prop != null && !string.IsNullOrWhiteSpace(value))
                     {
                         var expressions = prop
                             .SearchProperties(ClassViewModel.Name, maxDepth: 1)
@@ -311,14 +313,9 @@ namespace IntelliTect.Coalesce.Controllers
                     }
                 }
 
-                // This uses the default search properties based on the attributes and defaults (name and ID for example).
-                var terms = listParameters.Search
-                        .Split(new string[] { " ", ", ", " ," }, StringSplitOptions.RemoveEmptyEntries);
+
 
                 var completeSearchClauses = new List<string>();
-
-
-
 
                 // For all searchable properties where SearchIsSplitOnSpaces is true,
                 // we require that each word in the search terms yields at least one match.
@@ -327,12 +324,18 @@ namespace IntelliTect.Coalesce.Controllers
                 // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
                 // of the same records. This will yield people named "steve steverson" or "steverson steve".
                 var splitOnStringTermClauses = new List<string>();
+                var terms = listParameters.Search
+                        .Split(new string[] { " ", "," }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(term => term.Trim())
+                        .Distinct()
+                        .Where(term => !string.IsNullOrWhiteSpace(term))
+                        .Take(MaxSearchTerms);
                 foreach (var termWord in terms)
                 {
                     var splitOnStringClauses = ClassViewModel
                         .SearchProperties(ClassViewModel.Name)
-                        .Where(f => f.Property.SearchIsSplitOnSpaces)
                         .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, termWord))
+                        .Where(f => f.property.SearchIsSplitOnSpaces)
                         .Select(t => t.statement)
                         .ToList();
 
@@ -350,8 +353,8 @@ namespace IntelliTect.Coalesce.Controllers
                 // we only require that the entire search term match at least one of these properties.
                 var searchClauses = ClassViewModel
                     .SearchProperties(ClassViewModel.Name)
-                    .Where(f => !f.Property.SearchIsSplitOnSpaces)
                     .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, listParameters.Search))
+                    .Where(f => !f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();
                 completeSearchClauses.AddRange(searchClauses);

@@ -341,10 +341,12 @@ namespace IntelliTect.Coalesce.Controllers
 
                     // For the given term word, allow any of the properties (so we join clauses with OR)
                     // to match the term word.
-                    splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+                    if (splitOnStringClauses.Any())
+                        splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
                 }
                 // Require each "word clause"
-                completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
+                if (splitOnStringTermClauses.Any())
+                    completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
 
 
 

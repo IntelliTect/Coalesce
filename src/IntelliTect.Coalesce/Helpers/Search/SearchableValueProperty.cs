@@ -34,15 +34,23 @@ namespace IntelliTect.Coalesce.Helpers.Search
         public static Dictionary<string, ParseFlags> DateFormats = new Dictionary<string, ParseFlags>
         {
             { "MMM yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
-            { "MMM, yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "MMMM yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MMM, yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "MMMM, yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MMM-yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MMMM-yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MMM/yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MMMM/yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "yyyy MM", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "yyyy M", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "yyyy-MM", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "yyyy-M", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "yyyy/MM", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "yyyy/M", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MM/yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "M/yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "MM-yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "M-yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
 
             //{ DateTimeFormatInfo.CurrentInfo.MonthDayPattern, ParseFlags.HaveDate },
             //{ DateTimeFormatInfo.CurrentInfo.FullDateTimePattern, ParseFlags.HaveDateTime },
@@ -138,17 +146,14 @@ namespace IntelliTect.Coalesce.Helpers.Search
             }
             else if (Property.Type.IsNumber)
             {
-                object numberValue = null;
-                try
+                var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(propertyClrType);
+                // This allows us to check if the conversion is valid without exceptions
+                // (in our code, anyway - the default implementation of this is just a try catch anyway)
+                if (typeConverter.IsValid(rawSearchTerm))
                 {
-                    numberValue = Convert.ChangeType(rawSearchTerm, propertyClrType);
-                }
-                catch
-                {
-                    // Don't care if the conversion failed - just means the input wasn't valid for the type.
-                }
-                if (numberValue != null)
+                    var numberValue = typeConverter.ConvertFromString(rawSearchTerm);
                     yield return (Property, $"({propertyAccessor} == {numberValue})");
+                }
             }
             else if (Property.Type.IsString)
             {

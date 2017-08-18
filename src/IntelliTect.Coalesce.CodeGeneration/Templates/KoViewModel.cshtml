@@ -51,7 +51,7 @@ module @moduleName {
         public coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
             = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
     
-        // Observables
+
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))
         {
         if (prop.Comment.Length > 0)
@@ -545,10 +545,10 @@ module @moduleName {
 
             // This stuff needs to be done after everything else is set up.
             // Complex Type Observables
-            @foreach (PropertyViewModel prop in model.Properties.Where(f=>f.IsComplexType && !f.IsInternalUse))
-            {
+        @foreach (PropertyViewModel prop in model.Properties.Where(f=>f.IsComplexType && !f.IsInternalUse))
+        {
             @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(self));
-            }
+        }
 
         @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
         {

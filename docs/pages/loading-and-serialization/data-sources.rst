@@ -20,7 +20,7 @@ These methods must receive two parameters: :csharp:`db` as the :csharp:`DbContex
         public static IQueryable<Person> IncludeFamily(AppDbContext db, ClaimsPrincipal user)
         {
             return db.People
-                .Include(f => f.Parents)
+                .Include(f => f.Parents).ThenInclude(s => s.Parents)
                 .Include(f => f.Cousins).ThenInclude(s => s.Parents);
         }
 

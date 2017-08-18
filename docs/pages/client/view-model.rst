@@ -15,10 +15,132 @@ These ViewModels are dependent on Knockout_, and are designed to be used directl
 Base Members
 ============
 
+	:ts:`includes: string`
+		String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable. See :ref:`Includes` for more information.
+
+
+
+
+	:ts:`isChecked: KnockoutObservable<boolean>`
+		Flag to use to determine if this item is checked. Provided for convenience.
+
+	:ts:`isEditing: KnockoutObservable<boolean>`
+		Flag to use to determine if this item is being edited. Only for convenience.
+
+	:ts:`isExpanded: KnockoutObservable<boolean>`
+		Flag to use to determine if this item is expanded. Provided for convenience.
+
+	:ts:`isVisible: KnockoutObservable<boolean>`
+		Flag to use to determine if this item is shown. Provided for convenience.
+
+	:ts:`isSelected: KnockoutObservable<boolean>`
+		Flag to use to determine if this item is selected. Provided for convenience.
+
+	:ts:`selectSingle: (): boolean`
+		Sets isSelected(true) on this object and clears on the rest of the items in the parent collection.
+
+
+
+	:ts:`isDirty: KnockoutObservable<boolean>`
+		Dirty Flag. Set when a value on the model changes. Reset when the model is saved or reloaded.
+
+	:ts:`isLoaded: KnockoutObservable<boolean>`
+		True once the data has been loaded.
+
+	:ts:`isLoading: KnockoutObservable<boolean>`
+		True if the object is loading.
+
+
+	:ts:`isSaving: KnockoutObservable<boolean>`
+		True if the object is currently saving.
+
+	:ts:`isThisOrChildSaving: KnockoutComputed<boolean>`
+		Returns true if the current object, or any of its children, are saving.
+
+	:ts:`load: id: any, callback?: (self: T) => void): JQueryPromise<any> | undefined`
+		Loads the object from the server based on the id specified. If no id is specified, the current id, is used if one is set.
+
+	:ts:`loadChildren: callback?: () => void) => void`
+		Loads any child objects that have an ID set, but not the full object. This is useful when creating an object that has a parent object and the ID is set on the new child.
+
+	:ts:`loadFromDto: data: any, force?: boolean, allowCollectionDeletes?: boolean) => void`
+		Loads this object from a data transfer object received from the server. 
+
+		* :ts:`force` - Will override the check against isLoading that is done to prevent recursion.
+		* :ts:`allowCollectionDeletes` - Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+
+
+	:ts:`deleteItem: callback?: (self: T) => void): JQueryPromise<any> | undefined`
+		Deletes the object without any prompt for confirmation.
+
+	:ts:`deleteItemWithConfirmation: callback?: () => void, message?: string): JQueryPromise<any> | undefined`
+		Deletes the object if a prompt for confirmation is answered affirmatively.
+
+	:ts:`errorMessage: KnockoutObservable<string>`
+		Contains the error message from the last failed call to the server.
+
+
+	:ts:`onSave: callback: (self: T) => void): boolean`
+		Register a callback to be called when a save is done.
+		Returns :ts:`true` if the callback was registered, or :ts:`false` if the callback was already registered.
+
+	:ts:`saveToDto: () => any`
+		Saves this object into a data transfer object to send to the server.
+
+	:ts:`save: callback?: (self: T) => void): JQueryPromise<any> | boolean | undefined`
+		Saves the object to the server and then calls a callback. Returns false if there are validation errors.
+
+
+	:ts:`parent: any`
+		Parent of this object, if this object was loaded as part of a hierarchy.
+
+	:ts:`parentCollection: KnockoutObservableArray<T>`
+		Parent of this object, if this object was loaded as part of list of objects.
+
+
+
+	:ts:`editUrl: KnockoutComputed<string>`
+		URL to a stock editor for this object.
+
+	:ts:`showEditor: callback?: any): JQueryPromise<any>`
+		Displays an editor for the object in a modal dialog.
+
+
+	:ts:`validate: (): boolean`
+		Triggers any validation messages to be shown, and returns a bool that indicates if there are any validation errors.
+
+	:ts:`validationIssues: any`
+		ValidationIssues returned from the server when trying to persist data
+
+	:ts:`warnings: KnockoutValidationErrors`
+		List of warnings found during validation. Saving is still allowed with warnings present.
+
+	:ts:`errors: KnockoutValidationErrors`
+		List of errors found during validation. Any errors present will prevent saving.
+
 
 
 Model-Specific Members
 ======================
+
+    Configuration
+        A static configuration object for configuring all instances of the ViewModel's  type is created, as well as an instance configuration object for configuring specific instances of the ViewModel. See (see :ref:`TSModelConfig`) for more information.
+
+        .. code-block:: typescript
+
+            public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
+                = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
+
+            public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
+                = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
+
+    DataSources
+        For each of the :ref:`CustomDataSources` on the class, an enum value will be added to an enum named ``ListViewModels.<ClassName>DataSources``. This enum can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and enum values can be assigned to the :ts:`dataSource` property.
+
+        .. code-block:: typescript
+
+            public dataSources = ListViewModels.PersonDataSources;
+            public dataSource: ListViewModels.PersonDataSources = ListViewModels.PersonDataSources.Default;
 
     Data Properties
         For each exposed property on the underlying EF POCO, a :ts:`KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be :ts:`KnockoutObservableArray<T>` objects.
@@ -35,7 +157,7 @@ Model-Specific Members
     
     .. _TypeScriptViewModelComputedText:
     Computed Text Properties
-        For each reference navigation property and each :cs:`enum` property on your POCO, a :ts:`KnockoutComputed<string>` property will be created that will provide the text to display for that property. For navigation properties, this will be the property on the class annotated with :ref:`ListTextAttribute`.
+        For each reference navigation property and each Enum property on your POCO, a :ts:`KnockoutComputed<string>` property will be created that will provide the text to display for that property. For navigation properties, this will be the property on the class annotated with :ref:`ListTextAttribute`.
 
         .. code-block:: typescript
 

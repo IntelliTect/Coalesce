@@ -558,6 +558,7 @@ module Coalesce {
 
         /**
             Query string to append to the API call when loading the list of items.
+            If query is non-null, this value will not be used.
         */
         public queryString: string = "";
         /**

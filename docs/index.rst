@@ -23,6 +23,7 @@ Welcome to Coalesce's documentation!
     pages/modeling/attributes
     pages/modeling/interfaces
     pages/modeling/methods
+    pages/modeling/external-type
 
 .. toctree::
     :maxdepth: 3

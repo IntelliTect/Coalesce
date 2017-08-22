@@ -34,31 +34,52 @@ module Coalesce {
             return computed;
         }
 
+        /** The relative url where the API may be found. */
         public baseApiUrl = this.prop<string>("baseApiUrl");
+        /** The relative url where the generated views may be found. */
         public baseViewUrl = this.prop<string>("baseViewUrl");
+        /** Whether or not the callback specified for onFailure will be called or not. */
         public showFailureAlerts = this.prop<boolean>("showFailureAlerts");
 
+        /** A callback to be called when a failure response is received from the server. */
         public onFailure = this.prop<(object: T, message: string) => void>("onFailure");
+        /** A callback to be called when an AJAX request begins. */
         public onStartBusy = this.prop<(object: T) => void>("onStartBusy");
+        /** A callback to be called when an AJAX request completes. */
         public onFinishBusy = this.prop<(object: T) => void>("onFinishBusy");
     }
 
     export class ViewModelConfiguration<T extends BaseViewModel<T>> extends CoalesceConfiguration<T> {
+        /** Time to wait after a change is seen before auto-saving (if autoSaveEnabled is true). Acts as a debouncing timer for multiple simultaneous changes. */
         public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
+        /** Determines whether changes to a model will be automatically saved after saveTimeoutMs milliseconds have elapsed. */
         public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
+        /** Determines whether or not changes to many-to-many collection properties will automatically trigger a save call to the server or not. */
         public autoSaveCollectionsEnabled = this.prop<boolean>("autoSaveCollectionsEnabled");
+        /** Whether to invoke onStartBusy and onFinishBusy during saves. */
         public showBusyWhenSaving = this.prop<boolean>("showBusyWhenSaving");
+        /** Whether or not to reload the ViewModel with the state of the object received from the server after a call to .save(). */
         public loadResponseFromSaves = this.prop<boolean>("loadResponseFromSaves");
-
+        /**
+            An optional callback to be called when an object is loaded from a response from the server.
+            Callback will be called after all properties on the ViewModel have been set from the server response.
+        */
         public onLoadFromDto = this.prop<(object: T) => void>("onLoadFromDto");
 
-        public raw = (name: keyof ViewModelConfiguration<T>) => {
+        /**
+            Gets the underlying observable that stores the object's explicit configuration value.
+        */
+        public raw = (name: keyof ViewModelConfiguration<T>): KnockoutObservable<any> => {
             return this["_" + name];
         }
     }
 
     export class ListViewModelConfiguration<T extends BaseListViewModel<T, TItem>, TItem extends BaseViewModel<TItem>> extends CoalesceConfiguration<T> {
-        public raw = (name: keyof ListViewModelConfiguration<T, TItem>) => {
+
+        /**
+            Gets the underlying observable that stores the object's explicit configuration value.
+        */
+        public raw = (name: keyof ListViewModelConfiguration<T, TItem>): KnockoutObservable<any> => {
             return this["_" + name];
         }
     }
@@ -71,7 +92,6 @@ module Coalesce {
     export var GlobalConfiguration = new RootConfig();
     GlobalConfiguration.baseApiUrl("/api");
     GlobalConfiguration.baseViewUrl("");
-    GlobalConfiguration.showFailureAlerts(true);
     GlobalConfiguration.showFailureAlerts(true);
     GlobalConfiguration.onFailure((obj, message) => alert(message));
     GlobalConfiguration.onStartBusy(obj => Coalesce.Utilities.showBusy());

@@ -1,0 +1,109 @@
+
+.. _TSModelConfig:
+
+
+ViewModel Configuration
+-----------------------
+
+
+A crucial part of the generated TypeScript ViewModels that Coalesce creates for you is the hierarchical configuration system that allows coarse-grained or fine-grained control over their behaviors.
+
+Hierarchy
+.........
+
+The configuration system has four levels where configuration can be performed, structured as follows:
+
+Root Configuration
+    | :ts:`Coalesce.GlobalConfiguration`
+    |
+    
+    The root configuration contains all configuration properties which apply to both :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel`.
+
+Root ViewModel/ListViewModel Configuration
+    | :ts:`Coalesce.GlobalConfiguration.viewModel`
+    | :ts:`Coalesce.GlobalConfiguration.listViewModel`
+    |
+    
+    An additional two root configuration objects exist, one for :ref:`TypeScriptViewModel` and one for :ref:`TypeScriptListViewModel`. These configuration objects govern behavior that applies to either only ViewModels or only ListViewModels. Root configuration *can* be overridden using these objects, although the practicality of doing so is dubious.
+
+Class Configuration
+    | :ts:`ViewModels.<ClassName>.coalesceConfig`
+    | :ts:`ListViewModels.<ClassName>List.coalesceConfig`
+    | 
+
+    Each generated class - both :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel` - has a static property named :ts:`coalesceConfig` that controls behavior for all instances of that class.
+
+Instance Configuration
+    | :ts:`instance.coalesceConfig`
+    |
+
+    Each instance of a :ref:`TypeScriptViewModel` or :ref:`TypeScriptListViewModel` also has a :ts:`coalesceConfig` property that controls behaviors for that instance only.
+
+
+
+Evaluation
+..........
+
+All configuration properties are Knockout :ts:`ComputedObservable<T>` objects. These observables behave like any other observable - call them with no parameter to obtain the value, call with a parameter to set their value.
+
+Whenever a configuration property is read from, it first checks its own configuration object for the value of that property. If the explicit value for that configuration object is null, the parent's configuration will be checked for a value. This continues until either a value is found or the root configuration object is reached.
+
+When a configuration property is given a value, that value is established on that configuration object only. Any dependent configuration objects will not be modified, and if those dependent configuration objects already have a value for that property, their existing value will be used unless that value is later set to null.
+
+To obtain the raw value for a specific configuration property, call the :ts:`raw()` method on the observable: :ts:`model.coalesceConfig.autoSaveEnabled.raw()`.
+
+
+Available Properties & Defaults
+...............................
+
+The following configuration properties are available. Their default values are also listed.
+
+Root Configuration
+~~~~~~~~~~~~~~~~~~
+
+These properties are available to both ViewModelConfiguration and ListViewModelConfiguration.
+
+baseApiUrl - :ts:`"/api"`
+    The relative url where the API may be found. 
+
+baseViewUrl - :ts:`""`
+    The relative url where the admin views may be found.
+
+showFailureAlerts - :ts:`true`
+    Whether or not the callback specified for :ts:`onFailure` will be called or not.
+
+onFailure - :ts:`(obj, message) => alert(message)`
+    A callback to be called when a failure response is received from the server.
+
+onStartBusy - :ts:`obj => Coalesce.Utilities.showBusy()`
+    A callback to be called when an AJAX request begins.
+
+onFinishBusy - :ts:`obj => Coalesce.Utilities.hideBusy()`
+    A callback to be called when an AJAX request completes.
+
+ViewModelConfiguration
+~~~~~~~~~~~~~~~~~~
+
+autoSaveEnabled - :ts:`true`
+    Determines whether changes to a model will be automatically saved after :ts:`saveTimeoutMs` milliseconds have elapsed.
+
+autoSaveCollectionsEnabled - :ts:`true`
+    Determines whether or not changes to many-to-many collection properties will automatically trigger a save call to the server or not.
+
+saveTimeoutMs - :ts:`500`
+    Time to wait after a change is seen before auto-saving (if :ts:`autoSaveEnabled` is true). Acts as a debouncing timer for multiple simultaneous changes.
+
+showBusyWhenSaving - :ts:`false`
+    Whether to invoke :ts:`onStartBusy` and :ts:`onFinishBusy` during saves.
+
+loadResponseFromSaves - :ts:`true`
+    Whether or not to reload the ViewModel with the state of the object received from the server after a call to :ts:`.save()`.
+
+onLoadFromDto - :ts:`null`
+    An optional callback to be called when an object is loaded from a response from the server. Callback will be called after all properties on the ViewModel have been set from the server response.
+
+
+ListViewModelConfiguration
+~~~~~~~~~~~~~~~~~~
+
+    No special configuration is currently available for ListViewModels.

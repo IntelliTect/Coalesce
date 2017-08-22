@@ -217,10 +217,12 @@ If you wanted to get even simpler, you could simply set the :csharp:`out include
             - CEO
 
 
-Caveats
-.......
+.. _ExternalTypeIncludeTreeCaveats:
 
-One important point remains regarding :csharp:`IncludeTree` - it is not used to control the serialization of objects which are not mapped to the database. Objects of types that are not mapped to the database are always put into the DTOs when encountered, with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
+External Type Caveats
+.....................
+
+One important point remains regarding :csharp:`IncludeTree` - it is not used to control the serialization of objects which are not mapped to the database, known as :ref:`ExternalTypes`. External Types are always put into the DTOs when encountered (unless otherwise prevented by :ref:`DtoIncludesExcludesAttr` or :ref:`SecurityAttribute`), with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
 
 By not filtering unmapped properties, you as the developer don't need to account for them in every place throughout your application where they appear - instead, they 'just work' and show up on the client as expected.
 

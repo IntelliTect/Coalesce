@@ -46,7 +46,7 @@ Controlling Serialization
 -------------------------
 
 Include Tree
-...........
+............
 
 An important concept in controlling the output of Coalesce's API, :ref:`IncludeTree` is a representation of the structure of the object graph that should be sent to the client.
 

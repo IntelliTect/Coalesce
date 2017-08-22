@@ -36,11 +36,27 @@ Once you have built out a simple POCO data model, you can get started on the fun
 Coalesce includes a number of ways in which you can cutomize your data model. Cutomizations affect the generated API and the generated views.
 
 
+Properties
+~~~~~~~~~~
+
+Read :ref:`ModelProperties` for an outline of the different types of properties that you may place on your models and the code that Coalesce will generate for each of them.
+
+
+Attributes
+~~~~~~~~~~
+
+Coalesce provides a number of C# attributes that can be used to decorate your model classes and their properties in order to customize behavior, appearance, security, and more. Coalesce also supports a number of annotations from :csharp:`System.ComponentModel.DataAnnotations`.
+
+Read :ref:`ModelAttributes` to learn more.
+
+
+Interfaces
+~~~~~~~~~~
+
 TODO: INSERT LINKS TO THESE PAGES IN SMALL INTRO SECTIONS IN THIS DOC LIKE I DID WITH LOADING-AND-SERIALIZATION.RST
-    modeling/properties
-    modeling/attributes
     modeling/interfaces
     modeling/methods
+    modeling/external-type
 
 
 

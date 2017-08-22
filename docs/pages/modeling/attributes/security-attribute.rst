@@ -74,16 +74,16 @@ Example Usage
 
 .. code-block:: c#
 
-        [Edit(Roles = "Management", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
-        public class Employee
-        {
-            public int EmployeeId { get; set; }
+    [Edit(Roles = "Management", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
+    public class Employee
+    {
+        public int EmployeeId { get; set; }
 
-            [Edit("Payroll")]
-            public string LastFourSsn { get; set; }
-            
-            ...
-        }
+        [Edit("Payroll")]
+        public string LastFourSsn { get; set; }
+        
+        ...
+    }
 
 
 |

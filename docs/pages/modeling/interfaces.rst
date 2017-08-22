@@ -27,7 +27,7 @@ IBeforeSave
 
     .. code-block:: c#
 
-        public interface IBeforeSave<T, TContext> where TContext: DbContext
+        public interface IBeforeSave<T, TContext> where TContext : DbContext
         {
             ValidateResult<T> BeforeSave(T original, TContext db, ClaimsPrincipal user, string includes);
         }

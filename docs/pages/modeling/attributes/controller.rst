@@ -23,7 +23,7 @@ Example Usage
 
 
 Properties
----------
+----------
 
     :csharp:`public bool ApiRouted { get; set; } = true;`
         Determines whether or not a :csharp:`[Route]` annotation will be placed on the generated API controller. Set to :csharp:`false` to prevent emission of the :csharp:`[Route]` attribute.

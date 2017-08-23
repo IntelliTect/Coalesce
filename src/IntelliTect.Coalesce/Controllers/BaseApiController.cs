@@ -673,6 +673,13 @@ namespace IntelliTect.Coalesce.Controllers
             var manyToManyProperty = ClassViewModel.Properties.First(f => string.Compare(f.ManyToManyCollectionName, propertyName, true) == 0);
             if (manyToManyProperty != null && manyToManyProperty.Object != null)
             {
+                // Check security on the collection property that holds the many-to-many objects.
+                if (!manyToManyProperty.SecurityInfo.IsEditable(User))
+                {
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                    return new SaveResult<TDto>("Unauthorized");
+                }
+
                 string table = manyToManyProperty.Object.TableName;
                 string thisKeyName = manyToManyProperty.Object.Properties.First(f => f.PureType.Name == ClassViewModel.Name).ObjectIdProperty.ColumnName;
                 string otherKeyName = manyToManyProperty.Object.Properties.First(f => !f.IsPrimaryKey && f.IsId && f.ColumnName != thisKeyName).ColumnName;
@@ -681,11 +688,27 @@ namespace IntelliTect.Coalesce.Controllers
                 {
                     if (method == "Remove")
                     {
+                        // Check permissions for deleting the many-to-many objects.
+                        if (!manyToManyProperty.Object.SecurityInfo.IsDeleteAllowed(User))
+                        {
+                            Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                            return new SaveResult<TDto>("Unauthorized");
+                        }
                         string sql = "Delete from " + table + " where " + thisKeyName + " = {0} and " + otherKeyName + " = {1}";
                         Db.Database.ExecuteSqlCommand(sql, id, childId);
                     }
                     else if (method == "Add")
                     {
+                        // Check permissions for creating the many-to-many objects.
+                        if (!manyToManyProperty.Object.SecurityInfo.IsCreateAllowed(User))
+                        {
+                            Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                            return new SaveResult<TDto>("Unauthorized");
+                        }
+
+                        // TODO: (maybe?) Check if the user is allowed to read the objects on the other side of the relationship (otherKeyName).
+                        // This prevents an attack where the user just makes up foreign key values, hoping they're valid.
+
                         string sql = "Insert Into " + table + " (" + thisKeyName + ", " + otherKeyName + ") Values ({0}, {1})";
                         Db.Database.ExecuteSqlCommand(sql, id, childId);
                     }

@@ -403,7 +403,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     // Only copy the typings on a brand new project. Never attempt to update them, since the end user
                     // may want to update their libraries, get rid of some (well, you probably can't), or update versions.
                     CopyToDestination(
-                        fileName: "tsd.d.ts",
+                        fileName: "index.d.ts",
                         sourcePath: "Templates/typings",
                         destinationPath: Path.Combine(WebProject.ProjectFullPath, "typings"));
 
@@ -481,7 +481,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     "gulpfile.js",
                     "package.json",
                     "tsconfig.template.json",
-                    "tsd.json",
+                    "typings.json",
                 };
                 foreach (var fileName in configFiles)
                 {

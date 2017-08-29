@@ -14,9 +14,9 @@ Coalesce supports several types of DTOs:
 
 -  DTOs that are automatically generated for each POCO database object.
    These are controlled via :ref:`ModelAttributes` on the POCO.
--  DTOs that support the standard ViewModels.
 -  DTOs that are created with IClassDto and create unique ViewModels.
 -  DTOs based on database views.
+
 
 Automatically Generated DTOs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,18 +25,8 @@ Every POCO database class in Coalesce gets a DTO. These DTOs are used to
 shuttle data back and forth to the client. They are generated classes
 that have nullable versions of all the properties on the POCO class, and are the mechanism by which almost all the techniques described in :ref:`ControllingLoading` function.
 
-:ref:`DtoIncludesExcludesAttr` and the :ref:`Includes` infrastructure can be used to indicate which properties should be transferred to the client in which cases, and :ref:`IncludeTree` is used to dictate how these DTOs are constructed from POCOs populated from the database.
+:ref:`DtoIncludesExcludesAttr` and the :ref:`Includes` infrastructure can be used to indicate which properties should be transferred to the client in which cases, and :ref:`IncludeTree` is used to dictate how these DTOs are constructed from POCOs retrieved from the database.
 
-
-DTOs with Standard View Models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO: Dan fills this in.
-
-::
-
-
-        Example needed
 
 IClassDtos
 ~~~~~~~~~~
@@ -75,32 +65,37 @@ an IEnumerable. This is simply an indicator for Coalesce and does not
 impact the database. This may be replaced by other less obtrusive
 methods in the future.
 
-ListDataSource is supported from the POCO database object, but it
+ListDataSource is supported from the POCO database object, but is
 transferred to the DTO. All querying must be done on the original object
 and not the DTO since only fields in the database can be queried via
 Entity Framework.
 
-::
+    .. code-block:: c#
+
+        public class AppDbContext : DbContext
+        {
+            public DbSet<Case> Cases { get; set; }
+            public IEnumerable<CaseDto> CaseDtos { get; set; }
+        }
 
 
-        public IEnumerable<CaseDto> CaseDtos { get; set; }
+    .. code-block:: c#
 
-Methods are not yet supported on DTOs.
-
-::
-
-
-        public class CaseDto: IClassDto<Case, CaseDto>
+        public class CaseDto : IClassDto<Case, CaseDto>
         {
             [Key]
             public int CaseId { get; set; }
+
             public string Title { get; set; }
-            [ReadOnly(true)]
+
+            [Read]
             public string AssignedToName { get; set; }
+
             public void Update(Case obj, ClaimsPrincipal user, string includes)
             {
                 obj.Title = Title;
             }
+
             public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary<object, object> objects = null, IncludeTree tree = null)
             {
                 var dto = new CaseDto();
@@ -117,12 +112,6 @@ Methods are not yet supported on DTOs.
 Database Views
 ~~~~~~~~~~~~~~
 
-A view can manually be created in the database that will map to a
-regular POCO object. The typical approach is to create a POCO that has
-all the desired fields. Build an EF migration for this POCO, but don't
-apply it to the database. Replace the generated migration code with the
-code to generate/remove the view instead. This will all the view to be
-automatically created. This approach is ideal for situations where you
-want to filter at the database level on calculated fields. Be wary of
-unintentionally creating views that are read-only. This is fine, but the
-data will not be updatable like it is with a regular table based POCO.
+A view can manually be created in the database that will map to a regular POCO object. The typical approach is to create a POCO that has all the desired fields. Build an EF migration for this POCO, but don't apply it to the database. Replace the generated migration code with the :csharp:`migrationBuilder.Sql(...)` calls to generate/remove the view instead so that the view will exist for anyone who runs the migrations. This approach is ideal for situations where you want to filter at the database level on calculated fields.
+
+Read-only views are fine, but you'll want to annotate the class with the proper :ref:`SecurityAttributes` (deny edit, create, and delete) to ensure the generated code matches the available behavior as accurately as possible.

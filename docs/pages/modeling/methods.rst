@@ -42,7 +42,7 @@ You can return virtually anything from these methods:
         Any custom type you define may also be returned from a method. Corresponding TypeScript ViewModels will be created for these types. See :ref:`ExternalTypes`.
 
         .. warning::
-            When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your custom type (:ref:`ExternalTypes`), it will also generate ViewModels for the types of any of its properties, and so on down the tree. If something like :csharp:`System.Threading.Timer`, for example, is encountered as a property, these generated types will get out of hand extremely quickly.
+            When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your :ref:`ExternalTypes`, it will also generate ViewModels for the types of any of its properties, and so on down the tree. If a type is encountered from the FCL or another package that your application uses, these generated types will get out of hand extremely quickly.
 
             Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier.
     :csharp:`IEnumerable<T>`

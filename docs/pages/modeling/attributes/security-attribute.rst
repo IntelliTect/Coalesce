@@ -1,5 +1,6 @@
 
 .. _SecurityAttribute:
+.. _SecurityAttributes:
 
 Security Attributes
 ===================

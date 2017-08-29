@@ -6,10 +6,7 @@ Intro to Modeling
 Overview
 --------
 
-Models are the core business objects of your application. More specifically, they
-are the fundamental representation of data in your application. The design of your
-models is very important. In `Entity Framework Core`_, data models are just
-Plain Old CLR Classes (POCOs).
+Models are the core business objects of your application - they serve as the fundamental representation of data in your application. The design of your models is very important. In `Entity Framework Core`_, data models are just Plain Old CLR Objects (POCOs).
 
 .. _Entity Framework Core:
 .. _EF Core:
@@ -27,13 +24,7 @@ Guidance on this topic is available in abundance in the `Entity Framework Core`_
 
 Don't worry about querying or saving data for now - Coalesce will provide a lot of that functionality for you. To get started, just build your POCOs and :csharp:`DbContext` classes.
 
-
-Customizing Your Data Model
----------------------------
-
-Once you have built out a simple POCO data model, you can get started on the fun part - customizing it.
-
-Coalesce includes a number of ways in which you can cutomize your data model. Cutomizations affect the generated API and the generated views.
+Before you start building, you are highly encouraged to read the sections below. The linked pages explain in greater detail what Coalesce will build for you for each part of your data model.
 
 
 Properties
@@ -53,35 +44,12 @@ Read :ref:`ModelAttributes` to learn more.
 Interfaces
 ~~~~~~~~~~
 
-TODO: INSERT LINKS TO THESE PAGES IN SMALL INTRO SECTIONS IN THIS DOC LIKE I DID WITH LOADING-AND-SERIALIZATION.RST
-    modeling/interfaces
-    modeling/methods
-    modeling/external-type
+There are several interfaces in Coalesce that you may implement in your models to add custom behavior. Read :ref:`ModelInterfaces` to learn about the different model interfaces and what they can offer.
 
 
+Methods
+~~~~~~~
 
-| 
-
-**The generated admin views have documentation pages that include all
-view model documentation specific to each class.**
-
-
-Validation
-^^^^^^^^^^
-
-Validation is handled using standard MVC attributes. These attributes
-are not only enforced on the server side in the database, but are also
-passed to the client and enforced using the KnockoutValidation_ library.
-There is also flexible annotation-based validation for the client side.
-Full validation documentation is in the Annotations section
-
-| 
+You can place both static and interface methods on your model classes. Any public methods will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read :ref:`ModelMethods` to learn more.
 
 
-| 
-
-Security
-^^^^^^^^
-
-Security is handled via attributes on the class, properties, and
-methods. See :ref:`Security` for more information.

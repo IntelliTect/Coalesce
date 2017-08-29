@@ -27,13 +27,21 @@ Welcome to Coalesce's documentation!
 
 .. toctree::
     :maxdepth: 3
+    :caption: Client TypeScript
+
+    pages/client/view-model
+    pages/client/list-view-model
+    pages/client/model-config
+
+.. toctree::
+    :maxdepth: 3
     :caption: Data Loading & Serialization
 
     pages/loading-and-serialization/index
-    pages/loading-and-serialization/dtos
     pages/loading-and-serialization/data-sources
     pages/loading-and-serialization/include-tree
     pages/loading-and-serialization/includes
+    pages/loading-and-serialization/dtos
 
 .. toctree::
     :maxdepth: 2

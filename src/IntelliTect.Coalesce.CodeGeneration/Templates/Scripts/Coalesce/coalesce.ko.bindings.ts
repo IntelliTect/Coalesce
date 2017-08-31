@@ -183,8 +183,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
         var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName'));
-        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName'));
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textFieldName'));
         var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
@@ -536,8 +536,11 @@ ko.bindingHandlers.datePicker = {
 
 
 ko.bindingHandlers.saveImmediately = {
-    init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        if (!viewModel.coalesceConfig) return;
+    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel<any>, bindingContext) {
+        if (!viewModel.coalesceConfig) {
+            console.error("saveImmediately binding was used in a context where $data is not a Coalesce.BaseViewModel<>");
+            return;
+        }
 
         // Set up to save immediately when the cursor enters and return to a regular state when it leaves.
         var oldValue;
@@ -553,14 +556,19 @@ ko.bindingHandlers.saveImmediately = {
 
 // Delays the save until the cursor leaves the field even if there is a value change.
 ko.bindingHandlers.delaySave = {
-    init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel<any>, bindingContext) {
+        if (!viewModel.coalesceConfig) {
+            console.error("delaySave binding was used in a context where $data is not a Coalesce.BaseViewModel<>");
+            return;
+        }
+
         // Set up to not save immediately when the cursor enters and return to a regular state when it leaves.
         $(element).on("focus", function () {
-            viewModel.isSavingAutomatically = false;
+            viewModel.coalesceConfig.autoSaveEnabled(false);
         });
         // Turn it back on when the cursor leaves.
         $(element).on("blur", function () {
-            viewModel.isSavingAutomatically = true;
+            viewModel.coalesceConfig.autoSaveEnabled(true);
             // Save if there were changes.
             if (viewModel.isDirty() && !viewModel.isSaving()) {
                 viewModel.save();

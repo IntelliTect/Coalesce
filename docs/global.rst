@@ -9,6 +9,9 @@
 .. role:: ts(code)
    :language: typescript
 
+.. role:: html(code)
+   :language: html
+
 
 .. role:: ctor
     :class: ctor-param

@@ -250,9 +250,13 @@ module @moduleName {
         @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         @:/** Presents a series of input boxes to call the server method (@method.Name) */
         @:public @method.JsVariableUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            @:var $promptVal: string = null;
         @foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
         {
-            @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString($"prompt('{param.Name.ToProperCase()}')");
+            @:$promptVal = @($"prompt('{param.Name.ToProperCase()}')");
+            @:if ($promptVal === null) return;
+            @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString("$promptVal");
+            @:  
         }
         @foreach (var param in method.ClientParameters.Where(f => !f.ConvertsFromJsString))
         {

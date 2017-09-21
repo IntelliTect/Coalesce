@@ -74,8 +74,20 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             string xmlDocs = symbol.GetDocumentationCommentXml();
             if (xmlDocs.Length > 0)
             {
-                xmlDocumentation.LoadXml(xmlDocs);
-                returnValue = xmlDocumentation.SelectSingleNode("/member/summary").InnerText.Trim();
+                try
+                {
+                    xmlDocumentation.LoadXml(xmlDocs);
+                    returnValue = xmlDocumentation.SelectSingleNode("/member/summary").InnerText.Trim();
+                }
+                catch (Exception ex)
+                {
+                    // Non-critical error. Write it out and ignore.
+                    // Usually this is because of a badly-formed XML comment in the source code.
+                    Console.Error.WriteLine($"Error trying to parse XML Comments for symbol {symbol.ToDisplayString()}:");
+                    Console.Error.WriteLine(xmlDocs);
+                    // The full exception isn't really important. Usually the error will be an XML comment inside of xmlDocs.
+                    //Console.Error.WriteLine(ex);
+                }
             }
 
             return returnValue;

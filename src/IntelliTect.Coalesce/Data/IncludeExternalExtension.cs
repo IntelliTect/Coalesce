@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Linq.Dynamic;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -93,7 +93,10 @@ namespace IntelliTect.Coalesce.Data
                 {
                     // Look up object by ID field and ID value.
                     //object objectValue = list.Where($"{propViewModel.ObjectIdProperty.Name} = {idValue}").FirstOrDefault();
-                    object objectValue = list.Where($"{propViewModel.PureType.ClassViewModel.PrimaryKey.Name} = {idValue}").FirstOrDefault();
+                    object objectValue = list
+                        .AsQueryable()
+                        .Where($"{propViewModel.PureType.ClassViewModel.PrimaryKey.Name} = {idValue}")
+                        .FirstOrDefault();
                     // Set the value.
                     propViewModel.Wrapper.PropertyInfo.SetValue(obj, objectValue);
                 }

@@ -3,7 +3,7 @@
     <Description>IntelliTect.Coalesce.CodeGeneration Class Library</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>intelliTect</Authors>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net462</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce.CodeGeneration</AssemblyName>
     <PackageId>IntelliTect.Coalesce.CodeGeneration</PackageId>
@@ -69,16 +69,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="gitlink" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
+    <!--<PackageReference Include="Microsoft.CSharp" Version="4.3.0" />-->
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.WebEncoders.Core" Version="1.0.0-rc1-final" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="1.1.3" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.5.24" />
   </ItemGroup>

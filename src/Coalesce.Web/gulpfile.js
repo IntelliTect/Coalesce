@@ -207,7 +207,7 @@ gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeG
 gulp.task('coalesce:build', shell.task([
         //'if exist "%temp%/CoalesceExe" rmdir "%temp%/CoalesceExe" /s /q',
         'dotnet msbuild /t:restore /v:q "../IntelliTect.Coalesce.Cli"',
-        'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f net46'
+        'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f net462'
     ],{ verbose: true }
 ));
 

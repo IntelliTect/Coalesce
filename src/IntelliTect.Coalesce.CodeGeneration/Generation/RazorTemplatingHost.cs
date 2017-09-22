@@ -3,11 +3,13 @@
 
 using System;
 using Microsoft.AspNetCore.Razor;
-using Microsoft.AspNetCore.Razor.CodeGenerators;
+using Microsoft.AspNetCore.Razor.Language;
+using System.IO;
+using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
-{ 
-    internal class RazorTemplatingHost : RazorEngineHost
+{
+    internal class CoalesceRazorTemplateEngine : RazorTemplateEngine
     {
         private static readonly string[] _defaultNamespaces = new[]
         {
@@ -17,21 +19,27 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             "System.Dynamic",
             "Microsoft.VisualStudio.Web.CodeGeneration",
             "Microsoft.VisualStudio.Web.CodeGeneration.Templating",
+            "IntelliTect.Coalesce.Templating",
         };
 
-        public RazorTemplatingHost(Type baseType)
-            : base(new CSharpRazorCodeLanguage())
+        public CoalesceRazorTemplateEngine(RazorEngine engine, RazorProject project) : base(engine, project)
         {
-            if (baseType == null)
-            {
-                throw new ArgumentNullException(nameof(baseType));
-            }
+            Options.DefaultImports = GetDefaultImports();
+        }
 
-            DefaultBaseClass = baseType.FullName;
-
-            foreach (var ns in _defaultNamespaces)
+        private static RazorSourceDocument GetDefaultImports()
+        {
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
             {
-                NamespaceImports.Add(ns);
+                foreach (var ns in _defaultNamespaces)
+                {
+                    writer.WriteLine($"@using {ns}");
+                }
+                writer.Flush();
+
+                stream.Position = 0;
+                return RazorSourceDocument.ReadFrom(stream, fileName: null, encoding: Encoding.UTF8);
             }
         }
     }

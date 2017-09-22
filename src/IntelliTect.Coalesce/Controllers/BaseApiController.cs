@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.DataAnnotations;
@@ -208,11 +208,11 @@ namespace IntelliTect.Coalesce.Controllers
                 var result3 = result2.Where(f => BeforeGet(f));
 
                 var tree = result.GetIncludeTree();
-                IEnumerable<TDto> result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes, tree)).ToList();
+                var result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes, tree)).ToList();
 
                 if (listParameters.FieldList.Any())
                 {
-                    return new ListResult(result4.ToList().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
+                    return new ListResult(result4.AsQueryable().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
                         page, totalCount, pageSize);
                 }
                 return new ListResult(result4, page, totalCount, pageSize);

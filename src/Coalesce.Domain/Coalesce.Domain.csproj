@@ -3,8 +3,7 @@
     <Description>Coalesce.Domain Class Library</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>IntelliTect</Authors>
-    <TargetFramework>net46</TargetFramework>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <TargetFramework>netcoreapp20</TargetFramework>
     <AssemblyName>Coalesce.Domain</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>Coalesce.Domain</PackageId>
@@ -23,9 +22,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GenFu" Version="1.2.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />

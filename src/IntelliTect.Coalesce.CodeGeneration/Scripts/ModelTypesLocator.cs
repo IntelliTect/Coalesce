@@ -46,9 +46,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 throw new FileNotFoundException($"Couldn't find project in workspace with project file name {projectFileName}");
             }
 
-            return _compilation = project
-                .AddMetadataReferences(_projectContext.CompilationAssemblies.Select(rr => MetadataReference.CreateFromFile(rr.ResolvedPath)))
+            _compilation = project
+                .WithMetadataReferences(_projectContext.GetMetadataReferences())
+                //.WithMetadataReferences(_projectContext.CompilationAssemblies.Select(rr => MetadataReference.CreateFromFile(rr.ResolvedPath)))
                 .GetCompilationAsync().Result;
+
+            var diagnostics = _compilation.GetDiagnostics();
+            Console.WriteLine(diagnostics);
+
+            return _compilation;
         }
 
         public IEnumerable<INamedTypeSymbol> GetAllTypes()
@@ -138,11 +144,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             {
                 if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
                 {
-                    // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
-                    //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
-                    //     Therefore we must ignore an empty error message.
-                    Debug.WriteLine(e.Diagnostic.Message);
-                    if (e.Diagnostic.Message.EndsWith(".csproj'", StringComparison.OrdinalIgnoreCase) == false)
+                    
+                       // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
+                       //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
+                       //     Therefore we must ignore an empty error message.
+                       Debug.WriteLine(e.Diagnostic.Message);
+                    if (!e.Diagnostic.Message.Contains(
+                        "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
                     {
                         throw new InvalidProjectFileException(e.Diagnostic.Message);
                     }

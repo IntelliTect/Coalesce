@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}"
 EndProject
@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
-		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}"
@@ -112,5 +111,8 @@ Global
 		{1E015AC9-1537-4078-9167-B5C49A1C7DEE} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
 		{06AD3635-FFFE-4254-80EB-F3F3424A8460} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
 		{3B393517-9C91-4432-B9D0-F48488767B8F} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {00AED75F-9188-45D1-9D31-5486D4464AF2}
 	EndGlobalSection
 EndGlobal

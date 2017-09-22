@@ -5,7 +5,7 @@ using IntelliTect.Coalesce.Helpers.IncludeTree;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using System.Linq.Dynamic;
+using System.Linq.Dynamic.Core;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Coalesce.Web.Models;
@@ -93,7 +93,7 @@ namespace Coalesce.Web.Models
             var propValCaseProducts = obj.CaseProducts;
             if (propValCaseProducts != null && (tree == null || tree[nameof(newObject.CaseProducts)] != null))
             {
-                newObject.CaseProducts = propValCaseProducts.OrderBy("CaseProductId ASC").Select(f => CaseProductDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CaseProducts)])).ToList();
+                newObject.CaseProducts = propValCaseProducts.AsQueryable().OrderBy("CaseProductId ASC").ToList().Select(f => CaseProductDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CaseProducts)])).ToList();
             }
             else if (propValCaseProducts == null && tree?[nameof(newObject.CaseProducts)] != null)
             {

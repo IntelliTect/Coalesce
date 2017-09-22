@@ -5,7 +5,7 @@ using IntelliTect.Coalesce.Helpers.IncludeTree;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using System.Linq.Dynamic;
+using System.Linq.Dynamic.Core;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Coalesce.Web.Models;

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.ProjectModel.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Common
 {

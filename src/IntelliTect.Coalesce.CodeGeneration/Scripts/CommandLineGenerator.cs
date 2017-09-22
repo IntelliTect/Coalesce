@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
-using Microsoft.Extensions.ProjectModel;
 using IntelliTect.Coalesce.CodeGeneration.Common;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts

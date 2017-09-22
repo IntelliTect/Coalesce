@@ -14,8 +14,6 @@ using IntelliTect.Coalesce.Validation;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.Extensions.ProjectModel;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 

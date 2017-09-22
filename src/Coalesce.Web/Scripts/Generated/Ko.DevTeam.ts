@@ -34,7 +34,7 @@ module ViewModels {
         public coalesceConfig: Coalesce.ViewModelConfiguration<DevTeam>
             = new Coalesce.ViewModelConfiguration<DevTeam>(DevTeam.coalesceConfig);
     
-        // Observables
+
         public devTeamId: KnockoutObservable<number> = ko.observable(null);
         public name: KnockoutObservable<string> = ko.observable(null);
 

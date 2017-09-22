@@ -1013,7 +1013,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
                     if (defaultOrderBy != null)
                     {
-                        sb.Append($".OrderBy(\"{defaultOrderBy}\")");
+                        sb.Append($".AsQueryable().OrderBy(\"{defaultOrderBy}\").ToList()");
                     }
 
                     sb.Append($".Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();");

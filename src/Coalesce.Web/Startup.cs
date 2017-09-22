@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System;
 using System.Linq;
 using IntelliTect.Coalesce.Mapping;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Coalesce.Web
 {
@@ -49,6 +50,13 @@ namespace Coalesce.Web
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
 
+            services.AddAuthentication(DemoMiddleware.AuthenticationScheme)
+                .AddCookie(DemoMiddleware.AuthenticationScheme, options => {
+                    options.AccessDeniedPath = "/Account/AccessDenied/";
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/LogOff";
+                });
+
             ReflectionRepository.AddContext<AppDbContext>();
 
             RoleMapping.Add("Admin", "S-1-5-4");  // Interactive user.
@@ -68,14 +76,7 @@ namespace Coalesce.Web
             app.UseDeveloperExceptionPage();
 
             // *** DEMO ONLY ***
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                AuthenticationScheme = DemoMiddleware.AuthenticationScheme,
-                LoginPath = "/Account/Login/",
-                AccessDeniedPath = "/Account/AccessDenied/",
-                AutomaticAuthenticate = true,
-                AutomaticChallenge = true
-            });
+            app.UseAuthentication();
             app.UseDemoMiddleware();
 
             app.UseMvc(routes =>
@@ -97,7 +98,6 @@ namespace Coalesce.Web
             //    Mapper.AddMap(model.Type, Type.GetType($"{ns}.Models.{model.Type.Name}DtoGen"));
             //}
 
-            SampleData.Initialize(app.ApplicationServices.GetService<AppDbContext>());
         }
 
     }

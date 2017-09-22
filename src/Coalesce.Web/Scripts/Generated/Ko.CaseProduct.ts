@@ -34,7 +34,7 @@ module ViewModels {
         public coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
             = new Coalesce.ViewModelConfiguration<CaseProduct>(CaseProduct.coalesceConfig);
     
-        // Observables
+
         public caseProductId: KnockoutObservable<number> = ko.observable(null);
         public caseId: KnockoutObservable<number> = ko.observable(null);
         public case: KnockoutObservable<ViewModels.Case> = ko.observable(null);

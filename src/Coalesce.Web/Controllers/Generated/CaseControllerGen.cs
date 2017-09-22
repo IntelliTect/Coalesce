@@ -1,7 +1,6 @@
 using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.PlatformAbstractions;
 using Coalesce.Web;
 using Coalesce.Domain;
 using Coalesce.Domain.External;

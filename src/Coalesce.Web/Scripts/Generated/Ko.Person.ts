@@ -34,7 +34,7 @@ module ViewModels {
         public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
             = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
     
-        // Observables
+
         /** ID for the person object. */
         public personId: KnockoutObservable<number> = ko.observable(null);
         /** Title of the person, Mr. Mrs, etc. */
@@ -213,7 +213,11 @@ module ViewModels {
         public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         /** Presents a series of input boxes to call the server method (Rename) */
         public renameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            var addition: String = prompt('Addition');
+            var $promptVal: string = null;
+            $promptVal = prompt('Addition');
+            if ($promptVal === null) return;
+            var addition: String = $promptVal;
+              
             return this.rename(addition, callback, reload);
         }
         /** Presents a modal with input boxes to call the server method (Rename). Depends on a modal existing with id #method-Rename. */
@@ -288,6 +292,7 @@ module ViewModels {
         public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         /** Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName) */
         public changeSpacesToDashesInNameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            var $promptVal: string = null;
             return this.changeSpacesToDashesInName(callback, reload);
         }
         /** Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName). Depends on a modal existing with id #method-ChangeSpacesToDashesInName. */

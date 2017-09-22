@@ -48,11 +48,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             _compilation = project
                 .WithMetadataReferences(_projectContext.GetMetadataReferences())
-                //.WithMetadataReferences(_projectContext.CompilationAssemblies.Select(rr => MetadataReference.CreateFromFile(rr.ResolvedPath)))
                 .GetCompilationAsync().Result;
 
+            /*
+            // Commented this out because it seems to be giving us lots of nonsense errors that aren't true,
+            // and that don't actually affect our output.
+
             var diagnostics = _compilation.GetDiagnostics();
-            Console.WriteLine(diagnostics);
+            var errors = diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error);
+            if (errors.Any())
+                throw new AggregateException(errors.Select(e => new Exception(e.ToString())));
+            //*/
 
             return _compilation;
         }

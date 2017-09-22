@@ -161,9 +161,9 @@
                 @foreach (var prop in vm.SearchProperties())
                 {
                     <tr>
-                        <th>@prop.Key</th>
-                        <td>@prop.Value.SearchIsSplitOnSpaces</td>
-                        <td>@prop.Value.SearchMethod.ToString().ToProperCase()</td>
+                        <th>@prop.Property</th>
+                        <td>@prop.Property.SearchIsSplitOnSpaces</td>
+                        <td>@prop.Property.SearchMethod.ToString().ToProperCase()</td>
                     </tr>
                 }
 

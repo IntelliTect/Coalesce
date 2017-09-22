@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Razor;
 using Microsoft.AspNetCore.Razor.Language;
 using System.IO;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
-    internal class CoalesceRazorTemplateEngine : RazorTemplateEngine
+    internal class CoalesceRazorTemplateEngine : MvcRazorTemplateEngine
     {
         private static readonly string[] _defaultNamespaces = new[]
         {

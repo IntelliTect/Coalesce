@@ -68,17 +68,17 @@
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="gitlink" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="gitlink" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Build" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
     <!--<PackageReference Include="Microsoft.CSharp" Version="4.3.0" />-->
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="1.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.1" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.WebEncoders.Core" Version="1.0.0-rc1-final" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.5.24" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.8.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />

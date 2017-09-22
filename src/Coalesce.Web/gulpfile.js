@@ -220,3 +220,12 @@ gulp.task('coalesce', ['coalesce:build'], shell.task
     ],
     { verbose: true }
 ));
+
+
+gulp.task('coalesce:debug', ['coalesce:build'], shell.task
+    ([
+        '"%temp%/CoalesceExe/IntelliTect.Coalesce.Cli.exe" ' +
+        '-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web --debug'
+    ],
+    { verbose: true }
+    ));

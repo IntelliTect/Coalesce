@@ -13,9 +13,9 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using NuGet.Frameworks;
 using System.Text;
-using Microsoft.Extensions.ProjectModel.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Common;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Common
 {

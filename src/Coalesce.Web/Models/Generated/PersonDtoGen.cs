@@ -5,7 +5,7 @@ using IntelliTect.Coalesce.Helpers.IncludeTree;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using System.Linq.Dynamic;
+using System.Linq.Dynamic.Core;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Coalesce.Web.Models;
@@ -87,7 +87,7 @@ namespace Coalesce.Web.Models
             var propValCasesAssigned = obj.CasesAssigned;
             if (propValCasesAssigned != null && (tree == null || tree[nameof(newObject.CasesAssigned)] != null))
             {
-                newObject.CasesAssigned = propValCasesAssigned.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesAssigned)])).ToList();
+                newObject.CasesAssigned = propValCasesAssigned.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesAssigned)])).ToList();
             }
             else if (propValCasesAssigned == null && tree?[nameof(newObject.CasesAssigned)] != null)
             {
@@ -97,7 +97,7 @@ namespace Coalesce.Web.Models
             var propValCasesReported = obj.CasesReported;
             if (propValCasesReported != null && (tree == null || tree[nameof(newObject.CasesReported)] != null))
             {
-                newObject.CasesReported = propValCasesReported.OrderBy("CaseKey ASC").Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesReported)])).ToList();
+                newObject.CasesReported = propValCasesReported.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => CaseDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CasesReported)])).ToList();
             }
             else if (propValCasesReported == null && tree?[nameof(newObject.CasesReported)] != null)
             {

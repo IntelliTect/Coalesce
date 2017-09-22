@@ -2,8 +2,10 @@
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.Templating;
+using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Razor;
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
@@ -42,8 +44,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         private CoalesceTemplate GetCompiledTemplate(string path, string content)
         {
             RazorTemplateEngine engine = new CoalesceRazorTemplateEngine(
-                RazorEngine.Create(options => options
-                    .SetBaseType(nameof(CoalesceTemplate))
+                RazorEngine.Create(options => {
+                    //RazorExtensions.Register(options);
+                    options
+                        .AddDirective(InheritsDirective.Directive)
+                        .SetBaseType(nameof(CoalesceTemplate));
+                }
                 ),
                 RazorProject.Create(Path.GetDirectoryName(path))
             ); 

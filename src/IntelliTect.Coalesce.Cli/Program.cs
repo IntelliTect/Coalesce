@@ -1,9 +1,9 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Common;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.ProjectModel;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace IntelliTect.Coalesce.Cli
@@ -16,6 +16,24 @@ namespace IntelliTect.Coalesce.Cli
             {
                 Name = "Coalesce"
             };
+
+#if DEBUG
+            if (args.Contains("--debug", StringComparer.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"Attach a debugger to processID: {System.Diagnostics.Process.GetCurrentProcess().Id}. Waiting...");
+                var waitStep = 10;
+                for (int i = 120; i > 0; i-= waitStep)
+                {
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        Console.WriteLine("Debugger attached.");
+                        break;
+                    }
+                    if (i % 10 == 0) Console.WriteLine($"Waiting {i}...");
+                    System.Threading.Thread.Sleep(1000 * waitStep);
+                }
+            }
+#endif
 
             app.HelpOption("-h|--help");
             var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);

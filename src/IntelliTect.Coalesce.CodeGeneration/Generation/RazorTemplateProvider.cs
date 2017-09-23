@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Common;
+﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Common;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.Templating;
@@ -81,7 +82,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
-            var references = _projectContext.GetMetadataReferences();
+            var references = _projectContext.GetTemplateMetadataReferences();
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,

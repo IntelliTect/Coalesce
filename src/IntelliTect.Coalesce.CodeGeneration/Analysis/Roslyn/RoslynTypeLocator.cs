@@ -12,17 +12,20 @@ using Microsoft.Build.Exceptions;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition.Wrappers;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Scripts
+namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
-    public class ModelTypesLocator
+    public class RoslynTypeLocator : TypeLocator
     {
         private Workspace _projectWorkspace;
-        private ProjectContext _projectContext;
+        private RoslynProjectContext _projectContext;
 
         private Compilation _compilation;
 
-        public ModelTypesLocator(Workspace projectWorkspace, ProjectContext projectContext)
+        public RoslynTypeLocator(Workspace projectWorkspace, RoslynProjectContext projectContext)
         {
             if (projectWorkspace == null)
             {
@@ -65,7 +68,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
         public IEnumerable<INamedTypeSymbol> GetAllTypes()
         {
-            return RoslynUtilities.GetDirectTypesInCompilation(GetProjectCompilation());
+            var compilation = GetProjectCompilation();
+            if (compilation == null)
+            {
+                throw new ArgumentNullException(nameof(compilation));
+            }
+
+            var types = new List<INamedTypeSymbol>();
+            void CollectTypes(INamespaceSymbol ns)
+            {
+                types.AddRange(ns.GetTypeMembers());
+
+                foreach (var nestedNs in ns.GetNamespaceMembers())
+                {
+                    CollectTypes(nestedNs);
+                }
+            }
+
+            CollectTypes(compilation.Assembly.GlobalNamespace);
+            return types;
         }
 
         /*
@@ -143,7 +164,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
         }
 
-        public static ModelTypesLocator FromProjectContext(ProjectContext project)
+        public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
         {
             var workspace = MSBuildWorkspace.Create();
             workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
@@ -167,7 +188,37 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
             //var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
 
-            return new ModelTypesLocator(workspace, project);
+            return new RoslynTypeLocator(workspace, project);
+        }
+
+        public override TypeViewModel FindType(string typeName, bool throwWhenNotFound = true)
+        {
+            if (string.IsNullOrEmpty(typeName))
+            {
+                throw new ArgumentException($"Please provide a valid {nameof(typeName)}", nameof(typeName));
+            }
+
+            var candidateModelTypes = GetType(typeName).ToList();
+
+            int count = candidateModelTypes.Count;
+            if (count == 0)
+            {
+                if (throwWhenNotFound)
+                {
+                    throw new ArgumentException(string.Format("A type with the name {0} does not exist", typeName));
+                }
+                return null;
+            }
+
+            if (count > 1)
+            {
+                throw new ArgumentException(string.Format(
+                    "Multiple types matching the name {0} exist:{1}, please use a fully qualified name",
+                    typeName,
+                    string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
+            }
+
+            return new TypeViewModel(new SymbolTypeWrapper(candidateModelTypes.First()));
         }
 
         private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>

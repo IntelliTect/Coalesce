@@ -10,3 +10,4 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("70a4dc17-0f5d-4ff0-8d9c-ecdcbb565203")]
+[assembly: InternalsVisibleTo("IntelliTect.Coalesce.CodeGeneration")]

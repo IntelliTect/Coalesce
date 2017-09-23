@@ -1,6 +1,10 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Common;
+﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection;
+using IntelliTect.Coalesce.CodeGeneration.Common;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Linq;
@@ -35,7 +39,52 @@ namespace IntelliTect.Coalesce.Cli
             }
 #endif
 
+            Console.WriteLine("Starting Coalesce");
+            Console.WriteLine("https://github.com/IntelliTect/Coalesce");
+            Console.WriteLine();
+
             app.HelpOption("-h|--help");
+            var configFile = app.Argument("[config]", "coalesce.json configuration file that will drive generation.");
+
+            string configFilePath = null;
+            if (!string.IsNullOrWhiteSpace(configFile.Value))
+            {
+                configFilePath = configFile.Value;
+                if (!File.Exists(configFilePath))
+                {
+                    throw new FileNotFoundException("Couldn't find Coalesce configuration file", Path.GetFullPath(configFilePath));
+                }
+            }
+            else
+            {
+                var curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+                const string configFileName = "coalesce.json";
+                while (curDirectory != null)
+                {
+                    var matchingFiles = curDirectory.EnumerateFiles(configFileName);
+                    if (matchingFiles.Any())
+                    {
+                        configFilePath = matchingFiles.First().FullName;
+                        break;
+                    }
+                    curDirectory = curDirectory.Parent;
+                }
+            }
+            if (configFilePath == null)
+            {
+                throw new FileNotFoundException("Couldn't find a coalesce.json configuration file");
+            }
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(configFilePath));
+
+            var configRoot = new ConfigurationBuilder()
+                .AddJsonFile(configFilePath)
+                .Build();
+
+            var config = configRoot.Get<CoalesceConfiguration>();
+
+
+
+
             var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);
             var force = app.Option("-f|--force", "Use this option to overwrite existing files", CommandOptionType.SingleValue);
             var relativeFolderPath = app.Option("-outDir|--relativeFolderPath", "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder", CommandOptionType.SingleValue);
@@ -49,9 +98,6 @@ namespace IntelliTect.Coalesce.Cli
 
             app.OnExecute(async () =>
             {
-                Console.WriteLine("Staring Coalesce");
-                Console.WriteLine("https://github.com/IntelliTect/Coalesce");
-                Console.WriteLine();
 
                 var model = new CommandLineGeneratorModel
                 {
@@ -67,11 +113,11 @@ namespace IntelliTect.Coalesce.Cli
 
                 Console.WriteLine("Loading Projects");
                 // Find the web project
-                ProjectContext webContext = MsBuildProjectContextBuilder.CreateContext(webProject.Value());
+                ProjectContext webContext = ReflectionProjectContext.CreateContext(config.WebProject);
                 if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
 
                 // Find the data project
-                ProjectContext dataContext = MsBuildProjectContextBuilder.CreateContext(dataProject.Value());
+                ProjectContext dataContext = ReflectionProjectContext.CreateContext(config.DataProject);
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
                 Console.WriteLine("");

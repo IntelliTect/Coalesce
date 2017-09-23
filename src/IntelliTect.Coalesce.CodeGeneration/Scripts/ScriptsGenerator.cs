@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Threading;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 {
@@ -49,30 +50,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
                 else
                 {
-                    var startupSymbol = ValidationUtil.ValidateType("Startup", "", WebProject.TypeLocator, throwWhenNotFound: false);
-                    targetNamespace = startupSymbol.ContainingNamespace.ToDisplayString();
+                    var startupSymbol = WebProject.TypeLocator.FindType("Startup", throwWhenNotFound: false);
+                    targetNamespace = startupSymbol.FullNamespace;
                 }
                 Console.WriteLine($"Namespace: {targetNamespace}");
 
-                var dataContextSymbol = ValidationUtil.ValidateType(model.DataContextClass, "dataContext", DataProject.TypeLocator, throwWhenNotFound: false);
+                var dataContextType = DataProject.TypeLocator.FindType(model.DataContextClass, throwWhenNotFound: false);
 
                 // var assembly = DataProject.TypeLocator.GetAssembly();
 
                 if (model.ValidateOnly)
                 {
-                    Console.WriteLine($"Validating model for: {dataContextSymbol.ToDisplayString()}");
+                    Console.WriteLine($"Validating model for: {dataContextType.FullName}");
                 }
                 else
                 {
-                    Console.WriteLine($"Building scripts for: {dataContextSymbol.ToDisplayString()}");
+                    Console.WriteLine($"Building scripts for: {dataContextType.FullName}");
                 }
 
                 List<ClassViewModel> models = null;
                 try
                 {
                     models = ReflectionRepository
-                                    .AddContext(dataContextSymbol)
-                                    //.Where(m => m.PrimaryKey != null)
+                                    .AddContext(dataContextType)
                                     .ToList();
                 }
                 catch (Exception ex)
@@ -166,7 +166,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
                 else
                 {
-                    var contextInfo = new ContextInfo(dataContextSymbol.Name, targetNamespace);
+                    var contextInfo = new ContextInfo(dataContextType.Name, targetNamespace);
                     return GenerateScripts(model, models, contextInfo, targetNamespace);
                 }
             }

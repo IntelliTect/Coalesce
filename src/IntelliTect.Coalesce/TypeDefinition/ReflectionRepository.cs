@@ -159,6 +159,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return AddContext(context);
         }
 
+        public static List<ClassViewModel> AddContext(TypeViewModel t)
+        {
+            var context = new ClassViewModel(t);
+            return AddContext(context);
+        }
+
+
         public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) // where T: AppDbContext
         {
             var context = new ClassViewModel(contextSymbol);

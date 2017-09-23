@@ -1,0 +1,14 @@
+{
+	webProject: {
+		projectFile: "../Coalesce - Copy/src/Coalesce.Web/Coalesce.Web.csproj",
+		build: {
+			args: "",
+		}
+	},
+	dataProject: {
+		projectFile: "../Coalesce - Copy/src/Coalesce.Domain/Coalesce.Domain.csproj",
+		build: {
+			args: "",
+		}
+	}
+}

@@ -14,8 +14,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base
     public abstract class ProjectContext
     {
 
-        public string ProjectFullPath { get; set; }
         public string ProjectFilePath { get; set; }
+
+        public string ProjectPath => Path.GetDirectoryName(ProjectFilePath);
+
+        public string ProjectFileName => Path.GetFileName(ProjectPath);
 
         public abstract TypeLocator TypeLocator { get; }
 

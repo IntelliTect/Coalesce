@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
 
         private System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var AppBasePath = Path.GetDirectoryName(_projectContext.AssemblyInfo.FullName);
+            var AppBasePath = Path.GetDirectoryName(_projectContext.AssemblyFileInfo.FullName);
             if (!Path.IsPathRooted(AppBasePath))
             {
                 AppBasePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), AppBasePath));
@@ -49,9 +49,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
             return null;
         }
 
+        private Assembly _assembly;
+        private Assembly GetAssembly()
+        {
+            var asmFile = _projectContext.AssemblyFileInfo;
+            if (!asmFile.Exists) return null;
+            return _assembly = asmFile == null ? null : Assembly.LoadFile(asmFile.FullName);
+        }
+
         public override TypeViewModel FindType(string typeName, bool throwWhenNotFound = true)
         {
-            var candidateModelTypes = _projectContext.Assembly.ExportedTypes
+            var assembly = GetAssembly();
+            if (assembly == null)
+                throw new FileNotFoundException($"Cannot locate type {typeName} - Assembly for project {_projectContext.ProjectFileName} is unavailable.");
+
+            var candidateModelTypes = assembly
+                .ExportedTypes
                 .Where(t => t.Name == typeName || t.FullName == typeName)
                 .ToList();
 

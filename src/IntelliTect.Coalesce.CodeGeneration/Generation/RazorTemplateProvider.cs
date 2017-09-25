@@ -132,7 +132,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             {
                 var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(result);
                 var root = syntaxTree.GetRoot();
-                root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.Create());
+                root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, new AdhocWorkspace());
                 result = root.ToFullString();
             }
 

@@ -63,4 +63,25 @@ CaseProduct  dB:True    Edit:True   Create:True    Delete:True
  CaseProductId    Int32            Int32           False False True  Case Product Id False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      False    Int32Id                                       
  CaseId           Int32            Int32           False False False Case Id         False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      True     Int32Id                                       
  Case             Case             Case            False False False Case            True  False False    False  False False False False  False False    ko.observable(null)       KnockoutObservable<ViewModels.Case>                ViewModels.Case False      False     False    CaseId                                        
- ProductId        Int32            Int32           False False False Product Id      False False False    False  True  False False False  False 
+ ProductId        Int32            Int32           False False False Product Id      False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      True     Int32Id                                       
+ Product          Product          Product         False False False Product         True  False False    False  False False False False  False False    ko.observable(null)       KnockoutObservable<ViewModels.Product>             ViewModels.Product False      False     False    ProductId                                     
+CaseDto  dB:False    Edit:True   Create:True    Delete:True
+ CaseId           Int32            Int32           False False True  Case Id         False False False    False  True  False False False  False False    ko.observable(null)       KnockoutObservable<number>                         number          False      True      False    Int32Id                                       
+ Title            String           String          False False False Title           True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
+ AssignedToName   String           String          False False False Assigned To Name True  False False    False  False False False False  True  False    ko.observable(null)       KnockoutObservable<string>                         String          False      False     False    StringId                                      
+-------- Enumerations --------
+Title
+	0 : Mr
+	1 : Ms
+	2 : Mrs
+	4 : Miss
+Gender
+	0 : NonSpecified
+	1 : Male
+	2 : Female
+Status
+	0 : Open
+	1 : InProgress
+	2 : Resolved
+	3 : ClosedNoSolution
+	4 : Cancelled

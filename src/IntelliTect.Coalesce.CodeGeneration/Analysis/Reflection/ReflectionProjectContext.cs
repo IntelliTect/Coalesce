@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Runtime.Versioning;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
 {
@@ -16,29 +17,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
     {
         public override TypeLocator TypeLocator => new ReflectionTypeLocator(this);
 
-        public FileInfo AssemblyInfo { get; private set; }
+        public FileInfo AssemblyFileInfo { get; private set; }
         public Assembly Assembly { get; private set; }
 
         public override ICollection<MetadataReference> GetTemplateMetadataReferences()
         {
+            // Force load required assemblies into the current appdomain.
+            // This was taken from commit 09c9be3, RazorTemplating.cs
+            // Load Microsoft.CSharp.RuntimeBinder
+            new Microsoft.CSharp.RuntimeBinder.RuntimeBinderException();
+            // Load Micosoft.AspNetCore.Html
+            new Microsoft.AspNetCore.Html.HtmlString("");
+
+
+
             var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Select(asm => asm.GetName());
 
-            var outputAssemblies = Directory
-                .EnumerateFiles(Path.GetDirectoryName(Assembly.Location))
-                .Where(f => new[] { "exe", "dll" }.Contains(Path.GetExtension(f)))
-                .Select(path => AssemblyName.GetAssemblyName(path));
+            var outputAssemblies = AssemblyFileInfo.Directory
+                .EnumerateFiles()
+                .Where(f => new[] { "exe", "dll" }.Contains(f.Extension))
+                .Select(f => AssemblyName.GetAssemblyName(f.FullName));
 
             return loadedAssemblies
                 .Concat(outputAssemblies)
-                // Get only one reference for each assembly.
+                // Get only one reference for each assembly. There may be duplicates because we pulled from
+                // both our current AppDomain and the target assembly's output dir.
                 .GroupBy(name => name.FullName)
                 .Select(group => group.First())
                 .Select(name => new Uri(name.CodeBase).LocalPath)
                 .Select(path => MetadataReference.CreateFromFile(path))
                 .Cast<MetadataReference>()
                 .ToList();
-
         }
 
 
@@ -46,12 +56,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
         {
             var assemblyInfo = ResolveAssembly(projectConfig);
             var projectFileAbsPath = Path.GetFullPath(projectConfig.ProjectFile);
+
+            //var asm = Assembly.ReflectionOnlyLoadFrom(assemblyInfo.FullName);
+            //var attrs2 = asm.GetCustomAttributes(typeof(System.Runtime.Versioning.TargetFrameworkAttribute), false);
+
+
             var context = new ReflectionProjectContext
             {
-                ProjectFullPath = Path.GetDirectoryName(projectFileAbsPath),
                 ProjectFilePath = projectFileAbsPath,
-                AssemblyInfo = assemblyInfo,
-                Assembly = Assembly.LoadFile(assemblyInfo.FullName)
+                AssemblyFileInfo = assemblyInfo,
             };
 
 
@@ -80,6 +93,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
                     args = new[]
                     {
                         projectConfig.ProjectFile,
+                        "/nologo",
                         $"-o \"{projectConfig.Build.Output}\"",
                         "-f netcoreapp20"
                     };
@@ -87,22 +101,30 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
                 else
                 {
                     args = new[] {
-                        projectConfig.ProjectFile
+                        projectConfig.ProjectFile,
+                        "/nologo",
                     };
                 }
 
                 Command command = Command.CreateDotNet("build", args);
-                Console.WriteLine($"Running {command.CommandName} {command.CommandArgs}");
+                Console.WriteLine($"dotnet {command.CommandArgs}");
 
                 var result = command
                     .CaptureStdOut()
-                    .OnOutputLine(Console.WriteLine)
+                    .OnOutputLine(l =>
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("    " + l);
+                        Console.ResetColor();
+                    })
                     .OnErrorLine(e => throw new Exception(e))
                     .Execute();
 
                 if (result.ExitCode != 0)
                 {
-                    throw new Exception($"{command.CommandName} exited with code {result.ExitCode}");
+                    //throw new Exception($"{command.CommandName} exited with code {result.ExitCode}");
+                    return null;
                 }
                 if (assemblyLocation == null)
                 {

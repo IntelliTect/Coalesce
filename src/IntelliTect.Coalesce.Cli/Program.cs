@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace IntelliTect.Coalesce.Cli
 {
@@ -39,7 +40,9 @@ namespace IntelliTect.Coalesce.Cli
             }
 #endif
 
-            Console.WriteLine("Starting Coalesce");
+            var attr = Assembly.GetEntryAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
+
+            Console.WriteLine($"Starting Coalesce, running under {attr.FrameworkName}");
             Console.WriteLine("https://github.com/IntelliTect/Coalesce");
             Console.WriteLine();
 
@@ -75,6 +78,8 @@ namespace IntelliTect.Coalesce.Cli
                 throw new FileNotFoundException("Couldn't find a coalesce.json configuration file");
             }
             Directory.SetCurrentDirectory(Path.GetDirectoryName(configFilePath));
+            Console.WriteLine($"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
+
 
             var configRoot = new ConfigurationBuilder()
                 .AddJsonFile(configFilePath)

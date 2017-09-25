@@ -3,7 +3,7 @@
     <Description>IntelliTect.Coalesce Class Library</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>intelliTect</Authors>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>IntelliTect.Coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce</PackageId>

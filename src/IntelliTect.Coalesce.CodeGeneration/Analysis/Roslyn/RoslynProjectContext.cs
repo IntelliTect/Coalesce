@@ -85,6 +85,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public static RoslynProjectContext CreateContext(string projectPath, string projectFile, string targetsLocation, string configuration = "Debug")
         {
+#if !NET462
+            throw new PlatformNotSupportedException("Roslyn-based project systems are only supported on full framework due to the need for MSBuildWorkspace");
+#endif
+
+#if NET462
             var errors = new List<string>();
             var tmpFile = Path.GetTempFileName();
 
@@ -141,7 +146,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 return new RoslynProjectContext
                 {
                     CompilationAssemblies = references,
-                    ProjectFullPath = projectPath,
                     ProjectFilePath = projectFile
                 };
             }
@@ -149,6 +153,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
             {
                 throw new InvalidOperationException("Failed to read the BuildContext information.", ex);
             }
+#endif
         }
 
         public ICollection<MetadataReference> GetMetadataReferences()

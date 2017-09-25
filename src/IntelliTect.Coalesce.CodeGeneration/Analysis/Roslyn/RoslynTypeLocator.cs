@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-#if NET451
-using System.ComponentModel;
-#endif
 using System.Linq;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.CodeAnalysis;
-using IntelliTect.Coalesce.CodeGeneration.Common;
-using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Build.Exceptions;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+
+#if NET462
+using Microsoft.CodeAnalysis.MSBuild;
+#endif
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
@@ -166,6 +163,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
         {
+#if !NET462
+            throw new PlatformNotSupportedException("Roslyn-based project systems are only supported on full framework due to the need for MSBuildWorkspace");
+#endif
+#if NET462
             var workspace = MSBuildWorkspace.Create();
             workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
             {
@@ -186,9 +187,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
             var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
 
-            //var workspace = new ProjectJsonWorkspace(project.ProjectDirectory);
-
             return new RoslynTypeLocator(workspace, project);
+#endif
         }
 
         public override TypeViewModel FindType(string typeName, bool throwWhenNotFound = true)

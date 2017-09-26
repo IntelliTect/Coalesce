@@ -118,11 +118,11 @@ namespace IntelliTect.Coalesce.Cli
 
                 Console.WriteLine("Loading Projects");
                 // Find the web project
-                ProjectContext webContext = ReflectionProjectContext.CreateContext(config.WebProject);
+                ProjectContext webContext = CodeGeneration.Analysis.Roslyn.RoslynProjectContext.CreateContext(config.WebProject);
                 if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
 
                 // Find the data project
-                ProjectContext dataContext = ReflectionProjectContext.CreateContext(config.DataProject);
+                ProjectContext dataContext = CodeGeneration.Analysis.Roslyn.RoslynProjectContext.CreateContext(config.DataProject);
                 if (dataContext == null) throw new ArgumentException("Data project was not found.");
 
                 Console.WriteLine("");

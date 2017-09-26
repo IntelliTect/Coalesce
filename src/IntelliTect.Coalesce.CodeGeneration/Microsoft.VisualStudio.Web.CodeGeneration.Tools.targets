@@ -27,7 +27,15 @@ Outputs the Project Information needed for CodeGeneration to a file.
             File="$(OutputFile)"  
             Lines="@(ReferencePath)"  
             Overwrite="true"  
-            Encoding="Unicode"/> 
+            Encoding="Unicode"/>
+
+
+    <!--<WriteLinesToFile
+            File="$(OutputFile)"
+            Lines="@(Compile)"
+            Overwrite="true"
+            Encoding="Unicode"/>-->
+    
 
   </Target>
 </Project>

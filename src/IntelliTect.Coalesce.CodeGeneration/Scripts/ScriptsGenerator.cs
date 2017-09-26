@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
 
         public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
         {
-            TemplateProvider = new RazorTemplateProvider(dataProject);
+            TemplateProvider = new RazorTemplateProvider(webProject);
 
             WebProject = webProject;
             DataProject = dataProject;

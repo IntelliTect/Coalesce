@@ -8,6 +8,7 @@ using System.IO;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 
 #if NET462
 using Microsoft.CodeAnalysis.MSBuild;
@@ -164,7 +165,28 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
         public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
         {
 #if !NET462
-            throw new PlatformNotSupportedException("Roslyn-based project systems are only supported on full framework due to the need for MSBuildWorkspace");
+
+            var workspace = new RoslynWorkspace(project.MsBuildProjectContext, project.MsBuildProjectContext.Configuration);
+            workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
+            {
+                if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+                {
+
+                    // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
+                    //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
+                    //     Therefore we must ignore an empty error message.
+                    Debug.WriteLine(e.Diagnostic.Message);
+                    if (!e.Diagnostic.Message.Contains(
+                        "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
+                    {
+                        throw new InvalidProjectFileException(e.Diagnostic.Message);
+                    }
+                }
+            };
+
+            //var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
+
+            return new RoslynTypeLocator(workspace, project);
 #endif
 #if NET462
             var workspace = MSBuildWorkspace.Create();

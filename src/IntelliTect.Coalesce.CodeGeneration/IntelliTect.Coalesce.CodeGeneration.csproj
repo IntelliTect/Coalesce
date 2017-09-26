@@ -20,7 +20,8 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Templates/**" />
-    <EmbeddedResource Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" />
+    <!--<EmbeddedResource Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets" />-->
+    <EmbeddedResource Include="Analysis/Roslyn/Microsoft/Targets/**" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
@@ -41,6 +42,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Core" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.8.0" />
   </ItemGroup>

@@ -20,76 +20,47 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
+using Microsoft.VisualStudio.Web.CodeGeneration.Tools;
+using Microsoft.VisualStudio.Web.CodeGeneration;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
     public class RoslynProjectContext : ProjectContext
     {
-        public List<ResolvedReference> CompilationAssemblies { get; set; }
-
-
         private TypeLocator _typeLocator;
         public override TypeLocator TypeLocator => _typeLocator = (_typeLocator ?? RoslynTypeLocator.FromProjectContext(this));
 
+        public IProjectContext MsBuildProjectContext { get; private set; }
+
         public override ICollection<MetadataReference> GetTemplateMetadataReferences() => GetMetadataReferences();
 
-        public static RoslynProjectContext CreateContext(string projectPath)
+        public static RoslynProjectContext CreateContext(ProjectConfiguration projectConfig)
         {
-            if (string.IsNullOrEmpty(projectPath))
-                throw new ArgumentException($"{nameof(projectPath)} is required.");
-
-            // Check for uri paths
-            if (projectPath.StartsWith("file:")) projectPath = new Uri(projectPath).LocalPath;
-
-            // Search up the folders from the path provided and find a project.json
-            var foundProjectJsonPath = "";
-            var foundProjectJsonFile = "";
-            var curDirectory = new DirectoryInfo(projectPath);
-            var rootDirectory = curDirectory.Root.FullName;
-            while (curDirectory.FullName != rootDirectory)
-            {
-                var files = curDirectory.EnumerateFiles("*.csproj", SearchOption.TopDirectoryOnly);
-                if (files.Count() == 1)
-                {
-                    foundProjectJsonPath = curDirectory.FullName;
-                    foundProjectJsonFile = files.Single().FullName;
-                    break;
-                }
-                curDirectory = curDirectory.Parent;
-            }
-            if (string.IsNullOrEmpty(foundProjectJsonPath)) throw new ArgumentException("Project path not found.");
+            var projectFile = projectConfig.ProjectFile;
+            var projectFileAbsPath = Path.GetFullPath(projectFile);
 
             var configuration = "Debug";
 #if RELEASE
             configuration = "Release";
 #endif
 
-            var tempFile = Path.GetTempFileName();
-            var assembly = Assembly.GetExecutingAssembly();
-            string sourceFile = assembly.GetName().Name + ".Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets";
-            var stream = assembly.GetManifestResourceStream(sourceFile);
-            var output = File.OpenWrite(tempFile);
-            stream.CopyTo(output);
-            output.Close();
-
             var context = CreateContext(
-                foundProjectJsonPath,
-                foundProjectJsonFile,
-                tempFile,
+                projectFileAbsPath,
+                projectFile,
                 configuration);
-
-            File.Delete(tempFile);
 
             return context;
         }
 
-        public static RoslynProjectContext CreateContext(string projectPath, string projectFile, string targetsLocation, string configuration = "Debug")
+        public static RoslynProjectContext CreateContext(string projectPath, string projectFile, string configuration = "Debug")
         {
-#if !NET462
-            throw new PlatformNotSupportedException("Roslyn-based project systems are only supported on full framework due to the need for MSBuildWorkspace");
-#endif
+//#if !NET462
+//            throw new PlatformNotSupportedException("Roslyn-based project systems are only supported on full framework due to the need for MSBuildWorkspace");
+//#endif
 
-#if NET462
+//#if NET462
             var errors = new List<string>();
             var tmpFile = Path.GetTempFileName();
 
@@ -108,52 +79,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 .Execute();
             if (result.ExitCode != 0) errors.Add($"Restore packages exited with code {result.ExitCode}");
 
-            if (!errors.Any())
-            {
-                Console.WriteLine($"   {Path.GetFileName(projectFile)}: Evaluating & building dependencies");
-                result = Command.CreateDotNet(
-                    "msbuild",
-                    new string[]
-                    {
-                        projectPath,
-                        "/nologo",
-                        "/v:q",
-                        "/t:EvaluateProjectInfoForCodeGeneration",
-                        $"/p:OutputFile={tmpFile};CustomBeforeMicrosoftCSharpTargets={targetsLocation};Configuration={configuration};BuildProjectReferences=true"
-                    })
-                    .OnOutputLine(Console.WriteLine)
-                    .OnErrorLine(e => { Console.Error.WriteLine(e); errors.Add(e); })
-                    .Execute();
-                if (result.ExitCode != 0) errors.Add($"Evaluating & building dependencies exited with code {result.ExitCode}");
-            }
 
-            if (errors.Any())
-            {
-                var errorMsg = $"Failed to get Project Context for {projectPath}: {string.Concat(errors.Select(e => $"{Environment.NewLine}    {e}"))}";
-                throw new InvalidOperationException(errorMsg);
-            }
 
-            try
-            {
-                var lines = File.ReadAllLines(tmpFile);
-                var references = new List<ResolvedReference>();
 
-                foreach (var line in lines)
-                {
-                    references.Add(new ResolvedReference(Path.GetFileName(line), line));
-                }
+            Console.WriteLine($"   {Path.GetFileName(projectFile)}: Evaluating & building dependencies");
+            var targetsLocation = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            new TargetInstaller().EnsureTargetImported(targetsLocation);
+            var projectContext = 
+                new MsBuildProjectContextBuilder(projectPath, targetsLocation, configuration)
+                .Build();
 
-                return new RoslynProjectContext
-                {
-                    CompilationAssemblies = references,
-                    ProjectFilePath = projectFile
-                };
-            }
-            catch (Exception ex)
+            Directory.Delete(targetsLocation, true);
+
+            return new RoslynProjectContext
             {
-                throw new InvalidOperationException("Failed to read the BuildContext information.", ex);
-            }
-#endif
+                ProjectFilePath = Path.GetFullPath(projectFile),
+                MsBuildProjectContext = projectContext,
+            };
+            
+//#endif
         }
 
         public ICollection<MetadataReference> GetMetadataReferences()
@@ -166,10 +110,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
             // some other references which are not available in any of these closures.
             // As the above comment, the right thing to do here is to use the dependency closure of
             // the assembly which has the template.
-            var exports = CompilationAssemblies;
+            var exports = MsBuildProjectContext.CompilationAssemblies;
 
             if (exports != null)
-            {
+            { 
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 foreach (var export in exports)
                 {

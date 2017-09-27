@@ -21,6 +21,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
         public string Assembly { get; set; }
 
+        public string RootNamespace { get; set; }
+
         /// <summary>
         /// Build configuration (Debug/Release) to use when building or analyzing projects.
         /// </summary>

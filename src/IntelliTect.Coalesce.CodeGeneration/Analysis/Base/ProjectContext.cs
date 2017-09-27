@@ -51,6 +51,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base
         /// </summary>
         public string Framework { get; set; }
 
+        public virtual string RootNamespace { get; }
+
         public abstract ICollection<MetadataReference> GetTemplateMetadataReferences();
 
     }

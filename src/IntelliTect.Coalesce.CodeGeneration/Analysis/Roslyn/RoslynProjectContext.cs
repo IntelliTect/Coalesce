@@ -35,6 +35,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public override TypeLocator TypeLocator => _typeLocator = (_typeLocator ?? RoslynTypeLocator.FromProjectContext(this));
 
+        public override string RootNamespace => ProjectConfiguration.RootNamespace ?? MsBuildProjectContext.RootNamespace;
+
         public IProjectContext MsBuildProjectContext { get; private set; }
 
         public override ICollection<MetadataReference> GetTemplateMetadataReferences() => GetMetadataReferences();

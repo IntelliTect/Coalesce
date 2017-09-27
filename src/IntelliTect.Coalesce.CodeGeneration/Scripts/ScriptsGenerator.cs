@@ -43,21 +43,27 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             using (StreamWriter streamWriter = new StreamWriter("output.txt", false))
             {
                 Console.WriteLine($"Starting Generator");
-                string targetNamespace;
-                if (!string.IsNullOrEmpty(model.TargetNamespace))
+                string targetNamespace = WebProject.RootNamespace;
+                Console.WriteLine($"Target Namespace: {targetNamespace}");
+
+                TypeViewModel dataContextType;
+                if (string.IsNullOrWhiteSpace(model.DataContextClass))
                 {
-                    targetNamespace = model.TargetNamespace;
+                    var candidates = DataProject.TypeLocator
+                        .FindDerivedTypes(typeof(Microsoft.EntityFrameworkCore.DbContext).FullName)
+                        .ToList();
+                    if (candidates.Count() != 1)
+                    {
+                        throw new InvalidOperationException($"Couldn't find a single DbContext to generate from. " +
+                            $"Specify the name of your DbContext with the '-dc MyDbContext' command line param.");
+                    }
+                    dataContextType = candidates.Single();
                 }
                 else
                 {
-                    var startupSymbol = WebProject.TypeLocator.FindType("Startup", throwWhenNotFound: false);
-                    targetNamespace = startupSymbol.FullNamespace;
+                    dataContextType = DataProject.TypeLocator.FindType(model.DataContextClass, throwWhenNotFound: false);
                 }
-                Console.WriteLine($"Namespace: {targetNamespace}");
-
-                var dataContextType = DataProject.TypeLocator.FindType(model.DataContextClass, throwWhenNotFound: false);
-
-                // var assembly = DataProject.TypeLocator.GetAssembly();
+                
 
                 if (model.ValidateOnly)
                 {
@@ -68,41 +74,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     Console.WriteLine($"Building scripts for: {dataContextType.FullName}");
                 }
 
-                List<ClassViewModel> models = null;
-                try
-                {
-                    models = ReflectionRepository
+                List<ClassViewModel> models = ReflectionRepository
                                     .AddContext(dataContextType)
                                     .ToList();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed to generate models\n   {ex.Message}\n{ex.StackTrace}");
-                    if (Debugger.IsAttached)
-                    {
-                        Console.WriteLine("Press enter to quit");
-                        Console.Read();
-                    }
-                    Environment.Exit(1);
-                }
 
-
-                ValidationHelper validationResult = null;
-
-                try
-                {
-                    validationResult = ValidateContext.Validate(models);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An Exception occurred during validation\n   {ex.Message}\n{ex.StackTrace}");
-                    if (Debugger.IsAttached)
-                    {
-                        Console.WriteLine("Press enter to quit");
-                        Console.Read();
-                    }
-                    Environment.Exit(1);
-                }
+                ValidationHelper validationResult = ValidateContext.Validate(models);
 
                 bool foundIssues = false;
                 foreach (var validation in validationResult.Where(f => !f.WasSuccessful))

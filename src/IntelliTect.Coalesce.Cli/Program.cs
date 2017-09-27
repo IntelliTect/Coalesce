@@ -92,25 +92,17 @@ namespace IntelliTect.Coalesce.Cli
 
 
             var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);
-            var force = app.Option("-f|--force", "Use this option to overwrite existing files", CommandOptionType.SingleValue);
-            var relativeFolderPath = app.Option("-outDir|--relativeFolderPath", "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder", CommandOptionType.SingleValue);
-            var onlyGenerateFiles = app.Option("-filesOnly|--onlyGenerateFiles", "Will only generate the file output and will not restore any of the packages", CommandOptionType.SingleValue);
             var validateOnly = app.Option("-vo|--validateOnly", "Validates the model but does not generate the models", CommandOptionType.SingleValue);
             var area = app.Option("-a|--area", "The area where the generated/scaffolded code should be placed", CommandOptionType.SingleValue);
             var module = app.Option("-m|--module", "The prefix to apply to the module name of the generated typescript files", CommandOptionType.SingleValue);
-            var webProject = app.Option("-wp|--webproject", "Relative path to the web project; if empty will search up from current folder for first project.json", CommandOptionType.SingleValue);
-            var dataProject = app.Option("-dp|--dataproject", "Relative path to the data project", CommandOptionType.SingleValue);
             var targetNamespace = app.Option("-ns|--namespace", "Target Namespace for the generated code", CommandOptionType.SingleValue);
 
             app.OnExecute(async () =>
             {
-
+                // TODO: Move all configuration to coalesce.json, and remove these CLI parameters.
                 var model = new CommandLineGeneratorModel
                 {
                     DataContextClass = dataContextClass.Value() ?? "",
-                    Force = force.Value() != null && force.Value().ToLower() == "true",
-                    RelativeFolderPath = relativeFolderPath.Value() ?? "",
-                    OnlyGenerateFiles = onlyGenerateFiles.Value() != null && onlyGenerateFiles.Value().ToLower() == "true",
                     ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
                     AreaLocation = area.Value() ?? "",
                     TypescriptModulePrefix = module.Value() ?? "",
@@ -140,12 +132,10 @@ namespace IntelliTect.Coalesce.Cli
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.ToString());
                 if (ex.InnerException != null)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
-                    Console.WriteLine(ex.InnerException.StackTrace);
+                    Console.WriteLine(ex.InnerException.ToString());
                 }
             }
         }

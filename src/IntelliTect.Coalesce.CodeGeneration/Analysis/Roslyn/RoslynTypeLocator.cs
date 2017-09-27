@@ -64,8 +64,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
             return _compilation;
         }
 
+
+        private ICollection<INamedTypeSymbol> _allTypes;
         public IEnumerable<INamedTypeSymbol> GetAllTypes()
         {
+            if (_allTypes != null) return _allTypes;
+
             var compilation = GetProjectCompilation();
             if (compilation == null)
             {
@@ -82,9 +86,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                     CollectTypes(nestedNs);
                 }
             }
-
             CollectTypes(compilation.Assembly.GlobalNamespace);
-            return types;
+
+            return _allTypes = types;
         }
 
         /*
@@ -151,22 +155,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
         }
         */
 
-        public IEnumerable<INamedTypeSymbol> GetType(string typeName)
-        {
-            if (typeName == null)
-            {
-                throw new ArgumentNullException(nameof(typeName));
-            }
-
-            return GetAllTypes()
-                .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal));
-        }
-
         public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
         {
 #if !NET462
-
             var workspace = new RoslynWorkspace(project.MsBuildProjectContext, project.MsBuildProjectContext.Configuration);
+#endif
+#if NET462
+            var workspace = MSBuildWorkspace.Create();
+#endif
+
             workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
             {
                 if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
@@ -184,43 +181,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 }
             };
 
-            //var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
-
-            return new RoslynTypeLocator(workspace, project);
-#endif
 #if NET462
-            var workspace = MSBuildWorkspace.Create();
-            workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
-            {
-                if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
-                {
-                    
-                       // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
-                       //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
-                       //     Therefore we must ignore an empty error message.
-                       Debug.WriteLine(e.Diagnostic.Message);
-                    if (!e.Diagnostic.Message.Contains(
-                        "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
-                    {
-                        throw new InvalidProjectFileException(e.Diagnostic.Message);
-                    }
-                }
-            };
-
             var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
+#endif
 
             return new RoslynTypeLocator(workspace, project);
-#endif
         }
 
         public override TypeViewModel FindType(string typeName, bool throwWhenNotFound = true)
         {
             if (string.IsNullOrEmpty(typeName))
             {
-                throw new ArgumentException($"Please provide a valid {nameof(typeName)}", nameof(typeName));
+                throw new ArgumentNullException(nameof(typeName));
             }
 
-            var candidateModelTypes = GetType(typeName).ToList();
+            var candidateModelTypes = GetAllTypes()
+                .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal))
+                .ToList();
 
             int count = candidateModelTypes.Count;
             if (count == 0)
@@ -241,6 +218,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
             }
 
             return new TypeViewModel(new SymbolTypeWrapper(candidateModelTypes.First()));
+        }
+
+        public override IEnumerable<TypeViewModel> FindDerivedTypes(string typeName, bool throwWhenNotFound = true)
+        {
+            bool HasBaseType(INamedTypeSymbol type) =>
+                type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).EndsWith(typeName) || (type.BaseType != null && HasBaseType(type.BaseType));
+
+            return GetAllTypes()
+                .Where(type => HasBaseType(type))
+                .Select(t => new TypeViewModel(new SymbolTypeWrapper(t)));
         }
 
         private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>

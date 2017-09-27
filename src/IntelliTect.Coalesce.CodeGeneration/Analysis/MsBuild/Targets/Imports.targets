@@ -1,0 +1,13 @@
+﻿<!--
+ Copyright (c) .NET Foundation. All rights reserved.
+ Licensed under the Apache License, Version 2.0.
+ -->
+
+<Project ToolsVersion="15.3" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Condition=" '$(TargetFramework)' == '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(CodeGenerationTargetLocation)\buildMultiTargeting\IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets" Condition="Exists('$(CodeGenerationTargetLocation)\buildMultiTargeting\IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' != '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(CodeGenerationTargetLocation)\build\IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets" Condition="Exists('$(CodeGenerationTargetLocation)\build\IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets')" />
+  </ImportGroup>
+</Project>

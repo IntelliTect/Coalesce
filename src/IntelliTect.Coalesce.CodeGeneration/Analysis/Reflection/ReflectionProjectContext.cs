@@ -10,15 +10,21 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Runtime.Versioning;
+using PC = IntelliTect.Coalesce.CodeGeneration.Configuration.ProjectConfiguration;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
 {
     public class ReflectionProjectContext : ProjectContext
     {
-        public override TypeLocator TypeLocator => new ReflectionTypeLocator(this);
-
         public FileInfo AssemblyFileInfo { get; private set; }
-        public Assembly Assembly { get; private set; }
+
+        public ReflectionProjectContext(ProjectConfiguration projectConfig) : base(projectConfig)
+        {
+            throw new NotImplementedException("ReflectionProjectContext is in a somewhat unfinished state." +
+                "If reflection-based generation is needed, it will probably need some work before it is robust enough for use..");
+        }
+
+        public override TypeLocator TypeLocator => new ReflectionTypeLocator(this);
 
         public override ICollection<MetadataReference> GetTemplateMetadataReferences()
         {
@@ -28,8 +34,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
             new Microsoft.CSharp.RuntimeBinder.RuntimeBinderException();
             // Load Micosoft.AspNetCore.Html
             new Microsoft.AspNetCore.Html.HtmlString("");
-
-
 
             var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Select(asm => asm.GetName());
@@ -54,19 +58,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
 
         public static ReflectionProjectContext CreateContext(ProjectConfiguration projectConfig)
         {
-            var assemblyInfo = ResolveAssembly(projectConfig);
-            var projectFileAbsPath = Path.GetFullPath(projectConfig.ProjectFile);
-
-            //var asm = Assembly.ReflectionOnlyLoadFrom(assemblyInfo.FullName);
-            //var attrs2 = asm.GetCustomAttributes(typeof(System.Runtime.Versioning.TargetFrameworkAttribute), false);
-
-
-            var context = new ReflectionProjectContext
-            {
-                ProjectFilePath = projectFileAbsPath,
-                AssemblyFileInfo = assemblyInfo,
-            };
-
+            var context = new ReflectionProjectContext(projectConfig);
+            context.AssemblyFileInfo = ResolveAssembly(projectConfig);
 
             return context;
         }
@@ -76,34 +69,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
             var assemblyLocation = projectConfig.Assembly;
             var projectName = Path.GetFileNameWithoutExtension(projectConfig.ProjectFile);
 
-            if (projectConfig.Build != null)
+            if (projectConfig.Build)
             {
-                string[] args = null;
-                if (!string.IsNullOrWhiteSpace(projectConfig.Build.Args))
+                var args = new List<string>
                 {
-                    args = projectConfig.Build.Args.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                }
-                else if (!string.IsNullOrWhiteSpace(projectConfig.Build.Output))
-                {
-                    if (string.IsNullOrWhiteSpace(assemblyLocation))
-                    {
-                        assemblyLocation = projectConfig.Build.Output;
-                    }
+                    projectConfig.ProjectFile,
+                };
 
-                    args = new[]
-                    {
-                        projectConfig.ProjectFile,
-                        "/nologo",
-                        $"-o \"{projectConfig.Build.Output}\"",
-                        "-f netcoreapp20"
-                    };
-                }
-                else
+                if (!string.IsNullOrWhiteSpace(projectConfig.Configuration))
                 {
-                    args = new[] {
-                        projectConfig.ProjectFile,
-                        "/nologo",
-                    };
+                    args.Add($"--configuration");
+                    args.Add($"{projectConfig.Configuration}");
+                }
+                if (!string.IsNullOrWhiteSpace(projectConfig.Framework))
+                {
+                    args.Add($"--framework");
+                    args.Add($"{projectConfig.Framework}");
                 }
 
                 Command command = Command.CreateDotNet("build", args);
@@ -118,13 +99,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
                         Console.WriteLine("    " + l);
                         Console.ResetColor();
                     })
-                    .OnErrorLine(e => throw new Exception(e))
+                    .OnErrorLine(e => { Console.Error.WriteLine(e); throw new Exception(e); })
                     .Execute();
 
                 if (result.ExitCode != 0)
                 {
-                    //throw new Exception($"{command.CommandName} exited with code {result.ExitCode}");
-                    return null;
+                    throw new Exception($"{command.CommandName} exited with code {result.ExitCode}");
+                    //return null;
                 }
                 if (assemblyLocation == null)
                 {
@@ -132,8 +113,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
                     var buildLine = outputLines.FirstOrDefault(l => l.Trim().StartsWith(projectName + " -> "));
                     assemblyLocation = Regex.Match(buildLine, @" \-\> (.*)").Groups[1].Value;
                 }
+            }
 
-
+            if (assemblyLocation == null)
+            {
+                throw new FileNotFoundException($"Couldnt not determine assembly to analyze for project {projectConfig.ProjectFile}. " +
+                    $"Please specify it using the {nameof(PC.Assembly)} config property, " +
+                    $"or set {nameof(PC.Build)}=true");
             }
 
             if (Directory.Exists(assemblyLocation))

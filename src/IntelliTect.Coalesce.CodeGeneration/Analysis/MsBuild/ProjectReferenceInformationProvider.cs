@@ -8,7 +8,7 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
-namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
+namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 {
     public class ProjectReferenceInformationProvider
     {

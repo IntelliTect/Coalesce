@@ -10,7 +10,7 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     sass = require('gulp-sass'),
     typescriptCompiler = require('gulp-typescript'),
-    rimraf = require('rimraf'),
+    del = require('del'),
     path = require('path'),
     shell = require('gulp-shell'),
     gutil = require('gulp-util'),
@@ -41,8 +41,8 @@ function getFolders(dir) {
         });
 }
 
-gulp.task('clean-images', function (cb) {
-    rimraf(paths.img, cb);
+gulp.task('clean-images', function () {
+    return del(paths.img);
 });
 
 gulp.task("copy-images", ['clean-images'], function () {
@@ -55,7 +55,7 @@ gulp.task('img:watch', function () {
 });
 
 gulp.task("clean-lib", function (cb) {
-    rimraf(paths.lib, cb);
+    return del(paths.img);
 });
 
 gulp.task("copy-lib", ['clean-lib'], function () {
@@ -203,11 +203,15 @@ gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeG
 
 */
 
+var coalesceBuildDir = `${require('os').tmpdir()}/CoalesceExe`;
 
-gulp.task('coalesce:build', shell.task([
-        //'if exist "%temp%/CoalesceExe" rmdir "%temp%/CoalesceExe" /s /q',
-        'dotnet msbuild /t:restore /v:q "../IntelliTect.Coalesce.Cli"',
-        'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f netcoreapp2.0'
+gulp.task('coalesce:cleanbuild', function (cb) {
+    return del(coalesceBuildDir, { force: true });
+});
+
+gulp.task('coalesce:build', ['coalesce:cleanbuild'], shell.task([
+        'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.Cli"',
+        `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}" -f netcoreapp2.0`
     ],{ verbose: true }
 ));
 
@@ -215,8 +219,8 @@ gulp.task('coalesce:build', shell.task([
 // Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
 gulp.task('coalesce', ['coalesce:build'], shell.task
     ([
-        '"%temp%/CoalesceExe/IntelliTect.Coalesce.Cli.exe" ' +
-        '-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web'
+        `dotnet "${coalesceBuildDir}/IntelliTect.Coalesce.Cli.dll" ` +
+        "-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web"
     ],
     { verbose: true }
 ));
@@ -224,8 +228,8 @@ gulp.task('coalesce', ['coalesce:build'], shell.task
 
 gulp.task('coalesce:debug', ['coalesce:build'], shell.task
     ([
-        '"%temp%/CoalesceExe/IntelliTect.Coalesce.Cli.exe" ' +
-        '-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web --debug'
+        `dotnet "${coalesceBuildDir}/IntelliTect.Coalesce.Cli.dll"` +
+        "-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web --debug"
     ],
     { verbose: true }
     ));

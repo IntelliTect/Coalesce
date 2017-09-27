@@ -15,19 +15,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
     public class ProjectConfiguration
     {
-        public BuildConfiguration Build { get; set; }
-
-        // public string BuildCommand { get; set; }
+        public bool Build { get; set; }
 
         public string ProjectFile { get; set; }
 
         public string Assembly { get; set; }
-    }
 
-    public class BuildConfiguration
-    {
-        public string Args { get; set; }
+        /// <summary>
+        /// Build configuration (Debug/Release) to use when building or analyzing projects.
+        /// </summary>
+        public string Configuration { get; set; } = "Debug";
 
-        public string Output { get; set; }
+        /// <summary>
+        /// Target Framework to use when building or analyzing projects.
+        /// </summary>
+        public string Framework { get; set; }
     }
 }

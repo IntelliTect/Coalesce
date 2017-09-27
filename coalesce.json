@@ -1,14 +1,14 @@
 {
 	webProject: {
-		projectFile: "../Coalesce - Copy/src/Coalesce.Web/Coalesce.Web.csproj",
-		build: {
-			args: "",
-		}
+		projectFile: "../Coalesce/src/Coalesce.Web/Coalesce.Web.csproj",
+		framework: "netcoreapp2.0",
+		configuration: "Debug",
+		build: true
 	},
 	dataProject: {
-		projectFile: "../Coalesce - Copy/src/Coalesce.Domain/Coalesce.Domain.csproj",
-		build: {
-			args: "",
-		}
+		projectFile: "../Coalesce/src/Coalesce.Domain/Coalesce.Domain.csproj",
+		framework: "netstandard2.0",
+		configuration: "Debug",
+		build: true
 	}
 }

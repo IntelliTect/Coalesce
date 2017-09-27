@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
-using Microsoft.VisualStudio.Web.CodeGeneration.Msbuild;
 using System.Linq;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft
+namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 {
+    /// <summary>
+    /// Provides project metadata useful for code generation.
+    /// </summary>
     public class MsBuildProjectContext : IProjectContext
     {
-        public class PackageDependencyDump
+        public class PackageDependency
         {
             public string ItemSpec => Path;
             public string Path { get; set; }
@@ -21,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft
             public string Dependencies { get; set; }
         }
 
-        public PackageDependencyDump[] DependenciesDesignTime { get; set; }
+        public PackageDependency[] DependenciesDesignTime { get; set; }
         public string[] CompilationItems { get; set; }
         public string[] ProjectReferences { get; set; }
         public string[] ResolvedReferences { get; set; }
@@ -88,7 +90,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft
                 projectReferences);
         }
 
-        private IEnumerable<DependencyDescription> GetPackageDependencies(PackageDependencyDump[] packageDependecyItems)
+        private IEnumerable<DependencyDescription> GetPackageDependencies(PackageDependency[] packageDependecyItems)
         {
 
             var packages = packageDependecyItems
@@ -104,7 +106,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft
             return packageMap.Values;
         }
 
-        private void PopulateDependencies(Dictionary<string, DependencyDescription> packageMap, PackageDependencyDump[] packageDependecyItems)
+        private void PopulateDependencies(Dictionary<string, DependencyDescription> packageMap, PackageDependency[] packageDependecyItems)
         {
             foreach (var item in packageDependecyItems)
             {
@@ -128,7 +130,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft
             }
         }
 
-        private DependencyDescription GetPackageDependency(PackageDependencyDump item)
+        private DependencyDescription GetPackageDependency(PackageDependency item)
         {
             var type = item.Type;
             var name = ("Target".Equals(type, StringComparison.OrdinalIgnoreCase))

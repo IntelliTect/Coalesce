@@ -21,15 +21,18 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
-using Microsoft.VisualStudio.Web.CodeGeneration.Tools;
-using Microsoft.VisualStudio.Web.CodeGeneration;
-using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn.Microsoft;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
     public class RoslynProjectContext : ProjectContext
     {
         private TypeLocator _typeLocator;
+
+        public RoslynProjectContext(ProjectConfiguration projectConfig) : base(projectConfig)
+        {
+        }
+
         public override TypeLocator TypeLocator => _typeLocator = (_typeLocator ?? RoslynTypeLocator.FromProjectContext(this));
 
         public IProjectContext MsBuildProjectContext { get; private set; }
@@ -38,66 +41,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public static RoslynProjectContext CreateContext(ProjectConfiguration projectConfig)
         {
-            var projectFile = projectConfig.ProjectFile;
-            var projectFileAbsPath = Path.GetFullPath(projectFile);
+            var context = new RoslynProjectContext(projectConfig);
 
-            var configuration = "Debug";
-#if RELEASE
-            configuration = "Release";
-#endif
-
-            var context = CreateContext(
-                projectFileAbsPath,
-                projectFile,
-                configuration);
+            context.MsBuildProjectContext =
+                new MsBuildProjectContextBuilder(context)
+                .RestoreProjectPackages()
+                .BuildProjectContext();
 
             return context;
-        }
-
-        public static RoslynProjectContext CreateContext(string projectPath, string projectFile, string configuration = "Debug")
-        {
-//#if !NET462
-//            throw new PlatformNotSupportedException("Roslyn-based project systems are only supported on full framework due to the need for MSBuildWorkspace");
-//#endif
-
-//#if NET462
-            var errors = new List<string>();
-            var tmpFile = Path.GetTempFileName();
-
-            Console.WriteLine($"   {Path.GetFileName(projectFile)}: Restoring packages");
-            var result = Command.CreateDotNet(
-                "msbuild",
-                new string[]
-                {
-                    projectPath,
-                    "/nologo",
-                    "/v:q", // Can't call 'dotnet restore' because it ignores verbosity: https://github.com/dotnet/cli/issues/5989
-                    "/t:restore"
-                })
-                .OnOutputLine(Console.WriteLine)
-                .OnErrorLine(e => { Console.Error.WriteLine(e); errors.Add(e); })
-                .Execute();
-            if (result.ExitCode != 0) errors.Add($"Restore packages exited with code {result.ExitCode}");
-
-
-
-
-            Console.WriteLine($"   {Path.GetFileName(projectFile)}: Evaluating & building dependencies");
-            var targetsLocation = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            new TargetInstaller().EnsureTargetImported(targetsLocation);
-            var projectContext = 
-                new MsBuildProjectContextBuilder(projectPath, targetsLocation, configuration)
-                .Build();
-
-            Directory.Delete(targetsLocation, true);
-
-            return new RoslynProjectContext
-            {
-                ProjectFilePath = Path.GetFullPath(projectFile),
-                MsBuildProjectContext = projectContext,
-            };
-            
-//#endif
         }
 
         public ICollection<MetadataReference> GetMetadataReferences()

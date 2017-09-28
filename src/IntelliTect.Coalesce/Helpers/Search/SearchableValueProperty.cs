@@ -157,6 +157,21 @@ namespace IntelliTect.Coalesce.Helpers.Search
             }
             else if (Property.Type.IsString)
             {
+                // Theoretical support for EF.Functions.Like. Not yet supported in DynamicLinq.
+                // https://github.com/StefH/System.Linq.Dynamic.Core/issues/105
+                /*
+                 switch (Property.SearchMethod)
+                {
+                    case DataAnnotations.SearchAttribute.SearchMethods.BeginsWith:
+                        yield return (Property, $"({propertyAccessor} != null && EF.Functions.Like({propertyAccessor}, \"{term}%\")");
+                        break;
+                    case DataAnnotations.SearchAttribute.SearchMethods.Contains:
+                        yield return (Property, $"({propertyAccessor} != null && EF.Functions.Like({propertyAccessor}, \"%{term}%\")");
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+                 * */
                 var term = rawSearchTerm.EscapeStringLiteralForLinqDynamic();
                 yield return (Property, $"({propertyAccessor} != null && {propertyAccessor}.{string.Format(Property.SearchMethodCall, term)})");
             }

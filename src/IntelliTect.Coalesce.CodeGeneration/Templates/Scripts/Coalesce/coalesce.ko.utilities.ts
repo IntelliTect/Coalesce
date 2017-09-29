@@ -54,13 +54,20 @@ module Coalesce {
         ) {
 
             var originalContent = existingArray();
+
             // We're going to build a new array from scratch.
             // If we spliced and pushed the existing array one row at a time as needed,
             // it performs much more slowly, and also rebuilds the DOM in realtime as that happens.
+            // This is because each push/splice triggers all subscribers to update.
+            // If there are expensive subscriptions (not just the DOM - custom application code as well),
+            // then performance drops off the edge of a cliff into a firey abyss.
 
             // Knockout is smart enough when we update the value of existingArray with newArray
             // to figure out exactly what changed, and will only rebuild the DOM as needed,
-            // instead of rebuilding the entire thing: http://stackoverflow.com/a/18050443
+            // instead of rebuilding the entire thing: http://stackoverflow.com/a/18050443.
+            // However, there will ALWAYS be one single notification to subscribers, even if we didn't actually change the array.
+            // If arrays are being rebuilt frequently, this "false" subscriber notification could be detrimental to performance.
+            // To prevent this from happening, at the bottom of this function we perform an array comparison before updating the final observable.
             var newContent: Array<U> = [];
 
             // If no specific equality comparison has been requested,
@@ -115,7 +122,16 @@ module Coalesce {
                 newContent.unshift(...originalContent);
             }
 
-            existingArray(newContent);
+            if (newContent.length == originalContent.length &&
+                ko.utils.compareArrays(newContent, originalContent).every(c => c.status == "retained")) {
+                // Everything is the same (by doing a shallow equality check of the array - objects are checked by reference).
+                // Shallow equality check by reference is perfectly in line with the spec for ObservableArray.
+            } else {
+                // Something is different. Update the observable.
+                // See the comments at the top of the file for why we do this conditionally.
+                // Basically, its because this call ALWAYS notifies subscribers, but we can be more intelligent about it.
+                existingArray(newContent);
+            }
         }
 
 

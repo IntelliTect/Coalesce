@@ -79,7 +79,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
                     xmlDocumentation.LoadXml(xmlDocs);
                     returnValue = xmlDocumentation.SelectSingleNode("/member/summary").InnerText.Trim();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Non-critical error. Write it out and ignore.
                     // Usually this is because of a badly-formed XML comment in the source code.

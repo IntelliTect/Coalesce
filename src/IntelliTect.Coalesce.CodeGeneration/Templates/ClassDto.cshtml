@@ -34,7 +34,7 @@
         if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
     }
 }
-@foreach (var ns in namespaces)
+@foreach (var ns in namespaces.OrderBy(n => n))
 {
     @:using @ns;
 }

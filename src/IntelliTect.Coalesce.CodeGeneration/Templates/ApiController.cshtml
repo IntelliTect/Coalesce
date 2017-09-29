@@ -63,7 +63,7 @@
         if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
     }
 }
-@foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)))
+@foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)).OrderBy(n => n))
 {
     @:using @ns;
 }

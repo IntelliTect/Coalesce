@@ -104,6 +104,12 @@ module Coalesce {
     GlobalConfiguration.viewModel.loadResponseFromSaves(true);
 
 
+    export interface LoadableViewModel {
+        loadFromDto: (data: any) => void;
+        parent: any;
+        parentCollection: any;
+    }
+
     export class BaseViewModel<T extends BaseViewModel<T>> {
 
         protected modelName: string;

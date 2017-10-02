@@ -380,7 +380,8 @@ module @moduleName {
             }
             this.isLoading(false);
             this.isDirty(false);
-            this.validate();
+    
+            if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
 
         /** Save the object into a DTO */

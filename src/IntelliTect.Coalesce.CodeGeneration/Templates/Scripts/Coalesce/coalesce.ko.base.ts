@@ -52,14 +52,22 @@ module Coalesce {
     export class ViewModelConfiguration<T extends BaseViewModel<T>> extends CoalesceConfiguration<T> {
         /** Time to wait after a change is seen before auto-saving (if autoSaveEnabled is true). Acts as a debouncing timer for multiple simultaneous changes. */
         public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
+
         /** Determines whether changes to a model will be automatically saved after saveTimeoutMs milliseconds have elapsed. */
         public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
+
         /** Determines whether or not changes to many-to-many collection properties will automatically trigger a save call to the server or not. */
         public autoSaveCollectionsEnabled = this.prop<boolean>("autoSaveCollectionsEnabled");
+
         /** Whether to invoke onStartBusy and onFinishBusy during saves. */
         public showBusyWhenSaving = this.prop<boolean>("showBusyWhenSaving");
+
         /** Whether or not to reload the ViewModel with the state of the object received from the server after a call to .save(). */
         public loadResponseFromSaves = this.prop<boolean>("loadResponseFromSaves");
+
+        /** Whether or not to validate the model after loading it from a DTO from the server. Disabling this can improve performance in some cases.. */
+        public validateOnLoadFromDto = this.prop<boolean>("validateOnLoadFromDto");
+
         /**
             An optional callback to be called when an object is loaded from a response from the server.
             Callback will be called after all properties on the ViewModel have been set from the server response.
@@ -102,6 +110,7 @@ module Coalesce {
     GlobalConfiguration.viewModel.autoSaveCollectionsEnabled(true);
     GlobalConfiguration.viewModel.showBusyWhenSaving(false);
     GlobalConfiguration.viewModel.loadResponseFromSaves(true);
+    GlobalConfiguration.viewModel.validateOnLoadFromDto(true);
 
 
     export interface LoadableViewModel {

@@ -91,12 +91,12 @@ Entity Framework.
             [Read]
             public string AssignedToName { get; set; }
 
-            public void Update(Case obj, ClaimsPrincipal user, string includes)
+            public void Update(Case obj, IMappingContext context)
             {
                 obj.Title = Title;
             }
 
-            public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary<object, object> objects = null, IncludeTree tree = null)
+            public CaseDto CreateInstance(Case obj, IMappingContext context, IncludeTree tree = null)
             {
                 var dto = new CaseDto();
                 dto.CaseId = obj.CaseKey;

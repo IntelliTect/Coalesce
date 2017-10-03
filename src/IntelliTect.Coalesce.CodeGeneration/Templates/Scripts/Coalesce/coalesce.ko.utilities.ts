@@ -72,7 +72,7 @@ module Coalesce {
 
             // If no specific equality comparison has been requested,
             // use a hash table for O(1) lookups on a single key to prevent O(n^2) from nested for-loops.
-            if (equalityComparer == null) {
+            if (equalityComparer == null && idField) {
                 var originalLookup = BuildLookup(originalContent, idField);
             }
 
@@ -146,7 +146,7 @@ module Coalesce {
 
             // If no specific equality comparison has been requested,
             // use a hash table for O(1) lookups on a single key to prevent O(n^2) from nested for-loops.
-            if (equalityComparer == null) {
+            if (equalityComparer == null && idField) {
                 var originalLookup = BuildLookup(originalContent, idField);
             }
 

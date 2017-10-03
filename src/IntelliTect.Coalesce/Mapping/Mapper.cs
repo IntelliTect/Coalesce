@@ -8,17 +8,17 @@ namespace IntelliTect.Coalesce.Mapping
 {
     public static class Mapper<T, TDto> where TDto : IClassDto<T, TDto>, new()
     {
-        public static TDto ObjToDtoMapper(T obj, ClaimsPrincipal user, string includes, IncludeTree tree = null)
+        public static TDto ObjToDtoMapper(T obj, IMappingContext context, IncludeTree tree = null)
         {
             var creator = new TDto();
-            var dto = creator.CreateInstance(obj, user, includes, null, tree);
+            var dto = creator.CreateInstance(obj, context, tree);
             
             return dto;
         }
 
-        public static void DtoToObjMapper(TDto dto, T entity, ClaimsPrincipal user, string includes)
+        public static void DtoToObjMapper(TDto dto, T entity, IMappingContext context)
         {
-            dto.Update(entity, user, includes);
+            dto.Update(entity, context);
         }
     }
 }

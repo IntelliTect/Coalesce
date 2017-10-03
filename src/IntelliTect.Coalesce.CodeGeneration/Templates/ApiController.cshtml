@@ -469,7 +469,8 @@ namespace @(namespaceName).Api
             }
             else if (method.ReturnType.PureType.HasClassViewModel)
             {
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+                @:var mappingContext = new MappingContext(User, "");
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
             }
             else
             {
@@ -484,7 +485,8 @@ namespace @(namespaceName).Api
             }
             else if (method.ReturnType.HasClassViewModel)
             {
-                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, User, "", includeTree);
+                @:var mappingContext = new MappingContext(User, "");
+                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, mappingContext, includeTree);
             }
             else
             {

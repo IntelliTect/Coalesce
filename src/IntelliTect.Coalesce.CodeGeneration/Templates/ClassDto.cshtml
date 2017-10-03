@@ -54,15 +54,10 @@ namespace @(namespaceName).Models
         }
 
         // Create a new version of this object or use it from the lookup.
-        public static @(model.Name)DtoGen Create(@(model.FullName) obj, ClaimsPrincipal user = null, string includes = null,
-                                   @("Dictionary<object, object>") objects = null, IncludeTree tree = null) {
-            // Return null of the object is null;
+        public static @(model.Name)DtoGen Create(@(model.FullName) obj, IMappingContext context, IncludeTree tree = null) {
             if (obj == null) return null;
+            var includes = context.Includes;
                         
-            if (objects == null) objects = new @("Dictionary<object, object>")();
-
-            includes = includes ?? "";
-
             // Applicable includes for @(model.Name)
             @(model.DtoIncludesAsCS())
 
@@ -73,14 +68,12 @@ namespace @(namespaceName).Models
             @(model.PropertyRolesAsCS())
 
 
-
             // See if the object is already created, but only if we aren't restricting by an includes tree.
             // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
-            if (tree == null && objects.ContainsKey(obj)) 
-                return (@(model.Name)DtoGen)objects[obj];
+            if (tree == null && context.TryGetMapping(obj, out @(model.Name)DtoGen existing)) return existing; 
 
             var newObject = new @(model.Name)DtoGen();
-            if (tree == null) objects.Add(obj, newObject);
+            if (tree == null) context.AddMapping(obj, newObject);
             // Fill the properties of the object.
             @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty).OrderBy(p => p.PureType.HasClassViewModel))
             {
@@ -90,17 +83,16 @@ namespace @(namespaceName).Models
         }
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public @(model.Name)DtoGen CreateInstance(@(model.FullName) obj, ClaimsPrincipal user = null, string includes = null,
-                                @("Dictionary<object, object>") objects = null, IncludeTree tree = null) {
-            return Create(obj, user, includes, objects, tree);
+        public @(model.Name)DtoGen CreateInstance(@(model.FullName) obj, IMappingContext context, IncludeTree tree = null) {
+            return Create(obj, context, tree);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(@(model.FullName) entity, ClaimsPrincipal user = null, string includes = null)
+        public void Update(@(model.FullName) entity, IMappingContext context)
         {
-            includes = includes ?? "";
+            var includes = context.Includes;
 
-            if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, context)) return;
 
             // Applicable includes for @(model.Name)
             @(model.DtoIncludesAsCS())
@@ -111,9 +103,28 @@ namespace @(namespaceName).Models
             // Applicable roles for @(model.Name)
             @(model.PropertyRolesAsCS())
 
-            @foreach (var prop in model.Properties.Where(p => p.CanWrite && p.HasViewModelProperty))
+            @foreach (var conditionGroup in model.Properties
+             .Where(p => p.CanWrite && p.HasViewModelProperty)
+             .Select(p => p.DtoToObjPropertySetter())
+             .Where(p => p != null)
+             .GroupBy(s => s.Value.conditional))
             {
-                @prop.DtoToObjPropertySetter()
+            if (!string.IsNullOrWhiteSpace(conditionGroup.Key))
+            {
+            @:if (@(conditionGroup.Key)) {
+                @foreach (var setter in conditionGroup)
+                {
+                @:@(setter.Value.setter)
+                }
+            @:}
+            }
+            else
+            {
+            @foreach (var setter in conditionGroup)
+            {
+            @:@(setter.Value.setter)
+            }
+            }
             }
         }
 

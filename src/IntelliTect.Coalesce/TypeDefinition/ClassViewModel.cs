@@ -521,11 +521,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             var allPropertyRoles = Properties.Aggregate(new List<string>(), (p, c) => p.Union(c.SecurityInfo.EditRolesList.Union(c.SecurityInfo.ReadRolesList)).ToList());
 
-            var output = allPropertyRoles.Select(role => $"bool is{role} = false;").ToList();
-            output.Add("if (user != null)");
-            output.Add("{");
-            output.AddRange(allPropertyRoles.Select(role => $"\tis{role} = user.IsInRole(\"{role}\");"));
-            output.Add("}");
+            var output = allPropertyRoles.Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");").ToList();
 
             return string.Join($"{Environment.NewLine}\t\t\t", output);
         }

@@ -1016,7 +1016,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         sb.Append($".AsQueryable().OrderBy(\"{defaultOrderBy}\").ToList()");
                     }
 
-                    sb.Append($".Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();");
+                    sb.Append($".Select(f => {PureType.Name}DtoGen.Create(f, context, tree?[nameof({objectName}.{Name})])).ToList();");
 
                     sb.AppendLine();
                     sb.Append("            ");
@@ -1054,7 +1054,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Otherwise, this would break IncludesExternal.
                 string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
                 setter = $@"{treeCheck}
-                {objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects, tree?[nameof({objectName}.{Name})]);
+                {objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, context, tree?[nameof({objectName}.{Name})]);
 ";
             }
             else
@@ -1077,11 +1077,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string DtoToObjPropertySetter()
+        public (string conditional, string setter)? DtoToObjPropertySetter()
         {
             if (IgnorePropertyInUpdates)
             {
-                return "";
+                return null;
             }
             else
             {
@@ -1096,15 +1096,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var statement = GetPropertySetterConditional(true);
                 if (!string.IsNullOrWhiteSpace(statement))
                 {
-                    return $@"          if ({statement})
-            {{
-                {setter}
-            }}
-";
+                    return (statement, setter);
                 }
                 else
                 {
-                    return $"\t\t\t{setter}{Environment.NewLine}";
+                    return (null, setter);
                 }
             }
         }

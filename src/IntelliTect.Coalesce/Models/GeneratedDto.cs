@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.Mapping;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -8,12 +9,12 @@ namespace IntelliTect.Coalesce.Models
 {
     public class GeneratedDto<T, TDto>
     {
-        public virtual bool OnSecurityTrim(ClaimsPrincipal user, string includes)
+        public virtual bool OnSecurityTrim(IMappingContext context)
         {
             return false;
         }
 
-        public virtual bool OnUpdate(T entity, ClaimsPrincipal user, string includes)
+        public virtual bool OnUpdate(T entity, IMappingContext context)
         {
             return false;
         }

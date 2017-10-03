@@ -654,7 +654,8 @@ namespace IntelliTect.Coalesce.Controllers
         protected virtual TDto MapObjToDto(T obj, string includes, IncludeTree tree = null)
         {
             //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
-            return Mapper<T, TDto>.ObjToDtoMapper(obj, User, includes, tree);
+            var context = new MappingContext(User, includes);
+            return Mapper<T, TDto>.ObjToDtoMapper(obj, context, tree);
         }
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj
@@ -664,7 +665,8 @@ namespace IntelliTect.Coalesce.Controllers
         protected virtual void MapDtoToObj(TDto dto, T obj, string includes)
         {
             //dto.Update(obj);
-            Mapper<T, TDto>.DtoToObjMapper(dto, obj, User, includes);
+            var context = new MappingContext(User, includes);
+            Mapper<T, TDto>.DtoToObjMapper(dto, obj, context);
         }
 
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)

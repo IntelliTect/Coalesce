@@ -366,10 +366,10 @@ module @moduleName {
             @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
             {
             if (prop.Type.IsDate)
-            {   // Using valueOf/getTime here is a 2000% performance increase over moment.isSame()
+            {   // Using valueOf/getTime here is a 20x performance increase over moment.isSame(). moment(new Date(...)) is also a 10x perf increase.
             @:if (data.@prop.JsonName == null) this.@(prop.JsVariable)(null);
             @:else if (this.@(prop.JsVariable)() == null || this.@(prop.JsVariable)().valueOf() != new Date(data.@prop.JsonName).getTime()){
-                @:this.@(prop.JsVariable)(moment(data.@prop.JsonName));
+                @:this.@(prop.JsVariable)(moment(new Date(data.@prop.JsonName)));
             @:}
             } else if (!prop.IsPOCO && !prop.IsPrimaryKey) {
             @:this.@(prop.JsVariable)(data.@prop.JsonName);
@@ -429,54 +429,42 @@ module @moduleName {
 
             return dto;
         }
-
+        
+        public setupValidation = () => {
+            if (this.errors !== null) return;
+            this.errors = ko.validation.group([
+            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty && !p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs)))
+            {
+                @:this.@(prop.JsVariable).extend({ @prop.ClientValidationKnockoutJs }),
+            }
+            ]);
+            this.warnings = ko.validation.group([
+            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty && p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs)))
+            {
+                @:this.@(prop.JsVariable).extend({ @prop.ClientValidationKnockoutJs }),
+            }
+            ]);
+        }
+    
+        // Computed Observable for edit URL
+        public editUrl = ko.pureComputed(() => {
+            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.@(model.PrimaryKey.JsVariable)();
+        });
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            
-            ko.validation.init({
-                grouping: {
-                    deep: true,
-                    live: true,
-                    observable: true
-                }
-            });
 
-            // SetupValidation {
-            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty))
-            {
-                var validationProperties = prop.ClientValidationKnockoutJs;
-                if (validationProperties != string.Empty || prop.Type.IsDate)
-                {
-			@:self.@prop.JsVariable = self.@(prop.JsVariable).extend({ @(prop.Type.IsDate ? "moment: { unix: true }, " : "")@prop.ClientValidationKnockoutJs });
-                }
+            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
+                this.setupValidation();
             }
-            
-            self.errors = ko.validation.group([
-            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty && !p.ClientValidationAllowSave))
-            {
-                @:self.@(prop.JsVariable),
-            }
-            ]);
-            self.warnings = ko.validation.group([
-            @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasViewModelProperty && p.ClientValidationAllowSave))
-            {
-                @:self.@(prop.JsVariable),
-            }
-            ]);
-
-            // Computed Observable for edit URL
-            self.editUrl = ko.computed(function() {
-                return self.coalesceConfig.baseViewUrl() + self.viewController + "/CreateEdit?id=" + self.@(model.PrimaryKey.JsVariable)();
-            });
 
             // Create computeds for display for objects
             @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.IsComplexType && !f.IsInternalUse))
             {
-			@:self.@prop.JsTextPropertyName = ko.computed(function()
+			@:self.@prop.JsTextPropertyName = ko.pureComputed(function()
 			@:{   // If the object exists, use the text value. Otherwise show 'None'
 				@:if (self.@(prop.JsVariable)() && self.@(prop.JsVariable)().@(prop.Object.ListTextProperty.JsVariable)()) {
 					@:return self.@(prop.JsVariable)().@(prop.Object.ListTextProperty.JsVariable)().toString();

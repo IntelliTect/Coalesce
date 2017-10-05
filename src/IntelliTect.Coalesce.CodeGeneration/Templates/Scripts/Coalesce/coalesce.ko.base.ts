@@ -65,8 +65,18 @@ module Coalesce {
         /** Whether or not to reload the ViewModel with the state of the object received from the server after a call to .save(). */
         public loadResponseFromSaves = this.prop<boolean>("loadResponseFromSaves");
 
-        /** Whether or not to validate the model after loading it from a DTO from the server. Disabling this can improve performance in some cases.. */
+        /**
+            Whether or not to validate the model after loading it from a DTO from the server.
+            Disabling this can improve performance in some cases.
+        */
         public validateOnLoadFromDto = this.prop<boolean>("validateOnLoadFromDto");
+
+        /**
+            Whether or not validation on a ViewModel should be setup in its constructor,
+            or if validation must be set up manually by calling viewModel.setupValidation().
+            Turning this off can improve performance in read-only scenarios.
+        */
+        public setupValidationAutomatically = this.prop<boolean>("setupValidationAutomatically");
 
         /**
             An optional callback to be called when an object is loaded from a response from the server.
@@ -111,7 +121,15 @@ module Coalesce {
     GlobalConfiguration.viewModel.showBusyWhenSaving(false);
     GlobalConfiguration.viewModel.loadResponseFromSaves(true);
     GlobalConfiguration.viewModel.validateOnLoadFromDto(true);
+    GlobalConfiguration.viewModel.setupValidationAutomatically(true);
 
+    ko.validation.init({
+        grouping: {
+            deep: false,
+            live: true,
+            observable: true
+        }
+    });
 
     export interface LoadableViewModel {
         loadFromDto: (data: any) => void;
@@ -245,16 +263,21 @@ module Coalesce {
             Returns true if there are no client-side validation issues.
             Saves will be prevented if this returns false.
         */
-        public isValid = (): boolean => this.errors().length == 0;
+        public isValid = (): boolean => this.errors == null || this.errors().length == 0;
 
         /**
             Triggers any validation messages to be shown, and returns a bool that indicates if there are any validation errors.
         */
         public validate = (): boolean => {
-            this.errors.showAllMessages();
-            this.warnings.showAllMessages();
+            if (this.errors) {
+                this.errors.showAllMessages();
+                this.warnings.showAllMessages();
+            }
             return this.isValid();
         };
+
+        /** Setup knockout validation on this ViewModel. This is done automatically unless disabled with setupValidationAutomatically(false) */
+        public setupValidation: () => void;
 
         /** True if the object is loading. */
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);

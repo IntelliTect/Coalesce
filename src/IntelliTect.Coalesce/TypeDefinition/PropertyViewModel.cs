@@ -203,6 +203,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                // Don't bother with validation on non-editable fields.
+                if (!CanWrite) return null;
 
                 var isRequired = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool?;
                 var minValue = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinValue)) as double?;
@@ -225,6 +227,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
                 var validations = new List<string>();
+
+                if (Type.IsDate)
+                {
+                    validations.Add("moment: { unix: true }");
+                }
 
                 if (isRequired.HasValue && isRequired.Value)
                 {

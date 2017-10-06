@@ -17,6 +17,10 @@ namespace IntelliTect.Coalesce.Helpers
 
             html.AppendLine($@"
     <script>
+        @if (!ViewBag.Editable)
+        {{
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }}
         var {model.ListViewModelObjectName} = new ListViewModels.{model.ListViewModelClassName}();
         
         // Set up parent info based on the URL.

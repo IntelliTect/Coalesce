@@ -57,12 +57,15 @@ ko.bindingHandlers.select2Ajax = {
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
-                        return {
+                        var data = {
                             search: params.term,
                             page: params.page,
                             pageSize: pageSize,
-                            fields: allBindings.get('idField') + "," + allBindings.get('textField')
+                            fields: allBindings.get('idField') + "," + allBindings.get('textField'),
                         };
+                        if (!allBindings.has('cache') || !allBindings.get('cache'))
+                            data["_"] = new Date().getTime();
+                        return data;
                     },
                     processResults: function (data, params) {
                         if (allBindings.has('idField')) {
@@ -85,7 +88,7 @@ ko.bindingHandlers.select2Ajax = {
                             }
                         };
                     },
-                    cache: "true" //(allBindings.get('cache') || false).toString(),
+                    cache: (allBindings.has('cache') ? allBindings.get('cache') : false).toString(),
                 },
                 //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
                 //minimumInputLength: 1,
@@ -201,10 +204,13 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
-                        return {
+                        var data = {
                             search: params.term,
                             page: params.page
                         };
+                        if (!allBindings.has('cache') || !allBindings.get('cache'))
+                            data["_"] = new Date().getTime();
+                        return data;
                     },
                     processResults: function (data, params) {
                         params.page = params.page || 1;
@@ -218,7 +224,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             }
                         };
                     },
-                    cache: "true" //(allBindings.get('cache') || false).toString(),
+                    cache: (allBindings.has('cache') ? allBindings.get('cache') : false).toString(),
                 },
                 //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
                 //minimumInputLength: 1,
@@ -363,11 +369,14 @@ ko.bindingHandlers.select2AjaxText = {
                     delay: 250,
                     data: function (params) {
                         myParams = params
-                        return {
+                        var data = {
                             property: allBindings.get('property'),
                             search: params.term,
                             page: params.page
                         };
+                        if (!allBindings.has('cache') || !allBindings.get('cache'))
+                            data["_"] = new Date().getTime();
+                        return data;
                     },
                     processResults: function (data, page) {
                         var result = [];
@@ -392,7 +401,7 @@ ko.bindingHandlers.select2AjaxText = {
                         }
                         return { results: result };
                     },
-                    cache: "true" //(allBindings.get('cache') || false).toString(),
+                    cache: (allBindings.has('cache') ? allBindings.get('cache') : false).toString(),
                 },
                 //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
                 //minimumInputLength: 1,

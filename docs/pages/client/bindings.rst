@@ -50,6 +50,9 @@ Input Bindings
 
             openOnFocus
                 If true, the dropdown will open when tabbed to. Browser support may be incomplete in some versions of IE.
+				
+			cache
+				Controls caching behavior of the AJAX request. Defaults to false. Seems to only affect IE - Chrome will never cache JSON ajax requests.
 
             
 
@@ -88,6 +91,9 @@ Input Bindings
 
             openOnFocus
                 If true, the dropdown will open when tabbed to. Browser support may be incomplete in some versions of IE.
+				
+			cache
+				Controls caching behavior of the AJAX request. Defaults to false. Seems to only affect IE - Chrome will never cache JSON ajax requests.
 
 
     select2AjaxText

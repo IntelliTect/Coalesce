@@ -7,7 +7,11 @@ module Coalesce {
             var lookup: { [k: string]: T; } = {};
             for (let i = 0; i < array.length; i++) {
                 var item = array[i];
-                lookup[ko.unwrap(item[idField]).toString()] = item;
+                var key = ko.unwrap(item[idField]);
+
+                // If an item is missing a value for a key, we can't look it up.
+                // This is OK, because keyless items will never match an incoming item anyway.
+                if (key != null) lookup[key.toString()] = item;
             }
             return lookup;
         }

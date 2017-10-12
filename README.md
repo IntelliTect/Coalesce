@@ -11,7 +11,7 @@ Branch 2.0: [![Build status](https://ci.appveyor.com/api/projects/status/mev829i
 Branch master: [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/master?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/master)
 
 ## Bottom Line
-Projects that used to take us a three weeks now take one week. 
+Projects that used to take us three weeks now take one week. 
 
 ## Learn More
 You can find a sample app with documentation here: http://coalesce.intellitect.com/
@@ -30,7 +30,7 @@ This project gives you everything you need to start building an amazing web site
 * Building business logic
 * Crafting awesome web front ends
 
-### Coalesce automates laborious laborious tasks
+### Coalesce automates laborious tasks
 * Generating a robust API layer with searching, sorting, filtering, paging, etc. 
 * Generating easy to use View Models for easy data binding on the client side using Knockout
 * Pulling all (or most of) the data for your page in a single AJAX call. This includes the ability to gather the correct children.
@@ -43,7 +43,7 @@ This project gives you everything you need to start building an amazing web site
 ## Why Coalesce
 Coalesce was created when developers at IntelliTect, after writing many web sites, got bored. We got bored of writing really awesome API and View Model code because making this code awesome takes lots of work. However, it is boring because, while not all the same, it ended up being very repetitive. Supporting paging, sorting, searching, data binding, security, etc. for every type of object is laborious. We also really disliked the auto generated MVC CRUD pages and thought users had the right to a better admin experience. 
 
-Specifically, we had a large line-of-business applicaiton to write which had a SPA page with over 300 fields on it. The thought of writing this by hand was just too daunting especially when the page needed to be saved as the edit were made. 
+Specifically, we had a large line-of-business application to write which had a SPA page with over 300 fields on it. The thought of writing this by hand was just too daunting especially when the page needed to be saved as edits were made. 
 
 With Coalesce, every time we found a great thing to add to our APIs, view models or admin pages, we could just add it once and it was immediately available in all our classes. 
 
@@ -51,7 +51,7 @@ Just as a note, we have tried to make Coalesce really easy to pick up and use. S
 
 
 ## Design Methodology
-Being early adopters of ASP.NET 5/Core, we took cues from the Microsoft team to limit the cognative load of using Coalesce. Here are some of the guiding tenants.
+Being early adopters of ASP.NET 5/Core, we took cues from the Microsoft team to limit the cognitive load of using Coalesce. Here are some of the guiding tenants.
 * Writing code should be really fun
 * I want to spend my time doing things that require thought and creativity not turning the crank
 * Keep Coalesce focused on solving the task at hand and resist adding the ability to send email
@@ -65,7 +65,7 @@ Knockout is the default data binding mechanism for Coalesce. After using Knockou
 
 At the core, all Coalesce really needs is a data binding mechanism. While Knockout is not the newest and shiniest thing on the block it is a very robust data-binding framework which is exactly what we need. 
 
-We have had great success with what we term hybrid-SPA applications. This is an application where which has several main pages which load via MVC, but once on the page all the interaction is done via AJAX. 
+We have had great success with what we term hybrid-SPA applications. This is an application that has several main pages which load via MVC, but once on the page all the interaction is done via AJAX. 
 
 With this in mind, we have tried to build Coalesce so that another framework could be easily added at a later date. 
 

@@ -1,7 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Knockout code generation for Coalesce</Description>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>IntelliTect</Authors>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AssemblyName>IntelliTect.Coalesce.CodeGeneration.Knockout</AssemblyName>
+    <PackageId>IntelliTect.Coalesce.CodeGeneration.Knockout</PackageId>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <OutputType>Library</OutputType>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <DebugType>full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
   </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Templates/**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
+  </ItemGroup>
 
 </Project>

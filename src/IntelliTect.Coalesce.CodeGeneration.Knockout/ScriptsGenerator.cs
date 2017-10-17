@@ -14,11 +14,12 @@ using IntelliTect.Coalesce.Validation;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Scripts;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Scripts
+namespace IntelliTect.Coalesce.CodeGeneration.Knockout
 {
     public class ScriptsGenerator
     {
@@ -36,7 +37,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             DataProject = dataProject;
         }
 
-        internal Task Generate(CommandLineGeneratorModel model)
+        public Task Generate(CommandLineGeneratorModel model)
         {
             Dictionary<string, Dictionary<int, string>> enumValues = new Dictionary<string, Dictionary<int, string>>();
 
@@ -372,43 +373,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                             destinationPath: scriptsOutputPath);
                 }
 
-                if (!coalescePathExisted)
-                {
-                    // Only copy the typings on a brand new project. Never attempt to update them, since the end user
-                    // may want to update their libraries, get rid of some (well, you probably can't), or update versions.
-                    CopyToDestination(
-                        fileName: "tsd.d.ts",
-                        sourcePath: "Templates/typings",
-                        destinationPath: Path.Combine(WebProject.ProjectPath, "typings"));
-
-                    string[] typings =
-                    {
-                        "bootstrap",
-                        "bootstrap.v3.datetimepicker",
-                        "jquery",
-                        "knockout",
-                        "knockout.validation",
-                        "moment",
-                    };
-                    foreach (var fileName in typings)
-                    {
-                        CopyToDestination(
-                                fileName: fileName + ".d.ts",
-                                sourcePath: "Templates/typings/" + fileName,
-                                destinationPath: Path.Combine(
-                                    WebProject.ProjectPath,
-                                    "typings",
-                                    fileName));
-                    }
-
-                    // This one is a special snowflake
-                    CopyToDestination(
-                       fileName: "moment-node.d.ts",
-                       sourcePath: "Templates/typings/moment",
-                       destinationPath: Path.Combine(WebProject.ProjectPath, "typings/moment"));
-                }
-
-
                 string[] generationTemplates =
                 {
                     "ApiController.cshtml",
@@ -433,52 +397,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                 }
             }
 
-            var stylesOutputPath = Path.Combine(
-                WebProject.ProjectPath,
-                areaLocation,
-                "Styles");
-            CopyToOriginalsAndDestinationIfNeeded(
-                    alertIfNoCopy: false,
-                    fileName: "site.scss",
-                    sourcePath: "Templates/Styles",
-                    originalsPath: originalsPath,
-                    destinationPath: stylesOutputPath);
-
-            // if generating an area, assume the root site already has all "plumbing" needed
-            if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
-            {
-                // Copy files from ProjectConfig if they don't already exist
-                string[] configFiles =
-                {
-                    "bower.json",
-                    ".bowerrc",
-                    "gulpfile.js",
-                    "package.json",
-                    "tsconfig.template.json",
-                    "tsd.json",
-                };
-                foreach (var fileName in configFiles)
-                {
-                    CopyToOriginalsAndDestinationIfNeeded(
-                            alertIfNoCopy: false,
-                            fileName: fileName,
-                            sourcePath: "Templates/ProjectConfig",
-                            originalsPath: originalsPath,
-                            destinationPath: WebProject.ProjectPath);
-                }
-
-                CopyToDestination(
-                        fileName: "CoalesceScaffoldingReadme.txt",
-                        sourcePath: "Templates",
-                        destinationPath: WebProject.ProjectPath);
-            }
-
-
-            CopyToDestination(
-                    fileName: "CoalesceScaffoldingReadme.txt",
-                    sourcePath: "Templates",
-                    destinationPath: WebProject.ProjectPath);
-
             string destPath = Path.Combine(WebProject.ProjectPath, areaLocation, "Views", "_ViewImports.cshtml");
             CopyToOriginalsAndDestinationIfNeeded(
                     fileName: "_ViewImports.cshtml",
@@ -486,7 +404,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
                     originalsPath: originalTemplatesPath,
                     destinationPath: activeTemplatesPath);
             await Generate("_ViewImports.cshtml", destPath, null);
-
 
 
             destPath = Path.Combine(sharedViewOutputPath, "_AdminLayout.cshtml");
@@ -498,10 +415,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
             await Generate("_AdminLayout.cshtml", destPath, commandLineGeneratorModel.AreaLocation);
         }
 
-        private Task Generate(string templateName, string outputPath, object model)
+
+        private async Task WriteFileAsync(Stream contentsStream, string outputPath)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            if (File.Exists(outputPath))
+            {
+                if (!FileUtilities.HasDifferences(contentsStream, outputPath))
+                {
+                    return;
+                }
+
+                // Remove read only flag, if it exists.
+                // Commented out because I don't know why we do this. If something is read only, its probably that way on purpose.
+                // File.SetAttributes(outputPath, File.GetAttributes(outputPath) & ~FileAttributes.ReadOnly);
+            }
+
+            using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            {
+                contentsStream.Seek(0, SeekOrigin.Begin);
+                await contentsStream.CopyToAsync(fileStream);
+            };
+        }
+
+        private async Task Generate(string templateName, string outputPath, object model)
         {
             var template = TemplateProvider.GetCompiledTemplate(Path.Combine(ActiveTemplatesPath, templateName));
-            return TemplateProvider.RunTemplateAsync(template, model, outputPath);
+
+            using (var sourceStream = await TemplateProvider.RunTemplateAsync(template, model, outputPath))
+            {
+                await WriteFileAsync(sourceStream, outputPath);
+            }
         }
 
         class GenerationOutputContext : IDisposable

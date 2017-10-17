@@ -21,7 +21,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Generation
+namespace IntelliTect.Coalesce.CodeGeneration.Templating
 {
     public class RazorTemplateProvider
     {
@@ -114,7 +114,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             }
         }
 
-        public async Task RunTemplateAsync(CoalesceTemplate template, dynamic templateModel, string outputPath)
+        public async Task<Stream> RunTemplateAsync(CoalesceTemplate template, dynamic templateModel, string outputPath)
         {
             template.Model = templateModel;
 
@@ -135,34 +135,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, new AdhocWorkspace());
                 result = root.ToFullString();
             }
-
-            using (var sourceStream = new MemoryStream(Encoding.UTF8.GetBytes(result)))
-            {
-                await WriteFileAsync(sourceStream, outputPath);
-            }
-        }
-
-        private async Task WriteFileAsync(Stream contentsStream, string outputPath)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            if (File.Exists(outputPath))
-            {
-                if (!FileUtilities.HasDifferences(contentsStream, outputPath))
-                {
-                    return;
-                }
-
-                // Remove read only flag, if it exists.
-                // Commented out because I don't know why we do this. If something is read only, its probably that way on purpose.
-                // File.SetAttributes(outputPath, File.GetAttributes(outputPath) & ~FileAttributes.ReadOnly);
-            }
-
-            using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-            {
-                contentsStream.Seek(0, SeekOrigin.Begin);
-                await contentsStream.CopyToAsync(fileStream);
-            };
+            
+            return new MemoryStream(Encoding.UTF8.GetBytes(result));
         }
     }
 }

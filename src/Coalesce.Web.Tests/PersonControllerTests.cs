@@ -263,7 +263,7 @@ namespace Coalesce.Web.Tests
             var generic = new GenericListResult<Person, PersonDtoGen>(thing);
 
             var result = await _pc.List(null, null, null, null, null, null, "BorCPeople", null, "1", null, null, null, null, null, null, null, null);
-            Assert.Equal(0, result.List.Count());
+            Assert.Empty(result.List);
         }
 
         [Fact]

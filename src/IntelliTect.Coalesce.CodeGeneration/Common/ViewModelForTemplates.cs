@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Common
             }
     }
 
-        public string AreaName { get; internal set; }
+        public string AreaName { get; set; }
 
         public string ModulePrefix { get; set; }
     }

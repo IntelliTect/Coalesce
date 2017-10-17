@@ -95,6 +95,10 @@
     {
 
     <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
         var caseProductList = new ListViewModels.CaseProductList();
         
         // Set up parent info based on the URL.

@@ -28,12 +28,12 @@ namespace Coalesce.Web.Tests
             Assert.NotNull(c.DataSource);
 
             var result = await c.List(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-            Assert.Equal(result.List.Count(), 10);
-            Assert.Equal(result.TotalCount, 10);
-            Assert.Equal(result.PageCount, 1);
+            Assert.Equal(10, result.List.Count());
+            Assert.Equal(10, result.TotalCount);
+            Assert.Equal(1, result.PageCount);
 
             var first = await c.Get("1");
-            Assert.Equal(first.CompanyId, 1);
+            Assert.Equal(1, first.CompanyId);
         }
     }
 }

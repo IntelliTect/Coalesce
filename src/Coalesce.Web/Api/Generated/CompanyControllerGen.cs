@@ -1,20 +1,20 @@
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+using Coalesce.Web.Models;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Coalesce.Web.Models;
-using Coalesce.Domain;
-using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Api
 {

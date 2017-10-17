@@ -115,6 +115,10 @@
     {
 
     <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
         var companyList = new ListViewModels.CompanyList();
         
         // Set up parent info based on the URL.

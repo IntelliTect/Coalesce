@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using Xunit;
-using System.Management;
 using Coalesce.Web.Tests.Helpers;
 
 namespace Coalesce.Web.Tests
@@ -59,7 +58,7 @@ namespace Coalesce.Web.Tests
 
             IWebElement personLink = driver.FindElement(By.PartialLinkText("Person"));
             personLink.Click();
-            driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
             IWebElement editLink = driver.FindElement(By.CssSelector(@"table tbody tr:nth-child(1) td:nth-child(11) > div > a"));
             editLink.Click();
@@ -86,7 +85,7 @@ namespace Coalesce.Web.Tests
             driver.Navigate().Refresh();
 
             IWebElement nametd = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(3) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div"));
-            Assert.Equal(nametd.Text, "AdamTest");
+            Assert.Equal("AdamTest", nametd.Text);
 
             // Table Edit
             IWebElement edit = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(1) > div > div.btn-group.pull-right > a:nth-child(3)"));
@@ -108,7 +107,7 @@ namespace Coalesce.Web.Tests
             readonlyButton.Click();
 
             nametd = driver.FindElement(By.CssSelector(@"body > div > div:nth-child(3) > div > table > tbody > tr:nth-child(1) > td:nth-child(2) > div"));
-            Assert.Equal(nametd.Text, "Adam");
+            Assert.Equal("Adam", nametd.Text);
 
             // Show the final results.
             Thread.Sleep(1000);

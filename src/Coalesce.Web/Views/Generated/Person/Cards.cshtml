@@ -334,6 +334,10 @@
     {
 
     <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
         var personList = new ListViewModels.PersonList();
         
         // Set up parent info based on the URL.

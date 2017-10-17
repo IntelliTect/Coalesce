@@ -1,9 +1,9 @@
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+using Coalesce.Web;
 using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Coalesce.Web;
-using Coalesce.Domain;
-using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Controllers
 {

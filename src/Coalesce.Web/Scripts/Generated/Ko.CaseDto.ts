@@ -70,7 +70,8 @@ module ViewModels {
             }
             this.isLoading(false);
             this.isDirty(false);
-            this.validate();
+    
+            if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
 
         /** Save the object into a DTO */
@@ -82,36 +83,29 @@ module ViewModels {
 
             return dto;
         }
-
+        
+        public setupValidation = () => {
+            if (this.errors !== null) return;
+            this.errors = ko.validation.group([
+            ]);
+            this.warnings = ko.validation.group([
+            ]);
+        }
+    
+        // Computed Observable for edit URL
+        public editUrl = ko.pureComputed(() => {
+            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseId();
+        });
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            
-            ko.validation.init({
-                grouping: {
-                    deep: true,
-                    live: true,
-                    observable: true
-                }
-            });
 
-            // SetupValidation {
-            
-            self.errors = ko.validation.group([
-                self.caseId,
-                self.title,
-                self.assignedToName,
-            ]);
-            self.warnings = ko.validation.group([
-            ]);
-
-            // Computed Observable for edit URL
-            self.editUrl = ko.computed(function() {
-                return self.coalesceConfig.baseViewUrl() + self.viewController + "/CreateEdit?id=" + self.caseId();
-            });
+            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
+                this.setupValidation();
+            }
 
             // Create computeds for display for objects
 

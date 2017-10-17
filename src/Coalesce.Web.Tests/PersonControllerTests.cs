@@ -82,11 +82,12 @@ namespace Coalesce.Web.Tests
         public async void ListIncludesDefault()
         {
             var result = await _pc.CustomList(personId: "1");
-            var person = result.List.Cast<PersonDtoGen>().First();
+            var list = result.List.Cast<PersonDtoGen>();
+            var person = list.First();
             Assert.NotNull(person.Company);
             // GenFu's company names change.
             Assert.Equal("La Pocatière", person.Company.City);
-            Assert.Equal(1, result.List.Count());
+            Assert.Single(list);
         }
 
         //[Fact]

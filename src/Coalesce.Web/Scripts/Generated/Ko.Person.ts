@@ -357,16 +357,16 @@ module ViewModels {
             this.email(data.email);
             this.gender(data.gender);
             if (data.birthDate == null) this.birthDate(null);
-            else if (this.birthDate() == null || !this.birthDate().isSame(moment(data.birthDate))){
-                this.birthDate(moment(data.birthDate));
+            else if (this.birthDate() == null || this.birthDate().valueOf() != new Date(data.birthDate).getTime()){
+                this.birthDate(moment(new Date(data.birthDate)));
             }
             if (data.lastBath == null) this.lastBath(null);
-            else if (this.lastBath() == null || !this.lastBath().isSame(moment(data.lastBath))){
-                this.lastBath(moment(data.lastBath));
+            else if (this.lastBath() == null || this.lastBath().valueOf() != new Date(data.lastBath).getTime()){
+                this.lastBath(moment(new Date(data.lastBath)));
             }
             if (data.nextUpgrade == null) this.nextUpgrade(null);
-            else if (this.nextUpgrade() == null || !this.nextUpgrade().isSame(moment(data.nextUpgrade))){
-                this.nextUpgrade(moment(data.nextUpgrade));
+            else if (this.nextUpgrade() == null || this.nextUpgrade().valueOf() != new Date(data.nextUpgrade).getTime()){
+                this.nextUpgrade(moment(new Date(data.nextUpgrade)));
             }
             this.personStatsId(data.personStatsId);
             this.timeZone(data.timeZone);
@@ -377,7 +377,8 @@ module ViewModels {
             }
             this.isLoading(false);
             this.isDirty(false);
-            this.validate();
+    
+            if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
 
         /** Save the object into a DTO */
@@ -408,59 +409,38 @@ module ViewModels {
 
             return dto;
         }
-
+        
+        public setupValidation = () => {
+            if (this.errors !== null) return;
+            this.errors = ko.validation.group([
+                this.firstName.extend({ minLength: 2, maxLength: 75 }),
+                this.lastName.extend({ minLength: 3, maxLength: 100 }),
+                this.birthDate.extend({ moment: { unix: true } }),
+                this.lastBath.extend({ moment: { unix: true } }),
+                this.nextUpgrade.extend({ moment: { unix: true } }),
+                this.companyId.extend({ required: {params: true, message: "Company is required."} }),
+            ]);
+            this.warnings = ko.validation.group([
+            ]);
+        }
+    
+        // Computed Observable for edit URL
+        public editUrl = ko.pureComputed(() => {
+            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.personId();
+        });
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            
-            ko.validation.init({
-                grouping: {
-                    deep: true,
-                    live: true,
-                    observable: true
-                }
-            });
 
-            // SetupValidation {
-			self.firstName = self.firstName.extend({ minLength: 2, maxLength: 75 });
-			self.lastName = self.lastName.extend({ minLength: 3, maxLength: 100 });
-			self.birthDate = self.birthDate.extend({ moment: { unix: true },  });
-			self.lastBath = self.lastBath.extend({ moment: { unix: true },  });
-			self.nextUpgrade = self.nextUpgrade.extend({ moment: { unix: true },  });
-			self.companyId = self.companyId.extend({ required: {params: true, message: "Company is required."} });
-            
-            self.errors = ko.validation.group([
-                self.personId,
-                self.title,
-                self.firstName,
-                self.lastName,
-                self.email,
-                self.gender,
-                self.casesAssigned,
-                self.casesReported,
-                self.birthDate,
-                self.lastBath,
-                self.nextUpgrade,
-                self.personStatsId,
-                self.personStats,
-                self.timeZone,
-                self.name,
-                self.companyId,
-                self.company,
-            ]);
-            self.warnings = ko.validation.group([
-            ]);
-
-            // Computed Observable for edit URL
-            self.editUrl = ko.computed(function() {
-                return self.coalesceConfig.baseViewUrl() + self.viewController + "/CreateEdit?id=" + self.personId();
-            });
+            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
+                this.setupValidation();
+            }
 
             // Create computeds for display for objects
-			self.personStatsText = ko.computed(function()
+			self.personStatsText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.personStats() && self.personStats().personStatsId()) {
 					return self.personStats().personStatsId().toString();
@@ -468,7 +448,7 @@ module ViewModels {
 					return "None";
 				}
 			});
-			self.companyText = ko.computed(function()
+			self.companyText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.company() && self.company().altName()) {
 					return self.company().altName().toString();

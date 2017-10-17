@@ -16,6 +16,7 @@ module ViewModels {
         // Loads this object from a data transfer object received from the server.
         public loadFromDto: (data: any) => void;
         public parent: any;
+        public parentCollection: any;
 
 
         constructor(newItem?: any, parent?: any){

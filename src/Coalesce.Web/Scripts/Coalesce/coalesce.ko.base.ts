@@ -52,14 +52,32 @@ module Coalesce {
     export class ViewModelConfiguration<T extends BaseViewModel<T>> extends CoalesceConfiguration<T> {
         /** Time to wait after a change is seen before auto-saving (if autoSaveEnabled is true). Acts as a debouncing timer for multiple simultaneous changes. */
         public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
+
         /** Determines whether changes to a model will be automatically saved after saveTimeoutMs milliseconds have elapsed. */
         public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
+
         /** Determines whether or not changes to many-to-many collection properties will automatically trigger a save call to the server or not. */
         public autoSaveCollectionsEnabled = this.prop<boolean>("autoSaveCollectionsEnabled");
+
         /** Whether to invoke onStartBusy and onFinishBusy during saves. */
         public showBusyWhenSaving = this.prop<boolean>("showBusyWhenSaving");
+
         /** Whether or not to reload the ViewModel with the state of the object received from the server after a call to .save(). */
         public loadResponseFromSaves = this.prop<boolean>("loadResponseFromSaves");
+
+        /**
+            Whether or not to validate the model after loading it from a DTO from the server.
+            Disabling this can improve performance in some cases.
+        */
+        public validateOnLoadFromDto = this.prop<boolean>("validateOnLoadFromDto");
+
+        /**
+            Whether or not validation on a ViewModel should be setup in its constructor,
+            or if validation must be set up manually by calling viewModel.setupValidation().
+            Turning this off can improve performance in read-only scenarios.
+        */
+        public setupValidationAutomatically = this.prop<boolean>("setupValidationAutomatically");
+
         /**
             An optional callback to be called when an object is loaded from a response from the server.
             Callback will be called after all properties on the ViewModel have been set from the server response.
@@ -102,7 +120,22 @@ module Coalesce {
     GlobalConfiguration.viewModel.autoSaveCollectionsEnabled(true);
     GlobalConfiguration.viewModel.showBusyWhenSaving(false);
     GlobalConfiguration.viewModel.loadResponseFromSaves(true);
+    GlobalConfiguration.viewModel.validateOnLoadFromDto(true);
+    GlobalConfiguration.viewModel.setupValidationAutomatically(true);
 
+    ko.validation.init({
+        grouping: {
+            deep: false,
+            live: true,
+            observable: true
+        }
+    });
+
+    export interface LoadableViewModel {
+        loadFromDto: (data: any) => void;
+        parent: any;
+        parentCollection: any;
+    }
 
     export class BaseViewModel<T extends BaseViewModel<T>> {
 
@@ -230,16 +263,21 @@ module Coalesce {
             Returns true if there are no client-side validation issues.
             Saves will be prevented if this returns false.
         */
-        public isValid = (): boolean => this.errors().length == 0;
+        public isValid = (): boolean => this.errors == null || this.errors().length == 0;
 
         /**
             Triggers any validation messages to be shown, and returns a bool that indicates if there are any validation errors.
         */
         public validate = (): boolean => {
-            this.errors.showAllMessages();
-            this.warnings.showAllMessages();
+            if (this.errors) {
+                this.errors.showAllMessages();
+                this.warnings.showAllMessages();
+            }
             return this.isValid();
         };
+
+        /** Setup knockout validation on this ViewModel. This is done automatically unless disabled with setupValidationAutomatically(false) */
+        public setupValidation: () => void;
 
         /** True if the object is loading. */
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -346,7 +384,7 @@ module Coalesce {
 
 
         /** Loads the object from the server based on the id specified. If no id is specified, the current id, is used if one is set. */
-        public load = (id: any, callback?: (self: T) => void): JQueryPromise<any> | undefined => {
+        public load = (id?: any, callback?: (self: T) => void): JQueryPromise<any> | undefined => {
             if (!id) {
                 id = this[this.primaryKeyName]();
             }

@@ -1,16 +1,16 @@
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+using Coalesce.Web.Models;
+using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Collections.Generic;
 using System.Security.Claims;
-using Coalesce.Web.Models;
-using Coalesce.Domain;
-using Coalesce.Domain.External;
 
 using static Coalesce.Domain.Case;
 
@@ -37,15 +37,10 @@ namespace Coalesce.Web.Models
         public DevTeamDtoGen DevTeamAssigned { get; set; }
 
         // Create a new version of this object or use it from the lookup.
-        public static CaseDtoGen Create(Coalesce.Domain.Case obj, ClaimsPrincipal user = null, string includes = null,
-                                   Dictionary<object, object> objects = null, IncludeTree tree = null)
+        public static CaseDtoGen Create(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
         {
-            // Return null of the object is null;
             if (obj == null) return null;
-
-            if (objects == null) objects = new Dictionary<object, object>();
-
-            includes = includes ?? "";
+            var includes = context.Includes;
 
             // Applicable includes for Case
 
@@ -54,19 +49,15 @@ namespace Coalesce.Web.Models
             bool excludePersonListGen = includes == "PersonListGen";
 
             // Applicable roles for Case
-            if (user != null)
-            {
-            }
 
 
 
             // See if the object is already created, but only if we aren't restricting by an includes tree.
             // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
-            if (tree == null && objects.ContainsKey(obj))
-                return (CaseDtoGen)objects[obj];
+            if (tree == null && context.TryGetMapping(obj, out CaseDtoGen existing)) return existing;
 
             var newObject = new CaseDtoGen();
-            if (tree == null) objects.Add(obj, newObject);
+            if (tree == null) context.AddMapping(obj, newObject);
             // Fill the properties of the object.
             newObject.CaseKey = obj.CaseKey;
             newObject.Title = obj.Title;
@@ -81,19 +72,19 @@ namespace Coalesce.Web.Models
             if (!(excludePersonListGen))
             {
                 if (tree == null || tree[nameof(newObject.AssignedTo)] != null)
-                    newObject.AssignedTo = PersonDtoGen.Create(obj.AssignedTo, user, includes, objects, tree?[nameof(newObject.AssignedTo)]);
+                    newObject.AssignedTo = PersonDtoGen.Create(obj.AssignedTo, context, tree?[nameof(newObject.AssignedTo)]);
 
             }
             if (!(excludePersonListGen))
             {
                 if (tree == null || tree[nameof(newObject.ReportedBy)] != null)
-                    newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, user, includes, objects, tree?[nameof(newObject.ReportedBy)]);
+                    newObject.ReportedBy = PersonDtoGen.Create(obj.ReportedBy, context, tree?[nameof(newObject.ReportedBy)]);
 
             }
             var propValCaseProducts = obj.CaseProducts;
             if (propValCaseProducts != null && (tree == null || tree[nameof(newObject.CaseProducts)] != null))
             {
-                newObject.CaseProducts = propValCaseProducts.AsQueryable().OrderBy("CaseProductId ASC").ToList().Select(f => CaseProductDtoGen.Create(f, user, includes, objects, tree?[nameof(newObject.CaseProducts)])).ToList();
+                newObject.CaseProducts = propValCaseProducts.AsQueryable().OrderBy("CaseProductId ASC").ToList().Select(f => CaseProductDtoGen.Create(f, context, tree?[nameof(newObject.CaseProducts)])).ToList();
             }
             else if (propValCaseProducts == null && tree?[nameof(newObject.CaseProducts)] != null)
             {
@@ -101,24 +92,23 @@ namespace Coalesce.Web.Models
             }
 
 
-            newObject.DevTeamAssigned = DevTeamDtoGen.Create(obj.DevTeamAssigned, user, includes, objects, tree?[nameof(newObject.DevTeamAssigned)]);
+            newObject.DevTeamAssigned = DevTeamDtoGen.Create(obj.DevTeamAssigned, context, tree?[nameof(newObject.DevTeamAssigned)]);
 
             return newObject;
         }
 
         // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public CaseDtoGen CreateInstance(Coalesce.Domain.Case obj, ClaimsPrincipal user = null, string includes = null,
-                                Dictionary<object, object> objects = null, IncludeTree tree = null)
+        public CaseDtoGen CreateInstance(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
         {
-            return Create(obj, user, includes, objects, tree);
+            return Create(obj, context, tree);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(Coalesce.Domain.Case entity, ClaimsPrincipal user = null, string includes = null)
+        public void Update(Coalesce.Domain.Case entity, IMappingContext context)
         {
-            includes = includes ?? "";
+            var includes = context.Includes;
 
-            if (OnUpdate(entity, user, includes)) return;
+            if (OnUpdate(entity, context)) return;
 
             // Applicable includes for Case
 
@@ -127,9 +117,7 @@ namespace Coalesce.Web.Models
             bool excludePersonListGen = includes == "PersonListGen";
 
             // Applicable roles for Case
-            if (user != null)
-            {
-            }
+
 
             entity.Title = Title;
             entity.Description = Description;

@@ -89,6 +89,10 @@
     {
 
     <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
         var productList = new ListViewModels.ProductList();
         
         // Set up parent info based on the URL.

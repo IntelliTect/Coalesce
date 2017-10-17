@@ -171,8 +171,8 @@ module ViewModels {
             this.title(data.title);
             this.description(data.description);
             if (data.openedAt == null) this.openedAt(null);
-            else if (this.openedAt() == null || !this.openedAt().isSame(moment(data.openedAt))){
-                this.openedAt(moment(data.openedAt));
+            else if (this.openedAt() == null || this.openedAt().valueOf() != new Date(data.openedAt).getTime()){
+                this.openedAt(moment(new Date(data.openedAt)));
             }
             this.assignedToId(data.assignedToId);
             this.reportedById(data.reportedById);
@@ -185,7 +185,8 @@ module ViewModels {
             }
             this.isLoading(false);
             this.isDirty(false);
-            this.validate();
+    
+            if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
 
         /** Save the object into a DTO */
@@ -215,52 +216,34 @@ module ViewModels {
 
             return dto;
         }
-
+        
+        public setupValidation = () => {
+            if (this.errors !== null) return;
+            this.errors = ko.validation.group([
+                this.title.extend({ required: {params: true, message: "You must enter a title for the case."} }),
+                this.openedAt.extend({ moment: { unix: true } }),
+            ]);
+            this.warnings = ko.validation.group([
+            ]);
+        }
+    
+        // Computed Observable for edit URL
+        public editUrl = ko.pureComputed(() => {
+            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseKey();
+        });
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            
-            ko.validation.init({
-                grouping: {
-                    deep: true,
-                    live: true,
-                    observable: true
-                }
-            });
 
-            // SetupValidation {
-			self.title = self.title.extend({ required: {params: true, message: "You must enter a title for the case."} });
-			self.openedAt = self.openedAt.extend({ moment: { unix: true },  });
-            
-            self.errors = ko.validation.group([
-                self.caseKey,
-                self.title,
-                self.description,
-                self.openedAt,
-                self.assignedToId,
-                self.assignedTo,
-                self.reportedById,
-                self.reportedBy,
-                self.attachment,
-                self.severity,
-                self.status,
-                self.caseProducts,
-                self.devTeamAssignedId,
-                self.devTeamAssigned,
-            ]);
-            self.warnings = ko.validation.group([
-            ]);
-
-            // Computed Observable for edit URL
-            self.editUrl = ko.computed(function() {
-                return self.coalesceConfig.baseViewUrl() + self.viewController + "/CreateEdit?id=" + self.caseKey();
-            });
+            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
+                this.setupValidation();
+            }
 
             // Create computeds for display for objects
-			self.assignedToText = ko.computed(function()
+			self.assignedToText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.assignedTo() && self.assignedTo().name()) {
 					return self.assignedTo().name().toString();
@@ -268,7 +251,7 @@ module ViewModels {
 					return "None";
 				}
 			});
-			self.reportedByText = ko.computed(function()
+			self.reportedByText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.reportedBy() && self.reportedBy().name()) {
 					return self.reportedBy().name().toString();
@@ -276,7 +259,7 @@ module ViewModels {
 					return "None";
 				}
 			});
-			self.devTeamAssignedText = ko.computed(function()
+			self.devTeamAssignedText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.devTeamAssigned() && self.devTeamAssigned().name()) {
 					return self.devTeamAssigned().name().toString();

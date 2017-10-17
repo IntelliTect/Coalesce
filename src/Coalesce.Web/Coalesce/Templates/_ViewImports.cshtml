@@ -1,6 +1,6 @@
 ﻿@inherits IntelliTect.Coalesce.Templating.CoalesceTemplate
 @using IntelliTect.Coalesce.TypeDefinition
-@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System").OrderBy(n => n))
 {
 @:@@using @ns;
 }

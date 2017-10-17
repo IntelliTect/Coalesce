@@ -12,6 +12,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Common;
 using Xunit;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 
 namespace Coalesce.Web.Tests
 {
@@ -25,10 +28,13 @@ namespace Coalesce.Web.Tests
         public SecurityTests()
         {
             _process = Processes.StartDotNet();
-            _dataContext = MsBuildProjectContextBuilder.CreateContext(@"..\..\..\..\..\Coalesce.Domain");
+            _dataContext = RoslynProjectContext.CreateContext(new ProjectConfiguration
+            {
+                ProjectFile = @"..\..\..\..\..\Coalesce.Domain.csproj"
+            });
 
-            var typeLocator = IntelliTect.Coalesce.CodeGeneration.Scripts.ModelTypesLocator.FromProjectContext(_dataContext);
-            var contextSymbol = ValidationUtil.ValidateType("AppDbContext", "dataContext", typeLocator, throwWhenNotFound: false);
+            var typeLocator = _dataContext.TypeLocator;
+            var contextSymbol = typeLocator.FindType("AppDbContext", throwWhenNotFound: false);
             _models = ReflectionRepository
                             .AddContext(contextSymbol)
                             .Where(m => m.PrimaryKey != null)
@@ -50,17 +56,17 @@ namespace Coalesce.Web.Tests
                 // Check for any issues from an anonymous user
                 var anonTests = new SecurityTestsAnonymous(model, output);
                 var anonResults = await anonTests.RunTests();
-                Assert.Equal(true, anonResults);
+                Assert.True(anonResults);
 
                 // And admin users
                 var adminTests = new SecurityTestsAdmin(model, output);
                 var adminResults = await adminTests.RunTests();
-                Assert.Equal(true, adminResults);
+                Assert.True(adminResults);
 
                 // And regular users
                 var userTests = new SecurityTestsUser(model, output);
                 var userResults = await userTests.RunTests();
-                Assert.Equal(true, userResults);
+                Assert.True(userResults);
             }
 
             // Process.Start("output.txt");

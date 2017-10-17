@@ -57,10 +57,10 @@ namespace Coalesce.Web.Tests
         {
             GenericListResult<DevTeam, DevTeamDtoGen> result =
                 await _pc.List(null, null, null, 2, 2);
-            Assert.Equal(result.List.Count(), 2);
-            Assert.Equal(result.Page, 2);
-            Assert.Equal(result.TotalCount, 4);
-            Assert.Equal(result.PageCount, 2);
+            Assert.Equal(2, result.List.Count());
+            Assert.Equal(2, result.Page);
+            Assert.Equal(4, result.TotalCount);
+            Assert.Equal(2, result.PageCount);
         }
     }
 }

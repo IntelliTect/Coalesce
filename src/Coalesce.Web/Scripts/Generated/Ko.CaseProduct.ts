@@ -110,7 +110,8 @@ module ViewModels {
             }
             this.isLoading(false);
             this.isDirty(false);
-            this.validate();
+    
+            if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
 
         /** Save the object into a DTO */
@@ -129,43 +130,34 @@ module ViewModels {
 
             return dto;
         }
-
+        
+        public setupValidation = () => {
+            if (this.errors !== null) return;
+            this.errors = ko.validation.group([
+                this.caseId.extend({ required: {params: true, message: "Case is required."} }),
+                this.productId.extend({ required: {params: true, message: "Product is required."} }),
+            ]);
+            this.warnings = ko.validation.group([
+            ]);
+        }
+    
+        // Computed Observable for edit URL
+        public editUrl = ko.pureComputed(() => {
+            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseProductId();
+        });
 
         constructor(newItem?: any, parent?: any){
             super();
             var self = this;
             self.parent = parent;
             self.myId;
-            
-            ko.validation.init({
-                grouping: {
-                    deep: true,
-                    live: true,
-                    observable: true
-                }
-            });
 
-            // SetupValidation {
-			self.caseId = self.caseId.extend({ required: {params: true, message: "Case is required."} });
-			self.productId = self.productId.extend({ required: {params: true, message: "Product is required."} });
-            
-            self.errors = ko.validation.group([
-                self.caseProductId,
-                self.caseId,
-                self.case,
-                self.productId,
-                self.product,
-            ]);
-            self.warnings = ko.validation.group([
-            ]);
-
-            // Computed Observable for edit URL
-            self.editUrl = ko.computed(function() {
-                return self.coalesceConfig.baseViewUrl() + self.viewController + "/CreateEdit?id=" + self.caseProductId();
-            });
+            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
+                this.setupValidation();
+            }
 
             // Create computeds for display for objects
-			self.caseText = ko.computed(function()
+			self.caseText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.case() && self.case().caseKey()) {
 					return self.case().caseKey().toString();
@@ -173,7 +165,7 @@ module ViewModels {
 					return "None";
 				}
 			});
-			self.productText = ko.computed(function()
+			self.productText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
 				if (self.product() && self.product().name()) {
 					return self.product().name().toString();

@@ -1,20 +1,20 @@
+using Coalesce.Domain;
+using Coalesce.Domain.External;
+using Coalesce.Web.Models;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Coalesce.Web.Models;
-using Coalesce.Domain;
-using Coalesce.Domain.External;
 
 namespace Coalesce.Web.Api
 {
@@ -390,7 +390,8 @@ namespace Coalesce.Web.Api
             {
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetAllOpenCases(Db);
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, User, "", (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+                var mappingContext = new MappingContext(User, "");
+                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
 
                 result.WasSuccessful = true;
                 result.Message = null;
@@ -414,7 +415,8 @@ namespace Coalesce.Web.Api
             {
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetCaseSummary(Db);
-                result.Object = Mapper<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>.ObjToDtoMapper(objResult, User, "", includeTree);
+                var mappingContext = new MappingContext(User, "");
+                result.Object = Mapper<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>.ObjToDtoMapper(objResult, mappingContext, includeTree);
 
                 result.WasSuccessful = true;
                 result.Message = null;

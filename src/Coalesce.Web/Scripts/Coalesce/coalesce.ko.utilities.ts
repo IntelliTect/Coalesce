@@ -3,44 +3,106 @@
 module Coalesce {
     export module KnockoutUtilities {
 
-        // Function to marge two arrays based on data from the server
-        export function RebuildArray<T>(observableArray: KnockoutObservableArray<T>, incomingArray: T[], idField: string, viewModelClass, parent, allowCollectionDeletes: boolean = true) {
+        function BuildLookup<T>(array: T[], idField: string) {
+            var lookup: { [k: string]: T; } = {};
+            for (let i = 0; i < array.length; i++) {
+                var item = array[i];
+                var key = ko.unwrap(item[idField]);
 
-            var originalContent: Array<T> = observableArray();
+                // If an item is missing a value for a key, we can't look it up.
+                // This is OK, because keyless items will never match an incoming item anyway.
+                if (key != null) lookup[key.toString()] = item;
+            }
+            return lookup;
+        }
+
+        function GetMatchingItem<U, T>(
+            originalContent: U[],
+            incomingItem: T,
+            incomingItemIndex: number,
+            originalLookup: { [k: string]: U; } = null,
+            idField: string = null,
+            equalityComparer: (existingItem: U, incomingKey: any) => boolean = null
+        ) {
+            var matchingItem: U;
+            if (idField) {
+                let key = incomingItem[idField];
+                if (originalLookup) {
+                    matchingItem = originalLookup[key.toString()];
+                } else {
+                    let matchingItems = originalContent.filter(item => equalityComparer(item, key));
+
+                    if (matchingItems.length > 1) {
+                        // We have a problem because keys are duplicated.
+                        throw `Found duplicate items by key (name:${idField} value:${matchingItems[idField]}) when rebuilding array.`
+                    } else {
+                        matchingItem = matchingItems.length > 0 ? matchingItems[0] : null;
+                    }
+                }
+            } else {
+                matchingItem = originalContent[incomingItemIndex];
+            }
+
+            return matchingItem;
+        }
+
+        // Function to marge two arrays based on data from the server
+        export function RebuildArray<U extends LoadableViewModel, T>(
+            existingArray: KnockoutObservableArray<U>,
+            incomingArray: T[],
+            idField: string,
+            viewModelClass: new () => U,
+            parent: any,
+            allowCollectionDeletes: boolean = true,
+            equalityComparer: (existingItem: U, incomingKey: any) => boolean = null
+        ) {
+
+            var originalContent = existingArray();
+
             // We're going to build a new array from scratch.
-            // If we spliced and pushed the existing one row at a time as needed,
+            // If we spliced and pushed the existing array one row at a time as needed,
             // it performs much more slowly, and also rebuilds the DOM in realtime as that happens.
-            // Knockout is smart enough when we update the value of observableArray with newArray
+            // This is because each push/splice triggers all subscribers to update.
+            // If there are expensive subscriptions (not just the DOM - custom application code as well),
+            // then performance drops off the edge of a cliff into a firey abyss.
+
+            // Knockout is smart enough when we update the value of existingArray with newArray
             // to figure out exactly what changed, and will only rebuild the DOM as needed,
-            // instead of rebuilding the entire thing: http://stackoverflow.com/a/18050443
-            var newArray: Array<T> = [];
+            // instead of rebuilding the entire thing: http://stackoverflow.com/a/18050443.
+            // However, there will ALWAYS be one single notification to subscribers, even if we didn't actually change the array.
+            // If arrays are being rebuilt frequently, this "false" subscriber notification could be detrimental to performance.
+            // To prevent this from happening, at the bottom of this function we perform an array comparison before updating the final observable.
+            var newContent: Array<U> = [];
+
+            // If no specific equality comparison has been requested,
+            // use a hash table for O(1) lookups on a single key to prevent O(n^2) from nested for-loops.
+            if (equalityComparer == null && idField) {
+                var originalLookup = BuildLookup(originalContent, idField);
+            }
 
             // Can't do for (var i in array) because IE sees new methods added on to the prototype as keys
-            for (var i = 0; i < incomingArray.length; i++) {
-                var newItem;
+            for (let i = 0; i < incomingArray.length; i++) {
                 var inItem = incomingArray[i];
-                var key = inItem[idField] || inItem["id"];
-                var matchingItems = idField ? originalContent.filter(
-                    function (value) {
-                        return value[Coalesce.Utilities.lowerFirstLetter(idField)]() == key;
-                    }
-                ) : [originalContent[i] ];
-                if (matchingItems.length == 0 || typeof (matchingItems[0]) === 'undefined') {
+                var matchingItem = GetMatchingItem(originalContent, inItem, i, originalLookup, idField, equalityComparer);
+
+                if (matchingItem == null) {
                     // This is a brand new item that we don't already have an object for.
                     // We need to construct a new object and stick it in our newArray.
-                    newItem = new viewModelClass(inItem)
+                    var newItem = new viewModelClass();
+                    newItem.loadFromDto(inItem);
                     newItem.parent = parent;
-                    newItem.parentCollection = observableArray;
-                    newArray.push(newItem);
-                } else if (matchingItems.length == 1) {
+                    newItem.parentCollection = existingArray;
+                    newContent.push(newItem);
+                } else {
                     // We already have an object for this item.
                     // Stick the existing object into our new array, and then reload it from the DTO.
-                    newArray.push(matchingItems[0]);
+                    newContent.push(matchingItem);
 
                     // Only reload the item if it is not dirty. If it is dirty, there are user-made changes
                     // that aren't yet saved that we shouldn't be overwriting.
-                    if (typeof((<any>matchingItems[0]).isDirty) === 'undefined' || !(<any>matchingItems[0]).isDirty()) {
-                        (<any>matchingItems[0]).loadFromDto(inItem);
+
+                    if (!(matchingItem instanceof BaseViewModel) || !matchingItem.isDirty()) {
+                        matchingItem.loadFromDto(inItem);
                     }
 
                     if (!allowCollectionDeletes) {
@@ -48,10 +110,8 @@ module Coalesce {
                         // We're going to do a pass of everything that was in the original collection at this end of this method,
                         // where we'll add everything from the original collection to the new collection.
                         // We need to remove the current item from the original collection so it doesn't get added again when we do that.
-                        originalContent.splice(originalContent.indexOf(matchingItems[0]), 1);
+                        originalContent.splice(originalContent.indexOf(matchingItem), 1);
                     }
-                } else {
-                    // We have a problem because keys are duplicated.
                 }
             }
 
@@ -63,41 +123,53 @@ module Coalesce {
                 // Note that this used to only re-insert items that are dirty,
                 // but that didn't make any sense, and there was no comment that said why it was done that way.
                 // So, we're just going to add in everything from originalContent.
-                newArray.unshift(...originalContent);
+                newContent.unshift(...originalContent);
             }
 
-            observableArray(newArray);
+            if (newContent.length == originalContent.length &&
+                ko.utils.compareArrays(newContent, originalContent).every(c => c.status == "retained")) {
+                // Everything is the same (by doing a shallow equality check of the array - objects are checked by reference).
+                // Shallow equality check by reference is perfectly in line with the spec for ObservableArray.
+            } else {
+                // Something is different. Update the observable.
+                // See the comments at the top of the file for why we do this conditionally.
+                // Basically, its because this call ALWAYS notifies subscribers, but we can be more intelligent about it.
+                existingArray(newContent);
+            }
         }
 
 
-        export function RebuildArrayInPlace<T>(existingArray: KnockoutObservableArray<T>, incomingArray: T[] | KnockoutObservableArray<T>, idField: string) {
+        export function RebuildArrayInPlace<T>(
+            existingArray: KnockoutObservableArray<T>,
+            incomingArray: T[] | KnockoutObservableArray<T>,
+            idField?: string,
+            equalityComparer: (existingItem: T, incomingKey: any) => boolean = null
+        ) {
             var incomingArrayUnwrapped = ko.unwrap(incomingArray);
-            var existingArrayCopy = existingArray().slice();
+            var originalContent = existingArray().slice();
 
-            for (var i in incomingArrayUnwrapped) {
-                var newItem;
+            // If no specific equality comparison has been requested,
+            // use a hash table for O(1) lookups on a single key to prevent O(n^2) from nested for-loops.
+            if (equalityComparer == null && idField) {
+                var originalLookup = BuildLookup(originalContent, idField);
+            }
+
+            for (let i = 0; i < incomingArrayUnwrapped.length; i++) {
                 var inItem = incomingArrayUnwrapped[i];
-                var key = inItem[idField] || inItem["id"];
-                var matchingItems = idField ? existingArrayCopy.filter(
-                    function (value) {
-                        return value[Coalesce.Utilities.lowerFirstLetter(idField)]() == ko.utils.unwrapObservable(key);
-                    }
-                ) : [existingArrayCopy[i]];
+                var matchingItem = GetMatchingItem(originalContent, inItem, i, originalLookup, idField, equalityComparer);
 
-                if (matchingItems.length == 0 || typeof (matchingItems[0]) === 'undefined') {
+                if (matchingItem == null) {
                     // Add this to the observable collection
                     existingArray.push(inItem);
-                } else if (matchingItems.length == 1) {
-                    // Remove this one from the copy so we don't remove it later.
-                    existingArrayCopy.splice(existingArrayCopy.indexOf(matchingItems[0]), 1);
                 } else {
-                    // We have a problem because keys are duplicated.
+                    // Remove this one from the copy so we don't remove it later.
+                    originalContent.splice(originalContent.indexOf(matchingItem), 1);
                 }
             }
 
             // Remove any items that we didn't find in the incoming array.
-            for (var i in existingArrayCopy) {
-                existingArray.splice(existingArray.indexOf(existingArrayCopy[i]), 1);
+            for (var i in originalContent) {
+                existingArray.splice(existingArray.indexOf(originalContent[i]), 1);
             }
         }
     }

@@ -114,6 +114,10 @@
     {
 
     <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
         var devTeamList = new ListViewModels.DevTeamList();
         
         // Set up parent info based on the URL.

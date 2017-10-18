@@ -411,7 +411,13 @@ ko.bindingHandlers.select2AjaxText = {
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // See if the value exists. If not, we haven't loaded it from the server yet.
         var value = valueAccessor()();
-        var options = $(element).find('option[value="' + value + '"]');
+        var options;
+        if (value) {
+          options = $(element).find('option[value="' + value.toString().replace(/"/g, '\\"') + '"]');
+        } else {
+          options = $(element).find('option[value="' + value + '"]');
+        }
+
 
         // The option doesn't exist.
         if (options.length == 0) {

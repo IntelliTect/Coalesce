@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Templating
 {
-    public abstract class CoalesceTemplate
+    public abstract class CoalesceTemplate<TModel>
     {
         private TextWriter Output { get; set; }
 
-        public dynamic Model { get; set; }
+        public TModel Model { get; set; }
         public object FileName { get; internal set; }
 
         public abstract Task ExecuteAsync();

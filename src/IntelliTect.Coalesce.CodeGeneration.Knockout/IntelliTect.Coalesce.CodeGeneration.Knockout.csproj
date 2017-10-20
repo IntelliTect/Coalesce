@@ -29,5 +29,9 @@
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Templates\Views\Shared\" />
+  </ItemGroup>
 
 </Project>

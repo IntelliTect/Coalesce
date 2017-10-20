@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Scripts
@@ -19,5 +20,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Scripts
         public string TypescriptModulePrefix { get; set; }
         [Option(Name = "namespace", ShortName = "namespace", Description = "Target Namespace for the generated code.")]
         public string TargetNamespace { get; set; }
+        public CoalesceConfiguration CoalesceConfiguration { get; set; }
     }
 }

@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Templating
+namespace IntelliTect.Coalesce.CodeGeneration.Templating.Internal
 {
     internal class CoalesceRazorTemplateEngine : MvcRazorTemplateEngine
     {

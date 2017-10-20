@@ -102,6 +102,9 @@ namespace IntelliTect.Coalesce.Cli
                 // TODO: Move all configuration to coalesce.json, and remove these CLI parameters.
                 var model = new CommandLineGeneratorModel
                 {
+                    // TODO: added just so I can wire in the new templating code more easily.
+                    CoalesceConfiguration = config,
+
                     DataContextClass = dataContextClass.Value() ?? "",
                     ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
                     AreaLocation = area.Value() ?? "",

@@ -18,6 +18,10 @@ using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
+using Microsoft.Extensions.DependencyInjection;
+using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
+using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout
 {
@@ -25,13 +29,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
     {
         public const string ScriptsFolderName = "Scripts";
 
-        protected RazorTemplateProvider TemplateProvider { get; }
+        protected RazorTemplateCompiler TemplateProvider { get; }
         public ProjectContext WebProject { get; }
         public ProjectContext DataProject { get; }
 
         public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
         {
-            TemplateProvider = new RazorTemplateProvider(webProject);
+            TemplateProvider = new RazorTemplateCompiler(webProject);
 
             WebProject = webProject;
             DataProject = dataProject;
@@ -304,41 +308,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
                     originalsPath: originalsPath,
                     destinationPath: apiViewOutputPath);
 
-            // Copy over Shared Folder (_EditorHtml, _Master - always, _Layout only if it doesn't exist)
-            var sharedViewOutputPath = Path.Combine(
-                WebProject.ProjectPath,
-                areaLocation,
-                "Views", "Shared");
-
             CopyToOriginalsAndDestinationIfNeeded(
-                    fileName: "_EditorHtml.cshtml",
-                    sourcePath: "Templates/Views/Shared",
+                    fileName: "EditorHtml.cshtml",
+                    sourcePath: "Templates/Views/Api",
                     originalsPath: originalsPath,
-                    destinationPath: sharedViewOutputPath);
+                    destinationPath: apiViewOutputPath);
 
-            CopyToOriginalsAndDestinationIfNeeded(
-                    fileName: "_Master.cshtml",
-                    sourcePath: "Templates/Views/Shared",
-                    originalsPath: originalsPath,
-                    destinationPath: sharedViewOutputPath);
-
-            CopyToOriginalsAndDestinationIfNeeded(
-                    fileName: "_ViewStart.cshtml",
-                    sourcePath: "Templates/Views",
-                    originalsPath: originalsPath,
-                    destinationPath: Path.Combine(WebProject.ProjectPath, areaLocation, "Views"));
 
             if (string.IsNullOrWhiteSpace(commandLineGeneratorModel.AreaLocation))
             {
-                CopyToOriginalsAndDestinationIfNeeded(
-                        alertIfNoCopy: false,
-                        fileName: "_Layout.cshtml",
-                        sourcePath: "Templates/Views/Shared",
-                        originalsPath: originalsPath,
-                        destinationPath: sharedViewOutputPath);
-
-
-
                 // only copy the intellitect scripts when generating the root site, this isn't needed for areas since it will already exist at the root
                 // Copy files for the scripts folder
                 var scriptsOutputPath = Path.Combine(
@@ -396,23 +374,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
                             destinationPath: activeTemplatesPath);
                 }
             }
-
-            string destPath = Path.Combine(WebProject.ProjectPath, areaLocation, "Views", "_ViewImports.cshtml");
-            CopyToOriginalsAndDestinationIfNeeded(
-                    fileName: "_ViewImports.cshtml",
-                    sourcePath: "Templates/Views",
-                    originalsPath: originalTemplatesPath,
-                    destinationPath: activeTemplatesPath);
-            await Generate("_ViewImports.cshtml", destPath, null);
-
-
-            destPath = Path.Combine(sharedViewOutputPath, "_AdminLayout.cshtml");
-            CopyToOriginalsAndDestinationIfNeeded(
-                    fileName: "_AdminLayout.cshtml",
-                    sourcePath: "Templates/Views/Shared",
-                    originalsPath: originalTemplatesPath,
-                    destinationPath: activeTemplatesPath);
-            await Generate("_AdminLayout.cshtml", destPath, commandLineGeneratorModel.AreaLocation);
         }
 
 
@@ -441,12 +402,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
 
         private async Task Generate(string templateName, string outputPath, object model)
         {
-            var template = TemplateProvider.GetCompiledTemplate(Path.Combine(ActiveTemplatesPath, templateName));
+            //var template = TemplateProvider.GetCachedCompiledTemplate(Path.Combine(ActiveTemplatesPath, templateName));
 
-            using (var sourceStream = await TemplateProvider.RunTemplateAsync(template, model, outputPath))
-            {
-                await WriteFileAsync(sourceStream, outputPath);
-            }
+            //using (var sourceStream = await TemplateProvider.RunTemplateAsync(template, model, outputPath))
+            //{
+            //    await WriteFileAsync(sourceStream, outputPath);
+            //}
         }
 
         class GenerationOutputContext : IDisposable
@@ -519,8 +480,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
                 ModulePrefix = controllerGeneratorModel.TypescriptModulePrefix
             };
 
+
+            var services = new ServiceCollection();
+            services.AddSingleton(controllerGeneratorModel.CoalesceConfiguration);
+            services.AddSingleton(new RazorTemplateCompiler(WebProject));
+            services.AddSingleton<ITemplateResolver, TemplateResolver>();
+            var provider = services.BuildServiceProvider();
+
+
+            var generator = new KnockoutSuite(provider);
+            generator.WithOutputPath(WebProject.ProjectPath);
+            await generator.GenerateAsync();
+            return;
+            //services.AddSingleton<CoalesceConfig>
+
+
             // Copy over the static files
-            await CopyStaticFiles(controllerGeneratorModel);
+            // await CopyStaticFiles(controllerGeneratorModel);
 
             var apiViewOutputPath = Path.Combine(
                 WebProject.ProjectPath,

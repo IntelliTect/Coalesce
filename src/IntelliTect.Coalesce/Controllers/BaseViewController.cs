@@ -88,7 +88,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected ActionResult EditorHtmlImplementation(bool simple = false)
         {
             ViewBag.SimpleEditorOnly = simple;
-            return PartialView("~/Views/Shared/_EditorHtml.cshtml", classViewModel);
+            return View("~/Views/Api/EditorHtml.cshtml", classViewModel);
         }
 
 

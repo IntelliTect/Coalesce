@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Common
                 }
                 return result;
             }
-    }
+        }
 
         public string AreaName { get; set; }
 

@@ -12,6 +12,7 @@ declare module BootstrapV3DatetimePicker {
         stepping: any;
         keyBinds: any;
         timeZone: any;
+        showClear: boolean;
     }
 }
 
@@ -500,6 +501,7 @@ ko.bindingHandlers.datePicker = {
             sideBySide: allBindings.get('sideBySide') || false,
             timeZone: allBindings.get('timeZone') || "",
             keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
+            showClear: allBindings.get('showClear') || false
         })
             .on("dp.change", function (e) {
                 var preserveDate = allBindings.get('preserveDate') || false;

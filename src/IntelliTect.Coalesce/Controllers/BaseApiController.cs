@@ -905,7 +905,7 @@ namespace IntelliTect.Coalesce.Controllers
                     // Correct offset.
                     if (prop.Type.IsDateTimeOffset)
                     {
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
+                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, CurrentTimeZone.GetUtcOffset(parsedValue));
                         if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
                             !value.Contains(':'))
                         {

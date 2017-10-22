@@ -1,48 +1,56 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
-using System.IO;
-using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
-    public abstract class RazorTemplateGenerator<TModel> : IFileGenerator<TModel>
+    /// <summary>
+    /// Wrapper class to encapsulate all services needed for a RazorTemplateGenerator.
+    /// This prevents constructors from being enormous due to all the services.
+    /// </summary>
+    public class RazorServices
     {
-
-        public CoalesceConfiguration CoalesceConfiguration { get; }
-        protected ITemplateResolver Resolver { get; }
-        protected RazorTemplateCompiler Compiler { get; }
-
-        public RazorTemplateGenerator(CoalesceConfiguration coalesceConfig, ITemplateResolver resolver, RazorTemplateCompiler compiler)
+        public RazorServices(GenerationContext genContext, ITemplateResolver resolver, RazorTemplateCompiler compiler)
         {
-            CoalesceConfiguration = coalesceConfig;
+            GenerationContext = genContext;
             Resolver = resolver;
             Compiler = compiler;
         }
 
+        public GenerationContext GenerationContext { get; }
+        public ITemplateResolver Resolver { get; }
+        public RazorTemplateCompiler Compiler { get; }
+    }
+
+    public abstract class RazorTemplateGenerator<TModel> : IFileGenerator<TModel>
+    {
+        public RazorTemplateGenerator(RazorServices razorServices)
+        {
+            RazorServices = razorServices;
+        }
+
+        public RazorServices RazorServices { get; }
+
+        public GenerationContext GenerationContext => RazorServices.GenerationContext;
+        protected ITemplateResolver Resolver => RazorServices.Resolver;
+        protected RazorTemplateCompiler Compiler => RazorServices.Compiler;
+
+        public abstract TemplateDescriptor Template { get; }
         public TModel Model { get; set; }
         public string OutputPath { get; set; }
-        public abstract TemplateDescriptor Template { get; }
 
-        public string AreaName => CoalesceConfiguration.Output.AreaName;
-        public string ModulePrefix => CoalesceConfiguration.Output.TypescriptModulePrefix;
+        public string AreaName => GenerationContext.AreaName;
+        public string ModulePrefix => GenerationContext.TypescriptModulePrefix;
 
 
         public virtual async Task<Stream> GetOutputAsync()
         {
-            if (Model == null)
-            {
-                throw new InvalidOperationException($"{nameof(Model)} is null - cannot generate {Template}");
-            }
-
             Stream output;
             try
             {
@@ -56,31 +64,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 throw new InvalidOperationException($"There was an error running the template {Template}: {ex.Message}", ex);
             }
 
-            if (OutputIsCSharp)
-            {
-                using (output)
-                {
-                    var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(SourceText.From(output));
-                    var root = syntaxTree.GetRoot();
-                    root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, new AdhocWorkspace());
-
-                    Stream formattedOutput = new MemoryStream((int)output.Length);
-                    root.SerializeTo(formattedOutput);
-                    await formattedOutput.FlushAsync();
-                    return formattedOutput;
-                }
-            }
-
             return output;
         }
 
         public async Task GenerateAsync()
         {
-            if (Model == null)
-            {
-                throw new InvalidOperationException($"{nameof(OutputPath)} is null - cannot generate {Template}");
-            }
-
             if (!ShouldGenerate())
             {
                 return;
@@ -104,12 +92,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         }
 
         /// <summary>
-        /// Override to declare that the output of a generator is C# code.
-        /// If true, the code will be ran through the Roslyn formatter to clean up whitespace.
-        /// </summary>
-        public virtual bool OutputIsCSharp => false;
-
-        /// <summary>
         /// Override to add logic that determines whether or not the generator needs to run or not.
         /// 
         /// Generators that are conditional on the state of the filesytem should perform that check in here.
@@ -126,5 +108,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         /// </summary>
         /// <returns></returns>
         public virtual bool Validate() => true;
+
+        public override string ToString()
+        {
+            if (OutputPath != null)
+            {
+                return $"{Template.ToString()} => {OutputPath}";
+            }
+            return Template.ToString();
+        }
     }
 }

@@ -25,15 +25,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         TModel Model { get; set; }
     }
 
-    public interface ICompositeGenerator<TModel> : IGenerator<TModel>
+    public interface ICompositeGenerator : IGenerator
     {
         IEnumerable<IGenerator> GetGenerators();
     }
 
+    public interface ICompositeGenerator<TModel> : IGenerator<TModel>, ICompositeGenerator
+    {
+    }
+
     public interface IFileGenerator<TModel> : IGenerator<TModel>
     {
-        TemplateDescriptor Template { get; }
-
         Task<Stream> GetOutputAsync();
     }
 }

@@ -3,7 +3,7 @@
 @using IntelliTect.Coalesce.TypeDefinition
 @inherits CoalesceTemplate<ViewController>
 @{
-    ContextInfo contextInfo = Model.ContextInfo;
+    var contextInfo = Model.GenerationContext.DbContextType;
     ClassViewModel model = Model.Model;
     string namespaceName = Model.Namespace;
     string viewLocation = "~/Views";
@@ -17,7 +17,7 @@
     namespaces.Add("IntelliTect.Coalesce.Controllers");
     namespaces.Add("Microsoft.AspNetCore.Authorization");
     namespaces.Add("Microsoft.AspNetCore.Mvc");
-    namespaces.Add(contextInfo.Namespace);
+    namespaces.Add(contextInfo.FullNamespace);
 }
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
 {

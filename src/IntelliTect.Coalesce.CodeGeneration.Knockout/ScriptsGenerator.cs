@@ -41,115 +41,102 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
             DataProject = dataProject;
         }
 
-        public Task Generate(CommandLineGeneratorModel model)
+        public async Task Generate(CommandLineGeneratorModel model)
         {
-            Dictionary<string, Dictionary<int, string>> enumValues = new Dictionary<string, Dictionary<int, string>>();
+            Console.WriteLine($"Starting Generator");
+            string targetNamespace = WebProject.RootNamespace;
+            Console.WriteLine($"Target Namespace: {targetNamespace}");
 
-            using (StreamWriter streamWriter = new StreamWriter("output.txt", false))
+            TypeViewModel dataContextType;
+            if (string.IsNullOrWhiteSpace(model.DataContextClass))
             {
-                Console.WriteLine($"Starting Generator");
-                string targetNamespace = WebProject.RootNamespace;
-                Console.WriteLine($"Target Namespace: {targetNamespace}");
-
-                TypeViewModel dataContextType;
-                if (string.IsNullOrWhiteSpace(model.DataContextClass))
+                var candidates = DataProject.TypeLocator
+                    .FindDerivedTypes(typeof(Microsoft.EntityFrameworkCore.DbContext).FullName)
+                    .ToList();
+                if (candidates.Count() != 1)
                 {
-                    var candidates = DataProject.TypeLocator
-                        .FindDerivedTypes(typeof(Microsoft.EntityFrameworkCore.DbContext).FullName)
-                        .ToList();
-                    if (candidates.Count() != 1)
-                    {
-                        throw new InvalidOperationException($"Couldn't find a single DbContext to generate from. " +
-                            $"Specify the name of your DbContext with the '-dc MyDbContext' command line param.");
-                    }
-                    dataContextType = candidates.Single();
+                    throw new InvalidOperationException($"Couldn't find a single DbContext to generate from. " +
+                        $"Specify the name of your DbContext with the '-dc MyDbContext' command line param.");
                 }
-                else
-                {
-                    dataContextType = DataProject.TypeLocator.FindType(model.DataContextClass, throwWhenNotFound: false);
-                }
+                dataContextType = candidates.Single();
+            }
+            else
+            {
+                dataContextType = DataProject.TypeLocator.FindType(model.DataContextClass, throwWhenNotFound: false);
+            }
                 
 
-                if (model.ValidateOnly)
+            if (model.ValidateOnly)
+            {
+                Console.WriteLine($"Validating model for: {dataContextType.FullName}");
+            }
+            else
+            {
+                Console.WriteLine($"Building scripts for: {dataContextType.FullName}");
+            }
+
+            List<ClassViewModel> models = ReflectionRepository
+                                .AddContext(dataContextType)
+                                .ToList();
+
+            ValidationHelper validationResult = ValidateContext.Validate(models);
+
+            bool foundIssues = false;
+            foreach (var validation in validationResult.Where(f => !f.WasSuccessful))
+            {
+                foundIssues = true;
+                Console.WriteLine("--- " + validation.ToString());
+            }
+            if (!foundIssues)
+            {
+                Console.WriteLine("Model validated successfully");
+            }
+
+            if (foundIssues)
+            {
+                //throw new Exception("Model did not validate. " + validationResult.First(f => !f.WasSuccessful).ToString());
+                if (Debugger.IsAttached)
                 {
-                    Console.WriteLine($"Validating model for: {dataContextType.FullName}");
+                    Console.WriteLine("Press enter to quit");
+                    Console.Read();
                 }
-                else
+                Environment.Exit(1);
+            }
+
+            if (model.ValidateOnly)
+            {
+                return;
+            }
+            else
+            {
+                var generationContext = new GenerationContext(model.CoalesceConfiguration)
                 {
-                    Console.WriteLine($"Building scripts for: {dataContextType.FullName}");
-                }
+                    DataProject = DataProject,
+                    WebProject = WebProject,
+                    DbContextType = dataContextType,
+                };
 
-                List<ClassViewModel> models = ReflectionRepository
-                                    .AddContext(dataContextType)
-                                    .ToList();
 
-                ValidationHelper validationResult = ValidateContext.Validate(models);
+                var services = new ServiceCollection();
+                services.AddSingleton(generationContext);
+                services.AddSingleton(model.CoalesceConfiguration);
+                services.AddSingleton(new RazorTemplateCompiler(WebProject));
+                services.AddSingleton<ITemplateResolver, TemplateResolver>();
+                services.AddTransient<RazorServices>();
+                var provider = services.BuildServiceProvider();
 
-                bool foundIssues = false;
-                foreach (var validation in validationResult.Where(f => !f.WasSuccessful))
-                {
-                    foundIssues = true;
-                    streamWriter.WriteLine(validation.ToString());
-                    Console.WriteLine("--- " + validation.ToString());
-                }
-                if (!foundIssues)
-                {
-                    Console.WriteLine("Model validated successfully");
-                }
+                var generator = new KnockoutSuite(provider)
+                    .WithModel(models)
+                    .WithOutputPath(WebProject.ProjectPath);
 
-                streamWriter.WriteLine($" {"Name",-15}  {"Type",-15}  {"Pure Type",-15} {"Col",-5} {"Array",-5} {"Key",-5} {"DisplayName",-15} {"Null?",-5} {"Many",-5} {"Internal",-5} {"FileDL",-5} {"IsNum",-5} {"IsDT",-5} {"IsDTO",-5} {"IsBool",-5} {"IsStr",-5} {"IsEnum",-8} {"JsKoType",-25} {"TsKoType",-50} {"TsType",-15} {"DateOnly",-10} {"Hidden",-8} {"Required",-8} {"KeyName",-15} {"MinLength",-8} {"MaxLength",-10} {"Range",-10}");
+                IEnumerable<IGenerator> Flatten(ICompositeGenerator composite) =>
+                    composite.GetGenerators().SelectMany(g => (g is ICompositeGenerator c) ? Flatten(c) : new[] { g });
 
-                foreach (var obj in models.Where(p => p.HasDbSet || p.IsDto))
-                {
-                    //Console.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}");
-                    streamWriter.WriteLine($"{obj.Name}  dB:{obj.HasDbSet}    Edit:{obj.SecurityInfo.IsEditAllowed()}   Create:{obj.SecurityInfo.IsCreateAllowed()}    Delete:{obj.SecurityInfo.IsDeleteAllowed()}");
+                var allGenerators = Flatten(generator).ToList();
 
-                    foreach (var prop in obj.Properties.Where(f => !f.IsInternalUse))
-                    {
-                        streamWriter.WriteLine($@" {prop.Name,-15}  {prop.TypeName,-15}  {prop.PureType.Name,-15} {prop.Type.IsCollection,-5} {prop.Type.IsArray,-5} {prop.IsPrimaryKey,-5} {prop.DisplayName,-15} {prop.Type.IsNullable,-5} {prop.IsManytoManyCollection,-5} {prop.IsInternalUse,-5}    {prop.IsFileDownload,-5}  {prop.Type.IsNumber,-5} {prop.Type.IsDateTime,-5} {prop.Type.IsDateTimeOffset,-5} {prop.Type.IsBool,-5}  {prop.Type.IsString,-5} {prop.Type.IsEnum,-8} {prop.Type.JsKnockoutType,-25} {prop.Type.TsKnockoutType,-50} {prop.Type.TsType,-15} {prop.IsDateOnly,-10} {prop.IsHidden(HiddenAttribute.Areas.Edit),-8}  {prop.IsRequired,-8} {prop.ObjectIdPropertyName,-15} {prop.MinLength,-8} {prop.MaxLength,-10} {prop.Range?.Item1 + " " + prop.Range?.Item2,-10}");
-                        if (prop.Type.IsEnum && !enumValues.ContainsKey(prop.Name))
-                        {
-                            enumValues.Add(prop.Name, prop.Type.EnumValues);
-                        }
-                    }
+                await Task.WhenAll(allGenerators.Select(g => g.GenerateAsync()));
 
-                    foreach (var method in obj.Methods.Where(f => !f.IsInternalUse))
-                    {
-                        streamWriter.WriteLine($@" {method.Name,-15}  {method.ReturnType.Name,-15}  {method.ReturnType.PureType.Name,-15} {method.ReturnType.IsCollection,-5} {method.ReturnType.IsArray,-5} {null,-5} {null,-7} {method.DisplayName,-15} {method.ReturnType.IsNullable,-5} {null,-5} {null,-5}    {null,-5}  {method.ReturnType.IsNumber,-5} {method.ReturnType.IsDateTime,-5} {method.ReturnType.IsDateTimeOffset,-5} {method.ReturnType.IsBool,-5}  {method.ReturnType.IsString,-5} {method.ReturnType.IsEnum,-8} {method.ReturnType.JsKnockoutType,-25} {method.ReturnType.TsKnockoutType,-50} {method.ReturnType.TsType,-15} {null,-10} {method.IsHidden(HiddenAttribute.Areas.Edit),-8}  {null,-8} {null,-15} {null,-8} {null,-10} {"",-10}");
-                    }
-
-                }
-
-                streamWriter.WriteLine("-------- Enumerations --------");
-                foreach (string propertyKey in enumValues.Keys)
-                {
-                    streamWriter.WriteLine(propertyKey);
-                    foreach (var enumValue in enumValues[propertyKey])
-                    {
-                        streamWriter.WriteLine($"\t{enumValue.Key} : {enumValue.Value}");
-                    }
-                }
-
-                if (foundIssues)
-                {
-                    //throw new Exception("Model did not validate. " + validationResult.First(f => !f.WasSuccessful).ToString());
-                    if (Debugger.IsAttached)
-                    {
-                        Console.WriteLine("Press enter to quit");
-                        Console.Read();
-                    }
-                    Environment.Exit(1);
-                }
-
-                if (model.ValidateOnly)
-                {
-                    return Task.FromResult(0);
-                }
-                else
-                {
-                    var contextInfo = new ContextInfo(dataContextType.Name, targetNamespace);
-                    return GenerateScripts(model, models, contextInfo, targetNamespace);
-                }
+                //return GenerateScripts(model, models, contextInfo, targetNamespace);
             }
         }
 
@@ -482,19 +469,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
                 AreaName = controllerGeneratorModel.AreaLocation,
                 ModulePrefix = controllerGeneratorModel.TypescriptModulePrefix
             };
-
-
-            var services = new ServiceCollection();
-            services.AddSingleton(controllerGeneratorModel.CoalesceConfiguration);
-            services.AddSingleton(new RazorTemplateCompiler(WebProject));
-            services.AddSingleton<ITemplateResolver, TemplateResolver>();
-            var provider = services.BuildServiceProvider();
-
-            var generator = new KnockoutSuite(provider)
-                .WithModel(ReflectionRepository.Models.ToList())
-                .WithOutputPath(WebProject.ProjectPath);
-            await generator.GenerateAsync();
-            return;
             //services.AddSingleton<CoalesceConfig>
 
 

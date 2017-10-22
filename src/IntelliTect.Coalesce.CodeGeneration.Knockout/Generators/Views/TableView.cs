@@ -12,12 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class TableView : RazorTemplateGenerator<ClassViewModel>
     {
-        public TableView(
-            CoalesceConfiguration coalesceConfig,
-            ITemplateResolver resolver,
-            RazorTemplateCompiler compiler)
-            : base(coalesceConfig, resolver, compiler)
-        { }
+        public TableView(RazorServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "TableView.cshtml");

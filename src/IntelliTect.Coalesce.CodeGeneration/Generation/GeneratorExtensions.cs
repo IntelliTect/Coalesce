@@ -54,6 +54,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public static T WithModel<T, TModel>(this T generator, TModel model)
             where T : IGenerator<TModel>
         {
+
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model), $"Cannot set null model to {generator}");
+            }
+
             generator.Model = model;
             return generator;
         }

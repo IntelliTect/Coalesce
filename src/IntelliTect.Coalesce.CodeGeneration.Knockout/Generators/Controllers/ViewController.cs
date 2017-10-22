@@ -10,14 +10,9 @@ using IntelliTect.Coalesce.CodeGeneration.Configuration;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class ViewController : RazorTemplateGenerator<ClassViewModel>
+    public class ViewController : RazorTemplateCSharpGenerator<ClassViewModel>
     {
-        public ViewController(
-            CoalesceConfiguration coalesceConfig,
-            ITemplateResolver resolver,
-            RazorTemplateCompiler compiler)
-            : base(coalesceConfig, resolver, compiler)
-        { }
+        public ViewController(RazorServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "ViewController.cshtml");

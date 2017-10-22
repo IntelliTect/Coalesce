@@ -13,12 +13,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KoTsPartialStub : RazorTemplateGenerator<ClassViewModel>
     {
-        public KoTsPartialStub(
-            CoalesceConfiguration coalesceConfig,
-            ITemplateResolver resolver,
-            RazorTemplateCompiler compiler)
-            : base(coalesceConfig, resolver, compiler)
-        { }
+        public KoTsPartialStub(RazorServices razorServices) : base(razorServices) { }
 
         public override bool ShouldGenerate()
         {

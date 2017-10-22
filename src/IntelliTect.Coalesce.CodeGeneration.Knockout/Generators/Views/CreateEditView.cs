@@ -12,12 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class CreateEditView : RazorTemplateGenerator<ClassViewModel>
     {
-        public CreateEditView(
-            CoalesceConfiguration coalesceConfig,
-            ITemplateResolver resolver,
-            RazorTemplateCompiler compiler)
-            : base(coalesceConfig, resolver, compiler)
-        { }
+        public CreateEditView(RazorServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "CreateEditView.cshtml");

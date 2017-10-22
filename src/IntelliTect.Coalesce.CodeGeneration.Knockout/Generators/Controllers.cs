@@ -21,13 +21,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
             foreach (var model in this.Model.Where(model => model.OnContext))
             {
-                yield return Generator<ViewController>()
-                    .WithModel(model)
-                    .AppendOutputPath($"Controllers/Generated/{model.Name}Controller.cs");
-
                 yield return Generator<ApiController>()
                     .WithModel(model)
                     .AppendOutputPath($"Api/Generated/{model.Name}Controller.cs");
+
+                yield return Generator<ViewController>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Controllers/Generated/{model.Name}Controller.cs");
             }
         }
     }

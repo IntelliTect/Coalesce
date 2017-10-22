@@ -36,5 +36,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
             TemplatePath = templatePath;
             TemplateFileName = templateFileName;
         }
+
+        public override string ToString() => ManifestResourceAssembly != null ? ManifestResourceFullName : FullPath;
     }
 }

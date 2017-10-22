@@ -3,7 +3,6 @@
 @using IntelliTect.Coalesce.TypeDefinition
 @inherits CoalesceTemplate<ApiController>
 @{
-    ContextInfo contextInfo = Model.ContextInfo;
     ClassViewModel model = Model.Model;
     string namespaceName = Model.Namespace;
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
@@ -31,7 +30,7 @@
 
     var createIf = "";
     var editElseIf = "";
-    
+
 
     // Check if creates/edits aren't allowed
     @if (model.PrimaryKey.Type.IsString)

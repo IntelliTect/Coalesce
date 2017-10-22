@@ -23,15 +23,16 @@
     <EmbeddedResource Include="Templates/**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="Templates\Views\Shared\**" />
+    <EmbeddedResource Remove="Templates\Views\Shared\**" />
+    <None Remove="Templates\Views\Shared\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Templates\Views\Shared\" />
   </ItemGroup>
 
 </Project>

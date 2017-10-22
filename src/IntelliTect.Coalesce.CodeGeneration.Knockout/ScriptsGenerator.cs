@@ -223,7 +223,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
                 throw new FileNotFoundException("Embedded resource not found: " + sourceFile);
             }
 
-            if (!File.Exists(destinationFile) || FileUtilities.HasDifferences(inputStream, destinationFile))
+            if (!File.Exists(destinationFile) || FileUtilities.HasDifferencesAsync(inputStream, destinationFile).Result)
             {
                 const int tries = 3;
                 for (int i = 1; i <= tries; i++)
@@ -383,7 +383,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
 
             if (File.Exists(outputPath))
             {
-                if (!FileUtilities.HasDifferences(contentsStream, outputPath))
+                if (!await FileUtilities.HasDifferencesAsync(contentsStream, outputPath))
                 {
                     return;
                 }
@@ -397,6 +397,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
             {
                 contentsStream.Seek(0, SeekOrigin.Begin);
                 await contentsStream.CopyToAsync(fileStream);
+
+                // Manually flush to get async goodness for finishing the saving of the file.
+                await fileStream.FlushAsync();
             };
         }
 
@@ -487,9 +490,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
             services.AddSingleton<ITemplateResolver, TemplateResolver>();
             var provider = services.BuildServiceProvider();
 
-
-            var generator = new KnockoutSuite(provider);
-            generator.WithOutputPath(WebProject.ProjectPath);
+            var generator = new KnockoutSuite(provider)
+                .WithModel(ReflectionRepository.Models.ToList())
+                .WithOutputPath(WebProject.ProjectPath);
             await generator.GenerateAsync();
             return;
             //services.AddSingleton<CoalesceConfig>

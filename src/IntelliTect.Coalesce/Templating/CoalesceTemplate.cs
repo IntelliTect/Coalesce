@@ -6,24 +6,22 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Templating
 {
-    public abstract class CoalesceTemplate<TModel>
+    public abstract class CoalesceTemplate
     {
         private TextWriter Output { get; set; }
 
-        public TModel Model { get; set; }
-        public object FileName { get; internal set; }
+        public virtual dynamic Model { get; set; }
 
         public abstract Task ExecuteAsync();
 
-        public async Task<string> ExecuteTemplate()
+        public async Task<Stream> GetOutputAsync()
         {
-            StringBuilder output = new StringBuilder();
-            using (var writer = new StringWriter(output))
-            {
-                Output = writer;
-                await ExecuteAsync();
-            }
-            return output.ToString();
+            MemoryStream output = new MemoryStream();
+            Output = new StreamWriter(output);
+            await ExecuteAsync();
+            await Output.FlushAsync();
+            output.Seek(0, SeekOrigin.Begin);
+            return output;
         }
 
         public void WriteLiteral(object value)
@@ -61,5 +59,9 @@ namespace IntelliTect.Coalesce.Templating
                 writer.Write(content.ToString());
             }
         }
+    }
+    public abstract class CoalesceTemplate<TModel> : CoalesceTemplate
+    {
+        public new TModel Model { get; set; }
     }
 }

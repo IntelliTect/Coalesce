@@ -1,6 +1,8 @@
-﻿@inherits IntelliTect.Coalesce.Templating.CoalesceTemplate
+﻿@using IntelliTect.Coalesce.Templating;
+@using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 @using IntelliTect.Coalesce.TypeDefinition
-@using Microsoft.VisualStudio.Web.CodeGeneration
+@using IntelliTect.Coalesce.Utilities
+@inherits CoalesceTemplate<ClassDto>
 @{
     ClassViewModel model = Model.Model;
     string namespaceName = Model.Namespace;

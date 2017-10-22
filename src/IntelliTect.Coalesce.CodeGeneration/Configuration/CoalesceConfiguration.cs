@@ -9,8 +9,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
     {
         //public Dictionary<string, CoalesceProject> Projects { get; set; }
 
-        public ProjectConfiguration WebProject { get; set; }
         public ProjectConfiguration DataProject { get; set; }
+        public ProjectConfiguration WebProject { get; set; }
+
+        public OutputConfiguration Output { get; set; } = new OutputConfiguration();
+    }
+
+    public class OutputConfiguration
+    {
+        public string AreaName { get; set; } = null;
+
+        public string TypescriptModulePrefix { get; set; } = null;
     }
 
     public class ProjectConfiguration

@@ -1,8 +1,10 @@
-﻿@inherits IntelliTect.Coalesce.Templating.CoalesceTemplate
-@using IntelliTect.Coalesce.Utilities
+﻿@using IntelliTect.Coalesce.Templating;
+@using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 @using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Utilities
 @using IntelliTect.Coalesce.DataAnnotations
 @using IntelliTect.Coalesce.Helpers
+@inherits CoalesceTemplate<CreateEditView>
 @{
     ClassViewModel model = Model.Model;
     string viewModelsNamespace = "ViewModels";

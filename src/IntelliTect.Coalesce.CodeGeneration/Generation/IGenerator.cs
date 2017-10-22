@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         TModel Model { get; set; }
     }
 
-    public interface ICompositeGenerator : IGenerator
+    public interface ICompositeGenerator<TModel> : IGenerator<TModel>
     {
         IEnumerable<IGenerator> GetGenerators();
     }

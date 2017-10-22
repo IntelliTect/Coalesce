@@ -95,7 +95,6 @@ namespace IntelliTect.Coalesce.Cli
             var validateOnly = app.Option("-vo|--validateOnly", "Validates the model but does not generate the models", CommandOptionType.SingleValue);
             var area = app.Option("-a|--area", "The area where the generated/scaffolded code should be placed", CommandOptionType.SingleValue);
             var module = app.Option("-m|--module", "The prefix to apply to the module name of the generated typescript files", CommandOptionType.SingleValue);
-            var targetNamespace = app.Option("-ns|--namespace", "Target Namespace for the generated code", CommandOptionType.SingleValue);
 
             app.OnExecute(async () =>
             {
@@ -109,7 +108,6 @@ namespace IntelliTect.Coalesce.Cli
                     ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
                     AreaLocation = area.Value() ?? "",
                     TypescriptModulePrefix = module.Value() ?? "",
-                    TargetNamespace = targetNamespace.Value() ?? ""
                 };
 
                 Console.WriteLine("Loading Projects");

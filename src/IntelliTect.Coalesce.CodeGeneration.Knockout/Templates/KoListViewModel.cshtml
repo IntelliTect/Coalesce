@@ -1,6 +1,8 @@
-﻿@inherits IntelliTect.Coalesce.Templating.CoalesceTemplate
+﻿@using IntelliTect.Coalesce.Templating;
+@using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 @using IntelliTect.Coalesce.TypeDefinition
 @using IntelliTect.Coalesce.Utilities
+@inherits CoalesceTemplate<KoListViewModel>
 @{
     ClassViewModel model = Model.Model;
     string moduleName = "ListViewModels";

@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
-    public abstract class CompositeGenerator : ICompositeGenerator
+    public abstract class CompositeGenerator<TModel> : ICompositeGenerator<TModel>
     {
         public IServiceProvider ServiceProvider { get; }
 
@@ -27,12 +27,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         }
 
         public string OutputPath { get; set; }
+        public TModel Model { get; set; }
 
         public async Task GenerateAsync()
         {
             var generators = GetGenerators().ToList();
 
-            await Task.WhenAll(generators.Select(g => g.GenerateAsync()));
+            // MUST evaluate the enumerable here before passing to Task.WhenAll. Otherwise, these will only be processed one by one.
+            List<Task> tasks = generators.Select(g => g.GenerateAsync()).ToList();
+
+            await Task.WhenAll(tasks);
         }
 
         public abstract IEnumerable<IGenerator> GetGenerators();

@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
 {
     public class RazorTemplateCompiler
     {
-        private ConcurrentDictionary<string, CoalesceTemplate> _templateCache = new ConcurrentDictionary<string, CoalesceTemplate>();
+        private ConcurrentDictionary<string, Type> _templateTypeCache = new ConcurrentDictionary<string, Type>();
         private ProjectContext _projectContext;
 
         public RazorTemplateCompiler(ProjectContext projectContext)
@@ -35,15 +35,27 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
             _projectContext = projectContext;
         }
 
-        public CoalesceTemplate GetCachedCompiledTemplate(IResolvedTemplate template)
+        public CoalesceTemplate GetCompiledTemplate(IResolvedTemplate template)
         {
-            return _templateCache.GetOrAdd(template.FullName, path =>
+            var type = GetCachedTemplateType(template);
+            var compiledObject = Activator.CreateInstance(type);
+
+            if (!(compiledObject is CoalesceTemplate razorTemplate))
             {
-                return GetCompiledTemplate(template);
+                throw new InvalidCastException($"Couldn't cast the result of template {template} to class {typeof(CoalesceTemplate).FullName}.");
+            }
+            return razorTemplate;
+        }
+
+        public Type GetCachedTemplateType(IResolvedTemplate template)
+        {
+            return _templateTypeCache.GetOrAdd(template.FullName, path =>
+            {
+                return GetTemplateType(template);
             });
         }
 
-        private CoalesceTemplate GetCompiledTemplate(IResolvedTemplate template)
+        private Type GetTemplateType(IResolvedTemplate template)
         {
             RazorTemplateEngine engine = new CoalesceRazorTemplateEngine(
                 RazorEngine.Create(options => {
@@ -88,22 +100,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
             }
 
             var type = Compile(generatorResults.GeneratedCode);
-            var compiledObject = Activator.CreateInstance(type);
-            var razorTemplate = compiledObject as CoalesceTemplate;
 
-            if (!(compiledObject is CoalesceTemplate))
-            {
-                throw new InvalidCastException($"Couldn't cast the result of template {template} to class {typeof(CoalesceTemplate).FullName}.");
-            }
-
-            return razorTemplate;
+            return type;
         }
 
         private Type Compile(string content)
         {
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
-            var references = _projectContext.GetTemplateMetadataReferences();
+            var references = _projectContext.GetTemplateMetadataReferences()
+                .Concat(AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .Where(asm => !asm.IsDynamic && !string.IsNullOrEmpty(asm.Location))
+                    .Select(asm => MetadataReference.CreateFromFile(asm.Location))
+                );
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,
@@ -133,23 +143,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
                     return type;
                 }
             }
-        }
-
-        public async Task<Stream> RunTemplateAsync(CoalesceTemplate template, dynamic templateModel)
-        {
-            template.Model = templateModel;
-
-            string result;
-            try
-            {
-                result = await template.ExecuteTemplate();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"There was an error running the template {template.FileName}: {ex.Message}", ex);
-            }
-            
-            return new MemoryStream(Encoding.UTF8.GetBytes(result));
         }
     }
 }

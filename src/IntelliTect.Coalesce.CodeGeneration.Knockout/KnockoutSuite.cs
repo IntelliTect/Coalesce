@@ -10,9 +10,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KnockoutSuite : CompositeGenerator<List<ClassViewModel>>
     {
-        public KnockoutSuite(IServiceProvider serviceProvider) : base(serviceProvider)
-        {
-        }
+        public KnockoutSuite(CompositeGeneratorServices services) : base(services) { }
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
@@ -22,11 +20,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
             yield return Generator<Views>()
                 .WithModel(Model)
-                .AppendOutputPath("Views/Generated");
+                .AppendOutputPath("Views");
 
             yield return Generator<Models>()
                 .WithModel(Model)
-                .AppendOutputPath("Models/Generated");
+                .AppendOutputPath("Models");
 
             yield return Generator<Controllers>()
                 .WithModel(Model);

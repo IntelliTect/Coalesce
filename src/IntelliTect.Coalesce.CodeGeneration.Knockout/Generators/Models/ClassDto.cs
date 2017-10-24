@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class ClassDto : RazorTemplateCSharpGenerator<ClassViewModel>
     {
-        public ClassDto(RazorServices razorServices) : base(razorServices) { }
+        public ClassDto(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "ClassDto.cshtml");

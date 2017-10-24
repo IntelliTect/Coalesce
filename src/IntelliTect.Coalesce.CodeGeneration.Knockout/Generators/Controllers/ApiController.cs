@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class ApiController : RazorTemplateCSharpGenerator<ClassViewModel>
     {
-        public ApiController(RazorServices razorServices) : base(razorServices) { }
+        public ApiController(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "ApiController.cshtml");

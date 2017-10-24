@@ -303,7 +303,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
+                var model = this.ClassViewModel;
                 if (model != null)
                 {
                     string typeName = "";

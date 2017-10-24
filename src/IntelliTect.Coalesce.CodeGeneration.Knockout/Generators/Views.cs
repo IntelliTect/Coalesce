@@ -10,25 +10,32 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class Views : CompositeGenerator<List<ClassViewModel>>
     {
-        public Views(IServiceProvider serviceProvider) : base(serviceProvider)
+        public Views(CompositeGeneratorServices services) : base(services) { }
+
+        public override IEnumerable<ICleaner> GetCleaners()
         {
+            yield return Cleaner<DirectoryCleaner>()
+                .AppendTargetPath("Generated")
+                .WithDepth(SearchOption.AllDirectories);
         }
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
+            yield return Generator<StaticApiViews>();
+
             foreach (var model in this.Model)
             {
                 if (model.OnContext)
                 {
                     yield return Generator<TableView>()
                         .WithModel(model)
-                        .AppendOutputPath($"{model.Name}/Table.cshtml");
+                        .AppendOutputPath($"Generated/{model.Name}/Table.cshtml");
                     yield return Generator<CardView>()
                         .WithModel(model)
-                        .AppendOutputPath($"{model.Name}/Cards.cshtml");
+                        .AppendOutputPath($"Generated/{model.Name}/Cards.cshtml");
                     yield return Generator<CreateEditView>()
                         .WithModel(model)
-                        .AppendOutputPath($"{model.Name}/CreateEdit.cshtml");
+                        .AppendOutputPath($"Generated/{model.Name}/CreateEdit.cshtml");
                 }
             }
         }

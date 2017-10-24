@@ -43,6 +43,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             return generator;
         }
 
+
         /// <summary>
         /// Fluent configuration of a generator's model.
         /// </summary>
@@ -54,7 +55,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public static T WithModel<T, TModel>(this T generator, TModel model)
             where T : IGenerator<TModel>
         {
-
             if (model == null)
             {
                 throw new ArgumentNullException(nameof(model), $"Cannot set null model to {generator}");
@@ -62,6 +62,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             generator.Model = model;
             return generator;
+        }
+    }
+
+    public static class CleanerExtensions
+    {
+        /// <summary>
+        /// Fluent configuration of the taget path of a cleaner.
+        /// </summary>
+        /// <typeparam name="T">The type of the cleaner</typeparam>
+        /// <param name="generator">The cleaner being configured.</param>
+        /// <param name="outputPath">
+        ///     The target path to be appended to the current target path of the cleaner.
+        /// </param>
+        /// <returns></returns>
+        public static T AppendTargetPath<T>(this T cleaner, string targetPath)
+            where T : ICleaner
+        {
+            cleaner.TargetPath = Path.Combine(cleaner.TargetPath, targetPath);
+            return cleaner;
         }
     }
 }

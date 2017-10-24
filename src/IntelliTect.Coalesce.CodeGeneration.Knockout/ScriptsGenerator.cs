@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
+using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout
 {
@@ -29,14 +30,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
     {
         public const string ScriptsFolderName = "Scripts";
 
-        protected RazorTemplateCompiler TemplateProvider { get; }
         public ProjectContext WebProject { get; }
         public ProjectContext DataProject { get; }
 
         public ScriptsGenerator(ProjectContext webProject, ProjectContext dataProject)
         {
-            TemplateProvider = new RazorTemplateCompiler(webProject);
-
             WebProject = webProject;
             DataProject = dataProject;
         }
@@ -114,28 +112,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout
                     DataProject = DataProject,
                     WebProject = WebProject,
                     DbContextType = dataContextType,
-                };
-
+                }; ;
 
                 var services = new ServiceCollection();
+                services.AddLogging(builder => builder.AddProvider(new SimpleConsoleLoggerProvider()));
                 services.AddSingleton(generationContext);
                 services.AddSingleton(model.CoalesceConfiguration);
-                services.AddSingleton(new RazorTemplateCompiler(WebProject));
+                services.AddSingleton<RazorTemplateCompiler>();
                 services.AddSingleton<ITemplateResolver, TemplateResolver>();
-                services.AddTransient<RazorServices>();
+                services.AddSingleton<RazorTemplateServices>();
+                services.AddSingleton<CompositeGeneratorServices>();
                 var provider = services.BuildServiceProvider();
 
-                var generator = new KnockoutSuite(provider)
+                var generator = ActivatorUtilities.CreateInstance<KnockoutSuite>(provider)
                     .WithModel(models)
                     .WithOutputPath(WebProject.ProjectPath);
 
-                IEnumerable<IGenerator> Flatten(ICompositeGenerator composite) =>
-                    composite.GetGenerators().SelectMany(g => (g is ICompositeGenerator c) ? Flatten(c) : new[] { g });
-
-                var allGenerators = Flatten(generator).ToList();
-
-                await Task.WhenAll(allGenerators.Select(g => g.GenerateAsync()));
-
+                await generator.GenerateAsync();
+                
                 //return GenerateScripts(model, models, contextInfo, targetNamespace);
             }
         }

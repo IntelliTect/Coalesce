@@ -10,17 +10,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class Models : CompositeGenerator<List<ClassViewModel>>
     {
-        public Models(IServiceProvider serviceProvider) : base(serviceProvider)
+        public Models(CompositeGeneratorServices services) : base(services) { }
+
+        public override IEnumerable<ICleaner> GetCleaners()
         {
+            yield return Cleaner<DirectoryCleaner>()
+                .AppendTargetPath("Generated");
         }
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            foreach (var model in this.Model.Where(model => model.OnContext && !model.IsDto))
+            foreach (var model in this.Model.Where(model => !model.IsDto))
             {
                 yield return Generator<ClassDto>()
                     .WithModel(model)
-                    .AppendOutputPath($"{model.Name}DtoGen.cs");
+                    .AppendOutputPath($"Generated/{model.Name}DtoGen.cs");
                 
             }
         }

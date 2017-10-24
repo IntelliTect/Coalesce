@@ -7,6 +7,7 @@ using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
@@ -14,28 +15,35 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
     /// Wrapper class to encapsulate all services needed for a RazorTemplateGenerator.
     /// This prevents constructors from being enormous due to all the services.
     /// </summary>
-    public class RazorServices
+    public class RazorTemplateServices
     {
-        public RazorServices(GenerationContext genContext, ITemplateResolver resolver, RazorTemplateCompiler compiler)
+        public RazorTemplateServices(
+            ILoggerFactory loggerFactory,
+            GenerationContext genContext,
+            ITemplateResolver resolver,
+            RazorTemplateCompiler compiler)
         {
+            LoggerFactory = loggerFactory;
             GenerationContext = genContext;
             Resolver = resolver;
             Compiler = compiler;
         }
 
+        public ILoggerFactory LoggerFactory { get; }
         public GenerationContext GenerationContext { get; }
         public ITemplateResolver Resolver { get; }
         public RazorTemplateCompiler Compiler { get; }
     }
 
-    public abstract class RazorTemplateGenerator<TModel> : IFileGenerator<TModel>
+    public abstract class RazorTemplateGenerator<TModel> : FileGenerator, IFileGenerator<TModel>
     {
-        public RazorTemplateGenerator(RazorServices razorServices)
+        public RazorTemplateGenerator(RazorTemplateServices razorServices)
         {
             RazorServices = razorServices;
+            Logger = razorServices.LoggerFactory.CreateLogger(GetType().Name);
         }
 
-        public RazorServices RazorServices { get; }
+        public RazorTemplateServices RazorServices { get; }
 
         public GenerationContext GenerationContext => RazorServices.GenerationContext;
         protected ITemplateResolver Resolver => RazorServices.Resolver;
@@ -43,13 +51,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public abstract TemplateDescriptor Template { get; }
         public TModel Model { get; set; }
-        public string OutputPath { get; set; }
 
         public string AreaName => GenerationContext.AreaName;
         public string ModulePrefix => GenerationContext.TypescriptModulePrefix;
 
 
-        public virtual async Task<Stream> GetOutputAsync()
+        public override async Task<Stream> GetOutputAsync()
         {
             Stream output;
             try
@@ -66,48 +73,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             return output;
         }
-
-        public async Task GenerateAsync()
-        {
-            if (!ShouldGenerate())
-            {
-                return;
-            }
-
-            using (var contents = await GetOutputAsync())
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
-
-                if (!await FileUtilities.HasDifferencesAsync(contents, OutputPath))
-                {
-                    return;
-                }
-
-                using (FileStream fileStream = new FileStream(OutputPath, FileMode.Create, FileAccess.Write))
-                {
-                    contents.Seek(0, SeekOrigin.Begin);
-                    await contents.CopyToAsync(fileStream);
-                };
-            }
-        }
-
-        /// <summary>
-        /// Override to add logic that determines whether or not the generator needs to run or not.
-        /// 
-        /// Generators that are conditional on the state of the filesytem should perform that check in here.
-        /// Checking the filesystem should not be done inside GetGenerators() on an ICompositeGenerator<>.
-        /// </summary>
-        /// <returns>False if the generator should not generate output nor persiste it to disk.</returns>
-        public virtual bool ShouldGenerate() => true;
-
-        // TODO: make this return a list of validation issues. These could be warnings or errors.
-
-        /// <summary>
-        /// Perform validation on the model of a generator.
-        /// Return false if there is a validation issue preventing generation.
-        /// </summary>
-        /// <returns></returns>
-        public virtual bool Validate() => true;
 
         public override string ToString()
         {

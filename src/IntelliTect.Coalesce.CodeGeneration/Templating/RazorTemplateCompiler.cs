@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Common;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Internal;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
@@ -28,11 +30,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
     public class RazorTemplateCompiler
     {
         private ConcurrentDictionary<string, Type> _templateTypeCache = new ConcurrentDictionary<string, Type>();
-        private ProjectContext _projectContext;
 
-        public RazorTemplateCompiler(ProjectContext projectContext)
+        private readonly ProjectContext _projectContext;
+        private readonly ILogger<RazorTemplateCompiler> _logger;
+
+        public RazorTemplateCompiler(GenerationContext genContext, ILogger<RazorTemplateCompiler> logger)
         {
-            _projectContext = projectContext;
+            _projectContext = genContext.WebProject;
+            _logger = logger;
         }
 
         public CoalesceTemplate GetCompiledTemplate(IResolvedTemplate template)
@@ -94,12 +99,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
                 generatorResults = engine.GenerateCode(document);
             }
 
+            if (_logger.IsEnabled(LogLevel.Trace))
+            {
+                _logger.LogTrace($"Generated C# from template {template}:\r\n{generatorResults.GeneratedCode}");
+            }
+            else
+            {
+                _logger.LogDebug($"Generated C# from template {template}");
+            }
+
             if (generatorResults.Diagnostics.Any(d => d.Severity == RazorDiagnosticSeverity.Error))
             {
+                _logger.LogError($"Error compiling razor to C# for template: {template}");
                 throw new TemplateProcessingException(generatorResults.Diagnostics.Select(e => e.ToString()), generatorResults.GeneratedCode);
             }
 
             var type = Compile(generatorResults.GeneratedCode);
+            
+            _logger.LogDebug($"Compiled C# for {template} into in-memory assembly.");
 
             return type;
         }

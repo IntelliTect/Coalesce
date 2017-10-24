@@ -4,7 +4,6 @@
 @using IntelliTect.Coalesce.Utilities
 @inherits CoalesceTemplate<LocalBaseApiController>
 @{
-    var contextInfo = Model.GenerationContext.DbContextType;
     string namespaceName = Model.Namespace;
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
     {
@@ -13,7 +12,7 @@
 }
 using IntelliTect.Coalesce.Controllers;
 // Model Namespaces
-using @contextInfo.FullNamespace;
+using @Model.Namespace;
 @foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System").OrderBy(n => n))
 {
 @:using @ns;
@@ -24,7 +23,7 @@ namespace @(namespaceName).Api
 {
     // This class allows developers to inject base class behaviors into the inheritance chain
     // This file should not be modified, but another partial class should be created where your custom behavior can be placed.
-    public partial class LocalBaseApiController<T, TDto> : BaseApiController<T, TDto, @contextInfo.Name>
+    public partial class LocalBaseApiController<T, TDto> : BaseApiController<T, TDto, @Model.GenerationContext.DbContextType.Name>
         where T : class, new()
         where TDto: class, IClassDto<T, TDto>, new()
     {

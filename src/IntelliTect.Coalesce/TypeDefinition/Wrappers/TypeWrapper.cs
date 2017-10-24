@@ -113,6 +113,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         {
             get
             {
+                if (IsPrimitive) return null;
                 if (Symbol != null && Symbol is INamedTypeSymbol) return ReflectionRepository.GetClassViewModel(Symbol as INamedTypeSymbol);
                 if (Info != null) return ReflectionRepository.GetClassViewModel(Info);
                 return null;

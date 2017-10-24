@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KoExternalType : RazorTemplateGenerator<ClassViewModel>
     {
-        public KoExternalType(RazorServices razorServices) : base(razorServices) { }
+        public KoExternalType(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "KoExternalType.cshtml");

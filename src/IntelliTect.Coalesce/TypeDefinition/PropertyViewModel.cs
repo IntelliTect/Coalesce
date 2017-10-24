@@ -168,7 +168,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
-        public ClassViewModel Object => Wrapper.Type.PureType.ClassViewModel;
+        public ClassViewModel Object => PureType.IsPOCO ? PureType.Wrapper.ClassViewModel : null;
 
         public bool IsDbSet => Type.Name.Contains("DbSet");
 

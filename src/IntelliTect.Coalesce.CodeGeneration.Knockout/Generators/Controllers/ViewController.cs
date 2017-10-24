@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class ViewController : RazorTemplateCSharpGenerator<ClassViewModel>
     {
-        public ViewController(RazorServices razorServices) : base(razorServices) { }
+        public ViewController(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "ViewController.cshtml");

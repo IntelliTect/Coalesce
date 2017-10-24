@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
     public abstract class RazorTemplateCSharpGenerator<TModel> : RazorTemplateGenerator<TModel>
     {
-        public RazorTemplateCSharpGenerator(RazorServices razorServices) : base(razorServices)
+        public RazorTemplateCSharpGenerator(RazorTemplateServices razorServices) : base(razorServices)
         {
         }
 
@@ -20,13 +20,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             using (var output = await base.GetOutputAsync())
             {
+                await output.FlushAsync();
                 var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(SourceText.From(output));
                 var root = syntaxTree.GetRoot();
                 root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, new AdhocWorkspace());
 
                 Stream formattedOutput = new MemoryStream((int)output.Length);
-                root.SerializeTo(formattedOutput);
-                await formattedOutput.FlushAsync();
+                var writer = new StreamWriter(formattedOutput, System.Text.Encoding.UTF8);
+                root.WriteTo(writer);
+                await writer.FlushAsync();
+                formattedOutput.Seek(0, SeekOrigin.Begin);
                 return formattedOutput;
             }
         }

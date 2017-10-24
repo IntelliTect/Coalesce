@@ -10,8 +10,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class Controllers : CompositeGenerator<List<ClassViewModel>>
     {
-        public Controllers(IServiceProvider serviceProvider) : base(serviceProvider)
+        public Controllers(CompositeGeneratorServices services) : base(services) { }
+
+        public override IEnumerable<ICleaner> GetCleaners()
         {
+            yield return Cleaner<DirectoryCleaner>()
+                .AppendTargetPath("Api/Generated");
+            yield return Cleaner<DirectoryCleaner>()
+                .AppendTargetPath("Controllers/Generated");
         }
 
         public override IEnumerable<IGenerator> GetGenerators()
@@ -23,11 +29,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<ApiController>()
                     .WithModel(model)
-                    .AppendOutputPath($"Api/Generated/{model.Name}Controller.cs");
+                    .AppendOutputPath($"Api/Generated/{model.Name}ControllerGen.cs");
 
                 yield return Generator<ViewController>()
                     .WithModel(model)
-                    .AppendOutputPath($"Controllers/Generated/{model.Name}Controller.cs");
+                    .AppendOutputPath($"Controllers/Generated/{model.Name}ControllerGen.cs");
             }
         }
     }

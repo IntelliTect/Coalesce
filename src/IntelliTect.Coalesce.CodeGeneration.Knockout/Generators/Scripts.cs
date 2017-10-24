@@ -10,11 +10,32 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class Scripts : CompositeGenerator<List<ClassViewModel>>
     {
-        public Scripts(IServiceProvider serviceProvider) : base(serviceProvider)
+        public Scripts(CompositeGeneratorServices services) : base(services) { }
+
+        public override IEnumerable<ICleaner> GetCleaners()
         {
+            yield return Cleaner<DirectoryCleaner>()
+                .AppendTargetPath("Generated");
         }
 
+
         public override IEnumerable<IGenerator> GetGenerators()
+        {
+            yield return Generator<StaticScripts>();
+
+            var dynamicGenerators = GetDynamicGenerators().ToList();
+            foreach (var gen in dynamicGenerators)
+            {
+                yield return gen;
+            }
+
+            yield return Generator<TsReferencesFile>()
+                .WithModel(dynamicGenerators)
+                .AppendOutputPath("viewmodels.generated.d.ts");
+        }
+
+
+        private IEnumerable<IGenerator> GetDynamicGenerators()
         {
             string Partial(ClassViewModel model) => model.HasTypeScriptPartial ? ".Partial" : "";
 
@@ -27,9 +48,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
                     yield return Generator<KoListViewModel>()
                         .WithModel(model)
-                        .AppendOutputPath($"Generated/Ko.{model.Name}List.ts");
+                        .AppendOutputPath($"Generated/Ko.{model.ListViewModelClassName}.ts");
                 }
-                else
+
+                if (!model.OnContext)
                 {
                     yield return Generator<KoExternalType>()
                         .WithModel(model)

@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KoViewModel : RazorTemplateGenerator<ClassViewModel>
     {
-        public KoViewModel(RazorServices razorServices) : base(razorServices) { }
+        public KoViewModel(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "KoViewModel.cshtml");

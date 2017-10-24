@@ -10,9 +10,9 @@ using IntelliTect.Coalesce.CodeGeneration.Configuration;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class LocalBaseApiController : RazorTemplateCSharpGenerator<ClassViewModel>
+    public class LocalBaseApiController : RazorTemplateCSharpGenerator<object>
     {
-        public LocalBaseApiController(RazorServices razorServices) : base(razorServices) { }
+        public LocalBaseApiController(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "LocalBaseApiController.cshtml");

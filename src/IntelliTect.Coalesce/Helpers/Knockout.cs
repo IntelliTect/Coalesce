@@ -114,13 +114,13 @@ namespace IntelliTect.Coalesce.Helpers
 
 
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
-            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null,, bool delaySave = true)
+            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = true)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding, format, preserve, stepping, delaySave);
         }
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
-            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, , bool delaySave = true)
+            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null,  bool delaySave = true)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding, format, preserve, stepping, delaySave);
@@ -140,7 +140,7 @@ namespace IntelliTect.Coalesce.Helpers
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
-            string format = null, int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, , bool delaySave = true)
+            string format = null, int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1,  bool delaySave = true)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols,delaySave);
@@ -161,7 +161,7 @@ namespace IntelliTect.Coalesce.Helpers
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTime>> propertySelector,
-            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1,, bool delaySave = true)
+            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = true)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols, delaySave);

@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Templating
@@ -30,6 +31,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
     public class RazorTemplateCompiler
     {
         private ConcurrentDictionary<string, Type> _templateTypeCache = new ConcurrentDictionary<string, Type>();
+        private ConcurrentDictionary<string, SemaphoreSlim> _templateCacheLocks = new ConcurrentDictionary<string, SemaphoreSlim>();
 
         private readonly ProjectContext _projectContext;
         private readonly ILogger<RazorTemplateCompiler> _logger;
@@ -40,9 +42,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
             _logger = logger;
         }
 
-        public CoalesceTemplate GetCompiledTemplate(IResolvedTemplate template)
+        public async Task<CoalesceTemplate> GetTemplateInstance(IResolvedTemplate template)
         {
-            var type = GetCachedTemplateType(template);
+            var type = await GetCachedTemplateType(template);
             var compiledObject = Activator.CreateInstance(type);
 
             if (!(compiledObject is CoalesceTemplate razorTemplate))
@@ -52,12 +54,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
             return razorTemplate;
         }
 
-        public Type GetCachedTemplateType(IResolvedTemplate template)
+        public async Task<Type> GetCachedTemplateType(IResolvedTemplate template)
         {
-            return _templateTypeCache.GetOrAdd(template.FullName, path =>
+            // https://stackoverflow.com/a/34834337/2465631
+
+            var key = template.FullName;
+            var keyLock = _templateCacheLocks.GetOrAdd(key, x => new SemaphoreSlim(1));
+            await keyLock.WaitAsync();
+            try
             {
-                return GetTemplateType(template);
-            });
+                return _templateTypeCache.GetOrAdd(key, path =>
+                {
+                    return GetTemplateType(template);
+                });
+            }
+            finally
+            {
+                keyLock.Release();
+            }
         }
 
         private Type GetTemplateType(IResolvedTemplate template)

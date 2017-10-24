@@ -53,7 +53,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         /// <param name="model">The model to configure the generator with.</param>
         /// <returns></returns>
         public static T WithModel<T, TModel>(this T generator, TModel model)
-            where T : IGenerator<TModel>
+            // This is doubly qualified because Intellisense seems to want to list this method
+            // EVERYWHERE unless we have the IGenerator (non-generic) constraint as well. (VS2017 15.3.5)
+            where T : IGenerator<TModel>, IGenerator
         {
             if (model == null)
             {

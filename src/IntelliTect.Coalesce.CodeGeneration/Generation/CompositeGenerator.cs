@@ -74,6 +74,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             Logger.LogDebug($"Generating {fileGenerators.Count} files from {compositeGenerators.Count} composites");
             await Task.WhenAll(fileGenerators
+                .AsParallel()
                 .Select(g => g.GenerateAsync()));
 
 

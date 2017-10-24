@@ -29,5 +29,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
             }
             return stream;
         }
+
+        public override string ToString() => TemplateDescriptor.ManifestResourceFullName;
     }
 }

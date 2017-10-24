@@ -3,10 +3,12 @@ using IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
 using IntelliTect.Coalesce.CodeGeneration.Common;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
+using IntelliTect.Coalesce.CodeGeneration.Knockout;
 using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -88,28 +90,8 @@ namespace IntelliTect.Coalesce.Cli
 
             var config = configRoot.Get<CoalesceConfiguration>();
 
-
-
-
-            var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);
-            var validateOnly = app.Option("-vo|--validateOnly", "Validates the model but does not generate the models", CommandOptionType.SingleValue);
-            var area = app.Option("-a|--area", "The area where the generated/scaffolded code should be placed", CommandOptionType.SingleValue);
-            var module = app.Option("-m|--module", "The prefix to apply to the module name of the generated typescript files", CommandOptionType.SingleValue);
-
             app.OnExecute(async () =>
             {
-                // TODO: Move all configuration to coalesce.json, and remove these CLI parameters.
-                var model = new CommandLineGeneratorModel
-                {
-                    // TODO: added just so I can wire in the new templating code more easily.
-                    CoalesceConfiguration = config,
-
-                    DataContextClass = dataContextClass.Value() ?? "",
-                    ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
-                    AreaLocation = area.Value() ?? "",
-                    TypescriptModulePrefix = module.Value() ?? "",
-                };
-
                 Console.WriteLine("Loading Projects");
                 // Find the web project
                 ProjectContext webContext = RoslynProjectContext.CreateContext(config.WebProject);
@@ -121,8 +103,14 @@ namespace IntelliTect.Coalesce.Cli
 
                 Console.WriteLine("");
 
-                CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);
-                await generator.GenerateCode(model);
+                var generator = new ScriptsGenerator(webContext, dataContext);
+                await generator.Generate(config);
+
+                if (Debugger.IsAttached)
+                {
+                    Console.WriteLine("Press Enter to quit");
+                    Console.Read();
+                }
 
                 return 0;
             });

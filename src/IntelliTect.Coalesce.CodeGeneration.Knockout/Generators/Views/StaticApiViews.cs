@@ -9,13 +9,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
     public class StaticApiViews : CompositeGenerator<object>
     {
         public StaticApiViews(CompositeGeneratorServices services) : base(services) { }
-
-        public override IEnumerable<ICleaner> GetCleaners()
-        {
-            // Old editor html file.
-            yield return Cleaner<FileCleaner>().AppendTargetPath("Api/_EditorHtml.cshtml");
-        }
-
+        
         public override IEnumerable<IGenerator> GetGenerators()
         {
             string[] files =

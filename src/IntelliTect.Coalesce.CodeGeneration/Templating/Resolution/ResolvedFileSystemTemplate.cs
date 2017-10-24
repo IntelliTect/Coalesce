@@ -23,5 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
         {
             return File.OpenRead(FullName);
         }
+
+        public override string ToString() => FullName;
     }
 }

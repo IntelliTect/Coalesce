@@ -68,13 +68,13 @@ namespace IntelliTect.Coalesce.Helpers
         #region Dates
 
         public static HtmlString DateTimeWithLabel(
-            string label, string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, int? labelCols = null, int? inputCols = null, bool delaySave = true)
+            string label, string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, int? labelCols = null, int? inputCols = null, bool delaySave = false)
         {
             return DateTime(dataBinding, format, preserve, stepping, delaySave).AddLabel(label, labelCols, inputCols);
         }
 
         public static HtmlString DateTime(
-            string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = true)
+            string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = false)
         {
             string icon = "fa-calendar";
             string steppingText = "";
@@ -114,54 +114,54 @@ namespace IntelliTect.Coalesce.Helpers
 
 
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
-            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = true)
+            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding, format, preserve, stepping, delaySave);
         }
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
-            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null,  bool delaySave = true)
+            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null,  bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding, format, preserve, stepping, delaySave);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, DateTime>> propertySelector,
-            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave=true)
+            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave=false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding, format, preserve, stepping, delaySave);
         }
         public static HtmlString InputFor<T>(Expression<Func<T, DateTime?>> propertySelector,
-            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = true)
+            string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding, format, preserve, stepping, delaySave);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
-            string format = null, int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1,  bool delaySave = true)
+            string format = null, int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1,  bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols,delaySave);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
-            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = true)
+            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols, delaySave);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTime?>> propertySelector,
-            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = true)
+            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols, delaySave);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTime>> propertySelector,
-            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = true)
+            string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1, bool delaySave = false)
         {
             var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(propertyModel.DisplayNameLabel(label), propertyModel.JsVariableForBinding, format, preserve, stepping, labelCols, inputCols, delaySave);

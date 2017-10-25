@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
+using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +29,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
     public interface ICompositeGenerator<TModel> : IGenerator<TModel>, ICompositeGenerator
     {
+        // Composite interface - no additional members; just shorthand for the two sub-interfaces.
+    }
+
+    public interface IRootGenerator : ICompositeGenerator<List<ClassViewModel>>
+    {
+        // Nothing special about this right now, but there may be in the future.
     }
 
     public interface IFileGenerator : IGenerator

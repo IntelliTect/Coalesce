@@ -5,36 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
-using IntelliTect.Coalesce.CodeGeneration.Configuration;
-using IntelliTect.Coalesce.CodeGeneration.Utilities;
-using Microsoft.Extensions.Logging;
+using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
-    /// <summary>
-    /// Wrapper class to encapsulate all services needed for a RazorTemplateGenerator.
-    /// This prevents constructors from being enormous due to all the services.
-    /// </summary>
-    public class RazorTemplateServices
-    {
-        public RazorTemplateServices(
-            ILoggerFactory loggerFactory,
-            GenerationContext genContext,
-            ITemplateResolver resolver,
-            RazorTemplateCompiler compiler)
-        {
-            LoggerFactory = loggerFactory;
-            GenerationContext = genContext;
-            Resolver = resolver;
-            Compiler = compiler;
-        }
-
-        public ILoggerFactory LoggerFactory { get; }
-        public GenerationContext GenerationContext { get; }
-        public ITemplateResolver Resolver { get; }
-        public RazorTemplateCompiler Compiler { get; }
-    }
-
     public abstract class RazorTemplateGenerator<TModel> : FileGenerator, IFileGenerator<TModel>
     {
         public RazorTemplateGenerator(RazorTemplateServices razorServices)

@@ -1,24 +1,15 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
-using IntelliTect.Coalesce.CodeGeneration.Common;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.CodeGeneration.Scripts;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Internal;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
-using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.Templating;
-using Microsoft.AspNetCore.Mvc.Razor.Extensions;
-using Microsoft.AspNetCore.Razor;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Web.CodeGeneration.Core;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -26,7 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Templating
+namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
 {
     public class RazorTemplateCompiler
     {
@@ -56,7 +47,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
 
         public async Task<Type> GetCachedTemplateType(IResolvedTemplate template)
         {
-            // https://stackoverflow.com/a/34834337/2465631
+            // this synchronization pattern is from https://stackoverflow.com/a/34834337/2465631
 
             var key = template.FullName;
             var keyLock = _templateCacheLocks.GetOrAdd(key, x => new SemaphoreSlim(1));
@@ -96,12 +87,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
             else
             {
                 // Need to provide the default imports here.
-                // They aren't used in generation if you load directly from a stream.
-                // They are applied automatically by Razor when loading a file from a filesystem,
-                // but aren't when we construct a document ourselves.
+                // They won't automatically be used in generation if you load directly from a stream:
+                //      They are applied automatically by Razor when loading a file from a filesystem,
+                //      but aren't when we construct a document ourselves.
                 // One potential resolution for this would be to create our own implementation of RazorEngine -
-                // the implementation that gets resolved above from RazorProject.Create is a FileSystemRazorProject.
-                // We could theoretically create our own ManifestResourceRazorProject, or potentially a RazorProject
+                // the underlying implementation that is ultimately used in this code is a FileSystemRazorProject.
+                // We could theoretically create our own ManifestResourceRazorProject, or potentially event a RazorProject
                 // that will resolve any needed files from either location, prioritizing filesystem if the base template is read from filesystem.
                 // This would probably be WAY overkill for our needs, though.
                 var document = RazorCodeDocument.Create(
@@ -115,6 +106,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating
 
             if (_logger.IsEnabled(LogLevel.Trace))
             {
+                // Check log level enabled before trying to log this, since this will allocate a massive string.
                 _logger.LogTrace($"Generated C# from template {template}:\r\n{generatorResults.GeneratedCode}");
             }
             else

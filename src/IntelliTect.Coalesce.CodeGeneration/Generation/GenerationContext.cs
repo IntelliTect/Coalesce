@@ -14,13 +14,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             CoalesceConfiguration = config;
         }
-        public CoalesceConfiguration CoalesceConfiguration { get; }
 
+        public CoalesceConfiguration CoalesceConfiguration { get; }
 
         public ProjectContext WebProject { get; set; }
 
         public ProjectContext DataProject { get; set; }
-
 
         public TypeViewModel DbContextType { get; set; }
 

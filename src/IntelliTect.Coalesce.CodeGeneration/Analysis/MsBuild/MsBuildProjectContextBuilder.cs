@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Microsoft.DotNet.Cli.Utils;
 using System.Linq;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 {
@@ -28,9 +29,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
         public string TargetsLocation { get; private set; }
         public string Configuration { get; private set; } = "Release";
         public string Framework { get; private set; } = null;
+        public ILogger Logger { get; }
 
-        public MsBuildProjectContextBuilder(ProjectContext context)
+        public MsBuildProjectContextBuilder(ILogger logger, ProjectContext context)
         {
+            Logger = logger;
             _context = context;
             if (_context.Configuration != null) Configuration = _context.Configuration;
             if (_context.Framework != null) Framework = _context.Framework;
@@ -90,7 +93,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
         {
             var projectPath = _context.ProjectFilePath;
 
-            Console.WriteLine($"   {(projectPath)}: Restoring packages");
+            Logger?.LogInformation($"   {(projectPath)}: Restoring packages");
             var result = Command.CreateDotNet(
                 "restore",
                 new string[]
@@ -123,9 +126,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 InstallTargets(TargetsLocation);
             }
 
-            Console.Write($"   {(projectPath)}");
-            if (Framework != null) Console.Write($" ({Framework})");
-            Console.WriteLine($": Evaluating & building dependencies");
+            var line = $"   {(projectPath)}";
+            if (Framework != null) line += $" ({Framework})";
+            line += $": Evaluating & building dependencies";
+            Logger?.LogInformation(line);
 
             var projectInfoFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var args = new List<string>

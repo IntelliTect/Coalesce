@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using System.IO;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base

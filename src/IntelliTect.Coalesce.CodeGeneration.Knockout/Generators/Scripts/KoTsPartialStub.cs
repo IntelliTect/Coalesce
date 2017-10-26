@@ -4,9 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
-using Microsoft.VisualStudio.Web.CodeGeneration;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
-using IntelliTect.Coalesce.CodeGeneration.Configuration;
+using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using System.IO;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators

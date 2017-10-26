@@ -62,7 +62,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     yield return Generator<KoTsPartialStub>()
                         .WithModel(model)
-                        .AppendOutputPath($"Partials/Ko.{model.Name}{Partial(model)}.partial.ts");
+                        .AppendOutputPath($"Partials/Ko.{model.Name}.partial.ts");
                 }
             }
         }

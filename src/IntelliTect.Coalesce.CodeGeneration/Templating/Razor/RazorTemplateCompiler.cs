@@ -131,12 +131,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
         {
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
-            var references = _projectContext.GetTemplateMetadataReferences()
+            var references = 
+                _projectContext.GetTemplateMetadataReferences()
+
+                // Add in references to any other currently loaded Coalesce assemblies.
+                // Primarily, this will be the assembly that actually hosts the generator,
+                // but this could also be any other assembly that IntelliTect.Coalesce.CodeGeneration needs but IntelliTect.Coalesce doesn't.
+
+                // This pevents Coalesce-based projects from needing to reference the code gen
+                // packages/projects/assemblies when using stock generators,
+                // which are always named IntelliTect.Coalesce.* and are the only generators Coalesce supports as of 10.26.2017 anyway.
                 .Concat(AppDomain.CurrentDomain
                     .GetAssemblies()
-                    .Where(asm => !asm.IsDynamic && !string.IsNullOrEmpty(asm.Location))
-                    .Select(asm => MetadataReference.CreateFromFile(asm.Location))
-                );
+                    .Where(asm => !asm.IsDynamic && !string.IsNullOrEmpty(asm.Location) && asm.FullName.Contains("IntelliTect.Coalesce"))
+                    .Select(asm => MetadataReference.CreateFromFile(asm.Location)));
+
             var assemblyName = Path.GetRandomFileName();
 
             var compilation = CSharpCompilation.Create(assemblyName,

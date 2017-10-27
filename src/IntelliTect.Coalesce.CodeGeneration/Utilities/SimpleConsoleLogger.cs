@@ -32,7 +32,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
                     return;
                 }
 
-                Console.WriteLine($"{logLevel}: {formatter(state, exception)}");
+                var levelString = logLevel == LogLevel.Information ? "Info" : logLevel.ToString();
+                Console.WriteLine($"{levelString}: {formatter(state, exception)}");
             }
 
             public bool IsEnabled(LogLevel logLevel)

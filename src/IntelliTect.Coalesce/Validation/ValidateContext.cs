@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce.Validation
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.Properties.Where(f => !f.IsInternalUse))
                 {
-                    assert.Area = $"{model.Name}: {prop.Name}";
+                    assert.Area = $"{model.Name}.{prop.Name}";
                     try
                     {
                         assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.ReadAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
@@ -68,6 +68,11 @@ namespace IntelliTect.Coalesce.Validation
                         if (prop.Type.IsCollection)
                         {
                             assert.AreNotEqual(prop.TypeName, prop.PureType, "Collection is not defined correctly.");
+                            if (prop.PureTypeOnContext)
+                            {
+                                assert.IsNotNull(prop.InverseProperty, $"A Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object.Name}. " +
+                                    $"Add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name} to specify the actual name of the inverse property.", isWarning: true);
+                            }
                         }
                         if (prop.IsManytoManyCollection)
                         {
@@ -86,7 +91,7 @@ namespace IntelliTect.Coalesce.Validation
                 // Validate Methods
                 foreach (var method in model.Methods.Where(f => !f.IsInternalUse))
                 {
-                    assert.Area = $"{model.Name}: {method.Name}";
+                    assert.Area = $"{model.Name}.{method.Name}";
                     try
                     {
                         assert.IsNotNull(method.JsVariable, $"JS Variable is: {method.JsVariable}");

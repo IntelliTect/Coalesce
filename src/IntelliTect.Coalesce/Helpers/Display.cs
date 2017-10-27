@@ -96,15 +96,6 @@ namespace IntelliTect.Coalesce.Helpers
             {
                 if (prop.PureTypeOnContext)
                 {
-                    if (prop.ListEditorUrl == null)
-                    {
-                        Console.WriteLine($"WARNING: Inverse Property {prop.Parent.Name} was not found on {prop.Object.Name}. You need to add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name}.");
-                        //if (prop.InverseProperty != null)
-                        //{
-                        //    Console.WriteLine($"{prop.InverseProperty.Name}");
-                        //}
-                    }
-
                     return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 }
 

@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +32,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
         {
             _projectContext = genContext.WebProject;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Locate all templates embedded in an assembly, and try and precompile them.
+        /// </summary>
+        public Task PrecompileAssemblyTemplates(Assembly assembly)
+        {
+            var tasks = assembly.GetManifestResourceNames()
+                .Where(name => name.EndsWith(".cshtml"))
+                .AsParallel()
+                .Select(name =>
+                {
+                    var parts = Regex.Match(name, $@"{assembly.GetName().Name}\.(.*)\.([^\.]+\.cshtml)").Groups;
+                    var path = parts[1].Value;
+                    var fileName = parts[2].Value;
+                    return new TemplateDescriptor(assembly, path, fileName);
+                })
+                .Select(descriptor => new ResolvedManifestResourceTemplate(descriptor))
+                .Select( async resolved =>
+                {
+                    _logger.LogTrace($"Precompiling suspected template {resolved}");
+                    try
+                    {
+                        await GetTemplateInstance(resolved);
+                        _logger.LogDebug($"Successfully precompiled {resolved}");
+                    }
+                    catch
+                    {
+                        _logger.LogDebug($"Precompilation of {resolved} failed.");
+                    }
+                });
+
+            return Task.WhenAll(tasks.ToArray());
         }
 
         public async Task<CoalesceTemplate> GetTemplateInstance(IResolvedTemplate template)

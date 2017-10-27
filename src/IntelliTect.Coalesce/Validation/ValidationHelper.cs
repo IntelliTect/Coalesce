@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.Validation
             {
                 result = false;
             }
-            this.Add(new ValidationResult() { WasSuccessful = result, isWarning = isWarning, Area = Area, Message = message });
+            this.Add(new ValidationResult() { WasSuccessful = result, IsWarning = isWarning, Area = Area, Message = message });
 
             return result;
         }

@@ -28,8 +28,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             where TGenerator : IRootGenerator
         {
             var services = new ServiceCollection();
-            services.AddLogging(builder => 
-                builder.AddProvider(new SimpleConsoleLoggerProvider()));
+            // TODO: configure logging level from command line or config file.
+            services.AddLogging(builder => builder
+                //.SetMinimumLevel(LogLevel.Debug)
+                .AddProvider(new SimpleConsoleLoggerProvider()));
 
             services.AddSingleton(Config);
             services.AddSingleton<RazorTemplateCompiler>();
@@ -48,6 +50,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             logger.LogInformation("Loading Projects");
 
             genContext.WebProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.WebProject);
+
+            // Now that we have the web project, we should be able to precompile our templates while the data project analyzes.
+            var precompileTask = Task.Run(() => provider.GetRequiredService<RazorTemplateCompiler>()
+                .PrecompileAssemblyTemplates(typeof(TGenerator).Assembly));
+
             genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
             genContext.DbContextType = FindDbContextType(Config, genContext.DataProject);
 
@@ -57,13 +64,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                                 .ToList();
 
             var validationResult = ValidateContext.Validate(models);
-            var errors = validationResult.Where(r => !r.WasSuccessful);
-            if (errors.Any())
+            var issues = validationResult.Where(r => !r.WasSuccessful);
+            foreach (var issue in issues)
             {
-                foreach (var error in errors)
-                {
-                    logger.LogError("--- " + error.ToString());
-                }
+                if (issue.IsWarning) logger.LogWarning(issue.ToString());
+                else logger.LogError(issue.ToString());
+            }
+            if (issues.Any(i => !i.IsWarning))
+            {
                 logger.LogError("Model validation failed. Exiting.");
                 return;
             }
@@ -72,7 +80,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 .WithModel(models)
                 .WithOutputPath(genContext.WebProject.ProjectPath);
 
+            await precompileTask;
             await generator.GenerateAsync();
+
+            logger.LogInformation("Generation Complete");
 
         }
 

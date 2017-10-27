@@ -819,7 +819,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool HasInverseProperty => Wrapper.HasAttribute<InversePropertyAttribute>();
 
         /// <summary>
-        /// For a many to many collection this is the reference to this object from the contained object.
+        /// For a collection, this is the reference to this object from the contained object.
         /// </summary>
         public PropertyViewModel InverseProperty
         {

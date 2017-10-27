@@ -25,6 +25,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
     /// </summary>
     public class MsBuildProjectContextBuilder
     {
+        public const string SuppressedWarnings = "NU1603";
+
         private ProjectContext _context;
         public string TargetsLocation { get; private set; }
         public string Configuration { get; private set; } = "Release";
@@ -100,9 +102,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 {
                     projectPath,
                     "--verbosity", "quiet",
+                    $"/p:nowarn={SuppressedWarnings}"
                 })
-                .OnOutputLine(Console.WriteLine)
-                .OnErrorLine(Console.Error.WriteLine)
+                .OnOutputLine(l => Logger.LogInformation(l))
+                .OnErrorLine(l => Logger.LogError(l))
                 .Execute();
             if (result.ExitCode != 0)
             {
@@ -137,6 +140,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 projectPath,
                 "/nologo",
                 "/v:q",
+                $"/p:nowarn={SuppressedWarnings}",
                 $"/t:EvaluateProjectInfoForCodeGeneration",
                 $"/p:CustomBeforeMicrosoftCSharpTargets={TargetsLocation}\\Imports.targets",
                 $"/p:OutputFile={projectInfoFile}",
@@ -146,8 +150,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             if (Framework != null) args.Add($"/p:TargetFramework={Framework}");
 
             var result = Command.CreateDotNet("msbuild", args)
-                .OnOutputLine(Console.WriteLine)
-                .OnErrorLine(Console.Error.WriteLine)
+                .OnOutputLine(l => Logger.LogInformation(l))
+                .OnErrorLine(l => Logger.LogError(l))
                 .Execute();
 
             if (result.ExitCode != 0)

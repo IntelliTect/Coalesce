@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.3.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.0.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.9" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.10" />
     <PackageReference Include="System.Net.Http" Version="4.3.2" />
   </ItemGroup>
   <!--<ItemGroup>

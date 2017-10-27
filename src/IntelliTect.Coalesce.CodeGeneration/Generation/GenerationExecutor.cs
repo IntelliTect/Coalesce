@@ -41,10 +41,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             services.AddSingleton<GenerationContext>();
             services.AddTransient<IProjectContextFactory, RoslynProjectContextFactory>();
             var provider = services.BuildServiceProvider();
+
             var logger = provider.GetRequiredService<ILogger<GenerationExecutor>>();
-
-            logger.LogInformation("Starting Generator");
-
             var genContext = provider.GetRequiredService<GenerationContext>();
 
             logger.LogInformation("Loading Projects");
@@ -80,8 +78,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 .WithModel(models)
                 .WithOutputPath(genContext.WebProject.ProjectPath);
 
-            await precompileTask;
+            logger.LogInformation("Starting Generation");
+
             await generator.GenerateAsync();
+            await precompileTask;
 
             logger.LogInformation("Generation Complete");
 

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Html;
 using System.Text;
-using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Knockout.Models;
 
-namespace IntelliTect.Coalesce.Helpers
+namespace IntelliTect.Coalesce.Knockout.Helpers
 {
     public static class TableHelper
     {

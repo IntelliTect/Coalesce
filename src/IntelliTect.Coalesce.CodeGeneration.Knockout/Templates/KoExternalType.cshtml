@@ -1,6 +1,7 @@
 ﻿@using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 @using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 @using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Knockout.TypeDefinition
 @using IntelliTect.Coalesce.Utilities
 @inherits CoalesceTemplate<KoExternalType>
 @{
@@ -31,10 +32,10 @@ module @moduleName {
         // Observables
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))
         {
-		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType) = @(prop.Type.JsKnockoutType);
+		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.JsKnockoutType());
         if (prop.Type.IsEnum)
         { 
-        @:public @(prop.JsTextPropertyName) = @(prop.Type.JsKnockoutType);  // Enum Text Value
+        @:public @(prop.JsTextPropertyName) = @(prop.Type.JsKnockoutType());  // Enum Text Value
         }
         }
         // Loads this object from a data transfer object received from the server.

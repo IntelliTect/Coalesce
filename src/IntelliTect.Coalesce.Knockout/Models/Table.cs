@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.TypeDefinition;
 
-namespace IntelliTect.Coalesce.Models
+namespace IntelliTect.Coalesce.Knockout.Models
 {
     public class Table
     {

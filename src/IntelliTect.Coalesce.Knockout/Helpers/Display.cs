@@ -2,8 +2,9 @@
 using System;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Knockout.TypeDefinition;
 
-namespace IntelliTect.Coalesce.Helpers
+namespace IntelliTect.Coalesce.Knockout.Helpers
 {
     public static class Display
     {
@@ -17,14 +18,14 @@ namespace IntelliTect.Coalesce.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                var result = @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                var result = @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 return new HtmlString(result);
             }
             else if (editable && prop.CanWrite && !prop.IsInternalUse)
             {
                 if (prop.Type.IsDate)
                 {
-                    return Knockout.DateTime(prop.JsVariableForBinding, prop.DateFormat);
+                    return Knockout.DateTime(prop.JsVariableForBinding(), prop.DateFormat);
                 }
                 else if (prop.Type.IsEnum)
                 {
@@ -32,7 +33,7 @@ namespace IntelliTect.Coalesce.Helpers
                 }
                 else if (prop.Type.IsBool)
                 {
-                    return Knockout.Checkbox(prop.JsVariableForBinding);
+                    return Knockout.Checkbox(prop.JsVariableForBinding());
                 }
                 else if (prop.HasValidValues)
                 {
@@ -52,18 +53,18 @@ namespace IntelliTect.Coalesce.Helpers
                 }
                 else
                 {
-                    return Knockout.TextInput(prop.JsVariableForBinding);
+                    return Knockout.TextInput(prop.JsVariableForBinding());
                 }
             }
             else
             {
                 if (prop.IsDateOnly)
                 {
-                    return Knockout.DisplayDate(prop.JsVariableForBinding);
+                    return Knockout.DisplayDate(prop.JsVariableForBinding());
                 }
                 else if (prop.Type.IsDate)
                 {
-                    return Knockout.DisplayDateTime(prop.JsVariableForBinding);
+                    return Knockout.DisplayDateTime(prop.JsVariableForBinding());
                 }
                 else if (prop.IsManytoManyCollection)
                 {
@@ -71,7 +72,7 @@ namespace IntelliTect.Coalesce.Helpers
                 }
                 else if (prop.Type.IsBool)
                 {
-                    return Knockout.DisplayCheckbox(prop.JsVariableForBinding);
+                    return Knockout.DisplayCheckbox(prop.JsVariableForBinding());
                 }
                 else if (prop.IsPOCO && !prop.IsComplexType)
                 {
@@ -83,7 +84,7 @@ namespace IntelliTect.Coalesce.Helpers
                 }
                 else
                 {
-                    return Knockout.DisplayText(prop.JsVariableForBinding);
+                    return Knockout.DisplayText(prop.JsVariableForBinding());
                 }
             }
             // If in doubt do nothing. But put a comment in
@@ -96,10 +97,10 @@ namespace IntelliTect.Coalesce.Helpers
             {
                 if (prop.PureTypeOnContext)
                 {
-                    return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                    return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 }
 
-                return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: " + prop.JsVariableForBinding + @"().length + "" Items""' ></div>";
+                return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: " + prop.JsVariableForBinding() + @"().length + "" Items""' ></div>";
             }
             else
             {

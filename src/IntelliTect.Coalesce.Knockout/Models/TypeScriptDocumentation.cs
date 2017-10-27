@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Models
+namespace IntelliTect.Coalesce.Knockout.Models
 {
     public class TypeScriptDocumentation
     {

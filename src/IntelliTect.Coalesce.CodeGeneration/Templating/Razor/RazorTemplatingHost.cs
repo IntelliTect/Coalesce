@@ -18,7 +18,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
             "System.Linq",
             "System.Collections.Generic",
             "System.Dynamic",
-            "IntelliTect.Coalesce.Templating",
         };
 
         public CoalesceRazorTemplateEngine(RazorEngine engine, RazorProject project) : base(engine, project)

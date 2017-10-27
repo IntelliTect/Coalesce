@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Linq;
 using System.Net;
-using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Controllers;
 using Microsoft.AspNetCore.Html;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using Microsoft.Extensions.Primitives;
+using IntelliTect.Coalesce.Knockout.Models;
 
-namespace IntelliTect.Coalesce.Controllers
+namespace IntelliTect.Coalesce.Knockout.Controllers
 {
     public abstract class BaseViewController<T, TContext> : BaseViewController<T, T, TContext>
         where T : class, new()
@@ -88,7 +88,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected ActionResult EditorHtmlImplementation(bool simple = false)
         {
             ViewBag.SimpleEditorOnly = simple;
-            return View("~/Views/Api/EditorHtml.cshtml", classViewModel);
+            return PartialView("~/Views/Api/EditorHtml.cshtml", classViewModel);
         }
 
 

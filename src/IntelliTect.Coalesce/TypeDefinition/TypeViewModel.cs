@@ -109,27 +109,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public TypeViewModel FirstTypeArgument => new TypeViewModel(Wrapper.FirstTypeArgument);
 
         /// <summary>
-        /// Type used in knockout for the observable.
+        /// Best approximation of a TypeScript type definition for the type.
         /// </summary>
         public string TsType
         {
             get
             {
-                if (Wrapper.IsTimeZoneInfo) return "any";
-                if (IsBool) return "boolean";
-                if (IsDate) return "moment.Moment";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType + "[]";
-                if (IsPOCO) return $"ViewModels.{PureType.Name}";
-                if (IsClass) return PureType.Name;
-                if (IsEnum) return "number";
-                if (IsNumber) return "number";
-                return "any";
+                return TsTypePlain;
             }
         }
 
         /// <summary>
-        /// Type used in knockout for the observable.
+        /// Exrepssion that will convert from a string to the data's actual type.
         /// </summary>
         public string TsConvertFromString(string expression)
         {
@@ -142,13 +135,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
-        /// Type used in knockout for the observable.
+        /// Best approximation of a TypeScript type definition for the type, not accounting for arrays.
+        /// Collection types will be typed as "any". Use TsType to get correct collection types.
         /// </summary>
         public string TsTypePlain
         {
             get
             {
-                if (this.Name == nameof(TimeZoneInfo)) return "any";
+                if (Wrapper.IsTimeZoneInfo) return "any";
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
                 if (IsPOCO) return $"ViewModels.{PureType.Name}";
@@ -159,43 +153,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        /// <summary>
-        /// Type used in knockout for the observable.
-        /// </summary>
-        public string JsKnockoutType
-        {
-            get
-            {
-                if (IsByteArray) return "ko.observable(null)";
-                if (IsCollection || IsArray) return "ko.observableArray([])";
-                if (IsComplexType) return "ko.observable(null)";
-                else if (IsDate)
-                {
-                    if (IsNullable) return "ko.observable(null)";
-                    else return "ko.observable(moment())";
-                }
-                else return "ko.observable(null)";
-            }
-        }
-
-        /// <summary>
-        /// Type used in knockout for the observable with ViewModels.
-        /// </summary>
-        public string TsKnockoutType
-        {
-            get
-            {
-                if (IsByteArray) return "KnockoutObservable<string>";
-                if ((IsArray || IsCollection) && (PureType.IsNumber)) return "KnockoutObservableArray<number>";
-                if ((IsArray || IsCollection) && (PureType.IsString)) return "KnockoutObservableArray<string>";
-                if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
-                else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
-                else if (IsCollection || IsArray) return "KnockoutObservableArray<any>";
-                else if (IsString) return "KnockoutObservable<string>";
-                else if (IsPOCO && HasClassViewModel) return "KnockoutObservable<ViewModels." + ClassViewModel.ViewModelClassName + ">";
-                else return "KnockoutObservable<" + TsType + ">";
-            }
-        }
 
         public bool HasClassViewModel => ClassViewModel != null;
 

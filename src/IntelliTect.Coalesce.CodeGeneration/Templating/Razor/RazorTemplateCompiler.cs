@@ -1,7 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
-using IntelliTect.Coalesce.Templating;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.CodeAnalysis;
@@ -50,6 +49,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                     return new TemplateDescriptor(assembly, path, fileName);
                 })
                 .Select(descriptor => new ResolvedManifestResourceTemplate(descriptor))
+                .Where(resolved =>
+                {
+                    using (var reader = new StreamReader(resolved.GetContents()))
+                    {
+                        // Read the first few characters to try and see if this looks like a template.
+                        // If this check doesn't work, no harm done - this whole process just an attempt at optimization.
+                        var contents = new char[500];
+                        const string searchString = nameof(CoalesceTemplate);
+                        reader.ReadBlock(contents, 0, contents.Length);
+                        var looksLikeTemplate = new String(contents).Contains(searchString);
+
+                        if (!looksLikeTemplate)
+                            _logger.LogDebug($"Won't precompile {resolved}, doesn't contain {searchString} in first {contents.Length} chars");
+                        return looksLikeTemplate;
+                    }
+                })
                 .Select( async resolved =>
                 {
                     _logger.LogTrace($"Precompiling suspected template {resolved}");

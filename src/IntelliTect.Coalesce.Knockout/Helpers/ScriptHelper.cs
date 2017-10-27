@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Html;
-using System.Text;
+﻿using System.Text;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Html;
 
-namespace IntelliTect.Coalesce.Helpers
+namespace IntelliTect.Coalesce.Knockout.Helpers
 {
     public static class ScriptHelper
     {

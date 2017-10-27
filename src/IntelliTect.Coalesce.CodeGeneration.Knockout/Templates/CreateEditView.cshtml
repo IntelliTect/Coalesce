@@ -3,7 +3,7 @@
 @using IntelliTect.Coalesce.TypeDefinition
 @using IntelliTect.Coalesce.Utilities
 @using IntelliTect.Coalesce.DataAnnotations
-@using IntelliTect.Coalesce.Helpers
+@using IntelliTect.Coalesce.Knockout.Helpers
 @inherits CoalesceTemplate<CreateEditView>
 @{
     ClassViewModel model = Model.Model;
@@ -17,6 +17,8 @@
         viewModelsNamespace = Model.ModulePrefix + "." + viewModelsNamespace;
     }
 }
+@@using IntelliTect.Coalesce.Knockout.Helpers
+
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="btn-group pull-right">

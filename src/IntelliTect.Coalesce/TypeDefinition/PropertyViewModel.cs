@@ -12,6 +12,7 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Text;
 using IntelliTect.Coalesce.Helpers.Search;
+using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -106,18 +107,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string JsVariable => Name.ToCamelCase();
 
-        private static readonly Regex JsKeywordRegex = new Regex(
-                "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$");
+        public static readonly Regex JsKeywordRegex = new Regex(
+            "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true" +
+            "|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import" +
+            "|public|return|static|switch|typeof|default|extends|finally|package|private" +
+            "|continue|debugger|function|arguments|interface|protected|implements|instanceof)$");
 
         /// <summary>
         /// Returns true if the value if JsVariable is a reserved keyword in JavaScript.
         /// </summary>
         public bool JsVariableIsReserved => JsKeywordRegex.IsMatch(JsVariable);
-
-        /// <summary>
-        /// Returns the correctly-prefixed version of the value of JsVariable for use in Knockout bindings
-        /// </summary>
-        public string JsVariableForBinding => JsVariableIsReserved ? $"$data.{JsVariable}" : JsVariable;
 
         /// <summary>
         /// Name of the Valid Value list object in JS in Pascal case.
@@ -126,14 +125,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
-        /// Text property name for knockout, for things like enums. PureType+'Text'
+        /// Text property name for things like enums. PureType+'Text'
         /// </summary>
         public string JsTextPropertyName => JsVariable + "Text";
-
-        /// <summary>
-        /// Text property name for knockout bindings, for things like enums. PureType+'Text'
-        /// </summary>
-        public string JsTextPropertyNameForBinding => JsVariableForBinding + "Text";
 
 
         /// <summary>
@@ -193,158 +187,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!HasClientValidation) return false;
                 var allowSave = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.AllowSave)) as bool?;
                 return allowSave.HasValue && allowSave.Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Knockout JS text for the validation.
-        /// </summary>
-        public string ClientValidationKnockoutJs
-        {
-            get
-            {
-                // Don't bother with validation on non-editable fields.
-                if (!CanWrite) return null;
-
-                var isRequired = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool?;
-                var minValue = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinValue)) as double?;
-                var maxValue = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MaxValue)) as double?;
-                var minLength = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinLength)) as int?;
-                var maxLength = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MaxLength)) as int?;
-                var pattern = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.Pattern));
-                var step = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.Step)) as double?;
-                var isEmail = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsEmail)) as bool?;
-                var isPhoneUs = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsPhoneUs)) as bool?;
-                var equal = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.Equal));
-                var notEqual = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.NotEqual));
-                var isDate = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDate)) as bool?;
-                var isDateIso = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDateIso)) as bool?;
-                var isNumber = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsNumber)) as bool?;
-                var isDigit = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDigit)) as bool?;
-                var customName = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.CustomName));
-                var customValue = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.CustomValue));
-                var errorMessage = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.ErrorMessage));
-
-
-                var validations = new List<string>();
-
-                if (Type.IsDate)
-                {
-                    validations.Add("moment: { unix: true }");
-                }
-
-                if (isRequired.HasValue && isRequired.Value)
-                {
-                    validations.Add($"required: {KoValidationOptions("true", errorMessage ?? $"{(IdPropertyObjectProperty ?? this).DisplayName} is required.")}");
-                }
-                else if (IsRequired)
-                {
-                    string message = null;
-                    if (Wrapper.HasAttribute<RequiredAttribute>())
-                    {
-                        message = Wrapper.GetAttributeObject<RequiredAttribute, string>(nameof(RequiredAttribute.ErrorMessage));
-                    }
-                    if (string.IsNullOrWhiteSpace(message))
-                    {
-                        var name = (IdPropertyObjectProperty ?? this).DisplayName;
-                        message = $"{name} is required.";
-                    }
-
-                    validations.Add($"required: {KoValidationOptions("true", message)}");
-                }
-
-                if (Type.IsString)
-                {
-                    if (Range != null)
-                    {
-                        var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
-                        validations.Add($"minLength: {KoValidationOptions(Range.Item1.ToString(), message)}, maxLength: {KoValidationOptions(Range.Item2.ToString(), message)}");
-                    }
-                    else
-                    {
-                        if (MinLength.HasValue)
-                        {
-                            var message = Wrapper.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
-                            validations.Add($"minLength: {KoValidationOptions(MinLength.Value.ToString(), message)}");
-                        }
-                        else if (minLength.HasValue && minLength.Value != int.MaxValue)
-                        {
-                            validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
-                        }
-
-                        if (MaxLength.HasValue)
-                        {
-                            var message = Wrapper.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
-                            validations.Add($"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), message)}");
-                        }
-                        else if (maxLength.HasValue && maxLength.Value != int.MinValue)
-                        {
-                            validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
-                        }
-                    }
-                }
-                else if (Type.IsNumber)
-                {
-                    if (Range != null)
-                    {
-                        var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
-                        validations.Add($"min: {KoValidationOptions(Range.Item1.ToString(), message)}, max: {KoValidationOptions(Range.Item2.ToString(), message)}");
-                    }
-                    else
-                    {
-                        if (minValue.HasValue && minValue.Value != double.MaxValue)
-                            validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
-                        if (maxValue.HasValue && maxValue.Value != double.MinValue)
-                            validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
-                    }
-                }
-
-                if (pattern != null)
-                    validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
-                if (step.HasValue && step.Value != 0)
-                    validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
-                if (isEmail.HasValue && isEmail.Value)
-                    validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
-                if (isPhoneUs.HasValue && isPhoneUs.Value)
-                    validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
-                if (equal != null)
-                    validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");
-                if (notEqual != null)
-                    validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
-                if (isDate.HasValue && isDate.Value)
-                    validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");
-                if (isDateIso.HasValue && isDateIso.Value)
-                    validations.Add($"isDateISO: {KoValidationOptions("true", errorMessage)}");
-                if (isNumber.HasValue && isNumber.Value)
-                    validations.Add($"isNumber: {KoValidationOptions("true", errorMessage)}");
-                if (isDigit.HasValue && isDigit.Value)
-                    validations.Add($"isDigit: {KoValidationOptions("true", errorMessage)}");
-                if (!string.IsNullOrWhiteSpace(customName) && !string.IsNullOrWhiteSpace(customValue))
-                    validations.Add($"{customName}: {customValue}");
-
-                return string.Join(", ", validations);
-            }
-        }
-
-        private string AddErrorMessage(string errorMessage)
-        {
-            string message = null;
-
-            if (!string.IsNullOrWhiteSpace(errorMessage)) message = $", message: \"{errorMessage}\"";
-
-            return message;
-        }
-
-        private string KoValidationOptions(string value, string errorMessage)
-        {
-            string message = AddErrorMessage(errorMessage);
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                return $"{{params: {value}, message: \"{errorMessage}\"}}";
-            }
-            else
-            {
-                return value;
             }
         }
 
@@ -1124,5 +966,29 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     IsInternalUse;
             }
         }
+
+        
+        public bool HasAttribute<TAttribute>()
+            where TAttribute : Attribute
+            => Wrapper.HasAttribute<TAttribute>();
+
+        public object GetAttributeValue<TAttribute>(string valueName)
+            where TAttribute : Attribute
+            => Wrapper.GetAttributeValue<TAttribute>(valueName);
+
+        public T? GetAttributeValue<TAttribute, T>(string valueName)
+            where TAttribute : Attribute
+            where T : struct
+             => Wrapper.GetAttributeValue<TAttribute, T>(valueName);
+
+        public T GetAttributeObject<TAttribute, T>(Expression<Func<TAttribute, T>> propertyExpression)
+            where TAttribute : Attribute
+            where T : class
+            => Wrapper.GetAttributeObject<TAttribute, T>(propertyExpression.GetExpressedProperty().Name);
+
+        public T GetAttributeObject<TAttribute, T>(string valueName)
+            where TAttribute : Attribute
+            where T : class
+            => Wrapper.GetAttributeObject<TAttribute, T>(valueName);
     }
 }

@@ -5,7 +5,6 @@ branches:
   - 2.0
 image: Visual Studio 2017
 configuration: Debug
-platform: Any CPU
 before_build:
 - cmd: >-
     dotnet restore

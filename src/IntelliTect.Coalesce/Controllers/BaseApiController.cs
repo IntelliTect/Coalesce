@@ -165,9 +165,7 @@ namespace IntelliTect.Coalesce.Controllers
                 }
 
                 // Get a count
-                int totalCount;
-                if (result is IAsyncQueryProvider) totalCount = await result.CountAsync();
-                else totalCount = result.Count();
+                int totalCount = await result.CountAsync();
 
 
                 // Add paging.
@@ -187,9 +185,7 @@ namespace IntelliTect.Coalesce.Controllers
                 result = result.Take(pageSize);
 
                 // Make the database call
-                IEnumerable<T> result2;
-                if (result is IAsyncQueryProvider) result2 = await result.ToListAsync();
-                else result2 = result.ToList();
+                IEnumerable<T> result2 = await result.ToListAsync();
 
                 // Add external entities
                 result2.IncludesExternal(listParameters.Includes);
@@ -237,9 +233,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 result = AddFilters(result, listParameters);
 
-                int count;
-                if (result is IAsyncQueryProvider) count = await result.CountAsync();
-                else count = result.Count();
+                int count = await result.CountAsync();
 
                 return count;
             }
@@ -437,7 +431,6 @@ namespace IntelliTect.Coalesce.Controllers
             return dto;
         }
 
-        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
         {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.

@@ -4,21 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using Microsoft.Extensions.Internal;
-using Newtonsoft.Json;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Linq;
-using NuGet.Frameworks;
-using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Common;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
-using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
@@ -37,21 +26,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public override string RootNamespace => ProjectConfiguration.RootNamespace ?? MsBuildProjectContext.RootNamespace;
 
-        public IProjectContext MsBuildProjectContext { get; private set; }
+        public IProjectContext MsBuildProjectContext { get; internal set; }
 
         public override ICollection<MetadataReference> GetTemplateMetadataReferences() => GetMetadataReferences();
-
-        public static RoslynProjectContext CreateContext(ProjectConfiguration projectConfig)
-        {
-            var context = new RoslynProjectContext(projectConfig);
-
-            context.MsBuildProjectContext =
-                new MsBuildProjectContextBuilder(context)
-                .RestoreProjectPackages()
-                .BuildProjectContext();
-
-            return context;
-        }
 
         public ICollection<MetadataReference> GetMetadataReferences()
         {

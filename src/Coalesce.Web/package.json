@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "Coalesce Demo",
+  "name": "CoalesceDemo",
   "private": true,
   "devDependencies": {
     "gulp": "^3.9.1",

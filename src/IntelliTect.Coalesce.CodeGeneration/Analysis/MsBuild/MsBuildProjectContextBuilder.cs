@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Microsoft.DotNet.Cli.Utils;
 using System.Linq;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 {
@@ -24,13 +25,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
     /// </summary>
     public class MsBuildProjectContextBuilder
     {
+        public const string SuppressedWarnings = "NU1603";
+
         private ProjectContext _context;
         public string TargetsLocation { get; private set; }
         public string Configuration { get; private set; } = "Release";
         public string Framework { get; private set; } = null;
+        public ILogger Logger { get; }
 
-        public MsBuildProjectContextBuilder(ProjectContext context)
+        public MsBuildProjectContextBuilder(ILogger logger, ProjectContext context)
         {
+            Logger = logger;
             _context = context;
             if (_context.Configuration != null) Configuration = _context.Configuration;
             if (_context.Framework != null) Framework = _context.Framework;
@@ -90,16 +95,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
         {
             var projectPath = _context.ProjectFilePath;
 
-            Console.WriteLine($"   {(projectPath)}: Restoring packages");
+            Logger?.LogInformation($"   {(projectPath)}: Restoring packages");
             var result = Command.CreateDotNet(
                 "restore",
                 new string[]
                 {
                     projectPath,
                     "--verbosity", "quiet",
+                    $"/p:nowarn={SuppressedWarnings}"
                 })
-                .OnOutputLine(Console.WriteLine)
-                .OnErrorLine(Console.Error.WriteLine)
+                .OnOutputLine(l => Logger.LogInformation(l))
+                .OnErrorLine(l => Logger.LogError(l))
                 .Execute();
             if (result.ExitCode != 0)
             {
@@ -123,9 +129,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 InstallTargets(TargetsLocation);
             }
 
-            Console.Write($"   {(projectPath)}");
-            if (Framework != null) Console.Write($" ({Framework})");
-            Console.WriteLine($": Evaluating & building dependencies");
+            var line = $"   {(projectPath)}";
+            if (Framework != null) line += $" ({Framework})";
+            line += $": Evaluating & building dependencies";
+            Logger?.LogInformation(line);
 
             var projectInfoFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var args = new List<string>
@@ -133,6 +140,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 projectPath,
                 "/nologo",
                 "/v:q",
+                $"/p:nowarn={SuppressedWarnings}",
                 $"/t:EvaluateProjectInfoForCodeGeneration",
                 $"/p:CustomBeforeMicrosoftCSharpTargets={TargetsLocation}\\Imports.targets",
                 $"/p:OutputFile={projectInfoFile}",
@@ -142,8 +150,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             if (Framework != null) args.Add($"/p:TargetFramework={Framework}");
 
             var result = Command.CreateDotNet("msbuild", args)
-                .OnOutputLine(Console.WriteLine)
-                .OnErrorLine(Console.Error.WriteLine)
+                .OnOutputLine(l => Logger.LogInformation(l))
+                .OnErrorLine(l => Logger.LogError(l))
                 .Execute();
 
             if (result.ExitCode != 0)

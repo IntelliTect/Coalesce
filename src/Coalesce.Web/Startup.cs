@@ -77,7 +77,7 @@ namespace Coalesce.Web
 
             // *** DEMO ONLY ***
             app.UseAuthentication();
-            app.UseDemoMiddleware();
+            app.UseMiddleware<DemoMiddleware>();
 
             app.UseMvc(routes =>
             {

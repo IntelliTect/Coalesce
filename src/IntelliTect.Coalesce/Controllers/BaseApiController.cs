@@ -166,7 +166,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Get a count
                 int totalCount;
-                if (result is IAsyncQueryProvider) totalCount = await result.CountAsync();
+                if (result.Provider is IAsyncQueryProvider) totalCount = await result.CountAsync();
                 else totalCount = result.Count();
 
 
@@ -188,7 +188,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Make the database call
                 IEnumerable<T> result2;
-                if (result is IAsyncQueryProvider) result2 = await result.ToListAsync();
+                if (result.Provider is IAsyncQueryProvider) result2 = await result.ToListAsync();
                 else result2 = result.ToList();
 
                 // Add external entities
@@ -238,7 +238,7 @@ namespace IntelliTect.Coalesce.Controllers
                 result = AddFilters(result, listParameters);
 
                 int count;
-                if (result is IAsyncQueryProvider) count = await result.CountAsync();
+                if (result.Provider is IAsyncQueryProvider) count = await result.CountAsync();
                 else count = result.Count();
 
                 return count;
@@ -437,7 +437,6 @@ namespace IntelliTect.Coalesce.Controllers
             return dto;
         }
 
-        [SuppressMessage("Async method lacks 'await' operators", "CS1998", Justification = "EF Core 1.0 is slower with async: https://github.com/aspnet/EntityFramework/issues/5816")]
         private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
         {
             // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
@@ -905,7 +904,7 @@ namespace IntelliTect.Coalesce.Controllers
                     // Correct offset.
                     if (prop.Type.IsDateTimeOffset)
                     {
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, timeZone.BaseUtcOffset);
+                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, CurrentTimeZone.GetUtcOffset(parsedValue));
                         if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
                             !value.Contains(':'))
                         {

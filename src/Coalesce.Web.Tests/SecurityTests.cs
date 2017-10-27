@@ -1,16 +1,11 @@
 ﻿using Coalesce.Web.Tests.Helpers;
-using IntelliTect.Coalesce.CodeGeneration;
-using IntelliTect.Coalesce.CodeGeneration.Scripts;
 using IntelliTect.Coalesce.TypeDefinition;
-using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using IntelliTect.Coalesce.CodeGeneration.Common;
 using Xunit;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
@@ -28,7 +23,7 @@ namespace Coalesce.Web.Tests
         public SecurityTests()
         {
             _process = Processes.StartDotNet();
-            _dataContext = RoslynProjectContext.CreateContext(new ProjectConfiguration
+            _dataContext = new RoslynProjectContextFactory(null).CreateContext(new ProjectConfiguration
             {
                 ProjectFile = @"..\..\..\..\..\Coalesce.Domain.csproj"
             });

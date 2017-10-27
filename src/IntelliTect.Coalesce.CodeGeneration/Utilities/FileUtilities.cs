@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Utilities
 {
@@ -11,27 +12,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
         /// <param name="sourceStream">Stream to compare with the file.</param>
         /// <param name="filename">File to compare with the stream.</param>
         /// <returns></returns>
-        public static bool HasDifferences(Stream sourceStream, string filename)
+        public static async Task<bool> HasDifferencesAsync(Stream sourceStream, string filename)
         {
             if (File.Exists(filename))
             {
-                string origString;
-                using (var stream = File.OpenRead(filename))
+                var origContents = Task.Run(async () =>
                 {
-                    origString = new StreamReader(stream).ReadToEnd();
-                }
-                sourceStream.Seek(0, SeekOrigin.Begin);
-                string sourceString = new StreamReader(sourceStream).ReadToEnd();
-                origString = origString.Replace("\n", Environment.NewLine).Replace("\r\r", "\r");
-                sourceString = sourceString.Replace("\n", Environment.NewLine).Replace("\r\r", "\r");
-                var result = sourceString != origString;
-                if (result)
+                    string origString;
+                    using (var stream = File.OpenRead(filename))
+                    {
+                        origString = await new StreamReader(stream).ReadToEndAsync();
+                    }
+                    return origString.Replace("\r\n", "\n");
+                });
+                var newContents = Task.Run(async () =>
                 {
-                    //Console.WriteLine($"Change to {filename}");
-                }
-                return result;
+                    sourceStream.Seek(0, SeekOrigin.Begin);
+                    string sourceString = await new StreamReader(sourceStream).ReadToEndAsync();
+                    sourceStream.Seek(0, SeekOrigin.Begin);
+                    return sourceString.Replace("\r\n", "\n");
+                });
+                return !string.Equals(await origContents, await newContents, StringComparison.InvariantCulture);
             }
-            return false;
+            return true;
         }
 
         public static bool HasDifferences(string fileName1, string fileName2)
@@ -53,8 +56,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
             }
 
             // Open the two files.
-            string f1 = File.ReadAllText(fileName1).Replace("\r", "").Replace("\n", "");
-            string f2 = File.ReadAllText(fileName2).Replace("\r", "").Replace("\n", "");
+            string f1 = File.ReadAllText(fileName1).Replace("\r\n", "\n");
+            string f2 = File.ReadAllText(fileName2).Replace("\r\n", "\n");
 
             // Check the file sizes. If they are not the same, the files 
             // are not the same.

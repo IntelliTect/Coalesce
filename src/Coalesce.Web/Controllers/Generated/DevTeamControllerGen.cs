@@ -1,7 +1,7 @@
-using Coalesce.Domain;
+﻿using Coalesce.Domain;
 using Coalesce.Domain.External;
 using Coalesce.Web;
-using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Knockout.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

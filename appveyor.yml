@@ -5,10 +5,9 @@ branches:
   - 2.0
 image: Visual Studio 2017
 configuration: Debug
-platform: Any CPU
 before_build:
 - cmd: >-
-    nuget restore
+    dotnet restore
 
     cd src\Coalesce.Web
 
@@ -20,7 +19,7 @@ before_build:
 
     cd ..\Coalesce.Domain
 
-    dotnet ef database update
+    dotnet ef database update --framework netcoreapp2.0
 build:
   project: Coalesce.sln
   verbosity: minimal

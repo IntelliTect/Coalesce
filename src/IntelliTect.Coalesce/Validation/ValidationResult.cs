@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Validation
     public class ValidationResult
     {
         public bool WasSuccessful { get; set; }
-        public bool isWarning { get; set; }
+        public bool IsWarning { get; set; }
         public string Area { get; set; }
         public string Message { get; set; }
 
@@ -18,11 +18,11 @@ namespace IntelliTect.Coalesce.Validation
             {
                 return $"  Success: {Area}: {Message}";
             }
-            if (isWarning)
+            if (IsWarning)
             {
-                return $"--Warning: {Area}: {Message}";
+                return $"-- Warning: {Area}: {Message}";
             }
-            return $"**Failure: {Area}: {Message}";
+            return $"** Failure: {Area}: {Message}";
         }
     }
 }

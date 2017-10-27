@@ -1,0 +1,31 @@
+﻿@using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
+@using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Utilities
+@inherits CoalesceTemplate<LocalBaseApiController>
+@{
+    string namespaceName = Model.Namespace;
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        namespaceName += "." + Model.AreaName;
+    }
+}
+using IntelliTect.Coalesce.Controllers;
+// Model Namespaces
+using @Model.Namespace;
+@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System").OrderBy(n => n))
+{
+@:using @ns;
+}
+using IntelliTect.Coalesce.Interfaces;
+
+namespace @(namespaceName).Api
+{
+    // This class allows developers to inject base class behaviors into the inheritance chain
+    // This file should not be modified, but another partial class should be created where your custom behavior can be placed.
+    public partial class LocalBaseApiController<T, TDto> : BaseApiController<T, TDto, @Model.GenerationContext.DbContextType.Name>
+        where T : class, new()
+        where TDto: class, IClassDto<T, TDto>, new()
+    {
+    }
+}

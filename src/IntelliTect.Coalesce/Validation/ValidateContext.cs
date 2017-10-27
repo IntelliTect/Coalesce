@@ -33,14 +33,9 @@ namespace IntelliTect.Coalesce.Validation
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.Properties.Where(f => !f.IsInternalUse))
                 {
-                    assert.Area = $"{model.Name}: {prop.Name}";
+                    assert.Area = $"{model.Name}.{prop.Name}";
                     try
                     {
-                        assert.IsNotNull(prop.JsVariable, $"JS Variable not found.");
-                        assert.IsNotNull(prop.JsVariableForBinding, $"JS Variable for binding not found.");
-                        assert.IsNotNull(prop.Type.TsKnockoutType, $"TS Knockout Type not found.");
-                        assert.IsNotNull(prop.Type.JsKnockoutType, $"JS Knockout Type not found.");
-
                         assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.ReadAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
                             "Property-level ReadAttribute security doesn't support the PermissionLevel property");
                         assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.EditAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
@@ -73,16 +68,16 @@ namespace IntelliTect.Coalesce.Validation
                         if (prop.Type.IsCollection)
                         {
                             assert.AreNotEqual(prop.TypeName, prop.PureType, "Collection is not defined correctly.");
+                            if (prop.PureTypeOnContext)
+                            {
+                                assert.IsNotNull(prop.InverseProperty, $"A Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object.Name}. " +
+                                    $"Add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name} to specify the actual name of the inverse property.", isWarning: true);
+                            }
                         }
                         if (prop.IsManytoManyCollection)
                         {
                             assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist");
                             assert.IsNotNull(prop.ManyToManyCollectionProperty.Object.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty.Object.ViewModelClassName}");
-                        }
-                        if (prop.Type.IsEnum)
-                        {
-                            assert.IsNotNull(prop.JsTextPropertyName, $"Enum JS Text Variable is: {prop.JsTextPropertyName}");
-                            assert.IsNotNull(prop.JsTextPropertyNameForBinding, $"Enum KO Text Binding is: {prop.JsTextPropertyNameForBinding}");
                         }
                         // See if we are using an invalid name
                         assert.AreNotEqual("active", prop.Name.ToLower(), "Property name cannot be 'Active' because it conflicts with standard API parameters");
@@ -96,12 +91,10 @@ namespace IntelliTect.Coalesce.Validation
                 // Validate Methods
                 foreach (var method in model.Methods.Where(f => !f.IsInternalUse))
                 {
-                    assert.Area = $"{model.Name}: {method.Name}";
+                    assert.Area = $"{model.Name}.{method.Name}";
                     try
                     {
                         assert.IsNotNull(method.JsVariable, $"JS Variable is: {method.JsVariable}");
-                        assert.IsNotNull(method.ReturnType.TsKnockoutType, $"TS Knockout Type is: {method.ReturnType.TsKnockoutType}");
-                        assert.IsNotNull(method.ReturnType.JsKnockoutType, $"JS Knockout Type is: {method.ReturnType.JsKnockoutType}");
 
                         // Check di
                         foreach (var param in method.Parameters)

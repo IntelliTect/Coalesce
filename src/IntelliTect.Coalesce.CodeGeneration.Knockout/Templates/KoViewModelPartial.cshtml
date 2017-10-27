@@ -1,0 +1,32 @@
+﻿@using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
+@using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Utilities
+@inherits CoalesceTemplate<KoTsPartialStub>
+@{
+    ClassViewModel model = Model.Model;
+    string moduleName = "ViewModels";
+    if (!string.IsNullOrWhiteSpace(Model.AreaName))
+    {
+        moduleName = Model.AreaName + "." + moduleName;
+    }
+    if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
+    {
+        moduleName = Model.ModulePrefix + "." + moduleName;
+    }
+}
+@{ 
+@:/// <reference path="../viewmodels.generated.d.ts" />
+}
+
+
+
+module @moduleName {
+	export class @(model.ViewModelClassName) extends @(model.ViewModelGeneratedClassName) {
+
+        constructor(newItem?: any, parent?: any) {
+            super(newItem, parent);
+
+        }
+    }
+}

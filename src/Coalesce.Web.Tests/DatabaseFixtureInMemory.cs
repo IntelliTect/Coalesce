@@ -16,7 +16,7 @@ namespace Coalesce.Web.Tests
         {
             ReflectionRepository.AddContext<DbContext>();
             var dbOptionBuilder = new DbContextOptionsBuilder();
-            dbOptionBuilder.UseInMemoryDatabase();
+            dbOptionBuilder.UseInMemoryDatabase("InMemoryTestDb");
             Db = new AppDbContext(dbOptionBuilder.Options);
             // Wipe the database out first;
             //Db.Database.EnsureDeleted();

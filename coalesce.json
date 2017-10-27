@@ -11,4 +11,17 @@
     "configuration": "Debug",
     "build": true
   }
+
+
+  //"generators": {
+  //  "IntelliTect.Coalesce.CodeGeneration.Knockout",
+  //},
+  //"generatorConfig": {
+  //  "_Layout": {
+  //    "generate": false
+  //  },
+  //  "KoViewModel": {
+  //    "replace": "MyProject.Generators.ViewImports"
+  //  }
+  //}
 }

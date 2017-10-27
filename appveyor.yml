@@ -8,7 +8,7 @@ configuration: Debug
 platform: Any CPU
 before_build:
 - cmd: >-
-    nuget restore
+    dotnet restore
 
     cd src\Coalesce.Web
 

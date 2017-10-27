@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace IntelliTect.Coalesce.Templating
+namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
 {
     public abstract class CoalesceTemplate
     {

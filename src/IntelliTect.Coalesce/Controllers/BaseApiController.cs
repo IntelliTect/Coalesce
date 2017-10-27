@@ -165,7 +165,9 @@ namespace IntelliTect.Coalesce.Controllers
                 }
 
                 // Get a count
-                int totalCount = await result.CountAsync();
+                int totalCount;
+                if (result.Provider is IAsyncQueryProvider) totalCount = await result.CountAsync();
+                else totalCount = result.Count();
 
 
                 // Add paging.
@@ -185,7 +187,9 @@ namespace IntelliTect.Coalesce.Controllers
                 result = result.Take(pageSize);
 
                 // Make the database call
-                IEnumerable<T> result2 = await result.ToListAsync();
+                IEnumerable<T> result2;
+                if (result.Provider is IAsyncQueryProvider) result2 = await result.ToListAsync();
+                else result2 = result.ToList();
 
                 // Add external entities
                 result2.IncludesExternal(listParameters.Includes);
@@ -233,7 +237,9 @@ namespace IntelliTect.Coalesce.Controllers
 
                 result = AddFilters(result, listParameters);
 
-                int count = await result.CountAsync();
+                int count;
+                if (result.Provider is IAsyncQueryProvider) count = await result.CountAsync();
+                else count = result.Count();
 
                 return count;
             }

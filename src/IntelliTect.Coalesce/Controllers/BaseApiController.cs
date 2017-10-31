@@ -99,7 +99,11 @@ namespace IntelliTect.Coalesce.Controllers
             return DataSource ?? ReadOnlyDataSource;
         }
 
+        // CS1998 disabled because our async usage within was removed due to https://github.com/aspnet/EntityFrameworkCore/issues/6039.
+        // Restore async usage once fix is available.
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         protected async Task<ListResult> ListImplementation(ListParameters listParameters)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             try
             {
@@ -166,9 +170,11 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Get a count
                 int totalCount;
-                if (result.Provider is IAsyncQueryProvider) totalCount = await result.CountAsync();
-                else totalCount = result.Count();
-
+                // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
+                // Renable once microsoft releases the fix and we upgrade our references.
+                //if (result.Provider is IAsyncQueryProvider) totalCount = await result.CountAsync();
+                //else totalCount = result.Count();
+                totalCount = result.Count();
 
                 // Add paging.
                 int page = listParameters.Page ?? 1;
@@ -188,8 +194,11 @@ namespace IntelliTect.Coalesce.Controllers
 
                 // Make the database call
                 IEnumerable<T> result2;
-                if (result.Provider is IAsyncQueryProvider) result2 = await result.ToListAsync();
-                else result2 = result.ToList();
+                // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
+                // Renable once microsoft releases the fix and we upgrade our references.
+                //if (result.Provider is IAsyncQueryProvider) result2 = await result.ToListAsync();
+                //else result2 = result.ToList();
+                result2 = result.ToList();
 
                 // Add external entities
                 result2.IncludesExternal(listParameters.Includes);

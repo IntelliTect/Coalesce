@@ -547,16 +547,24 @@ ko.bindingHandlers.saveImmediately = {
     }
 };
 
+
 // Delays the save until the cursor leaves the field even if there is a value change.
 ko.bindingHandlers.delaySave = {
-    init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel<any>, bindingContext) {
+        if (!viewModel.coalesceConfig) {
+            console.error("delaySave binding was used in a context where $data is not a Coalesce.BaseViewModel<>");
+            return;
+        }
+        var existingAutoSaveValueRaw: boolean;
+
         // Set up to not save immediately when the cursor enters and return to a regular state when it leaves.
         $(element).on("focus", function () {
-            viewModel.isSavingAutomatically = false;
+            existingAutoSaveValueRaw = viewModel.coalesceConfig.autoSaveEnabled.raw();
+            viewModel.coalesceConfig.autoSaveEnabled(false);
         });
-        // Turn it back on when the cursor leaves.
+        // Turn it back to previous state when the cursor leaves.
         $(element).on("blur", function () {
-            viewModel.isSavingAutomatically = true;
+            viewModel.coalesceConfig.autoSaveEnabled(existingAutoSaveValueRaw);
             // Save if there were changes.
             if (viewModel.isDirty() && !viewModel.isSaving()) {
                 viewModel.save();

@@ -16,7 +16,7 @@ using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class PropertyViewModel
+    public class PropertyViewModel : IAttributeProvider
     {
         /// <summary>
         /// .net PropertyInfo class that gives reflected information about the property.
@@ -87,24 +87,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool PureTypeOnContext => PureType.ClassViewModel?.OnContext ?? false;
 
-        /// <summary>
-        /// Gets the name for the API call.
-        /// </summary>
-        public string Api
-        {
-            get
-            {
-                if (Wrapper.Type.IsGeneric && Wrapper.Type.IsCollection)
-                {
-                    if (IsManytoManyCollection)
-                    {
-                        return Object.ApiUrl;
-                    }
-                }
-                return Object.ApiUrl;
-            }
-        }
-
         public string JsVariable => Name.ToCamelCase();
 
         public static readonly Regex JsKeywordRegex = new Regex(
@@ -119,16 +101,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool JsVariableIsReserved => JsKeywordRegex.IsMatch(JsVariable);
 
         /// <summary>
-        /// Name of the Valid Value list object in JS in Pascal case.
-        /// </summary>
-        public string ValidValueListName => Name + "ValidValues";
-
-
-        /// <summary>
         /// Text property name for things like enums. PureType+'Text'
         /// </summary>
         public string JsTextPropertyName => JsVariable + "Text";
-
 
         /// <summary>
         /// Returns true if the property is class outside the system NameSpace, but is not a string, array, or filedownload
@@ -151,7 +126,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is a complex type.
         /// </summary>
-        public bool IsComplexType => IsPOCO && Object.IsComplexType;
+        public bool IsComplexType => false;
 
 
         /// <summary>
@@ -316,7 +291,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return false;
         }
 
-        public string ListGroup => Wrapper.GetAttributeObject<ListGroupAttribute, string>(nameof(ListGroupAttribute.Group));
+        public string ListGroup => Wrapper.GetAttributeValue<ListGroupAttribute>(a => a.Group);
 
         public bool HasReadOnlyAttribute => Wrapper.HasAttribute<ReadOnlyAttribute>();
 
@@ -381,13 +356,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (rootModelName == null) return true;
 
-            var whitelist = Wrapper.GetAttributeObject<SearchAttribute, string>(a => a.RootWhitelist);
+            var whitelist = Wrapper.GetAttributeValue<SearchAttribute>(a => a.RootWhitelist);
             if (!string.IsNullOrWhiteSpace(whitelist))
             {
                 return whitelist.Split(',').Contains(rootModelName);
             }
 
-            var blacklist = Wrapper.GetAttributeObject<SearchAttribute, string>(a => a.RootBlacklist);
+            var blacklist = Wrapper.GetAttributeValue<SearchAttribute>(a => a.RootBlacklist);
             if (!string.IsNullOrWhiteSpace(blacklist))
             {
                 return !blacklist.Split(',').Contains(rootModelName);
@@ -667,7 +642,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var name = Wrapper.GetAttributeObject<InversePropertyAttribute, string>(nameof(InversePropertyAttribute.Property));
+                var name = Wrapper.GetAttributeValue<InversePropertyAttribute>(a => a.Property);
                 if (name != null)
                 {
                     var inverseProperty = Object.PropertyByName(name);
@@ -729,11 +704,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "Allow";
         }
 
-        public SecurityInfoProperty SecurityInfo
+        public PropertySecurityInfo SecurityInfo
         {
             get
             {
-                var result = new SecurityInfoProperty();
+                var result = new PropertySecurityInfo();
 
                 if (Wrapper.HasAttribute<ReadAttribute>())
                 {
@@ -975,20 +950,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public object GetAttributeValue<TAttribute>(string valueName)
             where TAttribute : Attribute
             => Wrapper.GetAttributeValue<TAttribute>(valueName);
-
-        public T? GetAttributeValue<TAttribute, T>(string valueName)
-            where TAttribute : Attribute
-            where T : struct
-             => Wrapper.GetAttributeValue<TAttribute, T>(valueName);
-
-        public T GetAttributeObject<TAttribute, T>(Expression<Func<TAttribute, T>> propertyExpression)
-            where TAttribute : Attribute
-            where T : class
-            => Wrapper.GetAttributeObject<TAttribute, T>(propertyExpression.GetExpressedProperty().Name);
-
-        public T GetAttributeObject<TAttribute, T>(string valueName)
-            where TAttribute : Attribute
-            where T : class
-            => Wrapper.GetAttributeObject<TAttribute, T>(valueName);
     }
 }

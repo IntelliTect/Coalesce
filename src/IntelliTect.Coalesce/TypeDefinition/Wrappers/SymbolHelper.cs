@@ -53,18 +53,12 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         }
 
         // Not sure if these even work...
-        public static T? GetAttributeValue<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector) where TAttribute : Attribute where T : struct
+        public static T? GetAttributeValue<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector)
+            where TAttribute : Attribute where T : struct
         {
             var result = symbol.GetAttributeValue<TAttribute>(propertySelector.Name);
 
             return (T)result;
-        }
-
-        public static T GetAttributeObject<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector) where TAttribute : Attribute where T : class
-        {
-            var result = symbol.GetAttributeValue<TAttribute>(propertySelector.Name);
-
-            return result as T;
         }
 
         public static string ExtractXmlComments(ISymbol symbol)

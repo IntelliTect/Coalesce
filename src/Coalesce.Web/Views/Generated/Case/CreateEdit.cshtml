@@ -66,14 +66,14 @@
     @section Scripts
     {
     <script>
-        var acase = new ViewModels.Case();
-        acase.includes = "Editor";
+        var model = new ViewModels.Case();
+        model.includes = "Editor";
 
-        acase.saveCallbacks.push(function(obj){
+        model.saveCallbacks.push(function(obj){
             // If there is a new id, set the one for this page
             if (!Coalesce.Utilities.GetUrlParameter('id')){
-                if (acase.myId){
-                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", acase.myId);
+                if (model.myId) {
+                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
                     window.history.replaceState(null, window.document.title, newUrl);
                 }
             }
@@ -81,21 +81,21 @@
 
         @if (ViewBag.Id != null)
                 {
-                    @:acase.load('@ViewBag.Id');
+                    @:model.load('@ViewBag.Id');
                 }
         @foreach (var kvp in ViewBag.ParentIds)
                 {
-                    @:acase.@(((string)(@kvp.Key)))(@kvp.Value);
+                    @:model.@(((string)(@kvp.Key)))(@kvp.Value);
                 }
 
         window.onbeforeunload = function(){
-            if (acase.isDirty()) acase.save();
+            if (model.isDirty()) model.save();
         }
 
-        acase.isSavingAutomatically = false;
-        acase.loadChildren(function() {
-            ko.applyBindings(acase);
-            acase.isSavingAutomatically = true;
+        model.coalesceConfiguration.autoSaveEnabled(false);
+        model.loadChildren(function() {
+            ko.applyBindings(model);
+            model.coalesceConfiguration.autoSaveEnabled(true);
         });
     </script>
     }

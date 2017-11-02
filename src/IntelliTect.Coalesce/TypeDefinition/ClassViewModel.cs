@@ -17,45 +17,27 @@ using IntelliTect.Coalesce.Helpers.Search;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class ClassViewModel
+    public abstract class ClassViewModel : IAttributeProvider
     {
-        internal ClassWrapper Wrapper { get; }
-
-        /// <summary>
-        /// Has a DbSet property in the Context.
-        /// </summary>
-        public bool HasDbSet { get; internal set; }
         
         protected ICollection<PropertyViewModel> _Properties;
         protected ICollection<MethodViewModel> _Methods;
 
-        public ClassViewModel(TypeViewModel type)
+        public static ClassViewModel From(TypeViewModel type)
         {
-            if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
-            {
-                Wrapper = new ReflectionClassWrapper(((ReflectionTypeWrapper)(type.Wrapper)).Info);
-            }
-            else
-            {
-                Wrapper = new SymbolClassWrapper((INamedTypeSymbol)(((SymbolTypeWrapper)(type.Wrapper)).Symbol));
-            }
+            // TODO: implement some sort of factory pattern for this.
+            // Having ClassViewModel know about its derived types is quite undesirable.
+            if (type.Wrapper is ReflectionTypeWrapper rw) return new ReflectionClassViewModel(rw.Info);
+            if (type.Wrapper is SymbolTypeWrapper sw) return new SymbolClassViewModel(sw.Symbol);
+            throw new ArgumentException("Unknown TypeViewModel wrapper type.");
         }
 
-        public ClassViewModel(Type type)
-        {
-            Wrapper = new ReflectionClassWrapper(type);
-        }
+        public abstract string Name { get; }
+        public abstract string Namespace { get; }
+        public abstract string Comment { get; }
 
-        public ClassViewModel(ITypeSymbol classSymbol)
-        {
-            Wrapper = new SymbolClassWrapper(classSymbol);
-        }
 
-        public string Name => Wrapper.Name;
-
-        public string FullName => Wrapper.Namespace + "." + Wrapper.Name;
-
-        public string Comment => Wrapper.Comment;
+        public string FullName => Namespace + "." + Name;
 
         public string ControllerName => Name;
 
@@ -63,10 +45,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var overrideName = Wrapper.GetAttributeObject<ControllerAttribute, string>(nameof(ControllerAttribute.ApiControllerName));
+                var overrideName = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerName);
                 if (!string.IsNullOrWhiteSpace(overrideName)) return overrideName;
 
-                var suffix = Wrapper.GetAttributeObject<ControllerAttribute, string>(nameof(ControllerAttribute.ApiControllerSuffix));
+                var suffix = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerSuffix);
                 if (!string.IsNullOrWhiteSpace(suffix)) return $"{ControllerName}Controller{suffix}";
 
                 return $"{ControllerName}Controller";
@@ -74,7 +56,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public string ApiActionAccessModifier =>
-            (Wrapper.GetAttributeValue<ControllerAttribute, bool>(nameof(ControllerAttribute.ApiActionsProtected)) ?? false) ? "protected" : "public";
+            this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiActionsProtected) ?? false
+            ? "protected"
+            : "public";
 
         public string ApiName => Name;
 
@@ -83,15 +67,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel : this;
 
         /// <summary>
-        /// Returns true if this is a DTO that uses another underlying type specifed in DtoBaseViewModel.
+        /// If this class implements IClassDto, return true.
         /// </summary>
-        public bool IsDto => Wrapper.IsDto;
+        public abstract bool IsDto { get; }
 
         /// <summary>
-        /// The ClassViewModel this DTO is based on.
+        /// If this class implements IClassDto, return the ClassViewModel this DTO is based upon.
         /// </summary>
-        public ClassViewModel DtoBaseViewModel { get { return Wrapper.DtoBaseType; } }
-
+        public abstract ClassViewModel DtoBaseViewModel { get; }
 
         /// <summary>
         /// Name of the ViewModelClass
@@ -105,7 +88,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!HasTypeScriptPartial)
                     return ViewModelClassName;
 
-                var name = Wrapper.GetAttributeValue<TypeScriptPartialAttribute>(nameof(TypeScriptPartialAttribute.BaseClassName)) as string;
+                var name = this.GetAttributeValue<TypeScriptPartialAttribute>(a => a.BaseClassName);
 
                 if (string.IsNullOrEmpty(name)) return $"{ViewModelClassName}Partial";
 
@@ -113,15 +96,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public bool ApiRouted => Wrapper.GetAttributeValue<ControllerAttribute, bool>(nameof(ControllerAttribute.ApiRouted)) ?? true;
-
-
-        public string Namespace => Wrapper.Namespace;
-
-        /// <summary>
-        /// Name of an instance of the ViewModelClass
-        /// </summary>
-        public string ViewModelObjectName => ViewModelClassName.ToCamelCase();
+        public bool ApiRouted => this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiRouted) ?? true;
 
         /// <summary>
         /// Name of the List ViewModelClass
@@ -132,6 +107,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Name of an instance of the List ViewModelClass
         /// </summary>
         public string ListViewModelObjectName => ListViewModelClassName.ToCamelCase();
+
+
+
+
+        #region Member Info - Properties & Methods
+
+        internal abstract ICollection<PropertyWrapper> RawProperties { get; }
+        internal abstract ICollection<MethodWrapper> RawMethods { get; }
 
         /// <summary>
         /// All properties for the object
@@ -144,7 +127,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     _Properties = new List<PropertyViewModel>();
                     int count = 1;
-                    foreach (var pw in Wrapper.Properties)
+                    foreach (var pw in RawProperties)
                     {
                         if (_Properties.Any(f => f.Name == pw.Name))
                         {
@@ -176,53 +159,62 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (_Methods == null)
-                {
-                    _Methods = new List<MethodViewModel>();
-                    int count = 1;
-                    foreach (var mw in Wrapper.Methods)
-                    {
-                        if (!IsDto || (mw.Name != "Update" && mw.Name != "CreateInstance"))
-                        {
-                            _Methods.Add(new MethodViewModel(mw, this, count));
-                            count++;
-                        }
-                    }
-                }
+                if (_Methods != null) return _Methods;
 
-                return _Methods;
+                var exclude = new[] {
+                    nameof(Data.IIncludable<object>.Include),
+                    nameof(Data.IIncludeExternal<object>.IncludeExternal),
+                    nameof(object.ToString),
+                    nameof(object.Equals),
+                    nameof(object.GetHashCode),
+                    nameof(object.GetType),
+                };
+
+                return _Methods = RawMethods
+                    .Where(m => !exclude.Contains(m.Name))
+                    .Where(m => !IsDto || (m.Name != nameof(Interfaces.IClassDto<object, object>.Update) && m.Name != nameof(Interfaces.IClassDto<object, object>.CreateInstance)))
+                    .Select(m => new MethodViewModel(m, this))
+                    .ToList();
             }
         }
 
 
         /// <summary>
-        /// Returns the property ID field.
+        /// Returns a property matching the name if it exists.
         /// </summary>
-        public PropertyViewModel PrimaryKey => Properties.FirstOrDefault(f => f.IsPrimaryKey);
-
-        /// <summary>
-        /// Use the ListText Attribute first, then Name and then ID.
-        /// </summary>
-        public PropertyViewModel ListTextProperty
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public PropertyViewModel PropertyByName(string key)
         {
-            get
-            {
-                if (Properties.Any(f => f.IsListText))
-                {
-                    return Properties.First(f => f.IsListText);
-                }
-                if (Properties.Any(f => f.Name == "Name"))
-                {
-                    return Properties.First(f => f.Name == "Name");
-                }
-                return this.PrimaryKey;
-            }
+            return Properties.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
         }
 
+        /// <summary>
+        /// Returns a method matching the name if it exists.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public MethodViewModel MethodByName(string key)
+        {
+            return Methods.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
+        }
 
-        public string ApiUrl => ApiName;
+        /// <summary>
+        /// Returns a property matching the name if it exists.
+        /// </summary>
+        /// <param name="propertySelector"></param>
+        /// <returns></returns>
+        public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
+        {
+            PropertyInfo propInfo = propertySelector.GetExpressedProperty();
+            if (propInfo == null) throw new ArgumentException("Could not find property");
+            return PropertyByName(propInfo.Name);
+        }
 
-        public string ViewUrl => ControllerName;
+        #endregion
+
+
+        #region Searching/Sorting
 
         public string DefaultOrderByClause(string prependText = "")
         {
@@ -266,25 +258,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Nothing found, order by ListText and then ID.
                 if (!result.Any())
                 {
-                    if (PropertyByName("Name") != null && !PropertyByName("Name").HasNotMapped)
+                    var nameProp = PropertyByName("Name");
+                    if (nameProp != null && !nameProp.HasNotMapped)
                     {
-                        result.Add(
-                            new OrderByInformation()
-                            {
-                                FieldName = "Name",
-                                OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
-                                FieldOrder = 1
-                            });
+                        result.Add(new OrderByInformation()
+                        {
+                            FieldName = "Name",
+                            OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
+                            FieldOrder = 1
+                        });
                     }
-                    else if (Properties.Any(f => f.IsPrimaryKey))
+                    else if (PrimaryKey != null)
                     {
-                        result.Add(
-                            new OrderByInformation()
-                            {
-                                FieldName = Properties.First(f => f.IsPrimaryKey).Name,
-                                OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
-                                FieldOrder = 1
-                            });
+                        result.Add(new OrderByInformation()
+                        {
+                            FieldName = PrimaryKey.Name,
+                            OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
+                            FieldOrder = 1
+                        });
                     }
                 }
                 return result.OrderBy(f => f.FieldOrder);
@@ -303,122 +294,74 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (depth == 3) yield break;
 
             var searchProperties = Properties.Where(f => f.IsSearchable(rootModelName)).ToList();
-            var result = new Dictionary<string, PropertyViewModel>();
             if (searchProperties.Any())
             {
                 // Process these items to make sure we have things we can search on.
-                foreach (var prop in searchProperties)
+                foreach (var property in searchProperties)
                 {
                     // Get all the child items
-                    foreach (var searchProperty in prop.SearchProperties(rootModelName, depth, maxDepth))
+                    foreach (var searchProperty in property.SearchProperties(rootModelName, depth, maxDepth))
                     {
                         yield return searchProperty;
                     }
                 }
+                yield break;
             }
-            else
+
+            var prop = PropertyByName("Name");
+            if (prop != null && !prop.HasNotMapped)
             {
-                var prop = Properties.FirstOrDefault(
-                    f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
-                if (prop != null)
-                {
-                    yield return new SearchableValueProperty(prop);
-                }
+                yield return new SearchableValueProperty(prop);
+                yield break;
             }
-            if (!result.Any())
+
+            prop = Properties.FirstOrDefault(p => string.Equals(p.Name, $"{p.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) && !p.HasNotMapped);
+            if (prop != null && !prop.HasNotMapped)
             {
-                var prop = Properties.FirstOrDefault(
-                    f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
-                if (prop != null)
-                {
-                    yield return new SearchableValueProperty(prop);
-                }
+                yield return new SearchableValueProperty(prop);
+                yield break;
             }
-            if (!result.Any())
+
+            prop = Properties.FirstOrDefault(f => f.IsPrimaryKey);
+            if (prop != null)
             {
-                var prop = Properties.FirstOrDefault(f => f.IsPrimaryKey);
-                if (prop != null)
-                {
-                    yield return new SearchableValueProperty(prop);
-                }
+                yield return new SearchableValueProperty(prop);
+                yield break;
             }
         }
+
+        #endregion
+
+
 
         /// <summary>
-        /// Returns a property matching the name if it exists.
+        /// Returns the property ID field.
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public PropertyViewModel PropertyByName(string key)
-        {
-            return Properties.FirstOrDefault(f => string.Compare(f.Name, key, StringComparison.InvariantCultureIgnoreCase) == 0);
-        }
+        public PropertyViewModel PrimaryKey => Properties.FirstOrDefault(f => f.IsPrimaryKey);
 
         /// <summary>
-        /// Returns a method matching the name if it exists.
+        /// Use the ListText Attribute first, then Name and then ID.
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public MethodViewModel MethodByName(string key)
-        {
-            return Methods.FirstOrDefault(f => string.Compare(f.Name, key, StringComparison.InvariantCultureIgnoreCase) == 0);
-        }
+        public PropertyViewModel ListTextProperty =>
+            Properties.FirstOrDefault(f => f.IsListText) ??
+            Properties.FirstOrDefault(f => f.Name == "Name") ??
+            PrimaryKey;
 
-        /// <summary>
-        /// Returns a property matching the name if it exists.
-        /// </summary>
-        /// <param name="propertySelector"></param>
-        /// <returns></returns>
-        public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
-        {
-            PropertyInfo propInfo = GetPropertyInfo(propertySelector);
-            if (propInfo == null) throw new ArgumentException("Could not find property");
-            return PropertyByName(propInfo.Name);
-        }
+        public string ApiUrl => ApiName;
 
-
-        // http://stackoverflow.com/questions/671968/retrieving-property-name-from-lambda-expression
-        internal PropertyInfo GetPropertyInfo(LambdaExpression propertyLambda)
-        {
-            return propertyLambda.GetExpressedProperty(Type);
-        }
 
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
-
-        /// <summary>
-        /// Returns true if this is a complex type.
-        /// </summary>
-        public bool IsComplexType => HasAttribute<ComplexTypeAttribute>();
 
         /// <summary>
         /// Returns true if this class has a partial typescript file.
         /// </summary>
         public bool HasTypeScriptPartial => HasAttribute<TypeScriptPartialAttribute>();
 
+        public bool WillCreateViewController =>
+            this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateView) ?? true;
 
-        /// <summary>
-        /// Returns true if the attribute exists.
-        /// </summary>
-        /// <typeparam name="TAttribute"></typeparam>
-        /// <returns></returns>
-        public bool HasAttribute<TAttribute>() where TAttribute : Attribute => Wrapper.HasAttribute<TAttribute>();
-
-        public bool WillCreateViewController
-        {
-            get
-            {
-                var value = (Nullable<bool>)Wrapper.GetAttributeValue<CreateControllerAttribute>(nameof(CreateControllerAttribute.WillCreateView));
-                return value == null || value.Value;
-            }
-        }
-        public bool WillCreateApiController
-        {
-            get
-            {
-                var value = (Nullable<bool>)Wrapper.GetAttributeValue<CreateControllerAttribute>(nameof(CreateControllerAttribute.WillCreateApi));
-                return value == null || value.Value;
-            }
-        }
+        public bool WillCreateApiController =>
+            this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateApi) ?? true;
 
         /// <summary>
         /// Returns the DisplayName Attribute or 
@@ -426,73 +369,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
-        public bool HasViewModel => Name != "IdentityRole";
-
-        public override string ToString() => $"{Name} : {Wrapper}";
-
-        public string TableName
-        {
-            get
-            {
-                string tableName = (string)Wrapper.GetAttributeValue<TableAttribute>(nameof(TableAttribute.Name)) ?? ContextPropertyName;
-
-                if (tableName != null)
-                    return "dbo." + tableName;
-
-                return "dbo." + Name;
-            }
-        }
+        public string TableName =>
+            "dbo." + (this.GetAttributeValue<TableAttribute>(a => a.Name) ?? ContextPropertyName ?? Name);
 
         public string ContextPropertyName { get; set; }
+
         public bool OnContext { get; set; }
 
-        private SecurityInfoClass _securityInfo;
-        public SecurityInfoClass SecurityInfo
-        {
-            get
-            {
-                if (_securityInfo == null)
-                {
-                    _securityInfo = new SecurityInfoClass(
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<ReadAttribute>()),
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<EditAttribute>()),
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<DeleteAttribute>()),
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<CreateAttribute>())
-                    );
-
-                    //if (HasAttribute<ReadAttribute>())
-                    //{
-                    //    _securityInfo.IsRead = true;
-                    //    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.AllowAnonymous));
-                    //    if (allowAnonmous.HasValue) _securityInfo.AllowAnonymousRead = allowAnonmous.Value;
-                    //    var roles = (string)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.Roles));
-                    //    _securityInfo.ReadRoles = roles;
-                    //}
-
-                    //if (HasAttribute<EditAttribute>())
-                    //{
-                    //    _securityInfo.IsEdit = true;
-                    //    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.AllowAnonymous));
-                    //    if (allowAnonmous.HasValue) _securityInfo.AllowAnonymousEdit = allowAnonmous.Value;
-                    //    var roles = (string)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Roles));
-                    //    _securityInfo.EditRoles = roles;
-                    //}
-                }
-
-                return _securityInfo;
-            }
-        }
-
         /// <summary>
-        /// Returns true if any of the properties allow for a save when there is a validation issue. (warnings)
+        /// Has a DbSet property in the Context.
         /// </summary>
-        public bool ClientValidationAllowSave
-        {
-            get
-            {
-                return Properties.Any(f => f.ClientValidationAllowSave);
-            }
-        }
+        public bool HasDbSet { get; internal set; }
+
+        private ClassSecurityInfo _securityInfo;
+        public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
+            new SecurityPermission(GetSecurityAttribute<ReadAttribute>()),
+            new SecurityPermission(GetSecurityAttribute<EditAttribute>()),
+            new SecurityPermission(GetSecurityAttribute<DeleteAttribute>()),
+            new SecurityPermission(GetSecurityAttribute<CreateAttribute>())
+        ));
 
         public string DtoIncludesAsCS()
         {
@@ -514,24 +409,29 @@ namespace IntelliTect.Coalesce.TypeDefinition
                                 .Distinct()
                                 .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
                                 .ToList();
+
             return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
         }
 
         public string PropertyRolesAsCS()
         {
-            var allPropertyRoles = Properties.Aggregate(new List<string>(), (p, c) => p.Union(c.SecurityInfo.EditRolesList.Union(c.SecurityInfo.ReadRolesList)).ToList());
-
-            var output = allPropertyRoles.Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");").ToList();
-
-            return string.Join($"{Environment.NewLine}\t\t\t", output);
+            var allPropertyRoles = Properties
+                .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
+                .Distinct()
+                .Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");")
+                .ToList();
+            
+            return string.Join($"{Environment.NewLine}\t\t\t", allPropertyRoles);
         }
 
-        public Type Type
+
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+        protected virtual AttributeWrapper GetSecurityAttribute<TAttribute>() where TAttribute : SecurityAttribute
         {
-            get
-            {
-                return Wrapper.Info;
-            }
+            throw new NotImplementedException();
         }
+
+        public override string ToString() => $"{FullName}";
     }
 }

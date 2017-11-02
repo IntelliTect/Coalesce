@@ -30,14 +30,14 @@
     @section Scripts
     {
     <script>
-        var adevTeam = new ViewModels.DevTeam();
-        adevTeam.includes = "Editor";
+        var model = new ViewModels.DevTeam();
+        model.includes = "Editor";
 
-        adevTeam.saveCallbacks.push(function(obj){
+        model.saveCallbacks.push(function(obj){
             // If there is a new id, set the one for this page
             if (!Coalesce.Utilities.GetUrlParameter('id')){
-                if (adevTeam.myId){
-                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", adevTeam.myId);
+                if (model.myId) {
+                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
                     window.history.replaceState(null, window.document.title, newUrl);
                 }
             }
@@ -45,21 +45,21 @@
 
         @if (ViewBag.Id != null)
                 {
-                    @:adevTeam.load('@ViewBag.Id');
+                    @:model.load('@ViewBag.Id');
                 }
         @foreach (var kvp in ViewBag.ParentIds)
                 {
-                    @:adevTeam.@(((string)(@kvp.Key)))(@kvp.Value);
+                    @:model.@(((string)(@kvp.Key)))(@kvp.Value);
                 }
 
         window.onbeforeunload = function(){
-            if (adevTeam.isDirty()) adevTeam.save();
+            if (model.isDirty()) model.save();
         }
 
-        adevTeam.isSavingAutomatically = false;
-        adevTeam.loadChildren(function() {
-            ko.applyBindings(adevTeam);
-            adevTeam.isSavingAutomatically = true;
+        model.coalesceConfiguration.autoSaveEnabled(false);
+        model.loadChildren(function() {
+            ko.applyBindings(model);
+            model.coalesceConfiguration.autoSaveEnabled(true);
         });
     </script>
     }

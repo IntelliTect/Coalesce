@@ -126,14 +126,14 @@
     @section Scripts
     {
     <script>
-        var aperson = new ViewModels.Person();
-        aperson.includes = "Editor";
+        var model = new ViewModels.Person();
+        model.includes = "Editor";
 
-        aperson.saveCallbacks.push(function(obj){
+        model.saveCallbacks.push(function(obj){
             // If there is a new id, set the one for this page
             if (!Coalesce.Utilities.GetUrlParameter('id')){
-                if (aperson.myId){
-                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", aperson.myId);
+                if (model.myId) {
+                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
                     window.history.replaceState(null, window.document.title, newUrl);
                 }
             }
@@ -141,21 +141,21 @@
 
         @if (ViewBag.Id != null)
                 {
-                    @:aperson.load('@ViewBag.Id');
+                    @:model.load('@ViewBag.Id');
                 }
         @foreach (var kvp in ViewBag.ParentIds)
                 {
-                    @:aperson.@(((string)(@kvp.Key)))(@kvp.Value);
+                    @:model.@(((string)(@kvp.Key)))(@kvp.Value);
                 }
 
         window.onbeforeunload = function(){
-            if (aperson.isDirty()) aperson.save();
+            if (model.isDirty()) model.save();
         }
 
-        aperson.isSavingAutomatically = false;
-        aperson.loadChildren(function() {
-            ko.applyBindings(aperson);
-            aperson.isSavingAutomatically = true;
+        model.coalesceConfiguration.autoSaveEnabled(false);
+        model.loadChildren(function() {
+            ko.applyBindings(model);
+            model.coalesceConfiguration.autoSaveEnabled(true);
         });
     </script>
     }

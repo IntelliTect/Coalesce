@@ -34,24 +34,24 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
             // Don't bother with validation on non-editable fields.
             if (!prop.CanWrite) return null;
 
-            var isRequired = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool?;
-            var minValue = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinValue)) as double?;
-            var maxValue = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MaxValue)) as double?;
-            var minLength = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinLength)) as int?;
-            var maxLength = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MaxLength)) as int?;
-            var pattern = prop.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.Pattern));
-            var step = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.Step)) as double?;
-            var isEmail = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsEmail)) as bool?;
-            var isPhoneUs = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsPhoneUs)) as bool?;
-            var equal = prop.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.Equal));
-            var notEqual = prop.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.NotEqual));
-            var isDate = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDate)) as bool?;
-            var isDateIso = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDateIso)) as bool?;
-            var isNumber = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsNumber)) as bool?;
-            var isDigit = prop.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDigit)) as bool?;
-            var customName = prop.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.CustomName));
-            var customValue = prop.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.CustomValue));
-            var errorMessage = prop.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.ErrorMessage));
+            var isRequired = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired);
+            var minValue = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue);
+            var maxValue = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue);
+            var minLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength);
+            var maxLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength);
+            var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
+            var step = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.Step);
+            var isEmail = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail);
+            var isPhoneUs = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsPhoneUs);
+            var equal = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Equal);
+            var notEqual = prop.GetAttributeValue<ClientValidationAttribute>(a => a.NotEqual);
+            var isDate = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsDate);
+            var isDateIso = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsDateIso);
+            var isNumber = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsNumber);
+            var isDigit = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsDigit);
+            var customName = prop.GetAttributeValue<ClientValidationAttribute>(a => a.CustomName);
+            var customValue = prop.GetAttributeValue<ClientValidationAttribute>(a => a.CustomValue);
+            var errorMessage = prop.GetAttributeValue<ClientValidationAttribute>(a => a.ErrorMessage);
 
 
             var validations = new List<string>();
@@ -70,7 +70,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
                 string message = null;
                 if (prop.HasAttribute<RequiredAttribute>())
                 {
-                    message = prop.GetAttributeObject<RequiredAttribute, string>(nameof(RequiredAttribute.ErrorMessage));
+                    message = prop.GetAttributeValue<RequiredAttribute>(a => a.ErrorMessage);
                 }
                 if (string.IsNullOrWhiteSpace(message))
                 {
@@ -85,14 +85,14 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
             {
                 if (prop.Range != null)
                 {
-                    var message = prop.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
+                    var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
                     validations.Add($"minLength: {KoValidationOptions(prop.Range.Item1.ToString(), message)}, maxLength: {KoValidationOptions(prop.Range.Item2.ToString(), message)}");
                 }
                 else
                 {
                     if (prop.MinLength.HasValue)
                     {
-                        var message = prop.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
+                        var message = prop.GetAttributeValue<MinLengthAttribute>(a => a.ErrorMessage);
                         validations.Add($"minLength: {KoValidationOptions(prop.MinLength.Value.ToString(), message)}");
                     }
                     else if (minLength.HasValue && minLength.Value != int.MaxValue)
@@ -102,7 +102,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
 
                     if (prop.MaxLength.HasValue)
                     {
-                        var message = prop.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
+                        var message = prop.GetAttributeValue<MaxLengthAttribute>(a => a.ErrorMessage);
                         validations.Add($"maxLength: {KoValidationOptions(prop.MaxLength.Value.ToString(), message)}");
                     }
                     else if (maxLength.HasValue && maxLength.Value != int.MinValue)
@@ -115,7 +115,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
             {
                 if (prop.Range != null)
                 {
-                    var message = prop.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
+                    var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
                     validations.Add($"min: {KoValidationOptions(prop.Range.Item1.ToString(), message)}, max: {KoValidationOptions(prop.Range.Item2.ToString(), message)}");
                 }
                 else

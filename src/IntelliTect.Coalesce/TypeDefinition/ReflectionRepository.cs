@@ -35,12 +35,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static ClassViewModel GetClassViewModel(Type classType)
         {
-            return _models.GetOrAdd(GetKey(classType), _ => new ClassViewModel(classType));
+            return _models.GetOrAdd(GetKey(classType), _ => new ReflectionClassViewModel(classType));
         }
 
-        public static ClassViewModel GetClassViewModel(INamedTypeSymbol classType)
+        public static ClassViewModel GetClassViewModel(ITypeSymbol classType)
         {
-            return _models.GetOrAdd(GetKey(classType), _ => new ClassViewModel(classType));
+            return _models.GetOrAdd(GetKey(classType), _ => new SymbolClassViewModel(classType));
         }
         
 
@@ -69,8 +69,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static PropertyViewModel PropertyBySelector(LambdaExpression propertySelector)
         {
-            var objModel = GetClassViewModel(propertySelector.Parameters.First().Type);
-            return objModel.PropertyByName(propertySelector.GetExpressedProperty(objModel.Type).Name);
+            var type = propertySelector.Parameters.First().Type;
+            var objModel = GetClassViewModel(type);
+            return objModel.PropertyByName(propertySelector.GetExpressedProperty(type).Name);
         }
 
         public static bool IsValidViewModelClass(string name)
@@ -119,7 +120,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <param name="classType"></param>
         /// <returns></returns>
 
-        private static string GetKey(INamedTypeSymbol classType)
+        private static string GetKey(ITypeSymbol classType)
         {
             List<string> namespaces = new List<string>();
             var curNamespace = classType.ContainingNamespace;
@@ -155,20 +156,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public static List<ClassViewModel> AddContext(Type t)
         {
-            var context = new ClassViewModel(t);
+            var context = new ReflectionClassViewModel(t);
             return AddContext(context);
         }
 
         public static List<ClassViewModel> AddContext(TypeViewModel t)
         {
-            var context = new ClassViewModel(t);
+            var context = ClassViewModel.From(t);
             return AddContext(context);
         }
 
 
         public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) // where T: AppDbContext
         {
-            var context = new ClassViewModel(contextSymbol);
+            var context = new SymbolClassViewModel(contextSymbol);
             // Reflect on the AppDbContext
             return AddContext(context);
         }
@@ -226,7 +227,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     if (!models.Any(f => f.Name == method.ReturnType.PureType.Name))
                     {
-                        var methodModel = new ClassViewModel(method.ReturnType.PureType);
+                        var methodModel = ClassViewModel.From(method.ReturnType.PureType);
                         models.Add(methodModel);
                         AddChildModels(models, methodModel);
                     }
@@ -239,7 +240,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         if (!models.Any(f => f.Name == arg.Type.Name))
                         {
-                            var argModel = new ClassViewModel(arg.Type);
+                            var argModel = ClassViewModel.From(arg.Type);
                             models.Add(argModel);
                             AddChildModels(models, argModel);
                         }

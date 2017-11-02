@@ -19,14 +19,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Wrapper = wrapper;
         }
 
-        public string Name
-        {
-            get
-            {
-                if (Wrapper.IsArray) return "Array";
-                return Wrapper.Name;
-            }
-        }
+        public string Name => Wrapper.IsArray ? "Array" : Wrapper.Name; // TODO: why 'Array' ????
 
         public string CsDefaultValue
         {

@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// <summary>
     /// Class that contains security information for a class or property based on the Read and Edit attributes
     /// </summary>
-    public class SecurityInfoProperty
+    public class PropertySecurityInfo
     {
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;

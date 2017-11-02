@@ -17,89 +17,47 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         internal MethodWrapper Wrapper { get; }
 
-        internal MethodViewModel(MethodWrapper wrapper, ClassViewModel parent, int classMethodOrder)
+        internal MethodViewModel(MethodWrapper wrapper, ClassViewModel parent)
         {
             Wrapper = wrapper;
             Parent = parent;
-            ClassMethodOrder = classMethodOrder;
         }
 
-        /// <summary>
-        /// Order rank of the method in the model.
-        /// </summary>
-        public int ClassMethodOrder { get; }
+        public bool IsStatic => Wrapper.IsStatic;
 
+        public bool IsIQueryableOfParent =>
+            IsStatic && ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
 
+        public string JsVariable => Name.ToCamelCase();
 
-        public bool IsStatic
-        {
-            get
-            {
-                return Wrapper.IsStatic;
-            }
-        }
+        public string JsVariableResult => JsVariable + "Result";
+        public string JsVariableResultRaw => JsVariable + "ResultRaw";
+        public string JsVariableIsLoading => JsVariable + "IsLoading";
+        public string JsVariableMessage => JsVariable + "Message";
+        public string JsVariableWasSuccessful => JsVariable + "WasSuccessful";
+        public string JsVariableUi => JsVariable + "Ui";
+        public string JsVariableModal => JsVariable + "Modal";
+        public string JsVariableArgs => JsVariable + "Args";
+        public string JsVariableWithArgs => JsVariable + "WithArgs";
 
-        public bool IsIQueryableOfParent
-        {
-            get
-            {
-                return IsStatic && ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
-            }
-        }
-
-        public string JsVariable
-        {
-            get
-            {
-                if (Wrapper.Name == "Validate") return "serverValidate";
-                return Name.ToCamelCase();
-            }
-        }
-        public string JsVariableResult { get { return JsVariable + "Result"; } }
-        public string JsVariableResultRaw { get { return JsVariable + "ResultRaw"; } }
-        public string JsVariableIsLoading { get { return JsVariable + "IsLoading"; } }
-        public string JsVariableMessage { get { return JsVariable + "Message"; } }
-        public string JsVariableWasSuccessful { get { return JsVariable + "WasSuccessful"; } }
-        public string JsVariableUi { get { return JsVariable + "Ui"; } }
-        public string JsVariableModal { get { return JsVariable + "Modal"; } }
-        public string JsVariableArgs { get { return JsVariable + "Args"; } }
-        public string JsVariableWithArgs { get { return JsVariable + "WithArgs"; } }
-
-        public string Comment { get { return Wrapper.Comment; } }
+        public string Comment => Wrapper.Comment;
 
         /// <summary>
         /// Name of the property
         /// </summary>
-        public string Name { get { return Wrapper.Name; } }
+        public string Name => Wrapper.Name;
 
 
         /// <summary>
         /// Name of the class that is used for storing arguments on the client.
         /// </summary>
-        public string ArgsName { get { return Wrapper.Name + "Args"; } }
+        public string ArgsName => Wrapper.Name + "Args";
 
 
         /// <summary>
         /// Name of the type
         /// </summary>
-        public TypeViewModel ReturnType
-        {
-            get
-            {
-                return new TypeViewModel(Wrapper.ReturnType);
-            }
-        }
-
-        /// <summary>
-        /// Type of the return. 
-        /// </summary>
-        public string ReturnTypeName
-        {
-            get
-            {
-                return ReturnType.NameWithTypeParams;
-            }
-        }
+        public TypeViewModel ReturnType => new TypeViewModel(Wrapper.ReturnType);
 
 
         /// <summary>
@@ -127,12 +85,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// List of parameters
         /// </summary>
-        public IEnumerable<ParameterViewModel> Parameters { get { return Wrapper.Parameters; } }
+        public IEnumerable<ParameterViewModel> Parameters => Wrapper.Parameters;
 
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
         /// </summary>
-        public IEnumerable<ParameterViewModel> ClientParameters { get { return Wrapper.Parameters.Where(f => !f.IsDI); } }
+        public IEnumerable<ParameterViewModel> ClientParameters => Wrapper.Parameters.Where(f => !f.IsDI);
 
         /// <summary>
         /// Gets the TypeScript parameters for this method call.
@@ -231,13 +189,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the name for the API call.
         /// </summary>
-        public string ApiUrl
-        {
-            get
-            {
-                return $"{Parent.ApiUrl}/{Name}";
-            }
-        }
+        public string ApiUrl => $"{Parent.ApiUrl}/{Name}";
 
         /// <summary>
         /// Returns the DisplayName Attribute or 

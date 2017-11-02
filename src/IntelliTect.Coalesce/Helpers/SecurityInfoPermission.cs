@@ -8,14 +8,14 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.Helpers
 {
-    public class SecurityInfoPermission
+    public class SecurityPermission
     {
         private AttributeData _attributeData;
         private SecurityAttribute _attribute;
 
         private List<string> _roleList = null;
 
-        public SecurityInfoPermission(AttributeWrapper attribute)
+        public SecurityPermission(AttributeWrapper attribute)
         {
             _attributeData = attribute.AttributeData;
             _attribute = attribute.Attribute;

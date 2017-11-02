@@ -152,17 +152,14 @@
     @:@@section Scripts
     @:{
     <script>
-        @{
-            var obj = 'a' + model.ViewModelObjectName;
-        }
-        var @(obj) = new @viewModelsNamespace.@(@model.ViewModelClassName)();
-        @(obj).includes = "Editor";
+        var model = new @viewModelsNamespace.@(model.ViewModelClassName)();
+        model.includes = "Editor";
 
-        @(obj).saveCallbacks.push(function(obj){
+        model.saveCallbacks.push(function(obj){
             // If there is a new id, set the one for this page
             if (!Coalesce.Utilities.GetUrlParameter('id')){
-                if (@(obj).myId){
-                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", @(obj).myId);
+                if (model.myId) {
+                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
                     window.history.replaceState(null, window.document.title, newUrl);
                 }
             }
@@ -171,22 +168,22 @@
         @{
         @:@@if (ViewBag.Id != null)
                 @:{
-                    @:@@:@(obj).load('@@ViewBag.Id');
+                    @:@@:model.load('@@ViewBag.Id');
                 @:}
         @:@@foreach (var kvp in ViewBag.ParentIds)
                 @:{
-                    @:@@:@(obj).@@(((string)(@@kvp.Key)))(@@kvp.Value);
+                    @:@@:model.@@(((string)(@@kvp.Key)))(@@kvp.Value);
                 @:}
         }
 
         window.onbeforeunload = function(){
-            if (@(obj).isDirty()) @(obj).save();
+            if (model.isDirty()) model.save();
         }
 
-        @(obj).isSavingAutomatically = false;
-        @(obj).loadChildren(function() {
-            ko.applyBindings(@(obj));
-            @(obj).isSavingAutomatically = true;
+        model.coalesceConfiguration.autoSaveEnabled(false);
+        model.loadChildren(function() {
+            ko.applyBindings(model);
+            model.coalesceConfiguration.autoSaveEnabled(true);
         });
     </script>
     @:}

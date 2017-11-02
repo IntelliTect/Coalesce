@@ -11,10 +11,10 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// <summary>
     /// Class that contains security information for a class or property based on the Read and Edit attributes
     /// </summary>
-    public class SecurityInfoClass
+    public class ClassSecurityInfo
     {
-        public SecurityInfoClass(SecurityInfoPermission read, SecurityInfoPermission edit,
-            SecurityInfoPermission delete, SecurityInfoPermission create)
+        public ClassSecurityInfo(SecurityPermission read, SecurityPermission edit,
+            SecurityPermission delete, SecurityPermission create)
         {
             Read = read;
             Edit = edit;
@@ -22,10 +22,10 @@ namespace IntelliTect.Coalesce.DataAnnotations
             Create = create;
         }
 
-        public SecurityInfoPermission Read { get; set; }
-        public SecurityInfoPermission Edit { get; set; }
-        public SecurityInfoPermission Delete { get; set; }
-        public SecurityInfoPermission Create { get; set; }
+        public SecurityPermission Read { get; set; }
+        public SecurityPermission Edit { get; set; }
+        public SecurityPermission Delete { get; set; }
+        public SecurityPermission Create { get; set; }
 
 
         public string ClassAnnotation

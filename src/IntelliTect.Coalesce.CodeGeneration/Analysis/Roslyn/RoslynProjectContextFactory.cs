@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
             context.MsBuildProjectContext =
                 new MsBuildProjectContextBuilder(Logger, context)
-                .RestoreProjectPackages()
+                //.RestoreProjectPackages()
                 .BuildProjectContext();
 
             return context;

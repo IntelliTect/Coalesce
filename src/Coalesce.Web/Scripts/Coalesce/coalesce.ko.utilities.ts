@@ -26,7 +26,7 @@ module Coalesce {
         ) {
             var matchingItem: U;
             if (idField) {
-                let key = incomingItem[idField];
+                let key = ko.unwrap(incomingItem[idField]);
                 if (originalLookup) {
                     matchingItem = originalLookup[key.toString()];
                 } else {

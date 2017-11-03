@@ -89,6 +89,9 @@ namespace IntelliTect.Coalesce.Data
         }
 
 
+        // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
+        // Renable once microsoft releases the fix and we upgrade our references.
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         /// <summary>
         /// Asynchronously finds an object based on key after an include has been done.
         /// </summary>
@@ -97,15 +100,19 @@ namespace IntelliTect.Coalesce.Data
         /// <param name="id"></param>
         /// <returns></returns>
         public async static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
+
             var classViewModel = ReflectionRepository.GetClassViewModel<T>();
             if (classViewModel.PrimaryKey.Type.IsString)
             {
-                return await query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").FirstAsync();
+                // return await query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").FirstAsync();
+                return query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").First();
             }
             else
             {
-                return await query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).FirstAsync();
+                // return await query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).FirstAsync();
+                return query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).First();
             }
         }
 

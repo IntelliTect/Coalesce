@@ -10,20 +10,33 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
+using Microsoft.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class MethodViewModel
+    public abstract class MethodViewModel : IAttributeProvider
     {
-        internal MethodWrapper Wrapper { get; }
+        public abstract bool IsStatic { get; }
 
-        internal MethodViewModel(MethodWrapper wrapper, ClassViewModel parent)
+        public abstract string Comment { get; }
+
+        public abstract string Name { get; }
+
+        public abstract TypeViewModel ReturnType { get; }
+
+        public abstract IEnumerable<ParameterViewModel> Parameters { get; }
+
+        /// <summary>
+        /// Returns true if this method is marked as InternalUse. Not exposed through the API
+        /// </summary>
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
+
+        public ClassViewModel Parent { get; }
+
+        internal MethodViewModel(ClassViewModel parent)
         {
-            Wrapper = wrapper;
             Parent = parent;
         }
-
-        public bool IsStatic => Wrapper.IsStatic;
 
         public bool IsIQueryableOfParent =>
             IsStatic && ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
@@ -40,25 +53,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsVariableArgs => JsVariable + "Args";
         public string JsVariableWithArgs => JsVariable + "WithArgs";
 
-        public string Comment => Wrapper.Comment;
 
-        /// <summary>
-        /// Name of the property
-        /// </summary>
-        public string Name => Wrapper.Name;
 
 
         /// <summary>
         /// Name of the class that is used for storing arguments on the client.
         /// </summary>
-        public string ArgsName => Wrapper.Name + "Args";
-
-
-        /// <summary>
-        /// Name of the type
-        /// </summary>
-        public TypeViewModel ReturnType => new TypeViewModel(Wrapper.ReturnType);
-
+        public string ArgsName => Name + "Args";
 
         /// <summary>
         /// Type of the return. Object if void.
@@ -81,16 +82,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return result;
             }
         }
-
-        /// <summary>
-        /// List of parameters
-        /// </summary>
-        public IEnumerable<ParameterViewModel> Parameters => Wrapper.Parameters;
-
+        
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
         /// </summary>
-        public IEnumerable<ParameterViewModel> ClientParameters => Wrapper.Parameters.Where(f => !f.IsDI);
+        public IEnumerable<ParameterViewModel> ClientParameters => Parameters.Where(f => !f.IsDI);
 
         /// <summary>
         /// Gets the TypeScript parameters for this method call.
@@ -183,9 +179,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        public ClassViewModel Parent { get; }
-
         /// <summary>
         /// Gets the name for the API call.
         /// </summary>
@@ -195,19 +188,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                var displayName = Wrapper.GetAttributeValue<DisplayNameAttribute>(nameof(DisplayNameAttribute.DisplayName)) as string;
-                if (displayName != null) return displayName;
-                displayName = Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Name)) as string;
-                if (displayName != null) return DisplayName;
-                else return Regex.Replace(Name, "[A-Z]", " $0").Trim();
-            }
-        }
-
-
+        public string DisplayName => 
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.
@@ -216,10 +200,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public bool IsHidden(HiddenAttribute.Areas area)
         {
-            var hiddenArea = (Nullable<HiddenAttribute.Areas>)Wrapper.GetAttributeValue<DisplayNameAttribute>(nameof(DisplayNameAttribute.DisplayName));
-            if (hiddenArea == null) return false;
+            var hiddenArea = this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area);
+            if (!hiddenArea.HasValue) return false;
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
+
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
         public SecurityInfoMethod SecurityInfo
         {
@@ -227,21 +214,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var result = new SecurityInfoMethod();
 
-                if (Wrapper.HasAttribute<ExecuteAttribute>())
+                if (HasAttribute<ExecuteAttribute>())
                 {
                     result.IsExecute = true;
-                    var roles = (string)Wrapper.GetAttributeValue<ExecuteAttribute>(nameof(ExecuteAttribute.Roles));
-                    result.ExecuteRoles = roles;
+                    result.ExecuteRoles = this.GetAttributeValue<ExecuteAttribute>(a => a.Roles);
                 }
 
                 return result;
             }
         }
-
-        /// <summary>
-        /// Returns true if this method is marked as InternalUse. Not exposed through the API
-        /// </summary>
-        public bool IsInternalUse => Wrapper.IsInternalUse;
 
         /// <summary>
         /// If true, this is a client side method.

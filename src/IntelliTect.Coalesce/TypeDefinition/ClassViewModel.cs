@@ -23,15 +23,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected ICollection<PropertyViewModel> _Properties;
         protected ICollection<MethodViewModel> _Methods;
 
-        public static ClassViewModel From(TypeViewModel type)
-        {
-            // TODO: implement some sort of factory pattern for this.
-            // Having ClassViewModel know about its derived types is quite undesirable.
-            if (type.Wrapper is ReflectionTypeWrapper rw) return new ReflectionClassViewModel(rw.Info);
-            if (type.Wrapper is SymbolTypeWrapper sw) return new SymbolClassViewModel(sw.Symbol);
-            throw new ArgumentException("Unknown TypeViewModel wrapper type.");
-        }
-
         public abstract string Name { get; }
         public abstract string Namespace { get; }
         public abstract string Comment { get; }
@@ -113,8 +104,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Member Info - Properties & Methods
 
-        internal abstract ICollection<PropertyWrapper> RawProperties { get; }
-        internal abstract ICollection<MethodWrapper> RawMethods { get; }
+        internal abstract ICollection<PropertyViewModel> RawProperties { get; }
+        internal abstract ICollection<MethodViewModel> RawMethods { get; }
 
         /// <summary>
         /// All properties for the object
@@ -127,21 +118,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     _Properties = new List<PropertyViewModel>();
                     int count = 1;
-                    foreach (var pw in RawProperties)
+                    foreach (var prop in RawProperties)
                     {
-                        if (_Properties.Any(f => f.Name == pw.Name))
+                        if (_Properties.Any(f => f.Name == prop.Name))
                         {
                             // This is a duplicate. Keep the one that isn't virtual
-                            if (!pw.IsVirtual)
+                            if (!prop.IsVirtual)
                             {
-                                _Properties.Remove(_Properties.First(f => f.Name == pw.Name));
-                                var prop = new PropertyViewModel(pw, this, count);
+                                _Properties.Remove(_Properties.First(f => f.Name == prop.Name));
+                                prop.ClassFieldOrder = count;
                                 _Properties.Add(prop);
                             }
                         }
                         else
                         {
-                            var prop = new PropertyViewModel(pw, this, count);
+                            prop.ClassFieldOrder = count;
                             _Properties.Add(prop);
                         }
                         count++;
@@ -173,7 +164,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return _Methods = RawMethods
                     .Where(m => !exclude.Contains(m.Name))
                     .Where(m => !IsDto || (m.Name != nameof(Interfaces.IClassDto<object, object>.Update) && m.Name != nameof(Interfaces.IClassDto<object, object>.CreateInstance)))
-                    .Select(m => new MethodViewModel(m, this))
                     .ToList();
             }
         }

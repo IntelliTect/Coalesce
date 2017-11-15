@@ -23,14 +23,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static ClassViewModel GetClassViewModel(TypeViewModel classType)
         {
-            if (classType.Wrapper is ReflectionTypeWrapper)
-            {
-                return GetClassViewModel(classType.Wrapper.Info);
-            }
-            else
-            {
-                return GetClassViewModel((INamedTypeSymbol)classType.Wrapper.Symbol);
-            }
+            return classType.ClassViewModel;
         }
 
         public static ClassViewModel GetClassViewModel(Type classType)
@@ -95,13 +88,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         private static string GetKey(TypeViewModel type)
         {
-            if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
+            if (type is ReflectionTypeViewModel reflectedType)
             {
-                return GetKey(((ReflectionTypeWrapper)(type.Wrapper)).Info);
+                return GetKey(reflectedType.Info);
             }
             else
             {
-                return GetKey((INamedTypeSymbol)(((SymbolTypeWrapper)(type.Wrapper)).Symbol));
+                return GetKey(((SymbolTypeViewModel)type).Symbol);
             }
         }
         /// <summary>
@@ -109,10 +102,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <param name="classType"></param>
         /// <returns></returns>
-        private static string GetKey(Type classType)
-        {
-            return string.Format("{0}", classType.FullName);
-        }
+        private static string GetKey(Type classType) => classType.FullName;
 
         /// <summary>
         /// Gets a unique key for the collection.
@@ -162,7 +152,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static List<ClassViewModel> AddContext(TypeViewModel t)
         {
-            var context = ClassViewModel.From(t);
+            var context = t.ClassViewModel;
             return AddContext(context);
         }
 
@@ -221,26 +211,26 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     AddChildModels(models, propModel);
                 }
             }
-            foreach (var method in model.Methods.Where(p => !p.IsInternalUse && !p.ReturnType.IsVoid && p.ReturnType.PureType.IsPOCO))
+            foreach (var method in model.Methods.Where(p => !p.IsInternalUse && !p.ReturnType.IsVoid && p.ReturnType.PureType.HasClassViewModel))
             {
                 lock (models)
                 {
                     if (!models.Any(f => f.Name == method.ReturnType.PureType.Name))
                     {
-                        var methodModel = ClassViewModel.From(method.ReturnType.PureType);
+                        var methodModel = method.ReturnType.PureType.ClassViewModel;
                         models.Add(methodModel);
                         AddChildModels(models, methodModel);
                     }
                 }
                 // Iterate each of the incoming arguments and check them
-                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.Type.IsPOCO))
+                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.Type.HasClassViewModel))
                 {
                     string argKey = GetKey(arg.Type);
                     lock (models)
                     {
                         if (!models.Any(f => f.Name == arg.Type.Name))
                         {
-                            var argModel = ClassViewModel.From(arg.Type);
+                            var argModel = arg.Type.ClassViewModel;
                             models.Add(argModel);
                             AddChildModels(models, argModel);
                         }

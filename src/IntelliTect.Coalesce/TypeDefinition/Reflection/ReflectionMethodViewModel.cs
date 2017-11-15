@@ -8,11 +8,11 @@ using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class ReflectionMethodWrapper : MethodWrapper
+    public class ReflectionMethodViewModel : MethodViewModel
     {
         private MethodInfo Info { get; }
 
-        public ReflectionMethodWrapper(MethodInfo methodInfo)
+        public ReflectionMethodViewModel(MethodInfo methodInfo, ClassViewModel parent) : base(parent)
         {
             Info = methodInfo;
         }
@@ -28,21 +28,11 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override bool IsStatic => Info.IsStatic;
 
-        public override TypeWrapper ReturnType => new ReflectionTypeWrapper(Info.ReturnType);
+        public override TypeViewModel ReturnType => new ReflectionTypeViewModel(Info.ReturnType);
 
         public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
 
         public override IEnumerable<ParameterViewModel> Parameters
-        {
-            get
-            {
-                var result = new List<ParameterViewModel>();
-                foreach (var parameter in Info.GetParameters())
-                {
-                    result.Add(new ParameterViewModel( new ReflectionParameterWrapper(parameter)));
-                }
-                return result;
-            }
-        }
+            => Info.GetParameters().Select(p => new ReflectionParameterViewModel(p));
     }
 }

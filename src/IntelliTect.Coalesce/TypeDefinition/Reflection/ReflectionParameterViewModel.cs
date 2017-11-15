@@ -7,15 +7,17 @@ using System.Reflection;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class ReflectionParameterWrapper : ParameterWrapper
+    internal class ReflectionParameterViewModel : ParameterViewModel
     {
-        public ReflectionParameterWrapper(ParameterInfo info)
+        protected internal ParameterInfo Info { get; internal set; }
+
+        public ReflectionParameterViewModel(ParameterInfo info)
         {
             Info = info;
             if (info.ParameterType.IsByRef)
-                Type = new TypeViewModel(new ReflectionTypeWrapper(info.ParameterType.GetElementType()));
+                Type = new ReflectionTypeViewModel(info.ParameterType.GetElementType());
             else
-                Type = new TypeViewModel(new ReflectionTypeWrapper(info.ParameterType));
+                Type = new ReflectionTypeViewModel(info.ParameterType);
 
         }
 

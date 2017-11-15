@@ -11,25 +11,17 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class ParameterViewModel
+    public abstract class ParameterViewModel : IAttributeProvider
     {
-        internal ParameterWrapper Wrapper { get; }
+        public abstract string Name { get; }
 
-        public string Name => Wrapper.Name;
-
-        public TypeViewModel Type => Wrapper.Type;
-
-        internal ParameterViewModel(ParameterWrapper wrapper)
-        {
-            Wrapper = wrapper;
-        }
+        public TypeViewModel Type { get; protected set; }
 
         public bool IsManualDI => IsAContext || IsAUser || IsAnIncludeTree;
 
-        public bool IsInjected => Wrapper.HasAttribute<InjectAttribute>();
+        public bool IsInjected => HasAttribute<InjectAttribute>();
 
         public bool IsDI => IsManualDI || IsInjected;
-
 
         public bool IsAContext => Type.IsA<DbContext>();
 
@@ -68,5 +60,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             return argument;
         }
+
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

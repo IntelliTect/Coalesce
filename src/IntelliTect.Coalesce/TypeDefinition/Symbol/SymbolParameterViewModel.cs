@@ -6,12 +6,14 @@ using Microsoft.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class SymbolParameterWrapper : ParameterWrapper
+    internal class SymbolParameterViewModel : ParameterViewModel
     {
-        public SymbolParameterWrapper(IParameterSymbol symbol)
+        protected internal IParameterSymbol Symbol { get; internal set; }
+
+        public SymbolParameterViewModel(IParameterSymbol symbol)
         {
             Symbol = symbol;
-            Type = new TypeViewModel(new SymbolTypeWrapper(symbol.Type));
+            Type = new SymbolTypeViewModel(symbol.Type);
         }
 
         public override string Name => Symbol.Name;

@@ -23,15 +23,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => "";
 
-        internal override ICollection<PropertyWrapper> RawProperties => Type.GetProperties()
-            .Select(p => new ReflectionPropertyWrapper(p))
-            .Cast<PropertyWrapper>()
+        internal override ICollection<PropertyViewModel> RawProperties => Type.GetProperties()
+            .Select((p, i) => new ReflectionPropertyViewModel(this, p){ ClassFieldOrder = i })
+            .Cast<PropertyViewModel>()
             .ToList();
 
-        internal override ICollection<MethodWrapper> RawMethods => Type.GetMethods()
+        internal override ICollection<MethodViewModel> RawMethods => Type.GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
-            .Select(m => new ReflectionMethodWrapper(m))
-            .Cast<MethodWrapper>()
+            .Select(m => new ReflectionMethodViewModel(m, this))
+            .Cast<MethodViewModel>()
             .ToList();
 
         public override bool IsDto => Type.GetInterfaces().Any(f => f.Name.Contains("IClassDto"));

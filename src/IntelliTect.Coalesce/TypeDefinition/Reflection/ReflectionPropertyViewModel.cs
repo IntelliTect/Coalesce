@@ -7,21 +7,20 @@ using Microsoft.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class ReflectionPropertyWrapper : PropertyWrapper
+    internal class ReflectionPropertyViewModel : PropertyViewModel
     {
         protected PropertyInfo Info { get; }
 
-        public ReflectionPropertyWrapper(PropertyInfo propetyInfo)
+        public ReflectionPropertyViewModel(ClassViewModel parent, PropertyInfo propetyInfo)
         {
+            Parent = parent;
             Info = propetyInfo;
+            Type = new ReflectionTypeViewModel(Info.PropertyType);
         }
-
 
         public override string Name => Info.Name;
 
         public override string Comment => "";
-        
-        public override TypeWrapper Type => new ReflectionTypeWrapper(Info.PropertyType);
 
         public override bool HasGetter => Info.CanRead;
 

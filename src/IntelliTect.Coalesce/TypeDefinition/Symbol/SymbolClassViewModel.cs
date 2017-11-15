@@ -40,15 +40,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "";
         }
 
-        internal override ICollection<PropertyWrapper> RawProperties
+        internal override ICollection<PropertyViewModel> RawProperties
         {
             get
             {
                 var result = Symbol.GetMembers()
                     .Where(s => s.Kind == SymbolKind.Property)
                     .Cast<IPropertySymbol>()
-                    .Select(s => new SymbolPropertyWrapper(s))
-                    .Cast<PropertyWrapper>()
+                    .Select((s, i) => new SymbolPropertyViewModel(this, s) { ClassFieldOrder = i })
+                    .Cast<PropertyViewModel>()
                     .ToList();
 
                 // Add properties from the base class
@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        internal override ICollection<MethodWrapper> RawMethods
+        internal override ICollection<MethodViewModel> RawMethods
         {
             get
             {
@@ -69,7 +69,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     .Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public)
                     .Cast<IMethodSymbol>()
                     .Where(f => f.MethodKind == MethodKind.Ordinary)
-                    .Select(s => new SymbolMethodWrapper(s))
+                    .Select(s => new SymbolMethodViewModel(s, this))
                     .ToList();
 
                 // Add methods from the base class
@@ -77,14 +77,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     var parentSymbol = new SymbolClassViewModel(Symbol.BaseType);
                     result.AddRange(parentSymbol.Methods
-                        .Cast<SymbolMethodWrapper>()
+                        .Cast<SymbolMethodViewModel>()
                         // Don't add overriden methods
                         .Where(baseMethod => !result.Any(method => method.Symbol.OverriddenMethod == baseMethod.Symbol)
                     ));
                 }
 
                 return result
-                    .Cast<MethodWrapper>()
+                    .Cast<MethodViewModel>()
                     .ToList();
             }
         }

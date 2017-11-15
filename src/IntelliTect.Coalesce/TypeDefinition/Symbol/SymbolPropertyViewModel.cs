@@ -4,35 +4,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class SymbolPropertyWrapper : PropertyWrapper
+    internal class SymbolPropertyViewModel : PropertyViewModel
     {
         protected IPropertySymbol Symbol;
 
-        public SymbolPropertyWrapper(IPropertySymbol symbol)
+        public SymbolPropertyViewModel(ClassViewModel parent, IPropertySymbol symbol)
         {
+            Parent = parent;
             Symbol = symbol;
+            Type = new SymbolTypeViewModel(Symbol.Type);
         }
 
         public override string Name => Symbol.Name;
 
-        public override string Comment => SymbolHelper.ExtractXmlComments(Symbol);
+        public override string Comment =>
+            Regex.Replace(SymbolHelper.ExtractXmlComments(Symbol), "\n(\\s+)", "\n        // ");
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);
         
         public override bool HasAttribute<TAttribute>() => Symbol.HasAttribute<TAttribute>();
         
-
-        public override TypeWrapper Type => new SymbolTypeWrapper(Symbol.Type);
-
         public override bool HasGetter => !Symbol.IsWriteOnly;
 
         public override bool HasSetter => !Symbol.IsReadOnly;
-
-        public override PropertyInfo PropertyInfo => throw new NullReferenceException("Symbol based types do not have a PropertyInfo.");
 
         public override bool IsStatic => Symbol.IsStatic;
 

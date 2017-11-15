@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class SymbolTypeWrapper : TypeWrapper
+    internal class SymbolTypeViewModel : TypeViewModel
     {
-        public SymbolTypeWrapper(ITypeSymbol symbol)
+        protected internal ITypeSymbol Symbol { get; internal set; }
+
+        public SymbolTypeViewModel(ITypeSymbol symbol)
         {
             Symbol = symbol;
         }
@@ -45,19 +47,12 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         }
 
-        public override string Name { get { return Symbol.Name; } }
+        public override string Name => Symbol.Name;
 
-        public override bool IsCollection
-        {
-            get
-            {
-                return !IsArray &&
-                    !IsString &&
-                    Symbol.Interfaces.Any(f => f.Name.Contains("IEnumerable"));
-            }
-        }
+        public override bool IsCollection =>
+            !IsArray &&!IsString && Symbol.Interfaces.Any(f => f.Name.Contains("IEnumerable"));
 
-        public override bool IsArray { get { return Symbol.TypeKind == TypeKind.Array; } }
+        public override bool IsArray => Symbol.TypeKind == TypeKind.Array;
 
         /// <summary>
         /// Returns true if the property is nullable.
@@ -71,22 +66,9 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
-        public override bool IsNullableType
-        {
-            get
-            {
-                return Symbol.Name.Contains(nameof(Nullable));
-            }
-        }
+        public override bool IsNullableType => Symbol.Name.Contains(nameof(Nullable));
 
-        public override bool IsClass
-        {
-            get
-            {
-                if (IsArray) return true;
-                return Symbol.IsReferenceType;
-            }
-        }
+        public override bool IsClass => IsArray || Symbol.IsReferenceType;
 
         public override Dictionary<int, string> EnumValues
         {
@@ -100,8 +82,8 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
                     var symbol = Symbol;
                     if (IsNullableType)
                     {
-                        enumType = (PureType as SymbolTypeWrapper).NamedSymbol.EnumUnderlyingType;
-                        symbol = PureType.Symbol;
+                        enumType = (PureType as SymbolTypeViewModel).NamedSymbol.EnumUnderlyingType;
+                        symbol = (PureType as SymbolTypeViewModel).Symbol;
                     }
                     if (enumType != null)
                     {
@@ -118,23 +100,10 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
-        public override bool IsEnum
-        {
-            get
-            {
-                if (IsArray) { return false; }
-                else { return Symbol.TypeKind == TypeKind.Enum; }
-            }
-        }
+        public override bool IsEnum => Symbol.TypeKind == TypeKind.Enum;
 
-        public override string Namespace
-        {
-            get
-            {
-                if (Symbol.ContainingNamespace == null) return Symbol.BaseType.ContainingNamespace.Name;
-                return Symbol.ContainingNamespace.Name;
-            }
-        }
+        public override string Namespace => 
+            Symbol.ContainingNamespace?.Name ?? Symbol.BaseType.ContainingNamespace.Name;
 
         public override string FullNamespace
         {
@@ -152,41 +121,28 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
-        public override TypeWrapper PureType
+        public override TypeViewModel FirstTypeArgument =>
+            new SymbolTypeViewModel(NamedSymbol.TypeArguments.First());
+
+        public override TypeViewModel ArrayType =>
+            new SymbolTypeViewModel(((IArrayTypeSymbol)Symbol).ElementType);
+        
+        public override ClassViewModel ClassViewModel
         {
             get
             {
-                if (IsArray)
-                {
-                    return ArrayType;
-                }
-                if (IsGeneric && (IsCollection || IsNullable)) { return FirstTypeArgument; }
-                return this;
+                if (!HasClassViewModel) return null;
+                if (PureType != this) return PureType.ClassViewModel;
+                if (Symbol != null && Symbol is INamedTypeSymbol) return ReflectionRepository.GetClassViewModel(Symbol);
+                return null;
             }
         }
 
-        public override TypeWrapper FirstTypeArgument
-        {
-            get
-            {
-                return new SymbolTypeWrapper(NamedSymbol.TypeArguments.First());
-            }
-        }
+        public override object GetAttributeValue<TAttribute>(string valueName) =>
+            Symbol.GetAttributeValue<TAttribute>(valueName);
 
-        public override TypeWrapper ArrayType
-        {
-            get
-            { return new SymbolTypeWrapper(((IArrayTypeSymbol)Symbol).ElementType); }
-        }
-
-        public override object GetAttributeValue<TAttribute>(string valueName)
-        {
-            return Symbol.GetAttributeValue<TAttribute>(valueName);
-        }
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Symbol.HasAttribute<TAttribute>();
-        }
+        public override bool HasAttribute<TAttribute>() =>
+            Symbol.HasAttribute<TAttribute>();
 
         public override bool IsA<T>()
         {

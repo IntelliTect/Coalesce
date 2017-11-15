@@ -10,16 +10,34 @@ using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class TypeViewModel
+    public abstract class TypeViewModel : IAttributeProvider
     {
-        internal TypeWrapper Wrapper { get; }
+        public abstract string Name { get; }
 
-        internal TypeViewModel(TypeWrapper wrapper)
-        {
-            Wrapper = wrapper;
-        }
+        public abstract string Namespace { get; }
 
-        public string Name => Wrapper.IsArray ? "Array" : Wrapper.Name; // TODO: why 'Array' ????
+        public abstract string FullNamespace { get; }
+
+        public abstract bool IsGeneric { get; }
+
+        public abstract bool IsCollection { get; }
+
+        public abstract bool IsArray { get; }
+
+        public abstract bool IsNullable { get; }
+
+        public abstract bool IsNullableType { get; }
+
+        public abstract bool IsClass { get; }
+
+        public abstract Dictionary<int, string> EnumValues { get; }
+        public abstract bool IsEnum { get; }
+
+        public abstract TypeViewModel FirstTypeArgument { get; }
+
+        public abstract TypeViewModel ArrayType { get; }
+
+        public abstract bool IsA<T>();
 
         public string CsDefaultValue
         {
@@ -40,66 +58,50 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsString) { return ""; }
-                if (IsPOCO) { return "(object)"; }
-                if (IsEnum) { return "Convert.ToInt32"; }
-                if (IsNumber) { return "Convert.To" + Name; }
-                if (IsDateTime) { return "DateTime.Parse"; }
-                if (IsDateTimeOffset) { return "DateTimeOffset.Parse"; }
-                if (IsBool) { return "Convert.ToBoolean"; }
+                if (IsString) return "";
+                if (IsPOCO) return "(object)";
+                if (IsEnum) return "Convert.ToInt32";
+                if (IsNumber) return "Convert.To" + Name;
+                if (IsDateTime) return "DateTime.Parse";
+                if (IsDateTimeOffset) return "DateTimeOffset.Parse";
+                if (IsBool) return "Convert.ToBoolean";
                 return "(object)";
             }
         }
 
-        /// <summary>
-        /// Returns true if this type inherits from T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool IsA<T>()
+        public string FullName => $"{Namespace}.{Name}";
+
+        public string NameWithTypeParams
         {
-            return Wrapper.IsA<T>();
+            get
+            {
+                if (IsArray) return $"{PureType.Name}[]";
+                if (IsGeneric) return $"{Name}<{PureType.Name}>";
+                return Name;
+            }
         }
 
-        public string FullName => $"{Wrapper.Namespace}.{Name}";
-
-        public string FullNamespace => Wrapper.FullNamespace;
-
-        public string NameWithTypeParams => Wrapper.NameWithTypeParams;
-
-        public string FullyQualifiedNameWithTypeParams => Wrapper.FullyQualifiedNameWithTypeParams;
-
-        /// <summary>
-        /// Returns true if the property is an array.
-        /// </summary>
-        public bool IsArray => Wrapper.IsArray;
-
-        /// <summary>
-        /// Returns true if the property is a collection.
-        /// </summary>
-        public bool IsCollection => Wrapper.IsCollection;
+        public string FullyQualifiedNameWithTypeParams
+        {
+            get
+            {
+                if (IsArray) return $"{PureType.FullNamespace}.{PureType.Name}[]";
+                if (IsGeneric) return $"{FullNamespace}.{Name}<{PureType.FullNamespace}.{PureType.Name}>";
+                return $"{PureType.FullNamespace}.{Name}";
+            }
+        }
 
         /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool => Wrapper.IsBool;
-
-        /// <summary>
-        /// Returns true if the property is nullable.
-        /// </summary>
-        public bool IsNullable => Wrapper.IsNullable;
+        public bool IsBool => Name == "Boolean";
 
         /// <summary>
         /// Returns true if the property returns void.
         /// </summary>
         public bool IsVoid => Name == "Void";
 
-        public bool IsPrimitive => Wrapper.IsPrimitive;
-
-        /// <summary>
-        /// Returns the first generic argument for a generic type.
-        /// </summary>
-        public TypeViewModel FirstTypeArgument => new TypeViewModel(Wrapper.FirstTypeArgument);
+        public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
         /// <summary>
         /// Best approximation of a TypeScript type definition for the type.
@@ -135,7 +137,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (Wrapper.IsTimeZoneInfo) return "any";
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
                 if (IsPOCO) return $"ViewModels.{PureType.Name}";
@@ -147,9 +148,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
 
-        public bool HasClassViewModel => ClassViewModel != null;
+        public bool HasClassViewModel => !IsPrimitive && PureType.IsPOCO;
 
-        public ClassViewModel ClassViewModel => PureType.IsPOCO ? PureType.Wrapper.ClassViewModel : null;
+        public abstract ClassViewModel ClassViewModel { get; }
 
 
         /// <summary>
@@ -160,25 +161,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
-        public bool IsDate => Wrapper.IsDate;
+        public bool IsDate => IsDateTime || IsDateTimeOffset;
+
+
 
         /// <summary>
         /// True if the property is a string.
         /// </summary>
-        public bool IsString => Wrapper.IsString;
+        public bool IsString => Name == "String";
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
         /// </summary>
-        public bool IsDateTime => Wrapper.IsDateTime;
+        public bool IsDateTime => PureType.Name == "DateTime";
 
         /// <summary>
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
-        public bool IsDateTimeOffset => Wrapper.IsDateTimeOffset;
+        public bool IsDateTimeOffset => PureType.Name == "DateTimeOffset";
 
         /// <summary>
-        /// Returns true if class is a Byte
+        /// Returns true if class is a Byte[]
         /// </summary>
         public bool IsByteArray => PureType.Name == nameof(Byte) && IsArray;
 
@@ -211,43 +214,32 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
-        public TypeViewModel PureType => new TypeViewModel(Wrapper.PureType);
+        public TypeViewModel PureType
+        {
+            get
+            {
+                if (IsArray)
+                {
+                    return ArrayType;
+                }
+                if (IsGeneric && (IsCollection || IsNullable)) { return FirstTypeArgument; }
+                return this;
+            }
+        }
 
         /// <summary>
-        /// Returns true if the property type is a class.
+        /// Returns true if the property is class outside the System namespac, and is not a string, array, or filedownload
         /// </summary>
-        public bool IsClass => Wrapper.IsClass;
-
-        /// <summary>
-        /// Returns true if the property is class outside the system NameSpace, but is not a string, array, or filedownload
-        /// </summary>
-        public bool IsPOCO => !IsArray && !IsCollection && !FullName.StartsWith("System") && Wrapper.IsClass;
-
-        public bool IsGeneric => Wrapper.IsGeneric;
-
-
-        public bool IsEnum => Wrapper.IsEnum;
+        public bool IsPOCO => !IsArray && !IsCollection && !FullName.StartsWith("System") && IsClass;
 
         public string TsDeclaration => $"{Name}: {TsType}";
 
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
 
         public string CsDeclaration(string parameterName) => $"{NameWithTypeParams} {parameterName.ToCamelCase()}";
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
-
-        /// <summary>
-        /// Returns all the possible enumeration values.
-        /// </summary>
-        public Dictionary<int, string> EnumValues => Wrapper.EnumValues;
-
-        // This doesn't work correctly, but we will probably need it at some point.
-        //public string FullType { get
-        //    {
-        //        if (IsGeneric) return $"{Wrapper.Namespace}.{Name}<{FirstTypeArgument}>";
-        //        if (IsArray) return $"{Name}[]";
-        //        return $"{Wrapper.Namespace}.{Name}";
-        //    }
-        //}
 
         public string NullableTypeForDto
         {
@@ -258,10 +250,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     string typeName = "";
 
-                    if (Wrapper.IsNullable || Wrapper.IsArray || Wrapper.IsCollection)
-                        typeName = Wrapper.NameWithTypeParams;
+                    if (IsNullable || IsArray || IsCollection)
+                        typeName = NameWithTypeParams;
                     else
-                        typeName = Wrapper.Name + "?";
+                        typeName = Name + "?";
 
                     typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
 
@@ -269,10 +261,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 else
                 {
-                    if (Wrapper.IsNullable || Wrapper.IsArray)
-                        return Wrapper.FullyQualifiedNameWithTypeParams;
+                    if (IsNullable || IsArray)
+                        return FullyQualifiedNameWithTypeParams;
                     else
-                        return Wrapper.Name + "?";
+                        return Name + "?";
                 }
 
             }
@@ -282,8 +274,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (Wrapper.IsNullable || Wrapper.IsArray) return "";
-                else return $"({Wrapper.Name})";
+                if (IsNullable || IsArray) return "";
+                else return $"({Name})";
             }
         }
     }

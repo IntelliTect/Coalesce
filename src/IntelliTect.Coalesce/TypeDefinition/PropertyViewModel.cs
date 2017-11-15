@@ -16,74 +16,61 @@ using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class PropertyViewModel : IAttributeProvider
+    public abstract class PropertyViewModel : IAttributeProvider
     {
+        public TypeViewModel Type { get; protected set; }
+
+        public abstract string Comment { get; }
+
+        public abstract bool HasGetter { get; }
+        public abstract bool HasSetter { get; }
+
+        public abstract bool IsVirtual { get; }
+
+        public abstract bool IsStatic { get; }
+
         /// <summary>
-        /// .net PropertyInfo class that gives reflected information about the property.
+        /// Convenient accessor for the PropertyInfo when in reflection-based contexts.
         /// </summary>
-        internal PropertyWrapper Wrapper { get; }
+        public virtual PropertyInfo PropertyInfo => throw new InvalidOperationException("PropertyInfo not available in the current context");
 
-        internal PropertyViewModel(PropertyWrapper propertyWrapper, ClassViewModel parent, int classFieldOrder)
-        {
-            Wrapper = propertyWrapper;
-            Parent = parent;
-            ClassFieldOrder = classFieldOrder;
-        }
-        public PropertyViewModel(PropertyInfo propertyInfo, ClassViewModel parent, int classFieldOrder)
-        {
-            Wrapper = new ReflectionPropertyWrapper(propertyInfo);
-            Parent = parent;
-            ClassFieldOrder = classFieldOrder;
-        }
-
-        public PropertyViewModel(IPropertySymbol propertySymbol, ClassViewModel parent, int classFieldOrder)
-        {
-            Wrapper = new SymbolPropertyWrapper(propertySymbol);
-            Parent = parent;
-            ClassFieldOrder = classFieldOrder;
-        }
+        /// <summary>
+        /// Returns true if this property has the InternalUse Attribute 
+        /// </summary>
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
         public static implicit operator PropertyViewModel(System.Linq.Expressions.LambdaExpression e)
         {
             return ReflectionRepository.PropertyBySelector(e);
         }
 
-        public TypeViewModel Type => new TypeViewModel(Wrapper.Type);
-
         /// <summary>
         /// Order rank of the field in the model.
         /// </summary>
-        public int ClassFieldOrder { get; }
+        public int ClassFieldOrder { get; internal set; }
 
 
         /// <summary>
         /// Name of the property
         /// </summary>
-        public string Name => Wrapper.Name;
+        public abstract string Name { get; }
 
         /// <summary>
         /// Name of the property sent by Json over the wire. Camel Cased Name
         /// </summary>
-        public string JsonName => Wrapper.Name.ToCamelCase();
-
-        public string Comment
-        {
-            get
-            {
-                return Regex.Replace(Wrapper.Comment, "\n(\\s+)", "\n        // ");
-            }
-        }
+        public string JsonName => Name.ToCamelCase();
+        
         /// <summary>
         /// Name of the type
         /// </summary>
-        public string TypeName => Wrapper.Type.Name;
+        public string TypeName => Type.Name;
 
-        public ClassViewModel Parent { get; }
+        public ClassViewModel Parent { get; protected set; }
 
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
-        public TypeViewModel PureType => new TypeViewModel(Wrapper.Type.PureType);
+        public TypeViewModel PureType => Type.PureType;
 
         public bool PureTypeOnContext => PureType.ClassViewModel?.OnContext ?? false;
 
@@ -112,16 +99,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                return !Wrapper.Type.Namespace.StartsWith("System") &&
-                  !Wrapper.Type.IsString &&
-                  Wrapper.Type.IsClass &&
-                  !Wrapper.Type.IsArray &&
-                  !Wrapper.Type.IsCollection &&
+                return !Type.FullNamespace.StartsWith("System") &&
+                  !Type.IsPrimitive &&
+                  Type.IsClass &&
+                  !Type.IsArray &&
+                  !Type.IsCollection &&
                   !IsFileDownload;
             }
         }
-
-        public bool IsStatic => Wrapper.IsStatic;
 
         /// <summary>
         /// Returns true if this property is a complex type.
@@ -137,7 +122,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
-        public ClassViewModel Object => PureType.IsPOCO ? PureType.Wrapper.ClassViewModel : null;
+        public ClassViewModel Object => PureType.ClassViewModel;
 
         public bool IsDbSet => Type.Name.Contains("DbSet");
 
@@ -145,12 +130,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
         /// </summary>
-        public bool IsManytoManyCollection => Wrapper.Type.IsCollection && Wrapper.HasAttribute<ManyToManyAttribute>();
+        public bool IsManytoManyCollection => Type.IsCollection && HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
         /// True if this property has the ClientValidation Attribute
         /// </summary>
-        public bool HasClientValidation => Wrapper.HasAttribute<ClientValidationAttribute>();
+        public bool HasClientValidation => HasAttribute<ClientValidationAttribute>();
 
         /// <summary>
         /// True if the client should save data when there is a ClientValidation error. False is default.
@@ -160,7 +145,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (!HasClientValidation) return false;
-                var allowSave = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.AllowSave)) as bool?;
+                var allowSave = this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.AllowSave);
                 return allowSave.HasValue && allowSave.Value;
             }
         }
@@ -168,41 +153,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the name of the collection to map as a direct many-to-many collection
         /// </summary>
-        public string ManyToManyCollectionName => Wrapper.GetAttributeValue<ManyToManyAttribute>(nameof(ManyToManyAttribute.CollectionName)) as string;
+        public string ManyToManyCollectionName => this.GetAttributeValue<ManyToManyAttribute>(a => a.CollectionName);
 
         /// <summary>
         /// Property on the other side of the many-to-many relationship.
         /// </summary>
-        public PropertyViewModel ManyToManyCollectionProperty
-        {
-            get
-            {
-                foreach (var prop in Object.Properties)
-                {
-                    if (prop.IsPOCO && prop.Object.Name != Parent.Name)
-                    {
-                        return prop;
-                    }
-                }
-                return null;
-            }
-        }
-
-
-        /// <summary>
-        /// Returns true if this property has the InternalUse Attribute 
-        /// </summary>
-        public bool IsInternalUse => Wrapper.IsInternalUse;
+        public PropertyViewModel ManyToManyCollectionProperty =>
+            Object.Properties.FirstOrDefault(prop => prop.IsPOCO && prop.Object.Name != Parent.Name);
 
         /// <summary>
         /// Returns true if this property has the FileDownload Attribute.
         /// </summary>
-        public bool IsFileDownload => Wrapper.HasAttribute<FileDownloadAttribute>();
-
-        /// <summary>
-        /// Only available on reflected types, not during Roslyn compile.
-        /// </summary>
-        public PropertyInfo PropertyInfo => Wrapper.PropertyInfo;
+        public bool IsFileDownload => HasAttribute<FileDownloadAttribute>();
 
         /// <summary>
         /// True if the property is read only.
@@ -212,12 +174,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool CanWrite => Wrapper.HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
+        public bool CanWrite => HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
 
         /// <summary>
         /// True if the property can be read.
         /// </summary>
-        public bool CanRead => Wrapper.HasGetter;
+        public bool CanRead => HasGetter;
 
 
         /// <summary>
@@ -227,7 +189,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var dateType = Wrapper.GetAttributeValue<DateTypeAttribute, DateTypeAttribute.DateTypes>(nameof(DateTypeAttribute.DateType));
+                var dateType = this.GetAttributeValue<DateTypeAttribute, DateTypeAttribute.DateTypes>(a => a.DateType);
                 if (dateType != null)
                 {
                     return dateType.Value == DateTypeAttribute.DateTypes.DateOnly;
@@ -242,17 +204,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                var displayName = Wrapper.GetAttributeValue<DisplayNameAttribute>(nameof(DisplayNameAttribute.DisplayName)) as string;
-                if (displayName != null) return displayName;
-                displayName = Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Name)) as string;
-                if (displayName != null) return displayName;
-                else return Regex.Replace(Name, "[A-Z]", " $0").Trim();
-            }
-        }
+        public string DisplayName =>
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
         public string DisplayNameLabel(string labelOverride) => labelOverride ?? DisplayName;
 
@@ -286,17 +241,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (IsId) return true;
             if (IsInternalUse) return true;
             // Check the attribute
-            var value = Wrapper.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(nameof(HiddenAttribute.Area));
+            var value = this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area);
             if (value != null) return value.Value == area || value.Value == HiddenAttribute.Areas.All;
             return false;
         }
 
-        public string ListGroup => Wrapper.GetAttributeValue<ListGroupAttribute>(a => a.Group);
+        public string ListGroup => this.GetAttributeValue<ListGroupAttribute>(a => a.Group);
 
-        public bool HasReadOnlyAttribute => Wrapper.HasAttribute<ReadOnlyAttribute>();
+        public bool HasReadOnlyAttribute => this.HasAttribute<ReadOnlyAttribute>();
 
 #pragma warning disable CS0618 // Type or member is obsolete
-        public bool HasReadOnlyApiAttribute => Wrapper.HasAttribute<ReadOnlyApiAttribute>();
+        public bool HasReadOnlyApiAttribute => this.HasAttribute<ReadOnlyApiAttribute>();
 #pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
@@ -306,11 +261,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var value = Wrapper.HasAttribute<RequiredAttribute>();
-                if (value) return true;
+                if (this.HasAttribute<RequiredAttribute>()) return true;
 
-                value = Wrapper.HasAttribute<ClientValidationAttribute>();
-                if (value && Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool? == false) return false;
+                // Explicit == false is intentional - if the parameter is missing, GetAttributeValue returns null.
+                if (this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired) == false) return false;
 
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
                 if (IsForeignKey && !Type.IsNullable) return true;
@@ -318,7 +272,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsPrimaryKey) return false;  // Because it will be created by the server.
                 // TODO: Figure out how to handle situations where we want to hand back an invalid model because the server side is going to figure things out for us.
                 //if (IsId && !IsNullable) return true;
-                if (Wrapper.Type.IsCollection) return false;
+                if (Type.IsCollection) return false;
                 return false;
             }
         }
@@ -326,12 +280,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the MinLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MinLength => Wrapper.GetAttributeValue<MinLengthAttribute, int>(nameof(MinLengthAttribute.Length));
+        public int? MinLength => this.GetAttributeValue<MinLengthAttribute, int>(a => a.Length);
         
         /// <summary>
         /// Returns the MaxLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MaxLength => Wrapper.GetAttributeValue<MaxLengthAttribute, int>(nameof(MaxLengthAttribute.Length));
+        public int? MaxLength => this.GetAttributeValue<MaxLengthAttribute, int>(a => a.Length);
         
         /// <summary>
         /// Returns the range of valid values or null if they don't exist. (min, max)
@@ -340,8 +294,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var min = Wrapper.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
-                var max = Wrapper.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
+                var min = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
+                var max = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
                 if (min != null && max != null) return new Tuple<object, object>(min, max);
                 return null;
             }
@@ -352,17 +306,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsSearchable(string rootModelName)
         {
-            if (!Wrapper.HasAttribute<SearchAttribute>()) return false;
+            if (!HasAttribute<SearchAttribute>()) return false;
 
             if (rootModelName == null) return true;
 
-            var whitelist = Wrapper.GetAttributeValue<SearchAttribute>(a => a.RootWhitelist);
+            var whitelist = this.GetAttributeValue<SearchAttribute>(a => a.RootWhitelist);
             if (!string.IsNullOrWhiteSpace(whitelist))
             {
                 return whitelist.Split(',').Contains(rootModelName);
             }
 
-            var blacklist = Wrapper.GetAttributeValue<SearchAttribute>(a => a.RootBlacklist);
+            var blacklist = this.GetAttributeValue<SearchAttribute>(a => a.RootBlacklist);
             if (!string.IsNullOrWhiteSpace(blacklist))
             {
                 return !blacklist.Split(',').Contains(rootModelName);
@@ -375,7 +329,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// How to search for the string when this is a search property.
         /// </summary>
         public SearchAttribute.SearchMethods SearchMethod =>
-            Wrapper.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(a => a.SearchMethod)
+            this.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(a => a.SearchMethod)
             ?? SearchAttribute.SearchMethods.BeginsWith;
 
         /// <summary>
@@ -389,7 +343,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if the search term should be split on spaces and evaluated individually with or.
         /// </summary>
         public bool SearchIsSplitOnSpaces =>
-            Wrapper.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? false;
+            this.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? false;
 
         /// <summary>
         /// Returns the fields to search for this object. This could be just the field itself 
@@ -430,7 +384,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is the field to be used for list text and marked with the ListText Attribute.
         /// </summary>
-        public bool IsListText => Wrapper.HasAttribute<ListTextAttribute>();
+        public bool IsListText => this.HasAttribute<ListTextAttribute>();
 
         /// <summary>
         /// Returns true if this property is a primary or foreign key.
@@ -445,11 +399,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (Wrapper.HasAttribute<KeyAttribute>())
+                if (this.HasAttribute<KeyAttribute>())
                     return true;
-                else if (string.Compare(Name, "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
-                else if (string.Compare(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
-                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Compare(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase) == 0) return true;
+                else if (string.Equals(Name, "Id", StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+                else if (string.Equals(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Equals(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
                 return false;
 
             }
@@ -464,7 +421,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (IsPOCO) return false;
-                if (Wrapper.HasAttribute<ForeignKeyAttribute>() && !IsPOCO)
+                if (this.HasAttribute<ForeignKeyAttribute>() && !IsPOCO)
                 {
                     return true;
                 }
@@ -472,7 +429,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     return true;
                 }
-                if (Parent.Properties.Any(p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name))))
+                if (Parent.Properties.Any(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)))
                 {
                     // You can also put the attribute on the POCO property and refer to the key property. This detects that.
                     return true;
@@ -492,7 +449,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 // Use the foreign key attribute
-                var value = (string)Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name));
+                var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
                 if (value != null) return value;
                 // See if this is a one-to-one using the parent's key
                 // Look up the other object and check the key
@@ -528,11 +485,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsForeignKey)
                 {
                     /// Use the ForeignKey Attribute if it is there.
-                    var value = (string)Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name));
+                    var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
                     if (value != null) return value;
 
                     // Use the ForeignKey Attribute on the object property if it is there.
-                    var prop = Parent.Properties.SingleOrDefault(p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name)));
+                    var prop = Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name));
                     if (prop != null) return prop.Name;
 
                     // Else, by convention remove the Id at the end.
@@ -569,7 +526,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 int order = 10000;
-                var value = (int?)Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Order));
+                var value = this.GetAttributeValue<DisplayAttribute, int>(a => a.Order);
                 if (value != null) order = value.Value;
                 // Format them to be sorted.
                 return string.Format($"{order:D7}:{ClassFieldOrder:D3}");
@@ -582,9 +539,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var order = (int?)Wrapper.GetAttributeValue<DefaultOrderByAttribute>(nameof(DefaultOrderByAttribute.FieldOrder));
-                var direction = Wrapper.GetAttributeValue<DefaultOrderByAttribute, DefaultOrderByAttribute.OrderByDirections>(nameof(DefaultOrderByAttribute.OrderByDirection));
-                var fieldName = Wrapper.GetAttributeValue<DefaultOrderByAttribute>(nameof(DefaultOrderByAttribute.FieldName)) as string;
+                var order = this.GetAttributeValue<DefaultOrderByAttribute, int>(a => a.FieldOrder);
+                var direction = this.GetAttributeValue<DefaultOrderByAttribute, DefaultOrderByAttribute.OrderByDirections>(nameof(DefaultOrderByAttribute.OrderByDirection));
+                var fieldName = this.GetAttributeValue<DefaultOrderByAttribute>(a => a.FieldName);
                 if (order != null && direction != null)
                 {
                     var name = Name;
@@ -633,7 +590,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public bool HasInverseProperty => Wrapper.HasAttribute<InversePropertyAttribute>();
+        public bool HasInverseProperty => HasAttribute<InversePropertyAttribute>();
 
         /// <summary>
         /// For a collection, this is the reference to this object from the contained object.
@@ -642,7 +599,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var name = Wrapper.GetAttributeValue<InversePropertyAttribute>(a => a.Property);
+                var name = this.GetAttributeValue<InversePropertyAttribute>(a => a.Property);
                 if (name != null)
                 {
                     var inverseProperty = Object.PropertyByName(name);
@@ -710,17 +667,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var result = new PropertySecurityInfo();
 
-                if (Wrapper.HasAttribute<ReadAttribute>())
+                if (this.HasAttribute<ReadAttribute>())
                 {
                     result.IsRead = true;
-                    var roles = (string)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.Roles));
+                    var roles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
                     result.ReadRoles = roles;
                 }
 
-                if (Wrapper.HasAttribute<EditAttribute>())
+                if (this.HasAttribute<EditAttribute>())
                 {
                     result.IsEdit = true;
-                    var roles = (string)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Roles));
+                    var roles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
                     result.EditRoles = roles;
                 }
 
@@ -738,7 +695,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Has the NotMapped attribute.
         /// </summary>
-        public bool HasNotMapped => Wrapper.HasAttribute<NotMappedAttribute>();
+        public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
 
         /// <summary>
         /// If true, this property should be searchable on the URL line. 
@@ -760,36 +717,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this property has the Includes Attribute
         /// </summary>
-        public bool HasDtoIncludes => Wrapper.HasAttribute<DtoIncludesAttribute>();
+        public bool HasDtoIncludes => HasAttribute<DtoIncludesAttribute>();
 
         /// <summary>
         /// Returns a list of content views from the Includes attribute
         /// </summary>
-        public List<string> DtoIncludes
-        {
-            get
-            {
-                var includes = (Wrapper.GetAttributeValue<DtoIncludesAttribute>(nameof(DtoIncludesAttribute.ContentViews)) as string).Trim();
-                return includes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
-            }
-        }
+        public IEnumerable<string> DtoIncludes =>
+            (this.GetAttributeValue<DtoIncludesAttribute>(a => a.ContentViews) ?? "")
+            .Trim()
+            .Split(new char[] { ',' })
+            .Select(s => s.Trim());
 
         /// <summary>
         /// True if this property has the Excludes Attribute
         /// </summary>
-        public bool HasDtoExcludes => Wrapper.HasAttribute<DtoExcludesAttribute>();
+        public bool HasDtoExcludes => this.HasAttribute<DtoExcludesAttribute>();
 
         /// <summary>
         /// Returns a list of content views from the Excludes attribute
         /// </summary>
-        public List<string> DtoExcludes
-        {
-            get
-            {
-                var excludes = (Wrapper.GetAttributeValue<DtoExcludesAttribute>(nameof(DtoExcludesAttribute.ContentViews)) as string).Trim();
-                return excludes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
-            }
-        }
+        public IEnumerable<string> DtoExcludes =>
+            (this.GetAttributeValue<DtoExcludesAttribute>(a => a.ContentViews) ?? "")
+            .Trim()
+            .Split(new char[] { ',' })
+            .Select(s => s.Trim());
 
         private string GetPropertySetterConditional(bool isForEdit)
         {
@@ -929,6 +880,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+
         private bool IgnorePropertyInUpdates
         {
             get
@@ -941,14 +895,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     IsInternalUse;
             }
         }
-
-        
-        public bool HasAttribute<TAttribute>()
-            where TAttribute : Attribute
-            => Wrapper.HasAttribute<TAttribute>();
-
-        public object GetAttributeValue<TAttribute>(string valueName)
-            where TAttribute : Attribute
-            => Wrapper.GetAttributeValue<TAttribute>(valueName);
     }
 }

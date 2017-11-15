@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    internal class SymbolMethodWrapper : MethodWrapper
+    public class SymbolMethodViewModel : MethodViewModel
     {
-        public IMethodSymbol Symbol { get; protected set; }
+        internal IMethodSymbol Symbol { get; private set; }
 
-        public SymbolMethodWrapper(IMethodSymbol symbol)
+        public SymbolMethodViewModel(IMethodSymbol symbol, ClassViewModel parent) : base(parent)
         {
             Symbol = symbol;
         }
@@ -26,21 +26,11 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         
         public override bool IsStatic => Symbol.IsStatic;
 
-        public override TypeWrapper ReturnType => new SymbolTypeWrapper(Symbol.ReturnType);
+        public override TypeViewModel ReturnType => new SymbolTypeViewModel(Symbol.ReturnType);
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
 
         public override IEnumerable<ParameterViewModel> Parameters
-        {
-            get
-            {
-                var result = new List<ParameterViewModel>();
-                foreach (var parameter in Symbol.Parameters)
-                {
-                    result.Add(new ParameterViewModel( new SymbolParameterWrapper(parameter)));
-                }
-                return result;
-            }
-        }
+            => Symbol.Parameters.Select(p => new SymbolParameterViewModel(p));
     }
 }

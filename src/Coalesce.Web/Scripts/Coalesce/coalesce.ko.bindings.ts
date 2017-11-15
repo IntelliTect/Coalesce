@@ -308,6 +308,11 @@ ko.bindingHandlers.select2AjaxMultiple = {
         }
     },
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        // Make sure that we read the valueAccessor BEFORE we return out of this function.
+        // Otherwise, the dependency detection will not be set up correctly.
+        // See https://stackoverflow.com/a/23880007/2465631;
+        var value: Array<any> = valueAccessor()();
+
         if ($(element).data("select2-ajax-updating")) return;
         $(element).data("select2-ajax-updating", true);
 
@@ -316,7 +321,6 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
 
         // See if the value exists. If not, we haven't loaded it from the server yet.
-        var value: Array<any> = valueAccessor()();
         var select2Value = $(element).val();
         if (!select2Value) select2Value = [];
         var selectedIds = [];

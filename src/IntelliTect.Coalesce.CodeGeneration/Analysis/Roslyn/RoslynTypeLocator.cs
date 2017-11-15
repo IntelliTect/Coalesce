@@ -217,7 +217,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                     string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
             }
 
-            return new TypeViewModel(new SymbolTypeWrapper(candidateModelTypes.First()));
+            return new SymbolTypeViewModel(candidateModelTypes.First());
         }
 
         public override IEnumerable<TypeViewModel> FindDerivedTypes(string typeName, bool throwWhenNotFound = true)
@@ -227,7 +227,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
             return GetAllTypes()
                 .Where(type => HasBaseType(type))
-                .Select(t => new TypeViewModel(new SymbolTypeWrapper(t)));
+                .Select(t => new SymbolTypeViewModel(t));
         }
 
         private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>

@@ -85,7 +85,9 @@ namespace Coalesce.Domain
 
         public static IQueryable<Case> GetAllOpenCases(AppDbContext db)
         {
-            return db.Cases.Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress).Include(c => c.AssignedTo).Include(c => c.ReportedBy);
+            return db.Cases
+                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .IncludeChildren();
         }
 
         public IQueryable<Case> Include(IQueryable<Case> entities, string include = null)

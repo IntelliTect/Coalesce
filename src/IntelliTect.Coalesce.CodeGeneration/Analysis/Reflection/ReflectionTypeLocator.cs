@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
                     string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
             }
 
-            return new TypeViewModel(new ReflectionTypeWrapper(candidateModelTypes.Single()));
+            return new ReflectionTypeViewModel(candidateModelTypes.Single());
         }
 
         public override IEnumerable<TypeViewModel> FindDerivedTypes(string typeName, bool throwWhenNotFound = true)

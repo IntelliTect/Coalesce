@@ -36,13 +36,13 @@ namespace IntelliTect.Coalesce.Validation
                     assert.Area = $"{model.Name}.{prop.Name}";
                     try
                     {
-                        assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.ReadAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
+                        assert.IsNull(prop.GetAttributeValue<DataAnnotations.ReadAttribute, Helpers.SecurityPermissionLevels>(a => a.PermissionLevel),
                             "Property-level ReadAttribute security doesn't support the PermissionLevel property");
-                        assert.IsNull(prop.Wrapper.GetAttributeValue<DataAnnotations.EditAttribute>(nameof(DataAnnotations.ReadAttribute.PermissionLevel)),
+                        assert.IsNull(prop.GetAttributeValue<DataAnnotations.EditAttribute, Helpers.SecurityPermissionLevels>(a => a.PermissionLevel),
                             "Property-level EditAttribute security doesn't support the PermissionLevel property");
-                        assert.isFalse(prop.Wrapper.HasAttribute<DataAnnotations.CreateAttribute>(),
+                        assert.isFalse(prop.HasAttribute<DataAnnotations.CreateAttribute>(),
                             "Property-level security doesn't support CreateAttribute");
-                        assert.isFalse(prop.Wrapper.HasAttribute<DataAnnotations.DeleteAttribute>(),
+                        assert.isFalse(prop.HasAttribute<DataAnnotations.DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
                         if (prop.IsPOCO && !prop.IsComplexType)

@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce.Data
                 var list = _repositories[type] as IEnumerable<TProperty>;
                 // Get item from the list
                 // Get ID field
-                var idProperty = propViewModel.ObjectIdProperty.Wrapper.PropertyInfo;
+                var idProperty = propViewModel.ObjectIdProperty.PropertyInfo;
                 // get ID value
                 object idValue = idProperty.GetValue(obj);
                 if (idValue != null)
@@ -98,7 +98,7 @@ namespace IntelliTect.Coalesce.Data
                         .Where($"{propViewModel.PureType.ClassViewModel.PrimaryKey.Name} = {idValue}")
                         .FirstOrDefault();
                     // Set the value.
-                    propViewModel.Wrapper.PropertyInfo.SetValue(obj, objectValue);
+                    propViewModel.PropertyInfo.SetValue(obj, objectValue);
                 }
             }
 

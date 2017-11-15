@@ -72,4 +72,5 @@
 
 * New attribute: [Controller]. Place this attribute on your C# model classes to customize the generation of the API controllers.
 
+* Added extension method for IServiceProvider: services.AddCoalesce(). This replaces the need for the required "ReflectionRepository.AddContext" call in Startup.cs.
 

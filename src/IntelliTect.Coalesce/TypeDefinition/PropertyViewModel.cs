@@ -41,7 +41,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static implicit operator PropertyViewModel(System.Linq.Expressions.LambdaExpression e)
         {
-            return ReflectionRepository.PropertyBySelector(e);
+            return ReflectionRepository.Global.PropertyBySelector(e);
         }
 
         /// <summary>

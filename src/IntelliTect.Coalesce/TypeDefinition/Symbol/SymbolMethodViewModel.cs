@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override string Name => Symbol.Name;
 
-        public override string Comment => SymbolHelper.ExtractXmlComments(Symbol);
+        public override string Comment => SymbolExtensions.ExtractXmlComments(Symbol);
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);

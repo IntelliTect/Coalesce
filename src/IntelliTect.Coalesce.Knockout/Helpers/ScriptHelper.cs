@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
     {
         public static HtmlString StandardBinding<T>()
         {
-            return StandardBinding(ReflectionRepository.GetClassViewModel<T>());
+            return StandardBinding(ReflectionRepository.Global.GetClassViewModel<T>());
         }
 
         public static HtmlString StandardBinding(ClassViewModel model)

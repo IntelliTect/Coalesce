@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Data
             }
             else
             {
-                var model = ReflectionRepository.GetClassViewModel<T>();
+                var model = ReflectionRepository.Global.GetClassViewModel<T>();
                 foreach (var prop in model.Properties.Where(f => !f.IsInternalUse && f.IsExternal))
                 {
                     // TODO: need to figure out how to do this without a <T>
@@ -78,7 +78,7 @@ namespace IntelliTect.Coalesce.Data
 
         public static T IncludeExternal<T, TProperty>(this T obj, Expression<Func<T, TProperty>> propertySelector) where T : class
         {
-            var objViewModel = ReflectionRepository.GetClassViewModel<T>();
+            var objViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
             var propViewModel = objViewModel.PropertyBySelector(propertySelector);
             string type = propViewModel.Type.Name;
             if (_repositories.ContainsKey(type))

@@ -13,7 +13,7 @@
 using IntelliTect.Coalesce.Controllers;
 // Model Namespaces
 using @Model.Namespace;
-@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System").OrderBy(n => n))
+@foreach (var ns in ReflectionRepository.Global.Namespaces.Where(f => f != "System").OrderBy(n => n))
 {
 @:using @ns;
 }

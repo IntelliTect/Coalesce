@@ -28,7 +28,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
 
         protected BaseViewController()
         {
-            classViewModel = ReflectionRepository.GetClassViewModel<T>();
+            classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
         }
 
         // Page Listing the items in the collection.

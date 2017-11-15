@@ -13,7 +13,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void LoadContext()
         {
-            var models = ReflectionRepository.AddContext<AppDbContext>();
+            var models = ReflectionRepository.Global.AddContext<AppDbContext>();
             Assert.Equal(9, models.Count);
             Assert.Equal(5, models.Where(f=>f.HasDbSet).Count());
         }
@@ -22,7 +22,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void Person()
         {
-            var person = ReflectionRepository.GetClassViewModel<Person>();
+            var person = ReflectionRepository.Global.GetClassViewModel<Person>();
             Assert.NotNull(person);
         }
     }

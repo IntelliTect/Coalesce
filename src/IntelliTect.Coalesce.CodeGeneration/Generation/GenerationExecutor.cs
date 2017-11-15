@@ -57,7 +57,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             genContext.DbContextType = FindDbContextType(Config, genContext.DataProject);
 
 
-            List<ClassViewModel> models = ReflectionRepository
+            List<ClassViewModel> models = ReflectionRepository.Global
                                 .AddContext(genContext.DbContextType)
                                 .ToList();
 

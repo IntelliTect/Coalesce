@@ -1,4 +1,5 @@
 ﻿using Coalesce.Domain;
+using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Validation;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,8 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelValidation()
         {
-            var result = ValidateContext.Validate<AppDbContext>();
+            var models = ReflectionRepository.Global.AddContext<AppDbContext>();
+            var result = ValidateContext.Validate(models);
 
             foreach (var test in result)
             {

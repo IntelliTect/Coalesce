@@ -27,7 +27,7 @@ namespace Coalesce.Web.Api
 
         public PersonController()
         {
-            Model = ReflectionRepository.Models.Single(m => m.Name == "Person");
+            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "Person");
         }
 
 

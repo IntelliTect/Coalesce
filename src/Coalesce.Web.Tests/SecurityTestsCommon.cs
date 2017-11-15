@@ -140,7 +140,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("devTeamAssignedId", "")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Case");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Case");
 
             return await ApiPost(model, "Save", formData);
         }
@@ -163,7 +163,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("companyId", "1")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Person");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Person");
 
             return await ApiPost(model, "Save", formData);
         }
@@ -176,7 +176,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("name", "Test Product")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Product");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Product");
 
             return await ApiPost(model, "Save", formData);
         }
@@ -194,7 +194,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("zipCode", "")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Company");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Company");
 
             return await ApiPost(model, "Save", formData);
         }

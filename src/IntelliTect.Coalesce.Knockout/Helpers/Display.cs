@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
     {
         public static HtmlString Property<T, TProp>(Expression<Func<T, TProp>> propertySelector, bool editable)
         {
-            var propertyModel = ReflectionRepository.PropertyBySelector(propertySelector);
+            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return Property(propertySelector, editable);
         }
 

@@ -27,7 +27,7 @@ namespace Coalesce.Web.Api
 
         public CompanyController()
         {
-            Model = ReflectionRepository.Models.Single(m => m.Name == "Company");
+            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "Company");
         }
 
 

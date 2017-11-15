@@ -14,35 +14,37 @@ using System.Collections.Concurrent;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public static class ReflectionRepository
+    public class ReflectionRepository
     {
-        private static ConcurrentDictionary<string, ClassViewModel> _models = new ConcurrentDictionary<string, ClassViewModel>();
-        private static object _lock = new object();
-        private static string _contextNamespace;
+        public static readonly ReflectionRepository Global = new ReflectionRepository();
+
+        private ConcurrentDictionary<string, ClassViewModel> _models = new ConcurrentDictionary<string, ClassViewModel>();
+        private object _lock = new object();
+        private string _contextNamespace;
 
 
-        public static ClassViewModel GetClassViewModel(TypeViewModel classType)
+        public ClassViewModel GetClassViewModel(TypeViewModel classType)
         {
             return classType.ClassViewModel;
         }
 
-        public static ClassViewModel GetClassViewModel(Type classType)
+        public ClassViewModel GetClassViewModel(Type classType)
         {
             return _models.GetOrAdd(GetKey(classType), _ => new ReflectionClassViewModel(classType));
         }
 
-        public static ClassViewModel GetClassViewModel(ITypeSymbol classType)
+        public ClassViewModel GetClassViewModel(ITypeSymbol classType)
         {
             return _models.GetOrAdd(GetKey(classType), _ => new SymbolClassViewModel(classType));
         }
         
 
-        public static ClassViewModel GetClassViewModel(string className)
+        public ClassViewModel GetClassViewModel(string className)
         {
             return _models.Values.FirstOrDefault(f => f.Name == className);
         }
 
-        public static ClassViewModel GetClassViewModel<T>()
+        public ClassViewModel GetClassViewModel<T>()
         {
             return GetClassViewModel(typeof(T));
         }
@@ -54,20 +56,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="propertySelector"></param>
         /// <returns></returns>
-        public static PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
+        public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
         {
             var objModel = GetClassViewModel<T>();
             return objModel.PropertyBySelector(propertySelector);
         }
 
-        public static PropertyViewModel PropertyBySelector(LambdaExpression propertySelector)
+        public PropertyViewModel PropertyBySelector(LambdaExpression propertySelector)
         {
             var type = propertySelector.Parameters.First().Type;
             var objModel = GetClassViewModel(type);
             return objModel.PropertyByName(propertySelector.GetExpressedProperty(type).Name);
         }
 
-        public static bool IsValidViewModelClass(string name)
+        public bool IsValidViewModelClass(string name)
         {
             if (name == "Image") return false;
             if (name == "IdentityUserRole") return false;
@@ -86,7 +88,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <param name="classType"></param>
         /// <returns></returns>
-        private static string GetKey(TypeViewModel type)
+        private string GetKey(TypeViewModel type)
         {
             if (type is ReflectionTypeViewModel reflectedType)
             {
@@ -97,12 +99,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return GetKey(((SymbolTypeViewModel)type).Symbol);
             }
         }
+
         /// <summary>
         /// Gets a unique key for the collection.
         /// </summary>
         /// <param name="classType"></param>
         /// <returns></returns>
-        private static string GetKey(Type classType) => classType.FullName;
+        private string GetKey(Type classType) => classType.FullName;
 
         /// <summary>
         /// Gets a unique key for the collection.
@@ -110,7 +113,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <param name="classType"></param>
         /// <returns></returns>
 
-        private static string GetKey(ITypeSymbol classType)
+        private string GetKey(ITypeSymbol classType)
         {
             List<string> namespaces = new List<string>();
             var curNamespace = classType.ContainingNamespace;
@@ -126,45 +129,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return string.Format("{0}", $"{fullNamespace}.{classType.Name}");
         }
 
-        public static IEnumerable<ClassViewModel> Models => _models.Values;
+        public IEnumerable<ClassViewModel> Models => _models.Values;
 
         /// <summary>
         /// Adds a context to the reflection repository. Do this on startup with all the contexts.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static List<ClassViewModel> AddContext<T>() where T : DbContext
-        {
-            return AddContext(typeof(T));
-        }
+        public List<ClassViewModel> AddContext<T>() where T : DbContext => AddContext(typeof(T));
+        public List<ClassViewModel> AddContext(Type t) => AddContext(new ReflectionClassViewModel(t));
+        public List<ClassViewModel> AddContext(TypeViewModel t) => AddContext(t.ClassViewModel);
+        public List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) => AddContext(new SymbolClassViewModel(contextSymbol));
 
-
-        /// <summary>
-        /// Adds a context to the reflection repository. Do this on startup with all the contexts.
-        /// </summary>
-        /// <typeparam name="t">Type of DbContext to add.</typeparam>
-        /// <returns></returns>
-        public static List<ClassViewModel> AddContext(Type t)
-        {
-            var context = new ReflectionClassViewModel(t);
-            return AddContext(context);
-        }
-
-        public static List<ClassViewModel> AddContext(TypeViewModel t)
-        {
-            var context = t.ClassViewModel;
-            return AddContext(context);
-        }
-
-
-        public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) // where T: AppDbContext
-        {
-            var context = new SymbolClassViewModel(contextSymbol);
-            // Reflect on the AppDbContext
-            return AddContext(context);
-        }
-
-        public static List<ClassViewModel> AddContext(ClassViewModel context)
+        public List<ClassViewModel> AddContext(ClassViewModel context)
         {
             _contextNamespace = context.Namespace;
             // Lock so that parallel execution only uses this once at a time.
@@ -177,7 +154,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         && IsValidViewModelClass(prop.PureType.Name)
                         && !prop.IsInternalUse)
                     {
-                        var model = ReflectionRepository.GetClassViewModel(prop.PureType);
+                        var model = this.GetClassViewModel(prop.PureType);
 
                         if (model != null)
                         {
@@ -200,7 +177,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         }
 
-        private static void AddChildModels(List<ClassViewModel> models, ClassViewModel model)
+        private void AddChildModels(List<ClassViewModel> models, ClassViewModel model)
         {
             foreach (var prop in model.Properties.Where(p => !p.IsInternalUse && p.PureType.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
             {
@@ -242,7 +219,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// All the namespaces in the models.
         /// </summary>
-        public static IEnumerable<string> Namespaces
+        public IEnumerable<string> Namespaces
         {
             get
             {
@@ -252,7 +229,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return result;
             }
         }
-
     }
 
     internal class ClassViewModelComparer : IEqualityComparer<ClassViewModel>

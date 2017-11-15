@@ -9,14 +9,6 @@ namespace IntelliTect.Coalesce.Validation
 {
     public static class ValidateContext
     {
-
-        public static ValidationHelper Validate<T>() where T : DbContext
-        {
-            var models = ReflectionRepository.AddContext<T>();
-
-            return Validate(models);
-        }
-
         public static ValidationHelper Validate(List<ClassViewModel> models)
         {
             var assert = new ValidationHelper();

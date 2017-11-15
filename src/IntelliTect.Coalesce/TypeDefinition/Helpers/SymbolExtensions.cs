@@ -9,12 +9,11 @@ using System.Xml;
 
 namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 {
-    public static class SymbolHelper
+    public static class SymbolExtensions
     {
         public static AttributeData GetAttribute<TAttribute>(this ISymbol symbol)
         {
             return symbol.GetAttributes().SingleOrDefault(a => a.AttributeClass.Name == typeof(TAttribute).Name);
-
         }
 
         public static bool HasAttribute<TAttribute>(this ISymbol symbol)
@@ -50,15 +49,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             if (constructorArgument.IsNull) return defaultValue;
 
             return constructorArgument.Value;
-        }
-
-        // Not sure if these even work...
-        public static T? GetAttributeValue<TAttribute, T>(this ISymbol symbol, Expression<Func<TAttribute, T>> propertySelector)
-            where TAttribute : Attribute where T : struct
-        {
-            var result = symbol.GetAttributeValue<TAttribute>(propertySelector.Name);
-
-            return (T)result;
         }
 
         public static string ExtractXmlComments(ISymbol symbol)

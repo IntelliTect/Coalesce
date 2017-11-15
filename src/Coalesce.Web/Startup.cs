@@ -13,6 +13,7 @@ using System;
 using System.Linq;
 using IntelliTect.Coalesce.Mapping;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using IntelliTect.Coalesce;
 
 namespace Coalesce.Web
 {
@@ -38,6 +39,8 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddCoalesce();
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -56,8 +59,6 @@ namespace Coalesce.Web
                     options.LoginPath = "/Account/Login";
                     options.LogoutPath = "/Account/LogOff";
                 });
-
-            ReflectionRepository.AddContext<AppDbContext>();
 
             RoleMapping.Add("Admin", "S-1-5-4");  // Interactive user.
             RoleMapping.Add("User", "S-1-1-0");  // Everyone who has logged on.
@@ -93,7 +94,7 @@ namespace Coalesce.Web
 
             var classNameParts = GetType().FullName.Split(new char[] { '.' });
             var ns = string.Join(".", classNameParts.Take(classNameParts.Length - 1));
-            //foreach (var model in ReflectionRepository.Models.Where(m => m.PrimaryKey != null && m.OnContext))
+            //foreach (var model in ReflectionRepository.Global.Models.Where(m => m.PrimaryKey != null && m.OnContext))
             //{
             //    Mapper.AddMap(model.Type, Type.GetType($"{ns}.Models.{model.Type.Name}DtoGen"));
             //}

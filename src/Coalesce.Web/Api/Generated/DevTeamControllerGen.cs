@@ -27,7 +27,7 @@ namespace Coalesce.Web.Api
 
         public DevTeamController()
         {
-            Model = ReflectionRepository.Models.Single(m => m.Name == "DevTeam");
+            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "DevTeam");
         }
 
 

@@ -27,7 +27,7 @@ namespace Coalesce.Web.Api
 
         public CaseDtoController()
         {
-            Model = ReflectionRepository.Models.Single(m => m.Name == "CaseDto");
+            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "CaseDto");
         }
 
 

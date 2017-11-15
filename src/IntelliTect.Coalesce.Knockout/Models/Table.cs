@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Knockout.Models
         /// </summary>
         /// <returns></returns>
         internal Table() {
-            ViewModel = ReflectionRepository.GetClassViewModel<T>();
+            ViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
 
         }
 

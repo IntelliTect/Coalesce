@@ -22,7 +22,7 @@ namespace Coalesce.Web.Tests
             // Add some data to it.
             SampleData.Initialize(Db);
 
-            ReflectionRepository.AddContext<DbContext>();
+            ReflectionRepository.Global.AddContext<DbContext>();
         }
 
 

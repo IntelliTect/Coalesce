@@ -39,14 +39,14 @@
     These object are available using the following code.
 </p>
 <pre>
-<code>ReflectionRepository.AddContext&lt;DbContext&gt;();</code>
+<code>ReflectionRepository.Global.AddContext&lt;DbContext&gt;();</code>
 </pre>
 
 <h3>Enumerating Your Data Model</h3>
 <p>It is easy to get meta data information about your view model. There are many convenience methods and properties to make accessing child elements easy. This is how the Display and Knockout helper extensions work behind the scenes.</p>
 <pre>
 <code>
-    var objectVm = ReflectionRepository.GetClassViewModel&lt;Person&gt;();
+    var objectVm = ReflectionRepository.Global.GetClassViewModel&lt;Person&gt;();
     var propertyVm = objectVm.PropertyBySelector&lt;Person&gt;(p=>p.FirstName);
     Console.WriteLine(propertyVm.DisplayName);
 </code>

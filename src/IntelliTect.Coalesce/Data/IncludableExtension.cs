@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce.Data
         /// <returns></returns>
         public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query) where T : class, new()
         {
-            var model = ReflectionRepository.GetClassViewModel<T>();
+            var model = ReflectionRepository.Global.GetClassViewModel<T>();
             foreach (var prop in model.Properties.Where(f => !f.IsStatic && !f.IsInternalUse && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet && !f.HasNotMapped))
             {
                 if (prop.IsManytoManyCollection)
@@ -103,7 +103,7 @@ namespace IntelliTect.Coalesce.Data
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
 
-            var classViewModel = ReflectionRepository.GetClassViewModel<T>();
+            var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
             if (classViewModel.PrimaryKey.Type.IsString)
             {
                 // return await query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").FirstAsync();
@@ -125,7 +125,7 @@ namespace IntelliTect.Coalesce.Data
         /// <returns></returns>
         public static T FindItem<T>(this IQueryable<T> query, object id)
         {
-            var classViewModel = ReflectionRepository.GetClassViewModel<T>();
+            var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
             if (classViewModel.PrimaryKey.Type.IsString)
             {
                 return query.Where(string.Format("{0} = \"{1}\"", classViewModel.PrimaryKey.Name, id)).First();

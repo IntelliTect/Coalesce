@@ -24,7 +24,7 @@
     namespaces.Add("System.Security.Claims");
     namespaces.Add($"{namespaceName}.Models");
 }
-@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+@foreach (var ns in ReflectionRepository.Global.Namespaces.Where(f => f != "System"))
 {
     if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
 }

@@ -133,7 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             {
                 if (!HasClassViewModel) return null;
                 if (PureType != this) return PureType.ClassViewModel;
-                if (Symbol != null && Symbol is INamedTypeSymbol) return ReflectionRepository.GetClassViewModel(Symbol);
+                if (Symbol != null && Symbol is INamedTypeSymbol) return ReflectionRepository.Global.GetClassViewModel(Symbol);
                 return null;
             }
         }

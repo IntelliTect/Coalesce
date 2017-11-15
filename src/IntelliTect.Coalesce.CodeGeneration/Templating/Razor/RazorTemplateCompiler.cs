@@ -202,6 +202,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                         syntaxTrees: syntaxTrees,
                         references: references);
 
+            //var analyzers = System.Collections.Immutable.ImmutableArray.CreateBuilder<Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer>();
+            //Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis..))
+            //        .GetTypes()
+            //        .Where(x => typeof(DiagnosticAnalyzer).IsAssignableFrom(x))
+            //        .Select(Activator.CreateInstance)
+            //        .Cast<DiagnosticAnalyzer>()
+            //        .ToList()
+            //        .ForEach(x => analyzers.Add(x));
+
+
             using (var assemblyStream = new MemoryStream())
             {
                 using (var pdbStream = new MemoryStream())

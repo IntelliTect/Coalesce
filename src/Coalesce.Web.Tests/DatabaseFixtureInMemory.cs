@@ -14,7 +14,7 @@ namespace Coalesce.Web.Tests
 
         public DatabaseFixtureInMemory()
         {
-            ReflectionRepository.AddContext<DbContext>();
+            ReflectionRepository.Global.AddContext<DbContext>();
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseInMemoryDatabase("InMemoryTestDb");
             Db = new AppDbContext(dbOptionBuilder.Options);

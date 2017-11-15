@@ -23,10 +23,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0" />
     <PackageReference Include="CsvHelper" Version="3.0.0-chi02" />
     <PackageReference Include="gitlink" Version="3.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.3.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.3.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.0.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.10" />
     <PackageReference Include="System.Net.Http" Version="4.3.2" />

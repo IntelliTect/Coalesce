@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var iDto = Type.GetInterfaces().FirstOrDefault(f => f.Name.Contains("IClassDto"));
                 if (iDto != null)
                 {
-                    ClassViewModel baseModel = ReflectionRepository.GetClassViewModel(iDto.GetGenericArguments()[0].Name);
+                    ClassViewModel baseModel = ReflectionRepository.Global.GetClassViewModel(iDto.GetGenericArguments()[0].Name);
                     return baseModel;
                 }
                 return null;

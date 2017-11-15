@@ -75,7 +75,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             {
                 if (!HasClassViewModel) return null;
                 if (PureType != this) return PureType.ClassViewModel;
-                if (Info != null) return ReflectionRepository.GetClassViewModel(Info);
+                if (Info != null) return ReflectionRepository.Global.GetClassViewModel(Info);
                 return null;
             }
         }

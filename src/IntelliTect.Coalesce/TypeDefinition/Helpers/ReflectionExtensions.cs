@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public static class TypeHelper
+    public static class ReflectionExtensions
     {
         /// <summary>
         /// Returns the attributed requested if it exists or null if it does not.

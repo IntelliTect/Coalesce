@@ -51,7 +51,7 @@
         
 
 }
-@foreach (var ns in ReflectionRepository.Namespaces.Where(f => f != "System"))
+@foreach (var ns in ReflectionRepository.Global.Namespaces.Where(f => f != "System"))
 {
     if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
 }
@@ -88,7 +88,7 @@ namespace @(namespaceName).Api
 
         public @(model.ApiControllerClassName)()
         {
-            Model = ReflectionRepository.Models.Single(m => m.Name == "@(model.Name)");
+            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "@(model.Name)");
         }
 
         @if (securityInfo.IsReadAllowed())

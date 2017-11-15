@@ -30,14 +30,14 @@
         </p>
         <div>
             <span style="width: 50px; display: inline-block">Tables: </span>
-            @foreach (var vm in ReflectionRepository.Models.Where(f => f.HasDbSet || f.IsDto))
+            @foreach (var vm in ReflectionRepository.Global.Models.Where(f => f.HasDbSet || f.IsDto))
             {
                 <span>• <a asp-action="Table" asp-controller="@vm.Name" style="padding-right: 15px">@vm.DisplayName</a></span>
             }
         </div>
         <div>
             <span style="width: 50px; display: inline-block">Cards: </span>
-            @foreach (var vm in ReflectionRepository.Models.Where(f => f.HasDbSet || f.IsDto))
+            @foreach (var vm in ReflectionRepository.Global.Models.Where(f => f.HasDbSet || f.IsDto))
             {
                 <span>• <a asp-action="Cards" asp-controller="@vm.Name" style="padding-right: 15px">@vm.DisplayName</a></span>
             }

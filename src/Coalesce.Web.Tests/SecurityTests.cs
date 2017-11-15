@@ -30,7 +30,7 @@ namespace Coalesce.Web.Tests
 
             var typeLocator = _dataContext.TypeLocator;
             var contextSymbol = typeLocator.FindType("AppDbContext", throwWhenNotFound: false);
-            _models = ReflectionRepository
+            _models = ReflectionRepository.Global
                             .AddContext(contextSymbol)
                             .Where(m => m.PrimaryKey != null)
                             .ToList();

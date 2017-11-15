@@ -19,7 +19,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Namespace => FullNamespace(Symbol.ContainingNamespace);
 
-        public override string Comment => SymbolHelper.ExtractXmlComments(Symbol);
+        public override string Comment => SymbolExtensions.ExtractXmlComments(Symbol);
 
         /// <summary>
         /// Recursive function to get the full namespace.
@@ -99,7 +99,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var iDto = Symbol.AllInterfaces.FirstOrDefault(f => f.Name.Contains("IClassDto"));
                 if (iDto != null)
                 {
-                    ClassViewModel baseModel = ReflectionRepository.GetClassViewModel(iDto.TypeArguments[0]);
+                    ClassViewModel baseModel = ReflectionRepository.Global.GetClassViewModel(iDto.TypeArguments[0]);
                     return baseModel;
                 }
                 return null;

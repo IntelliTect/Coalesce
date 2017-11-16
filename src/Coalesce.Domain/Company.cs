@@ -22,10 +22,6 @@ namespace Coalesce.Domain
 
         [NotMapped]
         [ListText]
-        public string AltName { get
-            {
-                return Name + ": " + City;
-            }
-        }
+        public string AltName => Name + ": " + City;
     }
 }

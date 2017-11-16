@@ -1,4 +1,4 @@
-using IntelliTect.Coalesce.Controllers;
+﻿using IntelliTect.Coalesce.Controllers;
 // Model Namespaces
 using Coalesce.Web;
 using Coalesce.Domain;

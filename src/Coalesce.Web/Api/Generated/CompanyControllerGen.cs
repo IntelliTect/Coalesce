@@ -1,4 +1,4 @@
-using Coalesce.Domain;
+﻿using Coalesce.Domain;
 using Coalesce.Domain.External;
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce.Controllers;

@@ -72,7 +72,7 @@ module ViewModels {
         public nextUpgrade: KnockoutObservable<moment.Moment> = ko.observable(null);
         public personStatsId: KnockoutObservable<number> = ko.observable(null);
         public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
-        public timeZone: KnockoutObservable<any> = ko.observable(null);
+        public timeZone: KnockoutObservable<TimeZoneInfo> = ko.observable(null);
         /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
         public name: KnockoutObservable<string> = ko.observable(null);
         /** Company ID this person is employed by */

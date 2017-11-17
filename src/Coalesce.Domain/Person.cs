@@ -97,20 +97,8 @@ namespace Coalesce.Domain
         public DateTimeOffset? NextUpgrade { get; set; }
 
 
-        public int? PersonStatsId { get; set; }
         [Hidden]
-        public PersonStats PersonStats {get
-            {
-                return new PersonStats { Height = 10, Weight = 20, PersonStatsId = 1 };
-            }
-        }
-
-        [NotMapped]
-        [Hidden]
-        public TimeZoneInfo TimeZone { get; set; }
-
-
-        //public Address Address { get; set; }
+        public PersonStats PersonStats => new PersonStats { Name = Name, Height = 10, Weight = 20 };
 
         [InternalUse]
         [FileDownload]

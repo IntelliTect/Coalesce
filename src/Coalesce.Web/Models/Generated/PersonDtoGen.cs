@@ -32,9 +32,7 @@ namespace Coalesce.Web.Models
         public System.Nullable<System.DateTime> BirthDate { get; set; }
         public System.Nullable<System.DateTime> LastBath { get; set; }
         public System.Nullable<System.DateTimeOffset> NextUpgrade { get; set; }
-        public System.Nullable<System.Int32> PersonStatsId { get; set; }
         public PersonStatsDtoGen PersonStats { get; set; }
-        public System.TimeZoneInfo TimeZone { get; set; }
         public System.String Name { get; set; }
         public Int32? CompanyId { get; set; }
         public CompanyDtoGen Company { get; set; }
@@ -71,8 +69,6 @@ namespace Coalesce.Web.Models
             newObject.BirthDate = obj.BirthDate;
             newObject.LastBath = obj.LastBath;
             newObject.NextUpgrade = obj.NextUpgrade;
-            newObject.PersonStatsId = obj.PersonStatsId;
-            newObject.TimeZone = obj.TimeZone;
             newObject.Name = obj.Name;
             newObject.CompanyId = obj.CompanyId;
             var propValCasesAssigned = obj.CasesAssigned;
@@ -134,8 +130,6 @@ namespace Coalesce.Web.Models
             entity.BirthDate = BirthDate;
             entity.LastBath = LastBath;
             entity.NextUpgrade = NextUpgrade;
-            entity.PersonStatsId = PersonStatsId;
-            entity.TimeZone = TimeZone;
             entity.CompanyId = (Int32)(CompanyId ?? 0);
         }
 

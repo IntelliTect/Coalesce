@@ -31,7 +31,6 @@ module ListViewModels {
             lastName?:String;
             email?:String;
             gender?:number;
-            personStatsId?:number;
             name?:String;
             companyId?:number;
         } = null;
@@ -288,74 +287,6 @@ module ListViewModels {
         public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
         
 
-        // Call server method (NamesStartingWithPublic)
-        // Gets all the first names starting with the characters.
-        public namesStartingWithPublic = (characters: String, callback: () => void = null, reload: boolean = true) => {
-            this.namesStartingWithPublicIsLoading(true);
-            this.namesStartingWithPublicMessage('');
-            this.namesStartingWithPublicWasSuccessful(null);
-            $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWithPublic",
-                     data: { characters: characters },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.namesStartingWithPublicResultRaw(data.object);
-                this.namesStartingWithPublicMessage('');
-                this.namesStartingWithPublicWasSuccessful(true);
-                this.namesStartingWithPublicResult(data.object);
-        
-                if (reload) {
-                    this.load(callback);
-                } else if ($.isFunction(callback)) {
-                    callback();
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.namesStartingWithPublicWasSuccessful(false);
-                this.namesStartingWithPublicMessage(errorMsg);
-
-                //alert("Could not call method namesStartingWithPublic: " + errorMsg);
-            })
-            .always(() => {
-                this.namesStartingWithPublicIsLoading(false);
-            });
-        } 
-        // Result of server method (NamesStartingWithPublic) strongly typed in a observable.
-        public namesStartingWithPublicResult: KnockoutObservableArray<string> = ko.observableArray([]);
-        // Raw result object of server method (NamesStartingWithPublic) simply wrapped in an observable.
-        public namesStartingWithPublicResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (NamesStartingWithPublic) is being called
-        public namesStartingWithPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (NamesStartingWithPublic) if it fails.
-        public namesStartingWithPublicMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (NamesStartingWithPublic) was successful.
-        public namesStartingWithPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (NamesStartingWithPublic)
-        public namesStartingWithPublicUi = (callback: () => void = null) => {
-            var characters: String = prompt('Characters');
-            this.namesStartingWithPublic(characters, callback);
-        }
-        // Presents a modal with input boxes to call the server method (NamesStartingWithPublic)
-        public namesStartingWithPublicModal = (callback: () => void = null) => {
-            $('#method-NamesStartingWithPublic').modal();
-            $('#method-NamesStartingWithPublic').on('shown.bs.modal', () => {
-                $('#method-NamesStartingWithPublic .btn-ok').unbind('click');
-                $('#method-NamesStartingWithPublic .btn-ok').click(() => {
-                    this.namesStartingWithPublicWithArgs(null, callback);
-                    $('#method-NamesStartingWithPublic').modal('hide');
-                });
-            });
-        }
-            // Variable for method arguments to allow for easy binding
-        public namesStartingWithPublicWithArgs = (args?: PersonList.NamesStartingWithPublicArgs, callback: () => void = null) => {
-            if (!args) args = this.namesStartingWithPublicArgs;
-            this.namesStartingWithPublic(args.characters(), callback);
-        }
-        public namesStartingWithPublicArgs = new PersonList.NamesStartingWithPublicArgs(); 
-        
-
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Person(newItem, parent);
 
         constructor() {
@@ -370,9 +301,6 @@ module ListViewModels {
             public numberTwo: KnockoutObservable<number> = ko.observable(null);
         }
         export class NamesStartingWithArgs {
-            public characters: KnockoutObservable<string> = ko.observable(null);
-        }
-        export class NamesStartingWithPublicArgs {
             public characters: KnockoutObservable<string> = ko.observable(null);
         }
     }

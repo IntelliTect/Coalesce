@@ -70,9 +70,7 @@ module ViewModels {
         public birthDate: KnockoutObservable<moment.Moment> = ko.observable(null);
         public lastBath: KnockoutObservable<moment.Moment> = ko.observable(null);
         public nextUpgrade: KnockoutObservable<moment.Moment> = ko.observable(null);
-        public personStatsId: KnockoutObservable<number> = ko.observable(null);
         public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
-        public timeZone: KnockoutObservable<TimeZoneInfo> = ko.observable(null);
         /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
         public name: KnockoutObservable<string> = ko.observable(null);
         /** Company ID this person is employed by */
@@ -324,9 +322,7 @@ module ViewModels {
             // Objects are loaded first so that they are available when the IDs get loaded.
             // This handles the issue with populating select lists with correct data because we now have the object.
             if (!data.personStats) { 
-                if (data.personStatsId != this.personStatsId()) {
-                    this.personStats(null);
-                }
+                this.personStats(null);
             }else {
                 if (!this.personStats()){
                     this.personStats(new PersonStats(data.personStats, this));
@@ -368,8 +364,6 @@ module ViewModels {
             else if (this.nextUpgrade() == null || this.nextUpgrade().valueOf() != new Date(data.nextUpgrade).getTime()){
                 this.nextUpgrade(moment(new Date(data.nextUpgrade)));
             }
-            this.personStatsId(data.personStatsId);
-            this.timeZone(data.timeZone);
             this.name(data.name);
             this.companyId(data.companyId);
             if (this.coalesceConfig.onLoadFromDto()){
@@ -397,11 +391,6 @@ module ViewModels {
             else dto.lastBath = this.lastBath().format('YYYY-MM-DDTHH:mm:ss');
             if (!this.nextUpgrade()) dto.NextUpgrade = null;
             else dto.nextUpgrade = this.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
-            dto.personStatsId = this.personStatsId();
-            if (!dto.personStatsId && this.personStats()) {
-                dto.personStatsId = this.personStats().personStatsId();
-            }
-            dto.timeZone = this.timeZone();
             dto.companyId = this.companyId();
             if (!dto.companyId && this.company()) {
                 dto.companyId = this.company().companyId();
@@ -442,8 +431,8 @@ module ViewModels {
             // Create computeds for display for objects
 			self.personStatsText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.personStats() && self.personStats().personStatsId()) {
-					return self.personStats().personStatsId().toString();
+				if (self.personStats() && self.personStats().name()) {
+					return self.personStats().name().toString();
 				} else {
 					return "None";
 				}
@@ -528,8 +517,6 @@ module ViewModels {
             self.birthDate.subscribe(self.autoSave);
             self.lastBath.subscribe(self.autoSave);
             self.nextUpgrade.subscribe(self.autoSave);
-            self.personStatsId.subscribe(self.autoSave);
-            self.timeZone.subscribe(self.autoSave);
             self.companyId.subscribe(self.autoSave);
             self.company.subscribe(self.autoSave);
         

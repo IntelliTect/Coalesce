@@ -44,7 +44,7 @@ namespace Coalesce.Web.Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
 
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
@@ -56,7 +56,6 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("LastName", lastName);
             parameters.AddFilter("Email", email);
             parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("PersonStatsId", personStatsId);
             parameters.AddFilter("Name", name);
             parameters.AddFilter("CompanyId", companyId);
 
@@ -78,7 +77,7 @@ namespace Coalesce.Web.Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
 
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
@@ -90,7 +89,6 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("LastName", lastName);
             parameters.AddFilter("Email", email);
             parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("PersonStatsId", personStatsId);
             parameters.AddFilter("Name", name);
             parameters.AddFilter("CompanyId", companyId);
 
@@ -104,7 +102,7 @@ namespace Coalesce.Web.Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
 
             ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
@@ -116,7 +114,6 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("LastName", lastName);
             parameters.AddFilter("Email", email);
             parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("PersonStatsId", personStatsId);
             parameters.AddFilter("Name", name);
             parameters.AddFilter("CompanyId", companyId);
 
@@ -202,7 +199,7 @@ namespace Coalesce.Web.Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
@@ -213,7 +210,6 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("LastName", lastName);
             parameters.AddFilter("Email", email);
             parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("PersonStatsId", personStatsId);
             parameters.AddFilter("Name", name);
             parameters.AddFilter("CompanyId", companyId);
 
@@ -237,7 +233,7 @@ namespace Coalesce.Web.Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string personStatsId = null, string name = null, string companyId = null)
+            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
@@ -248,7 +244,6 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("LastName", lastName);
             parameters.AddFilter("Email", email);
             parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("PersonStatsId", personStatsId);
             parameters.AddFilter("Name", name);
             parameters.AddFilter("CompanyId", companyId);
 
@@ -472,29 +467,6 @@ namespace Coalesce.Web.Api
             try
             {
                 var objResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
-                result.Object = objResult;
-
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Method: NamesStartingWithPublic
-        /// </summary>
-        [HttpPost("NamesStartingWithPublic")]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWithPublic(System.String characters)
-        {
-            var result = new SaveResult<IEnumerable<String>>();
-            try
-            {
-                var objResult = Coalesce.Domain.Person.NamesStartingWithPublic(characters, Db);
                 result.Object = objResult;
 
                 result.WasSuccessful = true;

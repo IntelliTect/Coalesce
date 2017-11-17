@@ -203,21 +203,6 @@
                                 <span class="label label-info" data-bind="fadeVisible: namesStartingWithIsLoading()">Loading</span>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithPublicModal">Names Starting With Public</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: namesStartingWithPublicResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: namesStartingWithPublicWasSuccessful"></span>
-                                <span class="" data-bind="text: namesStartingWithPublicMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: namesStartingWithPublicIsLoading()">Loading</span>
-                            </td>
-                        </tr>
                 </tbody>
             </table>
         </div>
@@ -262,29 +247,6 @@
                     <h4 class="modal-title">Names Starting With</h4>
                 </div>
                 <div class="modal-body form-horizontal" data-bind="with: namesStartingWithArgs">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Characters</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: characters">
-                            </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!-- Modal for method: NamesStartingWithPublic -->
-    <div id='method-NamesStartingWithPublic' class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Names Starting With Public</h4>
-                </div>
-                <div class="modal-body form-horizontal" data-bind="with: namesStartingWithPublicArgs">
                         <div class="form-group">
                             <label class="col-md-4 control-label">Characters</label>
                             <div class="col-md-8">

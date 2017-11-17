@@ -63,14 +63,13 @@
                 <tr>
                     <th>Name</th>
                     <th>Type</th>
-                    <th class="text-center">Exposed</th>
                     <th class="text-center">Required</th>
                     <th class="text-center">Read Only</th>
                     <th class="text-center">Has Valid Values</th>
                     <th class="text-center">Client Validation</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var prop in vm.Properties)
+                @foreach (var prop in vm.ClientExposedProperties)
                 {
                     <tr>
                         <th>@prop.Name</th>
@@ -90,16 +89,6 @@
                             else
                             {
                                 <span>@prop.PureType.Name</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            @if (!prop.IsInternalUse)
-                            {
-                            <span class="glyphicon glyphicon-ok" style="color:green;"></span>
-                            }
-                            else
-                            {
-                            <span class="glyphicon glyphicon-remove" style="color:red;"></span>
                             }
                         </td>
                         <td class="text-center">

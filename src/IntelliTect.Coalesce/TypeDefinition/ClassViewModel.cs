@@ -143,8 +143,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public IEnumerable<PropertyViewModel> ClientExposedProperties =>
-            Properties.Where(p => p.HasViewModelProperty && p.HasGetter && !p.IsInternalUse);
+        public IEnumerable<PropertyViewModel> ClientExposedProperties => Properties.Where(p => p.IsClientExposed);
 
         /// <summary>
         /// All the methods for the Class
@@ -252,7 +251,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!result.Any())
                 {
                     var nameProp = PropertyByName("Name");
-                    if (nameProp != null && !nameProp.HasNotMapped)
+                    if (nameProp != null && !nameProp.HasNotMapped && nameProp.IsClientExposed)
                     {
                         result.Add(new OrderByInformation()
                         {
@@ -301,25 +300,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 yield break;
             }
 
-            var prop = PropertyByName("Name");
-            if (prop != null && !prop.HasNotMapped)
+            foreach (var prop in new[]
             {
-                yield return new SearchableValueProperty(prop);
-                yield break;
-            }
-
-            prop = Properties.FirstOrDefault(p => string.Equals(p.Name, $"{p.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) && !p.HasNotMapped);
-            if (prop != null && !prop.HasNotMapped)
+                PropertyByName("Name"),
+                Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
+                PrimaryKey
+            })
             {
-                yield return new SearchableValueProperty(prop);
-                yield break;
-            }
-
-            prop = Properties.FirstOrDefault(f => f.IsPrimaryKey);
-            if (prop != null)
-            {
-                yield return new SearchableValueProperty(prop);
-                yield break;
+                if (prop != null && !prop.HasNotMapped && prop.IsClientExposed)
+                {
+                    yield return new SearchableValueProperty(prop);
+                    yield break;
+                }
             }
         }
 
@@ -336,8 +328,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Use the ListText Attribute first, then Name and then ID.
         /// </summary>
         public PropertyViewModel ListTextProperty =>
-            Properties.FirstOrDefault(f => f.IsListText) ??
-            Properties.FirstOrDefault(f => f.Name == "Name") ??
+            ClientExposedProperties.FirstOrDefault(f => f.IsListText) ??
+            ClientExposedProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
         public string ApiUrl => ApiName;
@@ -384,31 +376,31 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string DtoIncludesAsCS()
         {
-            var includeList = Properties
-                                .Where(p => p.HasDtoIncludes)
-                                .SelectMany(p => p.DtoIncludes)
-                                .Distinct()
-                                .Select(include => $"bool include{include} = includes == \"{include}\";")
-                                .ToList();
+            var includeList = ClientExposedProperties
+                .Where(p => p.HasDtoIncludes)
+                .SelectMany(p => p.DtoIncludes)
+                .Distinct()
+                .Select(include => $"bool include{include} = includes == \"{include}\";")
+                .ToList();
 
             return string.Join($"{Environment.NewLine}\t\t\t", includeList);
         }
 
         public string DtoExcludesAsCS()
         {
-            var excludeList = Properties
-                                .Where(p => p.HasDtoExcludes)
-                                .SelectMany(p => p.DtoExcludes)
-                                .Distinct()
-                                .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
-                                .ToList();
+            var excludeList = ClientExposedProperties
+                .Where(p => p.HasDtoExcludes)
+                .SelectMany(p => p.DtoExcludes)
+                .Distinct()
+                .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
+                .ToList();
 
             return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
         }
 
         public string PropertyRolesAsCS()
         {
-            var allPropertyRoles = Properties
+            var allPropertyRoles = ClientExposedProperties
                 .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
                 .Distinct()
                 .Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");")

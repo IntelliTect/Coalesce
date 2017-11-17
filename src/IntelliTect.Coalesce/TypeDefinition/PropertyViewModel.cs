@@ -18,6 +18,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class PropertyViewModel : IAttributeProvider
     {
+        public bool IsClientExposed => 
+               !IsInternalUse
+            // TODO: get rid of this.
+            && !(new[] { "Image", "IdentityRole", "IdentityUserRole", "IdentityUserClaim", "IdentityUserLogin" }.Contains(PureType.Name))
+            && HasGetter;
+
         public TypeViewModel Type { get; protected set; }
 
         public abstract string Comment { get; }
@@ -471,23 +477,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsForeignKey)
-                {
-                    /// Use the ForeignKey Attribute if it is there.
-                    var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
-                    if (value != null) return value;
+                if (!IsForeignKey) return null;
 
-                    // Use the ForeignKey Attribute on the object property if it is there.
-                    var prop = Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name));
-                    if (prop != null) return prop.Name;
+                /// Use the ForeignKey Attribute if it is there.
+                var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
+                if (value != null) return value;
 
-                    // Else, by convention remove the Id at the end.
-                    return Name.Substring(0, Name.Length - 2);
-                }
-                else
-                {
-                    return null;
-                }
+                // Use the ForeignKey Attribute on the object property if it is there.
+                var prop = Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name));
+                if (prop != null) return prop.Name;
+
+                // Else, by convention remove the Id at the end.
+                return Name.Substring(0, Name.Length - 2);
             }
         }
 
@@ -564,20 +565,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the core URL for the List Editor.
         /// </summary>
         public string ListEditorUrlName => string.Format("{0}ListUrl", JsVariable);
-
-        public bool HasViewModelProperty
-        {
-            get
-            {
-                if (IsInternalUse)
-                    return false;
-
-                if (new []{"Image","IdentityRole","IdentityUserRole","IdentityUserClaim","IdentityUserLogin"}.Contains(PureType.Name))
-                    return false;
-
-                return true;
-            }
-        }
 
         public bool HasInverseProperty => HasAttribute<InversePropertyAttribute>();
 

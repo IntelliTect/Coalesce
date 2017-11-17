@@ -19,11 +19,12 @@ namespace IntelliTect.Coalesce.Validation
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
                 assert.IsNotNull(model.PrimaryKey, $"Primary key not found for {model.Name}. Primary key should be named {model.Name}Id or have the [Key] attribute.");
+                assert.IsTrue(model.PrimaryKey.IsClientExposed, "Model primary keys must be exposed to the client.");
                 assert.IsTrue(model.SearchProperties().Any(), $"No searchable properties found for {model.Name}. Annotate a property with [Search].");
                 assert.IsNotNull(model.ListTextProperty, $"No default text for dropdown lists found for {model.Name}. Add a Name property or use the [ListText] annotation on the property to be used.");
                 assert.IsTrue(model.DefaultOrderBy.Any(), $"No default order found for {model.Name}. Use the [DefaultOrderBy] annotation.");
                 // Check object references to see if they all have keys and remote keys
-                foreach (var prop in model.Properties.Where(f => !f.IsInternalUse))
+                foreach (var prop in model.ClientExposedProperties)
                 {
                     assert.Area = $"{model.Name}.{prop.Name}";
                     try
@@ -32,9 +33,9 @@ namespace IntelliTect.Coalesce.Validation
                             "Property-level ReadAttribute security doesn't support the PermissionLevel property");
                         assert.IsNull(prop.GetAttributeValue<DataAnnotations.EditAttribute, Helpers.SecurityPermissionLevels>(a => a.PermissionLevel),
                             "Property-level EditAttribute security doesn't support the PermissionLevel property");
-                        assert.isFalse(prop.HasAttribute<DataAnnotations.CreateAttribute>(),
+                        assert.IsFalse(prop.HasAttribute<DataAnnotations.CreateAttribute>(),
                             "Property-level security doesn't support CreateAttribute");
-                        assert.isFalse(prop.HasAttribute<DataAnnotations.DeleteAttribute>(),
+                        assert.IsFalse(prop.HasAttribute<DataAnnotations.DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
                         if (prop.IsPOCO)
@@ -111,7 +112,7 @@ namespace IntelliTect.Coalesce.Validation
                             }
                             else
                             {
-                                assert.isFalse(param.IsManualDI, $"DI properties must be named either 'db' or 'user' or 'out includeTree'. Got {param.Name}");
+                                assert.IsFalse(param.IsManualDI, $"DI properties must be named either 'db' or 'user' or 'out includeTree'. Got {param.Name}");
                             }
                         }
 

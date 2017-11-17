@@ -36,7 +36,7 @@
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-            @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+            @foreach (var prop in model.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)).OrderBy(f => f.EditorOrder))
             {
                 <div class="form-group">
                     <label class="col-md-4 control-label">@prop.DisplayName</label>

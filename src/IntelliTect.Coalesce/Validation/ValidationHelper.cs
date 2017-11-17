@@ -41,7 +41,7 @@ namespace IntelliTect.Coalesce.Validation
             return IsTrue(obj == null, message, isWarning);
         }
 
-        public bool isFalse(bool expression, string message, bool isWarning = false)
+        public bool IsFalse(bool expression, string message, bool isWarning = false)
         {
             return IsTrue(!expression, message, isWarning);
         }

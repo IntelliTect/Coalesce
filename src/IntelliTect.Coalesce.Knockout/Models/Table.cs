@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.Knockout.Models
         /// <returns></returns>
         public Table<T> AddDefaultColumns()
         {
-            foreach (var prop in ViewModel.Properties
+            foreach (var prop in ViewModel.ClientExposedProperties
                 .Where(f=>!f.IsHidden( DataAnnotations.HiddenAttribute.Areas.List))
                 .OrderBy(f=>f.EditorOrder))
             {

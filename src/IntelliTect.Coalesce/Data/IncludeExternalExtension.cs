@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Data
             else
             {
                 var model = ReflectionRepository.Global.GetClassViewModel<T>();
-                foreach (var prop in model.Properties.Where(f => !f.IsInternalUse && f.IsExternal))
+                foreach (var prop in model.ClientExposedProperties.Where(f => f.IsExternal))
                 {
                     // TODO: need to figure out how to do this without a <T>
                     //query = query.IncludeExternal(prop);

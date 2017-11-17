@@ -6,7 +6,7 @@
 
 @{ ClassViewModel model = Model;}
 <div class="form-horizontal">
-    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.IsReadable(User)).OrderBy(f => f.EditorOrder))
+    @foreach (var prop in model.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.IsReadable(User)).OrderBy(f => f.EditorOrder))
     {
         if (ViewBag.SimpleEditorOnly == null || ViewBag.SimpleEditorOnly == false ||
                         (prop.IsManytoManyCollection == prop.Type.IsCollection))

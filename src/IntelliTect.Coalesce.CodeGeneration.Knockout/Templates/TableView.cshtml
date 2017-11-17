@@ -102,7 +102,7 @@
         }
         <thead>
             <tr>
-                @foreach (var prop in model.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                 {
                     @if (!prop.Type.IsCollection)
                     {
@@ -127,14 +127,14 @@
                 @{
                     @:@@if (@@ViewBag.Editable)
                     @:{
-                    @foreach (var prop in model.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                         {
                         @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)</td>
                         }
                     @:}
                     @:else
                     @:{
-                    @foreach (var prop in model.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                         {
                         @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false, null, true)</td>
                         }
@@ -144,7 +144,7 @@
 
                     <!-- Editor buttons -->
                     <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                        @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.IsClientMethod && !f.IsStatic))
+                        @if (model.ClientMethods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
                             {
                         <!-- Action buttons -->
                             <div class="btn-group" role="group">
@@ -152,7 +152,7 @@
                                     Actions <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    @foreach (var method in model.Methods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.IsClientMethod && !f.IsStatic))
+                                    @foreach (var method in model.ClientMethods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
                                         {
                                         <li>@Display.MethodHelper(method)</li>
                                         }
@@ -184,7 +184,7 @@
 
 
 
-@if (model.Methods.Any(f => f.IsStatic && f.IsClientMethod))
+@if (model.ClientMethods.Any(f => f.IsStatic))
 {
     <div class="card">
         <div class="card-heading">
@@ -201,7 +201,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (MethodViewModel method in model.Methods.Where(f => f.IsStatic && f.IsClientMethod))
+                    @foreach (MethodViewModel method in model.ClientMethods.Where(f => f.IsStatic))
                     {
                         <tr>
                             <td>
@@ -217,7 +217,7 @@
                                 else if (method.ReturnType.HasClassViewModel)
                                 {
                                     <dl class="dl-horizontal" data-bind="with: @method.JsVariableResult">
-                                        @foreach (var prop in method.ReturnType.ClassViewModel.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)))
+                                        @foreach (var prop in method.ReturnType.ClassViewModel.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)))
                                         {
                                             <dt>@prop.DisplayName</dt>
                                             <dd data-bind="text: @prop.JsVariableForBinding()"></dd>
@@ -245,7 +245,7 @@
 }
 
 
-@foreach (var method in model.Methods.Where(f => f.IsStatic && f.ClientParameters.Any() && f.IsClientMethod))
+@foreach (var method in model.ClientMethods.Where(f => f.IsStatic && f.ClientParameters.Any()))
 {
     <!-- Modal for method: @method.Name -->
     <div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog">

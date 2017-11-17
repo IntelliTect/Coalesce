@@ -73,7 +73,7 @@ namespace Coalesce.Web.Tests
             // Get a list of properties on anonmymous models that have read restrictions
             var models = Model.Models
                             .Where(m => m.SecurityInfo.AllowAnonymousAny)
-                            .SelectMany(m => m.Properties
+                            .SelectMany(m => m.ClientProperties
                                                 .Where(p => !p.SecurityInfo.IsReadable(User))
                                                 .Select(p => new { Model = m, Property = p }))
                             .ToList();
@@ -89,7 +89,7 @@ namespace Coalesce.Web.Tests
             // Get a list of properties on anonmymous models that have edit restrictions
             var models = Model.Models
                             .Where(m => m.SecurityInfo.Edit.AllowAnonymous)
-                            .SelectMany(m => m.Properties
+                            .SelectMany(m => m.ClientProperties
                                                 .Where(p => !p.SecurityInfo.IsEditable(User) && p.SecurityInfo.IsReadable(User))
                                                 .Select(p => new { Model = m, Property = p }))
                             .ToList();

@@ -148,61 +148,6 @@ module ListViewModels {
         }
         
 
-        // Call server method (GetAllOpenCases)
-        public getAllOpenCases = (callback: () => void = null, reload: boolean = true) => {
-            this.getAllOpenCasesIsLoading(true);
-            this.getAllOpenCasesMessage('');
-            this.getAllOpenCasesWasSuccessful(null);
-            $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCases",
-                     data: {  },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.getAllOpenCasesResultRaw(data.object);
-                this.getAllOpenCasesMessage('');
-                this.getAllOpenCasesWasSuccessful(true);
-                if (this.getAllOpenCasesResult()){
-                    Coalesce.KnockoutUtilities.RebuildArray(this.getAllOpenCasesResult, data.object, 'caseKey', ViewModels.Case, this, true);
-                }
-        
-                if (reload) {
-                    this.load(callback);
-                } else if ($.isFunction(callback)) {
-                    callback();
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.getAllOpenCasesWasSuccessful(false);
-                this.getAllOpenCasesMessage(errorMsg);
-
-                //alert("Could not call method getAllOpenCases: " + errorMsg);
-            })
-            .always(() => {
-                this.getAllOpenCasesIsLoading(false);
-            });
-        } 
-        // Result of server method (GetAllOpenCases) strongly typed in a observable.
-        public getAllOpenCasesResult: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
-        // Raw result object of server method (GetAllOpenCases) simply wrapped in an observable.
-        public getAllOpenCasesResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (GetAllOpenCases) is being called
-        public getAllOpenCasesIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (GetAllOpenCases) if it fails.
-        public getAllOpenCasesMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (GetAllOpenCases) was successful.
-        public getAllOpenCasesWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (GetAllOpenCases)
-        public getAllOpenCasesUi = (callback: () => void = null) => {
-            this.getAllOpenCases(callback);
-        }
-        // Presents a modal with input boxes to call the server method (GetAllOpenCases)
-        public getAllOpenCasesModal = (callback: () => void = null) => {
-            this.getAllOpenCasesUi(callback);
-        }
-        
-
         // Call server method (GetCaseSummary)
         // Returns a list of summary information about Cases
         public getCaseSummary = (callback: () => void = null, reload: boolean = true) => {

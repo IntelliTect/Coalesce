@@ -55,7 +55,7 @@ module @moduleName {
             = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
     
 
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties)
+        @foreach (PropertyViewModel prop in model.ClientProperties)
         {
         if (prop.Comment.Length > 0)
         {
@@ -84,13 +84,13 @@ module @moduleName {
         }
 
        
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsPOCO))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO))
         {
         @:/** Display text for @(prop.Name) */
         @:public @prop.JsTextPropertyName: KnockoutComputed<string>;
         }
         
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
         {
         <text>
         /** Add object to @(prop.JsVariable) */
@@ -119,7 +119,7 @@ module @moduleName {
         </text>
         }
 
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.Type.IsCollection && f.PureTypeOnContext))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.Type.IsCollection && f.PureTypeOnContext))
         {
         @:/** Url for a table view of all members of collection @prop.Name for the current object. */
         @:public @(prop.ListEditorUrlName): KnockoutComputed<string> = ko.computed({
@@ -137,14 +137,14 @@ module @moduleName {
         @:});
         }
 
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsPOCO && !f.Type.IsCollection))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection))
         {
         @:/** Pops up a stock editor for object @prop.JsVariable */
         @:public show@(prop.Name)Editor: (callback?: any) => void;
         }
 
 
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.PureType.IsEnum))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.PureType.IsEnum))
         {
         @:/** Array of all possible names & values of enum @prop.JsVariable */
         @:public @(prop.JsVariable)Values: EnumValue[] = [ 
@@ -155,7 +155,7 @@ module @moduleName {
         @:];
         }
 
-        @foreach (var method in model.Methods.Where(m => m.IsClientMethod && (!m.IsStatic || m.ReturnType.Name == model.Name)))
+        @foreach (var method in model.ClientMethods.Where(m => !m.IsStatic || m.ReturnType.Name == model.Name))
         {
         @:
         @:
@@ -309,7 +309,7 @@ module @moduleName {
             this.myId = data.@(model.PrimaryKey.JsonName);
             this.@(model.PrimaryKey.JsVariable)(data.@(model.PrimaryKey.JsonName));
             // Load the lists of other objects
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p=>p.Type.IsCollection && p.HasViewModel))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(p=>p.Type.IsCollection && p.HasViewModel))
         { 
             @:if (data.@prop.JsonName != null) {
             @if (prop.Object.PrimaryKey != null)
@@ -340,7 +340,7 @@ module @moduleName {
         }
             // Objects are loaded first so that they are available when the IDs get loaded.
             // This handles the issue with populating select lists with correct data because we now have the object.
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p => p.IsPOCO && !p.Type.IsCollection))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => p.IsPOCO && !p.Type.IsCollection))
             {
             @:if (!data.@prop.JsonName) { 
                 if (prop.ObjectIdProperty != null) {
@@ -366,7 +366,7 @@ module @moduleName {
             }
 
             // The rest of the objects are loaded now.
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p => !p.HasValidValues && !p.Type.IsCollection))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => !p.HasValidValues && !p.Type.IsCollection))
             {
             if (prop.Type.IsDate)
             {   // Using valueOf/getTime here is a 20x performance increase over moment.isSame(). moment(new Date(...)) is also a 10x perf increase.
@@ -392,7 +392,7 @@ module @moduleName {
             var dto: any = {};
             dto.@(model.PrimaryKey.JsonName) = this.@(model.PrimaryKey.JsVariable)();
 
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsClientWritable && !f.IsPOCO))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsClientWritable && !f.IsPOCO ))
             {
                 if (prop.Type.IsDateTimeOffset)
                 {
@@ -427,13 +427,13 @@ module @moduleName {
         public setupValidation = () => {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p => !p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs())))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => !p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs())))
             {
                 @:this.@(prop.JsVariable).extend({ @prop.ClientValidationKnockoutJs() }),
             }
             ]);
             this.warnings = ko.validation.group([
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p => p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs())))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs())))
             {
                 @:this.@(prop.JsVariable).extend({ @prop.ClientValidationKnockoutJs() }),
             }
@@ -456,7 +456,7 @@ module @moduleName {
             }
 
             // Create computeds for display for objects
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsPOCO))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO))
             {
 			@:self.@prop.JsTextPropertyName = ko.pureComputed(function()
 			@:{   // If the object exists, use the text value. Otherwise show 'None'
@@ -469,7 +469,7 @@ module @moduleName {
             }
 
     
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             @:// List Object model for @(prop.Name). Allows for loading subsets of data.
             @:var _@(prop.JsVariable)List: @(listModuleName).@(prop.Object.ListViewModelClassName) = null;
@@ -497,7 +497,7 @@ module @moduleName {
             }
 
 
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet))
             {
             @:self.show@(prop.Name)Editor = function(callback: any) {
                 @:if (!self.@(prop.JsVariable)()) {
@@ -510,7 +510,7 @@ module @moduleName {
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsReadOnly && !f.HasNotMapped))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsReadOnly && !f.HasNotMapped))
             {
                 @:// See if self.@(prop.JsVariable) needs to be loaded.
                 @:if (self.@(prop.JsVariable)() == null && self.@(prop.ObjectIdProperty.JsVariable)() != null){
@@ -531,11 +531,11 @@ module @moduleName {
             };
 
             // This stuff needs to be done after everything else is set up.
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p=>p.IsClientWritable && !p.IsManytoManyCollection && !p.Type.IsCollection))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(p=>p.IsClientWritable && !p.IsManytoManyCollection && !p.Type.IsCollection))
         {
             @:self.@(prop.JsVariable).subscribe(self.autoSave);
         }
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(p => p.IsManytoManyCollection))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => p.IsManytoManyCollection))
         {
             <text>
             self.@(prop.ManyToManyCollectionName.ToCamelCase()).subscribe(function(changes){
@@ -561,7 +561,7 @@ module @moduleName {
 
 
     export namespace @(model.ViewModelGeneratedClassName) {
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.PureType.IsEnum))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.PureType.IsEnum))
         {
         @:export enum @(prop.Name)Enum {
         @foreach (var kvp in prop.Type.EnumValues)
@@ -572,7 +572,7 @@ module @moduleName {
         }
 
         // Classes for use in method calls to support data binding for input for arguments
-        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && (!f.IsStatic || f.ReturnType.Name == model.Name) && f.IsClientMethod)){
+        @foreach(MethodViewModel method in model.ClientMethods.Where(f => f.ClientParameters.Any() && (!f.IsStatic || f.ReturnType.Name == model.Name))){
         @:export class @(method.ArgsName) {
             @foreach (var arg in method.ClientParameters)
             {

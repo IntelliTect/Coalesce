@@ -139,10 +139,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
-                if (IsPOCO) return $"ViewModels.{PureType.Name}";
-                if (IsClass) return PureType.Name;
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
+                if (IsPOCO) return $"ViewModels.{PureType.Name}";
+                if (IsClass) return PureType.Name;
                 return "any";
             }
         }

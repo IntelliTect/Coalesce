@@ -19,12 +19,12 @@ namespace IntelliTect.Coalesce.Validation
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
                 assert.IsNotNull(model.PrimaryKey, $"Primary key not found for {model.Name}. Primary key should be named {model.Name}Id or have the [Key] attribute.");
-                assert.IsTrue(model.PrimaryKey.IsClientExposed, "Model primary keys must be exposed to the client.");
+                assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
                 assert.IsTrue(model.SearchProperties().Any(), $"No searchable properties found for {model.Name}. Annotate a property with [Search].");
                 assert.IsNotNull(model.ListTextProperty, $"No default text for dropdown lists found for {model.Name}. Add a Name property or use the [ListText] annotation on the property to be used.");
                 assert.IsTrue(model.DefaultOrderBy.Any(), $"No default order found for {model.Name}. Use the [DefaultOrderBy] annotation.");
                 // Check object references to see if they all have keys and remote keys
-                foreach (var prop in model.ClientExposedProperties)
+                foreach (var prop in model.ClientProperties)
                 {
                     assert.Area = $"{model.Name}.{prop.Name}";
                     try
@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.Validation
                 }
 
                 // Validate Methods
-                foreach (var method in model.Methods.Where(f => !f.IsInternalUse))
+                foreach (var method in model.ClientMethods)
                 {
                     assert.Area = $"{model.Name}.{method.Name}";
                     try

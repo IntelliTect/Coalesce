@@ -380,31 +380,6 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
-        /// Method: GetAllOpenCases
-        /// </summary>
-        [HttpPost("GetAllOpenCases")]
-        public virtual SaveResult<IEnumerable<CaseDtoGen>> GetAllOpenCases()
-        {
-            var result = new SaveResult<IEnumerable<CaseDtoGen>>();
-            try
-            {
-                IncludeTree includeTree = null;
-                var objResult = Coalesce.Domain.Case.GetAllOpenCases(Db);
-                var mappingContext = new MappingContext(User, "");
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Case, CaseDtoGen>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]

@@ -157,7 +157,7 @@ namespace IntelliTect.Coalesce.Controllers
                         result = result.OrderBy(defaultOrderBy);
                     }
                     // Use the Name property if it exists.
-                    else if (ClassViewModel.ClientExposedProperties.Any(f => f.Name == "Name"))
+                    else if (ClassViewModel.ClientProperties.Any(f => f.Name == "Name"))
                     {
                         result = result.OrderBy("Name");
                     }
@@ -300,7 +300,7 @@ namespace IntelliTect.Coalesce.Controllers
                     var field = fieldValueParts[0].Trim();
                     var value = fieldValueParts[1].Trim();
 
-                    var prop = ClassViewModel.ClientExposedProperties.FirstOrDefault(f => 
+                    var prop = ClassViewModel.ClientProperties.FirstOrDefault(f => 
                         string.Compare(f.Name, field, true) == 0 ||
                         string.Compare(f.DisplayName, field, true) == 0);
 
@@ -394,14 +394,14 @@ namespace IntelliTect.Coalesce.Controllers
         protected IEnumerable<string> PropertyValuesImplementation(string property, int page = 1, string search = "")
         {
             var originalProp = ClassViewModel.PropertyByName(property);
-            if (originalProp != null && originalProp.IsClientExposed)
+            if (originalProp != null && originalProp.IsClientProperty)
             {
                 if (!originalProp.SecurityInfo.IsReadable(User)) throw new AccessViolationException($"{property} is not accessible by current user.");
 
                 List<PropertyViewModel> properties = new List<PropertyViewModel>();
                 if (originalProp.ListGroup != null)
                 {
-                    properties.AddRange(ClassViewModel.ClientExposedProperties.Where(f => f.ListGroup == originalProp.ListGroup));
+                    properties.AddRange(ClassViewModel.ClientProperties.Where(f => f.ListGroup == originalProp.ListGroup));
                 }
                 else
                 {
@@ -540,7 +540,7 @@ namespace IntelliTect.Coalesce.Controllers
             }
 
             // Convert all DateTimeOffsets to the correct Time Zone.
-            foreach (var prop in DtoViewModel.ClientExposedProperties.Where(f => f.Type.IsDateTimeOffset))
+            foreach (var prop in DtoViewModel.ClientProperties.Where(f => f.Type.IsDateTimeOffset))
             {
                 var typeProperty = dto.GetType().GetProperty(prop.Name);
                 // Make sure the property exists. TODO: Check this out for base classes.
@@ -680,7 +680,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
         {
             // Get the object of the middle class.
-            var manyToManyProperty = ClassViewModel.ClientExposedProperties.First(f => string.Compare(f.ManyToManyCollectionName, propertyName, true) == 0);
+            var manyToManyProperty = ClassViewModel.ClientProperties.First(f => string.Compare(f.ManyToManyCollectionName, propertyName, true) == 0);
             if (manyToManyProperty != null && manyToManyProperty.Object != null)
             {
                 // Check security on the collection property that holds the many-to-many objects.
@@ -692,8 +692,8 @@ namespace IntelliTect.Coalesce.Controllers
 
                 var joinClass = manyToManyProperty.Object;
                 string tableName = joinClass.TableName;
-                string thisKeyName = joinClass.ClientExposedProperties.First(f => f.PureType.Name == ClassViewModel.Name).ObjectIdProperty.ColumnName;
-                string otherKeyName = joinClass.ClientExposedProperties.First(f => !f.IsPrimaryKey && f.IsId && f.ColumnName != thisKeyName).ColumnName;
+                string thisKeyName = joinClass.ClientProperties.First(f => f.PureType.Name == ClassViewModel.Name).ObjectIdProperty.ColumnName;
+                string otherKeyName = joinClass.ClientProperties.First(f => !f.IsPrimaryKey && f.IsId && f.ColumnName != thisKeyName).ColumnName;
 
                 try
                 {

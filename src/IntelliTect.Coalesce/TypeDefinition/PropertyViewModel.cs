@@ -18,11 +18,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class PropertyViewModel : IAttributeProvider
     {
-        public bool IsClientExposed => 
-               !IsInternalUse
-            // TODO: get rid of this.
-            && !(new[] { "Image", "IdentityRole", "IdentityUserRole", "IdentityUserClaim", "IdentityUserLogin" }.Contains(PureType.Name))
-            && HasGetter;
+        /// <summary>
+        /// Returns whether or not the property may be exposed to the client.
+        /// </summary>
+        public bool IsClientProperty => !IsInternalUse && HasGetter;
 
         public TypeViewModel Type { get; protected set; }
 
@@ -44,11 +43,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if this property has the InternalUse Attribute 
         /// </summary>
         public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
-
-        public static implicit operator PropertyViewModel(System.Linq.Expressions.LambdaExpression e)
-        {
-            return ReflectionRepository.Global.PropertyBySelector(e);
-        }
 
         /// <summary>
         /// Order rank of the field in the model.

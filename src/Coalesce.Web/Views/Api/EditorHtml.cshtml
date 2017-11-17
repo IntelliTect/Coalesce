@@ -6,7 +6,7 @@
 
 @{ ClassViewModel model = Model;}
 <div class="form-horizontal">
-    @foreach (var prop in model.ClientExposedProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.IsReadable(User)).OrderBy(f => f.EditorOrder))
+    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.IsReadable(User)).OrderBy(f => f.EditorOrder))
     {
         if (ViewBag.SimpleEditorOnly == null || ViewBag.SimpleEditorOnly == false ||
                         (prop.IsManytoManyCollection == prop.Type.IsCollection))
@@ -21,7 +21,7 @@
         }
     }
 
-    @if (model.Methods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic && f.IsClientMethod))
+    @if (model.ClientMethods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic))
     {
     <div class="row">
         <div class="col-lg-offset-2 col-lg-10">
@@ -37,7 +37,7 @@
                         <label class="col-md-2">Loading</label>
                         <label class="col-md-2 bold">Notes</label>
                     </div>
-                    @foreach (MethodViewModel method in model.Methods.Where(f => f.SecurityInfo.IsExecutable(User) && !f.IsStatic && f.IsClientMethod))
+                    @foreach (MethodViewModel method in model.ClientMethods.Where(f => f.SecurityInfo.IsExecutable(User) && !f.IsStatic))
                         {
                         <div class="form-group form-horizontal">
                             <div class="col-md-2">

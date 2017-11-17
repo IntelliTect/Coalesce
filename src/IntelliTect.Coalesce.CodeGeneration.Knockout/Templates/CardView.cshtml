@@ -76,7 +76,7 @@
 
 <div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
     @{
-        var properties = model.ClientExposedProperties
+        var properties = model.ClientProperties
             .Where(f => !f.IsHidden(HiddenAttribute.Areas.List))
             .OrderBy(f => f.EditorOrder)
             .ToList();
@@ -123,7 +123,7 @@
             <div style="margin-top: auto">
                 <!-- Editor buttons -->
                 <div class="pull-right" role="group">
-                    @if (model.Methods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.IsClientMethod && !f.IsStatic))
+                    @if (model.ClientMethods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
                     {
                         <!-- Action buttons -->
                         <div class="btn-group" role="group">
@@ -131,7 +131,7 @@
                                 Actions <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                @foreach (var method in model.Methods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.IsClientMethod && !f.IsStatic))
+                                @foreach (var method in model.ClientMethods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
                                 {
                                     <li>@Display.MethodHelper(method)</li>
                                 }
@@ -162,7 +162,7 @@
 
 
 
-@if (model.Methods.Any(f => f.IsStatic && f.IsClientMethod))
+@if (model.ClientMethods.Any(f => f.IsStatic))
 {
     <div class="card">
         <div class="card-heading">
@@ -179,7 +179,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (MethodViewModel method in model.Methods.Where(f => f.IsStatic && f.IsClientMethod))
+                    @foreach (MethodViewModel method in model.ClientMethods.Where(f => f.IsStatic))
                     {
                         <tr>
                             <td>
@@ -207,7 +207,7 @@
 }
 
 
-@foreach (var method in model.Methods.Where(f => f.IsStatic && f.ClientParameters.Any() && f.IsClientMethod))
+@foreach (var method in model.ClientMethods.Where(f => f.IsStatic && f.ClientParameters.Any()))
 {
     <!-- Modal for method: @method.Name -->
     <div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog">

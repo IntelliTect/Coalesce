@@ -205,19 +205,7 @@ namespace Coalesce.Domain
         [Execute]
         public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
         {
-            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
-        }
-
-
-        /// <summary>
-        /// Gets all the first names starting with the characters.
-        /// </summary>
-        /// <param name="characters"></param>
-        /// <param name="db"></param>
-        /// <returns></returns>
-        public static IEnumerable<string> NamesStartingWithPublic(string characters, AppDbContext db)
-        {
-            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
+            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
         public static IQueryable<Person> NamesStartingWithAWithCases(AppDbContext db)

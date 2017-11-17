@@ -53,7 +53,7 @@
 {
     if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
 }
-@foreach (var method in model.Methods)
+@foreach (var method in model.ClientMethods)
 {
     var ns = method.ReturnType.PureType.FullNamespace;
     if (!ns.StartsWith("System"))
@@ -105,7 +105,7 @@ namespace @(namespaceName).Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            @(string.Join(",",model.BaseViewModel.ClientExposedProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+            @(string.Join(",",model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
             @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
@@ -116,7 +116,7 @@ namespace @(namespaceName).Api
             ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
-            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientExposedProperties.Where(f => f.IsUrlParameter))
+            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientProperties.Where(f => f.IsUrlParameter))
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
@@ -139,7 +139,7 @@ namespace @(namespaceName).Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            @(string.Join(",",model.ClientExposedProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+            @(string.Join(",",model.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
             @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
@@ -150,7 +150,7 @@ namespace @(namespaceName).Api
             ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
-            @foreach (PropertyViewModel prop in model.ClientExposedProperties.Where(f => f.IsUrlParameter))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsUrlParameter))
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
@@ -165,7 +165,7 @@ namespace @(namespaceName).Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            @(string.Join(",",model.ClientExposedProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+            @(string.Join(",",model.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
             @*if (!Model.SecurityInfo.IsReadAllowed(User))
             {
@@ -176,7 +176,7 @@ namespace @(namespaceName).Api
             ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
 
             // Add custom filters
-            @foreach(PropertyViewModel prop in model.ClientExposedProperties.Where(f=>f.IsUrlParameter))
+            @foreach(PropertyViewModel prop in model.ClientProperties.Where(f=>f.IsUrlParameter))
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
@@ -284,12 +284,12 @@ namespace @(namespaceName).Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            @(string.Join(",",model.BaseViewModel.ClientExposedProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+            @(string.Join(",",model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
-            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientExposedProperties.Where(f => f.IsUrlParameter))
+            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientProperties.Where(f => f.IsUrlParameter))
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
@@ -314,12 +314,12 @@ namespace @(namespaceName).Api
             string dataSource = null,
             string search = null,
             // Custom fields for this object.
-            @(string.Join(",",model.BaseViewModel.ClientExposedProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+            @(string.Join(",",model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
         {
             ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
-            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientExposedProperties.Where(f => f.IsUrlParameter))
+            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientProperties.Where(f => f.IsUrlParameter))
             {
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
@@ -393,7 +393,7 @@ namespace @(namespaceName).Api
 
         protected override IQueryable<@(model.BaseViewModel.FullName)> GetDataSource(ListParameters parameters)
         {
-            @foreach (var method in model.Methods.Where(m => m.IsStatic && m.ReturnType.IsA<IQueryable>() && m.ReturnType.PureType.Name == model.Name && m.IsClientMethod))
+            @foreach (var method in model.ClientDataSources)
             {
             @:if (parameters.DataSource == "@(method.Name)")
             @:{
@@ -417,7 +417,7 @@ namespace @(namespaceName).Api
         }
 
         // Methods from data class exposed through API Controller.
-        @foreach (var method in model.Methods.Where(m=>m.IsClientMethod))
+        @foreach (var method in model.ClientMethods)
         {
         <text>
         /// <summary>

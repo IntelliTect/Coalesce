@@ -148,7 +148,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             lock (_lock)
             {
                 var models = new List<ClassViewModel>();
-                foreach (var prop in context.ClientExposedProperties)
+                foreach (var prop in context.ClientProperties)
                 {
                     if ((prop.Type.IsCollection || prop.IsDbSet) && IsValidViewModelClass(prop.PureType.Name))
                     {
@@ -177,7 +177,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private void AddChildModels(List<ClassViewModel> models, ClassViewModel model)
         {
-            foreach (var prop in model.ClientExposedProperties.Where(p => p.PureType.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
+            foreach (var prop in model.ClientProperties.Where(p => p.PureType.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
             {
                 var propModel = prop.PureType.ClassViewModel;
                 if (propModel != null && !propModel.HasDbSet && !models.Contains(propModel))
@@ -186,7 +186,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     AddChildModels(models, propModel);
                 }
             }
-            foreach (var method in model.Methods.Where(p => !p.IsInternalUse && !p.ReturnType.IsVoid && p.ReturnType.PureType.HasClassViewModel))
+            foreach (var method in model.ClientMethods.Where(p => !p.ReturnType.IsVoid && p.ReturnType.PureType.HasClassViewModel))
             {
                 lock (models)
                 {

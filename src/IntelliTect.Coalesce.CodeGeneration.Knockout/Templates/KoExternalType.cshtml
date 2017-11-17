@@ -30,7 +30,7 @@ module @moduleName {
         }
 
         // Observables
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties)
+        @foreach (PropertyViewModel prop in model.ClientProperties)
         {
 		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.JsKnockoutType());
         if (prop.PureType.IsEnum)
@@ -57,7 +57,7 @@ module @moduleName {
             }
 
                 // Load the properties.
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties)
+        @foreach (PropertyViewModel prop in model.ClientProperties)
         {
             if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
             {

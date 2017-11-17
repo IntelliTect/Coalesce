@@ -15,6 +15,7 @@
 * Namespace intellitect.webApi is now Coalesce.ModalHelpers
 * Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within.
 * <ModelName>ListUrl properties on generated ViewModels is now correctly camelCased.
+* DataSources on models are no longer generated as client-callable static methods on ListViewModels.
 * BaseViewModel<T>:
 	* deleteCallbacks have been removed.
 	* customField1, 2, & 3 have been removed.

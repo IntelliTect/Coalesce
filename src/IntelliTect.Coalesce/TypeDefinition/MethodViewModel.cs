@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -37,9 +38,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Parent = parent;
         }
-
-        public bool IsIQueryableOfParent =>
-            IsStatic && ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
 
         public string JsVariable => Name.ToCamelCase();
 
@@ -126,14 +124,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the CS arguments passed to this method call.
         /// </summary>
-        public string CsArguments
-        {
-            get
-            {
-                var result = string.Join(", ", Parameters.Select(f => f.CsArgumentName));
-                return result;
-            }
-        }
+        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgumentName));
 
 
         /// <summary>
@@ -205,39 +196,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
-
-        public SecurityInfoMethod SecurityInfo
+        public SecurityInfoMethod SecurityInfo => new SecurityInfoMethod()
         {
-            get
-            {
-                var result = new SecurityInfoMethod();
-
-                if (HasAttribute<ExecuteAttribute>())
-                {
-                    result.IsExecute = true;
-                    result.ExecuteRoles = this.GetAttributeValue<ExecuteAttribute>(a => a.Roles);
-                }
-
-                return result;
-            }
-        }
+            IsExecute = HasAttribute<ExecuteAttribute>(),
+            ExecuteRoles = this.GetAttributeValue<ExecuteAttribute>(a => a.Roles) ?? ""
+        };
 
         /// <summary>
-        /// If true, this is a client side method.
+        /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsClientMethod
-        {
-            get
-            {
-                return !IsInternalUse && 
-                    Name != "BeforeSave" && 
-                    Name != "AfterSave" && 
-                    Name != "BeforeDelete" && 
-                    Name != "AfterDelete" &&
-                    Name != "Exclude";
-            }
-        }
+        public bool IsClientMethod => !IsInternalUse && !IsClientDataSource;
+
+        /// <summary>
+        /// If true, this is a method that can be specified by the client as a data source.
+        /// </summary>
+        public bool IsClientDataSource =>
+            !IsInternalUse &&
+            IsStatic && 
+            ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
+
+
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

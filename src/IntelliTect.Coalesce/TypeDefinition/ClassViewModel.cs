@@ -14,6 +14,7 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Helpers.Search;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -108,9 +109,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         internal abstract ICollection<MethodViewModel> RawMethods { get; }
 
         /// <summary>
-        /// All properties for the object
+        /// All properties for the object.
+        /// This collection is not filtered to only those properties which should be exposed to the client.
         /// </summary>
-        public ICollection<PropertyViewModel> Properties
+        /// <remarks>
+        /// This collection is internal to prevent accidental exposing of properties that should not be exposed.
+        /// </remarks>
+        internal ICollection<PropertyViewModel> Properties
         {
             get
             {
@@ -143,32 +148,49 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public IEnumerable<PropertyViewModel> ClientExposedProperties => Properties.Where(p => p.IsClientExposed);
+        public IEnumerable<PropertyViewModel> ClientProperties => Properties.Where(p => p.IsClientProperty);
 
         /// <summary>
-        /// All the methods for the Class
+        /// List of method names that should not be exposed to the client.
         /// </summary>
-        public ICollection<MethodViewModel> Methods
+        private string[] excludedMethodNames = new[] {
+            nameof(Data.IBeforeSave<object, DbContext>.BeforeSave),
+            nameof(Data.IAfterSave<object, DbContext>.AfterSave),
+            nameof(Data.IBeforeDelete<DbContext>.BeforeDelete),
+            nameof(Data.IAfterDelete<DbContext>.AfterDelete),
+            nameof(Data.IExcludable.Exclude),
+            nameof(Data.IIncludable<object>.Include),
+            nameof(Data.IIncludeExternal<object>.IncludeExternal),
+            nameof(object.ToString),
+            nameof(object.Equals),
+            nameof(object.GetHashCode),
+            nameof(object.GetType),
+        };
+
+        /// <summary>
+        /// All the methods for the Class.
+        /// This collection is NOT filtered to only client methods.
+        /// It IS filtered by common methods that 
+        /// </summary>
+        /// <remarks>
+        /// This collection is internal to prevent accidental exposing of methods that should not be exposed.
+        /// </remarks>
+        internal ICollection<MethodViewModel> Methods
         {
             get
             {
                 if (_Methods != null) return _Methods;
 
-                var exclude = new[] {
-                    nameof(Data.IIncludable<object>.Include),
-                    nameof(Data.IIncludeExternal<object>.IncludeExternal),
-                    nameof(object.ToString),
-                    nameof(object.Equals),
-                    nameof(object.GetHashCode),
-                    nameof(object.GetType),
-                };
-
                 return _Methods = RawMethods
-                    .Where(m => !exclude.Contains(m.Name))
+                    .Where(m => !excludedMethodNames.Contains(m.Name))
                     .Where(m => !IsDto || (m.Name != nameof(Interfaces.IClassDto<object, object>.Update) && m.Name != nameof(Interfaces.IClassDto<object, object>.CreateInstance)))
                     .ToList();
             }
         }
+
+        public IEnumerable<MethodViewModel> ClientMethods => Methods.Where(m => m.IsClientMethod);
+
+        public IEnumerable<MethodViewModel> ClientDataSources => Methods.Where(m => m.IsClientDataSource);
 
 
         /// <summary>
@@ -182,13 +204,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns a method matching the name if it exists.
+        /// Returns a client method matching the name if it exists.
+        /// Non-client-exposed methods will not be returned.
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
         public MethodViewModel MethodByName(string key)
         {
-            return Methods.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
+            return ClientMethods.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
@@ -251,7 +274,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!result.Any())
                 {
                     var nameProp = PropertyByName("Name");
-                    if (nameProp != null && !nameProp.HasNotMapped && nameProp.IsClientExposed)
+                    if (nameProp != null && !nameProp.HasNotMapped && nameProp.IsClientProperty)
                     {
                         result.Add(new OrderByInformation()
                         {
@@ -307,7 +330,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 PrimaryKey
             })
             {
-                if (prop != null && !prop.HasNotMapped && prop.IsClientExposed)
+                if (prop != null && !prop.HasNotMapped && prop.IsClientProperty)
                 {
                     yield return new SearchableValueProperty(prop);
                     yield break;
@@ -328,8 +351,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Use the ListText Attribute first, then Name and then ID.
         /// </summary>
         public PropertyViewModel ListTextProperty =>
-            ClientExposedProperties.FirstOrDefault(f => f.IsListText) ??
-            ClientExposedProperties.FirstOrDefault(f => f.Name == "Name") ??
+            ClientProperties.FirstOrDefault(f => f.IsListText) ??
+            ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
         public string ApiUrl => ApiName;
@@ -376,7 +399,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string DtoIncludesAsCS()
         {
-            var includeList = ClientExposedProperties
+            var includeList = ClientProperties
                 .Where(p => p.HasDtoIncludes)
                 .SelectMany(p => p.DtoIncludes)
                 .Distinct()
@@ -388,7 +411,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string DtoExcludesAsCS()
         {
-            var excludeList = ClientExposedProperties
+            var excludeList = ClientProperties
                 .Where(p => p.HasDtoExcludes)
                 .SelectMany(p => p.DtoExcludes)
                 .Distinct()
@@ -400,7 +423,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string PropertyRolesAsCS()
         {
-            var allPropertyRoles = ClientExposedProperties
+            var allPropertyRoles = ClientProperties
                 .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
                 .Distinct()
                 .Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");")

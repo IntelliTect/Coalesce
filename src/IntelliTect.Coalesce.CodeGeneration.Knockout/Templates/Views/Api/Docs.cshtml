@@ -69,7 +69,7 @@
                     <th class="text-center">Client Validation</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var prop in vm.ClientExposedProperties)
+                @foreach (var prop in vm.ClientProperties)
                 {
                     <tr>
                         <th>@prop.Name</th>
@@ -171,7 +171,7 @@
                     <th>TypeScript Parameters</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var method in vm.Methods.Where(m => m.IsClientMethod))
+                @foreach (var method in vm.ClientMethods)
                 {
                     <tr>
                         <th>@method.Name</th>
@@ -195,10 +195,10 @@
                 <h3>@vm.Name Alternate List Data Sources</h3>
                 <div>These can be accessed via the list view model's dataSource via an enumeration.</div>
             </div>
-            @if (vm.Methods.Any(m => m.IsIQueryableOfParent && m.IsClientMethod))
+            @if (vm.ClientDataSources.Any())
             {
                 <ul class="list-group">
-                    @foreach (var method in vm.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod))
+                    @foreach (var method in vm.ClientDataSources)
                 {
                         <li class="list-group-item">
                             @method.Name

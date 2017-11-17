@@ -507,55 +507,5 @@ namespace Coalesce.Web.Api
             }
             return result;
         }
-
-        /// <summary>
-        /// Method: NamesStartingWithAWithCases
-        /// </summary>
-        [HttpPost("NamesStartingWithAWithCases")]
-        public virtual SaveResult<IEnumerable<PersonDtoGen>> NamesStartingWithAWithCases()
-        {
-            var result = new SaveResult<IEnumerable<PersonDtoGen>>();
-            try
-            {
-                IncludeTree includeTree = null;
-                var objResult = Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
-                var mappingContext = new MappingContext(User, "");
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Method: BorCPeople
-        /// </summary>
-        [HttpPost("BorCPeople")]
-        public virtual SaveResult<IEnumerable<PersonDtoGen>> BorCPeople()
-        {
-            var result = new SaveResult<IEnumerable<PersonDtoGen>>();
-            try
-            {
-                IncludeTree includeTree = null;
-                var objResult = Coalesce.Domain.Person.BorCPeople(Db);
-                var mappingContext = new MappingContext(User, "");
-                result.Object = objResult.ToList().Select(o => Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
     }
 }

@@ -38,7 +38,7 @@ module @moduleName {
     // Add an enum for all methods that are static and IQueryable
     export enum @(model.Name)DataSources {
             Default,
-            @foreach(var method in model.BaseViewModel.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod && m.IsStatic).OrderBy(m => m.Name))
+            @foreach(var method in model.BaseViewModel.ClientDataSources.OrderBy(m => m.Name))
             {
             @:@method.Name,
             }
@@ -54,7 +54,7 @@ module @moduleName {
 
         public query: {
             where?: string;
-            @(string.Join("\n            ", model.BaseViewModel.ClientExposedProperties.Where(f=>f.IsUrlParameter).Select(f=>$"{f.UrlParameterName}?:{f.Type.TsType};")))
+            @(string.Join("\n            ", model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"{f.UrlParameterName}?:{f.Type.TsType};")))
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
@@ -63,7 +63,7 @@ module @moduleName {
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(@(model.ListViewModelClassName).coalesceConfig);
 
-        @foreach(var method in model.Methods.Where(m => m.IsStatic && m.IsClientMethod))
+        @foreach(var method in model.ClientMethods.Where(m => m.IsStatic))
         {
         <text>
         // Call server method (@method.Name)
@@ -192,7 +192,7 @@ module @moduleName {
 
     export namespace @(model.ListViewModelClassName) {
         // Classes for use in method calls to support data binding for input for arguments
-        @foreach(MethodViewModel method in model.Methods.Where(f => f.ClientParameters.Any() && f.IsStatic && f.IsClientMethod)){
+        @foreach(MethodViewModel method in model.ClientMethods.Where(f => f.ClientParameters.Any() && f.IsStatic)){
         @:export class @(method.ArgsName) {
             @foreach (var arg in method.ClientParameters)
             {

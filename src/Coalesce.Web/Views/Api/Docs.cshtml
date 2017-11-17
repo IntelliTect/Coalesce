@@ -63,14 +63,13 @@
                 <tr>
                     <th>Name</th>
                     <th>Type</th>
-                    <th class="text-center">Exposed</th>
                     <th class="text-center">Required</th>
                     <th class="text-center">Read Only</th>
                     <th class="text-center">Has Valid Values</th>
                     <th class="text-center">Client Validation</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var prop in vm.Properties)
+                @foreach (var prop in vm.ClientProperties)
                 {
                     <tr>
                         <th>@prop.Name</th>
@@ -90,16 +89,6 @@
                             else
                             {
                                 <span>@prop.PureType.Name</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            @if (!prop.IsInternalUse)
-                            {
-                            <span class="glyphicon glyphicon-ok" style="color:green;"></span>
-                            }
-                            else
-                            {
-                            <span class="glyphicon glyphicon-remove" style="color:red;"></span>
                             }
                         </td>
                         <td class="text-center">
@@ -182,7 +171,7 @@
                     <th>TypeScript Parameters</th>
                     <th>Security</th>
                 </tr>
-                @foreach (var method in vm.Methods.Where(m => m.IsClientMethod))
+                @foreach (var method in vm.ClientMethods)
                 {
                     <tr>
                         <th>@method.Name</th>
@@ -206,10 +195,10 @@
                 <h3>@vm.Name Alternate List Data Sources</h3>
                 <div>These can be accessed via the list view model's dataSource via an enumeration.</div>
             </div>
-            @if (vm.Methods.Any(m => m.IsIQueryableOfParent && m.IsClientMethod))
+            @if (vm.ClientDataSources.Any())
             {
                 <ul class="list-group">
-                    @foreach (var method in vm.Methods.Where(m => m.IsIQueryableOfParent && m.IsClientMethod))
+                    @foreach (var method in vm.ClientDataSources)
                 {
                         <li class="list-group-item">
                             @method.Name

@@ -28,7 +28,7 @@
 {
     if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
 }
-@foreach (var prop in model.ClientExposedProperties)
+@foreach (var prop in model.ClientProperties)
 {
     var ns = prop.Type.PureType.FullNamespace;
     if (!ns.StartsWith("System"))
@@ -50,7 +50,7 @@ namespace @(namespaceName).Models
         {
         public @(model.Name)DtoGen() { }
 
-        @foreach (PropertyViewModel prop in model.ClientExposedProperties)
+        @foreach (PropertyViewModel prop in model.ClientProperties)
         {
         @:public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
         }
@@ -77,7 +77,7 @@ namespace @(namespaceName).Models
             var newObject = new @(model.Name)DtoGen();
             if (tree == null) context.AddMapping(obj, newObject);
             // Fill the properties of the object.
-            @foreach (var prop in model.ClientExposedProperties.OrderBy(p => p.PureType.HasClassViewModel))
+            @foreach (var prop in model.ClientProperties.OrderBy(p => p.PureType.HasClassViewModel))
             {
                 @prop.ObjToDtoPropertySetter("newObject")
             }            
@@ -105,7 +105,7 @@ namespace @(namespaceName).Models
             // Applicable roles for @(model.Name)
             @(model.PropertyRolesAsCS())
 
-            @foreach (var conditionGroup in model.ClientExposedProperties
+            @foreach (var conditionGroup in model.ClientProperties
             .Where(p => p.IsClientWritable)
             .Select(p => p.DtoToObjPropertySetter())
             .Where(p => p != null)

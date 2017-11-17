@@ -48,8 +48,6 @@
         createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
         editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {{";
     }
-        
-
 }
 @foreach (var ns in ReflectionRepository.Global.Namespaces.Where(f => f != "System"))
 {

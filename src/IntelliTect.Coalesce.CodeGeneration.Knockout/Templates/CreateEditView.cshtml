@@ -38,43 +38,20 @@
             </div>
             @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
             {
-                if (prop.IsComplexType)
-                {
-                    <div class="panel panel-default" data-bind="with: @prop.JsVariable">
-                        <div class="panel-heading">
-                            <h4>@prop.DisplayName</h4>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">@prop.DisplayName</label>
+                    @if (prop.IsPOCO && prop.PureTypeOnContext)
+                    {
+                        @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName, 7)
+                        <div class="col-md-1" data-bind="with: @prop.JsonName">
+                            <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                         </div>
-                        <div class="panel-body">
-                            <!-- Properties  -->
-                            @foreach (var subProp in prop.Object.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
-                            {
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label">@subProp.DisplayName</label>
-                                    <div class="col-md-8">
-                                        @Display.PropertyHelper(subProp, !subProp.IsReadOnly, Model.AreaName)
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">@prop.DisplayName</label>
-                        @if (prop.IsPOCO && prop.PureTypeOnContext)
-                        {
-                            @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName, 7)
-                            <div class="col-md-1" data-bind="with: @prop.JsonName">
-                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
-                            </div>
-                        }
-                        else
-                        {
-                            @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName)
-                        }
-                    </div>
-                }
+                    }
+                    else
+                    {
+                        @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName)
+                    }
+                </div>
             }
         </div>
     </div>

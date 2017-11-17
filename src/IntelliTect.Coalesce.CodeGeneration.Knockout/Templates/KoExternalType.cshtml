@@ -33,7 +33,7 @@ module @moduleName {
         @foreach (PropertyViewModel prop in model.Properties.Where(f => f.HasViewModelProperty))
         {
 		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.JsKnockoutType());
-        if (prop.Type.IsEnum)
+        if (prop.PureType.IsEnum)
         { 
         @:public @(prop.JsTextPropertyName) = @(prop.Type.JsKnockoutType());  // Enum Text Value
         }

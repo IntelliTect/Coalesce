@@ -223,8 +223,6 @@ module ViewModels {
             };
 
             // This stuff needs to be done after everything else is set up.
-            // Complex Type Observables
-
             self.caseId.subscribe(self.autoSave);
             self.case.subscribe(self.autoSave);
             self.productId.subscribe(self.autoSave);

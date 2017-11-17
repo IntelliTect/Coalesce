@@ -50,7 +50,7 @@ namespace @(namespaceName).Models
         {
         public @(model.Name)DtoGen() { }
 
-        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty))
+        @foreach (PropertyViewModel prop in model.Properties.Where(p => p.HasGetter && p.HasViewModelProperty))
         {
         @:public @prop.Type.NullableTypeForDto @prop.Name { get; set; }
         }
@@ -77,7 +77,7 @@ namespace @(namespaceName).Models
             var newObject = new @(model.Name)DtoGen();
             if (tree == null) context.AddMapping(obj, newObject);
             // Fill the properties of the object.
-            @foreach (var prop in model.Properties.Where(p => p.CanRead && p.HasViewModelProperty).OrderBy(p => p.PureType.HasClassViewModel))
+            @foreach (var prop in model.Properties.Where(p => p.HasGetter && p.HasViewModelProperty).OrderBy(p => p.PureType.HasClassViewModel))
             {
                 @prop.ObjToDtoPropertySetter("newObject")
             }            
@@ -106,13 +106,13 @@ namespace @(namespaceName).Models
             @(model.PropertyRolesAsCS())
 
             @foreach (var conditionGroup in model.Properties
-             .Where(p => p.CanWrite && p.HasViewModelProperty)
-             .Select(p => p.DtoToObjPropertySetter())
-             .Where(p => p != null)
-             .GroupBy(s => s.Value.conditional))
+            .Where(p => p.IsClientWritable && p.HasViewModelProperty)
+            .Select(p => p.DtoToObjPropertySetter())
+            .Where(p => p != null)
+            .GroupBy(s => s.Value.conditional))
             {
-            if (!string.IsNullOrWhiteSpace(conditionGroup.Key))
-            {
+                if (!string.IsNullOrWhiteSpace(conditionGroup.Key))
+                {
             @:if (@(conditionGroup.Key)) {
                 @foreach (var setter in conditionGroup)
                 {

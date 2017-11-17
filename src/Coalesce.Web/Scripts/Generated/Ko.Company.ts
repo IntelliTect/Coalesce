@@ -182,8 +182,6 @@ module ViewModels {
             };
 
             // This stuff needs to be done after everything else is set up.
-            // Complex Type Observables
-
             self.name.subscribe(self.autoSave);
             self.address1.subscribe(self.autoSave);
             self.address2.subscribe(self.autoSave);

@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
         public static string ClientValidationKnockoutJs(this PropertyViewModel prop)
         {
             // Don't bother with validation on non-editable fields.
-            if (!prop.CanWrite) return null;
+            if (!prop.IsClientWritable) return null;
 
             var isRequired = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired);
             var minValue = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue);

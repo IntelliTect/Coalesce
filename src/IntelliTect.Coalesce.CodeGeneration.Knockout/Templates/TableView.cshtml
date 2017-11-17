@@ -102,7 +102,7 @@
         }
         <thead>
             <tr>
-                @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+                @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                 {
                     @if (!prop.Type.IsCollection)
                     {
@@ -127,14 +127,14 @@
                 @{
                     @:@@if (@@ViewBag.Editable)
                     @:{
-                    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+                    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
                         @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)</td>
                         }
                     @:}
                     @:else
                     @:{
-                    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
+                    @foreach (var prop in model.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && f.HasViewModelProperty && !f.IsInternalUse).OrderBy(f => f.EditorOrder))
                         {
                         @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false, null, true)</td>
                         }

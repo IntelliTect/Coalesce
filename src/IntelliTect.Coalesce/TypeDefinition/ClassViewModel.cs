@@ -143,6 +143,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public IEnumerable<PropertyViewModel> ClientExposedProperties =>
+            Properties.Where(p => p.HasViewModelProperty && p.HasGetter && !p.IsInternalUse);
+
         /// <summary>
         /// All the methods for the Class
         /// </summary>

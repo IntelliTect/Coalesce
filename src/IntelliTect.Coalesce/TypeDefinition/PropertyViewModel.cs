@@ -108,16 +108,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        /// <summary>
-        /// Returns true if this property is a complex type.
-        /// </summary>
-        public bool IsComplexType => false;
-
 
         /// <summary>
         /// True if this property has a ViewModel.
         /// </summary>
-        public bool HasViewModel => Object != null && !IsInternalUse;
+        public bool HasViewModel => PureType.HasClassViewModel && !IsInternalUse;
 
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
@@ -169,19 +164,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the property is read only.
         /// </summary>
-        public bool IsReadOnly => !CanWrite && CanRead;
+        public bool IsReadOnly => !IsClientWritable && HasGetter;
 
         /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool CanWrite => HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
-
-        /// <summary>
-        /// True if the property can be read.
-        /// </summary>
-        public bool CanRead => HasGetter;
-
-
+        public bool IsClientWritable => HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
+        
         /// <summary>
         /// True if the property has the DateType(DateOnly) Attribute.
         /// </summary>
@@ -225,7 +214,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (Object == null || !Object.OnContext) return null;
 
-                if (IsPOCO && !IsComplexType) return Name;
+                if (IsPOCO) return Name;
 
                 return null;
             }
@@ -580,12 +569,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsInternalUse) return false;
-                if (PureType.Name == "Image") return false;
-                if (PureType.Name == "IdentityRole") return false;
-                if (PureType.Name == "IdentityUserRole") return false;
-                if (PureType.Name == "IdentityUserClaim") return false;
-                if (PureType.Name == "IdentityUserLogin") return false;
+                if (IsInternalUse)
+                    return false;
+
+                if (new []{"Image","IdentityRole","IdentityUserRole","IdentityUserClaim","IdentityUserLogin"}.Contains(PureType.Name))
+                    return false;
+
                 return true;
             }
         }
@@ -701,7 +690,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If true, this property should be searchable on the URL line. 
         /// </summary>
         public bool IsUrlParameter =>
-            !IsComplexType && (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
+            (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
 
         /// <summary>
         /// List of words already used in the API for other things.
@@ -883,17 +872,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
-        private bool IgnorePropertyInUpdates
-        {
-            get
-            {
-                return 
-                    IsReadOnly ||
-                    (IsPOCO && !IsComplexType) ||
-                    IsManytoManyCollection ||
-                    Type.IsCollection ||
-                    IsInternalUse;
-            }
-        }
+        private bool IgnorePropertyInUpdates =>
+            IsReadOnly || IsPOCO || IsManytoManyCollection || Type.IsCollection || IsInternalUse;
     }
 }

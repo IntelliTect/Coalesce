@@ -641,11 +641,11 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 returnString = DisplayCheckbox(propertyModel.JsVariableForBinding());
             }
-            else if (propertyModel.IsPOCO && !propertyModel.IsComplexType)
+            else if (propertyModel.IsPOCO)
             {
                 returnString = DisplayObject(propertyModel, linkObject);
             }
-            else if (propertyModel.Type.IsEnum || (propertyModel.PureType.IsEnum && propertyModel.Type.IsNullable))
+            else if (propertyModel.PureType.IsEnum)
             {
                 returnString = DisplayEnum(propertyModel);
             }

@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Validation
                         assert.isFalse(prop.HasAttribute<DataAnnotations.DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
-                        if (prop.IsPOCO && !prop.IsComplexType)
+                        if (prop.IsPOCO)
                         {
                             assert.IsNotNull(prop.Object, "The target object for the property was not found. Make sure naming is consistent.");
                             assert.IsNotNull(prop.Object.ListTextProperty, "The target object for the property has no discernable list text. Add a [ListTextAttribute] to one of its properties.");

@@ -11,37 +11,13 @@
         if (ViewBag.SimpleEditorOnly == null || ViewBag.SimpleEditorOnly == false ||
                         (prop.IsManytoManyCollection == prop.Type.IsCollection))
         {
-            if (prop.IsComplexType)
-            {
-                <div class="panel panel-default" data-bind="with: @prop.JsVariable">
-                    <div class="panel-heading">
-                        <h4>@prop.DisplayName</h4>
-                    </div>
-                    <div class="panel-body">
-                        <!-- Properties  -->
-                        @foreach (var subProp in prop.Object.Properties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)).OrderBy(f => f.EditorOrder))
-                        {
-                            <div class="form-group">
-                                <label class="col-md-4 control-label">@subProp.DisplayName</label>
-                                <div class="col-md-8">
-                                    @Display.Property(subProp, true)
-                                    @*@Editors.DisplayOrEdit(subProp, true, false)*@
-                                </div>
-                            </div>
-                        }
-                    </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">@prop.DisplayName</label>
+                <div class="col-md-8">
+                    @Display.Property(prop, prop.SecurityInfo.IsEditable(User))
+                    @*@Editors.DisplayOrEdit(prop, true, false)*@
                 </div>
-            }
-            else
-            {
-                <div class="form-group">
-                    <label class="col-md-4 control-label">@prop.DisplayName</label>
-                    <div class="col-md-8">
-                        @Display.Property(prop, prop.SecurityInfo.IsEditable(User))
-                        @*@Editors.DisplayOrEdit(prop, true, false)*@
-                    </div>
-                </div>
-            }
+            </div>
         }
     }
 

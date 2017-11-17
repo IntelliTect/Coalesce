@@ -154,11 +154,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
-        /// Returns true if this is a complex type.
-        /// </summary>
-        public bool IsComplexType => false;
-
-        /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
         public bool IsDate => IsDateTime || IsDateTimeOffset;

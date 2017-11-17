@@ -17,39 +17,39 @@
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Title</label>
-<div class="col-md-8 prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">First Name</label>
-<div class="col-md-8 prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Last Name</label>
-<div class="col-md-8 prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Email</label>
-<div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Gender</label>
-<div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Cases Assigned</label>
-<div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Cases Reported</label>
-<div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Birth Date</label>
-<div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Name</label>
-<div class="col-md-8 prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Company</label>
-<div class="col-md-7 prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>                            <div class="col-md-1" data-bind="with: company">
-                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
-                            </div>
-                    </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Title</label>
+<div class="col-md-8 prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">First Name</label>
+<div class="col-md-8 prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Last Name</label>
+<div class="col-md-8 prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Email</label>
+<div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Gender</label>
+<div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Cases Assigned</label>
+<div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Cases Reported</label>
+<div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Birth Date</label>
+<div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Name</label>
+<div class="col-md-8 prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))</div>                </div>
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Company</label>
+<div class="col-md-7 prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>                        <div class="col-md-1" data-bind="with: company">
+                            <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
+                        </div>
+                </div>
         </div>
     </div>
     <div class="panel-body">

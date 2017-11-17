@@ -62,7 +62,7 @@ module @moduleName {
         @:/** @(prop.Comment) */
         }
         @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.JsKnockoutType());
-        if (prop.Type.IsEnum || (prop.Type.IsNullable && prop.PureType.IsEnum))
+        if (prop.PureType.IsEnum)
         {
         @:/** Text value for enumeration @prop.Name */
         @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.pureComputed(() => {
@@ -144,7 +144,7 @@ module @moduleName {
         }
 
 
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.PureType.IsEnum))
         {
         @:/** Array of all possible names & values of enum @prop.JsVariable */
         @:public @(prop.JsVariable)Values: EnumValue[] = [ 
@@ -340,7 +340,7 @@ module @moduleName {
         }
             // Objects are loaded first so that they are available when the IDs get loaded.
             // This handles the issue with populating select lists with correct data because we now have the object.
-            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && p.IsPOCO && !p.Type.IsCollection && !p.IsComplexType && !p.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.HasGetter && p.IsPOCO && !p.Type.IsCollection && !p.IsInternalUse))
             {
             @:if (!data.@prop.JsonName) { 
                 if (prop.ObjectIdProperty != null) {
@@ -366,7 +366,7 @@ module @moduleName {
             }
 
             // The rest of the objects are loaded now.
-            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
+            @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.HasGetter && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
             {
             if (prop.Type.IsDate)
             {   // Using valueOf/getTime here is a 20x performance increase over moment.isSame(). moment(new Date(...)) is also a 10x perf increase.
@@ -392,10 +392,10 @@ module @moduleName {
             var dto: any = {};
             dto.@(model.Properties.First(f=>f.IsPrimaryKey).JsonName) = this.@(model.Properties.First(f=>f.IsPrimaryKey).JsVariable)();
 
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.CanWrite && !f.IsPOCO && f.HasViewModelProperty || f.IsComplexType))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsClientWritable && !f.IsPOCO && f.HasViewModelProperty))
             {
-            if (prop.Type.IsDateTimeOffset)
-            {
+                if (prop.Type.IsDateTimeOffset)
+                {
             @:if (!this.@(prop.JsVariable)()) dto.@prop.Name = null;
             @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ssZZ');
             }
@@ -403,15 +403,6 @@ module @moduleName {
             { 
             @:if (!this.@(prop.JsVariable)()) dto.@prop.Name = null;
             @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss');
-            }
-            else if (prop.IsComplexType) 
-            {
-            @:// Complex Type: @prop.Name>
-            @:dto.@(prop.JsonName)={};
-            foreach (PropertyViewModel subProp in prop.Object.Properties.Where(p=>p.CanRead && !p.HasValidValues && !p.Type.IsCollection && p.HasViewModelProperty))
-            {
-            @:dto.@(prop.JsonName).@(subProp.JsonName) = this.@(prop.JsVariable)().@(subProp.JsVariable)();
-            }
             }
             else if (prop.IsForeignKey)
             {
@@ -465,7 +456,7 @@ module @moduleName {
             }
 
             // Create computeds for display for objects
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.IsComplexType && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.IsInternalUse))
             {
 			@:self.@prop.JsTextPropertyName = ko.pureComputed(function()
 			@:{   // If the object exists, use the text value. Otherwise show 'None'
@@ -506,7 +497,7 @@ module @moduleName {
             }
 
 
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet && !f.IsInternalUse))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet && !f.IsInternalUse))
             {
             @:self.show@(prop.Name)Editor = function(callback: any) {
                 @:if (!self.@(prop.JsVariable)()) {
@@ -519,7 +510,7 @@ module @moduleName {
             // Load all child objects that are not loaded.
             self.loadChildren = function(callback) {
                 var loadingCount = 0;
-            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsComplexType && !f.IsInternalUse && !f.IsReadOnly && !f.HasNotMapped))
+            @foreach (PropertyViewModel prop in model.Properties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsInternalUse && !f.IsReadOnly && !f.HasNotMapped))
             {
                 @:// See if self.@(prop.JsVariable) needs to be loaded.
                 @:if (self.@(prop.JsVariable)() == null && self.@(prop.ObjectIdProperty.JsVariable)() != null){
@@ -540,13 +531,7 @@ module @moduleName {
             };
 
             // This stuff needs to be done after everything else is set up.
-            // Complex Type Observables
-        @foreach (PropertyViewModel prop in model.Properties.Where(f=>f.IsComplexType && !f.IsInternalUse))
-        {
-            @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(self));
-        }
-
-        @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.CanWrite && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
+        @foreach (PropertyViewModel prop in model.Properties.Where(p=>p.IsClientWritable && !p.IsManytoManyCollection && !p.Type.IsCollection && p.HasViewModelProperty))
         {
             @:self.@(prop.JsVariable).subscribe(self.autoSave);
         }
@@ -576,7 +561,7 @@ module @moduleName {
 
 
     export namespace @(model.ViewModelGeneratedClassName) {
-        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.Type.IsEnum || (f.Type.IsNullable && f.PureType.IsEnum)))
+        @foreach (PropertyViewModel prop in model.Properties.Where(f => f.PureType.IsEnum))
         {
         @:export enum @(prop.Name)Enum {
         @foreach (var kvp in prop.Type.EnumValues)

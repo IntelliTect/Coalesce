@@ -76,21 +76,15 @@
 
 <div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
     @{
-        var properties = model.Properties
-            .Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsComplexType && f.HasViewModelProperty && !f.IsInternalUse)
+        var properties = model.ClientExposedProperties
+            .Where(f => !f.IsHidden(HiddenAttribute.Areas.List))
             .OrderBy(f => f.EditorOrder)
             .ToList();
 
-        var titleProp = properties.Where(f => f.IsListText).FirstOrDefault();
-        if (titleProp == null)
-        {
+        var titleProp = properties.Where(f => f.IsListText).FirstOrDefault()
             // Prioritize "name" over "title" - probably more correct most of the time.
-            titleProp = properties.Where(f => f.Name == "Name").FirstOrDefault();
-            if (titleProp == null)
-            {
-                titleProp = properties.Where(f => f.Name == "Title").FirstOrDefault();
-            }
-        }
+            ?? properties.Where(f => f.Name == "Name").FirstOrDefault()
+            ?? properties.Where(f => f.Name == "Title").FirstOrDefault();
     }
     <div class="flex-card ">
         @if (titleProp != null)

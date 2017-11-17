@@ -14,7 +14,6 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
         {
             if (typeModel.IsByteArray) return "ko.observable(null)";
             if (typeModel.IsCollection || typeModel.IsArray) return "ko.observableArray([])";
-            if (typeModel.IsComplexType) return "ko.observable(null)";
             else if (typeModel.IsDate)
             {
                 if (typeModel.IsNullable) return "ko.observable(null)";

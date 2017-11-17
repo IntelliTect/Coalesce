@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 var result = @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 return new HtmlString(result);
             }
-            else if (editable && prop.CanWrite && !prop.IsInternalUse)
+            else if (editable && prop.IsClientWritable && !prop.IsInternalUse)
             {
                 if (prop.Type.IsDate)
                 {
@@ -74,7 +74,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 {
                     return Knockout.DisplayCheckbox(prop.JsVariableForBinding());
                 }
-                else if (prop.IsPOCO && !prop.IsComplexType)
+                else if (prop.IsPOCO)
                 {
                     return Knockout.DisplayObject(prop);
                 }
@@ -106,7 +106,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 if (editable)
                 {
-                    if ((prop.Type.IsNullable && prop.PureType.IsEnum) || prop.Type.IsEnum)
+                    if (prop.PureType.IsEnum)
                     {
                         return $"@(Knockout.SelectFor<{prop.Parent.FullName}>(p => p.{prop.Name}))";
                     }

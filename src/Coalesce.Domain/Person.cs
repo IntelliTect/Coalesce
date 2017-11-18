@@ -109,13 +109,7 @@ namespace Coalesce.Domain
         /// </summary>
         [ListText]
         [NotMapped]
-        public string Name
-        {
-            get
-            {
-                return String.Format("{0} {1} {2}", Title, FirstName, LastName);
-            }
-        }
+        public string Name => $"{Title} {FirstName} {LastName}";
 
         /// <summary>
         /// Company ID this person is employed by

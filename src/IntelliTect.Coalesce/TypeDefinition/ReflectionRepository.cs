@@ -23,31 +23,80 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private string _contextNamespace;
 
 
-        public ClassViewModel GetClassViewModel(TypeViewModel classType)
+        public void DiscoverCoalescedTypes(IEnumerable<INamedTypeSymbol> types)
         {
-            return classType.ClassViewModel;
+            foreach (var typeSymbol in types)
+            {
+                if (typeSymbol.HasAttribute<CoalesceAttribute>())
+                {
+                    var type = new SymbolTypeViewModel(typeSymbol);
+
+                    if (type.IsA<DbContext>())
+                    {
+                        AddContext(type);
+                    }
+                    //else if (type.IsA)
+                }
+            }
         }
 
-        public ClassViewModel GetClassViewModel(Type classType)
+        /// <summary>
+        /// Adds a context to the reflection repository. Do this on startup with all the contexts.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<ClassViewModel> AddContext<T>() where T : DbContext => AddContext(typeof(T));
+        public List<ClassViewModel> AddContext(Type t) => AddContext(new ReflectionClassViewModel(t));
+        public List<ClassViewModel> AddContext(TypeViewModel t) => AddContext(t.ClassViewModel);
+        public List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) => AddContext(new SymbolClassViewModel(contextSymbol));
+
+        public List<ClassViewModel> AddContext(ClassViewModel context)
         {
-            return _models.GetOrAdd(GetKey(classType), _ => new ReflectionClassViewModel(classType));
+            _contextNamespace = context.Namespace;
+            // Lock so that parallel execution only uses this once at a time.
+            lock (_lock)
+            {
+                var models = new List<ClassViewModel>();
+                foreach (var prop in context.ClientProperties)
+                {
+                    if (prop.Type.IsCollection || prop.IsDbSet)
+                    {
+                        var model = this.GetClassViewModel(prop.PureType);
+
+                        if (model != null)
+                        {
+                            model.HasDbSet = prop.IsDbSet;
+                            model.ContextPropertyName = prop.Name;
+                            model.OnContext = true;
+                            model.ContextPropertyName = prop.Name;
+                            models.Add(model);
+                        }
+                    }
+                }
+                // Check for other associated types that are not dbsets
+                foreach (var model in models.ToList())
+                {
+                    AddChildModels(models, model);
+                }
+
+                return models;
+            }
         }
 
-        public ClassViewModel GetClassViewModel(ITypeSymbol classType)
-        {
-            return _models.GetOrAdd(GetKey(classType), _ => new SymbolClassViewModel(classType));
-        }
-        
 
-        public ClassViewModel GetClassViewModel(string className)
-        {
-            return _models.Values.FirstOrDefault(f => f.Name == className);
-        }
 
-        public ClassViewModel GetClassViewModel<T>()
-        {
-            return GetClassViewModel(typeof(T));
-        }
+        public ClassViewModel GetClassViewModel(TypeViewModel classType) => classType.ClassViewModel;
+
+        public ClassViewModel GetClassViewModel(Type classType) =>
+            _models.GetOrAdd(GetKey(classType), _ => new ReflectionClassViewModel(classType));
+
+        public ClassViewModel GetClassViewModel(ITypeSymbol classType) =>
+            _models.GetOrAdd(GetKey(classType), _ => new SymbolClassViewModel(classType));
+
+        public ClassViewModel GetClassViewModel(string className) =>
+            _models.Values.FirstOrDefault(f => f.Name == className);
+
+        public ClassViewModel GetClassViewModel<T>() => GetClassViewModel(typeof(T));
 
         /// <summary>
         /// Gets a propertyViewModel based on the property selector.
@@ -68,21 +117,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var objModel = GetClassViewModel(type);
             return objModel.PropertyByName(propertySelector.GetExpressedProperty(type).Name);
         }
-
-        public bool IsValidViewModelClass(string name)
-        {
-            if (name == "Image") return false;
-            if (name == "IdentityUserRole") return false;
-            if (name == "IdentityRole") return false;
-            if (name == "IdentityRoleClaim") return false;
-            if (name == "IdentityUserClaim") return false;
-            if (name == "IdentityUserLogin") return false;
-            if (name == "IdentityUserToken") return false;
-            return true;
-        }
-
-
-
+        
         /// <summary>
         /// Gets a unique key for the collection.
         /// </summary>
@@ -131,53 +166,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public IEnumerable<ClassViewModel> Models => _models.Values;
 
-        /// <summary>
-        /// Adds a context to the reflection repository. Do this on startup with all the contexts.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public List<ClassViewModel> AddContext<T>() where T : DbContext => AddContext(typeof(T));
-        public List<ClassViewModel> AddContext(Type t) => AddContext(new ReflectionClassViewModel(t));
-        public List<ClassViewModel> AddContext(TypeViewModel t) => AddContext(t.ClassViewModel);
-        public List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) => AddContext(new SymbolClassViewModel(contextSymbol));
-
-        public List<ClassViewModel> AddContext(ClassViewModel context)
-        {
-            _contextNamespace = context.Namespace;
-            // Lock so that parallel execution only uses this once at a time.
-            lock (_lock)
-            {
-                var models = new List<ClassViewModel>();
-                foreach (var prop in context.ClientProperties)
-                {
-                    if ((prop.Type.IsCollection || prop.IsDbSet) && IsValidViewModelClass(prop.PureType.Name))
-                    {
-                        var model = this.GetClassViewModel(prop.PureType);
-
-                        if (model != null)
-                        {
-                            model.HasDbSet = prop.IsDbSet;
-                            model.ContextPropertyName = prop.Name;
-                            model.OnContext = true;
-                            model.ContextPropertyName = prop.Name;
-                            models.Add(model);
-                        }
-                    }
-                }
-                // Check for other associated types that are not dbsets
-                foreach (var model in models.ToList())
-                {
-                    AddChildModels(models, model);
-                }
-
-                return models;
-            }
-
-        }
-
         private void AddChildModels(List<ClassViewModel> models, ClassViewModel model)
         {
-            foreach (var prop in model.ClientProperties.Where(p => p.PureType.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
+            foreach (var prop in model.ClientProperties.Where(p => p.PureType.IsPOCO))
             {
                 var propModel = prop.PureType.ClassViewModel;
                 if (propModel != null && !propModel.HasDbSet && !models.Contains(propModel))
@@ -226,20 +217,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!result.Contains(_contextNamespace)) result.Add(_contextNamespace);
                 return result;
             }
-        }
-    }
-
-    internal class ClassViewModelComparer : IEqualityComparer<ClassViewModel>
-    {
-        public bool Equals(ClassViewModel x, ClassViewModel y)
-        {
-            if (x == y) return true;
-            return x?.FullName.Equals(y?.FullName) ?? false;
-        }
-
-        public int GetHashCode(ClassViewModel obj)
-        {
-            return obj.FullName.GetHashCode();
         }
     }
 }

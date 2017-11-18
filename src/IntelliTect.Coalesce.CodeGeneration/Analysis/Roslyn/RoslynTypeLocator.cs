@@ -86,6 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                     CollectTypes(nestedNs);
                 }
             }
+
             CollectTypes(compilation.Assembly.GlobalNamespace);
 
             return _allTypes = types;

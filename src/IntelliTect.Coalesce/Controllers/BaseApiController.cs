@@ -66,12 +66,7 @@ namespace IntelliTect.Coalesce.Controllers
         }
         private ILogger _Logger = null;
 
-        private static TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-        public static TimeZoneInfo CurrentTimeZone
-        {
-            get { return _timeZone; }
-            set { _timeZone = value; }
-        }
+        public static TimeZoneInfo CurrentTimeZone { get; set; } = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
 
         protected virtual IQueryable<T> GetDataSource(ListParameters listParameters)
         {

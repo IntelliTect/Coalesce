@@ -572,7 +572,20 @@ namespace IntelliTect.Coalesce
 
             if (ListParameters.FieldList.Any())
             {
-                mappedResult = mappedResult.AsQueryable().Select("new (" + string.Join(", ", ListParameters.FieldList) + ")").ToDynamicList<TDto>();
+                var allDtoProps = typeof(TDto).GetProperties();
+                var requestedProps = ListParameters.FieldList
+                    .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.InvariantCultureIgnoreCase)))
+                    .Where(prop => prop != null)
+                    .ToList();
+
+                mappedResult = mappedResult
+                    .Select(dto =>
+                    {
+                        var newDto = new TDto();
+                        foreach (var prop in requestedProps) prop.SetValue(newDto, prop.GetValue(dto));
+                        return newDto;
+                    })
+                    .ToList();
             }
 
             return new ListResult<TDto>(mappedResult, result.Page, result.TotalCount, result.PageSize);

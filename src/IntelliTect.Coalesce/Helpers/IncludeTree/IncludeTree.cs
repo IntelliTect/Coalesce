@@ -81,6 +81,25 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
             return head;
         }
 
+        public static IncludeTree ParseConstantExpression(ConstantExpression expr, out IncludeTree tail)
+        {
+            var members = expr.Value.ToString().Split('.');
+
+            IncludeTree head = null;
+            tail = null;
+
+            foreach (var member in members)
+            {
+                var newNode = new IncludeTree();
+                newNode.PropertyName = member;
+                if (head == null) head = newNode;
+                if (tail != null) tail.AddChild(newNode);
+                tail = newNode;
+            }
+
+            return head;
+        }
+
         #region IReadOnlyDictionary
 
         public bool ContainsKey(string key)

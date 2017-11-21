@@ -66,23 +66,11 @@ namespace IntelliTect.Coalesce.Controllers
         }
         private ILogger _Logger = null;
 
-        public static int DefaultPageSizeAll { get; set; } = 25;
-
-        private int? _defaultPageSize = null;
-        public int DefaultPageSize { get { return _defaultPageSize ?? DefaultPageSizeAll; } set { _defaultPageSize = value; } }
-        public int MaxSearchTerms { get; set; } = 6;
-
         private static TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
         public static TimeZoneInfo CurrentTimeZone
         {
-            get
-            {
-                return _timeZone;
-            }
-            set
-            {
-                _timeZone = value;
-            }
+            get { return _timeZone; }
+            set { _timeZone = value; }
         }
 
         protected virtual IQueryable<T> GetDataSource(ListParameters listParameters)
@@ -99,141 +87,28 @@ namespace IntelliTect.Coalesce.Controllers
             return DataSource ?? ReadOnlyDataSource;
         }
 
-        // CS1998 disabled because our async usage within was removed due to https://github.com/aspnet/EntityFrameworkCore/issues/6039.
-        // Restore async usage once fix is available.
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        protected async Task<ListResult> ListImplementation(ListParameters listParameters)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        protected IDataSource<T> GetIDataSource(ListParameters listParameters)
+        {
+            IQueryable<T> query = GetDataSource(listParameters);
+            return new OldDataSourceInteropDataSource<T, TContext>(Db, query)
+            {
+                ListParameters = listParameters,
+                User = User,
+                TimeZone = CurrentTimeZone
+            };
+        }
+
+        protected async Task<ListResult<TDto>> ListImplementation(ListParameters listParameters)
         {
             try
             {
-                IQueryable<T> result = GetDataSource(listParameters);
-
-                // Add the Include statements to the result to grab the right object graph. Passing "" gets the standard set.
-                if ((result is DbSet<T>) && string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
-                {
-                    result = result.Includes(listParameters.Includes);
-                }
-
-                // Add filters for the where clause, etc.
-                result = AddFilters(result, listParameters);
-
-                // Change to a list so we can sort on other fields not just what is in the database if we need to.
-                // TODO: Make this more flexible to allow for searching on computed terms. This could be automatic by detecting fields that are in the database.
-                // IEnumerable<T> result2 = result;
-                // if (listParameters.ToList) result2 = result.ToList() as IQueryable<T>;
-                // Above was removed because IEnumerable uses different extension methods than iQueryable causing very inefficient SQL to be used.
-
-                // Add sorting.
-                var orderByParams = listParameters.OrderByList;
-                if (orderByParams.Any())
-                {
-                    if (!orderByParams.Any(p => p.Key == "none"))
-                    {
-                        foreach (var orderByParam in orderByParams)
-                        {
-                            string fieldName = orderByParam.Key;
-                            var prop = ClassViewModel.PropertyByName(fieldName);
-                            if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
-                            {
-                                string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
-                                clause = clause.Replace("ASC", orderByParam.Value.ToUpper());
-                                clause = clause.Replace("DESC", orderByParam.Value.ToUpper());
-                                result = result.OrderBy(clause);
-                            }
-                            else
-                            {
-                                result = result.OrderBy(string.Join(", ", orderByParams.Select(f => $"{fieldName} {f.Value}")));
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // Use the DefaultOrderBy attributes if available
-                    var defaultOrderBy = ClassViewModel.DefaultOrderByClause();
-                    if (defaultOrderBy != null)
-                    {
-                        result = result.OrderBy(defaultOrderBy);
-                    }
-                    // Use the Name property if it exists.
-                    else if (ClassViewModel.ClientProperties.Any(f => f.Name == "Name"))
-                    {
-                        result = result.OrderBy("Name");
-                    }
-                    // Use the ID property.
-                    else
-                    {
-                        result = result.OrderBy(ClassViewModel.PrimaryKey.Name);
-                    }
-                }
-
-                // Get a count
-                int totalCount;
-                // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-                // Renable once microsoft releases the fix and we upgrade our references.
-                //if (result.Provider is IAsyncQueryProvider) totalCount = await result.CountAsync();
-                //else totalCount = result.Count();
-                totalCount = result.Count();
-
-                // Add paging.
-                int page = listParameters.Page ?? 1;
-                int pageSize = listParameters.PageSize ?? DefaultPageSize;
-                // Fix the page numbers if necessary
-                if ((page - 1) * pageSize > totalCount)
-                {
-                    page = (int)((totalCount - 1) / pageSize) + 1;
-                }
-                // Skip zero has issues.
-                // Due to a bug in both RC1 (fails in SQL 2008) and RC2 (doesn't get all included children) 
-                if (page > 1)
-                {
-                    result = result.Skip((page - 1) * pageSize);
-                }
-                result = result.Take(pageSize);
-
-                // Make the database call
-                IEnumerable<T> result2;
-                // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-                // Renable once microsoft releases the fix and we upgrade our references.
-                //if (result.Provider is IAsyncQueryProvider) result2 = await result.ToListAsync();
-                //else result2 = result.ToList();
-                result2 = result.ToList();
-
-                // Add external entities
-                result2.IncludesExternal(listParameters.Includes);
-
-                // Exclude certain data
-                if (new T() is IExcludable)
-                {
-                    foreach (var obj in result2)
-                    {
-                        ((IExcludable)obj).Exclude(listParameters.Includes);
-                    }
-                }
-
-                // Allow for security trimming
-                // TODO: This needs to be adjusted to handle paging correctly.
-                var result3 = result2.Where(f => BeforeGet(f));
-
-                var tree = result.GetIncludeTree();
-                var result4 = result3.ToList().Select(obj => MapObjToDto(obj, listParameters.Includes, tree)).ToList();
-
-                if (listParameters.FieldList.Any())
-                {
-                    return new ListResult(result4.AsQueryable().Select("new (" + string.Join(", ", listParameters.FieldList) + ")"),
-                        page, totalCount, pageSize);
-                }
-                return new ListResult(result4, page, totalCount, pageSize);
+                return await GetIDataSource(listParameters).GetMappedListAsync<TDto>();
             }
             catch (Exception ex)
             {
                 Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-                if (Logger != null)
-                {
-                    Logger.LogError(ex.Message, ex);
-                }
-                return new ListResult(ex);
+                Logger?.LogError(ex.Message, ex);
+                return new ListResult<TDto>(ex);
             }
         }
 
@@ -242,149 +117,19 @@ namespace IntelliTect.Coalesce.Controllers
         {
             try
             {
-                IQueryable<T> result = GetDataSource(listParameters);
-
-                result = AddFilters(result, listParameters);
-
-                int count;
-                if (result.Provider is IAsyncQueryProvider) count = await result.CountAsync();
-                else count = result.Count();
-
-                return count;
+                return await GetIDataSource(listParameters).GetCountAsync();
             }
             catch (Exception ex)
             {
-                //TODO: Log this error.
-                Console.WriteLine(ex.Message);
+                Logger?.LogError(ex.Message, ex);
                 Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-                //TODO: Hide this error from the client.
+
+                // TODO: don't rethrow?
                 throw ex;
             }
         }
 
-
-        protected IQueryable<T> AddFilters(IQueryable<T> result, ListParameters listParameters)
-        {
-            // Add key value pairs where = is used.
-            foreach (var clause in listParameters.Filters)
-            {
-                var prop = ClassViewModel.PropertyByName(clause.Key);
-                if (prop != null)
-                {
-                    result = DatabaseCompareExpression(result, prop, clause.Value, CurrentTimeZone);
-                }
-                else
-                {
-                    // This property was not recognized as a valid property name for this object.
-                    // TODO: Do something about this.
-                }
-            }
-
-            // Add more free form filters.
-            // Because this is processed through LINQ Dynamic,
-            // there's no chance for SQL injection here.
-            if (!string.IsNullOrWhiteSpace(listParameters.Where))
-            {
-                result = result.Where(listParameters.Where);
-            }
-
-            // Add general search filters.
-            // These search specified fields in the class
-            if (!string.IsNullOrWhiteSpace(listParameters.Search))
-            {
-                // See if the user has specified a field with a colon and search on that first
-                if (listParameters.Search.Contains(":"))
-                {
-                    var fieldValueParts = listParameters.Search.Split(new string[] { ":" }, StringSplitOptions.None);
-
-                    var field = fieldValueParts[0].Trim();
-                    var value = fieldValueParts[1].Trim();
-
-                    var prop = ClassViewModel.ClientProperties.FirstOrDefault(f => 
-                        string.Compare(f.Name, field, true) == 0 ||
-                        string.Compare(f.DisplayName, field, true) == 0);
-
-                    if (prop != null && !string.IsNullOrWhiteSpace(value))
-                    {
-                        var expressions = prop
-                            .SearchProperties(ClassViewModel.Name, maxDepth: 1)
-                            .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, value))
-                            .Select(t => t.statement)
-                            .ToList();
-
-                        // Join these together with an 'or'
-                        if (expressions.Any())
-                        {
-                            string finalSearchClause = string.Join(" || ", expressions);
-                            return result.Where(finalSearchClause);
-                        }
-
-                    }
-                }
-
-
-
-                var completeSearchClauses = new List<string>();
-
-                // For all searchable properties where SearchIsSplitOnSpaces is true,
-                // we require that each word in the search terms yields at least one match.
-                // This allows search results to become more refined as more words are typed in.
-                // For example, when searching on properties (FirstName, LastName) with input "steve steverson",
-                // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
-                // of the same records. This will yield people named "steve steverson" or "steverson steve".
-                var splitOnStringTermClauses = new List<string>();
-                var terms = listParameters.Search
-                        .Split(new string[] { " ", "," }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(term => term.Trim())
-                        .Distinct()
-                        .Where(term => !string.IsNullOrWhiteSpace(term))
-                        .Take(MaxSearchTerms);
-                foreach (var termWord in terms)
-                {
-                    var splitOnStringClauses = ClassViewModel
-                        .SearchProperties(ClassViewModel.Name)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, termWord))
-                        .Where(f => f.property.SearchIsSplitOnSpaces)
-                        .Select(t => t.statement)
-                        .ToList();
-
-                    // For the given term word, allow any of the properties (so we join clauses with OR)
-                    // to match the term word.
-                    if (splitOnStringClauses.Any())
-                        splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
-                }
-                // Require each "word clause"
-                if (splitOnStringTermClauses.Any())
-                    completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
-
-
-
-
-                // For all searchable properties where SearchIsSplitOnSpaces is false,
-                // we only require that the entire search term match at least one of these properties.
-                var searchClauses = ClassViewModel
-                    .SearchProperties(ClassViewModel.Name)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, listParameters.Search))
-                    .Where(f => !f.property.SearchIsSplitOnSpaces)
-                    .Select(t => t.statement)
-                    .ToList();
-                completeSearchClauses.AddRange(searchClauses);
-                
-
-                if (completeSearchClauses.Any())
-                {
-                    string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                    result = result.Where(finalSearchClause);
-                }
-            }
-
-            // Don't put anything after the searches. The property:value search handling returns early
-            // if it finds a match. If you need code down here, refactor that part.
-
-            return result;
-        }
-
-        /// <summary>
+                /// <summary>
         /// Returns the list of strings in a property so we can provide a list
         /// </summary>
         /// <param name="property"></param>
@@ -433,47 +178,16 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
-        protected async Task<TDto> GetImplementation(string id, ListParameters listParameters)
+        protected Task<TDto> GetImplementation(string id, ListParameters listParameters)
         {
-            var tuple = await GetUnmapped(id, listParameters);
-            var item = tuple.Item1;
-            IncludeTree tree = tuple.Item2;
-            if (item == null) return null;
-
-            // Map to DTO
-            var dto = MapObjToDto(item, listParameters.Includes, tree);
-
-            return dto;
+            return GetIDataSource(listParameters).GetMappedItemAsync<TDto>(id);
         }
 
-        private async Task<Tuple<T, IncludeTree>> GetUnmapped(string id, ListParameters listParameters)
+        private Task<(T Item, IncludeTree includeTree)> GetUnmapped(string id, ListParameters listParameters)
         {
-            // This isn't a list, but the logic is the same regardless for grabbing the data source for grabbing a single object.
-            IQueryable<T> source = GetDataSource(listParameters);
-
-            // Get the item and get external data.
-            if ((source is DbSet<T>) && string.Compare(listParameters.Includes, "none", StringComparison.InvariantCultureIgnoreCase) != 0)
-            {
-                source = source.Includes(listParameters.Includes);
-            }
-
-            var item = (await source.FindItemAsync(id)).IncludeExternal(listParameters.Includes);
-
-            var tree = source.GetIncludeTree();
-
-            if (!BeforeGet(item))
-            {
-                return null;
-            }
-
-            return new Tuple<T, IncludeTree>(item, tree);
+            return GetIDataSource(listParameters).GetItemAsync(id);
         }
-
-        protected virtual bool BeforeGet(T obj)
-        {
-            return true;
-        }
-
+        
         protected bool DeleteImplementation(string id)
         {
             T item = DataSource.FindItem(id);
@@ -798,10 +512,6 @@ namespace IntelliTect.Coalesce.Controllers
         }
 
 
-
-
-
-
         /// <summary>
         /// Gets the value of the ID in the DTO object using IdField.
         /// </summary>
@@ -876,119 +586,7 @@ namespace IntelliTect.Coalesce.Controllers
                 return _readOnlyDataSource;
             }
         }
-
-
-        /// <summary>
-        /// Gets a DbSet reference for the type.
-        /// </summary>
-        /// <param name="t"></param>
-        /// <returns></returns>
-        protected PropertyInfo GetDbSet(Type t)
-        {
-            // find the DbSet if we can
-            foreach (var prop in typeof(TContext).GetProperties())
-            {
-                // See if this is the right one
-                if (prop.PropertyType.Name.Contains("DbSet")
-                    && prop.PropertyType.GenericTypeArguments.Count() == 1
-                    && prop.PropertyType.GenericTypeArguments.First().Name == t.Name)
-                {
-                    return prop;
-                }
-            }
-            return null;
-        }
-
-        protected IQueryable<T> DatabaseCompareExpression(
-            IQueryable<T> query,
-            PropertyViewModel prop,
-            string value,
-            TimeZoneInfo timeZone)
-        {
-            if (prop.Type.IsDate)
-            {
-                // See if they just passed in a date or a date and a time
-                DateTime parsedValue;
-                if (DateTime.TryParse(value, out parsedValue))
-                {
-                    // Correct offset.
-                    if (prop.Type.IsDateTimeOffset)
-                    {
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, CurrentTimeZone.GetUtcOffset(parsedValue));
-                        if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
-                            !value.Contains(':'))
-                        {
-                            // Only a date
-                            var nextDate = dateTimeOffset.AddDays(1);
-                            return query.Where(string.Format(
-                                "{0} >= @0 && {0} < @1", prop.Name),
-                                dateTimeOffset, nextDate);
-                        }
-                        else
-                        {
-                            // Date and Time
-                            return query.Where(string.Format("{0} = @0",
-                                prop.Name), dateTimeOffset);
-                        }
-                    }
-                    else
-                    {
-                        if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
-                            !value.Contains(':'))
-                        {
-                            // Only a date
-                            var nextDate = parsedValue.AddDays(1);
-                            return query.Where(string.Format(
-                                "{0} >= @0 && {0} < @1", prop.Name),
-                                parsedValue, nextDate);
-                        }
-                        else
-                        {
-                            // Date and Time
-                            return query.Where(string.Format("{0} = @0",
-                                prop.Name), parsedValue);
-                        }
-                    }
-
-                }
-                else
-                {
-                    // Could not parse date string.
-                    return null;
-                }
-            }
-            else if (prop.Type.IsString)
-            {
-                if (value.Contains("*")) return query.Where($"{prop.Name}.StartsWith(\"{value.Replace("*", "")}\")");
-                else return query.Where($"{prop.Name} = \"{value}\"");
-            }
-            else if (prop.Type.IsEnum)
-            {
-                var expressions = new List<string>();
-                foreach (var valuePart in value.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    expressions.Add($"{prop.Name} = \"{prop.Type.EnumValues.SingleOrDefault(ev => ev.Key == Convert.ToInt32(valuePart)).Value}\"");
-                }
-                return query.Where(string.Join(" || ", expressions));
-            }
-            else
-            {
-                if (value.Contains(","))
-                {
-                    var whereList = new List<string>();
-                    foreach (var num in value.Split(','))
-                    {
-                        whereList.Add($"{prop.Name} = {num}");
-                    }
-                    return query.Where(string.Join(" or ", whereList));
-                }
-                else
-                {
-                    return query.Where(string.Format("{0} = {1}", prop.Name, value));
-                }
-            }
-        }
-
+        
         /// <summary>
         /// Called after the object is mapped and before it is saved. Allows for returning validation information.
         /// </summary>
@@ -1051,7 +649,7 @@ namespace IntelliTect.Coalesce.Controllers
                 var contents = context.Result as ObjectResult;
                 if (contents != null)
                 {
-                    var listResult = contents.Value as ListResult;
+                    var listResult = contents.Value as ListResult<T>;
                     var saveResult = contents.Value as SaveResult;
                     if ((listResult != null && !listResult.WasSuccessful) || (saveResult != null && !saveResult.WasSuccessful))
                     {

@@ -36,7 +36,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<GenericListResult<Coalesce.Domain.External.DevTeam, DevTeamDtoGen>> List(
+        public virtual async Task<ListResult<DevTeamDtoGen>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -53,8 +53,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("DevTeamId", devTeamId);
             parameters.AddFilter("Name", name);
 
-            var listResult = await ListImplementation(parameters);
-            return new GenericListResult<Coalesce.Domain.External.DevTeam, DevTeamDtoGen>(listResult);
+            return await ListImplementation(parameters);
         }
 
         /// <summary>
@@ -62,7 +61,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("customlist")]
         [Authorize]
-        public virtual async Task<ListResult> CustomList(
+        public virtual async Task<ListResult<DevTeamDtoGen>> CustomList(
             string fields = null,
             string includes = null,
             string orderBy = null, string orderByDescending = null,

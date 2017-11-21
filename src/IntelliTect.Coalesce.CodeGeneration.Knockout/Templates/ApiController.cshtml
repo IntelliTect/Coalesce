@@ -97,7 +97,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("list")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>> List(
+        @(model.ApiActionAccessModifier) virtual async Task<ListResult<@(model.DtoName)>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -121,8 +121,7 @@ namespace @(namespaceName).Api
             @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
             }
 
-            var listResult = await ListImplementation(parameters);
-            return new GenericListResult<@(model.BaseViewModel.FullName), @(model.DtoName)>(listResult);
+            return await ListImplementation(parameters);
         }
 
         /// <summary>
@@ -130,7 +129,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("customlist")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<ListResult> CustomList(
+        @(model.ApiActionAccessModifier) virtual async Task<ListResult<@(model.DtoName)>> CustomList(
             string fields = null,
             string includes = null,
             string orderBy = null, string orderByDescending = null,

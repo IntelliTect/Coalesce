@@ -170,7 +170,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public async void ListByWhere()
         {
-            var result = await _pc.List(null, null, null, null, null, "personId = 1 || personid = 2", null, null, null, null, null, null, null, null, null, null, null);
+            var result = await _pc.List(where: "personId = 1 || personid = 2");
             Assert.Equal(2, result.List.Count());
             var person = result.List.First();
             Assert.Equal("Joseph", person.FirstName);
@@ -180,7 +180,7 @@ namespace Coalesce.Web.Tests
         [Fact]
         public async void ListSearch()
         {
-            var result = await _pc.List(null, "lastName", null, null, null, null, null, "a", null, null, null, null, null, null, null, null, null);
+            var result = await _pc.List(orderBy: "lastName", search: "a");
             Assert.Equal(16, result.List.Count());
             var person = result.List.First();
             Assert.Equal("Arianna", person.FirstName);
@@ -232,44 +232,22 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void StaticWithDb()
         {
-            var result = _pc.NamesStartingWithPublic("a");
-            Assert.Equal(16, ((List<string>)result.Object).Count());
+            var result = _pc.NamesStartingWith("a");
+            Assert.Equal(16, result.Object.Count());
         }
-
-
-       [Fact]
-        public void Collection()
-        {
-            var result = _pc.BorCPeople();
-            Assert.Equal(14, result.Object.Count());
-        }
-
 
 
         [Fact]
-        public async void ListOfBorC()
+        public async Task Collection()
         {
-            var thing = new ListResult
-            {
-                List = new List<PersonDtoGen> { new PersonDtoGen { FirstName = "bob" } },
-                Message = "test",
-                Page = 1,
-                PageCount = 1,
-                PageSize = 1,
-                TotalCount = 1,
-                WasSuccessful = false,
-            };
-
-            var generic = new GenericListResult<Person, PersonDtoGen>(thing);
-
-            var result = await _pc.List(null, null, null, null, null, null, "BorCPeople", null, "1", null, null, null, null, null, null, null, null);
-            Assert.Empty(result.List);
+            var result = await _pc.List(dataSource: "BorCPeople", personId: "1");
+            Assert.Equal(14, result.List.Count());
         }
 
         [Fact]
-        public async void CountOfBorC()
+        public async Task CountOfBorC()
         {
-            var result = await _pc.Count(null, "BorCPeople");
+            var result = await _pc.Count(dataSource: "BorCPeople");
             Assert.Equal(14, result);
         }
     }

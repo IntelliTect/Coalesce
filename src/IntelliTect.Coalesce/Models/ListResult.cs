@@ -5,9 +5,8 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.Models
 {
-    public class ListResult
+    public class ListResult<T>
     {
-        // This is not generic because we can hand back partial objects based on the fields property.
         public bool WasSuccessful { get; set; }
         public string Message { get; set; }
         public int Page { get; set; }
@@ -15,21 +14,21 @@ namespace IntelliTect.Coalesce.Models
         public int PageCount { get; set; }
         public int TotalCount { get; set; }
 
-        public IEnumerable List { get; set; }
+        public ICollection<T> List { get; set; }
 
-        public ListResult(): base()
+        public ListResult() : base()
         {
         }
 
-        public ListResult(IEnumerable objs) 
+        public ListResult(ICollection<T> items) 
         {
-            List = objs;
+            List = items;
             WasSuccessful = true;
         }
 
-        public ListResult(IEnumerable objs, int page, int totalCount, int pageSize)
+        public ListResult(ICollection<T> items, int page, int totalCount, int pageSize)
         {
-            List = objs;
+            List = items;
             WasSuccessful = true;
             Page = page;
             TotalCount = totalCount;

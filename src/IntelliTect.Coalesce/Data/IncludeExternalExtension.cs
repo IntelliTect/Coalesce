@@ -34,16 +34,6 @@ namespace IntelliTect.Coalesce.Data
             {
                 return objT.IncludeExternal(query, includes);
             }
-            else
-            {
-                var model = ReflectionRepository.Global.GetClassViewModel<T>();
-                foreach (var prop in model.ClientProperties.Where(f => f.IsExternal))
-                {
-                    // TODO: need to figure out how to do this without a <T>
-                    //query = query.IncludeExternal(prop);
-                }
-
-            }
             return query;
         }
 

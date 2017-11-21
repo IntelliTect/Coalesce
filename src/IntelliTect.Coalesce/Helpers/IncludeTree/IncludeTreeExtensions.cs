@@ -33,12 +33,23 @@ namespace IntelliTect.Coalesce.Helpers.IncludeTree
                 if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include)
                  || callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.ThenInclude))
                 {
-                    // I'm like a wizard with all these casts.
-                    var body = ((MemberExpression)((LambdaExpression)((UnaryExpression)callExpr.Arguments[1]).Operand).Body);
-
-                    IncludeTree tail;
-                    var head = IncludeTree.ParseMemberExpression(body, out tail);
-
+                    IncludeTree head, tail;
+                    MemberExpression body;
+                    if (callExpr.Arguments[1] is UnaryExpression unary)
+                    {
+                        // I'm like a wizard with all these casts.
+                        body = ((MemberExpression)((LambdaExpression)unary.Operand).Body);
+                        head = IncludeTree.ParseMemberExpression(body, out tail);
+                    }
+                    else if (callExpr.Arguments[1] is ConstantExpression constant)
+                    {
+                        head = IncludeTree.ParseConstantExpression(constant, out tail);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Unhandled .{callExpr.Method.Name} expression type {callExpr.Arguments[1].GetType()}");
+                    }
+                    
                     // If we had a child from a ThenInclude, add it to the tail of this node.
                     if (currentNode != null)
                         tail.AddChild(currentNode);

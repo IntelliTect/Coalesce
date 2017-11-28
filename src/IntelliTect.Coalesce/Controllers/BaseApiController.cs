@@ -52,6 +52,7 @@ namespace IntelliTect.Coalesce.Controllers
         protected readonly ClassViewModel ClassViewModel;
         protected readonly ClassViewModel DtoViewModel;
 
+        // TODO: service antipattern. Inject this properly.
         protected ILogger Logger
         {
             get
@@ -66,31 +67,17 @@ namespace IntelliTect.Coalesce.Controllers
         }
         private ILogger _Logger = null;
 
-        public static TimeZoneInfo CurrentTimeZone { get; set; } = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-
         protected virtual IQueryable<T> GetDataSource(ListParameters listParameters)
         {
-            if (!string.IsNullOrWhiteSpace(listParameters.DataSource) && listParameters.DataSource != "Default")
-            {
-                // find the IQueryable if we can
-                var method = typeof(T).GetMethod(listParameters.DataSource);
-                if (method != null)
-                {
-                    return (IQueryable<T>)method.Invoke(null, new object[] { Db, User });
-                }
-            }
             return DataSource ?? ReadOnlyDataSource;
         }
 
         protected IDataSource<T> GetIDataSource(ListParameters listParameters)
         {
             IQueryable<T> query = GetDataSource(listParameters);
-            return new OldDataSourceInteropDataSource<T, TContext>(Db, query)
-            {
-                ListParameters = listParameters,
-                User = User,
-                TimeZone = CurrentTimeZone
-            };
+            var crudContext = HttpContext?.RequestServices.GetService<CrudContext<TContext>>();
+            crudContext.ListParameters = listParameters;
+            return new OldDataSourceInteropDataSource<T, TContext>(crudContext, query);
         }
 
         protected async Task<ListResult<TDto>> ListImplementation(ListParameters listParameters)
@@ -124,7 +111,7 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
-                /// <summary>
+        /// <summary>
         /// Returns the list of strings in a property so we can provide a list
         /// </summary>
         /// <param name="property"></param>
@@ -246,22 +233,6 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 item = new T();  // This does not work with Lazy Loading because it gives the POCO not the proxy object.
                 DataSource.Add(item);
-            }
-
-            // Convert all DateTimeOffsets to the correct Time Zone.
-            foreach (var prop in DtoViewModel.ClientProperties.Where(f => f.Type.IsDateTimeOffset))
-            {
-                var typeProperty = dto.GetType().GetProperty(prop.Name);
-                // Make sure the property exists. TODO: Check this out for base classes.
-                if (typeProperty != null)
-                {
-                    DateTimeOffset? value = (DateTimeOffset?)typeProperty.GetValue(dto);
-                    if (value != null)
-                    {
-                        dto.GetType().InvokeMember(prop.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
-                            Type.DefaultBinder, dto, new object[] { TimeZoneInfo.ConvertTime(value.Value, CurrentTimeZone) });
-                    }
-                }
             }
 
             // Create a shallow copy.

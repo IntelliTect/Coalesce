@@ -12,7 +12,6 @@ module ListViewModels {
     export enum PersonDataSources {
             Default,
             BorCPeople,
-            NamesStartingWithAWithCases,
         }
     export class PersonList extends Coalesce.BaseListViewModel<PersonList, ViewModels.Person> {
         protected modelName = "Person";

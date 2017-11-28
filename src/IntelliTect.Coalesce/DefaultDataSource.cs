@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce
         where TContext : DbContext
         where T : class
     {
-        public OldDataSourceInteropDataSource(TContext context, IQueryable<T> query) : base(context)
+        public OldDataSourceInteropDataSource(CrudContext<TContext> context, IQueryable<T> query) : base(context)
         {
             Query = query;
         }
@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce
         public override IQueryable<T> GetQuery()
         {
             var query = Query;
-            if (!string.Equals(ListParameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
+            if (!string.Equals(Context.ListParameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.IncludeChildren();
             }
@@ -61,34 +61,23 @@ namespace IntelliTect.Coalesce
         public int DefaultPageSize { get; set; } = 25;
 
         /// <summary>
-        /// Contains all the parameters that will be used for sorting, searching, filtering,
-        /// and any other transformations on the data being requested. 
+        /// Contains contextual information about the request for data being served.
         /// </summary>
-        public ListParameters ListParameters { get; set; }
+        public CrudContext<TContext> Context { get; }
 
         /// <summary>
-        /// The user making the current request for data.
+        /// The DbContext to be used for this request.
         /// </summary>
-        public ClaimsPrincipal User { get; set; }
-
-        /// <summary>
-        /// The timezone to be used when performing any actions on date inputs that lack time zone information.
-        /// </summary>
-        public TimeZoneInfo TimeZone { get; set; }
-
-        /// <summary>
-        /// The EF DbContext that will be used as the root source of data.
-        /// </summary>
-        public TContext Context { get; }
+        public TContext Db => Context.DbContext;
 
         /// <summary>
         /// A ClassViewModel representing the type T that is provided by this data source.
         /// </summary>
         public ClassViewModel ClassViewModel { get; protected set; }
 
-        public DefaultDataSource(TContext context)
+        public DefaultDataSource(CrudContext<TContext> context)
         {
-            Context = context;
+            Context = context ?? throw new ArgumentNullException(nameof(context));
             ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
         }
 
@@ -99,9 +88,9 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         public virtual IQueryable<T> GetQuery()
         {
-            IQueryable<T> query = Context.Set<T>();
+            IQueryable<T> query = Db.Set<T>();
 
-            if (!string.Equals(ListParameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
+            if (!string.Equals(Context.ListParameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.IncludeChildren();
             }
@@ -121,7 +110,7 @@ namespace IntelliTect.Coalesce
         public virtual IQueryable<T> ApplyListPropertyFilters(IQueryable<T> query)
         {
             // Add key value pairs where = is used.
-            foreach (var clause in ListParameters.Filters)
+            foreach (var clause in Context.ListParameters.Filters)
             {
                 var prop = ClassViewModel.PropertyByName(clause.Key);
                 if (prop != null)
@@ -154,7 +143,7 @@ namespace IntelliTect.Coalesce
                     // Correct offset.
                     if (prop.Type.IsDateTimeOffset)
                     {
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, TimeZone.GetUtcOffset(parsedValue));
+                        DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, Context.TimeZone.GetUtcOffset(parsedValue));
                         if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
                             !value.Contains(':'))
                         {
@@ -241,9 +230,9 @@ namespace IntelliTect.Coalesce
         {
             // Because this is processed through LINQ Dynamic,
             // there's no chance for SQL injection here.
-            if (!string.IsNullOrWhiteSpace(ListParameters.Where))
+            if (!string.IsNullOrWhiteSpace(Context.ListParameters.Where))
             {
-                return query.Where(ListParameters.Where);
+                return query.Where(Context.ListParameters.Where);
             }
             return query;
         }
@@ -257,7 +246,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The new query with additional filtering applied.</returns>
         public virtual IQueryable<T> ApplyListSearchTerm(IQueryable<T> query)
         {
-            var searchTerm = ListParameters.Search;
+            var searchTerm = Context.ListParameters.Search;
 
             // Add general search filters.
             // These search specified fields in the class
@@ -279,7 +268,7 @@ namespace IntelliTect.Coalesce
                     {
                         var expressions = prop
                             .SearchProperties(ClassViewModel.Name, maxDepth: 1)
-                            .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, value))
+                            .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, null, value))
                             .Select(t => t.statement)
                             .ToList();
 
@@ -314,7 +303,7 @@ namespace IntelliTect.Coalesce
                 {
                     var splitOnStringClauses = ClassViewModel
                         .SearchProperties(ClassViewModel.Name)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, termWord))
+                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, null, termWord))
                         .Where(f => f.property.SearchIsSplitOnSpaces)
                         .Select(t => t.statement)
                         .ToList();
@@ -335,7 +324,7 @@ namespace IntelliTect.Coalesce
                 // we only require that the entire search term match at least one of these properties.
                 var searchClauses = ClassViewModel
                     .SearchProperties(ClassViewModel.Name)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(User, null, searchTerm))
+                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, null, searchTerm))
                     .Where(f => !f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();
@@ -383,7 +372,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The new query with additional sorting applied.</returns>
         public virtual IQueryable<T> ApplyListClientSpecifiedSorting(IQueryable<T> query)
         {
-            var orderByParams = ListParameters.OrderByList;
+            var orderByParams = Context.ListParameters.OrderByList;
             if (!orderByParams.Any(p => p.Key == "none"))
             {
                 foreach (var orderByParam in orderByParams)
@@ -448,7 +437,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The new query with additional sorting applied.</returns>
         public virtual IQueryable<T> ApplyListSorting(IQueryable<T> query)
         {
-            var orderByParams = ListParameters.OrderByList;
+            var orderByParams = Context.ListParameters.OrderByList;
             if (orderByParams.Any())
             {
                 return ApplyListClientSpecifiedSorting(query);
@@ -488,8 +477,8 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         public virtual IQueryable<T> ApplyListPaging(IQueryable<T> query, int? totalCount, out int page, out int pageSize)
         {
-            page = ListParameters.Page ?? 1;
-            pageSize = ListParameters.PageSize ?? DefaultPageSize;
+            page = Context.ListParameters.Page ?? 1;
+            pageSize = Context.ListParameters.PageSize ?? DefaultPageSize;
             
             // Cap the page number at the last item
             if ((page - 1) * pageSize > totalCount)
@@ -567,13 +556,13 @@ namespace IntelliTect.Coalesce
         {
             var (result, tree) = await GetListAsync();
 
-            var mappingContext = new MappingContext(User, ListParameters.Includes);
+            var mappingContext = new MappingContext(Context.User, Context.ListParameters.Includes);
             var mappedResult = result.List.Select(obj => Mapper<T, TDto>.ObjToDtoMapper(obj, mappingContext, tree)).ToList();
 
-            if (ListParameters.FieldList.Any())
+            if (Context.ListParameters.FieldList.Any())
             {
                 var allDtoProps = typeof(TDto).GetProperties();
-                var requestedProps = ListParameters.FieldList
+                var requestedProps = Context.ListParameters.FieldList
                     .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.InvariantCultureIgnoreCase)))
                     .Where(prop => prop != null)
                     .ToList();
@@ -590,8 +579,7 @@ namespace IntelliTect.Coalesce
 
             return new ListResult<TDto>(mappedResult, result.Page, result.TotalCount, result.PageSize);
         }
-
-
+        
         /// <summary>
         /// Get an unmapped single object corresponding to the given primary key.
         /// </summary>
@@ -624,7 +612,7 @@ namespace IntelliTect.Coalesce
         {
             var (result, tree) = await GetItemAsync(id);
 
-            var mappingContext = new MappingContext(User, ListParameters.Includes);
+            var mappingContext = new MappingContext(Context.User, Context.ListParameters.Includes);
             var mappedResult = Mapper<T, TDto>.ObjToDtoMapper(result, mappingContext, tree);
 
             return mappedResult;

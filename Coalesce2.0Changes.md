@@ -53,6 +53,11 @@
     * _ViewImports.cshtml
 
 
+* Added extension method for IServiceProvider: services.AddCoalesce(). This replaces the need for the required "ReflectionRepository.AddContext" call in Startup.cs.
+* The default Time Zone used by Coalesce is no longer "Pacific Standard Time" - it is now TimeZoneInfo.Local. Use one of the "UseTimeZone" overloads in services.AddCoalesce(b => b.UseTimeZone) to override this behavior.
+  * b.UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")) will restore the old behavior.
+
+
 ## Deprications in Coalesce 2..0"
 
 * `BaseViewModel<T>.autoSaveEnabled`: Use `BaseViewModel<T>.coalesceConfig.autoSaveEnabled` observable instead.
@@ -72,6 +77,4 @@
   * On each ViewModel and ListViewModel instance, there is an instance-level configuration object named `coalesceConfig`. This object controls settings for each specific instance of a model.
 
 * New attribute: [Controller]. Place this attribute on your C# model classes to customize the generation of the API controllers.
-
-* Added extension method for IServiceProvider: services.AddCoalesce(). This replaces the need for the required "ReflectionRepository.AddContext" call in Startup.cs.
 

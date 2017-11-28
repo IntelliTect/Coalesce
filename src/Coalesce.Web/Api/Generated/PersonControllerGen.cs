@@ -316,10 +316,6 @@ namespace Coalesce.Web.Api
 
         protected override IQueryable<Coalesce.Domain.Person> GetDataSource(ListParameters parameters)
         {
-            if (parameters.DataSource == "NamesStartingWithAWithCases")
-            {
-                return Coalesce.Domain.Person.NamesStartingWithAWithCases(Db);
-            }
             if (parameters.DataSource == "BorCPeople")
             {
                 return Coalesce.Domain.Person.BorCPeople(Db);

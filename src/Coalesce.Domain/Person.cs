@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.Models;
 using static Coalesce.Domain.Case;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce;
 
 namespace Coalesce.Domain
 {
@@ -190,19 +191,39 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
-        public static IQueryable<Person> NamesStartingWithAWithCases(AppDbContext db)
-        {
-            db.Cases
-                .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
-                .Load();
+        //public static IQueryable<Person> NamesStartingWithAWithCases(AppDbContext db)
+        //{
+        //    db.Cases
+        //        .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+        //        .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+        //        .Load();
 
-            return db.People
-                .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-                .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-                .Where(f => f.FirstName.StartsWith("A"));
+        //    return db.People
+        //        .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+        //        .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+        //        .Where(f => f.FirstName.StartsWith("A"));
+        //}
+
+        public class NamesStartingWithAWithCases : DefaultDataSource<Person, AppDbContext>
+        {
+            public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context)
+            {
+            }
+
+            public override IQueryable<Person> GetQuery()
+            {
+                Db.Cases
+                    .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+                    .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                    .Load();
+
+                return Db.People
+                    .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+                    .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+                    .Where(f => f.FirstName.StartsWith("A"));
+            }
         }
-        
+
 
         /// <summary>
         /// People whose last name starts with B or c

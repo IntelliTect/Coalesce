@@ -14,14 +14,17 @@ namespace IntelliTect.Coalesce.Models
         public string OrderByDescending { get; set; }
         public int? Page { get; set; }
         public int? PageSize { get; set; }
+
         /// <summary>
         /// Text to search fields for.
         /// </summary>
         public string Search { get; set; }
+
         /// <summary>
         /// Data source to use for the list.
         /// </summary>
         public string DataSource { get; set; }
+
         /// <summary>
         /// CSV list of fields to return
         /// </summary>

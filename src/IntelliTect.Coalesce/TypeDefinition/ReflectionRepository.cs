@@ -20,7 +20,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ConcurrentDictionary<string, ClassViewModel> _models = new ConcurrentDictionary<string, ClassViewModel>();
         private object _lock = new object();
-        private string _contextNamespace;
 
 
         public void DiscoverCoalescedTypes(IEnumerable<INamedTypeSymbol> types)
@@ -35,7 +34,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         AddContext(type);
                     }
-                    //else if (type.IsA)
+                    //else if (type.IsA<IDataSource<>>)
                 }
             }
         }
@@ -52,7 +51,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public List<ClassViewModel> AddContext(ClassViewModel context)
         {
-            _contextNamespace = context.Namespace;
             // Lock so that parallel execution only uses this once at a time.
             lock (_lock)
             {
@@ -202,20 +200,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         }
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// All the namespaces in the models.
-        /// </summary>
-        public IEnumerable<string> Namespaces
-        {
-            get
-            {
-                var result = _models.Select(f => f.Value.Namespace).Distinct().ToList();
-                // Make sure we add the namespace of the context
-                if (!result.Contains(_contextNamespace)) result.Add(_contextNamespace);
-                return result;
             }
         }
     }

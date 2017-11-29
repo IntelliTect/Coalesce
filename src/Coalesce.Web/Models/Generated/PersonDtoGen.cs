@@ -1,6 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web.Models;
+﻿
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
@@ -12,8 +10,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
-using static Coalesce.Domain.Person;
-
 namespace Coalesce.Web.Models
 {
     public partial class PersonDtoGen : GeneratedDto<Coalesce.Domain.Person, PersonDtoGen>
@@ -21,21 +17,21 @@ namespace Coalesce.Web.Models
     {
         public PersonDtoGen() { }
 
-        public Int32? PersonId { get; set; }
-        public Titles? Title { get; set; }
-        public System.String FirstName { get; set; }
-        public System.String LastName { get; set; }
-        public System.String Email { get; set; }
-        public Genders? Gender { get; set; }
-        public ICollection<CaseDtoGen> CasesAssigned { get; set; }
-        public ICollection<CaseDtoGen> CasesReported { get; set; }
-        public System.Nullable<System.DateTime> BirthDate { get; set; }
-        public System.Nullable<System.DateTime> LastBath { get; set; }
-        public System.Nullable<System.DateTimeOffset> NextUpgrade { get; set; }
-        public PersonStatsDtoGen PersonStats { get; set; }
-        public System.String Name { get; set; }
-        public Int32? CompanyId { get; set; }
-        public CompanyDtoGen Company { get; set; }
+        public int? PersonId { get; set; }
+        public Coalesce.Domain.Person.Titles? Title { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public Coalesce.Domain.Person.Genders? Gender { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> CasesAssigned { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> CasesReported { get; set; }
+        public System.DateTime? BirthDate { get; set; }
+        public System.DateTime? LastBath { get; set; }
+        public System.DateTimeOffset? NextUpgrade { get; set; }
+        public Coalesce.Web.Models.PersonStatsDtoGen PersonStats { get; set; }
+        public string Name { get; set; }
+        public int? CompanyId { get; set; }
+        public Coalesce.Web.Models.CompanyDtoGen Company { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static PersonDtoGen Create(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
@@ -122,15 +118,15 @@ namespace Coalesce.Web.Models
             // Applicable roles for Person
 
 
-            entity.Title = (Titles)(Title ?? 0);
+            entity.Title = (Title ?? 0);
             entity.FirstName = FirstName;
             entity.LastName = LastName;
             entity.Email = Email;
-            entity.Gender = (Genders)(Gender ?? 0);
+            entity.Gender = (Gender ?? 0);
             entity.BirthDate = BirthDate;
             entity.LastBath = LastBath;
             entity.NextUpgrade = NextUpgrade;
-            entity.CompanyId = (Int32)(CompanyId ?? 0);
+            entity.CompanyId = (CompanyId ?? 0);
         }
 
     }

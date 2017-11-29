@@ -1,5 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
+﻿
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
@@ -21,7 +20,7 @@ namespace Coalesce.Web.Api
     [Route("api/[controller]")]
     [Authorize]
     public partial class CaseDtoController
-    : LocalBaseApiController<Coalesce.Domain.Case, CaseDto>
+    : LocalBaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>
     {
         protected ClassViewModel Model;
 
@@ -32,11 +31,11 @@ namespace Coalesce.Web.Api
 
 
         /// <summary>
-        /// Returns CaseDto
+        /// Returns Coalesce.Domain.CaseDto
         /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<ListResult<CaseDto>> List(
+        public virtual async Task<ListResult<Coalesce.Domain.CaseDto>> List(
             string includes = null,
             string orderBy = null, string orderByDescending = null,
             int? page = null, int? pageSize = null,
@@ -68,7 +67,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("customlist")]
         [Authorize]
-        public virtual async Task<ListResult<CaseDto>> CustomList(
+        public virtual async Task<ListResult<Coalesce.Domain.CaseDto>> CustomList(
             string fields = null,
             string includes = null,
             string orderBy = null, string orderByDescending = null,
@@ -120,7 +119,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<CaseDto> Get(string id, string includes = null, string dataSource = null)
+        public virtual async Task<Coalesce.Domain.CaseDto> Get(string id, string includes = null, string dataSource = null)
         {
 
             ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
@@ -141,12 +140,12 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual async Task<SaveResult<CaseDto>> Save(CaseDto dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<Coalesce.Domain.CaseDto>> Save(Coalesce.Domain.CaseDto dto, string includes = null, string dataSource = null, bool returnObject = true)
         {
 
             if (dto.CaseId == 0 && !Model.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<CaseDto>();
+                var result = new SaveResult<Coalesce.Domain.CaseDto>();
                 result.WasSuccessful = false;
                 result.Message = "Create not allowed on CaseDto objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -154,7 +153,7 @@ namespace Coalesce.Web.Api
             }
             else if (dto.CaseId != 0 && !Model.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<CaseDto>();
+                var result = new SaveResult<Coalesce.Domain.CaseDto>();
                 result.WasSuccessful = false;
                 result.Message = "Edit not allowed on CaseDto objects.";
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -166,19 +165,19 @@ namespace Coalesce.Web.Api
 
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<CaseDto> AddToCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<Coalesce.Domain.CaseDto> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual SaveResult<Coalesce.Domain.CaseDto> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
 
         /// <summary>
-        /// Downloads CSV of CaseDto
+        /// Downloads CSV of Coalesce.Domain.CaseDto
         /// </summary>
         [HttpGet("csvDownload")]
         [Authorize]
@@ -205,7 +204,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
 
             var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<CaseDto>();
+            var list = listResult.List.Cast<Coalesce.Domain.CaseDto>();
             var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
 
             byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
@@ -213,7 +212,7 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
-        /// Returns CSV text of CaseDto
+        /// Returns CSV text of Coalesce.Domain.CaseDto
         /// </summary>
         [HttpGet("csvText")]
         [Authorize]
@@ -240,7 +239,7 @@ namespace Coalesce.Web.Api
             parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
 
             var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<CaseDto>();
+            var list = listResult.List.Cast<Coalesce.Domain.CaseDto>();
             var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
 
             return csv;
@@ -253,7 +252,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CaseDto>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<Coalesce.Domain.CaseDto>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
         {
             if (file != null && file.Length > 0)
             {
@@ -274,17 +273,17 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CaseDto>>> CsvSave(string csv, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<Coalesce.Domain.CaseDto>>> CsvSave(string csv, bool hasHeader = true)
         {
             // Get list from CSV
-            var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CaseDto>(csv, hasHeader);
-            var resultList = new List<SaveResult<CaseDto>>();
+            var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<Coalesce.Domain.CaseDto>(csv, hasHeader);
+            var resultList = new List<SaveResult<Coalesce.Domain.CaseDto>>();
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
                 if (dto.CaseId == 0 && !Model.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<CaseDto>();
+                    var result = new SaveResult<Coalesce.Domain.CaseDto>();
                     result.WasSuccessful = false;
                     result.Message = "Create not allowed on CaseDto objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
@@ -292,7 +291,7 @@ namespace Coalesce.Web.Api
                 }
                 else if (dto.CaseId != 0 && !Model.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<CaseDto>();
+                    var result = new SaveResult<Coalesce.Domain.CaseDto>();
                     result.WasSuccessful = false;
                     result.Message = "Edit not allowed on CaseDto objects.";
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;

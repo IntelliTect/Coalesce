@@ -1,6 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web.Models;
+﻿
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
@@ -12,8 +10,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
-using static Coalesce.Domain.External.DevTeam;
-
 namespace Coalesce.Web.Models
 {
     public partial class DevTeamDtoGen : GeneratedDto<Coalesce.Domain.External.DevTeam, DevTeamDtoGen>
@@ -21,8 +17,8 @@ namespace Coalesce.Web.Models
     {
         public DevTeamDtoGen() { }
 
-        public Int32? DevTeamId { get; set; }
-        public System.String Name { get; set; }
+        public int? DevTeamId { get; set; }
+        public string Name { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static DevTeamDtoGen Create(Coalesce.Domain.External.DevTeam obj, IMappingContext context, IncludeTree tree = null)

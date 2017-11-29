@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
 
-        public string CsDeclaration => $"{(IsInjected ? "[FromServices] " : "")}{Type.FullyQualifiedNameWithTypeParams} {Name.ToCamelCase()}";
+        public string CsDeclaration => $"{(IsInjected ? "[FromServices] " : "")}{Type.FullyQualifiedName} {Name.ToCamelCase()}";
 
         /// <summary>
         /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()

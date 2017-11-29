@@ -10,37 +10,36 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class ReflectionClassViewModel : ClassViewModel
     {
-        protected Type Type { get; }
+        protected Type Info { get; }
 
         public ReflectionClassViewModel(Type type)
         {
-            Type = type;
+            Info = type;
+            Type = new ReflectionTypeViewModel(type);
         }
 
-        public override string Name => Type.Name;
-
-        public override string Namespace => Type.Namespace;
+        public override string Name => Info.Name;
 
         public override string Comment => "";
 
-        internal override ICollection<PropertyViewModel> RawProperties => Type.GetProperties()
+        internal override ICollection<PropertyViewModel> RawProperties => Info.GetProperties()
             .Select((p, i) => new ReflectionPropertyViewModel(this, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
             .ToList();
 
-        internal override ICollection<MethodViewModel> RawMethods => Type.GetMethods()
+        internal override ICollection<MethodViewModel> RawMethods => Info.GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
             .Select(m => new ReflectionMethodViewModel(m, this))
             .Cast<MethodViewModel>()
             .ToList();
 
-        public override bool IsDto => Type.GetInterfaces().Any(f => f.Name.Contains("IClassDto"));
+        public override bool IsDto => Info.GetInterfaces().Any(f => f.Name.Contains("IClassDto"));
 
         public override ClassViewModel DtoBaseViewModel
         {
             get
             {
-                var iDto = Type.GetInterfaces().FirstOrDefault(f => f.Name.Contains("IClassDto"));
+                var iDto = Info.GetInterfaces().FirstOrDefault(f => f.Name.Contains("IClassDto"));
                 if (iDto != null)
                 {
                     ClassViewModel baseModel = ReflectionRepository.Global.GetClassViewModel(iDto.GetGenericArguments()[0].Name);
@@ -59,7 +58,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected override AttributeWrapper GetSecurityAttribute<TAttribute>() =>
             new AttributeWrapper
             {
-                Attribute = Type.GetAttribute<TAttribute>()
+                Attribute = Info.GetAttribute<TAttribute>()
             };
     }
 }

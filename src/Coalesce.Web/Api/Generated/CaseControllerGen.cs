@@ -1,5 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
+﻿
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
@@ -335,9 +334,9 @@ namespace Coalesce.Web.Api
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
-        public virtual SaveResult<Int32> GetAllOpenCasesCount()
+        public virtual SaveResult<int> GetAllOpenCasesCount()
         {
-            var result = new SaveResult<Int32>();
+            var result = new SaveResult<int>();
             try
             {
                 var objResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
@@ -364,7 +363,7 @@ namespace Coalesce.Web.Api
             try
             {
                 object objResult = null;
-                Case.RandomizeDatesAndStatus(Db);
+                Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
                 result.Object = objResult;
 
                 result.WasSuccessful = true;

@@ -49,18 +49,7 @@
         editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {{";
     }
 }
-@foreach (var ns in ReflectionRepository.Global.Namespaces.Where(f => f != "System"))
-{
-    if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
-}
-@foreach (var method in model.ClientMethods)
-{
-    var ns = method.ReturnType.PureType.FullNamespace;
-    if (!ns.StartsWith("System"))
-    {
-        if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
-    }
-}
+
 @foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)).OrderBy(n => n))
 {
     @:using @ns;
@@ -80,7 +69,7 @@ namespace @(namespaceName).Api
 }
     @(securityInfo.ClassAnnotation)
     public partial class @(model.ApiControllerClassName)
-    : LocalBaseApiController<@(model.BaseViewModel.FullName), @(model.DtoName)>
+    : LocalBaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName)>
     {
         protected ClassViewModel Model;
 
@@ -390,7 +379,7 @@ namespace @(namespaceName).Api
         </text>
         }
 
-        protected override IQueryable<@(model.BaseViewModel.FullName)> GetDataSource(ListParameters parameters)
+        protected override IQueryable<@(model.BaseViewModel.Type.FullyQualifiedName)> GetDataSource(ListParameters parameters)
         {
             @foreach (var method in model.ClientDataSources)
             {
@@ -408,7 +397,7 @@ namespace @(namespaceName).Api
                     @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.PascalCaseName"]);
                 @:}
             }
-            @:    return @(method.Parent.Namespace).@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+            @:    return @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
             @:}
             }
 
@@ -441,9 +430,9 @@ namespace @(namespaceName).Api
                 {
                 if(method.ReturnType.IsVoid){
                 @:object objResult = null;
-                @:@(method.Parent.Name).@(method.Name)(@(method.CsArguments));
+                @:@(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
                 }else{
-@:var objResult = @(method.Parent.FullName).@(method.Name)(@(method.CsArguments));
+@:var objResult = @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
                 }
                 }
                 else
@@ -467,7 +456,7 @@ namespace @(namespaceName).Api
             else if (method.ReturnType.PureType.HasClassViewModel)
             {
                 @:var mappingContext = new MappingContext(User, "");
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
             }
             else
             {
@@ -483,7 +472,7 @@ namespace @(namespaceName).Api
             else if (method.ReturnType.HasClassViewModel)
             {
                 @:var mappingContext = new MappingContext(User, "");
-                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, mappingContext, includeTree);
+                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, mappingContext, includeTree);
             }
             else
             {

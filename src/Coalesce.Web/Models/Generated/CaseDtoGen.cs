@@ -1,6 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web.Models;
+﻿
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
@@ -12,8 +10,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
-using static Coalesce.Domain.Case;
-
 namespace Coalesce.Web.Models
 {
     public partial class CaseDtoGen : GeneratedDto<Coalesce.Domain.Case, CaseDtoGen>
@@ -21,20 +17,20 @@ namespace Coalesce.Web.Models
     {
         public CaseDtoGen() { }
 
-        public Int32? CaseKey { get; set; }
-        public System.String Title { get; set; }
-        public System.String Description { get; set; }
-        public DateTimeOffset? OpenedAt { get; set; }
-        public System.Nullable<System.Int32> AssignedToId { get; set; }
-        public PersonDtoGen AssignedTo { get; set; }
-        public System.Nullable<System.Int32> ReportedById { get; set; }
-        public PersonDtoGen ReportedBy { get; set; }
-        public System.Byte[] Attachment { get; set; }
-        public System.String Severity { get; set; }
-        public Statuses? Status { get; set; }
-        public ICollection<CaseProductDtoGen> CaseProducts { get; set; }
-        public System.Nullable<System.Int32> DevTeamAssignedId { get; set; }
-        public DevTeamDtoGen DevTeamAssigned { get; set; }
+        public int? CaseKey { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public System.DateTimeOffset? OpenedAt { get; set; }
+        public int? AssignedToId { get; set; }
+        public Coalesce.Web.Models.PersonDtoGen AssignedTo { get; set; }
+        public int? ReportedById { get; set; }
+        public Coalesce.Web.Models.PersonDtoGen ReportedBy { get; set; }
+        public byte[] Attachment { get; set; }
+        public string Severity { get; set; }
+        public Coalesce.Domain.Case.Statuses? Status { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts { get; set; }
+        public int? DevTeamAssignedId { get; set; }
+        public Coalesce.Web.Models.DevTeamDtoGen DevTeamAssigned { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static CaseDtoGen Create(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
@@ -121,12 +117,12 @@ namespace Coalesce.Web.Models
 
             entity.Title = Title;
             entity.Description = Description;
-            entity.OpenedAt = (DateTimeOffset)(OpenedAt ?? DateTime.Today);
+            entity.OpenedAt = (OpenedAt ?? DateTime.Today);
             entity.AssignedToId = AssignedToId;
             entity.ReportedById = ReportedById;
             entity.Attachment = Attachment;
             entity.Severity = Severity;
-            entity.Status = (Statuses)(Status ?? 0);
+            entity.Status = (Status ?? 0);
             entity.DevTeamAssignedId = DevTeamAssignedId;
         }
 

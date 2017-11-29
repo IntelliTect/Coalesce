@@ -65,6 +65,31 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
         }
 
 
+        private class SymbolDiscoveryVisitor : SymbolVisitor<IEnumerable<INamedTypeSymbol>>
+        {
+            public override IEnumerable<INamedTypeSymbol> VisitNamespace(INamespaceSymbol symbol)
+            {
+                foreach (var childSymbol in symbol.GetMembers())
+                {
+                    //We must implement the visitor pattern ourselves and 
+                    //accept the child symbols in order to visit their children
+                    foreach (var result in childSymbol.Accept(this)) yield return result;
+                }
+            }
+
+            public override IEnumerable<INamedTypeSymbol> VisitNamedType(INamedTypeSymbol symbol)
+            {
+                yield return symbol;
+
+                foreach (var childSymbol in symbol.GetTypeMembers())
+                {
+                    //Once againt we must accept the children to visit 
+                    //all of their children
+                    foreach (var result in childSymbol.Accept(this)) yield return result;
+                }
+            }
+        }
+
         private ICollection<INamedTypeSymbol> _allTypes;
         public IEnumerable<INamedTypeSymbol> GetAllTypes()
         {
@@ -76,20 +101,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 throw new ArgumentNullException(nameof(compilation));
             }
 
-            var types = new List<INamedTypeSymbol>();
-            void CollectTypes(INamespaceSymbol ns)
-            {
-                types.AddRange(ns.GetTypeMembers());
-
-                foreach (var nestedNs in ns.GetNamespaceMembers())
-                {
-                    CollectTypes(nestedNs);
-                }
-            }
-
-            CollectTypes(compilation.Assembly.GlobalNamespace);
-
-            return _allTypes = types;
+            return _allTypes = compilation.Assembly.GlobalNamespace
+                .Accept(new SymbolDiscoveryVisitor())
+                .ToList();
         }
 
         /*

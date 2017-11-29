@@ -39,7 +39,7 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCoalesce();
+            services.AddCoalesce<AppDbContext>();
 
             services.AddMvc().AddJsonOptions(options =>
             {

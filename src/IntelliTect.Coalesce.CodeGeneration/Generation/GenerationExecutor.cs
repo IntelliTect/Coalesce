@@ -57,6 +57,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             genContext.DbContextType = FindDbContextType(Config, genContext.DataProject);
 
 
+
+
+            // TESTING CODE REMOVE ME
+
+            var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
+            ReflectionRepository.Global.DiscoverCoalescedTypes(types);
+            // END TESTING CODE REMOVE ME
+
+
+
+
+
+
             List<ClassViewModel> models = ReflectionRepository.Global
                                 .AddContext(genContext.DbContextType)
                                 .ToList();

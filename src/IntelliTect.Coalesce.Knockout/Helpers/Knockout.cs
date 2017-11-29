@@ -433,7 +433,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     </select >
                     ",
                 /*0*/ propertyModel.ObjectIdProperty.JsVariable,
-                /*1*/ propertyModel.PureType.Name,
+                /*1*/ propertyModel.PureType.ClassViewModel.ApiControllerClassName.Replace("Controller", ""),
                 /*2*/ propertyModel.Object.PrimaryKey.Name,
                 /*3*/ propertyModel.Object.ListTextProperty.Name,
                 /*4*/ propertyModel.JsVariable,

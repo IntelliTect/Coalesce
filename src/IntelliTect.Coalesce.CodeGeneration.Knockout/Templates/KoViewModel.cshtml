@@ -61,7 +61,7 @@ module @moduleName {
         {
         @:/** @(prop.Comment) */
         }
-        @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.JsKnockoutType());
+        @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
         if (prop.PureType.IsEnum)
         {
         @:/** Text value for enumeration @prop.Name */
@@ -155,7 +155,7 @@ module @moduleName {
         @:];
         }
 
-        @foreach (var method in model.ClientMethods.Where(m => !m.IsStatic || m.ReturnType.Name == model.Name))
+        @foreach (var method in model.ClientMethods.Where(m => !m.IsStatic || m.ReturnType.EqualsType(model.Type)))
         {
         @:
         @:
@@ -211,7 +211,7 @@ module @moduleName {
                 @:this.@(method.JsVariableResult)(data.object);
             }
 
-                @if (method.ReturnType.Name == method.Parent.Name)
+                @if (method.ReturnType.EqualsType(method.Parent.Type))
                 {
                 @:// The return type is the type of the object, load it.
                 @:this.loadFromDto(data.object, true)
@@ -242,7 +242,7 @@ module @moduleName {
             });
         } </text>
         @:/** Result of server method (@method.Name) strongly typed in a observable. */
-        @:public @method.JsVariableResult: @method.ReturnType.TsKnockoutType() = @method.ReturnType.JsKnockoutType();
+        @:public @method.JsVariableResult: @method.ReturnType.TsKnockoutType() = @method.ReturnType.ObservableConstructorCall();
         @:/** Raw result object of server method (@method.Name) simply wrapped in an observable. */
         @:public @method.JsVariableResultRaw: KnockoutObservable<any> = ko.observable();
         @:/** True while the server method (@method.Name) is being called */
@@ -576,7 +576,7 @@ module @moduleName {
         @:export class @(method.ArgsName) {
             @foreach (var arg in method.ClientParameters)
             {
-            @:public @(arg.CsArgumentName): @(arg.Type.TsKnockoutType()) = @(arg.Type.JsKnockoutType());
+            @:public @(arg.CsArgumentName): @(arg.Type.TsKnockoutType()) = @(arg.Type.ObservableConstructorCall());
             }
         @:}
         }

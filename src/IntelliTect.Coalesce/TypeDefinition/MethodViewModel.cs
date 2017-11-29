@@ -66,8 +66,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                string result = ReturnType.NameWithTypeParams;
-                if (result == "Void") return "object";
+                string result = ReturnType.FullyQualifiedName;
+                if (result == "void") return "object";
                 result = result.Replace("IQueryable", "IEnumerable");
                 if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
                 {
@@ -113,7 +113,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 string result = "";
                 if (!IsStatic)
                 {
-                    result = $"{Parent.PrimaryKey.PureType.Name} id";
+                    result = $"{Parent.PrimaryKey.PureType.FullyQualifiedName} id";
                     if (parameters.Any()) result += ", ";
                 }
                 result += string.Join(", ", parameters.Select(f => f.CsDeclaration));
@@ -213,7 +213,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsClientDataSource =>
             !IsInternalUse &&
             IsStatic && 
-            ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
+            ReturnType.IsA<IQueryable>() && ReturnType.PureType.EqualsType(Parent.Type);
 
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;

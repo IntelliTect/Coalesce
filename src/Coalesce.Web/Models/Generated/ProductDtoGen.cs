@@ -1,6 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web.Models;
+﻿
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
@@ -12,8 +10,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
-using static Coalesce.Domain.Product;
-
 namespace Coalesce.Web.Models
 {
     public partial class ProductDtoGen : GeneratedDto<Coalesce.Domain.Product, ProductDtoGen>
@@ -21,8 +17,8 @@ namespace Coalesce.Web.Models
     {
         public ProductDtoGen() { }
 
-        public Int32? ProductId { get; set; }
-        public System.String Name { get; set; }
+        public int? ProductId { get; set; }
+        public string Name { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static ProductDtoGen Create(Coalesce.Domain.Product obj, IMappingContext context, IncludeTree tree = null)

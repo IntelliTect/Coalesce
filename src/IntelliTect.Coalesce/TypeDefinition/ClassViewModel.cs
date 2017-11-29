@@ -25,11 +25,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected ICollection<MethodViewModel> _Methods;
 
         public abstract string Name { get; }
-        public abstract string Namespace { get; }
         public abstract string Comment { get; }
-
-
-        public string FullName => Namespace + "." + Name;
+        public TypeViewModel Type { get; protected set; }
+        
+        public string FullyQualifiedName => Type.FullyQualifiedName;
 
         public string ControllerName => Name;
 
@@ -54,7 +53,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string ApiName => Name;
 
-        public string DtoName => IsDto ? Name : $"{Name}DtoGen";
+        public string DtoName => IsDto ? FullyQualifiedName : $"{Name}DtoGen";
 
         public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel : this;
 
@@ -440,6 +439,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             throw new NotImplementedException();
         }
 
-        public override string ToString() => $"{FullName}";
+        public override string ToString() => FullyQualifiedName;
     }
 }

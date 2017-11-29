@@ -59,7 +59,6 @@ namespace Coalesce.Domain
         [Search]
         public ICollection<CaseProduct> CaseProducts { get; set; }
 
-
         public int? DevTeamAssignedId { get; set; }
         //[NotMapped]
         [ForeignKey("DevTeamAssignedId")]

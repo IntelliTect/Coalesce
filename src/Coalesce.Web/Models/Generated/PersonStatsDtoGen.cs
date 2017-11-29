@@ -1,6 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web.Models;
+﻿
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
@@ -12,8 +10,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
-using static Coalesce.Domain.PersonStats;
-
 namespace Coalesce.Web.Models
 {
     public partial class PersonStatsDtoGen : GeneratedDto<Coalesce.Domain.PersonStats, PersonStatsDtoGen>
@@ -21,9 +17,9 @@ namespace Coalesce.Web.Models
     {
         public PersonStatsDtoGen() { }
 
-        public Double? Height { get; set; }
-        public Double? Weight { get; set; }
-        public System.String Name { get; set; }
+        public double? Height { get; set; }
+        public double? Weight { get; set; }
+        public string Name { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static PersonStatsDtoGen Create(Coalesce.Domain.PersonStats obj, IMappingContext context, IncludeTree tree = null)
@@ -76,8 +72,8 @@ namespace Coalesce.Web.Models
             // Applicable roles for PersonStats
 
 
-            entity.Height = (Double)(Height ?? 0);
-            entity.Weight = (Double)(Weight ?? 0);
+            entity.Height = (Height ?? 0);
+            entity.Weight = (Weight ?? 0);
             entity.Name = Name;
         }
 

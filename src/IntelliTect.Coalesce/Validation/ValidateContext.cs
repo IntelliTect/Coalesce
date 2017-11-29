@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce.Validation
                         }
                         if (prop.Type.IsCollection)
                         {
-                            assert.AreNotEqual(prop.TypeName, prop.PureType, "Collection is not defined correctly.");
+                            assert.AreNotEqual(prop.Type.FullyQualifiedName, prop.PureType.FullyQualifiedName, "Collection is not defined correctly.");
                             if (prop.PureTypeOnContext)
                             {
                                 assert.IsNotNull(prop.InverseProperty, $"A Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object.Name}. " +

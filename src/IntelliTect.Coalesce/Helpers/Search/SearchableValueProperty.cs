@@ -74,8 +74,6 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 ? Property.Name
                 : $"{propertyParent}.{Property.Name}";
 
-            var propertyClrType = Type.GetType(Property.Type.FullName, false);
-
             if (Property.Type.IsDate)
             {
                 string DateLiteral(DateTime date) =>
@@ -146,6 +144,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
             }
             else if (Property.Type.IsNumber)
             {
+                var propertyClrType = (Property.Type as TypeDefinition.Wrappers.ReflectionTypeViewModel).Info;
                 var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(propertyClrType);
                 // This allows us to check if the conversion is valid without exceptions
                 // (in our code, anyway - the default implementation of this is just a try catch anyway)

@@ -13,11 +13,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public SymbolClassViewModel(ITypeSymbol symbol)
         {
             Symbol = symbol;
+            Type = new SymbolTypeViewModel(Symbol);
         }
 
         public override string Name => Symbol.Name;
-
-        public override string Namespace => FullNamespace(Symbol.ContainingNamespace);
 
         public override string Comment => SymbolExtensions.ExtractXmlComments(Symbol);
 

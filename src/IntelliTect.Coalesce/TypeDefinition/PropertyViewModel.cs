@@ -60,11 +60,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string JsonName => Name.ToCamelCase();
         
-        /// <summary>
-        /// Name of the type
-        /// </summary>
-        public string TypeName => Type.Name;
-
         public ClassViewModel Parent { get; protected set; }
 
         /// <summary>
@@ -606,7 +601,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         //TODO: Make this more robust
         public string ColumnName => Name;
 
-        public override string ToString() => $"{Name} : {TypeName}";
+        public override string ToString() => $"{Name} : {Type.FullyQualifiedName}";
 
         public string SecurityToString()
         {
@@ -830,13 +825,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                var name = Name;
-                if (!Type.IsNullable && Type.CsDefaultValue != "null" && !Type.IsByteArray)
+                var newValue = Name;
+                if (!Type.IsNullable && Type.CsDefaultValue != "null")
                 {
-                    if (Type.IsDate) name = $"({name} ?? DateTime.Today)";
-                    else name = $"({name} ?? {Type.CsDefaultValue})";
+                    // TODO: perform validation logic if the DTO doesn't have a value?
+                    // This would be fairly significant breaking change that would have no workarounds if a value isn't desired in certain cases.
+                    
+                    // TODO: Why do dates default to DateTime.Today?
+                    if (Type.IsDate)
+                        newValue = $"({newValue} ?? DateTime.Today)";
+                    else
+                        newValue = $"({newValue} ?? {Type.CsDefaultValue})";
                 }
-                var setter = $"entity.{Name} = {Type.ExplicitConversionType}{name};";
+                var setter = $"entity.{Name} = {newValue};";
 
                 var statement = GetPropertySetterConditional(true);
                 if (!string.IsNullOrWhiteSpace(statement))

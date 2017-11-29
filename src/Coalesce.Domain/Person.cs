@@ -204,6 +204,7 @@ namespace Coalesce.Domain
         //        .Where(f => f.FirstName.StartsWith("A"));
         //}
 
+        [Coalesce]
         public class NamesStartingWithAWithCases : DefaultDataSource<Person, AppDbContext>
         {
             public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context)

@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
         /// <summary>
         /// Type used in knockout for the observable.
         /// </summary>
-        public static string JsKnockoutType(this TypeViewModel typeModel)
+        public static string ObservableConstructorCall(this TypeViewModel typeModel)
         {
             if (typeModel.IsByteArray) return "ko.observable(null)";
             if (typeModel.IsCollection || typeModel.IsArray) return "ko.observableArray([])";

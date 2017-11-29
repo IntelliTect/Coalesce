@@ -372,7 +372,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                 var joinClass = manyToManyProperty.Object;
                 string tableName = joinClass.TableName;
-                string thisKeyName = joinClass.ClientProperties.First(f => f.PureType.Name == ClassViewModel.Name).ObjectIdProperty.ColumnName;
+                string thisKeyName = joinClass.ClientProperties.First(f => f.PureType.EqualsType(ClassViewModel.Type)).ObjectIdProperty.ColumnName;
                 string otherKeyName = joinClass.ClientProperties.First(f => !f.IsPrimaryKey && f.IsId && f.ColumnName != thisKeyName).ColumnName;
 
                 try

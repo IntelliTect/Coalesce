@@ -1,6 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web.Models;
+﻿
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
@@ -12,8 +10,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
-using static Coalesce.Domain.CaseSummary;
-
 namespace Coalesce.Web.Models
 {
     public partial class CaseSummaryDtoGen : GeneratedDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>
@@ -21,11 +17,11 @@ namespace Coalesce.Web.Models
     {
         public CaseSummaryDtoGen() { }
 
-        public Int32? CaseSummaryId { get; set; }
-        public Int32? OpenCases { get; set; }
-        public Int32? CaseCount { get; set; }
-        public Int32? CloseCases { get; set; }
-        public System.String Description { get; set; }
+        public int? CaseSummaryId { get; set; }
+        public int? OpenCases { get; set; }
+        public int? CaseCount { get; set; }
+        public int? CloseCases { get; set; }
+        public string Description { get; set; }
 
         // Create a new version of this object or use it from the lookup.
         public static CaseSummaryDtoGen Create(Coalesce.Domain.CaseSummary obj, IMappingContext context, IncludeTree tree = null)
@@ -80,9 +76,9 @@ namespace Coalesce.Web.Models
             // Applicable roles for CaseSummary
 
 
-            entity.OpenCases = (Int32)(OpenCases ?? 0);
-            entity.CaseCount = (Int32)(CaseCount ?? 0);
-            entity.CloseCases = (Int32)(CloseCases ?? 0);
+            entity.OpenCases = (OpenCases ?? 0);
+            entity.CaseCount = (CaseCount ?? 0);
+            entity.CloseCases = (CloseCases ?? 0);
             entity.Description = Description;
         }
 

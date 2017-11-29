@@ -1,5 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
+﻿
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
@@ -330,7 +329,7 @@ namespace Coalesce.Web.Api
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]
-        public virtual SaveResult<PersonDtoGen> Rename(Int32 id, System.String addition)
+        public virtual SaveResult<PersonDtoGen> Rename(int id, string addition)
         {
             var result = new SaveResult<PersonDtoGen>();
             try
@@ -357,7 +356,7 @@ namespace Coalesce.Web.Api
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
-        public virtual SaveResult<object> ChangeSpacesToDashesInName(Int32 id)
+        public virtual SaveResult<object> ChangeSpacesToDashesInName(int id)
         {
             var result = new SaveResult<object>();
             try
@@ -383,9 +382,9 @@ namespace Coalesce.Web.Api
         /// Method: Add
         /// </summary>
         [HttpPost("Add")]
-        public virtual SaveResult<Int32> Add(System.Int32 numberOne, System.Int32 numberTwo)
+        public virtual SaveResult<int> Add(int numberOne, int numberTwo)
         {
-            var result = new SaveResult<Int32>();
+            var result = new SaveResult<int>();
             try
             {
                 var objResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
@@ -407,10 +406,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUser")]
         [Authorize]
-        public virtual SaveResult<String> GetUser()
+        public virtual SaveResult<string> GetUser()
         {
             if (!ClassViewModel.MethodByName("GetUser").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
-            var result = new SaveResult<String>();
+            var result = new SaveResult<string>();
             try
             {
                 var objResult = Coalesce.Domain.Person.GetUser(User);
@@ -431,9 +430,9 @@ namespace Coalesce.Web.Api
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]
-        public virtual SaveResult<String> GetUserPublic()
+        public virtual SaveResult<string> GetUserPublic()
         {
-            var result = new SaveResult<String>();
+            var result = new SaveResult<string>();
             try
             {
                 var objResult = Coalesce.Domain.Person.GetUserPublic(User);
@@ -455,10 +454,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual SaveResult<IEnumerable<String>> NamesStartingWith(System.String characters)
+        public virtual SaveResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
         {
             if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
-            var result = new SaveResult<IEnumerable<String>>();
+            var result = new SaveResult<System.Collections.Generic.IEnumerable<string>>();
             try
             {
                 var objResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);

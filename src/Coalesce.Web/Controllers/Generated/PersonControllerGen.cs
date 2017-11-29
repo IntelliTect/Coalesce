@@ -1,7 +1,4 @@
-﻿using Coalesce.Domain;
-using Coalesce.Domain.External;
-using Coalesce.Web;
-using IntelliTect.Coalesce.Knockout.Controllers;
+﻿using IntelliTect.Coalesce.Knockout.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +6,7 @@ namespace Coalesce.Web.Controllers
 {
     [Authorize]
     public partial class PersonController
-        : BaseViewController<Coalesce.Domain.Person, AppDbContext>
+        : BaseViewController<Coalesce.Domain.Person, Coalesce.Domain.AppDbContext>
     {
         public PersonController() : base() { }
 

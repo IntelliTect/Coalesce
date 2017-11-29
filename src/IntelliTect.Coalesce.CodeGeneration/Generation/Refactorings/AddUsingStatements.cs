@@ -21,7 +21,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation.Refactorings
     public class AddUsingStatements : RefactoringBase
     {
         private List<NameSyntax> Usings = new List<NameSyntax>();
-        private SemanticModel initialSemanticModel;
 
         public AddUsingStatements(ProjectContext projectContext) : base(projectContext)
         {

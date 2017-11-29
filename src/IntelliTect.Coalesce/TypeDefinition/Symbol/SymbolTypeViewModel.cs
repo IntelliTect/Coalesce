@@ -57,14 +57,7 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         /// <summary>
         /// Returns true if the property is nullable.
         /// </summary>
-        public override bool IsNullable
-        {
-            get
-            {
-                if (!IsArray) return Symbol.IsReferenceType || IsNullableType;
-                return false;
-            }
-        }
+        public override bool IsNullable => Symbol.IsReferenceType || IsNullableType;
 
         public override bool IsNullableType => Symbol.Name.Contains(nameof(Nullable));
 
@@ -102,24 +95,15 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override bool IsEnum => Symbol.TypeKind == TypeKind.Enum;
 
-        public override string Namespace => 
-            Symbol.ContainingNamespace?.Name ?? Symbol.BaseType.ContainingNamespace.Name;
+        public static readonly SymbolDisplayFormat DefaultDisplayFormat = SymbolDisplayFormat
+            .FullyQualifiedFormat
+            .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining)
+            .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix);
 
-        public override string FullNamespace
-        {
-            get
-            {
-                INamespaceSymbol currentNamespace = Symbol.ContainingNamespace ?? Symbol.BaseType.ContainingNamespace;
-                var fullNamespace = currentNamespace.Name;
-                while (currentNamespace != null)
-                {
-                    currentNamespace = currentNamespace.ContainingNamespace;
-                    if (currentNamespace != null && !string.IsNullOrEmpty(currentNamespace.Name)) fullNamespace = currentNamespace.Name + "." + fullNamespace;
-                }
+        public override string FullyQualifiedName => Symbol.ToDisplayString(DefaultDisplayFormat);
 
-                return fullNamespace;
-            }
-        }
+        public override string FullNamespace =>
+            (Symbol is IArrayTypeSymbol array ? array.ElementType : Symbol.ContainingSymbol).ToDisplayString(DefaultDisplayFormat);
 
         public override TypeViewModel FirstTypeArgument =>
             new SymbolTypeViewModel(NamedSymbol.TypeArguments.First());
@@ -168,5 +152,8 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             else if (symbol.BaseType != null) return IsA<T>(symbol.BaseType);
             return false;
         }
+
+        public override bool EqualsType(TypeViewModel b) =>
+            b is SymbolTypeViewModel s ? FullyQualifiedName == s.FullyQualifiedName : false;
     }
 }

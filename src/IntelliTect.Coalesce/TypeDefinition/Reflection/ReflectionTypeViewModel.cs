@@ -58,9 +58,42 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
 
         public override bool IsEnum => Info.IsEnum;
 
-        public override string Namespace => Info.Namespace;
-
         public override string FullNamespace => Info.Namespace;
+
+        private static string GetFriendlyTypeName(Type type)
+        {
+            // From https://stackoverflow.com/questions/401681
+
+            if (type.IsGenericParameter)
+            {
+                return type.Name;
+            }
+
+            if (!type.IsGenericType)
+            {
+                return type.FullName;
+            }
+
+            var builder = new System.Text.StringBuilder();
+            var name = type.Name;
+            var index = name.IndexOf("`");
+            builder.AppendFormat("{0}.{1}", type.Namespace, name.Substring(0, index));
+            builder.Append('<');
+            var first = true;
+            foreach (var arg in type.GetGenericArguments())
+            {
+                if (!first)
+                {
+                    builder.Append(',');
+                }
+                builder.Append(GetFriendlyTypeName(arg));
+                first = false;
+            }
+            builder.Append('>');
+            return builder.ToString();
+        }
+
+        public override string FullyQualifiedName => GetFriendlyTypeName(Info);
 
 
         public override TypeViewModel FirstTypeArgument => 
@@ -80,5 +113,6 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
             }
         }
 
+        public override bool EqualsType(TypeViewModel b) => b is ReflectionTypeViewModel r ? Info == r.Info : false;
     }
 }

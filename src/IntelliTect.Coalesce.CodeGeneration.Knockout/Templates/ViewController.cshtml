@@ -12,21 +12,10 @@
         namespaceName += "." + Model.AreaName;
         viewLocation = "~/Areas/" + Model.AreaName + "/Views";
     }
-
-    var namespaces = new List<string>();
-    namespaces.Add("IntelliTect.Coalesce.Knockout.Controllers");
-    namespaces.Add("Microsoft.AspNetCore.Authorization");
-    namespaces.Add("Microsoft.AspNetCore.Mvc");
-    namespaces.Add(Model.Namespace);
 }
-@foreach (var ns in ReflectionRepository.Global.Namespaces.Where(f => f != "System"))
-{
-    if (!namespaces.Contains(ns)) { namespaces.Add(ns); }
-}
-@foreach (var ns in namespaces.OrderBy(n => n))
-{
-@:using @ns;
-}
+using IntelliTect.Coalesce.Knockout.Controllers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace @(namespaceName).Controllers
 {
@@ -36,7 +25,7 @@ namespace @(namespaceName).Controllers
     }
     @(model.SecurityInfo.ClassAnnotation)
     public partial class @(model.ControllerName)Controller 
-        : BaseViewController<@(model.FullName), @contextInfo.Name> 
+        : BaseViewController<@(model.FullyQualifiedName), @contextInfo.FullyQualifiedName> 
     { 
         public @(model.ControllerName)Controller() : base() { }
 

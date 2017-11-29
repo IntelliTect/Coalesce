@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         public abstract string Name { get; }
 
-        public abstract string Namespace { get; }
+        public abstract string FullyQualifiedName { get; }
 
         public abstract string FullNamespace { get; }
 
@@ -69,37 +69,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string FullName => $"{Namespace}.{Name}";
-
-        public string NameWithTypeParams
-        {
-            get
-            {
-                if (IsArray) return $"{PureType.Name}[]";
-                if (IsGeneric) return $"{Name}<{PureType.Name}>";
-                return Name;
-            }
-        }
-
-        public string FullyQualifiedNameWithTypeParams
-        {
-            get
-            {
-                if (IsArray) return $"{PureType.FullNamespace}.{PureType.Name}[]";
-                if (IsGeneric) return $"{FullNamespace}.{Name}<{PureType.FullNamespace}.{PureType.Name}>";
-                return $"{PureType.FullNamespace}.{Name}";
-            }
-        }
-
         /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool => Name == "Boolean";
+        public bool IsBool => new[] { "bool", "boolean" }.Contains(Name.ToLowerInvariant());
 
         /// <summary>
         /// Returns true if the property returns void.
         /// </summary>
-        public bool IsVoid => Name == "Void";
+        public bool IsVoid => Name.ToLowerInvariant() == "void";
 
         public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
@@ -225,53 +203,42 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if the property is class outside the System namespac, and is not a string, array, or filedownload
         /// </summary>
-        public bool IsPOCO => !IsArray && !IsCollection && !FullName.StartsWith("System") && IsClass;
+        public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass;
 
         public string TsDeclaration => $"{Name}: {TsType}";
 
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
-
-        public string CsDeclaration(string parameterName) => $"{NameWithTypeParams} {parameterName.ToCamelCase()}";
+        
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
 
-        public string NullableTypeForDto
+        public string NullableTypeForDto(string dtoNamespace)
         {
-            get
+            var model = this.ClassViewModel;
+            if (model != null)
             {
-                var model = this.ClassViewModel;
-                if (model != null)
-                {
-                    string typeName = "";
+                string typeName = "";
 
-                    if (IsNullable || IsArray || IsCollection)
-                        typeName = NameWithTypeParams;
-                    else
-                        typeName = Name + "?";
-
-                    typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
-
-                    return typeName;
-                }
+                if (IsNullable || IsArray || IsCollection)
+                    typeName = FullyQualifiedName;
                 else
-                {
-                    if (IsNullable || IsArray)
-                        return FullyQualifiedNameWithTypeParams;
-                    else
-                        return Name + "?";
-                }
+                    typeName = Name + "?";
 
+                typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+                typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+
+                return typeName;
             }
-        }
-
-        public string ExplicitConversionType
-        {
-            get
+            else
             {
-                if (IsNullable || IsArray) return "";
-                else return $"({Name})";
+                if (IsNullable || IsArray)
+                    return FullyQualifiedName;
+                else
+                    return FullyQualifiedName + "?";
             }
         }
+
+        public abstract bool EqualsType(TypeViewModel b);
     }
 }

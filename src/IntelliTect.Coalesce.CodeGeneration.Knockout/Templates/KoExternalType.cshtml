@@ -32,10 +32,10 @@ module @moduleName {
         // Observables
         @foreach (PropertyViewModel prop in model.ClientProperties)
         {
-		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.JsKnockoutType());
+		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
         if (prop.PureType.IsEnum)
         { 
-        @:public @(prop.JsTextPropertyName) = @(prop.Type.JsKnockoutType());  // Enum Text Value
+        @:public @(prop.JsTextPropertyName) = @(prop.Type.ObservableConstructorCall());  // Enum Text Value
         }
         }
         // Loads this object from a data transfer object received from the server.

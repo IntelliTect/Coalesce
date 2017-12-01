@@ -30,10 +30,15 @@ namespace Coalesce.Web.Tests
 
             var typeLocator = _dataContext.TypeLocator;
             var contextSymbol = typeLocator.FindType("AppDbContext", throwWhenNotFound: false);
-            _models = ReflectionRepository.Global
-                            .AddContext(contextSymbol)
-                            .Where(m => m.PrimaryKey != null)
-                            .ToList();
+
+            var rr = new ReflectionRepository();
+            var types = (typeLocator as RoslynTypeLocator).GetAllTypes();
+            rr.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
+
+            _models = rr.Entities
+                .Select(e => e.ClassViewModel)
+                .Where(m => m.PrimaryKey != null)
+                .ToList();
         }
 
         [Fact(Skip = "Run Explicitly By Removing Skip", DisplayName = "Security Tests: Remove Skip To Run; Best To Run Alone")]

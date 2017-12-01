@@ -25,6 +25,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsA<T>() => IsA(typeof(T));
 
+        public override TypeViewModel[] GenericArgumentsFor(Type type) => Info
+            .GetInterfaces()
+            .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == type)
+            .GenericTypeArguments
+            .Select(t => new ReflectionTypeViewModel(t))
+            .ToArray();
+
         public override bool IsA(Type type) => Info.IsSubclassOf(type) || type.IsAssignableFrom(Info) || type == Info;
 
         public override bool IsGeneric => Info.IsGenericType;

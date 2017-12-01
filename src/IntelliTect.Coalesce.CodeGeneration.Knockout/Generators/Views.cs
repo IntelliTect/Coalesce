@@ -8,7 +8,7 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class Views : CompositeGenerator<List<ClassViewModel>>
+    public class Views : CompositeGenerator<ReflectionRepository>
     {
         public Views(CompositeGeneratorServices services) : base(services) { }
 
@@ -23,20 +23,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             yield return Generator<StaticApiViews>();
 
-            foreach (var model in this.Model)
+            foreach (var model in this.Model.ApiBackedClasses)
             {
-                if (model.OnContext)
-                {
-                    yield return Generator<TableView>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Generated/{model.Name}/Table.cshtml");
-                    yield return Generator<CardView>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Generated/{model.Name}/Cards.cshtml");
-                    yield return Generator<CreateEditView>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Generated/{model.Name}/CreateEdit.cshtml");
-                }
+                yield return Generator<TableView>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/{model.Name}/Table.cshtml");
+
+                yield return Generator<CardView>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/{model.Name}/Cards.cshtml");
+
+                yield return Generator<CreateEditView>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/{model.Name}/CreateEdit.cshtml");
             }
         }
     }

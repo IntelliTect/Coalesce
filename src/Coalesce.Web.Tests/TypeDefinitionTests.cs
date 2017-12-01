@@ -13,7 +13,10 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void LoadContext()
         {
-            var models = ReflectionRepository.Global.AddContext<AppDbContext>();
+            var rr = new ReflectionRepository();
+            rr.AddAssembly<AppDbContext>();
+            var models = rr.AllClassViewModels.ToList();
+
             Assert.Equal(9, models.Count);
             Assert.Equal(5, models.Where(f=>f.HasDbSet).Count());
         }

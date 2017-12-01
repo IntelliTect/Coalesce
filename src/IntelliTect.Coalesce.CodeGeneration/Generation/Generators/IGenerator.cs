@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         // Composite interface - no additional members; just shorthand for the two sub-interfaces.
     }
 
-    public interface IRootGenerator : ICompositeGenerator<List<ClassViewModel>>
+    public interface IRootGenerator : ICompositeGenerator<ReflectionRepository>
     {
         // Nothing special about this right now, but there may be in the future.
     }

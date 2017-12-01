@@ -102,12 +102,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        /// <summary>
-        /// True if this property has a ViewModel.
-        /// </summary>
-        public bool HasViewModel => PureType.HasClassViewModel && !IsInternalUse;
-
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
@@ -194,22 +188,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
-        public bool HasValidValues => IsManytoManyCollection || ApiController != null;
-
-        /// <summary>
-        /// If this is an object, the name of the API controller serving this data. Or null if none.
-        /// </summary>
-        public string ApiController
-        {
-            get
-            {
-                if (Object == null || !Object.OnContext) return null;
-
-                if (IsPOCO) return Name;
-
-                return null;
-            }
-        }
+        public bool HasValidValues => IsManytoManyCollection || ((Object?.OnContext) ?? false && IsPOCO);
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.

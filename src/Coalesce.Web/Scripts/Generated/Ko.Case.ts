@@ -161,10 +161,6 @@ module ViewModels {
                 }else{
                     this.devTeamAssigned().loadFromDto(data.devTeamAssigned);
                 }
-                if (this.parent && this.parent.myId == this.devTeamAssigned().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.devTeamAssigned()))
-                {
-                    this.parent.loadFromDto(data.devTeamAssigned, undefined, false);
-                }
             }
 
             // The rest of the objects are loaded now.

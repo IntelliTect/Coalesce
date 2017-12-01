@@ -19,7 +19,7 @@ namespace Coalesce.Domain.Tests
             // Add some data to it.
             SampleData.Initialize(Db);
 
-            ReflectionRepository.Global.AddContext<DbContext>();
+            ReflectionRepository.Global.AddAssembly<DbContext>();
         }
 
         public AppDbContext Db { get; }

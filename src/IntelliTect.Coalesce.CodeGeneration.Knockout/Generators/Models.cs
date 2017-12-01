@@ -8,7 +8,7 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class Models : CompositeGenerator<List<ClassViewModel>>
+    public class Models : CompositeGenerator<ReflectionRepository>
     {
         public Models(CompositeGeneratorServices services) : base(services) { }
 
@@ -20,7 +20,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            foreach (var model in this.Model.Where(model => !model.IsDto))
+            foreach (var model in this.Model
+                .Entities.Select(e => e.ClassViewModel)
+                .Union(Model.ExternalTypes))
             {
                 yield return Generator<ClassDto>()
                     .WithModel(model)

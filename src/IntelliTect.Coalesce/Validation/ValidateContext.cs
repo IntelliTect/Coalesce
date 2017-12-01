@@ -10,12 +10,13 @@ namespace IntelliTect.Coalesce.Validation
 {
     public static class ValidateContext
     {
-        public static ValidationHelper Validate(List<ClassViewModel> models)
+        public static ValidationHelper Validate(ReflectionRepository repository)
         {
             var assert = new ValidationHelper();
-            assert.IsTrue(models.Count > 0, "No models were created. Make sure all models have a DbSet on the context.");
+
+            assert.IsTrue(repository.AllClassViewModels.Any(), "No models were created. Make sure all models have a DbSet on the context.");
             // Make sure everyone has an id property
-            foreach (var model in models.Where(f => f.HasDbSet))
+            foreach (var model in repository.Entities.Select(e => e.ClassViewModel))
             {
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
@@ -128,7 +129,7 @@ namespace IntelliTect.Coalesce.Validation
             }
 
             // Validate the non-DbSet items (DTOs)
-            foreach (var model in models.Where(f => !f.HasDbSet && f.OnContext))
+            foreach (var model in repository.CustomDtos)
             {
                 assert.Area = $"DTO: {model.Name}";
                 // Console.WriteLine($"Validating DTO: {model.Name}");
@@ -147,7 +148,7 @@ namespace IntelliTect.Coalesce.Validation
             }
 
             // Validate the objects found that is not on the context. 
-            foreach (var model in models.Where(f => !f.OnContext))
+            foreach (var model in repository.ExternalTypes)
             {
                 assert.Area = $"External Model: {model.Name}";
                 //Console.WriteLine($"Validating Other Object: {model.Name}");

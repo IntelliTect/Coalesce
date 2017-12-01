@@ -445,5 +445,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             );
 
         public override string ToString() => FullyQualifiedName;
+
+        public override bool Equals(object obj) => obj is ClassViewModel that && this.Type.Equals(that.Type);
+
+        public override int GetHashCode() => this.Type.GetHashCode();
     }
 }

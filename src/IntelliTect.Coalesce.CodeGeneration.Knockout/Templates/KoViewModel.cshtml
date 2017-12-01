@@ -309,7 +309,7 @@ module @moduleName {
             this.myId = data.@(model.PrimaryKey.JsonName);
             this.@(model.PrimaryKey.JsVariable)(data.@(model.PrimaryKey.JsonName));
             // Load the lists of other objects
-        @foreach (PropertyViewModel prop in model.ClientProperties.Where(p=>p.Type.IsCollection && p.HasViewModel))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(p=>p.Type.IsCollection))
         { 
             @:if (data.@prop.JsonName != null) {
             @if (prop.Object.PrimaryKey != null)
@@ -497,7 +497,7 @@ module @moduleName {
             }
 
 
-            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.HasViewModel && f.PureType.ClassViewModel.HasDbSet))
+            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.PureType.ClassViewModel.HasDbSet))
             {
             @:self.show@(prop.Name)Editor = function(callback: any) {
                 @:if (!self.@(prop.JsVariable)()) {

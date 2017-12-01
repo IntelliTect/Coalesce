@@ -120,7 +120,7 @@
                         <td class="prop-severity">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Severity))</td>
                         <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
                         <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
-                        <td class="prop-devTeamAssigned">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
+                        <td class="prop-devTeamAssigned">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
                     }
                     else
                     {

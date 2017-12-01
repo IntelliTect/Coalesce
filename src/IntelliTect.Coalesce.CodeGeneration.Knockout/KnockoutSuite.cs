@@ -8,7 +8,7 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class KnockoutSuite : CompositeGenerator<List<ClassViewModel>>, IRootGenerator
+    public class KnockoutSuite : CompositeGenerator<ReflectionRepository>, IRootGenerator
     {
         public KnockoutSuite(CompositeGeneratorServices services) : base(services) { }
 

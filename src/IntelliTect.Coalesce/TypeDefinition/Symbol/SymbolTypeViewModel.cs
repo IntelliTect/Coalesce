@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    internal class SymbolTypeViewModel : TypeViewModel
+    public class SymbolTypeViewModel : TypeViewModel
     {
         protected internal ITypeSymbol Symbol { get; internal set; }
 
@@ -128,7 +128,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool HasAttribute<TAttribute>() =>
             Symbol.HasAttribute<TAttribute>();
 
-        public override bool IsA(Type typeToCheck)
+        /// <summary>
+        /// Find the ITypeSymbol that satisfies the inheritance relationship "this : typeToCheck"
+        /// </summary>
+        /// <param name="typeToCheck"></param>
+        /// <returns></returns>
+        private INamedTypeSymbol GetSatisfyingBaseTypeSymbol(Type typeToCheck)
         {
             if (typeToCheck.IsConstructedGenericType)
             {
@@ -140,24 +145,43 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
             // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
 
-            bool IsBase(ITypeSymbol symbol)
+            INamedTypeSymbol IsBase(INamedTypeSymbol symbol)
             {
-                if (symbol.MetadataName == typeToCheck.Name) return true;
+                if (symbol == null) return null;
+                if (symbol.MetadataName == typeToCheck.Name) return symbol;
                 else if (symbol.BaseType != null) return IsBase(symbol.BaseType);
-                return false;
+                return null;
             }
 
             // Check self & base classes.
-            if (IsBase(Symbol)) return true;
+            var baseSymbol = IsBase(Symbol as INamedTypeSymbol);
+            if (baseSymbol != null) return baseSymbol;
 
             // Check interfaces.
             foreach (var symbol in Symbol.AllInterfaces)
             {
-                if (symbol.MetadataName == typeToCheck.Name) return true;
+                if (symbol.MetadataName == typeToCheck.Name) return symbol;
             }
 
-            return false;
+            return null;
         }
+
+
+        /// <summary>
+        /// Get the generic parameters used to satisfy the inheritance relationship with the given type.
+        /// </summary>
+        public override TypeViewModel[] GenericArgumentsFor(Type type)
+        {
+            var baseTypeSymbol = GetSatisfyingBaseTypeSymbol(type);
+            if (baseTypeSymbol == null)
+            {
+                throw new ArgumentException($"{this} does not inherit from {type}");
+            }
+
+            return baseTypeSymbol.TypeArguments.Select(t => new SymbolTypeViewModel(t)).ToArray();
+        }
+
+        public override bool IsA(Type typeToCheck) => GetSatisfyingBaseTypeSymbol(typeToCheck) != null;
 
         public override bool IsA<T>() => IsA(typeof(T));
 

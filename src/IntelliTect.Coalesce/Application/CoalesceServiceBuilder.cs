@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce
         public CoalesceServiceBuilder AddContext<TContext>()
             where TContext : DbContext
         {
-            ReflectionRepository.Global.AddContext<TContext>();
+            ReflectionRepository.Global.AddAssembly<TContext>();
             Services.AddScoped(sp => new CrudContext<TContext>(
                 sp.GetRequiredService<TContext>(),
                 sp.GetRequiredService<Microsoft.AspNetCore.Http.HttpContext>().User,

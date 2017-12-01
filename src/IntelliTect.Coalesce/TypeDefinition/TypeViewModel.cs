@@ -37,6 +37,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract TypeViewModel ArrayType { get; }
 
         public abstract bool IsA(Type type);
+        public abstract TypeViewModel[] GenericArgumentsFor(Type type);
         public abstract bool IsA<T>();
 
         public string CsDefaultValue
@@ -239,6 +240,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TypeViewModel that)) return false;
+
+            return this.FullyQualifiedName == that.FullyQualifiedName;
+        }
+
+        public override int GetHashCode() => this.FullyQualifiedName.GetHashCode();
+
+        // TODO: maybe retire this in favor of plain .Equals? Make sure that ReflectionTypeViewModel.FullyQualifiedName is correct, first.
         public abstract bool EqualsType(TypeViewModel b);
+
+        public override string ToString() => FullyQualifiedName;
     }
 }

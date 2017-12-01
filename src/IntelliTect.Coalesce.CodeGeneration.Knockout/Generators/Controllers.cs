@@ -8,7 +8,7 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class Controllers : CompositeGenerator<List<ClassViewModel>>
+    public class Controllers : CompositeGenerator<ReflectionRepository>
     {
         public Controllers(CompositeGeneratorServices services) : base(services) { }
 
@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             yield return Generator<LocalBaseApiController>()
                 .AppendOutputPath($"Api/Generated/LocalBaseApiController.cs");
 
-            foreach (var model in this.Model.Where(model => model.OnContext))
+            foreach (var model in this.Model.ApiBackedClasses)
             {
                 yield return Generator<ApiController>()
                     .WithModel(model)

@@ -14,8 +14,9 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelValidation()
         {
-            var models = ReflectionRepository.Global.AddContext<AppDbContext>();
-            var result = ValidateContext.Validate(models);
+            var rr = new ReflectionRepository();
+            rr.AddAssembly<AppDbContext>();
+            var result = ValidateContext.Validate(rr);
 
             foreach (var test in result)
             {

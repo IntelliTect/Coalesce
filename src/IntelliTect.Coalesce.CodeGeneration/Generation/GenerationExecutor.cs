@@ -59,23 +59,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
 
 
-            // TESTING CODE REMOVE ME
-
+            // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
+            var rr = ReflectionRepository.Global;
             var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
-            ReflectionRepository.Global.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
-
-            // END TESTING CODE REMOVE ME
+            rr.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
 
 
-
-
-
-
-            List<ClassViewModel> models = ReflectionRepository.Global
-                                .AddContext(genContext.DbContextType)
-                                .ToList();
-
-            var validationResult = ValidateContext.Validate(models);
+            var validationResult = ValidateContext.Validate(rr);
             var issues = validationResult.Where(r => !r.WasSuccessful);
             foreach (var issue in issues)
             {
@@ -89,7 +79,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             }
 
             var generator = ActivatorUtilities.CreateInstance<TGenerator>(provider)
-                .WithModel(models)
+                .WithModel(rr)
                 .WithOutputPath(genContext.WebProject.ProjectPath);
 
             logger.LogInformation("Starting Generation");

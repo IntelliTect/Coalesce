@@ -1,6 +1,7 @@
 ﻿using Coalesce.Domain.External;
 using Coalesce.Domain.Repositories;
 using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Linq;
 
 namespace Coalesce.Domain
 {
+    [Coalesce]
     public class AppDbContext : DbContext
     {
         public DbSet<Person> People { get; set; }

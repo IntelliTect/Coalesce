@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 DateTime dt;
                 foreach (var formatInfo in DateFormats)
                 {
-                    if (DateTime.TryParseExact(rawSearchTerm, formatInfo.Key, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal, out dt))
+                    if (DateTime.TryParseExact(rawSearchTerm, formatInfo.Key, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal, out dt))
                     {
                         dt = dt.ToUniversalTime();
 
@@ -99,7 +99,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
 
                 // We didn't find any specific format above.
                 // Try general date parsing for either eaching by day or by minute.
-                if (DateTime.TryParse(rawSearchTerm, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal, out dt))
+                if (DateTime.TryParse(rawSearchTerm, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal, out dt))
                 {
                     TimeSpan range;
                     if (dt.TimeOfDay == TimeSpan.Zero)

@@ -8,10 +8,12 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace Coalesce.Domain
 {
-    public class CaseDto: IClassDto<Case, CaseDto>
+    [Coalesce]
+    public class CaseDto : IClassDto<Case, CaseDto>
     {
         [Key]
         public int CaseId { get; set; }

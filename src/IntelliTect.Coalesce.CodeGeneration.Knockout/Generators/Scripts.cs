@@ -8,7 +8,7 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class Scripts : CompositeGenerator<List<ClassViewModel>>
+    public class Scripts : CompositeGenerator<ReflectionRepository>
     {
         public Scripts(CompositeGeneratorServices services) : base(services) { }
 
@@ -39,31 +39,28 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             string Partial(ClassViewModel model) => model.HasTypeScriptPartial ? ".Partial" : "";
 
-            foreach (var model in this.Model)
+            foreach (var model in Model.ApiBackedClasses)
             {
-                if (model.OnContext || model.IsDto)
-                {
-                    yield return Generator<KoViewModel>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
-                    yield return Generator<KoListViewModel>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Generated/Ko.{model.ListViewModelClassName}.ts");
-                }
+                yield return Generator<KoViewModel>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
+                yield return Generator<KoListViewModel>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/Ko.{model.ListViewModelClassName}.ts");
+            }
 
-                if (!model.OnContext)
-                {
-                    yield return Generator<KoExternalType>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
-                }
+            foreach (var model in Model.ExternalTypes)
+            {
+                yield return Generator<KoExternalType>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
+            }
 
-                if (model.HasTypeScriptPartial)
-                {
-                    yield return Generator<KoTsPartialStub>()
-                        .WithModel(model)
-                        .AppendOutputPath($"Partials/Ko.{model.Name}.partial.ts");
-                }
+            foreach (var model in Model.AllClassViewModels.Where(c => c.HasTypeScriptPartial))
+            {
+                yield return Generator<KoTsPartialStub>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Partials/Ko.{model.Name}.partial.ts");
             }
         }
     }

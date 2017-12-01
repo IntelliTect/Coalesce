@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     internal class SymbolPropertyViewModel : PropertyViewModel
     {

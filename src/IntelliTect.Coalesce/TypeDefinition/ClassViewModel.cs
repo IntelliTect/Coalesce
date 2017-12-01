@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
@@ -390,10 +389,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ClassSecurityInfo _securityInfo;
         public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
-            new SecurityPermission(GetSecurityAttribute<ReadAttribute>()),
-            new SecurityPermission(GetSecurityAttribute<EditAttribute>()),
-            new SecurityPermission(GetSecurityAttribute<DeleteAttribute>()),
-            new SecurityPermission(GetSecurityAttribute<CreateAttribute>())
+            (GetSecurityAttribute<ReadAttribute>()),
+            (GetSecurityAttribute<EditAttribute>()),
+            (GetSecurityAttribute<DeleteAttribute>()),
+            (GetSecurityAttribute<CreateAttribute>())
         ));
 
         public string DtoIncludesAsCS()
@@ -434,10 +433,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
-        protected virtual AttributeWrapper GetSecurityAttribute<TAttribute>() where TAttribute : SecurityAttribute
-        {
-            throw new NotImplementedException();
-        }
+
+        protected SecurityPermission GetSecurityAttribute<TAttribute>()
+            where TAttribute : SecurityAttribute =>
+            !HasAttribute<TAttribute>()
+            ? new SecurityPermission()
+            : new SecurityPermission(
+                level: this.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized,
+                roles: this.GetAttributeValue<TAttribute>(a => a.Roles),
+                name: typeof(TAttribute).Name.Replace("Attribute", string.Empty)
+            );
 
         public override string ToString() => FullyQualifiedName;
     }

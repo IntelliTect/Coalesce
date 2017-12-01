@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using System.Collections.Concurrent;
+using IntelliTect.Coalesce.Interfaces;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -21,20 +21,38 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private ConcurrentDictionary<string, ClassViewModel> _models = new ConcurrentDictionary<string, ClassViewModel>();
         private object _lock = new object();
 
+        public IReadOnlyCollection<TypeViewModel> DbContexts { get; private set; }
+        public IReadOnlyCollection<TypeViewModel> Entities { get; private set; }
+        public IReadOnlyCollection<TypeViewModel> DataSources { get; private set; }
+        public IReadOnlyCollection<TypeViewModel> Behaviors { get; private set; }
+        public IReadOnlyCollection<TypeViewModel> Dtos { get; private set; }
+        public IReadOnlyCollection<TypeViewModel> ExternalTypes { get; private set; }
 
-        public void DiscoverCoalescedTypes(IEnumerable<INamedTypeSymbol> types)
+        //public IReadOnlyCollection<TypeViewModel> Services { get; private set; }
+        //public IReadOnlyCollection<TypeViewModel> ExternalEntities { get; private set; }
+
+        public void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
         {
-            foreach (var typeSymbol in types)
+            foreach (var type in types)
             {
-                if (typeSymbol.HasAttribute<CoalesceAttribute>())
+                if (type.HasAttribute<CoalesceAttribute>())
                 {
-                    var type = new SymbolTypeViewModel(typeSymbol);
+                    var b = type.IsA(typeof(IDataSource<>));
+                    //var a = type.IsA(typeof(IDataSource<object>));
+                    var c = type.IsA(typeof(DefaultDataSource<,>));
 
                     if (type.IsA<DbContext>())
                     {
                         AddContext(type);
                     }
-                    //else if (type.IsA<IDataSource<>>)
+                    else if (type.IsA(typeof(IDataSource<>)))
+                    {
+                        ///AddDataSource(type);
+                    }
+                    else if (type.IsA(typeof(IClassDto<,>)))
+                    {
+
+                    }
                 }
             }
         }
@@ -44,10 +62,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<ClassViewModel> AddContext<T>() where T : DbContext => AddContext(typeof(T));
-        public List<ClassViewModel> AddContext(Type t) => AddContext(new ReflectionClassViewModel(t));
+        public List<ClassViewModel> AddContext<T>() where T : DbContext => AddContext(new ReflectionClassViewModel(typeof(T)));
         public List<ClassViewModel> AddContext(TypeViewModel t) => AddContext(t.ClassViewModel);
-        public List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol) => AddContext(new SymbolClassViewModel(contextSymbol));
 
         public List<ClassViewModel> AddContext(ClassViewModel context)
         {
@@ -57,13 +73,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var models = new List<ClassViewModel>();
                 foreach (var prop in context.ClientProperties)
                 {
-                    if (prop.Type.IsCollection || prop.IsDbSet)
+                    var isDbSet = prop.Type.IsA(typeof(DbSet<>));
+
+                    if (prop.Type.IsCollection || isDbSet)
                     {
                         var model = this.GetClassViewModel(prop.PureType);
 
                         if (model != null)
                         {
-                            model.HasDbSet = prop.IsDbSet;
+                            model.HasDbSet = isDbSet;
                             model.ContextPropertyName = prop.Name;
                             model.OnContext = true;
                             model.ContextPropertyName = prop.Name;
@@ -71,6 +89,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         }
                     }
                 }
+
                 // Check for other associated types that are not dbsets
                 foreach (var model in models.ToList())
                 {

@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -37,6 +36,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract TypeViewModel ArrayType { get; }
 
+        public abstract bool IsA(Type type);
         public abstract bool IsA<T>();
 
         public string CsDefaultValue

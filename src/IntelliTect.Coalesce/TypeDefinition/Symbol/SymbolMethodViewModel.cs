@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class SymbolMethodViewModel : MethodViewModel
     {

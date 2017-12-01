@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     public static class SymbolExtensions
     {

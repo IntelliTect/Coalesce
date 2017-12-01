@@ -62,7 +62,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             // TESTING CODE REMOVE ME
 
             var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
-            ReflectionRepository.Global.DiscoverCoalescedTypes(types);
+            ReflectionRepository.Global.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
+
             // END TESTING CODE REMOVE ME
 
 

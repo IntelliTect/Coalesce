@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     internal class ReflectionTypeViewModel : TypeViewModel
     {
@@ -23,8 +23,9 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public override bool HasAttribute<TAttribute>() =>
             Info.HasAttribute<TAttribute>();
 
-        public override bool IsA<T>() => 
-            Info.IsSubclassOf(typeof(T)) || typeof(T).IsAssignableFrom(Info) || typeof(T) == Info;
+        public override bool IsA<T>() => IsA(typeof(T));
+
+        public override bool IsA(Type type) => Info.IsSubclassOf(type) || type.IsAssignableFrom(Info) || type == Info;
 
         public override bool IsGeneric => Info.IsGenericType;
 

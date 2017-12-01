@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
 
@@ -110,11 +109,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool HasAttribute<TAttribute>() =>
             Symbol.HasAttribute<TAttribute>();
-
-        protected override AttributeWrapper GetSecurityAttribute<TAttribute>() =>
-            new AttributeWrapper
-            {
-                AttributeData = Symbol.GetAttribute<TAttribute>()
-            };
     }
 }

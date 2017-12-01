@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Text;
@@ -113,10 +112,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
         public ClassViewModel Object => PureType.ClassViewModel;
-
-        public bool IsDbSet => Type.Name.Contains("DbSet");
-
-
+        
         /// <summary>
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
         /// </summary>

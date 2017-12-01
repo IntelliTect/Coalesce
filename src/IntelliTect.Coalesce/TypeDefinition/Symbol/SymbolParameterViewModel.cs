@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     internal class SymbolParameterViewModel : ParameterViewModel
     {

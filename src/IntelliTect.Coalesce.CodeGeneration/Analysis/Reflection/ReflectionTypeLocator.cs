@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using System.IO;
 using System.Reflection;
 

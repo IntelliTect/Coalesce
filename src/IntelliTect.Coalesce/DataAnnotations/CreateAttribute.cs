@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// Should users be allowed to create an entity via the API/button.
     /// </summary>    
     [AttributeUsage(AttributeTargets.Class)]
-    public class CreateAttribute: SecurityAttribute
+    public sealed class CreateAttribute : SecurityAttribute
     {
     }
 }

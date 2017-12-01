@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     internal class SymbolTypeViewModel : TypeViewModel
     {
@@ -128,30 +128,38 @@ namespace IntelliTect.Coalesce.TypeDefinition.Wrappers
         public override bool HasAttribute<TAttribute>() =>
             Symbol.HasAttribute<TAttribute>();
 
-        public override bool IsA<T>()
+        public override bool IsA(Type typeToCheck)
         {
-            // Check base classes.
-            if (IsA<T>(Symbol)) return true;
+            if (typeToCheck.IsConstructedGenericType)
+            {
+                throw new ArgumentException(
+                    "SymbolTypeViewModels can't currently check if a symbol is assignable to a specific constructed generic. " +
+                    "It can only check against non-constructed generics.", nameof(typeToCheck));
+            }
+
+            // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
+            // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
+
+            bool IsBase(ITypeSymbol symbol)
+            {
+                if (symbol.MetadataName == typeToCheck.Name) return true;
+                else if (symbol.BaseType != null) return IsBase(symbol.BaseType);
+                return false;
+            }
+
+            // Check self & base classes.
+            if (IsBase(Symbol)) return true;
+
             // Check interfaces.
             foreach (var symbol in Symbol.AllInterfaces)
             {
-                if (symbol.Name == typeof(T).Name) return true;
+                if (symbol.MetadataName == typeToCheck.Name) return true;
             }
+
             return false;
         }
 
-        /// <summary>
-        /// Checks inheritance tree.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        private bool IsA<T>(ITypeSymbol symbol)
-        {
-            if (symbol.Name == typeof(T).Name) return true;
-            else if (symbol.BaseType != null) return IsA<T>(symbol.BaseType);
-            return false;
-        }
+        public override bool IsA<T>() => IsA(typeof(T));
 
         public override bool EqualsType(TypeViewModel b) =>
             b is SymbolTypeViewModel s ? FullyQualifiedName == s.FullyQualifiedName : false;

@@ -6,7 +6,6 @@ using Microsoft.Build.Exceptions;
 using System.Diagnostics;
 using System.IO;
 using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 

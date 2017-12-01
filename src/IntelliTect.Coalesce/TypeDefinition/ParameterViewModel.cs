@@ -1,6 +1,5 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;

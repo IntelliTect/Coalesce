@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.Validation
 {
@@ -29,13 +30,13 @@ namespace IntelliTect.Coalesce.Validation
                     assert.Area = $"{model.Name}.{prop.Name}";
                     try
                     {
-                        assert.IsNull(prop.GetAttributeValue<DataAnnotations.ReadAttribute, Helpers.SecurityPermissionLevels>(a => a.PermissionLevel),
+                        assert.IsNull(prop.GetAttributeValue<ReadAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
                             "Property-level ReadAttribute security doesn't support the PermissionLevel property");
-                        assert.IsNull(prop.GetAttributeValue<DataAnnotations.EditAttribute, Helpers.SecurityPermissionLevels>(a => a.PermissionLevel),
+                        assert.IsNull(prop.GetAttributeValue<EditAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
                             "Property-level EditAttribute security doesn't support the PermissionLevel property");
-                        assert.IsFalse(prop.HasAttribute<DataAnnotations.CreateAttribute>(),
+                        assert.IsFalse(prop.HasAttribute<CreateAttribute>(),
                             "Property-level security doesn't support CreateAttribute");
-                        assert.IsFalse(prop.HasAttribute<DataAnnotations.DeleteAttribute>(),
+                        assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
                         if (prop.IsPOCO)

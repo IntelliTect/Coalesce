@@ -34,6 +34,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 .AddProvider(new SimpleConsoleLoggerProvider()));
 
             services.AddSingleton(Config);
+            services.AddSingleton(ReflectionRepository.Global);
             services.AddSingleton<RazorTemplateCompiler>();
             services.AddSingleton<ITemplateResolver, TemplateResolver>();
             services.AddSingleton<RazorTemplateServices>();

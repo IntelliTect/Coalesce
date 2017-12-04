@@ -1,5 +1,6 @@
 ﻿
 using Coalesce.Web.Models;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
@@ -35,18 +36,13 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual async Task<ListResult<PersonDtoGen>> List(
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
+        public virtual async Task<ListResult<PersonDtoGen>> List([FromQuery] ListParameters parameters,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
+            parameters.Fields = null;
 
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
+            //ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -313,11 +309,22 @@ namespace Coalesce.Web.Api
             return resultList;
         }
 
-        protected override IQueryable<Coalesce.Domain.Person> GetDataSource(ListParameters parameters)
+        protected override IDataSource<Coalesce.Domain.Person> GetDataSource(ListParameters parameters)
         {
+            IDataSource<Coalesce.Domain.Person> source = null;
+            if (parameters.DataSource == "NamesStartingWithAWithCases")
+            {
+                source = ActivateDataSource<Coalesce.Domain.NamesStartingWithAWithCases>();
+            }
             if (parameters.DataSource == "BorCPeople")
             {
-                return Coalesce.Domain.Person.BorCPeople(Db);
+                source = ActivateDataSource<Coalesce.Domain.BorCPeople>();
+            }
+
+            if (source != null)
+            {
+                source.Context.ListParameters = parameters;
+                return source;
             }
 
             return base.GetDataSource(parameters);
@@ -329,13 +336,13 @@ namespace Coalesce.Web.Api
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]
-        public virtual SaveResult<PersonDtoGen> Rename(int id, string addition)
+        public virtual async Task<SaveResult<PersonDtoGen>> Rename(int id, string addition)
         {
             var result = new SaveResult<PersonDtoGen>();
             try
             {
                 IncludeTree includeTree = null;
-                var item = DataSource.Includes().FindItem(id);
+                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id);
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
                 var mappingContext = new MappingContext(User, "");
@@ -356,12 +363,12 @@ namespace Coalesce.Web.Api
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
-        public virtual SaveResult<object> ChangeSpacesToDashesInName(int id)
+        public virtual async Task<SaveResult<object>> ChangeSpacesToDashesInName(int id)
         {
             var result = new SaveResult<object>();
             try
             {
-                var item = DataSource.Includes().FindItem(id);
+                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id);
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();

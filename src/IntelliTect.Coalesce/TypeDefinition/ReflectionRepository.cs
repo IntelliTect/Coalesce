@@ -34,21 +34,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         private HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
+        private HashSet<EntityTypeUsage> _entities = new HashSet<EntityTypeUsage>();
         private HashSet<DataSourceTypeUsage> _dataSources = new HashSet<DataSourceTypeUsage>();
         private HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
         private HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
+        public ReadOnlyHashSet<EntityTypeUsage> Entities => new ReadOnlyHashSet<EntityTypeUsage>(_entities);
         public ReadOnlyHashSet<DataSourceTypeUsage> DataSources => new ReadOnlyHashSet<DataSourceTypeUsage>(_dataSources);
         public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new ReadOnlyHashSet<ClassViewModel>(_externalTypes);
         public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
 
-        public IEnumerable<EntityTypeUsage> Entities => DbContexts.SelectMany(c => c.Entities);
         public IEnumerable<ClassViewModel> ApiBackedClasses => Entities.Select(e => e.ClassViewModel).Union(CustomDtos);
 
         public IEnumerable<ClassViewModel> AllClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
-            .Union(Entities.Select(c => c.ClassViewModel))
+            .Union(ApiBackedClasses)
             .Union(ExternalTypes);
 
         public IEnumerable<TypeViewModel> AllTypeViewModels =>
@@ -66,7 +67,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     if (type.IsA<DbContext>())
                     {
-                        _contexts.Add(new DbContextTypeUsage(type.ClassViewModel));
+                        var context = new DbContextTypeUsage(type.ClassViewModel);
+                        _contexts.Add(context);
+                        _entities.UnionWith(context.Entities);
                     }
                     else if (type.IsA(typeof(IDataSource<>)))
                     {
@@ -84,18 +87,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         var classViewModel = type.ClassViewModel;
 
                         // TODO: this is a lie, and is also terrible.
-                        // Just trying to maintain the way that IClassDtos were identified before this overhaull.
+                        // Just trying to maintain the way that IClassDtos were identified before this overhaul.
+                        // This property is primarily used to determine if there is an API controller serving this data.
                         classViewModel.OnContext = true;
 
                         _customDtos.Add(classViewModel);
+
+                        DiscoverNestedDataSourcesOn(classViewModel, classViewModel.DtoBaseViewModel);
                     }
                 }
             }
 
             foreach (var entity in Entities)
             {
-                DiscoverExternalMethodTypesOn(entity.ClassViewModel);
-                DiscoverExternalPropertyTypesOn(entity.ClassViewModel);
+                var classViewModel = entity.ClassViewModel;
+                DiscoverExternalMethodTypesOn(classViewModel);
+                DiscoverExternalPropertyTypesOn(classViewModel);
+                DiscoverNestedDataSourcesOn(classViewModel);
             }
         }
 
@@ -155,15 +163,31 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        // TODO: MAKE THIS O(1) AGAIN INSTEAD OF O(N)
+        private void DiscoverNestedDataSourcesOn(ClassViewModel model, ClassViewModel assertSourceFor = null)
+        {
+            assertSourceFor = assertSourceFor ?? model;
+
+            foreach (var nestedType in model.ClientNestedTypes.Where(t => t.IsA(typeof(IDataSource<>))))
+            {
+                var usage = new DataSourceTypeUsage(nestedType, model);
+                if (!usage.ServedType.Equals(assertSourceFor))
+                {
+                    throw new Exception($"{nestedType} is not a valid data source for {model} - {nestedType} must inherit from IDataSource<{assertSourceFor}>.");
+                }
+                _dataSources.Add(usage);
+            }
+        }
+
+
+        // TODO: MAKE THIS O(1) AGAIN INSTEAD OF O(N). OR, GET RID OF THE NEED FOR CACHING BY PULLING CONTEXTUAL INFORMATION OUT OF THESE MODELS.
 
         public ClassViewModel GetClassViewModel(Type classType) =>
             AllClassViewModels.FirstOrDefault(c => (c.Type as ReflectionTypeViewModel)?.Info.Equals(classType) ?? false)
             ?? new ReflectionClassViewModel(classType);
 
-        // TODO: MAKE THIS O(1) AGAIN INSTEAD OF O(N)
+        // TODO: MAKE THIS O(1) AGAIN INSTEAD OF O(N). OR, GET RID OF THE NEED FOR CACHING BY PULLING CONTEXTUAL INFORMATION OUT OF THESE MODELS.
 
-        public ClassViewModel GetClassViewModel(ITypeSymbol classType) =>
+        public ClassViewModel GetClassViewModel(INamedTypeSymbol classType) =>
             AllClassViewModels.FirstOrDefault(c => (c.Type as SymbolTypeViewModel)?.Symbol.Equals(classType) ?? false)
             ?? new SymbolClassViewModel(classType);
 

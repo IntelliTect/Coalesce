@@ -17,7 +17,7 @@ using IntelliTect.Coalesce.Mapping;
 namespace IntelliTect.Coalesce
 {
     // TODO: get rid of this. its just a temporary compatibility layer.
-    public class OldDataSourceInteropDataSource<T, TContext> : DefaultDataSource<T, TContext>
+    public class OldDataSourceInteropDataSource<T, TContext> : StandardDataSource<T, TContext>
         where TContext : DbContext
         where T : class
     {
@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce
         }
     }
 
-    public class DefaultDataSource<T, TContext> : IDataSource<T>
+    public class StandardDataSource<T, TContext> : IDataSource<T>
         where TContext : DbContext
         where T : class
     {
@@ -65,6 +65,8 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public CrudContext<TContext> Context { get; }
 
+        CrudContext IDataSource<T>.Context => Context;
+
         /// <summary>
         /// The DbContext to be used for this request.
         /// </summary>
@@ -75,7 +77,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public ClassViewModel ClassViewModel { get; protected set; }
 
-        public DefaultDataSource(CrudContext<TContext> context)
+        public StandardDataSource(CrudContext<TContext> context)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();

@@ -67,17 +67,26 @@ namespace IntelliTect.Coalesce.Controllers
         }
         private ILogger _Logger = null;
 
-        protected virtual IQueryable<T> GetDataSource(ListParameters listParameters)
+        protected virtual IDataSource<T> ActivateDataSource<TSource>() where TSource : IDataSource<T> =>
+            ActivatorUtilities.GetServiceOrCreateInstance<TSource>(HttpContext.RequestServices);
+
+        protected virtual IDataSource<T> GetDataSource(ListParameters listParameters)
         {
-            return DataSource ?? ReadOnlyDataSource;
+            var source = ActivateDataSource<StandardDataSource<T, TContext>>();
+            source.Context.ListParameters = listParameters;
+            return source;
+
+            // TODO: how does this work for IClassDtos?
+            //return DataSource ?? ReadOnlyDataSource;
         }
 
         protected IDataSource<T> GetIDataSource(ListParameters listParameters)
         {
-            IQueryable<T> query = GetDataSource(listParameters);
-            var crudContext = HttpContext?.RequestServices.GetService<CrudContext<TContext>>();
-            crudContext.ListParameters = listParameters;
-            return new OldDataSourceInteropDataSource<T, TContext>(crudContext, query);
+            // TODO: get rid of this method. Just call GetDataSource.
+            return GetDataSource(listParameters);
+            //var crudContext = HttpContext?.RequestServices.GetService<CrudContext<TContext>>();
+            //crudContext.ListParameters = listParameters;
+            //return new OldDataSourceInteropDataSource<T, TContext>(crudContext, query);
         }
 
         protected async Task<ListResult<TDto>> ListImplementation(ListParameters listParameters)
@@ -357,8 +366,13 @@ namespace IntelliTect.Coalesce.Controllers
             Mapper<T, TDto>.DtoToObjMapper(dto, obj, context);
         }
 
+
+
         protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
         {
+            // TODO: this only supports ints
+
+
             // Get the object of the middle class.
             var manyToManyProperty = ClassViewModel.ClientProperties.First(f => string.Compare(f.ManyToManyCollectionName, propertyName, true) == 0);
             if (manyToManyProperty != null && manyToManyProperty.Object != null)
@@ -371,27 +385,29 @@ namespace IntelliTect.Coalesce.Controllers
                 }
 
                 var joinClass = manyToManyProperty.Object;
-                string tableName = joinClass.TableName;
                 string thisKeyName = joinClass.ClientProperties.First(f => f.PureType.EqualsType(ClassViewModel.Type)).ObjectIdProperty.ColumnName;
                 string otherKeyName = joinClass.ClientProperties.First(f => !f.IsPrimaryKey && f.IsId && f.ColumnName != thisKeyName).ColumnName;
+
+                var mapping = Db.Model.FindEntityType(joinClass.FullyQualifiedName).Relational();
+                var tableName = $"{mapping.Schema}.{mapping.TableName}";
 
                 try
                 {
                     if (method == "Remove")
                     {
                         // Check permissions for deleting the many-to-many objects.
-                        if (!manyToManyProperty.Object.SecurityInfo.IsDeleteAllowed(User))
+                        if (!joinClass.SecurityInfo.IsDeleteAllowed(User))
                         {
                             Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
                             return new SaveResult<TDto>("Unauthorized");
                         }
-                        string sql = "Delete from " + tableName + " where " + thisKeyName + " = {0} and " + otherKeyName + " = {1}";
+                        string sql = "DELETE FROM " + tableName + " WHERE " + thisKeyName + " = {0} AND " + otherKeyName + " = {1}";
                         Db.Database.ExecuteSqlCommand(sql, id, childId);
                     }
                     else if (method == "Add")
                     {
                         // Check permissions for creating the many-to-many objects.
-                        if (!manyToManyProperty.Object.SecurityInfo.IsCreateAllowed(User))
+                        if (!joinClass.SecurityInfo.IsCreateAllowed(User))
                         {
                             Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
                             return new SaveResult<TDto>("Unauthorized");
@@ -400,7 +416,7 @@ namespace IntelliTect.Coalesce.Controllers
                         // TODO: (maybe?) Check if the user is allowed to read the objects on the other side of the relationship (otherKeyName).
                         // This prevents an attack where the user just makes up foreign key values, hoping they're valid.
 
-                        string sql = "Insert Into " + tableName + " (" + thisKeyName + ", " + otherKeyName + ") Values ({0}, {1})";
+                        string sql = "INSERT INTO " + tableName + " (" + thisKeyName + ", " + otherKeyName + ") VALUES ({0}, {1})";
                         Db.Database.ExecuteSqlCommand(sql, id, childId);
                     }
                     return new SaveResult<TDto>(true, null);

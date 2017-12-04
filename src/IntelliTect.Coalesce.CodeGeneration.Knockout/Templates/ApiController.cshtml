@@ -12,6 +12,7 @@
     var securityInfo = model.SecurityInfo;
 
     var namespaces = new List<string>();
+    namespaces.Add("IntelliTect.Coalesce");
     namespaces.Add("IntelliTect.Coalesce.Controllers");
     namespaces.Add("IntelliTect.Coalesce.Data");
     namespaces.Add("IntelliTect.Coalesce.Mapping");
@@ -379,26 +380,21 @@ namespace @(namespaceName).Api
         </text>
         }
 
-        protected override IQueryable<@(model.BaseViewModel.Type.FullyQualifiedName)> GetDataSource(ListParameters parameters)
+        protected override IDataSource<@(model.BaseViewModel.FullyQualifiedName)> GetDataSource(ListParameters parameters)
         {
-            @foreach (var method in model.ClientDataSources)
+            IDataSource<@(model.BaseViewModel.FullyQualifiedName)> source = null;
+            @foreach (var source in model.ClientDataSources(Model.RazorServices.ReflectionRepository))
             {
-            @:if (parameters.DataSource == "@(method.Name)")
+            @:if (parameters.DataSource == "@(source.Name)")
             @:{
-            foreach (var parameter in method.Parameters.Where(p => !p.IsDI))
-                {
-            @:    @parameter.Type.Name @parameter.CsArgumentName = @parameter.Type.CsDefaultValue;
-            @:    if (parameters.Filters.ContainsKey("@parameter.CsArgumentName"))
-                @:{
-                    @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.CsArgumentName"]);
-                @:}
-            @:    else if (parameters.Filters.ContainsKey("@parameter.PascalCaseName"))
-                @:{
-                    @:@parameter.CsArgumentName = @(parameter.Type.CsConvertFromString)(parameters.Filters["@parameter.PascalCaseName"]);
-                @:}
-            }
-            @:    return @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
+            @:    source = ActivateDataSource<@(source.FullyQualifiedName)>();
             @:}
+            }
+            
+            if (source != null)
+            {
+                source.Context.ListParameters = parameters;
+                return source;
             }
 
             return base.GetDataSource(parameters);
@@ -407,6 +403,8 @@ namespace @(namespaceName).Api
         // Methods from data class exposed through API Controller.
         @foreach (var method in model.ClientMethods)
         {
+            var returnType = $"SaveResult<{method.ReturnTypeNameForApi}>";
+            if (!method.IsStatic) { returnType = $"async Task<{returnType}>"; }
         <text>
         /// <summary>
         /// Method: @method.Name
@@ -415,7 +413,7 @@ namespace @(namespaceName).Api
         @if (!string.IsNullOrEmpty(method.SecurityInfo.ExecuteAnnotation)) {
 @:        @(method.SecurityInfo.ExecuteAnnotation)
         }
-        @(model.ApiActionAccessModifier) virtual SaveResult<@method.ReturnTypeNameForApi> @method.Name (@method.CsParameters){
+        @(model.ApiActionAccessModifier) virtual @returnType @method.Name (@method.CsParameters){
             @if (method.SecurityInfo.IsExecute) {
             @:if (!ClassViewModel.MethodByName("@method.Name").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             }
@@ -437,7 +435,7 @@ namespace @(namespaceName).Api
                 }
                 else
                 {
-@:var item = DataSource.Includes().FindItem(id);
+@:var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id);
                 if (method.ReturnType.IsVoid)
                 {
                 @:object objResult = null;

@@ -1,5 +1,6 @@
 ﻿
 using Coalesce.Web.Models;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
@@ -318,11 +319,18 @@ namespace Coalesce.Web.Api
             return resultList;
         }
 
-        protected override IQueryable<Coalesce.Domain.Case> GetDataSource(ListParameters parameters)
+        protected override IDataSource<Coalesce.Domain.Case> GetDataSource(ListParameters parameters)
         {
-            if (parameters.DataSource == "GetAllOpenCases")
+            IDataSource<Coalesce.Domain.Case> source = null;
+            if (parameters.DataSource == "AllOpenCases")
             {
-                return Coalesce.Domain.Case.GetAllOpenCases(Db);
+                source = ActivateDataSource<Coalesce.Domain.Case.AllOpenCases>();
+            }
+
+            if (source != null)
+            {
+                source.Context.ListParameters = parameters;
+                return source;
             }
 
             return base.GetDataSource(parameters);

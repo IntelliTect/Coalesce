@@ -44,7 +44,9 @@ namespace IntelliTect.Coalesce.Models
         /// <summary>
         /// List of filters added from the controller based on property=value on the URL.
         /// </summary>
-        public Dictionary<string, string> Filters { get; }
+        public Dictionary<string, string> Filters { get; } = new Dictionary<string, string>();
+
+        public ListParameters() { }
 
         public ListParameters(string fields = null,
             string includes = null, string orderBy = null, string orderByDescending = null,
@@ -60,7 +62,6 @@ namespace IntelliTect.Coalesce.Models
             Where = where;
             DataSource = dataSource;
             Search = search;
-            Filters = new Dictionary<string, string>();
         }
 
         /// <summary>

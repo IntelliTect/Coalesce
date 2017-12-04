@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -17,7 +18,10 @@ namespace IntelliTect.Coalesce
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
             builder(new CoalesceServiceBuilder(services));
-            
+
+            // Needed for CrudContext to access the current user.
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.TryAddSingleton(_ => ReflectionRepository.Global);
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
 

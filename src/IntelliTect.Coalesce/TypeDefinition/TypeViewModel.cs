@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -126,6 +127,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
         public bool HasClassViewModel => !IsPrimitive && PureType.IsPOCO;
 

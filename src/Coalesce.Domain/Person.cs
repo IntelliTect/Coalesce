@@ -18,7 +18,7 @@ namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
-    public class Person : IIncludable<Person>, IBeforeSave<Person, AppDbContext>
+    public class Person : IBeforeSave<Person, AppDbContext>
     {
         public enum Genders
         {
@@ -191,62 +191,6 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
-        //public static IQueryable<Person> NamesStartingWithAWithCases(AppDbContext db)
-        //{
-        //    db.Cases
-        //        .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-        //        .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
-        //        .Load();
-
-        //    return db.People
-        //        .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-        //        .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-        //        .Where(f => f.FirstName.StartsWith("A"));
-        //}
-
-        [Coalesce]
-        public class NamesStartingWithAWithCases : DefaultDataSource<Person, AppDbContext>
-        {
-            public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context)
-            {
-            }
-
-            public override IQueryable<Person> GetQuery()
-            {
-                Db.Cases
-                    .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-                    .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
-                    .Load();
-
-                return Db.People
-                    .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-                    .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-                    .Where(f => f.FirstName.StartsWith("A"));
-            }
-        }
-
-
-        /// <summary>
-        /// People whose last name starts with B or c
-        /// </summary>
-        /// <param name="db"></param>
-        /// <returns></returns>
-        public static IQueryable<Person> BorCPeople(AppDbContext db)
-        {
-            return db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
-        }
- 
-
-        public IQueryable<Person> Include(IQueryable<Person> entities, string include = null)
-        {
-            if (include == "none")
-                return entities;
-
-            return entities.Include(f => f.CasesAssigned)
-                .Include(f => f.CasesReported)
-                .Include(f => f.Company);
-        }
-
         public ValidateResult<Person> BeforeSave(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
         {
             // Check to make sure the name is a certain length after it has been saved.
@@ -258,5 +202,35 @@ namespace Coalesce.Domain
 
             return true;
         }
+    }
+
+    [Coalesce]
+    public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbContext>
+    {
+        public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
+
+        public override IQueryable<Person> GetQuery()
+        {
+            Db.Cases
+                .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
+                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .Load();
+
+            return Db.People
+                .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+                .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
+                .Where(f => f.FirstName.StartsWith("A"));
+        }
+    }
+
+    /// <summary>
+    /// People whose last name starts with B or c
+    /// </summary>
+    [Coalesce]
+    public class BorCPeople : StandardDataSource<Person, AppDbContext>
+    {
+        public BorCPeople(CrudContext<AppDbContext> context) : base(context) { }
+
+        public override IQueryable<Person> GetQuery() => Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
     }
 }

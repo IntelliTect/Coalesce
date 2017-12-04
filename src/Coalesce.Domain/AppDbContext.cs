@@ -18,20 +18,6 @@ namespace Coalesce.Domain
         public DbSet<Product> Products { get; set; }
         public DbSet<CaseProduct> CaseProducts { get; set; }
 
-
-        public IQueryable<DevTeam> DevTeams
-        {
-            get
-            {
-                return DevTeamRepository.Items;
-            }
-        }
-
-        /// <summary>
-        /// Hook to create CaseDtos controller and type script.
-        /// </summary>
-        public IEnumerable<CaseDto> CaseDtos { get; set; }
-
         public AppDbContext()
         {
         }
@@ -39,18 +25,5 @@ namespace Coalesce.Domain
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            //IncludeExternalExtension.Register<AppDbContext>();
-            modelBuilder.Entity<Case>().Ignore(c => c.DevTeamAssigned);
-            modelBuilder.Ignore<DevTeam>();
-
-            IncludeExternalExtension.Register<DevTeam>(DevTeamRepository.Items);
-
-            DevTeamRepository.Load();
-        }
-
-
     }
 }

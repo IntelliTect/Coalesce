@@ -1,5 +1,6 @@
 ﻿
 using Coalesce.Web.Models;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Controllers;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Helpers.IncludeTree;
@@ -313,8 +314,15 @@ namespace Coalesce.Web.Api
             return resultList;
         }
 
-        protected override IQueryable<Coalesce.Domain.Company> GetDataSource(ListParameters parameters)
+        protected override IDataSource<Coalesce.Domain.Company> GetDataSource(ListParameters parameters)
         {
+            IDataSource<Coalesce.Domain.Company> source = null;
+
+            if (source != null)
+            {
+                source.Context.ListParameters = parameters;
+                return source;
+            }
 
             return base.GetDataSource(parameters);
         }

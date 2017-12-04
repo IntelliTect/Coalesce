@@ -63,6 +63,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsClass => IsArray || Symbol.IsReferenceType;
 
+        public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
+
         public override Dictionary<int, string> EnumValues
         {
             get
@@ -117,7 +119,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (!HasClassViewModel) return null;
                 if (PureType != this) return PureType.ClassViewModel;
-                if (Symbol != null && Symbol is INamedTypeSymbol) return ReflectionRepository.Global.GetClassViewModel(Symbol);
+                if (Symbol is INamedTypeSymbol nts) return ReflectionRepository.Global.GetClassViewModel(nts);
                 return null;
             }
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Interfaces;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -21,32 +22,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => "";
 
-        internal override ICollection<PropertyViewModel> RawProperties => Info.GetProperties()
+        protected override ICollection<PropertyViewModel> RawProperties => Info.GetProperties()
             .Select((p, i) => new ReflectionPropertyViewModel(this, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
             .ToList();
 
-        internal override ICollection<MethodViewModel> RawMethods => Info.GetMethods()
+        protected override ICollection<MethodViewModel> RawMethods => Info.GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
             .Select(m => new ReflectionMethodViewModel(m, this))
             .Cast<MethodViewModel>()
             .ToList();
 
-        public override bool IsDto => Info.GetInterfaces().Any(f => f.Name.Contains("IClassDto"));
-
-        public override ClassViewModel DtoBaseViewModel
-        {
-            get
-            {
-                var iDto = Info.GetInterfaces().FirstOrDefault(f => f.Name.Contains("IClassDto"));
-                if (iDto != null)
-                {
-                    ClassViewModel baseModel = ReflectionRepository.Global.GetClassViewModel(iDto.GetGenericArguments()[0]);
-                    return baseModel;
-                }
-                return null;
-            }
-        }
+        protected override ICollection<TypeViewModel> RawNestedTypes => Info.GetNestedTypes()
+            .Select(t => new ReflectionTypeViewModel(t))
+            .Cast<TypeViewModel>()
+            .ToList();
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Type.GetAttributeValue<TAttribute>(valueName);

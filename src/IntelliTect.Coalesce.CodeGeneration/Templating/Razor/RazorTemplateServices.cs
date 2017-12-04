@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
@@ -11,17 +12,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
     public class RazorTemplateServices
     {
         public RazorTemplateServices(
+            ReflectionRepository repository,
             ILoggerFactory loggerFactory,
             GenerationContext genContext,
             ITemplateResolver resolver,
             RazorTemplateCompiler compiler)
         {
+            ReflectionRepository = repository;
             LoggerFactory = loggerFactory;
             GenerationContext = genContext;
             Resolver = resolver;
             Compiler = compiler;
         }
 
+        public ReflectionRepository ReflectionRepository { get; }
         public ILoggerFactory LoggerFactory { get; }
         public GenerationContext GenerationContext { get; }
         public ITemplateResolver Resolver { get; }

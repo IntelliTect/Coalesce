@@ -9,6 +9,8 @@ namespace IntelliTect.Coalesce
 {
     public interface IDataSource<T> where T : class
     {
+        CrudContext Context { get; }
+
         Task<(T item, IncludeTree includeTree)> GetItemAsync(object id);
         Task<TDto> GetMappedItemAsync<TDto>(object id) where TDto : IClassDto<T, TDto>, new();
 

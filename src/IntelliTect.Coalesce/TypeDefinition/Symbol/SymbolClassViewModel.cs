@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected ITypeSymbol Symbol { get; }
 
-        public SymbolClassViewModel(ITypeSymbol symbol)
+        public SymbolClassViewModel(INamedTypeSymbol symbol)
         {
             Symbol = symbol;
             Type = new SymbolTypeViewModel(Symbol);
@@ -38,7 +38,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "";
         }
 
-        internal override ICollection<PropertyViewModel> RawProperties
+        protected override ICollection<PropertyViewModel> RawProperties
         {
             get
             {
@@ -59,7 +59,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        internal override ICollection<MethodViewModel> RawMethods
+        protected override ICollection<MethodViewModel> RawMethods
         {
             get
             {
@@ -87,22 +87,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        public override bool IsDto => Symbol.AllInterfaces.Any(f => f.Name.Contains("IClassDto"));
-
-        public override ClassViewModel DtoBaseViewModel
-        {
-            get
-            {
-                var iDto = Symbol.AllInterfaces.FirstOrDefault(f => f.Name.Contains("IClassDto"));
-                if (iDto != null)
-                {
-                    ClassViewModel baseModel = ReflectionRepository.Global.GetClassViewModel(iDto.TypeArguments[0]);
-                    return baseModel;
-                }
-                return null;
-            }
-        }
+        protected override ICollection<TypeViewModel> RawNestedTypes => Symbol.GetTypeMembers()
+            .Select(t => new SymbolTypeViewModel(t))
+            .Cast<TypeViewModel>()
+            .ToList();
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);

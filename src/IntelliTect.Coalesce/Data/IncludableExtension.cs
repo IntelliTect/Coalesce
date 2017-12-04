@@ -16,55 +16,6 @@ namespace IntelliTect.Coalesce.Data
 {
     public static class IncludableExtension
     {
-        internal static MethodInfo IncludeMethodInfo { get; }
-        internal static MethodInfo ThenIncludeAfterCollectionMethodInfo { get; }
-
-        static IncludableExtension()
-        {
-            IncludeMethodInfo = typeof(EntityFrameworkQueryableExtensions)
-                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.Include))
-                .Single(mi => mi.GetParameters().Any(
-                    pi => pi.Name == "navigationPropertyPath" && pi.ParameterType != typeof(string)));
-
-            ThenIncludeAfterCollectionMethodInfo = typeof(EntityFrameworkQueryableExtensions)
-                .GetTypeInfo().GetDeclaredMethods(nameof(EntityFrameworkQueryableExtensions.ThenInclude))
-                .Single(mi =>
-                {
-                    var typeInfo = mi.GetParameters()[0].ParameterType.GenericTypeArguments[1].GetTypeInfo();
-                    return typeInfo.IsGenericType
-                           && typeInfo.GetGenericTypeDefinition() == typeof(IEnumerable<>);
-                });
-
-        }
-
-
-
-
-
-
-        /// <summary>
-        /// Includes sub objects from the graph based on IIncludable method on class.
-        /// </summary>------
-        /// <typeparam name="T"></typeparam>
-        /// <param name="query"></param>
-        /// <param name="include"></param>
-        /// <returns></returns>
-        public static IQueryable<T> Includes<T>(this IQueryable<T> query, string includes = null) where T : class, new()
-        {
-            T obj = new T();
-            var objT = obj as IIncludable<T>;
-            if (objT != null)
-            {
-                return objT.Include(query, includes);
-            }
-            else
-            {
-                query = query.IncludeChildren();
-            }
-            return query;
-        }
-
-
         /// <summary>
         /// Includes immediate children, as well as the other side of many-to-many relationships.
         /// </summary>
@@ -93,7 +44,7 @@ namespace IntelliTect.Coalesce.Data
         // Renable once microsoft releases the fix and we upgrade our references.
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         /// <summary>
-        /// Asynchronously finds an object based on key after an include has been done.
+        /// Asynchronously finds an object based on a specific primary key value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="query"></param>
@@ -117,7 +68,7 @@ namespace IntelliTect.Coalesce.Data
         }
 
         /// <summary>
-        /// Finds an object based on key after an include has been done.
+        /// Finds an object based on a specific primary key value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="query"></param>
@@ -134,14 +85,6 @@ namespace IntelliTect.Coalesce.Data
             {
                 return query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).First();
             }
-        }
-
-        static Expression CreateExpression(Type type, string propertyName)
-        {
-            var param = Expression.Parameter(type, "x");
-            Expression body = param;
-            body = Expression.PropertyOrField(body, propertyName);
-            return Expression.Lambda(body, param);
         }
     }
 }

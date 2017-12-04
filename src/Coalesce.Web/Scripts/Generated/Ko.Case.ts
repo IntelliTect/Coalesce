@@ -307,18 +307,6 @@ module ViewModels {
                         }
                     });
                 }
-                // See if self.devTeamAssigned needs to be loaded.
-                if (self.devTeamAssigned() == null && self.devTeamAssignedId() != null){
-                    loadingCount++;
-                    var devTeamAssignedObj = new DevTeam();
-                    devTeamAssignedObj.load(self.devTeamAssignedId(), function() {
-                        loadingCount--;
-                        self.devTeamAssigned(devTeamAssignedObj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
                 if (loadingCount == 0 && $.isFunction(callback)){
                     callback();
                 }

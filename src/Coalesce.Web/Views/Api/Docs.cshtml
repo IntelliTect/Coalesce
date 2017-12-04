@@ -176,7 +176,7 @@
                     <tr>
                         <th>@method.Name</th>
                         <td>
-                            @method.ReturnType.NameWithTypeParams
+                            @method.ReturnType.FullyQualifiedName
                         </td>
                         <td>
                             @method.CsParameters
@@ -195,23 +195,14 @@
                 <h3>@vm.Name Alternate List Data Sources</h3>
                 <div>These can be accessed via the list view model's dataSource via an enumeration.</div>
             </div>
-            @if (vm.ClientDataSources.Any())
-            {
-                <ul class="list-group">
-                    @foreach (var method in vm.ClientDataSources)
+            <ul class="list-group">
+                @foreach (var source in vm.ClientDataSources(ReflectionRepository.Global))
                 {
-                        <li class="list-group-item">
-                            @method.Name
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <div class="panel-body">
-                    None
-                </div>
-            }
+                    <li class="list-group-item">
+                        @source.Name
+                    </li>
+                }
+            </ul>
         </div>
 
 

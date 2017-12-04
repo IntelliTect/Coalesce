@@ -38,9 +38,9 @@ module @moduleName {
     // Add an enum for all methods that are static and IQueryable
     export enum @(model.Name)DataSources {
             Default,
-            @foreach(var method in model.BaseViewModel.ClientDataSources.OrderBy(m => m.Name))
+            @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))
             {
-            @:@method.Name,
+            @:@source.Name,
             }
         }
     export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)> {

@@ -59,12 +59,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this class implements IClassDto, return true.
         /// </summary>
-        public abstract bool IsDto { get; }
+        public bool IsDto => Type.IsA(typeof(Coalesce.Interfaces.IClassDto<,>));
 
         /// <summary>
-        /// If this class implements IClassDto, return the ClassViewModel this DTO is based upon.
+        /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
         /// </summary>
-        public abstract ClassViewModel DtoBaseViewModel { get; }
+        public ClassViewModel DtoBaseViewModel => IsDto
+            ? Type.GenericArgumentsFor(typeof(Interfaces.IClassDto<,>)).First().ClassViewModel
+            : null;
 
         /// <summary>
         /// Name of the ViewModelClass
@@ -103,8 +105,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Member Info - Properties & Methods
 
-        internal abstract ICollection<PropertyViewModel> RawProperties { get; }
-        internal abstract ICollection<MethodViewModel> RawMethods { get; }
+        protected abstract ICollection<PropertyViewModel> RawProperties { get; }
+        protected abstract ICollection<MethodViewModel> RawMethods { get; }
+        protected abstract ICollection<TypeViewModel> RawNestedTypes { get; }
 
         /// <summary>
         /// All properties for the object.
@@ -157,8 +160,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             nameof(Data.IBeforeDelete<DbContext>.BeforeDelete),
             nameof(Data.IAfterDelete<DbContext>.AfterDelete),
             nameof(Data.IExcludable.Exclude),
-            nameof(Data.IIncludable<object>.Include),
-            nameof(Data.IIncludeExternal<object>.IncludeExternal),
             nameof(object.ToString),
             nameof(object.Equals),
             nameof(object.GetHashCode),
@@ -188,7 +189,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public IEnumerable<MethodViewModel> ClientMethods => Methods.Where(m => m.IsClientMethod);
 
-        public IEnumerable<MethodViewModel> ClientDataSources => Methods.Where(m => m.IsClientDataSource);
+        internal IEnumerable<TypeViewModel> ClientNestedTypes => RawNestedTypes
+            .Where(t => !t.IsInternalUse);
+
+        public IEnumerable<TypeViewModel> ClientDataSources(ReflectionRepository repo) => repo
+            .DataSources
+            .Where(d => d.SourceFor.Equals(this))
+            .Select(d => d.TypeViewModel);
 
 
         /// <summary>
@@ -374,11 +381,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
         public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
-
-        public string TableName =>
-            "dbo." + (this.GetAttributeValue<TableAttribute>(a => a.Name) ?? ContextPropertyName ?? Name);
-
-        public string ContextPropertyName { get; set; }
 
         public bool OnContext { get; set; }
 

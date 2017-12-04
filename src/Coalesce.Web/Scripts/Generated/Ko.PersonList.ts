@@ -11,6 +11,7 @@ module ListViewModels {
     // Add an enum for all methods that are static and IQueryable
     export enum PersonDataSources {
             Default,
+            NamesStartingWithAWithCases,
             BorCPeople,
         }
     export class PersonList extends Coalesce.BaseListViewModel<PersonList, ViewModels.Person> {

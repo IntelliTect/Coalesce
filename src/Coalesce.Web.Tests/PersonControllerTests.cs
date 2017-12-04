@@ -216,7 +216,7 @@ namespace Coalesce.Web.Tests
         public async void InstanceFunction()
         {
             var result = _pc.Rename(1, "-test");
-            Assert.Equal("Joseph-test", result.Object.FirstName);
+            Assert.Equal("Joseph-test", result.Result.Object.FirstName);
             // Get the new item.
             var person = await _pc.Get(1.ToString());
             Assert.Equal("Joseph-test", person.FirstName);

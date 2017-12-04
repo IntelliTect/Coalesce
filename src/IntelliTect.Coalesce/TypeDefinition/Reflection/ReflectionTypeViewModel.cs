@@ -23,16 +23,40 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool HasAttribute<TAttribute>() =>
             Info.HasAttribute<TAttribute>();
 
-        public override bool IsA<T>() => IsA(typeof(T));
+        private Type GetSatisfyingBaseType(Type type)
+        {
+            IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
+            {
+                // From https://stackoverflow.com/a/17143662
+                return t.BaseType == null || t.BaseType == typeof(object)
+                    ? t.GetInterfaces()
+                    : Enumerable
+                        .Repeat(t.BaseType, 1)
+                        .Concat(t.GetInterfaces())
+                        .Concat(GetBaseClassesAndInterfaces(t.BaseType))
+                        .Distinct();
+            }
 
-        public override TypeViewModel[] GenericArgumentsFor(Type type) => Info
-            .GetInterfaces()
-            .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == type)
+            return GetBaseClassesAndInterfaces(Info)
+                .Concat(new[] { Info })
+                .FirstOrDefault(x =>
+                       x.Equals(type)
+                    || x.IsSubclassOf(type)
+                    || type.IsAssignableFrom(x)
+                    || x.IsGenericType && x.GetGenericTypeDefinition() == type
+                );
+        }
+
+        public override TypeViewModel[] GenericArgumentsFor(Type type) => 
+            GetSatisfyingBaseType(type)
             .GenericTypeArguments
             .Select(t => new ReflectionTypeViewModel(t))
             .ToArray();
 
-        public override bool IsA(Type type) => Info.IsSubclassOf(type) || type.IsAssignableFrom(Info) || type == Info;
+        public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;
+
+        public override bool IsA<T>() => IsA(typeof(T));
+
 
         public override bool IsGeneric => Info.IsGenericType;
 
@@ -45,6 +69,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsNullableType => Info.Name.Contains("Nullable");
 
         public override bool IsClass => Info.IsClass;
+
+        public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
 
         public override Dictionary<int, string> EnumValues
         {

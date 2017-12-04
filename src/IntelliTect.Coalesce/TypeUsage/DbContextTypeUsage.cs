@@ -22,7 +22,6 @@ namespace IntelliTect.Coalesce.TypeUsage
                     // TODO: eliminate these.
                     usage.ClassViewModel.OnContext = true;
                     usage.ClassViewModel.HasDbSet = true;
-                    usage.ClassViewModel.ContextPropertyName = p.Name;
 
                     return usage;
                 })

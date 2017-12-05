@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             {
                 var resolvedTemplate = this.Resolver.Resolve(Template);
                 var compiledTemplate = await this.Compiler.GetTemplateInstance(resolvedTemplate);
-                compiledTemplate.Model = this;
+                compiledTemplate.SetModel(this);
                 output = await compiledTemplate.GetOutputAsync();
             }
             catch (Exception ex)

@@ -118,10 +118,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
         {
             RazorTemplateEngine engine = new CoalesceRazorTemplateEngine(
                 RazorEngine.Create(options => {
-                    //RazorExtensions.Register(options);
-                    options
-                        .AddDirective(InheritsDirective.Directive)
-                        .SetBaseType(nameof(CoalesceTemplate));
+                    InheritsDirective.Register(options);
                 }),
                 RazorProject.Create(template.ResolvedFromDisk
                     ? template.FullName

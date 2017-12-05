@@ -380,10 +380,13 @@ namespace @(namespaceName).Api
         </text>
         }
 
-        protected override IDataSource<@(model.BaseViewModel.FullyQualifiedName)> GetDataSource(ListParameters parameters)
+        @{ var dataSources = model.ClientDataSources(Model.RazorServices.ReflectionRepository).ToList(); }
+        @if (dataSources.Any())
+        {
+        <text>protected override IDataSource<@(model.BaseViewModel.FullyQualifiedName)> GetDataSource(ListParameters parameters)
         {
             IDataSource<@(model.BaseViewModel.FullyQualifiedName)> source = null;
-            @foreach (var source in model.ClientDataSources(Model.RazorServices.ReflectionRepository))
+            @foreach (var source in dataSources)
             {
             @:if (parameters.DataSource == "@(source.Name)")
             @:{
@@ -398,6 +401,8 @@ namespace @(namespaceName).Api
             }
 
             return base.GetDataSource(parameters);
+        }
+        </text>
         }
 
         // Methods from data class exposed through API Controller.

@@ -314,18 +314,6 @@ namespace Coalesce.Web.Api
             return resultList;
         }
 
-        protected override IDataSource<Coalesce.Domain.Company> GetDataSource(ListParameters parameters)
-        {
-            IDataSource<Coalesce.Domain.Company> source = null;
-
-            if (source != null)
-            {
-                source.Context.ListParameters = parameters;
-                return source;
-            }
-
-            return base.GetDataSource(parameters);
-        }
 
         // Methods from data class exposed through API Controller.
     }

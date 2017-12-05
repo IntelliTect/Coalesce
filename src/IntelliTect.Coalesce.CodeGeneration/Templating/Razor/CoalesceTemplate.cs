@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
     {
         private TextWriter Output { get; set; }
 
-        public virtual dynamic Model { get; set; }
+        //public virtual object Model { get; set; }
 
         public abstract Task ExecuteAsync();
 
@@ -59,9 +59,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                 writer.Write(content.ToString());
             }
         }
+
+        public abstract void SetModel(object model);
     }
+
     public abstract class CoalesceTemplate<TModel> : CoalesceTemplate
+        where TModel : class
     {
-        public new TModel Model { get; set; }
+        public TModel Model { get; private set; }
+
+        public override void SetModel(object model) => Model = model as TModel ?? throw new ArgumentException("Incorrect model type");
     }
 }

@@ -36,13 +36,18 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual async Task<ListResult<PersonDtoGen>> List([FromQuery] ListParameters parameters,
+        public virtual async Task<ListResult<PersonDtoGen>> List(
+            string includes = null,
+            string orderBy = null, string orderByDescending = null,
+            int? page = null, int? pageSize = null,
+            string where = null,
+            string dataSource = null,
+            string search = null,
             // Custom fields for this object.
             string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
         {
-            parameters.Fields = null;
 
-            //ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
+            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
 
             // Add custom filters
             parameters.AddFilter("PersonId", personId);
@@ -308,6 +313,7 @@ namespace Coalesce.Web.Api
             }
             return resultList;
         }
+
 
         protected override IDataSource<Coalesce.Domain.Person> GetDataSource(ListParameters parameters)
         {

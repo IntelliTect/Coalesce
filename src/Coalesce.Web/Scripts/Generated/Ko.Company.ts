@@ -68,7 +68,7 @@ module ViewModels {
         /** Url for a table view of all members of collection Employees for the current object. */
         public employeesListUrl: KnockoutComputed<string> = ko.computed({
             read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/Person/Table?companyId=' + this.companyId();
+                     return this.coalesceConfig.baseViewUrl() + '/Person/Table?filter.companyId=' + this.companyId();
             },
             deferEvaluation: true
         });

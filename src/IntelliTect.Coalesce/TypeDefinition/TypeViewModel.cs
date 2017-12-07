@@ -39,7 +39,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsA(Type type);
         public abstract TypeViewModel[] GenericArgumentsFor(Type type);
-        public abstract bool IsA<T>();
+
+        public bool IsA<T>() => IsA(typeof(T));
 
         public string CsDefaultValue
         {
@@ -117,6 +118,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsString) return "string";
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
                 if (IsEnum) return "number";
@@ -129,7 +131,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
-        public bool HasClassViewModel => !IsPrimitive && PureType.IsPOCO;
+        public bool HasClassViewModel => !IsPrimitive && IsPOCO;
 
         public abstract ClassViewModel ClassViewModel { get; }
 
@@ -218,7 +220,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string NullableTypeForDto(string dtoNamespace)
         {
-            var model = this.ClassViewModel;
+            var model = this.PureType.ClassViewModel;
             if (model != null)
             {
                 string typeName = "";

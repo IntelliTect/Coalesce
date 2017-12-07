@@ -93,14 +93,9 @@ namespace Coalesce.Domain
         {
             public AllOpenCases(CrudContext<AppDbContext> context) : base(context) { }
 
-            public override IQueryable<Case> GetQuery() => Db.Cases
+            public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases
                 .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
                 .IncludeChildren();
-
-            public override Task<TDto> GetMappedItemAsync<TDto>(object id)
-            {
-                return base.GetMappedItemAsync<TDto>(id);
-            }
         }
 
         /// <summary>

@@ -13,10 +13,10 @@
 
     var namespaces = new List<string>();
     namespaces.Add("IntelliTect.Coalesce");
-    namespaces.Add("IntelliTect.Coalesce.Controllers");
+    namespaces.Add("IntelliTect.Coalesce.Api");
     namespaces.Add("IntelliTect.Coalesce.Data");
     namespaces.Add("IntelliTect.Coalesce.Mapping");
-    namespaces.Add("IntelliTect.Coalesce.Helpers.IncludeTree");
+    namespaces.Add("IntelliTect.Coalesce.Mapping.IncludeTree");
     namespaces.Add("IntelliTect.Coalesce.Models");
     namespaces.Add("IntelliTect.Coalesce.TypeDefinition");
     namespaces.Add("Microsoft.AspNetCore.Authorization");
@@ -31,23 +31,25 @@
 
     var createIf = "";
     var editElseIf = "";
+    //var dataSourceParameter = $"IDataSource<{model.BaseViewModel.FullyQualifiedName}, {Model.GenerationContext.DbContextType.FullyQualifiedName}> dataSource";
+    var dataSourceParameter = $"IDataSource<{model.BaseViewModel.FullyQualifiedName}> dataSource";
 
 
     // Check if creates/edits aren't allowed
-    @if (model.PrimaryKey.Type.IsString)
+    if (model.PrimaryKey.Type.IsString)
     {
-        createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !Model.SecurityInfo.IsEditAllowed(User)) {{";
+        createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !ClassViewModel.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !ClassViewModel.SecurityInfo.IsEditAllowed(User)) {{";
     }
     else if (model.IsDto)
     {
-        createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !Model.SecurityInfo.IsEditAllowed(User)) {{";
+        createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !ClassViewModel.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !ClassViewModel.SecurityInfo.IsEditAllowed(User)) {{";
     }
     else
     {
-        createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !Model.SecurityInfo.IsEditAllowed(User)) {{";
+        createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User)) {{";
+        editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User)) {{";
     }
 }
 
@@ -72,152 +74,41 @@ namespace @(namespaceName).Api
     public partial class @(model.ApiControllerClassName)
     : LocalBaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName)>
     {
-        protected ClassViewModel Model;
-
-        public @(model.ApiControllerClassName)()
+        public @(model.ApiControllerClassName)(@Model.GenerationContext.DbContextType.FullyQualifiedName db) : base(db)
         {
-            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "@(model.Name)");
         }
 
         @if (securityInfo.IsReadAllowed())
         {
         <text>
-        /// <summary>
-        /// Returns @(model.DtoName)
-        /// </summary>
         [HttpGet("list")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<ListResult<@(model.DtoName)>> List(
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            @(string.Join(",",model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
-        {
-            @*if (!Model.SecurityInfo.IsReadAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return new GenericListResult<@(model.BaseViewModel.Name), @(model.DtoName)>(new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." });
-            }*@
-
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientProperties.Where(f => f.IsUrlParameter))
-            {
-            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
-            }
-
-            return await ListImplementation(parameters);
-        }
-
-        /// <summary>
-        /// Returns custom object based on supplied fields
-        /// </summary>
-        [HttpGet("customlist")]
-        @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<ListResult<@(model.DtoName)>> CustomList(
-            string fields = null,
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            @(string.Join(",",model.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
-        {
-            @*if (!Model.SecurityInfo.IsReadAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return new ListResult { WasSuccessful = false, Message = "Read not allowed on @(model.Name) objects." };
-            }*@
-
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsUrlParameter))
-            {
-            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
-            }
-
-            return await ListImplementation(parameters);
-        }
+        @(model.ApiActionAccessModifier) virtual Task<ListResult<@(model.DtoName)>> List(ListParameters parameters, @dataSourceParameter)
+            => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<int> Count(
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            @(string.Join(",",model.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
-        {
-            @*if (!Model.SecurityInfo.IsReadAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return 0;
-            }*@
-
-            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
-
-            // Add custom filters
-            @foreach(PropertyViewModel prop in model.ClientProperties.Where(f=>f.IsUrlParameter))
-            {
-            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
-            }
-
-            return await CountImplementation(parameters);
-        }
+        @(model.ApiActionAccessModifier) virtual Task<int> Count(FilterParameters parameters, @dataSourceParameter)
+            => CountImplementation(parameters, dataSource);
 
         [HttpGet("propertyValues")]
         @(securityInfo.ReadAnnotation)
         @(model.ApiActionAccessModifier) virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-        {
-            @*if (!Model.SecurityInfo.IsReadAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return null;
-            }*@
-
-            return PropertyValuesImplementation(property, page, search);
-        }
+            => PropertyValuesImplementation(property, page, search);
 
         [HttpGet("get/{id}")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<@(model.DtoName)> Get(string id, string includes = null, string dataSource = null)
-        {
-            @*if (!Model.SecurityInfo.IsReadAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return null;
-            }*@
-
-            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
-            listParams.AddFilter("id", id);
-            return await GetImplementation(id, listParams);
-        }
+        @(model.ApiActionAccessModifier) virtual Task<@(model.DtoName)> Get(string id, DataSourceParameters parameters, @dataSourceParameter)
+            => GetImplementation(id, parameters, dataSource);
         </text>
         }
-
 
         @if (securityInfo.IsDeleteAllowed()) {
         <text>
         [HttpPost("delete/{id}")]
         @(securityInfo.DeleteAnnotation)
         @(model.ApiActionAccessModifier) virtual bool Delete(string id)
-        {
-            @*if (!Model.SecurityInfo.IsDeleteAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return false;
-            }*@
-
-            return DeleteImplementation(id);
-        }
+            => DeleteImplementation(id);
         </text>
         }
 
@@ -225,25 +116,21 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, string includes = null, string dataSource = null, bool returnObject = true)
+        @(model.ApiActionAccessModifier) virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, bool returnObject = true)
         {
 
             @(createIf)
-                var result = new SaveResult<@(model.DtoName)>();
-                result.WasSuccessful = false;
-                result.Message = "Create not allowed on @(model.Name) objects.";
+                var result = new SaveResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
             @(editElseIf)
-                var result = new SaveResult<@(model.DtoName)>();
-                result.WasSuccessful = false;
-                result.Message = "Edit not allowed on @(model.Name) objects.";
+                var result = new SaveResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
 
-            return await SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, returnObject);
         }
 
         [HttpPost("AddToCollection")]
@@ -266,28 +153,9 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("csvDownload")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<FileResult> CsvDownload(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            @(string.Join(",",model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        @(model.ApiActionAccessModifier) virtual async Task<FileResult> CsvDownload(ListParameters parameters, @dataSourceParameter)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientProperties.Where(f => f.IsUrlParameter))
-            {
-            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
-            }
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<@(model.DtoName)>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(await CsvText(parameters, dataSource));
             return File(bytes, "application/x-msdownload", "@(model.BaseViewModel.Name).csv");
         }
 
@@ -296,28 +164,10 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("csvText")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<string> CsvText(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            @(string.Join(",",model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"string {f.UrlParameterName} = null"))))
+        @(model.ApiActionAccessModifier) virtual async Task<string> CsvText(ListParameters parameters, @dataSourceParameter)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            @foreach (PropertyViewModel prop in model.BaseViewModel.ClientProperties.Where(f => f.IsUrlParameter))
-            {
-            @:parameters.AddFilter("@prop.Name", @prop.UrlParameterName);
-            }
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<@(model.DtoName)>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            return csv;
+            var listResult = await ListImplementation(parameters, dataSource);
+            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List);
         }
 
     
@@ -329,19 +179,18 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvUpload")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, @dataSourceParameter, bool hasHeader = true) 
         {
-            if (file != null && file.Length > 0)
+            if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
+
+            using (var stream = file.OpenReadStream())
             {
-                using (var stream = file.OpenReadStream())
+                using (var reader = new System.IO.StreamReader(stream))
                 {
-                    using (var reader = new System.IO.StreamReader(stream)) {
-                        var csv = reader.ReadToEnd();
-                        return await CsvSave(csv, hasHeader);
-                    }
+                    var csv = reader.ReadToEnd();
+                    return await CsvSave(csv, dataSource, hasHeader);
                 }
             }
-            throw new ArgumentException("No files uploaded");
         }
 
         /// <summary>
@@ -349,7 +198,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvSave")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, @dataSourceParameter, bool hasHeader = true) 
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<@(model.DtoName)>(csv, hasHeader);
@@ -357,50 +206,22 @@ namespace @(namespaceName).Api
             foreach (var dto in list){
                 // Check if creates/edits aren't allowed
                 @(createIf)
-                    var result = new SaveResult<@(model.DtoName)>();
-                    result.WasSuccessful = false;
-                    result.Message = "Create not allowed on @(model.Name) objects.";
+                    var result = new SaveResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 @(editElseIf)
-                    var result = new SaveResult<@(model.DtoName)>();
-                    result.WasSuccessful = false;
-                    result.Message = "Edit not allowed on @(model.Name) objects.";
+                    var result = new SaveResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else {
-                    var result = await SaveImplementation(dto, "none", null, false);
+                    var parameters = new DataSourceParameters() { Includes = "none" };
+                    var result = await SaveImplementation(dto, parameters, dataSource, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
-        }
-        </text>
-        }
-
-        @{ var dataSources = model.ClientDataSources(Model.RazorServices.ReflectionRepository).ToList(); }
-        @if (dataSources.Any())
-        {
-        <text>protected override IDataSource<@(model.BaseViewModel.FullyQualifiedName)> GetDataSource(ListParameters parameters)
-        {
-            IDataSource<@(model.BaseViewModel.FullyQualifiedName)> source = null;
-            @foreach (var source in dataSources)
-            {
-            @:if (parameters.DataSource == "@(source.Name)")
-            @:{
-            @:    source = ActivateDataSource<@(source.FullyQualifiedName)>();
-            @:}
-            }
-            
-            if (source != null)
-            {
-                source.Context.ListParameters = parameters;
-                return source;
-            }
-
-            return base.GetDataSource(parameters);
         }
         </text>
         }
@@ -440,7 +261,8 @@ namespace @(namespaceName).Api
                 }
                 else
                 {
-@:var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id);
+                    // TODO: this is quite a hack (passing in empty ListParameters). Methods really need to accept IDataSourceParameters.
+@:var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
                 if (method.ReturnType.IsVoid)
                 {
                 @:object objResult = null;

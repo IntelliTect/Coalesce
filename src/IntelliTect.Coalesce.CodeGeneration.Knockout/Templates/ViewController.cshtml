@@ -16,6 +16,7 @@
 using IntelliTect.Coalesce.Knockout.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 
 namespace @(namespaceName).Controllers
 {
@@ -60,9 +61,9 @@ namespace @(namespaceName).Controllers
         }
                       
         @(model.SecurityInfo.EditAnnotation)
-        public ActionResult Docs()
+        public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)
         {
-            return DocsImplementation();
+            return DocsImplementation(hostingEnvironment);
         }    
     }
 }

@@ -1,10 +1,10 @@
 ﻿
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
-using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
@@ -23,145 +23,57 @@ namespace Coalesce.Web.Api
     public partial class CaseDtoController
     : LocalBaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>
     {
-        protected ClassViewModel Model;
-
-        public CaseDtoController()
+        public CaseDtoController(Coalesce.Domain.AppDbContext db) : base(db)
         {
-            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "CaseDto");
         }
 
 
-        /// <summary>
-        /// Returns Coalesce.Domain.CaseDto
-        /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<ListResult<Coalesce.Domain.CaseDto>> List(
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
-        {
-
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("CaseKey", caseKey);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("Description", description);
-            parameters.AddFilter("OpenedAt", openedAt);
-            parameters.AddFilter("AssignedToId", assignedToId);
-            parameters.AddFilter("ReportedById", reportedById);
-            parameters.AddFilter("Severity", severity);
-            parameters.AddFilter("Status", status);
-            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
-
-            return await ListImplementation(parameters);
-        }
-
-        /// <summary>
-        /// Returns custom object based on supplied fields
-        /// </summary>
-        [HttpGet("customlist")]
-        [Authorize]
-        public virtual async Task<ListResult<Coalesce.Domain.CaseDto>> CustomList(
-            string fields = null,
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string caseId = null, string title = null, string assignedToName = null)
-        {
-
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("CaseId", caseId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("AssignedToName", assignedToName);
-
-            return await ListImplementation(parameters);
-        }
+        public virtual Task<ListResult<Coalesce.Domain.CaseDto>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+            => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
-        public virtual async Task<int> Count(
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string caseId = null, string title = null, string assignedToName = null)
-        {
-
-            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
-
-            // Add custom filters
-            parameters.AddFilter("CaseId", caseId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("AssignedToName", assignedToName);
-
-            return await CountImplementation(parameters);
-        }
+        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+            => CountImplementation(parameters, dataSource);
 
         [HttpGet("propertyValues")]
         [Authorize]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-        {
-
-            return PropertyValuesImplementation(property, page, search);
-        }
+            => PropertyValuesImplementation(property, page, search);
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<Coalesce.Domain.CaseDto> Get(string id, string includes = null, string dataSource = null)
-        {
-
-            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
-            listParams.AddFilter("id", id);
-            return await GetImplementation(id, listParams);
-        }
-
+        public virtual Task<Coalesce.Domain.CaseDto> Get(string id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+            => GetImplementation(id, parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual bool Delete(string id)
-        {
-
-            return DeleteImplementation(id);
-        }
+            => DeleteImplementation(id);
 
 
         [HttpPost("save")]
         [Authorize]
-        public virtual async Task<SaveResult<Coalesce.Domain.CaseDto>> Save(Coalesce.Domain.CaseDto dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<Coalesce.Domain.CaseDto>> Save(Coalesce.Domain.CaseDto dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, bool returnObject = true)
         {
 
-            if (dto.CaseId == 0 && !Model.SecurityInfo.IsCreateAllowed(User))
+            if (dto.CaseId == 0 && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<Coalesce.Domain.CaseDto>();
-                result.WasSuccessful = false;
-                result.Message = "Create not allowed on CaseDto objects.";
+                var result = new SaveResult<Coalesce.Domain.CaseDto>("Create not allowed on CaseDto objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.CaseId != 0 && !Model.SecurityInfo.IsEditAllowed(User))
+            else if (dto.CaseId != 0 && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<Coalesce.Domain.CaseDto>();
-                result.WasSuccessful = false;
-                result.Message = "Edit not allowed on CaseDto objects.";
+                var result = new SaveResult<Coalesce.Domain.CaseDto>("Edit not allowed on CaseDto objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
 
-            return await SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, returnObject);
         }
 
         [HttpPost("AddToCollection")]
@@ -182,33 +94,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [Authorize]
-        public virtual async Task<FileResult> CsvDownload(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
+        public virtual async Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("CaseKey", caseKey);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("Description", description);
-            parameters.AddFilter("OpenedAt", openedAt);
-            parameters.AddFilter("AssignedToId", assignedToId);
-            parameters.AddFilter("ReportedById", reportedById);
-            parameters.AddFilter("Severity", severity);
-            parameters.AddFilter("Status", status);
-            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<Coalesce.Domain.CaseDto>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(await CsvText(parameters, dataSource));
             return File(bytes, "application/x-msdownload", "Case.csv");
         }
 
@@ -217,33 +105,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [Authorize]
-        public virtual async Task<string> CsvText(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string caseKey = null, string title = null, string description = null, string openedAt = null, string assignedToId = null, string reportedById = null, string severity = null, string status = null, string devTeamAssignedId = null)
+        public virtual async Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("CaseKey", caseKey);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("Description", description);
-            parameters.AddFilter("OpenedAt", openedAt);
-            parameters.AddFilter("AssignedToId", assignedToId);
-            parameters.AddFilter("ReportedById", reportedById);
-            parameters.AddFilter("Severity", severity);
-            parameters.AddFilter("Status", status);
-            parameters.AddFilter("DevTeamAssignedId", devTeamAssignedId);
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<Coalesce.Domain.CaseDto>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            return csv;
+            var listResult = await ListImplementation(parameters, dataSource);
+            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List);
         }
 
 
@@ -253,20 +118,18 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<Coalesce.Domain.CaseDto>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<Coalesce.Domain.CaseDto>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
         {
-            if (file != null && file.Length > 0)
+            if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
+
+            using (var stream = file.OpenReadStream())
             {
-                using (var stream = file.OpenReadStream())
+                using (var reader = new System.IO.StreamReader(stream))
                 {
-                    using (var reader = new System.IO.StreamReader(stream))
-                    {
-                        var csv = reader.ReadToEnd();
-                        return await CsvSave(csv, hasHeader);
-                    }
+                    var csv = reader.ReadToEnd();
+                    return await CsvSave(csv, dataSource, hasHeader);
                 }
             }
-            throw new ArgumentException("No files uploaded");
         }
 
         /// <summary>
@@ -274,7 +137,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<Coalesce.Domain.CaseDto>>> CsvSave(string csv, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<Coalesce.Domain.CaseDto>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<Coalesce.Domain.CaseDto>(csv, hasHeader);
@@ -282,31 +145,27 @@ namespace Coalesce.Web.Api
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
-                if (dto.CaseId == 0 && !Model.SecurityInfo.IsCreateAllowed(User))
+                if (dto.CaseId == 0 && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<Coalesce.Domain.CaseDto>();
-                    result.WasSuccessful = false;
-                    result.Message = "Create not allowed on CaseDto objects.";
+                    var result = new SaveResult<Coalesce.Domain.CaseDto>("Create not allowed on CaseDto objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.CaseId != 0 && !Model.SecurityInfo.IsEditAllowed(User))
+                else if (dto.CaseId != 0 && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<Coalesce.Domain.CaseDto>();
-                    result.WasSuccessful = false;
-                    result.Message = "Edit not allowed on CaseDto objects.";
+                    var result = new SaveResult<Coalesce.Domain.CaseDto>("Edit not allowed on CaseDto objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else
                 {
-                    var result = await SaveImplementation(dto, "none", null, false);
+                    var parameters = new DataSourceParameters() { Includes = "none" };
+                    var result = await SaveImplementation(dto, parameters, dataSource, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
         }
-
 
         // Methods from data class exposed through API Controller.
     }

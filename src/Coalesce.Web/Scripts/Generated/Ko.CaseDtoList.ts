@@ -25,12 +25,12 @@ module ListViewModels {
         public query: {
             where?: string;
             caseKey?:number;
-            title?:String;
-            description?:String;
+            title?:string;
+            description?:string;
             openedAt?:moment.Moment;
             assignedToId?:number;
             reportedById?:number;
-            severity?:String;
+            severity?:string;
             status?:number;
             devTeamAssignedId?:number;
         } = null;

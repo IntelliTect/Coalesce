@@ -37,11 +37,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Select(t => new ReflectionTypeViewModel(t))
             .Cast<TypeViewModel>()
             .ToList();
-
-        public override object GetAttributeValue<TAttribute>(string valueName) =>
-            Type.GetAttributeValue<TAttribute>(valueName);
-
-        public override bool HasAttribute<TAttribute>() =>
-            Type.HasAttribute<TAttribute>();
     }
 }

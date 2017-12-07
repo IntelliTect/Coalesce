@@ -91,11 +91,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Select(t => new SymbolTypeViewModel(t))
             .Cast<TypeViewModel>()
             .ToList();
-
-        public override object GetAttributeValue<TAttribute>(string valueName) =>
-            Symbol.GetAttributeValue<TAttribute>(valueName);
-
-        public override bool HasAttribute<TAttribute>() =>
-            Symbol.HasAttribute<TAttribute>();
     }
 }

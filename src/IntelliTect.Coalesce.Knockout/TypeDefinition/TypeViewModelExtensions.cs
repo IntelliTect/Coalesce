@@ -28,12 +28,13 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
         public static string TsKnockoutType(this TypeViewModel typeModel)
         {
             if (typeModel.IsByteArray) return "KnockoutObservable<string>";
-            else if ((typeModel.IsArray || typeModel.IsCollection) && (typeModel.PureType.IsNumber)) return "KnockoutObservableArray<number>";
-            else if ((typeModel.IsArray || typeModel.IsCollection) && (typeModel.PureType.IsString)) return "KnockoutObservableArray<string>";
-            else if (typeModel.IsCollection && typeModel.HasClassViewModel) return "KnockoutObservableArray<ViewModels." + typeModel.ClassViewModel.ViewModelClassName + ">";
-            else if (typeModel.IsCollection || typeModel.IsArray) return "KnockoutObservableArray<any>";
-            else if (typeModel.IsString) return "KnockoutObservable<string>";
-            else if (typeModel.IsPOCO && typeModel.HasClassViewModel) return "KnockoutObservable<ViewModels." + typeModel.ClassViewModel.ViewModelClassName + ">";
+            //else if ((typeModel.IsArray || typeModel.IsCollection) && (typeModel.PureType.IsNumber)) return "KnockoutObservableArray<number>";
+            //else if ((typeModel.IsArray || typeModel.IsCollection) && (typeModel.PureType.IsString)) return "KnockoutObservableArray<string>";
+            //else if (typeModel.IsCollection && typeModel.PureType.HasClassViewModel) return "KnockoutObservableArray<ViewModels." + typeModel.PureType.ClassViewModel.ViewModelClassName + ">";
+            else if (typeModel.IsCollection || typeModel.IsArray) return $"KnockoutObservableArray<{typeModel.PureType.TsType}>";
+            //else if (typeModel.IsCollection || typeModel.IsArray) return $"KnockoutObservable<{typeModel.TsType}> ";
+            //else if (typeModel.IsString) return "KnockoutObservable<string>";
+            //else if (typeModel.IsPOCO && typeModel.HasClassViewModel) return "KnockoutObservable<ViewModels." + typeModel.ClassViewModel.ViewModelClassName + ">";
             else return "KnockoutObservable<" + typeModel.TsType + ">";
         }
     }

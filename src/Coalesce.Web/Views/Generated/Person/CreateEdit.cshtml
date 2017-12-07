@@ -152,10 +152,10 @@
             if (model.isDirty()) model.save();
         }
 
-        model.coalesceConfiguration.autoSaveEnabled(false);
+        model.coalesceConfig.autoSaveEnabled(false);
         model.loadChildren(function() {
             ko.applyBindings(model);
-            model.coalesceConfiguration.autoSaveEnabled(true);
+            model.coalesceConfig.autoSaveEnabled(true);
         });
     </script>
     }

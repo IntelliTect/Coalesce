@@ -1,5 +1,6 @@
 ﻿using System.Linq;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 

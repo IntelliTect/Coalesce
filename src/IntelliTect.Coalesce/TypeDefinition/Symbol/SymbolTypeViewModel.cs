@@ -118,7 +118,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (!HasClassViewModel) return null;
-                if (PureType != this) return PureType.ClassViewModel;
                 if (Symbol is INamedTypeSymbol nts) return ReflectionRepository.Global.GetClassViewModel(nts);
                 return null;
             }
@@ -184,8 +183,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public override bool IsA(Type typeToCheck) => GetSatisfyingBaseTypeSymbol(typeToCheck) != null;
-
-        public override bool IsA<T>() => IsA(typeof(T));
 
         public override bool EqualsType(TypeViewModel b) =>
             b is SymbolTypeViewModel s ? FullyQualifiedName == s.FullyQualifiedName : false;

@@ -10,8 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.Models;
-using static Coalesce.Domain.Case;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce;
 
 namespace Coalesce.Domain
@@ -209,11 +208,14 @@ namespace Coalesce.Domain
     {
         public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
 
-        public override IQueryable<Person> GetQuery()
+        [Coalesce]
+        public string ParamThing { get; set; }
+
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         {
             Db.Cases
                 .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .Where(c => c.Status == Case.Statuses.Open || c.Status == Case.Statuses.InProgress)
                 .Load();
 
             return Db.People
@@ -231,6 +233,7 @@ namespace Coalesce.Domain
     {
         public BorCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
-        public override IQueryable<Person> GetQuery() => Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
+            Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
     }
 }

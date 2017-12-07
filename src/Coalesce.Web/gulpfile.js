@@ -133,7 +133,7 @@ gulp.task('ts:local', function () {
 
     individualTsResult.dts.pipe(gulp.dest(paths.js));
 
-    individualTsResult.js
+    return individualTsResult.js
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
 });
@@ -148,7 +148,7 @@ gulp.task('ts', ['ts:local'], function () {
     rootApp.dts
         .pipe(gulp.dest(paths.js));
 
-    rootApp.js
+    return rootApp.js
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
 });

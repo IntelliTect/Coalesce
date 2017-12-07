@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.DataAnnotations;
 

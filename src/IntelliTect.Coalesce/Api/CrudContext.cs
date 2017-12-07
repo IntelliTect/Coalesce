@@ -24,24 +24,6 @@ namespace IntelliTect.Coalesce
             TimeZone = timeZone ?? throw new ArgumentNullException(nameof(timeZone));
         }
 
-        public CrudContext(ClaimsPrincipal user, TimeZoneInfo timeZone, ListParameters listParameters)
-            : this(user, timeZone)
-        {
-            ListParameters = listParameters ?? throw new ArgumentNullException(nameof(listParameters));
-        }
-
-        public CrudContext(ClaimsPrincipal user, ListParameters listParameters)
-            : this(user)
-        {
-            ListParameters = listParameters ?? throw new ArgumentNullException(nameof(listParameters));
-        }
-
-        /// <summary>
-        /// Contains all the parameters that will be used for sorting, searching, filtering,
-        /// and any other transformations on the data being requested. 
-        /// </summary>
-        public ListParameters ListParameters { get; set; } = null;
-
         /// <summary>
         /// The user making the request for a CRUD action.
         /// </summary>
@@ -64,18 +46,6 @@ namespace IntelliTect.Coalesce
 
         public CrudContext(TContext dbContext, ClaimsPrincipal user, TimeZoneInfo timeZone)
             : base(user, timeZone)
-        {
-            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        }
-
-        public CrudContext(TContext dbContext, ClaimsPrincipal user, TimeZoneInfo timeZone, ListParameters listParameters)
-            : base(user, timeZone, listParameters)
-        {
-            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        }
-
-        public CrudContext(TContext dbContext, ClaimsPrincipal user, ListParameters listParameters)
-            : base(user, listParameters)
         {
             DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }

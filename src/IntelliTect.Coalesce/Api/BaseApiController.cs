@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Interfaces;
@@ -12,7 +13,7 @@ using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -25,17 +26,20 @@ using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Utilities;
 using System.Globalization;
 
-namespace IntelliTect.Coalesce.Controllers
+namespace IntelliTect.Coalesce.Api
 {
-    public abstract class BaseApiController<T, TDto, TContext> : BaseControllerWithDb<TContext>
-    where T : class, new()
-    where TDto : class, IClassDto<T, TDto>, new()
-    where TContext : DbContext
+    public abstract class BaseApiController<T, TDto, TContext> : Controller
+        where T : class, new()
+        where TDto : class, IClassDto<T, TDto>, new()
+        where TContext : DbContext
     {
-        protected BaseApiController()
+        protected BaseApiController(TContext db)
         {
+            Db = db;
+
             // Set up a ViewModel so we can check out this object.
             ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
+
             if (typeof(T) == typeof(TDto) || typeof(TDto).Name.EndsWith("DtoGen"))
             {
                 DtoViewModel = ClassViewModel;
@@ -44,13 +48,16 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 DtoViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
             }
-
         }
+
+        public TContext Db { get; }
+
+        protected ClassViewModel ClassViewModel { get; }
+
+        protected ClassViewModel DtoViewModel { get; }
 
         protected DbSet<T> _dataSource;
         protected IQueryable<T> _readOnlyDataSource;
-        protected readonly ClassViewModel ClassViewModel;
-        protected readonly ClassViewModel DtoViewModel;
 
         // TODO: service antipattern. Inject this properly.
         protected ILogger Logger
@@ -59,6 +66,7 @@ namespace IntelliTect.Coalesce.Controllers
             {
                 if (_Logger == null)
                 {
+                    ILogger<object>
                     _Logger = HttpContext?.RequestServices.GetService<Logger<BaseApiController<T, TDto, TContext>>>();
                 }
 
@@ -70,30 +78,27 @@ namespace IntelliTect.Coalesce.Controllers
         protected virtual IDataSource<T> ActivateDataSource<TSource>() where TSource : IDataSource<T> =>
             ActivatorUtilities.GetServiceOrCreateInstance<TSource>(HttpContext.RequestServices);
 
-        protected virtual IDataSource<T> GetDataSource(ListParameters listParameters)
+        protected virtual IDataSource<T> GetDataSource(IDataSourceParameters parameters)
         {
-            var source = ActivateDataSource<StandardDataSource<T, TContext>>();
-            source.Context.ListParameters = listParameters;
-            return source;
+            switch (parameters.DataSource)
+            {
+                case "":
+                case "Default":
+                case null:
+                    return ActivateDataSource<StandardDataSource<T, TContext>>();
+                default:
+                    throw new KeyNotFoundException($"Data source '{parameters.DataSource}' not found.");
+            }
 
             // TODO: how does this work for IClassDtos?
             //return DataSource ?? ReadOnlyDataSource;
         }
 
-        protected IDataSource<T> GetIDataSource(ListParameters listParameters)
-        {
-            // TODO: get rid of this method. Just call GetDataSource.
-            return GetDataSource(listParameters);
-            //var crudContext = HttpContext?.RequestServices.GetService<CrudContext<TContext>>();
-            //crudContext.ListParameters = listParameters;
-            //return new OldDataSourceInteropDataSource<T, TContext>(crudContext, query);
-        }
-
-        protected async Task<ListResult<TDto>> ListImplementation(ListParameters listParameters)
+        protected async Task<ListResult<TDto>> ListImplementation(ListParameters listParameters, IDataSource<T> dataSource)
         {
             try
             {
-                return await GetIDataSource(listParameters).GetMappedListAsync<TDto>();
+                return await dataSource.GetMappedListAsync<TDto>(listParameters);
             }
             catch (Exception ex)
             {
@@ -104,11 +109,11 @@ namespace IntelliTect.Coalesce.Controllers
         }
 
 
-        protected async Task<int> CountImplementation(ListParameters listParameters)
+        protected async Task<int> CountImplementation(FilterParameters parameters, IDataSource<T> dataSource)
         {
             try
             {
-                return await GetIDataSource(listParameters).GetCountAsync();
+                return await dataSource.GetCountAsync(parameters);
             }
             catch (Exception ex)
             {
@@ -129,6 +134,9 @@ namespace IntelliTect.Coalesce.Controllers
         /// <returns></returns>
         protected IEnumerable<string> PropertyValuesImplementation(string property, int page = 1, string search = "")
         {
+
+            // TODO: figure out where this lives in the new world of datasources & behaviors
+
             var originalProp = ClassViewModel.PropertyByName(property);
             if (originalProp != null && originalProp.IsClientProperty)
             {
@@ -169,14 +177,14 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
-        protected Task<TDto> GetImplementation(string id, ListParameters listParameters)
+        protected Task<TDto> GetImplementation(string id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
-            return GetIDataSource(listParameters).GetMappedItemAsync<TDto>(id);
+            return dataSource.GetMappedItemAsync<TDto>(id, parameters);
         }
 
-        private Task<(T Item, IncludeTree includeTree)> GetUnmapped(string id, ListParameters listParameters)
+        private Task<(T Item, IncludeTree includeTree)> GetUnmapped(string id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
-            return GetIDataSource(listParameters).GetItemAsync(id);
+            return dataSource.GetItemAsync(id, parameters);
         }
         
         protected bool DeleteImplementation(string id)
@@ -213,9 +221,9 @@ namespace IntelliTect.Coalesce.Controllers
             return false;
         }
 
-        protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, string includes = null, string dataSource = null, bool returnObject = true)
+        protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, bool returnObject = true)
         {
-            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
+            var includes = parameters.Includes;
 
             var result = new SaveResult<TDto>();
 
@@ -274,8 +282,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                             // Pull the object to get any changes.
                             var idString = IdValue(item).ToString();
-                            listParams.AddFilter("id", idString);
-                            var itemResult = await GetUnmapped(idString, listParams);
+                            var itemResult = await dataSource.GetItemAsync(idString, parameters);
                             item = itemResult.Item1;
                             includeTree = itemResult.Item2;
 
@@ -291,7 +298,7 @@ namespace IntelliTect.Coalesce.Controllers
 
                             if (reloadItem && returnObject)
                             {
-                                itemResult = await GetUnmapped(idString, listParams);
+                                itemResult = await dataSource.GetItemAsync(idString, parameters);
                                 item = itemResult.Item1;
                                 includeTree = itemResult.Item2;
                             }
@@ -542,33 +549,6 @@ namespace IntelliTect.Coalesce.Controllers
             }
         }
 
-        /// <summary>
-        /// Gets an enumerable data source that is read only.
-        /// </summary>
-        public IQueryable<T> ReadOnlyDataSource
-        {
-            get
-            {
-                if (_readOnlyDataSource == null)
-                {
-                    // find the DbSet if we can
-                    foreach (var prop in typeof(TContext).GetProperties())
-                    {
-                        // See if this is the right one
-                        if (prop.PropertyType.Name == "IQueryable`1"
-                            && prop.PropertyType.GenericTypeArguments.Count() == 1
-                            && prop.PropertyType.GenericTypeArguments.First().Name == typeof(T).Name)
-                        {
-                            _readOnlyDataSource = (IQueryable<T>)prop.GetValue(Db);
-                            break;
-                        }
-                    }
-                }
-
-                return _readOnlyDataSource;
-            }
-        }
-        
         /// <summary>
         /// Called after the object is mapped and before it is saved. Allows for returning validation information.
         /// </summary>

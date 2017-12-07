@@ -24,13 +24,13 @@ module ListViewModels {
         public query: {
             where?: string;
             companyId?:number;
-            name?:String;
-            address1?:String;
-            address2?:String;
-            city?:String;
-            state?:String;
-            zipCode?:String;
-            altName?:String;
+            name?:string;
+            address1?:string;
+            address2?:string;
+            city?:string;
+            state?:string;
+            zipCode?:string;
+            altName?:string;
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned

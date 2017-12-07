@@ -122,14 +122,14 @@ module ViewModels {
         /** Url for a table view of all members of collection CasesAssigned for the current object. */
         public casesAssignedListUrl: KnockoutComputed<string> = ko.computed({
             read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?assignedToId=' + this.personId();
+                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?filter.assignedToId=' + this.personId();
             },
             deferEvaluation: true
         });
         /** Url for a table view of all members of collection CasesReported for the current object. */
         public casesReportedListUrl: KnockoutComputed<string> = ko.computed({
             read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?reportedById=' + this.personId();
+                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?filter.reportedById=' + this.personId();
             },
             deferEvaluation: true
         });
@@ -160,7 +160,7 @@ module ViewModels {
             Invoke server method Rename.
             Adds the text to the first name.
         */
-        public rename = (addition: String, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public rename = (addition: string, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
 
             this.renameIsLoading(true);
             this.renameMessage('');
@@ -214,7 +214,7 @@ module ViewModels {
             var $promptVal: string = null;
             $promptVal = prompt('Addition');
             if ($promptVal === null) return;
-            var addition: String = $promptVal;
+            var addition: string = $promptVal;
               
             return this.rename(addition, callback, reload);
         }

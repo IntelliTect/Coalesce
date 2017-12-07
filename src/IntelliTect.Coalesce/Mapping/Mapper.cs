@@ -2,13 +2,12 @@
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Collections.Concurrent;
 using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 
 namespace IntelliTect.Coalesce.Mapping
 {
     public static class Mapper<T, TDto> where TDto : IClassDto<T, TDto>, new()
     {
-        public static TDto ObjToDtoMapper(T obj, IMappingContext context, IncludeTree tree = null)
+        public static TDto ObjToDtoMapper(T obj, IMappingContext context, IncludeTree.IncludeTree tree = null)
         {
             var creator = new TDto();
             var dto = creator.CreateInstance(obj, context, tree);

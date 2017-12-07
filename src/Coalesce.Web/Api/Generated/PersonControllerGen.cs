@@ -1,10 +1,10 @@
 ﻿
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
-using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
@@ -23,154 +23,57 @@ namespace Coalesce.Web.Api
     public partial class PersonController
     : LocalBaseApiController<Coalesce.Domain.Person, PersonDtoGen>
     {
-        protected ClassViewModel Model;
-
-        public PersonController()
+        public PersonController(Coalesce.Domain.AppDbContext db) : base(db)
         {
-            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "Person");
         }
 
 
-        /// <summary>
-        /// Returns PersonDtoGen
-        /// </summary>
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual async Task<ListResult<PersonDtoGen>> List(
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
-        {
-
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("PersonId", personId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("FirstName", firstName);
-            parameters.AddFilter("LastName", lastName);
-            parameters.AddFilter("Email", email);
-            parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("CompanyId", companyId);
-
-            return await ListImplementation(parameters);
-        }
-
-        /// <summary>
-        /// Returns custom object based on supplied fields
-        /// </summary>
-        [HttpGet("customlist")]
-        [AllowAnonymous]
-        public virtual async Task<ListResult<PersonDtoGen>> CustomList(
-            string fields = null,
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
-        {
-
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("PersonId", personId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("FirstName", firstName);
-            parameters.AddFilter("LastName", lastName);
-            parameters.AddFilter("Email", email);
-            parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("CompanyId", companyId);
-
-            return await ListImplementation(parameters);
-        }
+        public virtual Task<ListResult<PersonDtoGen>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+            => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [AllowAnonymous]
-        public virtual async Task<int> Count(
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
-        {
-
-            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
-
-            // Add custom filters
-            parameters.AddFilter("PersonId", personId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("FirstName", firstName);
-            parameters.AddFilter("LastName", lastName);
-            parameters.AddFilter("Email", email);
-            parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("CompanyId", companyId);
-
-            return await CountImplementation(parameters);
-        }
+        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+            => CountImplementation(parameters, dataSource);
 
         [HttpGet("propertyValues")]
         [AllowAnonymous]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-        {
-
-            return PropertyValuesImplementation(property, page, search);
-        }
+            => PropertyValuesImplementation(property, page, search);
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual async Task<PersonDtoGen> Get(string id, string includes = null, string dataSource = null)
-        {
-
-            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
-            listParams.AddFilter("id", id);
-            return await GetImplementation(id, listParams);
-        }
-
+        public virtual Task<PersonDtoGen> Get(string id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+            => GetImplementation(id, parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual bool Delete(string id)
-        {
-
-            return DeleteImplementation(id);
-        }
+            => DeleteImplementation(id);
 
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual async Task<SaveResult<PersonDtoGen>> Save(PersonDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<PersonDtoGen>> Save(PersonDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource, bool returnObject = true)
         {
 
-            if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+            if (!dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<PersonDtoGen>();
-                result.WasSuccessful = false;
-                result.Message = "Create not allowed on Person objects.";
+                var result = new SaveResult<PersonDtoGen>("Create not allowed on Person objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+            else if (dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<PersonDtoGen>();
-                result.WasSuccessful = false;
-                result.Message = "Edit not allowed on Person objects.";
+                var result = new SaveResult<PersonDtoGen>("Edit not allowed on Person objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
 
-            return await SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, returnObject);
         }
 
         [HttpPost("AddToCollection")]
@@ -191,32 +94,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [AllowAnonymous]
-        public virtual async Task<FileResult> CsvDownload(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
+        public virtual async Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("PersonId", personId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("FirstName", firstName);
-            parameters.AddFilter("LastName", lastName);
-            parameters.AddFilter("Email", email);
-            parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("CompanyId", companyId);
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<PersonDtoGen>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(await CsvText(parameters, dataSource));
             return File(bytes, "application/x-msdownload", "Person.csv");
         }
 
@@ -225,32 +105,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [AllowAnonymous]
-        public virtual async Task<string> CsvText(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string personId = null, string title = null, string firstName = null, string lastName = null, string email = null, string gender = null, string name = null, string companyId = null)
+        public virtual async Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("PersonId", personId);
-            parameters.AddFilter("Title", title);
-            parameters.AddFilter("FirstName", firstName);
-            parameters.AddFilter("LastName", lastName);
-            parameters.AddFilter("Email", email);
-            parameters.AddFilter("Gender", gender);
-            parameters.AddFilter("Name", name);
-            parameters.AddFilter("CompanyId", companyId);
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<PersonDtoGen>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            return csv;
+            var listResult = await ListImplementation(parameters, dataSource);
+            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List);
         }
 
 
@@ -260,20 +118,18 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Person> dataSource, bool hasHeader = true)
         {
-            if (file != null && file.Length > 0)
+            if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
+
+            using (var stream = file.OpenReadStream())
             {
-                using (var stream = file.OpenReadStream())
+                using (var reader = new System.IO.StreamReader(stream))
                 {
-                    using (var reader = new System.IO.StreamReader(stream))
-                    {
-                        var csv = reader.ReadToEnd();
-                        return await CsvSave(csv, hasHeader);
-                    }
+                    var csv = reader.ReadToEnd();
+                    return await CsvSave(csv, dataSource, hasHeader);
                 }
             }
-            throw new ArgumentException("No files uploaded");
         }
 
         /// <summary>
@@ -281,7 +137,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvSave(string csv, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Person> dataSource, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<PersonDtoGen>(csv, hasHeader);
@@ -289,51 +145,26 @@ namespace Coalesce.Web.Api
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
-                if (!dto.PersonId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+                if (!dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<PersonDtoGen>();
-                    result.WasSuccessful = false;
-                    result.Message = "Create not allowed on Person objects.";
+                    var result = new SaveResult<PersonDtoGen>("Create not allowed on Person objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.PersonId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+                else if (dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<PersonDtoGen>();
-                    result.WasSuccessful = false;
-                    result.Message = "Edit not allowed on Person objects.";
+                    var result = new SaveResult<PersonDtoGen>("Edit not allowed on Person objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else
                 {
-                    var result = await SaveImplementation(dto, "none", null, false);
+                    var parameters = new DataSourceParameters() { Includes = "none" };
+                    var result = await SaveImplementation(dto, parameters, dataSource, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
-        }
-
-
-        protected override IDataSource<Coalesce.Domain.Person> GetDataSource(ListParameters parameters)
-        {
-            IDataSource<Coalesce.Domain.Person> source = null;
-            if (parameters.DataSource == "NamesStartingWithAWithCases")
-            {
-                source = ActivateDataSource<Coalesce.Domain.NamesStartingWithAWithCases>();
-            }
-            if (parameters.DataSource == "BorCPeople")
-            {
-                source = ActivateDataSource<Coalesce.Domain.BorCPeople>();
-            }
-
-            if (source != null)
-            {
-                source.Context.ListParameters = parameters;
-                return source;
-            }
-
-            return base.GetDataSource(parameters);
         }
 
         // Methods from data class exposed through API Controller.
@@ -348,7 +179,7 @@ namespace Coalesce.Web.Api
             try
             {
                 IncludeTree includeTree = null;
-                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id);
+                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
                 var objResult = item.Rename(addition);
                 Db.SaveChanges();
                 var mappingContext = new MappingContext(User, "");
@@ -374,7 +205,7 @@ namespace Coalesce.Web.Api
             var result = new SaveResult<object>();
             try
             {
-                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id);
+                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();

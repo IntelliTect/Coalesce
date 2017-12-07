@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Controllers;
+﻿using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Interfaces;
 
 namespace Coalesce.Web.Api
@@ -9,5 +9,6 @@ namespace Coalesce.Web.Api
         where T : class, new()
         where TDto : class, IClassDto<T, TDto>, new()
     {
+        protected LocalBaseApiController(Coalesce.Domain.AppDbContext db) : base(db) { }
     }
 }

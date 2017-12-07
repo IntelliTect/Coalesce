@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Query;
 
-namespace IntelliTect.Coalesce.Helpers.IncludeTree
+namespace IntelliTect.Coalesce.Mapping.IncludeTree
 {
     /// <summary>
     /// Query provider that will capture calls to .IncludedSeparately().

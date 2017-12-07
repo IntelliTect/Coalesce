@@ -432,9 +432,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return string.Join($"{Environment.NewLine}\t\t\t", allPropertyRoles);
         }
 
+        public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
+            Type.GetAttributeValue<TAttribute>(valueName);
 
-        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+        public bool HasAttribute<TAttribute>() where TAttribute : Attribute =>
+            Type.HasAttribute<TAttribute>();
 
         protected SecurityPermission GetSecurityAttribute<TAttribute>()
             where TAttribute : SecurityAttribute =>

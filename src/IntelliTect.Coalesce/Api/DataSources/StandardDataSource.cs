@@ -10,38 +10,15 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Mapping;
 
 namespace IntelliTect.Coalesce
 {
-    // TODO: get rid of this. its just a temporary compatibility layer.
-    public class OldDataSourceInteropDataSource<T, TContext> : StandardDataSource<T, TContext>
-        where TContext : DbContext
-        where T : class
-    {
-        public OldDataSourceInteropDataSource(CrudContext<TContext> context, IQueryable<T> query) : base(context)
-        {
-            Query = query;
-        }
-
-        private IQueryable<T> Query { get; }
-
-        public override IQueryable<T> GetQuery()
-        {
-            var query = Query;
-            if (!string.Equals(Context.ListParameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
-            {
-                query = query.IncludeChildren();
-            }
-            return query;
-        }
-    }
-
     public class StandardDataSource<T, TContext> : IDataSource<T>
+        where T : class, new()
         where TContext : DbContext
-        where T : class
     {
         /// <summary>
         /// When ListParameters.Includes is this value, the default behavior of including
@@ -88,11 +65,11 @@ namespace IntelliTect.Coalesce
         /// clauses in order to ultimately retrieve the final resulting data.
         /// </summary>
         /// <returns></returns>
-        public virtual IQueryable<T> GetQuery()
+        public virtual IQueryable<T> GetQuery(IDataSourceParameters parameters)
         {
             IQueryable<T> query = Db.Set<T>();
 
-            if (!string.Equals(Context.ListParameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
+            if (!string.Equals(parameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.IncludeChildren();
             }
@@ -109,10 +86,10 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="query">The query to filter.</param>
         /// <returns>The new query with additional filtering applied.</returns>
-        public virtual IQueryable<T> ApplyListPropertyFilters(IQueryable<T> query)
+        public virtual IQueryable<T> ApplyListPropertyFilters(IQueryable<T> query, IFilterParameters parameters)
         {
             // Add key value pairs where = is used.
-            foreach (var clause in Context.ListParameters.Filters)
+            foreach (var clause in parameters.Filter)
             {
                 var prop = ClassViewModel.PropertyByName(clause.Key);
                 if (prop != null)
@@ -228,13 +205,16 @@ namespace IntelliTect.Coalesce
         /// <param name="query">The query to filter.</param>
         /// <returns>The new query with additional filtering applied.</returns>
         /// <see cref="https://github.com/StefH/System.Linq.Dynamic.Core/wiki/Dynamic-Expressions"/>
-        public virtual IQueryable<T> ApplyListFreeformWhereClause(IQueryable<T> query)
+        public virtual IQueryable<T> ApplyListFreeformWhereClause(IQueryable<T> query, IFilterParameters parameters)
         {
             // Because this is processed through LINQ Dynamic,
             // there's no chance for SQL injection here.
-            if (!string.IsNullOrWhiteSpace(Context.ListParameters.Where))
+            // However, it can effectively examine your entire data model,
+            // so if this behavior is not desired (clients are untrusted),
+            // overriding the standard data source with one that eliminates this behavior may be desired.
+            if (!string.IsNullOrWhiteSpace(parameters.Where))
             {
-                return query.Where(Context.ListParameters.Where);
+                return query.Where(parameters.Where);
             }
             return query;
         }
@@ -246,9 +226,9 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="query">The query to filter.</param>
         /// <returns>The new query with additional filtering applied.</returns>
-        public virtual IQueryable<T> ApplyListSearchTerm(IQueryable<T> query)
+        public virtual IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)
         {
-            var searchTerm = Context.ListParameters.Search;
+            var searchTerm = parameters.Search;
 
             // Add general search filters.
             // These search specified fields in the class
@@ -354,11 +334,11 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="query">The query to filter.</param>
         /// <returns>The new query with additional filtering applied.</returns>
-        public virtual IQueryable<T> ApplyListFiltering(IQueryable<T> query)
+        public virtual IQueryable<T> ApplyListFiltering(IQueryable<T> query, IFilterParameters parameters)
         {
-            query = ApplyListPropertyFilters(query);
-            query = ApplyListFreeformWhereClause(query);
-            query = ApplyListSearchTerm(query);
+            query = ApplyListPropertyFilters(query, parameters);
+            query = ApplyListFreeformWhereClause(query, parameters);
+            query = ApplyListSearchTerm(query, parameters);
             return query;
         }
 
@@ -372,9 +352,9 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="query">The query to sort.</param>
         /// <returns>The new query with additional sorting applied.</returns>
-        public virtual IQueryable<T> ApplyListClientSpecifiedSorting(IQueryable<T> query)
+        public virtual IQueryable<T> ApplyListClientSpecifiedSorting(IQueryable<T> query, IListParameters parameters)
         {
-            var orderByParams = Context.ListParameters.OrderByList;
+            var orderByParams = parameters.OrderByList;
             if (!orderByParams.Any(p => p.Key == "none"))
             {
                 foreach (var orderByParam in orderByParams)
@@ -437,12 +417,12 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="query">The query to sort.</param>
         /// <returns>The new query with additional sorting applied.</returns>
-        public virtual IQueryable<T> ApplyListSorting(IQueryable<T> query)
+        public virtual IQueryable<T> ApplyListSorting(IQueryable<T> query, IListParameters parameters)
         {
-            var orderByParams = Context.ListParameters.OrderByList;
+            var orderByParams = parameters.OrderByList;
             if (orderByParams.Any())
             {
-                return ApplyListClientSpecifiedSorting(query);
+                return ApplyListClientSpecifiedSorting(query, parameters);
             }
             else
             {
@@ -477,13 +457,13 @@ namespace IntelliTect.Coalesce
         /// <param name="page">out: The page number that was skipped to.</param>
         /// <param name="pageSize">out: The page size that was used in paging.</param>
         /// <returns></returns>
-        public virtual IQueryable<T> ApplyListPaging(IQueryable<T> query, int? totalCount, out int page, out int pageSize)
+        public virtual IQueryable<T> ApplyListPaging(IQueryable<T> query, IListParameters parameters, int? totalCount, out int page, out int pageSize)
         {
-            page = Context.ListParameters.Page ?? 1;
-            pageSize = Context.ListParameters.PageSize ?? DefaultPageSize;
+            page = parameters.Page ?? 1;
+            pageSize = parameters.PageSize ?? DefaultPageSize;
             
             // Cap the page number at the last item
-            if ((page - 1) * pageSize > totalCount)
+            if (totalCount.HasValue && (page - 1) * pageSize > totalCount)
             {
                 page = (int)((totalCount - 1) / pageSize) + 1;
             }
@@ -505,7 +485,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="results"></param>
         /// <returns></returns>
-        public virtual ICollection<T> TransformResults(ICollection<T> results) => results;
+        public virtual ICollection<T> TransformResults(ICollection<T> results, IDataSourceParameters parameters) => results;
 
         /// <summary>
         /// For the given query, obtain the IncludeTree to be used when serializing the results of this data source.
@@ -514,7 +494,7 @@ namespace IntelliTect.Coalesce
         /// <param name="query">The query that may be used to get the IncludeTree from.</param>
         /// <returns>The IncludeTree that will be used to shape the serialized DTOs.</returns>
         /// <see cref="http://coalesce.readthedocs.io/en/latest/pages/loading-and-serialization/include-tree/"/>
-        public virtual IncludeTree GetIncludeTree(IQueryable<T> query) => query.GetIncludeTree();
+        public virtual IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
 
 
@@ -524,27 +504,27 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <returns>A ListResult with the requested data and paging information,
         /// and an IncludeTree to be used when mapping/serializing the data.</returns>
-        public virtual async Task<(ListResult<T> list, IncludeTree includeTree)> GetListAsync()
+        public virtual async Task<(ListResult<T> list, IncludeTree includeTree)> GetListAsync(IListParameters parameters)
         {
-            var query = GetQuery();
+            var query = GetQuery(parameters);
 
-            query = ApplyListFiltering(query);
-            query = ApplyListSorting(query);
+            query = ApplyListFiltering(query, parameters);
+            query = ApplyListSorting(query, parameters);
 
             // Get a count
             int totalCount = await GetCountAsync(query);
 
             // Add paging after we've gotten the total count.
-            query = ApplyListPaging(query, totalCount, out int page, out int pageSize);
+            query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
 
             // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
             // Renable once microsoft releases the fix and we upgrade our references.
             var canUseAsync = false; // query.Provider is IAsyncQueryProvider;
             ICollection<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
 
-            result = TransformResults(result);
+            result = TransformResults(result, parameters);
 
-            var tree = GetIncludeTree(query);
+            var tree = GetIncludeTree(query, parameters);
             return (new ListResult<T>(result, page, totalCount, pageSize), tree);
         }
 
@@ -553,18 +533,18 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>A ListResult containing the desired data mapped to the desired type.</returns>
-        public virtual async Task<ListResult<TDto>> GetMappedListAsync<TDto>()
+        public virtual async Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
             where TDto : IClassDto<T, TDto>, new()
         {
-            var (result, tree) = await GetListAsync();
+            var (result, tree) = await GetListAsync(parameters);
 
-            var mappingContext = new MappingContext(Context.User, Context.ListParameters.Includes);
+            var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = result.List.Select(obj => Mapper<T, TDto>.ObjToDtoMapper(obj, mappingContext, tree)).ToList();
 
-            if (Context.ListParameters.FieldList.Any())
+            if (parameters.Fields.Any())
             {
                 var allDtoProps = typeof(TDto).GetProperties();
-                var requestedProps = Context.ListParameters.FieldList
+                var requestedProps = parameters.Fields
                     .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.InvariantCultureIgnoreCase)))
                     .Where(prop => prop != null)
                     .ToList();
@@ -588,18 +568,18 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key to find the desired item by.</param>
         /// <returns>The requested item
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
-        public virtual async Task<(T item, IncludeTree includeTree)> GetItemAsync(object id)
+        public virtual async Task<(T item, IncludeTree includeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
-            var query = GetQuery();
+            var query = GetQuery(parameters);
 
             // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
             // Renable once microsoft releases the fix and we upgrade our references.
             var canUseAsync = false; // query.Provider is IAsyncQueryProvider;
             T result = canUseAsync ? await query.FindItemAsync(id) : query.FindItem(id);
 
-            result = TransformResults(new[] { result }).SingleOrDefault();
+            result = TransformResults(new[] { result }, parameters).SingleOrDefault();
 
-            var tree = GetIncludeTree(query);
+            var tree = GetIncludeTree(query, parameters);
             return (result, tree);
         }
 
@@ -609,21 +589,21 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key to find the desired item by.</param>
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>The desired item, mapped to the desired type.</returns>
-        public virtual async Task<TDto> GetMappedItemAsync<TDto>(object id)
+        public virtual async Task<TDto> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
             where TDto : IClassDto<T, TDto>, new()
         {
-            var (result, tree) = await GetItemAsync(id);
+            var (result, tree) = await GetItemAsync(id, parameters);
 
-            var mappingContext = new MappingContext(Context.User, Context.ListParameters.Includes);
+            var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = Mapper<T, TDto>.ObjToDtoMapper(result, mappingContext, tree);
 
             return mappedResult;
         }
 
-        public virtual Task<int> GetCountAsync()
+        public virtual Task<int> GetCountAsync(IFilterParameters parameters)
         {
-            var query = GetQuery();
-            query = ApplyListFiltering(query);
+            var query = GetQuery(parameters);
+            query = ApplyListFiltering(query, parameters);
             return GetCountAsync(query);
         }
     }

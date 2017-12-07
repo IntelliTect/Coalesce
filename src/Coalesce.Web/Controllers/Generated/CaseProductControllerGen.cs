@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.Knockout.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Coalesce.Web.Controllers
 {
@@ -42,9 +43,9 @@ namespace Coalesce.Web.Controllers
         }
 
         [Authorize]
-        public ActionResult Docs()
+        public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)
         {
-            return DocsImplementation();
+            return DocsImplementation(hostingEnvironment);
         }
     }
 }

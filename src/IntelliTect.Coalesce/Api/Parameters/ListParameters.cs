@@ -4,26 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Models
+namespace IntelliTect.Coalesce.Api
 {
-    public class ListParameters
+    public class ListParameters : FilterParameters, IListParameters
     {
-        public string Where { get; set; }
-        public string Includes { get; set; }
         public string OrderBy { get; set; }
         public string OrderByDescending { get; set; }
         public int? Page { get; set; }
         public int? PageSize { get; set; }
-
-        /// <summary>
-        /// Text to search fields for.
-        /// </summary>
-        public string Search { get; set; }
-
-        /// <summary>
-        /// Data source to use for the list.
-        /// </summary>
-        public string DataSource { get; set; }
 
         /// <summary>
         /// CSV list of fields to return
@@ -41,10 +29,8 @@ namespace IntelliTect.Coalesce.Models
                 return Fields.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
             }
         }
-        /// <summary>
-        /// List of filters added from the controller based on property=value on the URL.
-        /// </summary>
-        public Dictionary<string, string> Filters { get; } = new Dictionary<string, string>();
+
+        ICollection<string> IListParameters.Fields => FieldList;
 
         public ListParameters() { }
 
@@ -99,6 +85,8 @@ namespace IntelliTect.Coalesce.Models
             }
         }
 
+        IDictionary<string, string> IListParameters.OrderByList => OrderByList;
+
         /// <summary>
         /// Adds a name value condition to the Filters list.
         /// </summary>
@@ -108,8 +96,7 @@ namespace IntelliTect.Coalesce.Models
         {
             if (propertyValue != null)
             {
-                if (Filters.ContainsKey(propertyName)) Filters.Remove(propertyName);
-                Filters.Add(propertyName, propertyValue);
+                Filter[propertyName] = propertyValue;
             }
         }
     }

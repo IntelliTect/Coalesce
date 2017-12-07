@@ -55,8 +55,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;
 
-        public override bool IsA<T>() => IsA(typeof(T));
-
 
         public override bool IsGeneric => Info.IsGenericType;
 
@@ -70,7 +68,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsClass => Info.IsClass;
 
-        public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
+        public override bool IsInternalUse => base.IsInternalUse || !Info.IsVisible;
 
         public override Dictionary<int, string> EnumValues
         {
@@ -133,19 +131,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override TypeViewModel FirstTypeArgument => 
             new ReflectionTypeViewModel(Info.GenericTypeArguments.First());
 
-        public override TypeViewModel ArrayType => 
-            new ReflectionTypeViewModel(Info.GetElementType());
+        public override TypeViewModel ArrayType => IsArray
+            ? new ReflectionTypeViewModel(Info.GetElementType())
+            : null;
 
-        public override ClassViewModel ClassViewModel
-        {
-            get
-            {
-                if (!HasClassViewModel) return null;
-                if (PureType != this) return PureType.ClassViewModel;
-                if (Info != null) return ReflectionRepository.Global.GetClassViewModel(Info);
-                return null;
-            }
-        }
+        public override ClassViewModel ClassViewModel => HasClassViewModel
+            ? ReflectionRepository.Global.GetClassViewModel(Info)
+            : null;
 
         public override bool EqualsType(TypeViewModel b) => b is ReflectionTypeViewModel r ? Info == r.Info : false;
     }

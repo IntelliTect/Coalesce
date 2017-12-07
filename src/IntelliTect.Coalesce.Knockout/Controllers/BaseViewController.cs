@@ -1,34 +1,27 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.Knockout.Models;
+using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Controllers;
-using Microsoft.AspNetCore.Html;
-using System.Collections.Generic;
-using Microsoft.Extensions.Primitives;
-using IntelliTect.Coalesce.Knockout.Models;
 
 namespace IntelliTect.Coalesce.Knockout.Controllers
 {
-    public abstract class BaseViewController<T, TContext> : BaseViewController<T, T, TContext>
+    public abstract class BaseViewController<T, TContext> : Controller
         where T : class, new()
         where TContext : DbContext
     {
-        protected BaseViewController() : base() { }
-    }
-
-    public abstract class BaseViewController<T, TDto, TContext> : BaseControllerWithDb<TContext>
-        where T : class, new()
-        where TContext : DbContext
-    {
-        protected ClassViewModel classViewModel;
+        protected ClassViewModel ClassViewModel { get; }
 
         protected BaseViewController()
         {
-            classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
+            ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
         }
 
         // Page Listing the items in the collection.
@@ -48,9 +41,9 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
             }
             ViewBag.Query = ViewBag.Query == "" ? null : new HtmlString( ViewBag.Query );
 
-            @ViewBag.Title = typeof(T).Name + " List";
+            @ViewBag.Title = ClassViewModel.Name + " List";
 
-            return View(viewName, classViewModel);
+            return View(viewName, ClassViewModel);
         }
 
         // GET: Editing page
@@ -66,7 +59,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
                 if (kvp.Key == "id") id = kvp.Value;
                 else if (kvp.Key != string.Empty)
                 {
-                    var varName = classViewModel.PropertyByName(kvp.Key)?.JsVariable;
+                    var varName = ClassViewModel.PropertyByName(kvp.Key)?.JsVariable;
                     if (varName != null)
                     {
                         parentIds.Add(varName, kvp.Value);
@@ -75,9 +68,9 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
                 }
             }
 
-            @ViewBag.Title = typeof(T).Name + " Edit";
+            @ViewBag.Title = ClassViewModel.Name + " Edit";
             ViewBag.Id = id;
-            return View(viewName, classViewModel);
+            return View(viewName, ClassViewModel);
         }
 
         /// <summary>
@@ -88,27 +81,28 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
         protected ActionResult EditorHtmlImplementation(bool simple = false)
         {
             ViewBag.SimpleEditorOnly = simple;
-            return PartialView("~/Views/Api/EditorHtml.cshtml", classViewModel);
+            return PartialView("~/Views/Api/EditorHtml.cshtml", ClassViewModel);
         }
 
-
-        [HttpGet]
+        
         //[OutputCache(Duration = 10000, VaryByParam = "none")]
-        protected ActionResult DocsImplementation()
+        protected ActionResult DocsImplementation([FromServices] IHostingEnvironment hostingEnvironment)
         {
             // Load TypeScript docs
-            var baseClassPath = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Coalesce", "coalesce.ko.base.ts");
-            var path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ViewModelClassName}.{(classViewModel.HasTypeScriptPartial ? "Partial." : "")}ts");
+            var contentRoot = hostingEnvironment.ContentRootPath;
 
-            ViewBag.ObjDoc = GenerateTypeScriptDocs(path, classViewModel.ViewModelGeneratedClassName);
+            var baseClassPath = Path.Combine(contentRoot, "Scripts", "Coalesce", "coalesce.ko.base.ts");
+            var path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ViewModelClassName}.{(ClassViewModel.HasTypeScriptPartial ? "Partial." : "")}ts");
+
+            ViewBag.ObjDoc = GenerateTypeScriptDocs(path, ClassViewModel.ViewModelGeneratedClassName);
             ViewBag.BaseObjDoc = GenerateTypeScriptDocs(baseClassPath, "BaseViewModel");
 
-            path = Path.Combine(AppEnv.ContentRootPath, "Scripts", "Generated", $"ko.{classViewModel.ListViewModelClassName}.ts");
+            path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ListViewModelClassName}.ts");
 
-            ViewBag.ListDoc = GenerateTypeScriptDocs(path, classViewModel.ListViewModelClassName);
+            ViewBag.ListDoc = GenerateTypeScriptDocs(path, ClassViewModel.ListViewModelClassName);
             ViewBag.BaseListDoc = GenerateTypeScriptDocs( baseClassPath, "BaseListViewModel");
 
-            return View("~/Views/Api/Docs.cshtml", classViewModel);
+            return View("~/Views/Api/Docs.cshtml", ClassViewModel);
         }
 
         private TypeScriptDocumentation GenerateTypeScriptDocs(string path, string className = null)

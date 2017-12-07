@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.Mapping.IncludeTree;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Helpers.IncludeTree
+// Deliberately namespaced to IntelliTect.Coalesce for ease of use.
+namespace IntelliTect.Coalesce
 {
     public static class IncludeTreeExtensions
     {

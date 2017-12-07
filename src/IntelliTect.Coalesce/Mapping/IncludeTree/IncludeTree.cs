@@ -7,7 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Helpers.IncludeTree
+namespace IntelliTect.Coalesce.Mapping.IncludeTree
 {
     /// <summary>
     ///    Represents a hierarchy of entity properties which should be included in results sent to clients.

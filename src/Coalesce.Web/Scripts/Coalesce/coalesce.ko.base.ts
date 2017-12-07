@@ -49,7 +49,7 @@ module Coalesce {
         public onFinishBusy = this.prop<(object: T) => void>("onFinishBusy");
     }
 
-    export class ViewModelConfiguration<T extends BaseViewModel<T>> extends CoalesceConfiguration<T> {
+    export class ViewModelConfiguration<T extends BaseViewModel> extends CoalesceConfiguration<T> {
         /** Time to wait after a change is seen before auto-saving (if autoSaveEnabled is true). Acts as a debouncing timer for multiple simultaneous changes. */
         public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
 
@@ -92,7 +92,7 @@ module Coalesce {
         }
     }
 
-    export class ListViewModelConfiguration<T extends BaseListViewModel<T, TItem>, TItem extends BaseViewModel<TItem>> extends CoalesceConfiguration<T> {
+    export class ListViewModelConfiguration<T extends BaseListViewModel<TItem>, TItem extends BaseViewModel> extends CoalesceConfiguration<T> {
 
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
@@ -103,8 +103,8 @@ module Coalesce {
     }
 
     class RootConfig extends CoalesceConfiguration<any> {
-        public viewModel = new ViewModelConfiguration<BaseViewModel<any>>(this);
-        public listViewModel = new ListViewModelConfiguration<BaseListViewModel<any, BaseViewModel<any>>, BaseViewModel<any>>(this);
+        public viewModel = new ViewModelConfiguration<any>(this);
+        public listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
     }
 
     export var GlobalConfiguration = new RootConfig();
@@ -137,7 +137,7 @@ module Coalesce {
         parentCollection: any;
     }
 
-    export class BaseViewModel<T extends BaseViewModel<T>> {
+    export class BaseViewModel {
 
         protected modelName: string;
         protected modelDisplayName: string;
@@ -159,7 +159,7 @@ module Coalesce {
         /**
             Properties which determine how this object behaves.
         */
-        public coalesceConfig: ViewModelConfiguration<BaseViewModel<T>> = null;
+        public coalesceConfig: ViewModelConfiguration<this> = null;
 
         /** Stack for number of times loading has been called. */
         protected loadingCount: number = 0;
@@ -168,7 +168,7 @@ module Coalesce {
 
      
         /** Callbacks to call after a save. */
-        protected saveCallbacks: Array<(self: T) => void> = [];
+        protected saveCallbacks: Array<(self: this) => void> = [];
         
         /**
             String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable.
@@ -192,7 +192,7 @@ module Coalesce {
         /** Parent of this object, if this object was loaded as part of a hierarchy. */
         public parent: any = null;
         /** Parent of this object, if this object was loaded as part of list of objects. */
-        public parentCollection: KnockoutObservableArray<T> = null;
+        public parentCollection: KnockoutObservableArray<this> = null;
         /**
             Primary Key of the object.
             @deprecated Use the strongly-typed property of the key for this model whenever possible. This property will be removed once Coalesce supports composite keys.
@@ -329,7 +329,7 @@ module Coalesce {
             Saves the object to the server and then calls a callback.
             Returns false if there are validation errors.
         */
-        public save = (callback?: (self: T) => void): JQueryPromise<any> | boolean | undefined => {
+        public save = (callback?: (self: this) => void): JQueryPromise<any> | boolean | undefined => {
             if (!this.isLoading()) {
                 if (this.validate()) {
                     if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
@@ -348,7 +348,7 @@ module Coalesce {
                             }
                             // The object is now saved. Call any callback.
                             for (var i in this.saveCallbacks) {
-                                this.saveCallbacks[i](this as any as T);
+                                this.saveCallbacks[i](this);
                             }
                         })
                         .fail((xhr) => {
@@ -368,7 +368,7 @@ module Coalesce {
                         .always(() => {
                             this.isSaving(false);
                             if ($.isFunction(callback)) {
-                                callback(this as any as T);
+                                callback(this);
                             }
                             if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onFinishBusy()(this);
                         });
@@ -384,7 +384,7 @@ module Coalesce {
 
 
         /** Loads the object from the server based on the id specified. If no id is specified, the current id, is used if one is set. */
-        public load = (id?: any, callback?: (self: T) => void): JQueryPromise<any> | undefined => {
+        public load = (id?: any, callback?: (self: this) => void): JQueryPromise<any> | undefined => {
             if (!id) {
                 id = this[this.primaryKeyName]();
             }
@@ -400,7 +400,7 @@ module Coalesce {
                     .done((data) => {
                         this.loadFromDto(data, true);
                         this.isLoaded(true);
-                        if ($.isFunction(callback)) callback(this as any as T);
+                        if ($.isFunction(callback)) callback(this);
                     })
                     .fail(() => {
                         this.isLoaded(false);
@@ -415,7 +415,7 @@ module Coalesce {
         };
 
         /** Deletes the object without any prompt for confirmation. */
-        public deleteItem = (callback?: (self: T) => void): JQueryPromise<any> | undefined => {
+        public deleteItem = (callback?: (self: this) => void): JQueryPromise<any> | undefined => {
             var currentId = this[this.primaryKeyName]();
             if (currentId) {
                 return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
@@ -426,7 +426,7 @@ module Coalesce {
                             // Remove it from the parent collection
                             if (this.parentCollection && this.parent) {
                                 this.parent.isLoading(true);
-                                this.parentCollection.splice(this.parentCollection().indexOf(this as any as T), 1);
+                                this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
                                 this.parent.isLoading(false);
                             }
                         } else {
@@ -439,18 +439,18 @@ module Coalesce {
                     })
                     .always(() => {
                         if ($.isFunction(callback)) {
-                            callback(this as any as T);
+                            callback(this);
                         }
                     });
             } else {
                 // No ID has been assigned yet, just remove it.
                 if (this.parentCollection && this.parent) {
                     this.parent.isLoading(true);
-                    this.parentCollection.splice(this.parentCollection().indexOf(this as any as T), 1);
+                    this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
                     this.parent.isLoading(false);
                 }
                 if ($.isFunction(callback)) {
-                    callback(this as any as T);
+                    callback(this);
                 }
             }
         };
@@ -477,7 +477,7 @@ module Coalesce {
                     this.loadFromDto(data.object, true);
                     // The object is now saved. Call any callback.
                     for (var i in this.saveCallbacks) {
-                        this.saveCallbacks[i](this as any as T);
+                        this.saveCallbacks[i](this);
                     }
                 })
                 .fail((xhr) => {
@@ -513,7 +513,7 @@ module Coalesce {
             Register a callback to be called when a save is done.
             @returns true if the callback was registered. false if the callback was already registered. 
         */
-        public onSave = (callback: (self: T) => void): boolean => {
+        public onSave = (callback: (self: this) => void): boolean => {
             if ($.isFunction(callback) && !this.saveCallbacks.filter(c => c == callback).length) {
                 this.saveCallbacks.push(callback);
                 return true;
@@ -585,7 +585,7 @@ module Coalesce {
         }
     }
 
-    export class BaseListViewModel<T, TItem extends BaseViewModel<any>> {
+    export class BaseListViewModel<TItem extends BaseViewModel> {
 
         protected modelName: string;
 
@@ -612,7 +612,7 @@ module Coalesce {
         /**
             Properties which determine how this object behaves.
         */
-        public coalesceConfig: ListViewModelConfiguration<BaseListViewModel<T, TItem>, TItem> = null;
+        public coalesceConfig: ListViewModelConfiguration<this, TItem> = null;
 
         /**
             Query string to append to the API call when loading the list of items.

@@ -24,7 +24,7 @@ module ListViewModels {
         public query: {
             where?: string;
             productId?:number;
-            name?:String;
+            name?:string;
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned

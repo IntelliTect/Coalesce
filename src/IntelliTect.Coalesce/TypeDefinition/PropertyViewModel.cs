@@ -514,14 +514,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         /// <summary>
         /// Returns the URL for the List Editor with the ???Id= query string.
-        /// Ex: Adult/table?adultId=
+        /// Ex: Adult/table?filter.adultId=
         /// </summary>
         public string ListEditorUrl
         {
             get
             {
                 if (InverseIdProperty == null) { return null; }
-                return string.Format("{0}/Table?{1}=", Object.ControllerName, InverseIdProperty.JsonName);
+                return string.Format("{0}/Table?filter.{1}=", Object.ControllerName, InverseIdProperty.JsonName);
             }
         }
 

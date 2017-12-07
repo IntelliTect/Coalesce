@@ -22,7 +22,7 @@ namespace Coalesce.Web.Api
             // Add the company name to the last name if it changed.
             if (obj.CompanyId != orig.CompanyId && !string.IsNullOrEmpty(obj.LastName) && !obj.LastName.Contains(obj.Company.Name))
             {
-                obj.LastName = obj.LastName + "-" + obj.Company.Name;
+                // obj.LastName = obj.LastName + "-" + obj.Company.Name;
                 Db.SaveChanges();
             }
             return true;

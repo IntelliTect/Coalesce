@@ -36,13 +36,14 @@ var baseUrl = baseUrl || '';
 module @moduleName {
 
     // Add an enum for all methods that are static and IQueryable
-    export enum @(model.Name)DataSources {
-            Default,
-            @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))
-            {
-            @:@source.Name,
-            }
+    module enum @(model.Name)DataSources {
+        Default,
+        @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))
+        {
+        @:@source.Name,
         }
+    }
+
     export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)> {
         protected modelName = "@(model.Name)";
 

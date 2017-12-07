@@ -72,7 +72,7 @@ module ViewModels {
         /** Url for a table view of all members of collection CaseProducts for the current object. */
         public caseProductsListUrl: KnockoutComputed<string> = ko.computed({
             read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/CaseProduct/Table?caseId=' + this.caseKey();
+                     return this.coalesceConfig.baseViewUrl() + '/CaseProduct/Table?filter.caseId=' + this.caseKey();
             },
             deferEvaluation: true
         });

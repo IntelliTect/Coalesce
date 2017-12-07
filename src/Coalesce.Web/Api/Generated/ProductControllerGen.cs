@@ -1,10 +1,10 @@
 ﻿
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
-using IntelliTect.Coalesce.Controllers;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
@@ -23,136 +23,57 @@ namespace Coalesce.Web.Api
     public partial class ProductController
     : LocalBaseApiController<Coalesce.Domain.Product, ProductDtoGen>
     {
-        protected ClassViewModel Model;
-
-        public ProductController()
+        public ProductController(Coalesce.Domain.AppDbContext db) : base(db)
         {
-            Model = ReflectionRepository.Global.Models.Single(m => m.Name == "Product");
         }
 
 
-        /// <summary>
-        /// Returns ProductDtoGen
-        /// </summary>
         [HttpGet("list")]
         [Authorize]
-        public virtual async Task<ListResult<ProductDtoGen>> List(
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string productId = null, string name = null)
-        {
-
-            ListParameters parameters = new ListParameters(null, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("ProductId", productId);
-            parameters.AddFilter("Name", name);
-
-            return await ListImplementation(parameters);
-        }
-
-        /// <summary>
-        /// Returns custom object based on supplied fields
-        /// </summary>
-        [HttpGet("customlist")]
-        [Authorize]
-        public virtual async Task<ListResult<ProductDtoGen>> CustomList(
-            string fields = null,
-            string includes = null,
-            string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string productId = null, string name = null)
-        {
-
-            ListParameters parameters = new ListParameters(fields, includes, orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("ProductId", productId);
-            parameters.AddFilter("Name", name);
-
-            return await ListImplementation(parameters);
-        }
+        public virtual Task<ListResult<ProductDtoGen>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+            => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
-        public virtual async Task<int> Count(
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string productId = null, string name = null)
-        {
-
-            ListParameters parameters = new ListParameters(where: where, dataSource: dataSource, search: search, fields: null);
-
-            // Add custom filters
-            parameters.AddFilter("ProductId", productId);
-            parameters.AddFilter("Name", name);
-
-            return await CountImplementation(parameters);
-        }
+        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+            => CountImplementation(parameters, dataSource);
 
         [HttpGet("propertyValues")]
         [Authorize]
         public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-        {
-
-            return PropertyValuesImplementation(property, page, search);
-        }
+            => PropertyValuesImplementation(property, page, search);
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual async Task<ProductDtoGen> Get(string id, string includes = null, string dataSource = null)
-        {
-
-            ListParameters listParams = new ListParameters(includes: includes, dataSource: dataSource);
-            listParams.AddFilter("id", id);
-            return await GetImplementation(id, listParams);
-        }
-
+        public virtual Task<ProductDtoGen> Get(string id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+            => GetImplementation(id, parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual bool Delete(string id)
-        {
-
-            return DeleteImplementation(id);
-        }
+            => DeleteImplementation(id);
 
 
         [HttpPost("save")]
         [Authorize(Roles = "Admin")]
-        public virtual async Task<SaveResult<ProductDtoGen>> Save(ProductDtoGen dto, string includes = null, string dataSource = null, bool returnObject = true)
+        public virtual async Task<SaveResult<ProductDtoGen>> Save(ProductDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource, bool returnObject = true)
         {
 
-            if (!dto.ProductId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+            if (!dto.ProductId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<ProductDtoGen>();
-                result.WasSuccessful = false;
-                result.Message = "Create not allowed on Product objects.";
+                var result = new SaveResult<ProductDtoGen>("Create not allowed on Product objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
-            else if (dto.ProductId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+            else if (dto.ProductId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<ProductDtoGen>();
-                result.WasSuccessful = false;
-                result.Message = "Edit not allowed on Product objects.";
+                var result = new SaveResult<ProductDtoGen>("Edit not allowed on Product objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
 
-            return await SaveImplementation(dto, includes, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, returnObject);
         }
 
         [HttpPost("AddToCollection")]
@@ -173,26 +94,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [Authorize]
-        public virtual async Task<FileResult> CsvDownload(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string productId = null, string name = null)
+        public virtual async Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("ProductId", productId);
-            parameters.AddFilter("Name", name);
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<ProductDtoGen>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(csv);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(await CsvText(parameters, dataSource));
             return File(bytes, "application/x-msdownload", "Product.csv");
         }
 
@@ -201,26 +105,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [Authorize]
-        public virtual async Task<string> CsvText(
-            string orderBy = null, string orderByDescending = null,
-            int? page = 1, int? pageSize = 10000,
-            string where = null,
-            string dataSource = null,
-            string search = null,
-            // Custom fields for this object.
-            string productId = null, string name = null)
+        public virtual async Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
         {
-            ListParameters parameters = new ListParameters(null, "none", orderBy, orderByDescending, page, pageSize, where, dataSource, search);
-
-            // Add custom filters
-            parameters.AddFilter("ProductId", productId);
-            parameters.AddFilter("Name", name);
-
-            var listResult = await ListImplementation(parameters);
-            var list = listResult.List.Cast<ProductDtoGen>();
-            var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(list);
-
-            return csv;
+            var listResult = await ListImplementation(parameters, dataSource);
+            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List);
         }
 
 
@@ -230,20 +118,18 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize(Roles = "Admin")]
-        public virtual async Task<IEnumerable<SaveResult<ProductDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<ProductDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Product> dataSource, bool hasHeader = true)
         {
-            if (file != null && file.Length > 0)
+            if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
+
+            using (var stream = file.OpenReadStream())
             {
-                using (var stream = file.OpenReadStream())
+                using (var reader = new System.IO.StreamReader(stream))
                 {
-                    using (var reader = new System.IO.StreamReader(stream))
-                    {
-                        var csv = reader.ReadToEnd();
-                        return await CsvSave(csv, hasHeader);
-                    }
+                    var csv = reader.ReadToEnd();
+                    return await CsvSave(csv, dataSource, hasHeader);
                 }
             }
-            throw new ArgumentException("No files uploaded");
         }
 
         /// <summary>
@@ -251,7 +137,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize(Roles = "Admin")]
-        public virtual async Task<IEnumerable<SaveResult<ProductDtoGen>>> CsvSave(string csv, bool hasHeader = true)
+        public virtual async Task<IEnumerable<SaveResult<ProductDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Product> dataSource, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<ProductDtoGen>(csv, hasHeader);
@@ -259,31 +145,27 @@ namespace Coalesce.Web.Api
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
-                if (!dto.ProductId.HasValue && !Model.SecurityInfo.IsCreateAllowed(User))
+                if (!dto.ProductId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<ProductDtoGen>();
-                    result.WasSuccessful = false;
-                    result.Message = "Create not allowed on Product objects.";
+                    var result = new SaveResult<ProductDtoGen>("Create not allowed on Product objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
-                else if (dto.ProductId.HasValue && !Model.SecurityInfo.IsEditAllowed(User))
+                else if (dto.ProductId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<ProductDtoGen>();
-                    result.WasSuccessful = false;
-                    result.Message = "Edit not allowed on Product objects.";
+                    var result = new SaveResult<ProductDtoGen>("Edit not allowed on Product objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else
                 {
-                    var result = await SaveImplementation(dto, "none", null, false);
+                    var parameters = new DataSourceParameters() { Includes = "none" };
+                    var result = await SaveImplementation(dto, parameters, dataSource, false);
                     resultList.Add(result);
                 }
             }
             return resultList;
         }
-
 
         // Methods from data class exposed through API Controller.
     }

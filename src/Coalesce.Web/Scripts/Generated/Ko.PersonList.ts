@@ -8,12 +8,15 @@ var baseUrl = baseUrl || '';
 
 module ListViewModels {
 
+    export interface DataSource<T extends Coalesce.BaseViewModel<T>> { }
+
     // Add an enum for all methods that are static and IQueryable
-    export enum PersonDataSources {
-            Default,
-            NamesStartingWithAWithCases,
-            BorCPeople,
-        }
+    module PersonDataSources {
+        export class Default implements DataSource<ViewModels.Person> { }
+        export class NamesStartingWithAWithCases implements DataSource<ViewModels.Person> { }
+        export class BorCPeople implements DataSource<ViewModels.Person> { }
+    }
+
     export class PersonList extends Coalesce.BaseListViewModel<PersonList, ViewModels.Person> {
         protected modelName = "Person";
 
@@ -27,16 +30,16 @@ module ListViewModels {
             where?: string;
             personId?:number;
             title?:number;
-            firstName?:String;
-            lastName?:String;
-            email?:String;
+            firstName?:string;
+            lastName?:string;
+            email?:string;
             gender?:number;
-            name?:String;
+            name?:string;
             companyId?:number;
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public dataSource: PersonDataSources = PersonDataSources.Default;
+        public dataSource: DataSource<ViewModels.Person> = new PersonDataSources.Default();
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
@@ -45,6 +48,8 @@ module ListViewModels {
         // Call server method (Add)
         // Adds two numbers.
         public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true) => {
+            var source = new this.dataSources.BorCPeople();
+
             this.addIsLoading(true);
             this.addMessage('');
             this.addWasSuccessful(null);
@@ -221,7 +226,7 @@ module ListViewModels {
 
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
-        public namesStartingWith = (characters: String, callback: () => void = null, reload: boolean = true) => {
+        public namesStartingWith = (characters: string, callback: () => void = null, reload: boolean = true) => {
             this.namesStartingWithIsLoading(true);
             this.namesStartingWithMessage('');
             this.namesStartingWithWasSuccessful(null);
@@ -265,7 +270,7 @@ module ListViewModels {
         public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (NamesStartingWith)
         public namesStartingWithUi = (callback: () => void = null) => {
-            var characters: String = prompt('Characters');
+            var characters: string = prompt('Characters');
             this.namesStartingWith(characters, callback);
         }
         // Presents a modal with input boxes to call the server method (NamesStartingWith)

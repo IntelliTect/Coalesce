@@ -81,7 +81,9 @@ namespace Coalesce.Web.Tests
         [Fact]
         public async void ListIncludesDefault()
         {
-            var result = await _pc.CustomList(personId: "1");
+            var parameters = new ListParameters();
+            parameters.AddFilter("personId", "1");
+            var result = await _pc.List(parameters);
             var list = result.List.Cast<PersonDtoGen>();
             var person = list.First();
             Assert.NotNull(person.Company);

@@ -549,9 +549,9 @@ ko.bindingHandlers.datePicker = {
 
 
 ko.bindingHandlers.saveImmediately = {
-    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel<any>, bindingContext) {
-        if (!viewModel.coalesceConfig) {
-            console.error("saveImmediately binding was used in a context where $data is not a Coalesce.BaseViewModel<>");
+    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel, bindingContext) {
+        if (!viewModel.coalesceConfig || !viewModel.coalesceConfig.autoSaveEnabled) {
+            console.error("saveImmediately binding was used in a context where $data is not a Coalesce.BaseViewModel");
             return;
         }
 
@@ -569,9 +569,9 @@ ko.bindingHandlers.saveImmediately = {
 
 // Delays the save until the cursor leaves the field even if there is a value change.
 ko.bindingHandlers.delaySave = {
-    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel<any>, bindingContext) {
-        if (!viewModel.coalesceConfig) {
-            console.error("delaySave binding was used in a context where $data is not a Coalesce.BaseViewModel<>");
+    init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel, bindingContext) {
+        if (!viewModel.coalesceConfig || !viewModel.coalesceConfig.autoSaveEnabled) {
+            console.error("delaySave binding was used in a context where $data is not a Coalesce.BaseViewModel");
             return;
         }
 

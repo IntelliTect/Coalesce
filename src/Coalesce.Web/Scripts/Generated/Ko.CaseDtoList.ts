@@ -10,10 +10,11 @@ module ListViewModels {
 
     // Add an enum for all methods that are static and IQueryable
     export enum CaseDtoDataSources {
-            Default,
-            AllOpenCases,
-        }
-    export class CaseDtoList extends Coalesce.BaseListViewModel<CaseDtoList, ViewModels.CaseDto> {
+        Default,
+        AllOpenCases,
+    }
+
+    export class CaseDtoList extends Coalesce.BaseListViewModel<ViewModels.CaseDto> {
         protected modelName = "CaseDto";
 
         protected apiController = "/CaseDto";

@@ -8,16 +8,14 @@ var baseUrl = baseUrl || '';
 
 module ListViewModels {
 
-    export interface DataSource<T extends Coalesce.BaseViewModel<T>> { }
-
     // Add an enum for all methods that are static and IQueryable
-    module PersonDataSources {
-        export class Default implements DataSource<ViewModels.Person> { }
-        export class NamesStartingWithAWithCases implements DataSource<ViewModels.Person> { }
-        export class BorCPeople implements DataSource<ViewModels.Person> { }
+    export enum PersonDataSources {
+        Default,
+        NamesStartingWithAWithCases,
+        BorCPeople,
     }
 
-    export class PersonList extends Coalesce.BaseListViewModel<PersonList, ViewModels.Person> {
+    export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {
         protected modelName = "Person";
 
         protected apiController = "/Person";
@@ -39,7 +37,7 @@ module ListViewModels {
         } = null;
 
         // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public dataSource: DataSource<ViewModels.Person> = new PersonDataSources.Default();
+        public dataSource: PersonDataSources = PersonDataSources.Default;
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
@@ -48,8 +46,6 @@ module ListViewModels {
         // Call server method (Add)
         // Adds two numbers.
         public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true) => {
-            var source = new this.dataSources.BorCPeople();
-
             this.addIsLoading(true);
             this.addMessage('');
             this.addWasSuccessful(null);

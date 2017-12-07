@@ -10,9 +10,10 @@ module ListViewModels {
 
     // Add an enum for all methods that are static and IQueryable
     export enum CompanyDataSources {
-            Default,
-        }
-    export class CompanyList extends Coalesce.BaseListViewModel<CompanyList, ViewModels.Company> {
+        Default,
+    }
+
+    export class CompanyList extends Coalesce.BaseListViewModel<ViewModels.Company> {
         protected modelName = "Company";
 
         protected apiController = "/Company";

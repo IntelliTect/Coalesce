@@ -6,7 +6,7 @@
 
 module ViewModels {
 
-	export class CaseProduct extends Coalesce.BaseViewModel<CaseProduct>
+	export class CaseProduct extends Coalesce.BaseViewModel
     {
         protected modelName = "CaseProduct";
         protected primaryKeyName = "caseProductId";

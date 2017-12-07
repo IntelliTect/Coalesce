@@ -17,7 +17,7 @@ module Coalesce {
             this.parentConfig = parentConfig;
         }
 
-        protected prop = <TProp>(name: string): ComputedConfiguration<TProp> => {
+        protected prop = <TProp>(name: keyof this): ComputedConfiguration<TProp> => {
             var k = "_" + name;
             var raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
@@ -26,7 +26,12 @@ module Coalesce {
                 read: () => {
                     var rawValue = raw();
                     if (rawValue !== null) return rawValue;
-                    return this.parentConfig && this.parentConfig[name] ? this.parentConfig[name]() : null
+
+                    if (this.parentConfig && this.parentConfig[name as string]) {
+                        return this.parentConfig[name as string]();
+                    }
+
+                    return null;
                 },
                 write: raw
             }) as any as ComputedConfiguration<TProp>;
@@ -87,7 +92,7 @@ module Coalesce {
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
         */
-        public raw = (name: keyof ViewModelConfiguration<T>): KnockoutObservable<any> => {
+        public raw = (name: keyof this): KnockoutObservable<any> => {
             return this["_" + name];
         }
     }
@@ -97,7 +102,7 @@ module Coalesce {
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
         */
-        public raw = (name: keyof ListViewModelConfiguration<T, TItem>): KnockoutObservable<any> => {
+        public raw = (name: keyof this): KnockoutObservable<any> => {
             return this["_" + name];
         }
     }
@@ -166,10 +171,10 @@ module Coalesce {
         /** Stores the return value of setInterval for automatic save delays. */
         protected saveTimeout: number = 0;
 
-     
+
         /** Callbacks to call after a save. */
         protected saveCallbacks: Array<(self: this) => void> = [];
-        
+
         /**
             String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable.
         */
@@ -508,7 +513,7 @@ module Coalesce {
             }
         };
 
-        
+
         /**
             Register a callback to be called when a save is done.
             @returns true if the callback was registered. false if the callback was already registered. 
@@ -654,9 +659,9 @@ module Coalesce {
             if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
 
             return $.ajax({
-                    method: "GET",
-                    url: url,
-                    xhrFields: { withCredentials: true }
+                method: "GET",
+                url: url,
+                xhrFields: { withCredentials: true }
             })
                 .done((data) => {
 
@@ -731,19 +736,20 @@ module Coalesce {
             return $.ajax({
                 method: "GET",
                 url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + "dataSource="
-                    + this.dataSources[this.dataSource] + "&" + this.queryString,
-                xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.count(data);
-                if ($.isFunction(callback)) callback();
+                + this.dataSources[this.dataSource] + "&" + this.queryString,
+                xhrFields: { withCredentials: true }
             })
-            .fail(() => {
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this, "Could not get count of " + this.modelName + " items.");
-            })
-            .always(() => {
-                this.coalesceConfig.onFinishBusy()(this);
-            });
+                .done((data) => {
+                    this.count(data);
+                    if ($.isFunction(callback)) callback();
+                })
+                .fail(() => {
+                    if (this.coalesceConfig.showFailureAlerts())
+                        this.coalesceConfig.onFailure()(this, "Could not get count of " + this.modelName + " items.");
+                })
+                .always(() => {
+                    this.coalesceConfig.onFinishBusy()(this);
+                });
         };
 
         /** The result of getCount() or the total on this page. */
@@ -816,7 +822,7 @@ module Coalesce {
             $('#csv-upload').remove();
             // Add the form to the page to take the input
             $('body')
-                .append('<form id="csv-upload" display="none"></form>'); 
+                .append('<form id="csv-upload" display="none"></form>');
             $('#csv-upload')
                 .attr("action", this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvUpload").attr("method", "post")
                 .append('<input type="file" style="visibility: hidden;" name="file"/>');
@@ -838,18 +844,18 @@ module Coalesce {
                         contentType: false,
                         type: 'POST'
                     } as any)
-                    .done((data) => {
-                        this.isLoading(false);
-                        if ($.isFunction(callback)) callback();
-                    })
-                    .fail((data) => {
-                        if (this.coalesceConfig.showFailureAlerts())
-                            this.coalesceConfig.onFailure()(this, "CSV Upload Failed");
-                    })
-                    .always(() => {
-                        this.load();
-                        this.coalesceConfig.onFinishBusy()(this);
-                    });
+                        .done((data) => {
+                            this.isLoading(false);
+                            if ($.isFunction(callback)) callback();
+                        })
+                        .fail((data) => {
+                            if (this.coalesceConfig.showFailureAlerts())
+                                this.coalesceConfig.onFailure()(this, "CSV Upload Failed");
+                        })
+                        .always(() => {
+                            this.load();
+                            this.coalesceConfig.onFinishBusy()(this);
+                        });
                 }
                 // Remove the form
                 $('#csv-upload').remove();
@@ -862,7 +868,7 @@ module Coalesce {
 
         /** reloads the list after a slight delay (100ms default) to ensure that all changes are made. */
         private delayedLoad = (milliseconds?: number): void => {
-            if(this.loadTimeout) {
+            if (this.loadTimeout) {
                 clearTimeout(this.loadTimeout);
             }
             this.loadTimeout = setTimeout(() => {

@@ -13,6 +13,13 @@ module ListViewModels {
         export class Default extends Coalesce.DataSource<ViewModels.Case> { }
         export class AllOpenCases extends Coalesce.DataSource<ViewModels.Case> {
             protected _name = "AllOpenCases"
+            public minDate: KnockoutObservable<moment.Moment> = ko.observable(null);
+            public saveToDto = () => {
+                var dto: any = {};
+                if (!this.minDate()) dto.minDate = null;
+                else dto.minDate = this.minDate().format('YYYY-MM-DDTHH:mm:ssZZ');
+                return dto;
+            }
         }
     }
 

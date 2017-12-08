@@ -30,7 +30,6 @@ var baseUrl = baseUrl || '';
 
 module @moduleName {
 
-    // Add an enum for all methods that are static and IQueryable
     export namespace @(model.Name)DataSources {
         export class Default extends Coalesce.DataSource<@viewModelFullName> { }
         @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))

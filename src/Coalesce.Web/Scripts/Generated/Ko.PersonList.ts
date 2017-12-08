@@ -20,6 +20,7 @@ module ListViewModels {
                 return dto;
             }
         }
+        /** People whose last name starts with B or c */
         export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> {
             protected _name = "BorCPeople"
         }

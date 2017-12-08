@@ -147,8 +147,20 @@ module Coalesce {
 
         public saveToDto: () => object = () => { return {}; }
 
-        public getQueryString = () =>
-            `dataSource=${this._name}&${$.param({dataSource: this.saveToDto()})}`;
+        public getQueryString: () => string = () => {
+            var query = `dataSource=${this._name}`;
+
+            //&${$.param({ dataSource: this.saveToDto() }).replace(/dataSource%5B(.*?)%5D/g, 'dataSource.$1')}
+
+            var dto = this.saveToDto();
+            for (var key in dto) {
+                if (dto[key] !== null && dto[key] !== undefined) {
+                    query += `&dataSource.${key}=${encodeURI(dto[key])}`
+                }
+            }
+            return query;
+        }
+            
     }
 
     export abstract class BaseViewModel {
@@ -609,7 +621,7 @@ module Coalesce {
         /**
             The custom data source that will be invoked on the server to provide the data for this list.
         */
-        public abstract dataSource: any;
+        public abstract dataSource: DataSource<TItem>;
 
         /**
             Name of the primary key of the model that this list represents.
@@ -706,9 +718,8 @@ module Coalesce {
                 pageSize: pageSize || this.pageSize(),
                 search: this.search(),
                 orderBy: this.orderBy(),
-                orderByDescending: this.orderByDescending(),
-                dataSource: this.dataSources[this.dataSource]
-            });
+                orderByDescending: this.orderByDescending()
+            }) + "&" + this.dataSource.getQueryString();
         };
 
         /** Method which will instantiate a new item of the list's model type. */
@@ -740,8 +751,7 @@ module Coalesce {
             }
             return $.ajax({
                 method: "GET",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + "dataSource="
-                + this.dataSources[this.dataSource] + "&" + this.queryString,
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + this.dataSource.getQueryString() + "&" + this.queryString,
                 xhrFields: { withCredentials: true }
             })
                 .done((data) => {

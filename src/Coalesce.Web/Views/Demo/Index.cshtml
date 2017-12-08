@@ -55,6 +55,18 @@
             Search
         </label>
         <input type="text" value="" data-bind="textInput: search" class="form-control" placeholder="Search" />
+        
+        <label>
+            Query: Opened After Date
+        </label>
+        <!-- ko with: dataSource -->
+        <div class="input-group date">
+            <input data-bind="datePicker: minDate, format: 'M/D/YYYY h:mm a'" type="text" class="form-control">
+            <span class="input-group-addon">
+                <span class="fa fa-calendar"></span>
+            </span>
+        </div>
+        <!-- /ko -->
     </div>
     <div class="col-md-2" style="margin-top: 24px">
         <label>

@@ -9,10 +9,20 @@ var baseUrl = baseUrl || '';
 module ListViewModels {
 
     // Add an enum for all methods that are static and IQueryable
-    export enum PersonDataSources {
-        Default,
-        NamesStartingWithAWithCases,
-        BorCPeople,
+    export namespace PersonDataSources {
+        export class Default extends Coalesce.DataSource<ViewModels.Person> { }
+        export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
+            protected _name = "NamesStartingWithAWithCases"
+            public paramThing: KnockoutObservable<string> = ko.observable(null);
+            public saveToDto = () => {
+                var dto: any = {};
+                dto.paramThing = this.paramThing();
+                return dto;
+            }
+        }
+        export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> {
+            protected _name = "BorCPeople"
+        }
     }
 
     export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {
@@ -21,7 +31,7 @@ module ListViewModels {
         protected apiController = "/Person";
 
         public modelKeyName = "personId";
-        public dataSources = PersonDataSources;
+    
         public itemClass = ViewModels.Person;
 
         public query: {
@@ -35,9 +45,17 @@ module ListViewModels {
             name?:string;
             companyId?:number;
         } = null;
+    
+        /** 
+            The namespace containing all possible values of this.dataSource.
+        */
+        public dataSources = PersonDataSources;
 
-        // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public dataSource: PersonDataSources = PersonDataSources.Default;
+        /**
+            The data source on the server to use when retrieving objects.
+            Valid values are in this.dataSources.
+        */
+        public dataSource: Coalesce.DataSource<ViewModels.Person> = new this.dataSources.Default();
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);

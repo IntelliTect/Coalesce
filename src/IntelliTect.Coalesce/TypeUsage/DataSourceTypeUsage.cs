@@ -8,12 +8,12 @@ namespace IntelliTect.Coalesce.TypeUsage
 {
     public class DataSourceTypeUsage
     {
-        public DataSourceTypeUsage(TypeViewModel typeViewModel, ClassViewModel sourceFor)
+        public DataSourceTypeUsage(ClassViewModel dataSourceClass, ClassViewModel sourceFor)
         {
-            TypeViewModel = typeViewModel ?? throw new ArgumentNullException(nameof(typeViewModel));
+            DataSourceClass = dataSourceClass ?? throw new ArgumentNullException(nameof(dataSourceClass));
             SourceFor = sourceFor ?? throw new ArgumentNullException(nameof(sourceFor));
 
-            var servedType = TypeViewModel.GenericArgumentsFor(typeof(IDataSource<>)).Single();
+            var servedType = DataSourceClass.Type.GenericArgumentsFor(typeof(IDataSource<>)).Single();
 
             if (!servedType.HasClassViewModel)
             {
@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce.TypeUsage
         /// <summary>
         /// The class that represents the data source. Inherits from IDataSource.
         /// </summary>
-        public TypeViewModel TypeViewModel { get; }
+        public ClassViewModel DataSourceClass { get; }
 
         /// <summary>
         /// The type for which this is a data source.

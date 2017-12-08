@@ -44,10 +44,7 @@ namespace Coalesce.Web
             // Proof of concept - override the standard data source.
             services.AddScoped(typeof(StandardDataSource<,>), typeof(MyDataSource<,>));
 
-            services.AddMvc(options =>
-            {
-                options.ModelBinderProviders.Insert(0, new IntelliTect.Coalesce.Mvc.DataSourceModelBinderProvider());
-            }).AddJsonOptions(options =>
+            services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 

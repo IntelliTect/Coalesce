@@ -16,15 +16,15 @@ module ViewModels {
         protected viewController = "/Person";
     
         /** 
-            The enumeration of all possible values of this.dataSource.
+            The namespace containing all possible values of this.dataSource.
         */
-        public dataSources: typeof ListViewModels.PersonDataSources = ListViewModels.PersonDataSources;
+        public dataSources = ListViewModels.PersonDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: ListViewModels.PersonDataSources = ListViewModels.PersonDataSources.Default;
+        public dataSource: Coalesce.DataSource<Person> = new this.dataSources.Default();
 
         /** Behavioral configuration for all instances of Person. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
@@ -374,8 +374,8 @@ module ViewModels {
     
             if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
-
-        /** Save the object into a DTO */
+    
+        /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
             dto.personId = this.personId();
@@ -385,11 +385,11 @@ module ViewModels {
             dto.lastName = this.lastName();
             dto.email = this.email();
             dto.gender = this.gender();
-            if (!this.birthDate()) dto.BirthDate = null;
+            if (!this.birthDate()) dto.birthDate = null;
             else dto.birthDate = this.birthDate().format('YYYY-MM-DDTHH:mm:ss');
-            if (!this.lastBath()) dto.LastBath = null;
+            if (!this.lastBath()) dto.lastBath = null;
             else dto.lastBath = this.lastBath().format('YYYY-MM-DDTHH:mm:ss');
-            if (!this.nextUpgrade()) dto.NextUpgrade = null;
+            if (!this.nextUpgrade()) dto.nextUpgrade = null;
             else dto.nextUpgrade = this.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
             dto.companyId = this.companyId();
             if (!dto.companyId && this.company()) {
@@ -398,6 +398,29 @@ module ViewModels {
 
             return dto;
         }
+    
+        /**
+            Loads any child objects that have an ID set, but not the full object.
+            This is useful when creating an object that has a parent object and the ID is set on the new child.
+        */
+        public loadChildren = (callback?: () => void) => {
+            var loadingCount = 0;
+            // See if this.company needs to be loaded.
+            if (this.company() == null && this.companyId() != null){
+                loadingCount++;
+                var companyObj = new Company();
+                companyObj.load(this.companyId(), function() {
+                    loadingCount--;
+                    this.company(companyObj);
+                    if (loadingCount == 0 && $.isFunction(callback)){
+                        callback();
+                    }
+                });
+            }
+            if (loadingCount == 0 && $.isFunction(callback)){
+                callback();
+            }
+        };
         
         public setupValidation = () => {
             if (this.errors !== null) return;
@@ -486,26 +509,6 @@ module ViewModels {
                     self.company(new Company());
                 }
                 self.company().showEditor(callback)
-            };
-
-            // Load all child objects that are not loaded.
-            self.loadChildren = function(callback) {
-                var loadingCount = 0;
-                // See if self.company needs to be loaded.
-                if (self.company() == null && self.companyId() != null){
-                    loadingCount++;
-                    var companyObj = new Company();
-                    companyObj.load(self.companyId(), function() {
-                        loadingCount--;
-                        self.company(companyObj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
-                if (loadingCount == 0 && $.isFunction(callback)){
-                    callback();
-                }
             };
 
             // This stuff needs to be done after everything else is set up.

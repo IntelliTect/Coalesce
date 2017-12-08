@@ -1,74 +1,82 @@
-## Breaking Changes in Coalesce 2.0:
+## General Breaking Changes:
 
-* NPM Packages: Upgraded to `gulp-typescript` 3.0 and `typescript` 2.3. Breaking changes may be found at http://dev.ivogabe.com/gulp-typescript-3/.
-  * You will need to add/update references to `"gulp-typescript": "^3.1.6"` and `"typescript": "~2.3.2"` in your package.json.
+| CHANGE | RESOLUTION
+| ------ |----------|
+| NPM Packages: Upgraded to `gulp-typescript` 3.0 and `typescript` 2.3. Breaking changes may be found at http://dev.ivogabe.com/gulp-typescript-3/. | Add/update references to `"gulp-typescript": "^3.1.6"` and `"typescript": "~2.3.2"` in your package.json. Newer versions are fine, too.
+| TypeScript Global variable `baseUrl` is gone. | Replaced by `Coalesce.GlobalConfiguration.baseApiUrl` and `baseViewUrl`.
+| TypeScript global variable `saveTimeoutInMs` is gone. | Replaced by `Coalesce.GlobalConfiguration.saveTimeoutMs`, and the corresponding configuration in class-level and instance-level `CoalesceConfiguration<>` objects.
+| Various knockout bindings that would interpret a `saveImmediately` supplementary binding no longer do so. | The `saveImmediately` standalone binding still exists, but will only function if the currently scoped binding object is a Coalesce `BaseViewModel`. This is because the binding must access the model's `coalesceConfig` to set the save timeout, since `saveTimeoutInMs` is no longer a global.
+| Knockout binding `select2AjaxText`: no longer takes `object` as a complimentary binding in order to compute the url | Now takes `url` instead to be consistent with other select2 bindings.
+| `Scripts/Coalesce/intellitect.*` files are now named `Scripts/Coalesce/coalesce.*` , and now have a singular reference point: `Scripts/coalesce.dependencies.d.ts`. This file is only generated if it is missing - it can be modified at your desire. | Any `<reference ... />` elements in your typescript files that referenced the core coalesce TypeScript files should instead reference Scripts/coalesce.dependencies.d.ts. 
+| Namespace `intellitect.utilities` is now `Coalesce.Utilities` | Replace all references to the old name with the new.
+| Namespace `intellitect.webApi` is now `Coalesce.ModalHelpers` | Replace all references to the old name with the new.
+| Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within. | No changes needed unless your project referenced these files explicitly by name (unlikely).
+| DataSources on models are no longer generated as client-callable static methods on ListViewModels. | Replace usages of these calls with loads of a ListViewModel using the desired data source.
+----
 
-* TypeScript Global variable `baseUrl` is gone. Replaced by `Coalesce.GlobalConfiguration.baseApiUrl` and `baseViewUrl`.
-* TypeScript gloabl variable `saveTimeoutInMs` is gone. Replaced by `Coalesce.GlobalConfiguration.saveTimeoutMs`.
-* Various knockout bindings that took a `saveImmediately` supplimentary binding no longer do so. 
-  * The `saveImmediately` standalone binding still exists, but will only function if the currently scoped binding object is a Coalesce `BaseViewModel<T>`. This is beacuse the binding must access the model's `coalesceConfig` to set the save timeout, since `saveTimeoutInMs` is no longer a global.
-* Knockout binding `select2AjaxText`: no longer takes `object` as a complimentary binding in order to compute the url - now takes `url` instead to be consistent with other select2 bindings.
-* (Non-breaking, but very signigicant): References to Scripts/Coalesce/coalesce.*.ts files are now located in Scripts/coalesce.depdenencies.d.ts. This file is not regenerated and may be modified at will, but must remain in its location relative to Scripts/Generated.
-* Scripts/intellitect.references.d.ts is now named viewmodels.generated.d.ts. This is the file that should be referenced in your custom typescript files in order to consume Coalesce generated typescript files.
-* Scripts/Coalesce/intellitect.* files are now named Scripts/Coalesce/coalesce.*
-* Namespace intellitect.utilities is now Coalesce.Utilities
-* Namespace intellitect.webApi is now Coalesce.ModalHelpers
-* Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within.
-* <ModelName>ListUrl properties on generated ViewModels is now correctly camelCased.
-* DataSources on models are no longer generated as client-callable static methods on ListViewModels.
-* BaseViewModel<T>:
-	* deleteCallbacks have been removed.
-	* customField1, 2, & 3 have been removed.
-	* isDataFromSaveLoaded has been changed to BaseViewModel<T>.coalesceConfig.loadResponseFromSaves
-	* afterLoadFromDto has been changed to BaseViewModel<T>.coalesceConfig.onLoadFromDto
-	* loadValidValues is gone, as are the other model-specific methods and collections of a similar nature.
-	* isSavingWithChildren is now named isThisOrChildSaving.
-	* reload has been removed - it was redundant with .load().
-	* changeIsExpanded is now named toggleIsExpanded, and no longer takes a parameter.
-	* changeIsEditing is now named toggleIsEditing, and no longer takes a parameter.
-	* isSelectedToggle is now named toggleIsSelected
-* Generated ViewModels:
-	* public originalData: KnockoutObservable<any> has been removed.
-    * public init() has been removed.
+## BaseViewModel & Generated ViewModels:
 
-* Projects, Namespaces, & Generation
-  * Knockout code generation is now contained in IntelliTect.Coalesce.CodeGeneration.Knockout
-  * Knockout helpers are now contained in IntelliTect.Coalesce.Knockout
-    * Namespace for "Display" and "Knockout" classes have changed from IntelliTect.Coalesce.Helpers to IntelliTect.Coalesce.Knockout.Helpers. Using statements will need to be updated.
-    * To upgrade, add a reference to this project to your web project. This can replace the reference to IntelliTect.Coalesce.
-  * The "Coalesce" directory created in the root of a generated web project is no longer used nor needed.
-    * A new way to customize/override templates will be introduced at a later date.
-  * Coalesce no longer generates any project configuration files when not present. This includes:
-    * tsd.json
-    * gulpfile.js
-    * bower.json
-    * package.json
-    * site.scss
-    * tsconfig.json
-  * Many .cshtml view files are no longer generated by Coalesce:
-    * Shared/_AdminLayout.cshtml
-    * Shared/_Master.cshtml
-    * Shared/_Layout.cshtml
-    * _ViewStart.cshtml
-    * _ViewImports.cshtml
+| CHANGE | RESOLUTION
+| ------ |----------|
+| `BaseViewModel` is no longer a generic type `BaseViewModel<T>`. It now uses TypeScripts polymorphic `this` types for its self-referential needs | Remove any usages of the generic parameter. Replace with [Polymorphic this types](https://www.typescriptlang.org/docs/handbook/advanced-types.html) as needed.
+| `<ModelName>ListUrl` properties on generated ViewModels are now correctly camelCased. | Rename references from `MyModelListUrl` to `myModelListUrl`.
+| `deleteCallbacks` have been removed. | When deleting a model, pass a callback to `deleteItem` or `deleteItemWithConfirmation`.
+| `customField1`, `2`, & `3` have been removed. | Annotate your C# models with `[TypeScriptPartial]`, and create any custom fields on the stub that is generated.
+| `isDataFromSaveLoaded` has been changed to `BaseViewModel.coalesceConfig.loadResponseFromSaves` | Find and replace usages of the old property.
+| `afterLoadFromDto` has been changed to `BaseViewModel.coalesceConfig.onLoadFromDto` | Find and replace usages of the old property.
+| `loadValidValues()` is gone, as are the other model-specific methods and collections of a similar nature. | Create a `ListViewModel` of the desired object type and use it to load lists of items.
+| `isSavingWithChildren: boolean` is now named `isThisOrChildSaving` | Simple find-and-replace.
+| `reload()` has been removed. | Replace usages of `reload()` with no-argument calls to `load()`.
+| `changeIsExpanded(isExpanded)` is now named `toggleIsExpanded`, and no longer takes a parameter. | If a parameter was used, set the `isExpanded` observable directly. Otherwise, replace the old name with the new.
+| `changeIsEditing(isEditing)` is now named `toggleIsEditing`, and no longer takes a parameter. | If a parameter was used, set the `isEditing` observable directly. Otherwise, replace the old name with the new.
+| `isSelectedToggle()` is now named `toggleIsSelected`. | Simple find-and-replace.
+| `originalData: KnockoutObservable<any>` has been removed. | Create a `[TypeScriptPartial]`, create this field, and populate it in your constructor with the value of the first constructor parameter of the stub that will be provided upon regeneration.
+| `public init()` has been removed. | Create a `[TypeScriptPartial]` and add desired behavior into the constructor of the stub that will be provided upon regeneration.
+| `BaseViewModel.autoSaveEnabled` is deprecated | Use `BaseViewModel.coalesceConfig.autoSaveEnabled` observable instead.
+| `BaseViewModel.showBusyWhenSaving` is deprecated | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
+| `BaseViewModel.showFailureAlerts` is deprecated | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
+
+## Projects, Namespaces, & Generation
+
+| CHANGE | RESOLUTION
+| ------ |----------|
+| Knockout code generation is now contained in IntelliTect.Coalesce.CodeGeneration.Knockout | If using Coalesce as a submodule, optionally add this project to your solution.
+| Knockout helpers are now contained in IntelliTect.Coalesce.Knockout | In all cases, replace project references to `IntelliTect.Coalesce` with `IntelliTect.Coalesce.Knockout`. If using Coalesce as a submodule, optionally add this project to your solution.
+| Namespaces for "Display" and "Knockout" classes have changed from `IntelliTect.Coalesce.Helpers` to `IntelliTect.Coalesce.Knockout.Helpers`. | Update using statements accordingly.
+| The "Coalesce" directory created in the root of a generated web project is no longer used nor needed. A new way to customize/override templates will be introduced at a later date. | Remove this folder. 
+| Coalesce no longer generates any project configuration files that are not found when it generates. This includes: `tsd.json`, `gulpfile.js`, `bower.json`, `package.json`, `site.scss`, `tsconfig.json` | When creating a new project with Coalesce, use the [Starter Project](https://github.com/IntelliTect/Coalesce.Starter/). A `dotnet new` template will be introduced at a later date.
+| Many `.cshtml` view files are no longer generated by Coalesce: `Shared/_AdminLayout.cshtml`, `Shared/_Master.cshtml`, `Shared/_Layout.cshtml`, `_ViewStart.cshtml`, `_ViewImports.cshtml` | When creating a new project with Coalesce, use the [Starter Project](https://github.com/IntelliTect/Coalesce.Starter/). A `dotnet new` template will be introduced at a later date.
 
 
-* Added extension method for IServiceProvider: services.AddCoalesce(). This replaces the need for the required "ReflectionRepository.AddContext" call in Startup.cs.
-* The default Time Zone used by Coalesce is no longer "Pacific Standard Time" - it is now TimeZoneInfo.Local. Use one of the "UseTimeZone" overloads in services.AddCoalesce(b => b.UseTimeZone) to override this behavior.
-  * b.UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")) will restore the old behavior.
+## Configuration & Discovery
+| CHANGE | RESOLUTION
+| ------ |----------|
+| Your `DbContext` that Coalesce will generate from is now discovered by the presence of a `[Coalesce]` attribute on its class definition. | Place `[Coalesce]` on your `DbContext` that Coalesce should generate from.
+| `IEnumerable<IClassDto<>>` properties on your `DbContext` are no longer used to discover custom `IClassDto<>` implementations that should be generated | Place a `[Coalesce]` attribute on any `IClassDto<>` classes you wish to generate from. Remove the property on the `DbContext`.
+| Added extension methods for `IServiceProvider`: `services.AddCoalesce()`. This replaces the need for the (formerly) required `ReflectionRepository.AddContext` call in Startup.cs. | Replace call to `ReflectionRepository.AddContext` with `services.AddCoalesce()`.
+| The default timezone used by Coalesce when interpreting dates without timezone information is no longer "Pacific Standard Time" - it is now `TimeZoneInfo.Local`. | Use one of the `UseTimeZone` overloads in `services.AddCoalesce(b => b.UseTimeZone)` to override this behavior. Use `b.UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))` will restore the old behavior.
 
 
-## Deprications in Coalesce 2..0"
+## Modeling
+| CHANGE | RESOLUTION
+| ------ |----------|
+| Custom DataSources have been completely overhauled. `public static IQueryable<T>` methods on your models are no longer considered data sources. | See the "New Features" section below.
+| The `IIncludable<>` interface has been removed. | Move desired behavior into a custom data source. Override the default data source if needed. 
+| This `IIncludeExternal<>` interface has been removed. | Override the `TransformResults` method of the `StandardDataSource<,>` in a custom data source to attach items from an external location.
 
-* `BaseViewModel<T>.autoSaveEnabled`: Use `BaseViewModel<T>.coalesceConfig.autoSaveEnabled` observable instead.
-* `BaseViewModel<T>.showBusyWhenSaving`: Use `BaseViewModel<T>.coalesceConfig.showBusyWhenSaving` observable instead.
-* `BaseViewModel<T>.showFailureAlerts`: Use `BaseViewModel<T>.coalesceConfig.showFailureAlerts` observable instead.
 
-## New Features in Coalesce 2.0:
+## New Features:
+
+* Modular DataSources
+  * Custom DataSources are now implemented as classes that you define. These classes should inherit from `IDataSource<T>`, where `<T>` is the type of the entity served - the same `<T>` in the old `static IQueryable<T>` methods. 
+  * However, you will almost certainly want to inherit from `StandardDataSource<T, TContext>` to maintain the standard set of Coalesce behaviors. Override the `GetQuery` method of `StandardDataSource<,>` and replace it with the former contents of your `static IQueryable<T>` method. 
+  * Annotate your DataSource with `[Coalesce]` for it to be discovered, or place it as a nested class of a model that belongs to a `DbContext` that is annotated with `[Coalesce]`.
+  * DataSources may contain primitive (strings, numerics, bools, dates, enums) properties annotated with `[Coalesce]`. These properties will be made available in the generated TypeScript and will be automatically populated on the server with the values specified on the client.
+  * In TypeScript, the enum that used to contain all the possible datasources is now a namespace that contains all the possible datasource classes.
 
 * Hierarchical configuration system:
   * Many points of configuration for ViewModels and ListViewModels are done via a hierarchical configuration system.
-  * All configuration properties are observables. Getters will set the property at that level, causing it cascade down until it reaches an instance, or until it is overridden at a lower level.
+  * All configuration properties are observables. Setters will set the property at that level, causing it cascade down until it reaches an instance, or until it is overridden at a lower level.
   * Setting a configuration property to null will reset it back to inheriting from an ancestor. Setting the global defaults to null will probably cause errors.
   * Configuration defaults can be found around line 68 of coalesce.ko.base.ts.
   * A global object, Coalesce.GlobalConfiguration, has most of the default configuration.

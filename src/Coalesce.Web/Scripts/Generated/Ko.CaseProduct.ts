@@ -16,15 +16,15 @@ module ViewModels {
         protected viewController = "/CaseProduct";
     
         /** 
-            The enumeration of all possible values of this.dataSource.
+            The namespace containing all possible values of this.dataSource.
         */
-        public dataSources: typeof ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources;
+        public dataSources = ListViewModels.CaseProductDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources.Default;
+        public dataSource: Coalesce.DataSource<CaseProduct> = new this.dataSources.Default();
 
         /** Behavioral configuration for all instances of CaseProduct. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
@@ -113,8 +113,8 @@ module ViewModels {
     
             if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
-
-        /** Save the object into a DTO */
+    
+        /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
             dto.caseProductId = this.caseProductId();
@@ -130,6 +130,41 @@ module ViewModels {
 
             return dto;
         }
+    
+        /**
+            Loads any child objects that have an ID set, but not the full object.
+            This is useful when creating an object that has a parent object and the ID is set on the new child.
+        */
+        public loadChildren = (callback?: () => void) => {
+            var loadingCount = 0;
+            // See if this.case needs to be loaded.
+            if (this.case() == null && this.caseId() != null){
+                loadingCount++;
+                var caseObj = new Case();
+                caseObj.load(this.caseId(), function() {
+                    loadingCount--;
+                    this.case(caseObj);
+                    if (loadingCount == 0 && $.isFunction(callback)){
+                        callback();
+                    }
+                });
+            }
+            // See if this.product needs to be loaded.
+            if (this.product() == null && this.productId() != null){
+                loadingCount++;
+                var productObj = new Product();
+                productObj.load(this.productId(), function() {
+                    loadingCount--;
+                    this.product(productObj);
+                    if (loadingCount == 0 && $.isFunction(callback)){
+                        callback();
+                    }
+                });
+            }
+            if (loadingCount == 0 && $.isFunction(callback)){
+                callback();
+            }
+        };
         
         public setupValidation = () => {
             if (this.errors !== null) return;
@@ -188,38 +223,6 @@ module ViewModels {
                     self.product(new Product());
                 }
                 self.product().showEditor(callback)
-            };
-
-            // Load all child objects that are not loaded.
-            self.loadChildren = function(callback) {
-                var loadingCount = 0;
-                // See if self.case needs to be loaded.
-                if (self.case() == null && self.caseId() != null){
-                    loadingCount++;
-                    var caseObj = new Case();
-                    caseObj.load(self.caseId(), function() {
-                        loadingCount--;
-                        self.case(caseObj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
-                // See if self.product needs to be loaded.
-                if (self.product() == null && self.productId() != null){
-                    loadingCount++;
-                    var productObj = new Product();
-                    productObj.load(self.productId(), function() {
-                        loadingCount--;
-                        self.product(productObj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
-                if (loadingCount == 0 && $.isFunction(callback)){
-                    callback();
-                }
             };
 
             // This stuff needs to be done after everything else is set up.

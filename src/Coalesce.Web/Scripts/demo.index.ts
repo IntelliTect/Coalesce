@@ -5,7 +5,7 @@ module Demo {
         var allOpenCases = new ListViewModels.CaseList();
 
         allOpenCases.pageSize(100);
-        allOpenCases.dataSource = ListViewModels.CaseDataSources.AllOpenCases;
+        allOpenCases.dataSource = new allOpenCases.dataSources.AllOpenCases();
         allOpenCases.load();
 
         ko.applyBindings(allOpenCases);

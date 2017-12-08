@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IntelliTect.Coalesce
 {
@@ -24,6 +28,8 @@ namespace IntelliTect.Coalesce
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.TryAddSingleton(_ => ReflectionRepository.Global);
 
+            services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvc>();
+
             services.TryAddScoped<IDataSourceFactory, DataSourceFactory>();
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
             
@@ -39,6 +45,14 @@ namespace IntelliTect.Coalesce
             services.AddCoalesce(builder => builder.AddContext<TContext>());
 
             return services;
+        }
+
+        private class ConfigureMvc : IConfigureOptions<MvcOptions>
+        {
+            public void Configure(MvcOptions options)
+            {
+                options.ModelBinderProviders.Insert(0, new IntelliTect.Coalesce.Mvc.DataSourceModelBinderProvider());
+            }
         }
     }
 }

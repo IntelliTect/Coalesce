@@ -80,7 +80,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                             throw new InvalidOperationException($"{servedType} is not a valid type argument for a data source.");
                         }
 
-                        _dataSources.Add(new DataSourceTypeUsage(type, servedType.ClassViewModel));
+                        _dataSources.Add(new DataSourceTypeUsage(type.ClassViewModel, servedType.ClassViewModel));
                     }
                     else if (type.IsA(typeof(IClassDto<,>)))
                     {
@@ -169,7 +169,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             foreach (var nestedType in model.ClientNestedTypes.Where(t => t.IsA(typeof(IDataSource<>))))
             {
-                var usage = new DataSourceTypeUsage(nestedType, model);
+                var usage = new DataSourceTypeUsage(nestedType.ClassViewModel, model);
                 if (!usage.ServedType.Equals(assertSourceFor))
                 {
                     throw new Exception($"{nestedType} is not a valid data source for {model} - {nestedType} must inherit from IDataSource<{assertSourceFor}>.");

@@ -16,15 +16,15 @@ module ViewModels {
         protected viewController = "/Case";
     
         /** 
-            The enumeration of all possible values of this.dataSource.
+            The namespace containing all possible values of this.dataSource.
         */
-        public dataSources: typeof ListViewModels.CaseDataSources = ListViewModels.CaseDataSources;
+        public dataSources = ListViewModels.CaseDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: ListViewModels.CaseDataSources = ListViewModels.CaseDataSources.Default;
+        public dataSource: Coalesce.DataSource<Case> = new this.dataSources.Default();
 
         /** Behavioral configuration for all instances of Case. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Case>
@@ -184,15 +184,15 @@ module ViewModels {
     
             if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
-
-        /** Save the object into a DTO */
+    
+        /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
             dto.caseKey = this.caseKey();
 
             dto.title = this.title();
             dto.description = this.description();
-            if (!this.openedAt()) dto.OpenedAt = null;
+            if (!this.openedAt()) dto.openedAt = null;
             else dto.openedAt = this.openedAt().format('YYYY-MM-DDTHH:mm:ssZZ');
             dto.assignedToId = this.assignedToId();
             if (!dto.assignedToId && this.assignedTo()) {
@@ -212,6 +212,41 @@ module ViewModels {
 
             return dto;
         }
+    
+        /**
+            Loads any child objects that have an ID set, but not the full object.
+            This is useful when creating an object that has a parent object and the ID is set on the new child.
+        */
+        public loadChildren = (callback?: () => void) => {
+            var loadingCount = 0;
+            // See if this.assignedTo needs to be loaded.
+            if (this.assignedTo() == null && this.assignedToId() != null){
+                loadingCount++;
+                var assignedToObj = new Person();
+                assignedToObj.load(this.assignedToId(), function() {
+                    loadingCount--;
+                    this.assignedTo(assignedToObj);
+                    if (loadingCount == 0 && $.isFunction(callback)){
+                        callback();
+                    }
+                });
+            }
+            // See if this.reportedBy needs to be loaded.
+            if (this.reportedBy() == null && this.reportedById() != null){
+                loadingCount++;
+                var reportedByObj = new Person();
+                reportedByObj.load(this.reportedById(), function() {
+                    loadingCount--;
+                    this.reportedBy(reportedByObj);
+                    if (loadingCount == 0 && $.isFunction(callback)){
+                        callback();
+                    }
+                });
+            }
+            if (loadingCount == 0 && $.isFunction(callback)){
+                callback();
+            }
+        };
         
         public setupValidation = () => {
             if (this.errors !== null) return;
@@ -278,38 +313,6 @@ module ViewModels {
                     self.reportedBy(new Person());
                 }
                 self.reportedBy().showEditor(callback)
-            };
-
-            // Load all child objects that are not loaded.
-            self.loadChildren = function(callback) {
-                var loadingCount = 0;
-                // See if self.assignedTo needs to be loaded.
-                if (self.assignedTo() == null && self.assignedToId() != null){
-                    loadingCount++;
-                    var assignedToObj = new Person();
-                    assignedToObj.load(self.assignedToId(), function() {
-                        loadingCount--;
-                        self.assignedTo(assignedToObj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
-                // See if self.reportedBy needs to be loaded.
-                if (self.reportedBy() == null && self.reportedById() != null){
-                    loadingCount++;
-                    var reportedByObj = new Person();
-                    reportedByObj.load(self.reportedById(), function() {
-                        loadingCount--;
-                        self.reportedBy(reportedByObj);
-                        if (loadingCount == 0 && $.isFunction(callback)){
-                            callback();
-                        }
-                    });
-                }
-                if (loadingCount == 0 && $.isFunction(callback)){
-                    callback();
-                }
             };
 
             // This stuff needs to be done after everything else is set up.

@@ -8,7 +8,6 @@
     ClassViewModel model = Model.Model;
     string moduleName = "ListViewModels";
     string viewModelModuleName = "ViewModels";
-    string viewModelName = model.Name;
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
     {
         moduleName = Model.AreaName + "." + moduleName;
@@ -18,12 +17,8 @@
     {
         moduleName = Model.ModulePrefix + "." + moduleName;
         viewModelModuleName = Model.ModulePrefix + "." + viewModelModuleName;
-        viewModelName = Model.ModulePrefix + "." + viewModelName;
     }
-    if (model.HasTypeScriptPartial)
-    {
-        viewModelName += ".Partial";
-    }
+    string viewModelFullName = $"{viewModelModuleName}.{model.ViewModelClassName}";
 }
 
 /// <reference path="../coalesce.dependencies.d.ts" />
@@ -36,33 +31,74 @@ var baseUrl = baseUrl || '';
 module @moduleName {
 
     // Add an enum for all methods that are static and IQueryable
-    export enum @(model.Name)DataSources {
-        Default,
+    export namespace @(model.Name)DataSources {
+        export class Default extends Coalesce.DataSource<@viewModelFullName> { }
         @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))
         {
-        @:@source.Name,
+        if (source.Comment.Length > 0)
+        {
+        @:/** @(source.Comment) */
+        }
+        @:export class @source.Name extends Coalesce.DataSource<@viewModelFullName> {
+            @:protected _name = "@source.Name"
+            @if (source.DataSourceParameters.Any())
+            {
+            @foreach (PropertyViewModel prop in source.DataSourceParameters)
+            {
+            if (prop.Comment.Length > 0)
+            {
+            @:/** @(prop.Comment) */
+            }
+            @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
+            }
+            @:public saveToDto = () => {
+                @:var dto: any = {};
+            @foreach (PropertyViewModel prop in source.DataSourceParameters)
+            {
+                if (prop.Type.IsDate)
+                {
+                @:if (!this.@(prop.JsVariable)()) dto.@prop.JsonName = null;
+                @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss@(prop.Type.IsDateTimeOffset ? "ZZ" : "")');
+                }
+                else
+                {
+                @:dto.@prop.JsonName = this.@(prop.JsVariable)();
+                }
+            }
+                @:return dto;
+            @:}
+            }
+        @:}
         }
     }
 
-    export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@viewModelModuleName.@(model.ViewModelClassName)> {
+    export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@viewModelFullName> {
         protected modelName = "@(model.Name)";
 
         protected apiController = "/@(model.ApiUrl)";
 
         public modelKeyName = "@(model.PrimaryKey.JsVariable)";
-        public dataSources = @(model.Name)DataSources;
-        public itemClass = @viewModelModuleName.@(model.ViewModelClassName);
+    
+        public itemClass = @viewModelFullName;
 
         public query: {
             where?: string;
             @(string.Join("\n            ", model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"{f.UrlParameterName}?:{f.Type.TsType};")))
         } = null;
+    
+        /** 
+            The namespace containing all possible values of this.dataSource.
+        */
+        public dataSources = @(model.Name)DataSources;
 
-        // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public dataSource: @(model.Name)DataSources = @(model.Name)DataSources.Default;
+        /**
+            The data source on the server to use when retrieving objects.
+            Valid values are in this.dataSources.
+        */
+        public dataSource: Coalesce.DataSource<@viewModelFullName> = new this.dataSources.Default();
 
-        public static coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.listViewModel);
-        public coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelModuleName.@(model.ViewModelClassName)>(@(model.ListViewModelClassName).coalesceConfig);
+        public static coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelFullName>(Coalesce.GlobalConfiguration.listViewModel);
+        public coalesceConfig = new Coalesce.ListViewModelConfiguration<@(model.ListViewModelClassName), @viewModelFullName>(@(model.ListViewModelClassName).coalesceConfig);
 
         @foreach(var method in model.ClientMethods.Where(m => m.IsStatic))
         {
@@ -184,7 +220,7 @@ module @moduleName {
         @:
         }
 
-        protected createItem = (newItem?: any, parent?: any) => new @viewModelModuleName.@(model.ViewModelClassName)(newItem, parent);
+        protected createItem = (newItem?: any, parent?: any) => new @(viewModelFullName)(newItem, parent);
 
         constructor() {
             super();

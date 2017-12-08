@@ -108,7 +108,7 @@ module Coalesce {
     }
 
     class RootConfig extends CoalesceConfiguration<any> {
-        public viewModel = new ViewModelConfiguration<any>(this);
+        public viewModel = new ViewModelConfiguration<BaseViewModel>(this);
         public listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
     }
 
@@ -137,12 +137,21 @@ module Coalesce {
     });
 
     export interface LoadableViewModel {
-        loadFromDto: (data: any) => void;
-        parent: any;
-        parentCollection: any;
+        loadFromDto: (data: object) => void;
+        parent: object;
+        parentCollection: object;
     }
 
-    export class BaseViewModel {
+    export abstract class DataSource<T extends BaseViewModel> {
+        protected _name: string;
+
+        public saveToDto: () => object = () => { return {}; }
+
+        public getQueryString = () =>
+            `dataSource=${this._name}&${$.param({dataSource: this.saveToDto()})}`;
+    }
+
+    export abstract class BaseViewModel {
 
         protected modelName: string;
         protected modelDisplayName: string;
@@ -154,12 +163,12 @@ module Coalesce {
         /**
             List of all possible data sources that can be set on the dataSource property.
         */
-        public dataSources: any;
+        public abstract dataSources: any;
 
         /**
             The custom data source that will be invoked on the server to provide the data for this list.
         */
-        public dataSource: any;
+        public dataSource: DataSource<this>;
 
         /**
             Properties which determine how this object behaves.
@@ -227,7 +236,7 @@ module Coalesce {
         public isSelected: KnockoutObservable<boolean> = ko.observable(false);
         /** Flag to use to determine if this item is checked. Provided for convenience. */
         public isChecked: KnockoutObservable<boolean> = ko.observable(false);
-        /** Flag to use to determine if this item is being edited. Only for convenience. */
+        /** Flag to use to determine if this item is being edited. Provided for convenience. */
         public isEditing: KnockoutObservable<boolean> = ko.observable(false);
 
         /** Toggles the isExpanded flag. Use with a click binding for a button. */
@@ -298,16 +307,16 @@ module Coalesce {
           * @param allowCollectionDeletes - Set true when entire collections are loaded. True is the default.
                 In some cases only a partial collection is returned, set to false to only add/update collections.
         */
-        public loadFromDto: (data: any, force?: boolean, allowCollectionDeletes?: boolean) => void;
+        public abstract loadFromDto: (data: any, force?: boolean, allowCollectionDeletes?: boolean) => void;
 
         /** Saves this object into a data transfer object to send to the server. */
-        public saveToDto: () => any;
+        public abstract saveToDto: () => any;
 
         /**
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.
         */
-        public loadChildren: (callback?: () => void) => void;
+        public abstract loadChildren: (callback?: () => void) => void;
 
 
         /** Returns true if the current object, or any of its children, are saving. */
@@ -340,9 +349,7 @@ module Coalesce {
                     if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
                     this.isSaving(true);
 
-                    var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/Save?includes=" + this.includes + '&dataSource=';
-                    if (typeof this.dataSource === "string") url += this.dataSource;
-                    else url += this.dataSources[this.dataSource];
+                    var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}${this.dataSource.getQueryString()}`
 
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data) => {
@@ -397,10 +404,8 @@ module Coalesce {
                 this.isLoading(true);
                 this.coalesceConfig.onStartBusy()(this);
 
-                var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/Get/" + id + '?includes=' + this.includes + '&dataSource=';
-                if (typeof this.dataSource === "string") url += this.dataSource;
-                else url += this.dataSources[this.dataSource];
-
+                var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Get/${id}?includes=${this.includes}${this.dataSource.getQueryString()}`
+                
                 return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data) => {
                         this.loadFromDto(data, true);
@@ -590,34 +595,34 @@ module Coalesce {
         }
     }
 
-    export class BaseListViewModel<TItem extends BaseViewModel> {
+    export abstract class BaseListViewModel<TItem extends BaseViewModel> {
 
-        protected modelName: string;
+        protected abstract modelName: string;
 
-        protected apiController: string;
+        protected abstract apiController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.
         */
-        public dataSources: any;
+        public abstract dataSources: any;
 
         /**
             The custom data source that will be invoked on the server to provide the data for this list.
         */
-        public dataSource: any;
+        public abstract dataSource: any;
 
         /**
             Name of the primary key of the model that this list represents.
         */
-        public modelKeyName: string;
+        public abstract modelKeyName: string;
 
         // Reference to the class which this list represents.
-        protected itemClass: typeof BaseViewModel;
+        protected abstract itemClass: new() => TItem;
 
         /**
             Properties which determine how this object behaves.
         */
-        public coalesceConfig: ListViewModelConfiguration<this, TItem> = null;
+        public abstract coalesceConfig: ListViewModelConfiguration<this, TItem> = null;
 
         /**
             Query string to append to the API call when loading the list of items.
@@ -707,7 +712,7 @@ module Coalesce {
         };
 
         /** Method which will instantiate a new item of the list's model type. */
-        protected createItem: (newItem?: any, parent?: any) => TItem;
+        protected abstract createItem: (newItem?: any, parent?: any) => TItem;
 
         /** Adds a new item to the collection. */
         public addNewItem = (): TItem => {

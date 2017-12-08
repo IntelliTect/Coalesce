@@ -16,15 +16,15 @@ module ViewModels {
         protected viewController = "/CaseDto";
     
         /** 
-            The enumeration of all possible values of this.dataSource.
+            The namespace containing all possible values of this.dataSource.
         */
-        public dataSources: typeof ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources;
+        public dataSources = ListViewModels.CaseDtoDataSources;
 
         /**
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources.Default;
+        public dataSource: Coalesce.DataSource<CaseDto> = new this.dataSources.Default();
 
         /** Behavioral configuration for all instances of CaseDto. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseDto>
@@ -73,8 +73,8 @@ module ViewModels {
     
             if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
-
-        /** Save the object into a DTO */
+    
+        /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
             dto.caseId = this.caseId();
@@ -83,6 +83,17 @@ module ViewModels {
 
             return dto;
         }
+    
+        /**
+            Loads any child objects that have an ID set, but not the full object.
+            This is useful when creating an object that has a parent object and the ID is set on the new child.
+        */
+        public loadChildren = (callback?: () => void) => {
+            var loadingCount = 0;
+            if (loadingCount == 0 && $.isFunction(callback)){
+                callback();
+            }
+        };
         
         public setupValidation = () => {
             if (this.errors !== null) return;
@@ -112,14 +123,6 @@ module ViewModels {
     
 
 
-
-            // Load all child objects that are not loaded.
-            self.loadChildren = function(callback) {
-                var loadingCount = 0;
-                if (loadingCount == 0 && $.isFunction(callback)){
-                    callback();
-                }
-            };
 
             // This stuff needs to be done after everything else is set up.
             self.title.subscribe(self.autoSave);

@@ -34,8 +34,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
             var dataSources = servedType.ClientDataSources(reflectionRepository);
 
             Type dataSourceType = null;
-            var dataSourceTypeViewModel = dataSources.FirstOrDefault(t => t.Name == dataSourceName);
-            if (dataSourceTypeViewModel == null)
+            var dataSourceClassViewModel = dataSources.FirstOrDefault(t => t.Name == dataSourceName);
+            if (dataSourceClassViewModel == null)
             {
                 if (dataSourceName == "" || dataSourceName == "Default" || dataSourceName == null)
                 {
@@ -49,7 +49,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             }
             else
             {
-                dataSourceType = (dataSourceTypeViewModel as ReflectionTypeViewModel).Info;
+                dataSourceType = (dataSourceClassViewModel.Type as ReflectionTypeViewModel).Info;
             }
 
             return ActivatorUtilities.CreateInstance(serviceProvider, dataSourceType);

@@ -9,8 +9,8 @@ var baseUrl = baseUrl || '';
 module ListViewModels {
 
     // Add an enum for all methods that are static and IQueryable
-    export enum ProductDataSources {
-        Default,
+    export namespace ProductDataSources {
+        export class Default extends Coalesce.DataSource<ViewModels.Product> { }
     }
 
     export class ProductList extends Coalesce.BaseListViewModel<ViewModels.Product> {
@@ -19,7 +19,7 @@ module ListViewModels {
         protected apiController = "/Product";
 
         public modelKeyName = "productId";
-        public dataSources = ProductDataSources;
+    
         public itemClass = ViewModels.Product;
 
         public query: {
@@ -27,9 +27,17 @@ module ListViewModels {
             productId?:number;
             name?:string;
         } = null;
+    
+        /** 
+            The namespace containing all possible values of this.dataSource.
+        */
+        public dataSources = ProductDataSources;
 
-        // The custom code to run in order to pull the initial datasource to use for the collection that should be returned
-        public dataSource: ProductDataSources = ProductDataSources.Default;
+        /**
+            The data source on the server to use when retrieving objects.
+            Valid values are in this.dataSources.
+        */
+        public dataSource: Coalesce.DataSource<ViewModels.Product> = new this.dataSources.Default();
 
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<ProductList, ViewModels.Product>(Coalesce.GlobalConfiguration.listViewModel);
         public coalesceConfig = new Coalesce.ListViewModelConfiguration<ProductList, ViewModels.Product>(ProductList.coalesceConfig);

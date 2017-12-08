@@ -17,7 +17,7 @@ module Cases {
         load() {
             if (status != null && status != '') {
                 if (status == 'allOpen') {
-                    this.cases.dataSource = ListViewModels.CaseDataSources.AllOpenCases;
+                    this.cases.dataSource = new this.cases.dataSources.AllOpenCases();
                 }
                 else {
                     let retrievedStatus = new ViewModels.Case().statusValues.filter(function (obj) {

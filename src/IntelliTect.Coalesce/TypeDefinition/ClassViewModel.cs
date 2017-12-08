@@ -149,7 +149,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        /// <summary>
+        /// Properties on the class that are permitted to be exposed to the client.
+        /// </summary>
         public IEnumerable<PropertyViewModel> ClientProperties => Properties.Where(p => p.IsClientProperty);
+        
+        public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
+            // TODO: how  are we determining which properties to inject into a datasource?
+            // This is using [CoalesceAttribute] - should this be something else?
+            .Where(p => !p.IsInternalUse && p.HasSetter && p.HasAttribute<CoalesceAttribute>())
+             // These are the only supported types, for now
+            .Where(p => p.Type.IsPrimitive || p.Type.IsDate);
 
         /// <summary>
         /// List of method names that should not be exposed to the client.
@@ -192,10 +202,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         internal IEnumerable<TypeViewModel> ClientNestedTypes => RawNestedTypes
             .Where(t => !t.IsInternalUse);
 
-        public IEnumerable<TypeViewModel> ClientDataSources(ReflectionRepository repo) => repo
+        public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
             .DataSources
             .Where(d => d.SourceFor.Equals(this))
-            .Select(d => d.TypeViewModel);
+            .Select(d => d.DataSourceClass);
 
 
         /// <summary>

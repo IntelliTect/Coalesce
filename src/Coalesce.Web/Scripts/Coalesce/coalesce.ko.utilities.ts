@@ -47,7 +47,7 @@ module Coalesce {
         }
 
         // Function to marge two arrays based on data from the server
-        export function RebuildArray<U extends LoadableViewModel, T>(
+        export function RebuildArray<U extends LoadableViewModel, T extends object>(
             existingArray: KnockoutObservableArray<U>,
             incomingArray: T[],
             idField: string,

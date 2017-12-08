@@ -93,8 +93,12 @@ namespace Coalesce.Domain
         {
             public AllOpenCases(CrudContext<AppDbContext> context) : base(context) { }
 
+            [Coalesce]
+            public DateTimeOffset? MinDate { get; set; }
+
             public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases
                 .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .Where(c => MinDate == null || c.OpenedAt > MinDate)
                 .IncludeChildren();
         }
 

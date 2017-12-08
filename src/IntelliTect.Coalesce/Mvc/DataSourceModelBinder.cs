@@ -61,10 +61,8 @@ namespace IntelliTect.Coalesce.Mvc
             // TODO: how  are we determining which properties to inject into a datasource?
             // This is using [CoalesceAttribute] - should this be something else?
             // TODO: pull this logic out of here and into ClassViewModel.
-            var desiredPropertyViewModels = new ReflectionTypeViewModel(dataSourceType).ClassViewModel
-                .ClientProperties
-                .Where(p => p.HasAttribute<CoalesceAttribute>())
-                .ToList();
+            var desiredPropertyViewModels = 
+                new ReflectionTypeViewModel(dataSourceType).ClassViewModel.DataSourceParameters;
 
             var desiredPropertiesMetadata = desiredPropertyViewModels
                 .Select(propViewModel => bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, propViewModel.Name))

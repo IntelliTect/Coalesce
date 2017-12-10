@@ -17,7 +17,7 @@ module Coalesce {
             this.parentConfig = parentConfig;
         }
 
-        protected prop = <TProp>(name: keyof this): ComputedConfiguration<TProp> => {
+        protected prop = function<TProp>(name: string): ComputedConfiguration<TProp> {
             var k = "_" + name;
             var raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
@@ -90,6 +90,14 @@ module Coalesce {
         public onLoadFromDto = this.prop<(object: T) => void>("onLoadFromDto");
 
         /**
+            The dataSource (either an instance or a type) that will be used as the initial
+            dataSource when a new object of this type is created.
+            Not valid for global configuration; recommended to be used on class-level configuration.
+            E.g. ViewModels.MyModel.coalesceConfig.initialDataSource(MyModel.dataSources.MyDataSource);
+        */
+        public initialDataSource = this.prop<DataSource<T> | (new() => DataSource<T>)>("initialDataSource");
+
+        /**
             Gets the underlying observable that stores the object's explicit configuration value.
         */
         public raw = (name: keyof this): KnockoutObservable<any> => {
@@ -112,6 +120,9 @@ module Coalesce {
         public listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
     }
 
+    var invalidProp: any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
+    invalidProp.raw = invalidProp;
+
     export var GlobalConfiguration = new RootConfig();
     GlobalConfiguration.baseApiUrl("/api");
     GlobalConfiguration.baseViewUrl("");
@@ -127,6 +138,7 @@ module Coalesce {
     GlobalConfiguration.viewModel.loadResponseFromSaves(true);
     GlobalConfiguration.viewModel.validateOnLoadFromDto(true);
     GlobalConfiguration.viewModel.setupValidationAutomatically(true);
+    GlobalConfiguration.viewModel.initialDataSource = invalidProp;
 
     ko.validation.init({
         grouping: {
@@ -147,7 +159,9 @@ module Coalesce {
 
         public saveToDto: () => object = () => { return {}; }
 
-        public getQueryString: () => string = () => {
+        // This is computed so we can subscribe to when the request to the server changes,
+        // and then reload objects/lists accordingly.
+        public getQueryString = ko.computed(() => {
             var query = `dataSource=${this._name}`;
 
             //&${$.param({ dataSource: this.saveToDto() }).replace(/dataSource%5B(.*?)%5D/g, 'dataSource.$1')}
@@ -159,6 +173,18 @@ module Coalesce {
                 }
             }
             return query;
+        }, null, { deferEvaluation: true });
+
+        /**
+            Subscribe the given list to changes in the data source's parameters,
+            triggering a reload upon changed parameter values.
+        */
+        public subscribe = (list: BaseListViewModel<T>) => {
+            this.getQueryString.subscribe(() => {
+                if (list.isLoaded()) {
+                    list.delayedLoad(300);
+                }
+            })
         }
             
     }
@@ -597,7 +623,30 @@ module Coalesce {
                 });
         }
 
+        /**
+            Common base-class level initialization that depends on all constructors being ran
+            (and therefore cannot be performed directly in the base constructor).
+        */
+        protected baseInitialize = () => {
+
+            var dataSource = this.coalesceConfig.initialDataSource.peek();
+            if (dataSource === null) {
+                dataSource = new this.dataSources.Default()
+            } else {
+                if (dataSource instanceof Coalesce.DataSource) {
+                    this.dataSource = dataSource
+                } else {
+                    this.dataSource = new dataSource();
+                }
+            }
+
+            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
+                this.setupValidation();
+            }
+        }
+
         constructor() {
+
             // Handles setting the parent savingChildChange
             this.isSaving.subscribe((newValue: boolean) => {
                 if (this.parent && $.isFunction(this.parent.onSavingChildChange)) {
@@ -882,7 +931,7 @@ module Coalesce {
         private loadTimeout: number = 0;
 
         /** reloads the list after a slight delay (100ms default) to ensure that all changes are made. */
-        private delayedLoad = (milliseconds?: number): void => {
+        public delayedLoad = (milliseconds?: number): void => {
             if (this.loadTimeout) {
                 clearTimeout(this.loadTimeout);
             }
@@ -893,27 +942,18 @@ module Coalesce {
         }
 
         public constructor() {
-            var searchTimeout: number = 0;
-
             this.pageSize.subscribe(() => {
                 if (this.isLoaded()) {
                     this.load();
                 }
             });
             this.page.subscribe(() => {
+                // Page is set while we're loading results - ignore changes while isLoading() == true
                 if (this.isLoaded() && !this.isLoading()) {
                     this.delayedLoad(300);
                 }
             });
-            this.search.subscribe(() => {
-                if (searchTimeout) {
-                    clearTimeout(searchTimeout);
-                }
-                searchTimeout = setTimeout(() => {
-                    searchTimeout = 0;
-                    this.load();
-                }, 300);
-            });
+            this.search.subscribe(() => { if (this.isLoaded()) this.delayedLoad(300); });
             this.orderBy.subscribe(() => { if (this.isLoaded()) this.delayedLoad(); });
             this.orderByDescending.subscribe(() => { if (this.isLoaded()) this.delayedLoad(); });
         }

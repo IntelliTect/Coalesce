@@ -34,6 +34,14 @@ module @moduleName {
 
         protected apiController = "/@(model.ApiName)";
         protected viewController = "/@(model.ControllerName)";
+
+        /** Behavioral configuration for all instances of @(model.ViewModelClassName). Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
+            = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current @(model.ViewModelClassName) instance. */
+        public coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
+            = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -44,15 +52,7 @@ module @moduleName {
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: Coalesce.DataSource<@(model.ViewModelClassName)> = new this.dataSources.Default();
-
-        /** Behavioral configuration for all instances of @(model.ViewModelClassName). Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
-            = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.viewModel);
-
-        /** Behavioral configuration for the current @(model.ViewModelClassName) instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
-            = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
+        public dataSource: Coalesce.DataSource<@(model.ViewModelClassName)>;
     
 
         @foreach (PropertyViewModel prop in model.ClientProperties)
@@ -468,13 +468,10 @@ module @moduleName {
 
         constructor(newItem?: any, parent?: any){
             super();
+            this.baseInitialize();
             var self = this;
             self.parent = parent;
             self.myId;
-
-            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
-                this.setupValidation();
-            }
 
             // Create computeds for display for objects
             @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO))

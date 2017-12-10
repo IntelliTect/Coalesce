@@ -8,7 +8,6 @@ var baseUrl = baseUrl || '';
 
 module ListViewModels {
 
-    // Add an enum for all methods that are static and IQueryable
     export namespace CaseDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.Case> { }
         export class AllOpenCases extends Coalesce.DataSource<ViewModels.Case> {

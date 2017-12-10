@@ -20,8 +20,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
     public abstract class ClassViewModel : IAttributeProvider
     {
         
-        protected ICollection<PropertyViewModel> _Properties;
-        protected ICollection<MethodViewModel> _Methods;
+        protected IReadOnlyCollection<PropertyViewModel> _Properties;
+        protected IReadOnlyCollection<MethodViewModel> _Methods;
 
         public abstract string Name { get; }
         public abstract string Comment { get; }
@@ -116,36 +116,37 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <remarks>
         /// This collection is internal to prevent accidental exposing of properties that should not be exposed.
         /// </remarks>
-        internal ICollection<PropertyViewModel> Properties
+        internal IReadOnlyCollection<PropertyViewModel> Properties
         {
             get
             {
-                if (_Properties == null)
-                {
-                    _Properties = new List<PropertyViewModel>();
-                    int count = 1;
-                    foreach (var prop in RawProperties)
-                    {
-                        if (_Properties.Any(f => f.Name == prop.Name))
-                        {
-                            // This is a duplicate. Keep the one that isn't virtual
-                            if (!prop.IsVirtual)
-                            {
-                                _Properties.Remove(_Properties.First(f => f.Name == prop.Name));
-                                prop.ClassFieldOrder = count;
-                                _Properties.Add(prop);
-                            }
-                        }
-                        else
-                        {
-                            prop.ClassFieldOrder = count;
-                            _Properties.Add(prop);
-                        }
-                        count++;
-                    }
+                if (_Properties != null) return _Properties;
 
+                var properties = new List<PropertyViewModel>();
+                int count = 1;
+                foreach (var prop in RawProperties)
+                {
+                    if (properties.Any(f => f.Name == prop.Name))
+                    {
+                        // This is a duplicate. Keep the one that isn't virtual
+                        if (!prop.IsVirtual)
+                        {
+                            properties.Remove(properties.First(f => f.Name == prop.Name));
+                            prop.ClassFieldOrder = count;
+                            properties.Add(prop);
+                        }
+                    }
+                    else
+                    {
+                        prop.ClassFieldOrder = count;
+                        properties.Add(prop);
+                    }
+                    count++;
                 }
-                return _Properties;
+
+                // Don't assign to _Properties until the end in order to avoid threading issues.
+                // If _Properties were mutable, we could potentially have two threads attempting to build the same collection at once.
+                return _Properties = properties.AsReadOnly();
             }
         }
 
@@ -184,7 +185,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <remarks>
         /// This collection is internal to prevent accidental exposing of methods that should not be exposed.
         /// </remarks>
-        internal ICollection<MethodViewModel> Methods
+        internal IReadOnlyCollection<MethodViewModel> Methods
         {
             get
             {
@@ -193,7 +194,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return _Methods = RawMethods
                     .Where(m => !excludedMethodNames.Contains(m.Name))
                     .Where(m => !IsDto || (m.Name != nameof(Interfaces.IClassDto<object, object>.Update) && m.Name != nameof(Interfaces.IClassDto<object, object>.CreateInstance)))
-                    .ToList();
+                    .ToList().AsReadOnly();
             }
         }
 

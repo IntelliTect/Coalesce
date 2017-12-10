@@ -14,6 +14,14 @@ module ViewModels {
 
         protected apiController = "/Case";
         protected viewController = "/Case";
+
+        /** Behavioral configuration for all instances of Case. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<Case>
+            = new Coalesce.ViewModelConfiguration<Case>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current Case instance. */
+        public coalesceConfig: Coalesce.ViewModelConfiguration<Case>
+            = new Coalesce.ViewModelConfiguration<Case>(Case.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -24,15 +32,7 @@ module ViewModels {
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: Coalesce.DataSource<Case> = new this.dataSources.Default();
-
-        /** Behavioral configuration for all instances of Case. Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<Case>
-            = new Coalesce.ViewModelConfiguration<Case>(Coalesce.GlobalConfiguration.viewModel);
-
-        /** Behavioral configuration for the current Case instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<Case>
-            = new Coalesce.ViewModelConfiguration<Case>(Case.coalesceConfig);
+        public dataSource: Coalesce.DataSource<Case>;
     
 
         /** The Primary key for the Case object */
@@ -265,13 +265,10 @@ module ViewModels {
 
         constructor(newItem?: any, parent?: any){
             super();
+            this.baseInitialize();
             var self = this;
             self.parent = parent;
             self.myId;
-
-            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
-                this.setupValidation();
-            }
 
             // Create computeds for display for objects
 			self.assignedToText = ko.pureComputed(function()

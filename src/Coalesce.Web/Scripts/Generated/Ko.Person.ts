@@ -14,6 +14,14 @@ module ViewModels {
 
         protected apiController = "/Person";
         protected viewController = "/Person";
+
+        /** Behavioral configuration for all instances of Person. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
+            = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current Person instance. */
+        public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
+            = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -24,15 +32,7 @@ module ViewModels {
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: Coalesce.DataSource<Person> = new this.dataSources.Default();
-
-        /** Behavioral configuration for all instances of Person. Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
-            = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
-
-        /** Behavioral configuration for the current Person instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
-            = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
+        public dataSource: Coalesce.DataSource<Person>;
     
 
         /** ID for the person object. */
@@ -443,13 +443,10 @@ module ViewModels {
 
         constructor(newItem?: any, parent?: any){
             super();
+            this.baseInitialize();
             var self = this;
             self.parent = parent;
             self.myId;
-
-            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
-                this.setupValidation();
-            }
 
             // Create computeds for display for objects
 			self.personStatsText = ko.pureComputed(function()

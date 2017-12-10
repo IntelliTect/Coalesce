@@ -14,6 +14,14 @@ module ViewModels {
 
         protected apiController = "/CaseProduct";
         protected viewController = "/CaseProduct";
+
+        /** Behavioral configuration for all instances of CaseProduct. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
+            = new Coalesce.ViewModelConfiguration<CaseProduct>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current CaseProduct instance. */
+        public coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
+            = new Coalesce.ViewModelConfiguration<CaseProduct>(CaseProduct.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -24,15 +32,7 @@ module ViewModels {
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: Coalesce.DataSource<CaseProduct> = new this.dataSources.Default();
-
-        /** Behavioral configuration for all instances of CaseProduct. Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
-            = new Coalesce.ViewModelConfiguration<CaseProduct>(Coalesce.GlobalConfiguration.viewModel);
-
-        /** Behavioral configuration for the current CaseProduct instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
-            = new Coalesce.ViewModelConfiguration<CaseProduct>(CaseProduct.coalesceConfig);
+        public dataSource: Coalesce.DataSource<CaseProduct>;
     
 
         public caseProductId: KnockoutObservable<number> = ko.observable(null);
@@ -183,13 +183,10 @@ module ViewModels {
 
         constructor(newItem?: any, parent?: any){
             super();
+            this.baseInitialize();
             var self = this;
             self.parent = parent;
             self.myId;
-
-            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
-                this.setupValidation();
-            }
 
             // Create computeds for display for objects
 			self.caseText = ko.pureComputed(function()

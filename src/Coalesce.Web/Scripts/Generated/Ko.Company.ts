@@ -14,6 +14,14 @@ module ViewModels {
 
         protected apiController = "/Company";
         protected viewController = "/Company";
+
+        /** Behavioral configuration for all instances of Company. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<Company>
+            = new Coalesce.ViewModelConfiguration<Company>(Coalesce.GlobalConfiguration.viewModel);
+
+        /** Behavioral configuration for the current Company instance. */
+        public coalesceConfig: Coalesce.ViewModelConfiguration<Company>
+            = new Coalesce.ViewModelConfiguration<Company>(Company.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -24,15 +32,7 @@ module ViewModels {
             The data source on the server to use when retrieving the object.
             Valid values are in this.dataSources.
         */
-        public dataSource: Coalesce.DataSource<Company> = new this.dataSources.Default();
-
-        /** Behavioral configuration for all instances of Company. Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<Company>
-            = new Coalesce.ViewModelConfiguration<Company>(Coalesce.GlobalConfiguration.viewModel);
-
-        /** Behavioral configuration for the current Company instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<Company>
-            = new Coalesce.ViewModelConfiguration<Company>(Company.coalesceConfig);
+        public dataSource: Coalesce.DataSource<Company>;
     
 
         public companyId: KnockoutObservable<number> = ko.observable(null);
@@ -154,13 +154,10 @@ module ViewModels {
 
         constructor(newItem?: any, parent?: any){
             super();
+            this.baseInitialize();
             var self = this;
             self.parent = parent;
             self.myId;
-
-            if (this.coalesceConfig.setupValidationAutomatically.peek()) {
-                this.setupValidation();
-            }
 
             // Create computeds for display for objects
 

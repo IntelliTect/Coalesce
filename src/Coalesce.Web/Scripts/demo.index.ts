@@ -6,6 +6,7 @@ module Demo {
 
         allOpenCases.pageSize(100);
         allOpenCases.dataSource = new allOpenCases.dataSources.AllOpenCases();
+        allOpenCases.dataSource.subscribe(allOpenCases);
         allOpenCases.load();
 
         ko.applyBindings(allOpenCases);

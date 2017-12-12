@@ -241,21 +241,18 @@
                             <dt>Includes</dt>
                             <dd>The name of the list of child items to include by default, all immediate children are included. Specify 'none' to get no children. Note: this only works if lazy loading is turned off.</dd>
 
-                            <dt>List of field=value</dt>
+                            <dt>List of filter.[field]=[value]</dt>
                             <dd>
-                                A query parameter with the format [field]=[value] will automatically create a filter.
+                                A query parameter with the format filter.[field]=[value] will automatically create a filter.
                             </dd>
 
-                            <dt>Filter</dt>
+                            <dt>Where</dt>
                             <dd>Free form SQL filter with the syntax [field][operator][value]. eg. name='test', price>10</dd>
-
-                            <dt>Dto</dt>
-                            <dd>Fully qualified name of the DTO to return - i.e., Coalesce.Domain.Dtos.PersonDropDownDto</dd>
-
-                            <dt>ToList</dt>
+                            
+                            <dt>List of fields</dt>
                             <dd>
-                                Adding ToList to the query string will cause the query to execute before the sorting and paging,
-                                but after any filtering. This allows for sorting based on calculated fields.
+                                Any other string will be treated as a requested field name. If none are specified,
+                                all fields will be returned, otherwise only specified fields will be returned in a dynamic object.
                             </dd>
                         </dl>
                     </td>
@@ -292,7 +289,6 @@
                             If the Id is zero a new item is created. Validation is performed and passed back in the resultant object.
                             The the save was successful a WasSuccessful flag is set to true. The saved object is passed back
                             in the Object property. A message can be passed back in the Message Property.
-                            Field level validation is returnecd in ValidationIssues.
                         </p>
                 </tr>
                 <tr>

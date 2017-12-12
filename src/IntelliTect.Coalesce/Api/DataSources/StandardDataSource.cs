@@ -42,12 +42,15 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public CrudContext<TContext> Context { get; }
 
-        CrudContext IDataSource<T>.Context => Context;
-
         /// <summary>
         /// The DbContext to be used for this request.
         /// </summary>
         public TContext Db => Context.DbContext;
+
+        /// <summary>
+        /// The user making the request for data.
+        /// </summary>
+        public ClaimsPrincipal User => Context.User;
 
         /// <summary>
         /// A ClassViewModel representing the type T that is provided by this data source.
@@ -59,6 +62,13 @@ namespace IntelliTect.Coalesce
             Context = context ?? throw new ArgumentNullException(nameof(context));
             ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
         }
+
+        /// <summary>
+        /// Check if the data source may be used. This method will be called by the framework.
+        /// Use this.User to obtain the current user.
+        /// </summary>
+        /// <returns>True if the user is authorized, otherwise false.</returns>
+        public virtual (bool Authorized, string Message) IsAuthorized() => (true, null);
 
         /// <summary>
         /// Get the initial query that will be compounded upon with various other

@@ -408,6 +408,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             (GetSecurityAttribute<CreateAttribute>())
         ));
 
+        public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
+
         public string DtoIncludesAsCS()
         {
             var includeList = ClientProperties

@@ -30,16 +30,22 @@ var baseUrl = baseUrl || '';
 
 module @moduleName {
 
+    @{ 
+        var dataSources = model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository);
+        var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
+    }
     export namespace @(model.Name)DataSources {
-        export class Default extends Coalesce.DataSource<@viewModelFullName> { }
+        @if (defaultSource == null) {
+        @:export class Default extends Coalesce.DataSource<@viewModelFullName> { }
+        }
         @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))
         {
+        @:
         if (source.Comment.Length > 0)
         {
         @:/** @(source.Comment) */
         }
         @:export class @source.Name extends Coalesce.DataSource<@viewModelFullName> {
-            @:protected _name = "@source.Name"
             @if (source.DataSourceParameters.Any())
             {
             @foreach (PropertyViewModel prop in source.DataSourceParameters)
@@ -68,16 +74,16 @@ module @moduleName {
             @:}
             }
         @:}
+        if (source == defaultSource) {
+        @:export const Default = @source.Name;
+        }
         }
     }
 
     export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@viewModelFullName> {
         protected modelName = "@(model.Name)";
-
         protected apiController = "/@(model.ApiUrl)";
-
         public modelKeyName = "@(model.PrimaryKey.JsVariable)";
-    
         public itemClass = @viewModelFullName;
 
         public query: {

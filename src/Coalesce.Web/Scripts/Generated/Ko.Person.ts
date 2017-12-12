@@ -158,16 +158,16 @@ module ViewModels {
         
         /**
             Invoke server method Rename.
-            Adds the text to the first name.
+            Sets the FirstName to the given text.
         */
-        public rename = (addition: string, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public rename = (name: string, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
 
             this.renameIsLoading(true);
             this.renameMessage('');
             this.renameWasSuccessful(null);
             return $.ajax({ method: "POST",
                         url: this.coalesceConfig.baseApiUrl() + "/Person/Rename",
-                        data: { id: this.myId, addition: addition },
+                        data: { id: this.myId, name: name },
                         xhrFields: { withCredentials: true } })
             .done((data) => {
                 this.isDirty(false);
@@ -212,11 +212,11 @@ module ViewModels {
         /** Presents a series of input boxes to call the server method (Rename) */
         public renameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             var $promptVal: string = null;
-            $promptVal = prompt('Addition');
+            $promptVal = prompt('Name');
             if ($promptVal === null) return;
-            var addition: string = $promptVal;
+            var name: string = $promptVal;
               
-            return this.rename(addition, callback, reload);
+            return this.rename(name, callback, reload);
         }
         /** Presents a modal with input boxes to call the server method (Rename). Depends on a modal existing with id #method-Rename. */
         public renameModal = (callback: () => void = null, reload: boolean = true) => {
@@ -232,7 +232,7 @@ module ViewModels {
         /** Calls server method (Rename) with an instance of Person.RenameArgs, or the value of renameArgs if not specified. */
         public renameWithArgs = (args?: Person.RenameArgs, callback?: () => void, reload: boolean = true) => {
             if (!args) args = this.renameArgs;
-            return this.rename(args.addition(), callback, reload);
+            return this.rename(args.name(), callback, reload);
         }
         /** Object that can be easily bound to fields to allow data entry for the method */
         public renameArgs = new Person.RenameArgs(); 
@@ -546,7 +546,7 @@ module ViewModels {
 
         // Classes for use in method calls to support data binding for input for arguments
         export class RenameArgs {
-            public addition: KnockoutObservable<string> = ko.observable(null);
+            public name: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

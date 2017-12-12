@@ -222,11 +222,11 @@ namespace IntelliTect.Coalesce.Api
             return false;
         }
 
-        protected async Task<SaveResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, bool returnObject = true)
+        protected async Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, bool returnObject = true)
         {
             var includes = parameters.Includes;
 
-            var result = new SaveResult<TDto>();
+            var result = new ItemResult<TDto>();
 
             // See if this is new or an update using the key.
             T item = null;
@@ -319,7 +319,7 @@ namespace IntelliTect.Coalesce.Api
                     catch (Exception ex)
                     {
                         //Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
-                        result = new SaveResult<TDto>(ex);
+                        result = new ItemResult<TDto>(ex);
                         //Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
                     }
                     // Get the key back.
@@ -362,6 +362,7 @@ namespace IntelliTect.Coalesce.Api
             var context = new MappingContext(User, includes);
             return Mapper<T, TDto>.ObjToDtoMapper(obj, context, tree);
         }
+
         /// <summary>
         /// Allows for overriding the mapper from DTO to Obj
         /// </summary>
@@ -376,7 +377,7 @@ namespace IntelliTect.Coalesce.Api
 
 
 
-        protected SaveResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
+        protected ItemResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
         {
             // TODO: this only supports ints
 
@@ -389,7 +390,7 @@ namespace IntelliTect.Coalesce.Api
                 if (!manyToManyProperty.SecurityInfo.IsEditable(User))
                 {
                     Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                    return new SaveResult<TDto>("Unauthorized");
+                    return new ItemResult<TDto>("Unauthorized");
                 }
 
                 var joinClass = manyToManyProperty.Object;
@@ -407,7 +408,7 @@ namespace IntelliTect.Coalesce.Api
                         if (!joinClass.SecurityInfo.IsDeleteAllowed(User))
                         {
                             Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                            return new SaveResult<TDto>("Unauthorized");
+                            return new ItemResult<TDto>("Unauthorized");
                         }
                         string sql = "DELETE FROM " + tableName + " WHERE " + thisKeyName + " = {0} AND " + otherKeyName + " = {1}";
                         Db.Database.ExecuteSqlCommand(sql, id, childId);
@@ -418,7 +419,7 @@ namespace IntelliTect.Coalesce.Api
                         if (!joinClass.SecurityInfo.IsCreateAllowed(User))
                         {
                             Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                            return new SaveResult<TDto>("Unauthorized");
+                            return new ItemResult<TDto>("Unauthorized");
                         }
 
                         // TODO: (maybe?) Check if the user is allowed to read the objects on the other side of the relationship (otherKeyName).
@@ -427,17 +428,17 @@ namespace IntelliTect.Coalesce.Api
                         string sql = "INSERT INTO " + tableName + " (" + thisKeyName + ", " + otherKeyName + ") VALUES ({0}, {1})";
                         Db.Database.ExecuteSqlCommand(sql, id, childId);
                     }
-                    return new SaveResult<TDto>(true, null);
+                    return new ItemResult<TDto>(true, null);
                 }
                 catch (Exception ex)
                 {
-                    return new SaveResult<TDto>(ex);
+                    return new ItemResult<TDto>(ex);
                 }
             }
             else
             {
                 Response.StatusCode = (int)System.Net.HttpStatusCode.NotFound;
-                return new SaveResult<TDto>("Could not find many-to-many collection: " + propertyName);
+                return new ItemResult<TDto>("Could not find many-to-many collection: " + propertyName);
             }
 
             // GME: This is the code for the collections that are handled by EF, this is not available in EF 7 yet.
@@ -615,10 +616,14 @@ namespace IntelliTect.Coalesce.Api
 
                 if (errors.Any())
                 {
-                    context.Result = this.BadRequest(new SaveResult(string.Join("; ", errors)));
+                    // TODO: this could be more robust.
+                    // Lots of client methods in the typescript aren't expecting an object that looks like this.
+                    // Anything that takes a SaveResult or ListResult should be fine, but other things (Csv..., Count, Delete, Get) won't handle this.
+                    context.Result = this.BadRequest(new ApiResult(string.Join("; ", errors.Select(e => $"Invalid value for parameter {e.key}: {e.error}"))));
+                    return;
                 }
             }
-            var test = context.ActionArguments;
+
             base.OnActionExecuting(context);
         }
 
@@ -628,14 +633,14 @@ namespace IntelliTect.Coalesce.Api
 
             if (response.StatusCode == (int)HttpStatusCode.OK)
             {
-                var contents = context.Result as ObjectResult;
+                var contents = context.Result as Microsoft.AspNetCore.Mvc.ObjectResult;
                 if (contents != null)
                 {
                     var listResult = contents.Value as ListResult<T>;
-                    var saveResult = contents.Value as SaveResult;
+                    var saveResult = contents.Value as ItemResult;
                     if ((listResult != null && !listResult.WasSuccessful) || (saveResult != null && !saveResult.WasSuccessful))
                     {
-                        context.HttpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     }
                 }
             }

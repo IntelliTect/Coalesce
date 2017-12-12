@@ -55,6 +55,14 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
         protected Type GetDefaultDataSourceType(ClassViewModel servedType)
         {
+            var dataSources = servedType.ClientDataSources(reflectionRepository);
+            var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
+
+            if (defaultSource != null)
+            {
+                return (defaultSource.Type as ReflectionTypeViewModel).Info;
+            }
+
             var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
             var dataSourceType = typeof(StandardDataSource<,>).MakeGenericType(
                 (servedType.Type as ReflectionTypeViewModel).Info,

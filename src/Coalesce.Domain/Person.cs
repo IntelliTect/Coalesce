@@ -122,13 +122,13 @@ namespace Coalesce.Domain
         public Company Company { get; set; }
 
         /// <summary>
-        /// Adds the text to the first name.
+        /// Sets the FirstName to the given text.
         /// </summary>
         /// <param name="addition"></param>
         /// <returns></returns>
-        public Person Rename(string addition)
+        public Person Rename(string name)
         {
-            FirstName += addition;
+            FirstName = name;
             return this;
         }
 
@@ -200,6 +200,15 @@ namespace Coalesce.Domain
             }
 
             return true;
+        }
+
+        [Coalesce, DefaultDataSource]
+        public class WithoutCases : StandardDataSource<Person, AppDbContext>
+        {
+            public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
+
+            public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
+                => Db.People.Include(p => p.Company);
         }
     }
 

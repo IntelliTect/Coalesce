@@ -12,6 +12,8 @@
 | Namespace `intellitect.webApi` is now `Coalesce.ModalHelpers` | Replace all references to the old name with the new.
 | Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within. | No changes needed unless your project referenced these files explicitly by name (unlikely).
 | DataSources on models are no longer generated as client-callable static methods on ListViewModels. | Replace usages of these calls with loads of a ListViewModel using the desired data source.
+| API Endpoint `CustomList` has been merged with `List`. Parameters remain unchanged. | Replace all usages of `CustomList` with `List`.
+| `BaseViewController.IndexImplementation` no longer sets `ViewBag.ParentIdName` or `ViewBag.ParentId`. These properties were not used. | If you used these, implement your own custom, robust logic in your controllers that depend upon `IndexImplementation`.
 ----
 
 ## BaseViewModel & Generated ViewModels:
@@ -21,10 +23,10 @@
 | `BaseViewModel` is no longer a generic type `BaseViewModel<T>`. It now uses TypeScripts polymorphic `this` types for its self-referential needs | Remove any usages of the generic parameter. Replace with [Polymorphic this types](https://www.typescriptlang.org/docs/handbook/advanced-types.html) as needed.
 | `<ModelName>ListUrl` properties on generated ViewModels are now correctly camelCased. | Rename references from `MyModelListUrl` to `myModelListUrl`.
 | `deleteCallbacks` have been removed. | When deleting a model, pass a callback to `deleteItem` or `deleteItemWithConfirmation`.
-| `customField1`, `2`, & `3` have been removed. | Annotate your C# models with `[TypeScriptPartial]`, and create any custom fields on the stub that is generated.
-| `isDataFromSaveLoaded` has been changed to `BaseViewModel.coalesceConfig.loadResponseFromSaves` | Find and replace usages of the old property.
-| `afterLoadFromDto` has been changed to `BaseViewModel.coalesceConfig.onLoadFromDto` | Find and replace usages of the old property.
-| `loadValidValues()` is gone, as are the other model-specific methods and collections of a similar nature. | Create a `ListViewModel` of the desired object type and use it to load lists of items.
+| `customField1`, `2`, & `3` have been removed. | Annotate your C# models with `[TypeScriptPartial]`, and create any custom fields on the stub that is generated. Alternatively, place any view-specific, object-specific logic in the code that drives a particular view.
+| `BaseViewModel.isDataFromSaveLoaded` has been changed to `BaseViewModel.coalesceConfig.loadResponseFromSaves` | Find and replace usages of the old property.
+| `BaseViewModel.afterLoadFromDto` has been changed to `BaseViewModel.coalesceConfig.onLoadFromDto` | Find and replace usages of the old property.
+| `loadValidValues()` is gone, as are the other model-specific methods and collections of a similar nature. | Instantiate a `ListViewModel` of the desired object type and use it to load lists of items.
 | `isSavingWithChildren: boolean` is now named `isThisOrChildSaving` | Simple find-and-replace.
 | `reload()` has been removed. | Replace usages of `reload()` with no-argument calls to `load()`.
 | `changeIsExpanded(isExpanded)` is now named `toggleIsExpanded`, and no longer takes a parameter. | If a parameter was used, set the `isExpanded` observable directly. Otherwise, replace the old name with the new.
@@ -32,18 +34,19 @@
 | `isSelectedToggle()` is now named `toggleIsSelected`. | Simple find-and-replace.
 | `originalData: KnockoutObservable<any>` has been removed. | Create a `[TypeScriptPartial]`, create this field, and populate it in your constructor with the value of the first constructor parameter of the stub that will be provided upon regeneration.
 | `public init()` has been removed. | Create a `[TypeScriptPartial]` and add desired behavior into the constructor of the stub that will be provided upon regeneration.
-| `BaseViewModel.autoSaveEnabled` is deprecated | Use `BaseViewModel.coalesceConfig.autoSaveEnabled` observable instead.
-| `BaseViewModel.showBusyWhenSaving` is deprecated | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
-| `BaseViewModel.showFailureAlerts` is deprecated | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
+| `BaseViewModel.autoSaveEnabled` is deprecated. | Use `BaseViewModel.coalesceConfig.autoSaveEnabled` observable instead.
+| `BaseViewModel.showBusyWhenSaving` is deprecated. | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
+| `BaseViewModel.showFailureAlerts` is deprecated. | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
+| `BaseViewModel.validationIssues` has been removed. | Use `BaseViewModel.message` to get errors that occurred while saving a model. No other methods other than `save` were populating this collection, and it was only being populated with exception messages - not validation issues.
 
 ## Projects, Namespaces, & Generation
 
 | CHANGE | RESOLUTION
 | ------ |----------|
 | Knockout code generation is now contained in IntelliTect.Coalesce.CodeGeneration.Knockout | If using Coalesce as a submodule, optionally add this project to your solution.
-| Knockout helpers are now contained in IntelliTect.Coalesce.Knockout | In all cases, replace project references to `IntelliTect.Coalesce` with `IntelliTect.Coalesce.Knockout`. If using Coalesce as a submodule, optionally add this project to your solution.
-| Namespaces for "Display" and "Knockout" classes have changed from `IntelliTect.Coalesce.Helpers` to `IntelliTect.Coalesce.Knockout.Helpers`. | Update using statements accordingly.
-| The "Coalesce" directory created in the root of a generated web project is no longer used nor needed. A new way to customize/override templates will be introduced at a later date. | Remove this folder. 
+| Knockout helpers are now contained in project `IntelliTect.Coalesce.Knockout` | In all cases, replace project references to `IntelliTect.Coalesce` with `IntelliTect.Coalesce.Knockout`. If using Coalesce as a submodule, optionally add this project to your solution.
+| Namespaces for `Display` and `Knockout` classes have changed from `IntelliTect.Coalesce.Helpers` to `IntelliTect.Coalesce.Knockout.Helpers`. | Update using statements accordingly.
+| The `Coalesce` directory created in the root of a generated web project is no longer used nor needed. A new way to customize/override templates will be introduced at a later date. | Remove this folder. 
 | Coalesce no longer generates any project configuration files that are not found when it generates. This includes: `tsd.json`, `gulpfile.js`, `bower.json`, `package.json`, `site.scss`, `tsconfig.json` | When creating a new project with Coalesce, use the [Starter Project](https://github.com/IntelliTect/Coalesce.Starter/). A `dotnet new` template will be introduced at a later date.
 | Many `.cshtml` view files are no longer generated by Coalesce: `Shared/_AdminLayout.cshtml`, `Shared/_Master.cshtml`, `Shared/_Layout.cshtml`, `_ViewStart.cshtml`, `_ViewImports.cshtml` | When creating a new project with Coalesce, use the [Starter Project](https://github.com/IntelliTect/Coalesce.Starter/). A `dotnet new` template will be introduced at a later date.
 
@@ -53,7 +56,7 @@
 | ------ |----------|
 | Your `DbContext` that Coalesce will generate from is now discovered by the presence of a `[Coalesce]` attribute on its class definition. | Place `[Coalesce]` on your `DbContext` that Coalesce should generate from.
 | `IEnumerable<IClassDto<>>` properties on your `DbContext` are no longer used to discover custom `IClassDto<>` implementations that should be generated | Place a `[Coalesce]` attribute on any `IClassDto<>` classes you wish to generate from. Remove the property on the `DbContext`.
-| Added extension methods for `IServiceProvider`: `services.AddCoalesce()`. This replaces the need for the (formerly) required `ReflectionRepository.AddContext` call in Startup.cs. | Replace call to `ReflectionRepository.AddContext` with `services.AddCoalesce()`.
+| Added extension methods for `IServiceProvider`: `services.AddCoalesce()`. This replaces the need for the (formerly) required `ReflectionRepository.AddContext` call in Startup.cs. | Replace call to `ReflectionRepository.AddContext` in `Configure` or `ConfigureServices` with `services.AddCoalesce()` in `ConfigureServices` in your `Startup.cs`.
 | The default timezone used by Coalesce when interpreting dates without timezone information is no longer "Pacific Standard Time" - it is now `TimeZoneInfo.Local`. | Use one of the `UseTimeZone` overloads in `services.AddCoalesce(b => b.UseTimeZone)` to override this behavior. Use `b.UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))` will restore the old behavior.
 
 
@@ -71,6 +74,7 @@
   * Custom DataSources are now implemented as classes that you define. These classes should inherit from `IDataSource<T>`, where `<T>` is the type of the entity served - the same `<T>` in the old `static IQueryable<T>` methods. 
   * However, you will almost certainly want to inherit from `StandardDataSource<T, TContext>` to maintain the standard set of Coalesce behaviors. Override the `GetQuery` method of `StandardDataSource<,>` and replace it with the former contents of your `static IQueryable<T>` method. 
   * Annotate your DataSource with `[Coalesce]` for it to be discovered, or place it as a nested class of a model that belongs to a `DbContext` that is annotated with `[Coalesce]`.
+  * To prevent `StandardDataSource<T, TContext>` from being made available for a given type `T`, annotate a custom data source that serves the same `T` with `[DefaultDataSource]`.
   * DataSources may contain primitive (strings, numerics, bools, dates, enums) properties annotated with `[Coalesce]`. These properties will be made available in the generated TypeScript and will be automatically populated on the server with the values specified on the client.
   * In TypeScript, the enum that used to contain all the possible datasources is now a namespace that contains all the possible datasource classes.
 

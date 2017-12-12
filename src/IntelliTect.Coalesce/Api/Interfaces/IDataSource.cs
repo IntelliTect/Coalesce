@@ -7,11 +7,10 @@ using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce
 {
-    public interface IDataSource<T>
+
+    public interface IDataSource<T> : IAuthorizable
         where T : class, new()
     {
-        CrudContext Context { get; }
-
         Task<(T item, IncludeTree includeTree)> GetItemAsync(object id, IDataSourceParameters parameters);
         Task<TDto> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
             where TDto : IClassDto<T, TDto>, new();

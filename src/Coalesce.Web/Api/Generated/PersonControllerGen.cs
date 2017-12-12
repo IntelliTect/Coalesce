@@ -57,18 +57,18 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual async Task<SaveResult<PersonDtoGen>> Save(PersonDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource, bool returnObject = true)
+        public virtual async Task<ItemResult<PersonDtoGen>> Save(PersonDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource, bool returnObject = true)
         {
 
             if (!dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<PersonDtoGen>("Create not allowed on Person objects.");
+                var result = new ItemResult<PersonDtoGen>("Create not allowed on Person objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
             else if (dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<PersonDtoGen>("Edit not allowed on Person objects.");
+                var result = new ItemResult<PersonDtoGen>("Edit not allowed on Person objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
@@ -78,13 +78,13 @@ namespace Coalesce.Web.Api
 
         [HttpPost("AddToCollection")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDtoGen> AddToCollection(int id, string propertyName, int childId)
+        public virtual ItemResult<PersonDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [AllowAnonymous]
-        public virtual SaveResult<PersonDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual ItemResult<PersonDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -118,7 +118,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Person> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult<PersonDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Person> dataSource, bool hasHeader = true)
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -137,23 +137,23 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<PersonDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Person> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult<PersonDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Person> dataSource, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<PersonDtoGen>(csv, hasHeader);
-            var resultList = new List<SaveResult<PersonDtoGen>>();
+            var resultList = new List<ItemResult<PersonDtoGen>>();
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
                 if (!dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<PersonDtoGen>("Create not allowed on Person objects.");
+                    var result = new ItemResult<PersonDtoGen>("Create not allowed on Person objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else if (dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<PersonDtoGen>("Edit not allowed on Person objects.");
+                    var result = new ItemResult<PersonDtoGen>("Edit not allowed on Person objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
@@ -173,14 +173,14 @@ namespace Coalesce.Web.Api
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]
-        public virtual async Task<SaveResult<PersonDtoGen>> Rename(int id, string addition)
+        public virtual async Task<ItemResult<PersonDtoGen>> Rename(int id, string name)
         {
-            var result = new SaveResult<PersonDtoGen>();
+            var result = new ItemResult<PersonDtoGen>();
             try
             {
                 IncludeTree includeTree = null;
                 var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
-                var objResult = item.Rename(addition);
+                var objResult = item.Rename(name);
                 Db.SaveChanges();
                 var mappingContext = new MappingContext(User, "");
                 result.Object = Mapper<Coalesce.Domain.Person, PersonDtoGen>.ObjToDtoMapper(objResult, mappingContext, includeTree);
@@ -200,9 +200,9 @@ namespace Coalesce.Web.Api
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
-        public virtual async Task<SaveResult<object>> ChangeSpacesToDashesInName(int id)
+        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName(int id)
         {
-            var result = new SaveResult<object>();
+            var result = new ItemResult<object>();
             try
             {
                 var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
@@ -226,9 +226,9 @@ namespace Coalesce.Web.Api
         /// Method: Add
         /// </summary>
         [HttpPost("Add")]
-        public virtual SaveResult<int> Add(int numberOne, int numberTwo)
+        public virtual ItemResult<int> Add(int numberOne, int numberTwo)
         {
-            var result = new SaveResult<int>();
+            var result = new ItemResult<int>();
             try
             {
                 var objResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
@@ -250,10 +250,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUser")]
         [Authorize]
-        public virtual SaveResult<string> GetUser()
+        public virtual ItemResult<string> GetUser()
         {
             if (!ClassViewModel.MethodByName("GetUser").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
-            var result = new SaveResult<string>();
+            var result = new ItemResult<string>();
             try
             {
                 var objResult = Coalesce.Domain.Person.GetUser(User);
@@ -274,9 +274,9 @@ namespace Coalesce.Web.Api
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]
-        public virtual SaveResult<string> GetUserPublic()
+        public virtual ItemResult<string> GetUserPublic()
         {
-            var result = new SaveResult<string>();
+            var result = new ItemResult<string>();
             try
             {
                 var objResult = Coalesce.Domain.Person.GetUserPublic(User);
@@ -298,10 +298,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual SaveResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
+        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
         {
             if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
-            var result = new SaveResult<System.Collections.Generic.IEnumerable<string>>();
+            var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
             try
             {
                 var objResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);

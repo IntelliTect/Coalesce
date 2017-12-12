@@ -17,7 +17,7 @@ module Coalesce {
             this.parentConfig = parentConfig;
         }
 
-        protected prop = function<TProp>(name: string): ComputedConfiguration<TProp> {
+        protected prop = function <TProp>(name: string): ComputedConfiguration<TProp> {
             var k = "_" + name;
             var raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
@@ -95,7 +95,7 @@ module Coalesce {
             Not valid for global configuration; recommended to be used on class-level configuration.
             E.g. ViewModels.MyModel.coalesceConfig.initialDataSource(MyModel.dataSources.MyDataSource);
         */
-        public initialDataSource = this.prop<DataSource<T> | (new() => DataSource<T>)>("initialDataSource");
+        public initialDataSource = this.prop<DataSource<T> | (new () => DataSource<T>)>("initialDataSource");
 
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
@@ -186,7 +186,10 @@ module Coalesce {
                 }
             })
         }
-            
+
+        constructor() {
+            this._name = Coalesce.Utilities.getClassName(this);
+        }
     }
 
     export abstract class BaseViewModel {
@@ -255,8 +258,6 @@ module Coalesce {
         public isDirty: KnockoutObservable<boolean> = ko.observable(false);
         /** Contains the error message from the last failed call to the server. */
         public errorMessage: KnockoutObservable<string> = ko.observable(null);
-        /** ValidationIssues returned from the server when trying to persist data */
-        public validationIssues: any = ko.observableArray([]);
 
         /**
             If this is true, all changes will be saved automatically.
@@ -401,13 +402,11 @@ module Coalesce {
                                 this.saveCallbacks[i](this);
                             }
                         })
-                        .fail((xhr) => {
+                        .fail((xhr: JQueryXHR) => {
                             var errorMsg = "Unknown Error";
-                            var validationIssues = [];
                             if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                            if (xhr.responseJSON && xhr.responseJSON.validationIssues) validationIssues = xhr.responseJSON.validationIssues;
                             this.errorMessage(errorMsg);
-                            this.validationIssues(validationIssues);
+
                             // If an object was returned, load that object.
                             if (xhr.responseJSON && xhr.responseJSON.object) {
                                 this.loadFromDto(xhr.responseJSON.object, true);
@@ -451,7 +450,7 @@ module Coalesce {
                         if ($.isFunction(callback)) callback(this);
                     })
                     .fail(() => {
-                        this.isLoaded(false);
+                     (false);
                         if (this.coalesceConfig.showFailureAlerts())
                             this.coalesceConfig.onFailure()(this, "Could not load " + this.modelName + " with ID = " + id);
                     })
@@ -530,11 +529,11 @@ module Coalesce {
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
-                    var validationIssues = [];
+                    //var validationIssues = [];
                     if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    if (xhr.responseJSON && xhr.responseJSON.validationIssues) errorMsg = xhr.responseJSON.validationIssues;
+                    //if (xhr.responseJSON && xhr.responseJSON.validationIssues) errorMsg = xhr.responseJSON.validationIssues;
                     this.errorMessage(errorMsg);
-                    this.validationIssues(validationIssues);
+                    //this.validationIssues(validationIssues);
 
                     if (this.coalesceConfig.showFailureAlerts())
                         this.coalesceConfig.onFailure()(this, "Could not save the item: " + errorMsg);
@@ -631,7 +630,7 @@ module Coalesce {
 
             var dataSource = this.coalesceConfig.initialDataSource.peek();
             if (dataSource === null) {
-                dataSource = new this.dataSources.Default()
+                this.dataSource = new this.dataSources.Default()
             } else {
                 if (dataSource instanceof Coalesce.DataSource) {
                     this.dataSource = dataSource

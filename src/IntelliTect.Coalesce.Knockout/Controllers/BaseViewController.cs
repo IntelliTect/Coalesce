@@ -28,15 +28,11 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
         //[OutputCache(Duration = 10000, VaryByParam = "*")]
         protected ActionResult IndexImplementation(bool editable, string viewName = "~/Views/Api/Index.cshtml")
         {
-            ViewBag.ParentIdName = null;
-            ViewBag.ParentId = null;
             ViewBag.Editable = editable;
             ViewBag.Query = "";
-            string[] pageParams = { "page", "pageSize", "search" };
+            string[] pageParams = { "page", "pageSize", "search", "orderBy", "orderByDesc" };
             foreach (var kvp in Request.Query.Where( kvp => !pageParams.Contains(kvp.Key, StringComparer.InvariantCultureIgnoreCase) ))
             {
-                ViewBag.ParentIdName = kvp.Key;
-                ViewBag.ParentId = kvp.Value;
                 ViewBag.Query = ViewBag.Query + WebUtility.UrlEncode(kvp.Key) + "=" + WebUtility.UrlEncode(kvp.Value) + "&";
             }
             ViewBag.Query = ViewBag.Query == "" ? null : new HtmlString( ViewBag.Query );

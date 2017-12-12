@@ -10,8 +10,8 @@ module ListViewModels {
 
     export namespace CaseDtoDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.CaseDto> { }
+                
         export class AllOpenCases extends Coalesce.DataSource<ViewModels.CaseDto> {
-            protected _name = "AllOpenCases"
             public minDate: KnockoutObservable<moment.Moment> = ko.observable(null);
             public saveToDto = () => {
                 var dto: any = {};
@@ -24,11 +24,8 @@ module ListViewModels {
 
     export class CaseDtoList extends Coalesce.BaseListViewModel<ViewModels.CaseDto> {
         protected modelName = "CaseDto";
-
         protected apiController = "/CaseDto";
-
         public modelKeyName = "caseId";
-    
         public itemClass = ViewModels.CaseDto;
 
         public query: {

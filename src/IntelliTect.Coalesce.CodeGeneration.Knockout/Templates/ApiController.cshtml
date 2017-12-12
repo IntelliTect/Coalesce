@@ -116,16 +116,16 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<SaveResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, bool returnObject = true)
+        @(model.ApiActionAccessModifier) virtual async Task<ItemResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, bool returnObject = true)
         {
 
             @(createIf)
-                var result = new SaveResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
+                var result = new ItemResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
             @(editElseIf)
-                var result = new SaveResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
+                var result = new ItemResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
@@ -135,13 +135,13 @@ namespace @(namespaceName).Api
 
         [HttpPost("AddToCollection")]
         @(securityInfo.EditAnnotation)
-        @(model.ApiActionAccessModifier) virtual SaveResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
+        @(model.ApiActionAccessModifier) virtual ItemResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         @(securityInfo.EditAnnotation)
-        @(model.ApiActionAccessModifier) virtual SaveResult<@(model.DtoName)> RemoveFromCollection(int id, string propertyName, int childId)
+        @(model.ApiActionAccessModifier) virtual ItemResult<@(model.DtoName)> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -179,7 +179,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvUpload")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, @dataSourceParameter, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<ItemResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, @dataSourceParameter, bool hasHeader = true) 
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -198,20 +198,20 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvSave")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<SaveResult<@(model.DtoName)>>> CsvSave(string csv, @dataSourceParameter, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<ItemResult<@(model.DtoName)>>> CsvSave(string csv, @dataSourceParameter, bool hasHeader = true) 
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<@(model.DtoName)>(csv, hasHeader);
-            var resultList = new List<SaveResult<@(model.DtoName)>>();
+            var resultList = new List<ItemResult<@(model.DtoName)>>();
             foreach (var dto in list){
                 // Check if creates/edits aren't allowed
                 @(createIf)
-                    var result = new SaveResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
+                    var result = new ItemResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 @(editElseIf)
-                    var result = new SaveResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
+                    var result = new ItemResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
@@ -229,7 +229,7 @@ namespace @(namespaceName).Api
         // Methods from data class exposed through API Controller.
         @foreach (var method in model.ClientMethods)
         {
-            var returnType = $"SaveResult<{method.ReturnTypeNameForApi}>";
+            var returnType = $"ItemResult<{method.ReturnTypeNameForApi}>";
             if (!method.IsStatic) { returnType = $"async Task<{returnType}>"; }
         <text>
         /// <summary>
@@ -243,7 +243,7 @@ namespace @(namespaceName).Api
             @if (method.SecurityInfo.IsExecute) {
             @:if (!ClassViewModel.MethodByName("@method.Name").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
             }
-            var result = new SaveResult<@method.ReturnTypeNameForApi>();
+            var result = new ItemResult<@method.ReturnTypeNameForApi>();
             try{
                 @if (method.ReturnType.HasClassViewModel ||
                     (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection))

@@ -9,9 +9,12 @@ var baseUrl = baseUrl || '';
 module ListViewModels {
 
     export namespace PersonDataSources {
-        export class Default extends Coalesce.DataSource<ViewModels.Person> { }
+                
+        export class WithoutCases extends Coalesce.DataSource<ViewModels.Person> {
+        }
+        export const Default = WithoutCases;
+        
         export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
-            protected _name = "NamesStartingWithAWithCases"
             public paramThing: KnockoutObservable<string> = ko.observable(null);
             public saveToDto = () => {
                 var dto: any = {};
@@ -19,19 +22,16 @@ module ListViewModels {
                 return dto;
             }
         }
+        
         /** People whose last name starts with B or c */
         export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> {
-            protected _name = "BorCPeople"
         }
     }
 
     export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {
         protected modelName = "Person";
-
         protected apiController = "/Person";
-
         public modelKeyName = "personId";
-    
         public itemClass = ViewModels.Person;
 
         public query: {

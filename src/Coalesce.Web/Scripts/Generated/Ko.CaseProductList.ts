@@ -10,15 +10,12 @@ module ListViewModels {
 
     export namespace CaseProductDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.CaseProduct> { }
-    }
+            }
 
     export class CaseProductList extends Coalesce.BaseListViewModel<ViewModels.CaseProduct> {
         protected modelName = "CaseProduct";
-
         protected apiController = "/CaseProduct";
-
         public modelKeyName = "caseProductId";
-    
         public itemClass = ViewModels.CaseProduct;
 
         public query: {

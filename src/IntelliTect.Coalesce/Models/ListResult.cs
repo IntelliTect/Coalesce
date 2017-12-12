@@ -5,10 +5,8 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.Models
 {
-    public class ListResult<T>
+    public class ListResult<T> : ApiResult
     {
-        public bool WasSuccessful { get; set; }
-        public string Message { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int PageCount { get; set; }

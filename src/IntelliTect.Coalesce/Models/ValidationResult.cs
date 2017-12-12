@@ -56,6 +56,7 @@ namespace IntelliTect.Coalesce.Models
 
         //TODO: Build out field level support.
     }
+
     public class ValidateResult<T> : ValidateResult where T : class
     {
         public ValidateResult(bool wasSuccessful = true, string message = null, T returnObject = null)

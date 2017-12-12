@@ -10,15 +10,12 @@ module ListViewModels {
 
     export namespace CompanyDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.Company> { }
-    }
+            }
 
     export class CompanyList extends Coalesce.BaseListViewModel<ViewModels.Company> {
         protected modelName = "Company";
-
         protected apiController = "/Company";
-
         public modelKeyName = "companyId";
-    
         public itemClass = ViewModels.Company;
 
         public query: {

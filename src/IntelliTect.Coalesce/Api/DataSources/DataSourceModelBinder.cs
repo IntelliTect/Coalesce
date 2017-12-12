@@ -35,6 +35,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             }
 
             // Specify a default argument name if none is set by ModelBinderAttribute
+            // This is the name of the query parameter on the URL.
             if (string.IsNullOrEmpty(bindingContext.BinderModelName))
             {
                 bindingContext.BinderModelName = "dataSource";
@@ -43,12 +44,16 @@ namespace IntelliTect.Coalesce.Api.DataSources
             var valueProviderResult =
                 bindingContext.ValueProvider.GetValue(bindingContext.BinderModelName);
 
+            // This is the name of the dataSource that has been requested.
             var requestedDataSource = valueProviderResult.FirstValue;
 
-
+            // Grab the type information about what we need to inject,
+            // and make sure that we're really binding to an IDataSource<>.
             var typeViewModel = new ReflectionTypeViewModel(bindingContext.ModelType);
             if (!typeViewModel.IsA(typeof(IDataSource<>))) return;
 
+            // Figure out what type is satisfying the generic parameter of IDataSource<>.
+            // This is the type that our dataSource needs to serve.
             var servedType = typeViewModel.GenericArgumentsFor(typeof(IDataSource<>)).Single();
 
             object dataSource;
@@ -58,33 +63,33 @@ namespace IntelliTect.Coalesce.Api.DataSources
             }
             catch (DataSourceNotFoundException ex)
             {
-                bindingContext.ModelState.TryAddModelError(bindingContext.BinderModelName, ex, bindingContext.ModelMetadata);
+                // A data-source that doesn't exist was requested. Add a binding error and quit.
+                // The ApiController's IActionFilter (or individual actions) are responsible for handling the response for this error condition.
+                bindingContext.ModelState.TryAddModelError(bindingContext.BinderModelName, ex.Message);
                 return;
             }
 
+            // We now have an IDataSource<> instance. Get its actual type so we can reflect on it.
             var dataSourceType = dataSource.GetType();
 
-            bindingContext.Result = ModelBindingResult.Success(dataSource);
 
-
-            // TODO: how  are we determining which properties to inject into a datasource?
-            // This is using [CoalesceAttribute] - should this be something else?
-            // TODO: pull this logic out of here and into ClassViewModel.
+            // From our concrete dataSource, figure out which properties on it are injectable parameters.
             var desiredPropertyViewModels = 
                 new ReflectionTypeViewModel(dataSourceType).ClassViewModel.DataSourceParameters;
 
+            // Get the ASP.NET MVC metadata objects for these properties.
             var desiredPropertiesMetadata = desiredPropertyViewModels
                 .Select(propViewModel => bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, propViewModel.Name))
                 .ToList();
 
-            var req = desiredPropertiesMetadata.First();
-            var req2 = req.IsBindingRequired;
-
+            // Tell the validation stage that it should only perform validation 
+            // on the specific properties which we are binding to (and not ALL properties on the dataSource).
             bindingContext.ValidationState[dataSource] = new ValidationStateEntry()
             {
                 Strategy = new SelectivePropertyComplexObjectValidationStrategy(desiredPropertiesMetadata)
             };
 
+            // Hijack ComplexTypeModelBinder to do our binding for us on the properties we care about.
             var childBinder = new ComplexTypeModelBinder(desiredPropertiesMetadata.ToDictionary(
                 property => property,
                 property => modelBinderFactory.CreateBinder(new ModelBinderFactoryContext
@@ -101,6 +106,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 })
             ));
 
+            // Enter a nested scope for binding the properties on our dataSource
+            // (we're now 1 level deep instead of 0 levels deep).
             using (bindingContext.EnterNestedScope(
                 bindingContext.ModelMetadata.GetMetadataForType(dataSourceType),
                 bindingContext.FieldName,
@@ -115,7 +122,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 // it causeses validation of client parameter properties
                 // to not occurr if the client didn't provide any values for those parameters.
 
-                // The alternative to do this would be to make a full copy of ComplexTypeModelBinder and
+                // The alternative to do this would be to make a full copy of ComplexTypeModelBinder.cs and
                 // change out the desired pieces.
                 await (childBinder
                     .GetType()
@@ -123,16 +130,33 @@ namespace IntelliTect.Coalesce.Api.DataSources
                     .Invoke(childBinder, new[] { bindingContext }) as Task);
                 // await childBinder.BindModelAsync(bindingContext);
             }
+
+            // Perform auth check after binding parameters,
+            // so that any parameters may be used as part of checking auth
+            // (maybe certain users aren't allowed to query with certain parameters).
+            var authCheck = (dataSource as IAuthorizable).IsAuthorized();
+            if (!authCheck.Authorized)
+            {
+                bindingContext.ModelState.TryAddModelError(
+                    bindingContext.BinderModelName, 
+                    authCheck.Message ?? $"Access to DataSource '{requestedDataSource}' is unauthorized.");
+                return;
+            }
+
+            // Everything worked out; we have a dataSource!
+            // Hand back our resulting object, and we're done.
+            bindingContext.Result = ModelBindingResult.Success(dataSource);
         }
 
         private class SelectivePropertyComplexObjectValidationStrategy : IValidationStrategy
         {
+            private readonly ICollection<ModelMetadata> properties;
+
             public SelectivePropertyComplexObjectValidationStrategy(ICollection<ModelMetadata> properties)
             {
-                Properties = properties;
+                this.properties = properties;
             }
 
-            public ICollection<ModelMetadata> Properties { get; }
 
             /// <inheritdoc />
             public IEnumerator<ValidationEntry> GetChildren(
@@ -142,7 +166,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             {
                 if (model == null) return Enumerable.Empty<ValidationEntry>().GetEnumerator();
 
-                return Properties
+                return properties
                     .Select(p => new ValidationEntry(p, ModelNames.CreatePropertyModelName(key, p.BinderModelName ?? p.PropertyName), model))
                     .GetEnumerator();
             }

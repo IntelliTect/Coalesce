@@ -123,9 +123,13 @@ namespace IntelliTect.Coalesce.Validation
                     {
                         assert.IsTrue(false, $"Exception method validation. {ex.Message}");
                     }
-
                 }
+            }
 
+            // Validate data sources.
+            foreach (var sourcesForType in repository.DataSources.GroupBy(s => s.SourceFor))
+            {
+                assert.IsTrue(sourcesForType.Count(s => s.DataSourceClass.IsDefaultDataSource) <= 1, $"Cannot have multiple default data sources for {sourcesForType.Key}");
             }
 
             // Validate the non-DbSet items (DTOs)

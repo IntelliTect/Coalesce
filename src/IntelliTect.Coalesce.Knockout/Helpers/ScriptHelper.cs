@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         }}
 
         // Save and restore values from the URL:
-        var urlVariables = ['page', 'pageSize', 'search'];
+        var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){{
             var param = Coalesce.Utilities.GetUrlParameter(this);
             if (param) {{{model.ListViewModelObjectName}[this](param);}}

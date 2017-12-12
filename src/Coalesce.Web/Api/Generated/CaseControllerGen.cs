@@ -57,18 +57,18 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual async Task<SaveResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, bool returnObject = true)
+        public virtual async Task<ItemResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, bool returnObject = true)
         {
 
             if (!dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<CaseDtoGen>("Create not allowed on Case objects.");
+                var result = new ItemResult<CaseDtoGen>("Create not allowed on Case objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
             else if (dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<CaseDtoGen>("Edit not allowed on Case objects.");
+                var result = new ItemResult<CaseDtoGen>("Edit not allowed on Case objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
@@ -78,13 +78,13 @@ namespace Coalesce.Web.Api
 
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<CaseDtoGen> AddToCollection(int id, string propertyName, int childId)
+        public virtual ItemResult<CaseDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<CaseDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual ItemResult<CaseDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -118,7 +118,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<CaseDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult<CaseDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -137,23 +137,23 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<SaveResult<CaseDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult<CaseDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CaseDtoGen>(csv, hasHeader);
-            var resultList = new List<SaveResult<CaseDtoGen>>();
+            var resultList = new List<ItemResult<CaseDtoGen>>();
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
                 if (!dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<CaseDtoGen>("Create not allowed on Case objects.");
+                    var result = new ItemResult<CaseDtoGen>("Create not allowed on Case objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else if (dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<CaseDtoGen>("Edit not allowed on Case objects.");
+                    var result = new ItemResult<CaseDtoGen>("Edit not allowed on Case objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
@@ -173,9 +173,9 @@ namespace Coalesce.Web.Api
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
-        public virtual SaveResult<int> GetAllOpenCasesCount()
+        public virtual ItemResult<int> GetAllOpenCasesCount()
         {
-            var result = new SaveResult<int>();
+            var result = new ItemResult<int>();
             try
             {
                 var objResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
@@ -196,9 +196,9 @@ namespace Coalesce.Web.Api
         /// Method: RandomizeDatesAndStatus
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
-        public virtual SaveResult<object> RandomizeDatesAndStatus()
+        public virtual ItemResult<object> RandomizeDatesAndStatus()
         {
-            var result = new SaveResult<object>();
+            var result = new ItemResult<object>();
             try
             {
                 object objResult = null;
@@ -220,9 +220,9 @@ namespace Coalesce.Web.Api
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]
-        public virtual SaveResult<CaseSummaryDtoGen> GetCaseSummary()
+        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
-            var result = new SaveResult<CaseSummaryDtoGen>();
+            var result = new ItemResult<CaseSummaryDtoGen>();
             try
             {
                 IncludeTree includeTree = null;

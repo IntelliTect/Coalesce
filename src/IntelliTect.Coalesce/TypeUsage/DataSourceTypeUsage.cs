@@ -41,5 +41,12 @@ namespace IntelliTect.Coalesce.TypeUsage
         /// This may not be equal to SourceFor in the case of IClassDto.
         /// </summary>
         public ClassViewModel ServedType { get; }
+
+        public override int GetHashCode() => unchecked(DataSourceClass.GetHashCode() + SourceFor.GetHashCode());
+
+        public override bool Equals(object obj) =>
+            obj is DataSourceTypeUsage that 
+            && DataSourceClass.Equals(that.DataSourceClass) 
+            && SourceFor.Equals(that.SourceFor);
     }
 }

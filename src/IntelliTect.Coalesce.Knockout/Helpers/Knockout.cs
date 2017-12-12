@@ -427,7 +427,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             string result = string.Format(@"
                     <select class=""form-control"" 
-                        data-bind=""select2Ajax: {6}{0}, url: function() {{ return '/api/{1}/customlist{8}' }}, idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
+                        data-bind=""select2Ajax: {6}{0}, url: function() {{ return '/api/{1}/list{8}' }}, idField: '{2}', textField: '{3}', object: {6}{4}, allowClear: {7}"" 
                         placeholder=""{5}"">
                             <option>{5}</option>
                     </select >
@@ -463,7 +463,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             string result = string.Format(@"
                 <select data-bind = ""select2AjaxMultiple: {0}{1}, itemViewModel: {6}ViewModels.{2}, 
-                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/customlist?includes=none', pageSize: '{7}',""
+                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/list?includes=none', pageSize: '{7}',""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
                 prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
@@ -721,7 +721,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         //{
         //    string result = string.Format(@"
         //        <select class="""" style=""width: 100%;"" 
-        //            data-bind=""select2Ajax: {0}, url: '/api/adult/customlist', idField: 'AdultId', textField: 'NameAndBirthday', object: callLog().adult" placeholder = "Select Caller" >
+        //            data-bind=""select2Ajax: {0}, url: '/api/adult/list', idField: 'AdultId', textField: 'NameAndBirthday', object: callLog().adult" placeholder = "Select Caller" >
         //              < option ></ option >
         //          </ select > ", 
         //          valueId);

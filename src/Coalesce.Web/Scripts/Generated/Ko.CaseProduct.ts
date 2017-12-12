@@ -191,8 +191,8 @@ module ViewModels {
             // Create computeds for display for objects
 			self.caseText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.case() && self.case().caseKey()) {
-					return self.case().caseKey().toString();
+				if (self.case() && self.case().title()) {
+					return self.case().title().toString();
 				} else {
 					return "None";
 				}

@@ -10,15 +10,12 @@ module ListViewModels {
 
     export namespace ProductDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.Product> { }
-    }
+            }
 
     export class ProductList extends Coalesce.BaseListViewModel<ViewModels.Product> {
         protected modelName = "Product";
-
         protected apiController = "/Product";
-
         public modelKeyName = "productId";
-    
         public itemClass = ViewModels.Product;
 
         public query: {

@@ -57,18 +57,18 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual async Task<SaveResult<CompanyDtoGen>> Save(CompanyDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Company> dataSource, bool returnObject = true)
+        public virtual async Task<ItemResult<CompanyDtoGen>> Save(CompanyDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Company> dataSource, bool returnObject = true)
         {
 
             if (!dto.CompanyId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new SaveResult<CompanyDtoGen>("Create not allowed on Company objects.");
+                var result = new ItemResult<CompanyDtoGen>("Create not allowed on Company objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
             else if (dto.CompanyId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new SaveResult<CompanyDtoGen>("Edit not allowed on Company objects.");
+                var result = new ItemResult<CompanyDtoGen>("Edit not allowed on Company objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return result;
             }
@@ -78,13 +78,13 @@ namespace Coalesce.Web.Api
 
         [HttpPost("AddToCollection")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> AddToCollection(int id, string propertyName, int childId)
+        public virtual ItemResult<CompanyDtoGen> AddToCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Add");
         }
         [HttpPost("RemoveFromCollection")]
         [Authorize]
-        public virtual SaveResult<CompanyDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
+        public virtual ItemResult<CompanyDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
         {
             return ChangeCollection(id, propertyName, childId, "Remove");
         }
@@ -118,7 +118,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CompanyDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Company> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult<CompanyDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Company> dataSource, bool hasHeader = true)
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -137,23 +137,23 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize]
-        public virtual async Task<IEnumerable<SaveResult<CompanyDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Company> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult<CompanyDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Company> dataSource, bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CompanyDtoGen>(csv, hasHeader);
-            var resultList = new List<SaveResult<CompanyDtoGen>>();
+            var resultList = new List<ItemResult<CompanyDtoGen>>();
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
                 if (!dto.CompanyId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new SaveResult<CompanyDtoGen>("Create not allowed on Company objects.");
+                    var result = new ItemResult<CompanyDtoGen>("Create not allowed on Company objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }
                 else if (dto.CompanyId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new SaveResult<CompanyDtoGen>("Edit not allowed on Company objects.");
+                    var result = new ItemResult<CompanyDtoGen>("Edit not allowed on Company objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     resultList.Add(result);
                 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System;
 
-namespace IntelliTect.Coalesce.Mvc
+namespace IntelliTect.Coalesce.Api.DataSources
 {
     public class DataSourceModelBinderProvider : IModelBinderProvider
     {

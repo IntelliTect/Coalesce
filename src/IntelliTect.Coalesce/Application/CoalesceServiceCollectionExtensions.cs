@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce
         {
             public void Configure(MvcOptions options)
             {
-                options.ModelBinderProviders.Insert(0, new IntelliTect.Coalesce.Mvc.DataSourceModelBinderProvider());
+                options.ModelBinderProviders.Insert(0, new DataSourceModelBinderProvider());
             }
         }
     }

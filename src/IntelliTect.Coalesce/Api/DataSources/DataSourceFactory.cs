@@ -18,43 +18,50 @@ namespace IntelliTect.Coalesce.Api.DataSources
             this.reflectionRepository = reflectionRepository;
         }
 
+        protected Type GetDataSourceType(ClassViewModel servedType, string dataSourceName)
+        {
+            var dataSources = servedType.ClientDataSources(reflectionRepository);
+
+            var dataSourceClassViewModel = dataSources.FirstOrDefault(t => t.Name == dataSourceName);
+            if (dataSourceClassViewModel == null)
+            {
+                if (dataSourceName == "" || dataSourceName == "Default" || dataSourceName == null)
+                {
+                    return GetDefaultDataSourceType(servedType);
+                }
+                else
+                {
+                    throw new DataSourceNotFoundException(servedType, dataSourceName);
+                }
+            }
+            else
+            {
+                return (dataSourceClassViewModel.Type as ReflectionTypeViewModel).Info;
+            }
+        }
+
         public IDataSource<T> GetDataSource<T>(string dataSourceName)
             where T : class, new()
         {
             return GetDataSource(reflectionRepository.GetClassViewModel<T>(), dataSourceName) as IDataSource<T>;
         }
 
-        public object GetDataSource(Type servedType, string dataSourceName)
-        {
-            return GetDataSource(reflectionRepository.GetClassViewModel(servedType), dataSourceName);
-        }
-
         public object GetDataSource(ClassViewModel servedType, string dataSourceName)
         {
-            var dataSources = servedType.ClientDataSources(reflectionRepository);
-
-            Type dataSourceType = null;
-            var dataSourceClassViewModel = dataSources.FirstOrDefault(t => t.Name == dataSourceName);
-            if (dataSourceClassViewModel == null)
-            {
-                if (dataSourceName == "" || dataSourceName == "Default" || dataSourceName == null)
-                {
-                    return GetDefaultDataSource(servedType);
-                }
-                else
-                {
-                    // TODO: don't thow an exception. Handle the error through model state errors.
-                    throw new Exception($"unknown data source {dataSourceName}");
-                }
-            }
-            else
-            {
-                dataSourceType = (dataSourceClassViewModel.Type as ReflectionTypeViewModel).Info;
-            }
-
+            var dataSourceType = GetDataSourceType(servedType, dataSourceName);
             return ActivatorUtilities.CreateInstance(serviceProvider, dataSourceType);
         }
 
+
+        protected Type GetDefaultDataSourceType(ClassViewModel servedType)
+        {
+            var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
+            var dataSourceType = typeof(StandardDataSource<,>).MakeGenericType(
+                (servedType.Type as ReflectionTypeViewModel).Info,
+                (tContext.ClassViewModel.Type as ReflectionTypeViewModel).Info
+            );
+            return dataSourceType;
+        }
 
         public IDataSource<T> GetDefaultDataSource<T>()
             where T : class, new()
@@ -62,19 +69,9 @@ namespace IntelliTect.Coalesce.Api.DataSources
             return GetDefaultDataSource(reflectionRepository.GetClassViewModel<T>()) as IDataSource<T>;
         }
 
-        public object GetDefaultDataSource(Type servedType)
-        {
-            return GetDefaultDataSource(reflectionRepository.GetClassViewModel(servedType));
-        }
-
         public object GetDefaultDataSource(ClassViewModel servedType)
         {
-            var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
-            var dataSourceType = typeof(StandardDataSource<,>).MakeGenericType(
-                (servedType.Type as ReflectionTypeViewModel).Info,
-                (tContext.ClassViewModel.Type as ReflectionTypeViewModel).Info
-            );
-
+            var dataSourceType = GetDefaultDataSourceType(servedType);
             return ActivatorUtilities.CreateInstance(serviceProvider, dataSourceType);
         }
     }

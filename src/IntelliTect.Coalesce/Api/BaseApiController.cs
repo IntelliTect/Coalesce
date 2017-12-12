@@ -25,6 +25,7 @@ using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Utilities;
 using System.Globalization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace IntelliTect.Coalesce.Api
 {
@@ -600,6 +601,25 @@ namespace IntelliTect.Coalesce.Api
         protected virtual bool AfterDelete(T obj, TContext context)
         {
             return true;
+        }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            //context.ModelState.FindKeysWithPrefix("dataSource")
+            if (!context.ModelState.IsValid)
+            {
+                var errors = context.ModelState
+                    .Where(v => v.Value.Errors.Any() && v.Key.StartsWith("dataSource", StringComparison.InvariantCultureIgnoreCase))
+                    .SelectMany(v => v.Value.Errors.Select(e => (key: v.Key, error: e.ErrorMessage)))
+                    .ToList();
+
+                if (errors.Any())
+                {
+                    context.Result = this.BadRequest(new SaveResult(string.Join("; ", errors)));
+                }
+            }
+            var test = context.ActionArguments;
+            base.OnActionExecuting(context);
         }
 
         public override void OnActionExecuted(ActionExecutedContext context)

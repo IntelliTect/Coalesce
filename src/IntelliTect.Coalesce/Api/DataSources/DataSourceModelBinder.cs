@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Mvc
+namespace IntelliTect.Coalesce.Api.DataSources
 {
     public class DataSourceModelBinder : IModelBinder
     {
@@ -35,14 +35,13 @@ namespace IntelliTect.Coalesce.Mvc
             }
 
             // Specify a default argument name if none is set by ModelBinderAttribute
-            var dataSourceDescriminator = bindingContext.BinderModelName;
-            if (string.IsNullOrEmpty(dataSourceDescriminator))
+            if (string.IsNullOrEmpty(bindingContext.BinderModelName))
             {
-                dataSourceDescriminator = "dataSource";
+                bindingContext.BinderModelName = "dataSource";
             }
 
             var valueProviderResult =
-                bindingContext.ValueProvider.GetValue(dataSourceDescriminator);
+                bindingContext.ValueProvider.GetValue(bindingContext.BinderModelName);
 
             var requestedDataSource = valueProviderResult.FirstValue;
 
@@ -52,7 +51,17 @@ namespace IntelliTect.Coalesce.Mvc
 
             var servedType = typeViewModel.GenericArgumentsFor(typeof(IDataSource<>)).Single();
 
-            var dataSource = dataSourceFactory.GetDataSource(servedType.ClassViewModel, requestedDataSource);
+            object dataSource;
+            try
+            {
+                dataSource = dataSourceFactory.GetDataSource(servedType.ClassViewModel, requestedDataSource);
+            }
+            catch (DataSourceNotFoundException ex)
+            {
+                bindingContext.ModelState.TryAddModelError(bindingContext.BinderModelName, ex, bindingContext.ModelMetadata);
+                return;
+            }
+
             var dataSourceType = dataSource.GetType();
 
             bindingContext.Result = ModelBindingResult.Success(dataSource);
@@ -67,6 +76,9 @@ namespace IntelliTect.Coalesce.Mvc
             var desiredPropertiesMetadata = desiredPropertyViewModels
                 .Select(propViewModel => bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, propViewModel.Name))
                 .ToList();
+
+            var req = desiredPropertiesMetadata.First();
+            var req2 = req.IsBindingRequired;
 
             bindingContext.ValidationState[dataSource] = new ValidationStateEntry()
             {
@@ -96,9 +108,23 @@ namespace IntelliTect.Coalesce.Mvc
                 dataSource))
             {
                 bindingContext.PropertyFilter = p => desiredPropertiesMetadata.Contains(p);
-                await childBinder.BindModelAsync(bindingContext);
+
+                // We call the private method "BindModelCoreAsync" here because
+                // "BindModelAsync" performs a check to see if we should bother instantiating the root model (our dataSource).
+                // We already instantiated our dataSource, so this check is meaningless. The consequence of this frivolous check is that 
+                // it causeses validation of client parameter properties
+                // to not occurr if the client didn't provide any values for those parameters.
+
+                // The alternative to do this would be to make a full copy of ComplexTypeModelBinder and
+                // change out the desired pieces.
+                await (childBinder
+                    .GetType()
+                    .GetMethod("BindModelCoreAsync", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Invoke(childBinder, new[] { bindingContext }) as Task);
+                // await childBinder.BindModelAsync(bindingContext);
             }
         }
+
         private class SelectivePropertyComplexObjectValidationStrategy : IValidationStrategy
         {
             public SelectivePropertyComplexObjectValidationStrategy(ICollection<ModelMetadata> properties)

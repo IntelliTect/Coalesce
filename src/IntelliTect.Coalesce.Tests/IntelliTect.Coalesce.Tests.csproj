@@ -28,4 +28,8 @@
     <PackageReference Include="xunit" Version="2.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TypeDefinition\Symbol\" />
+  </ItemGroup>
+
 </Project>

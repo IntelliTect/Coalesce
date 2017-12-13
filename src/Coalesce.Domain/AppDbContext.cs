@@ -1,7 +1,6 @@
 ﻿using Coalesce.Domain.External;
 using Coalesce.Domain.Repositories;
-using IntelliTect.Coalesce.Data;
-using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Collections.Generic;

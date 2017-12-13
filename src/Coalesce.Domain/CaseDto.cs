@@ -1,14 +1,11 @@
-﻿using IntelliTect.Coalesce.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using IntelliTect.Coalesce.Mapping.IncludeTree;
-using IntelliTect.Coalesce.Mapping;
-using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce;
 
 namespace Coalesce.Domain
 {

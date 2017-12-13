@@ -24,7 +24,7 @@ module Cases {
                         return obj.value.toLowerCase() == status.toLowerCase();
                     });
                     if (retrievedStatus.length > 0) {
-                        this.cases.filter = { status: retrievedStatus[0].id };
+                        this.cases.filter = { status: retrievedStatus[0].id.toString() };
                     }
                 }
             }

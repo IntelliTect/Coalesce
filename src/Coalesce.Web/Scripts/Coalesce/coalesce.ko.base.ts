@@ -100,8 +100,8 @@ module Coalesce {
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
         */
-        public raw = (name: keyof this): KnockoutObservable<any> => {
-            return this["_" + name];
+        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
+            return (this as any)["_" + name];
         }
     }
 
@@ -110,8 +110,8 @@ module Coalesce {
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
         */
-        public raw = (name: keyof this): KnockoutObservable<any> => {
-            return this["_" + name];
+        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
+            return (this as any)["_" + name];
         }
     }
 
@@ -120,7 +120,8 @@ module Coalesce {
         public listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
     }
 
-    var invalidProp: any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
+    var invalidPropFunc: () => any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
+    var invalidProp: any = invalidPropFunc;
     invalidProp.raw = invalidProp;
 
     export var GlobalConfiguration = new RootConfig();
@@ -157,7 +158,7 @@ module Coalesce {
     export abstract class DataSource<T extends BaseViewModel> {
         protected _name: string;
 
-        public saveToDto: () => object = () => { return {}; }
+        public saveToDto: () => { [x: string]: string } = () => { return {}; }
 
         // This is computed so we can subscribe to when the request to the server changes,
         // and then reload objects/lists accordingly.
@@ -196,7 +197,7 @@ module Coalesce {
 
         protected modelName: string;
         protected modelDisplayName: string;
-        protected primaryKeyName: string;
+        protected primaryKeyName: keyof this;
 
         protected apiController: string;
         protected viewController: string;

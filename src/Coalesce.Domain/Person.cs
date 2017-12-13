@@ -10,7 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping.IncludeTree;
+using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce;
 
 namespace Coalesce.Domain

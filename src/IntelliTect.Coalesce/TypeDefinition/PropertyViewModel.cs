@@ -638,21 +638,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
 
         /// <summary>
-        /// If true, this property should be searchable on the URL line. 
+        /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 
         /// </summary>
-        public bool IsUrlParameter =>
-            (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
-
-        /// <summary>
-        /// List of words already used in the API for other things.
-        /// </summary>
-        private static readonly string[] ReservedUrlParameterNames = new[] {
-            "fields","include","includes","orderby","orderbydescending","page","pagesize","where","dataSource","case","params","if","this","base"};
-
-        /// <summary>
-        /// Name of the field to use in the API. If this is in ReservedUrlParameterNames, then my is added to the name.
-        /// </summary>
-        public string UrlParameterName => ReservedUrlParameterNames.Contains(Name.ToLower()) ? "my" + Name : Name.ToCamelCase();
+        public bool IsUrlFilterParameter => IsClientProperty && (Type.IsPrimitive || Type.IsDate);
 
         /// <summary>
         /// True if this property has the Includes Attribute

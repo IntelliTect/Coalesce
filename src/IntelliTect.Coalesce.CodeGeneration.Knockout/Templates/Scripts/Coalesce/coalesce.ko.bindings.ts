@@ -3,7 +3,7 @@
 // Extend JQuery for Select2 4.0 since type bindings are not available yet.
 interface JQuery {
     select2(): JQuery;
-    select2(any): JQuery;
+    select2(any: any): JQuery;
 }
 
 // There is an issue with the current data time picker definitely typed definition.
@@ -27,8 +27,8 @@ interface KnockoutBindingHandlers {
     tooltip: KnockoutBindingHandler;
     fadeVisible: KnockoutBindingHandler;
     slideVisible: KnockoutBindingHandler;
-    moment: any;
-    momentFromNow: any;
+    moment: KnockoutBindingHandler & { defaults: any };
+    momentFromNow: KnockoutBindingHandler & { defaults: any };
     booleanValue: KnockoutBindingHandler;
     formatNumberText: KnockoutBindingHandler;
 }
@@ -56,8 +56,8 @@ ko.bindingHandlers.select2Ajax = {
                     url: allBindings.get('url'),
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) {
-                        var data = {
+                    data: function (params: any) {
+                        var data: any = {
                             search: params.term,
                             page: params.page,
                             pageSize: pageSize,
@@ -67,14 +67,15 @@ ko.bindingHandlers.select2Ajax = {
                             data["_"] = new Date().getTime();
                         return data;
                     },
-                    processResults: function (data, params) {
+                    processResults: function (data: any, params: any) {
                         if (allBindings.has('idField')) {
 
                             if (allowClear && params.page == 1) {
                                 // Add a blank item
-                                var blank = {};
-                                blank[idField] = 0;
-                                blank[textField] = 'No Selection';
+                                var blank = {
+                                    [idField]: 0,
+                                    [textField]: 'No Selection',
+                                };
                                 data.list.unshift(blank);
                             }
                             for (var i in data.list) {
@@ -95,11 +96,11 @@ ko.bindingHandlers.select2Ajax = {
                 placeholder: placeholder,
                 allowClear: allowClear,
                 selectOnClose: selectOnClose,
-                templateResult: function (e) {
-                    return format.replace('{0}', (e[textField] || e.text || e));
+                templateResult: function (item: any) {
+                    return format.replace('{0}', (item[textField] || item.text || item));
                 },
-                templateSelection: function (e) {
-                    return selectionFormat.replace('{0}', (e[textField] || e.text || e));
+                templateSelection: function (item: any) {
+                    return selectionFormat.replace('{0}', (item[textField] || item.text || item));
                 },
             })
             .on("change", function (e) {
@@ -130,7 +131,7 @@ ko.bindingHandlers.select2Ajax = {
                 }
             });
         if (openOnFocus) {
-            $.data(element).select2.on("focus", function (e) {
+            $.data(element).select2.on("focus", function () {
                 $(element).select2("open");
             });
         }
@@ -203,8 +204,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     url: url,
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) {
-                        var data = {
+                    data: function (params: any) {
+                        var data: any = {
                             search: params.term,
                             page: params.page
                         };
@@ -212,7 +213,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             data["_"] = new Date().getTime();
                         return data;
                     },
-                    processResults: function (data, params) {
+                    processResults: function (data: any, params: any) {
                         params.page = params.page || 1;
                         for (var i in data.list) {
                             data.list[i].id = data.list[i][idFieldName];
@@ -231,17 +232,17 @@ ko.bindingHandlers.select2AjaxMultiple = {
                 placeholder: placeholder,
                 selectOnClose: selectOnClose,
                 allowClear: allowClear,
-                templateResult: function (e) {
-                    if (e.Classes) {
+                templateResult: function (item: any) {
+                    if (item.Classes) {
                         // This has a class use the formatting
-                        var optionElement = $('<span class="' + e.Classes + '">' +
-                            format.replace('{0}', (e[textFieldName] || e.text || e))
+                        var optionElement = $('<span class="' + item.Classes + '">' +
+                            format.replace('{0}', (item[textFieldName] || item.text || item))
                             + '</span>');
                         return optionElement;
                     }
-                    return format.replace('{0}', (e[textFieldName] || e.text || e));
+                    return format.replace('{0}', (item[textFieldName] || item.text || item));
                 },
-                templateSelection: function (e) {
+                templateSelection: function (item: any) {
                     //if (e.Classes) {
                     //    // This has a class use the formatting
                     //    var optionElement = $('<span class="' + e.Classes + '">' +
@@ -249,7 +250,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     //        + '</span>');
                     //    return optionElement;
                     //}
-                    return selectionFormat.replace('{0}', (e[textFieldName] || e.text || e));
+                    return selectionFormat.replace('{0}', (item[textFieldName] || item.text || item));
                 },
             })
             .on("change", function (e) {
@@ -302,7 +303,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                 $(element).data("select2-ajax-updating", false);
             });
         if (openOnFocus) {
-            $.data(element).select2.on("focus", function (e) {
+            $.data(element).select2.on("focus", function () {
                 $(element).select2("open");
             });
         }
@@ -362,7 +363,7 @@ ko.bindingHandlers.select2AjaxText = {
         var allowClear = allBindings.get('allowClear') || true
         var placeholder = $(element).attr('placeholder') || "select";
 
-        var myParams;
+        var myParams: any;
 
         // Create the Select2
         $(element)
@@ -371,9 +372,9 @@ ko.bindingHandlers.select2AjaxText = {
                     url: url,
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) {
+                    data: function (params: any) {
                         myParams = params
-                        var data = {
+                        var data: any = {
                             property: allBindings.get('property'),
                             search: params.term,
                             page: params.page
@@ -382,13 +383,14 @@ ko.bindingHandlers.select2AjaxText = {
                             data["_"] = new Date().getTime();
                         return data;
                     },
-                    processResults: function (data, page) {
+                    processResults: function (data: any, page: any) {
                         var result = [];
                         if (allowClear && !myParams.term) {
                             // Add a blank item
-                            var blank = {};
-                            blank["id"] = 0;
-                            blank["text"] = 'No Selection';
+                            var blank = {
+                                id: 0,
+                                text: 'No Selection'
+                            };
                             result.unshift(blank);
                         }
                         var perfectMatch = false;
@@ -425,7 +427,7 @@ ko.bindingHandlers.select2AjaxText = {
                 }
             });
         if (openOnFocus) {
-            $.data(element).select2.on("focus", function (e) {
+            $.data(element).select2.on("focus", function () {
                 $(element).select2("open");
             });
         }
@@ -476,7 +478,7 @@ ko.bindingHandlers.select2 = {
                 }
             });
         if (openOnFocus) {
-            $.data(element).select2.on("focus", function (e) {
+            $.data(element).select2.on("focus", function () {
                 $(element).select2("open");
             });
         }
@@ -556,13 +558,13 @@ ko.bindingHandlers.saveImmediately = {
         }
 
         // Set up to save immediately when the cursor enters and return to a regular state when it leaves.
-        var oldValue;
+        var oldTimeoutValue: number;
         $(element).on("focus", function () {
-            oldValue = viewModel.coalesceConfig.saveTimeoutMs.raw();
+            oldTimeoutValue = viewModel.coalesceConfig.saveTimeoutMs.raw();
             viewModel.coalesceConfig.saveTimeoutMs(0);
         });
         $(element).on("blur", function () {
-            viewModel.coalesceConfig.saveTimeoutMs(oldValue);
+            viewModel.coalesceConfig.saveTimeoutMs(oldTimeoutValue);
         });
     }
 };
@@ -610,7 +612,7 @@ ko.bindingHandlers.tooltip = {
     update: function (element, valueAccessor) {
         var $element = $(element);
         var value = ko.unwrap(valueAccessor());
-        var options = {};
+        var options: any = {};
 
         if (value === null || typeof value !== 'object') {
             options = value;
@@ -706,11 +708,6 @@ ko.virtualElements.allowedBindings['let'] = true;
 
     ko.bindingHandlers.moment = {
 
-        isDate: function (input) {
-            return Object.prototype.toString.call(input) === '[object Date]' ||
-                input instanceof Date;
-        },
-
         defaults: {
             invalid: '',
             format: 'MM/DD/YYYY'
@@ -764,11 +761,6 @@ ko.virtualElements.allowedBindings['let'] = true;
 
 
     ko.bindingHandlers.momentFromNow = {
-
-        isDate: function (input) {
-            return Object.prototype.toString.call(input) === '[object Date]' ||
-                input instanceof Date;
-        },
 
         defaults: {
             invalid: '',

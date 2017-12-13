@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using IntelliTect.Coalesce.Mapping.IncludeTree;
-using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Mapping;
 
 namespace IntelliTect.Coalesce
@@ -102,7 +101,7 @@ namespace IntelliTect.Coalesce
             foreach (var clause in parameters.Filter)
             {
                 var prop = ClassViewModel.PropertyByName(clause.Key);
-                if (prop != null)
+                if (prop != null && prop.IsClientProperty && prop.IsUrlFilterParameter)
                 {
                     query = DatabaseCompareExpression(query, prop, clause.Value);
                 }

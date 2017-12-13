@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IntelliTect.Coalesce.Mapping.IncludeTree;
-using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce

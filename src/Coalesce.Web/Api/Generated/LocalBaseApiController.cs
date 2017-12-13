@@ -1,5 +1,5 @@
-﻿using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Interfaces;
+﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.Api;
 
 namespace Coalesce.Web.Api
 {

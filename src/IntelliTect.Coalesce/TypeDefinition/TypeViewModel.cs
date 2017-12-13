@@ -75,10 +75,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool => new[] { "bool", "boolean" }.Contains(Name.ToLowerInvariant());
+        public bool IsBool => UnderlyingNullableType.Name == nameof(Boolean);
 
         /// <summary>
-        /// Returns true if the property returns void.
+        /// Returns true if this TypeViewModel represents void.
         /// </summary>
         public bool IsVoid => Name.ToLowerInvariant() == "void";
 
@@ -170,7 +170,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                switch (PureType.Name)
+                switch (UnderlyingNullableType.Name)
                 {
                     case nameof(Byte):
                     case nameof(Int16):
@@ -190,7 +190,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Gets the type name without any collection around it.
+        /// If this represents a nullable type, returns the underlying type that is nullable.
+        /// Otherwise, returns the current instance.
+        /// </summary>
+        public TypeViewModel UnderlyingNullableType => IsNullable ? FirstTypeArgument : this;
+
+        /// <summary>
+        /// Gets the type name without any collection or nullable around it.
         /// </summary>
         public TypeViewModel PureType
         {

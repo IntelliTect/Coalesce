@@ -28,7 +28,15 @@
     <None Remove="Templates\Views\Shared\**" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Remove="Templates\Scripts\tsconfig.json" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Templates\Scripts\tsconfig.json">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
   
   <ItemGroup>

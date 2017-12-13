@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using System.Collections.Concurrent;
-using IntelliTect.Coalesce.Interfaces;
 using IntelliTect.Coalesce.TypeUsage;
 
 namespace IntelliTect.Coalesce.TypeDefinition

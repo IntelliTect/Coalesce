@@ -7,7 +7,7 @@ module Coalesce {
             var lookup: { [k: string]: T; } = {};
             for (let i = 0; i < array.length; i++) {
                 var item = array[i];
-                var key = ko.unwrap(item[idField]);
+                var key = ko.unwrap((item as any)[idField]);
 
                 // If an item is missing a value for a key, we can't look it up.
                 // This is OK, because keyless items will never match an incoming item anyway.
@@ -26,7 +26,7 @@ module Coalesce {
         ) {
             var matchingItem: U;
             if (idField) {
-                let key = ko.unwrap(incomingItem[idField]);
+                let key = ko.unwrap((incomingItem as any)[idField]);
                 if (originalLookup) {
                     matchingItem = originalLookup[key.toString()];
                 } else {
@@ -34,7 +34,7 @@ module Coalesce {
 
                     if (matchingItems.length > 1) {
                         // We have a problem because keys are duplicated.
-                        throw `Found duplicate items by key (name:${idField} value:${matchingItems[idField]}) when rebuilding array.`
+                        throw `Found duplicate items by key (name:${idField}) when rebuilding array.`
                     } else {
                         matchingItem = matchingItems.length > 0 ? matchingItems[0] : null;
                     }

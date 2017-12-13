@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
-using IntelliTect.Coalesce.Interfaces;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace IntelliTect.Coalesce.Mapping
+namespace IntelliTect.Coalesce
 {
     public interface IMappingContext
     {

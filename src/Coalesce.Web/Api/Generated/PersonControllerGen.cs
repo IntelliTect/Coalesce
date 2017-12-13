@@ -4,7 +4,7 @@ using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Mapping;
-using IntelliTect.Coalesce.Mapping.IncludeTree;
+using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;

@@ -1,7 +1,6 @@
 ﻿
-using IntelliTect.Coalesce.Interfaces;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
-using IntelliTect.Coalesce.Mapping.IncludeTree;
 using IntelliTect.Coalesce.Models;
 using Newtonsoft.Json;
 using System;

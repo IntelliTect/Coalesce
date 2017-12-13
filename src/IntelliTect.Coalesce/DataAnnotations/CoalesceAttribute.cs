@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+namespace IntelliTect.Coalesce
 {
     // TODO: allow specifying on an interface to generate service APIs off of an interface? This would be the best design.
 

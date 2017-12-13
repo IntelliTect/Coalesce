@@ -59,13 +59,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this class implements IClassDto, return true.
         /// </summary>
-        public bool IsDto => Type.IsA(typeof(Coalesce.Interfaces.IClassDto<,>));
+        public bool IsDto => Type.IsA(typeof(IClassDto<,>));
 
         /// <summary>
         /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
         /// </summary>
         public ClassViewModel DtoBaseViewModel => IsDto
-            ? Type.GenericArgumentsFor(typeof(Interfaces.IClassDto<,>)).First().ClassViewModel
+            ? Type.GenericArgumentsFor(typeof(IClassDto<,>)).First().ClassViewModel
             : null;
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 return _Methods = RawMethods
                     .Where(m => !excludedMethodNames.Contains(m.Name))
-                    .Where(m => !IsDto || (m.Name != nameof(Interfaces.IClassDto<object, object>.Update) && m.Name != nameof(Interfaces.IClassDto<object, object>.CreateInstance)))
+                    .Where(m => !IsDto || (m.Name != nameof(IClassDto<object, object>.Update) && m.Name != nameof(IClassDto<object, object>.CreateInstance)))
                     .ToList().AsReadOnly();
             }
         }

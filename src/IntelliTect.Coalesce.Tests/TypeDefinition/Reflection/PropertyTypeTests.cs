@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.Reflection
             })
             {
                 Assert.True(prop.Type.IsNullable);
-                Assert.False(prop.Type.UnderlyingNullableType.IsNullable);
+                Assert.False(prop.Type.NullableUnderlyingType.IsNullable);
             }
 
             // TODO: arrays???

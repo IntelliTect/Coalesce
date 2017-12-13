@@ -39,6 +39,9 @@ module ListViewModels {
             lastName?:string;
             email?:string;
             gender?:string;
+            birthDate?:string;
+            lastBath?:string;
+            nextUpgrade?:string;
             name?:string;
             companyId?:string;
         } = null;

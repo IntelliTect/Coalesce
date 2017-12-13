@@ -75,7 +75,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool => UnderlyingNullableType.Name == nameof(Boolean);
+        public bool IsBool => NullableUnderlyingType.Name == nameof(Boolean);
 
         /// <summary>
         /// Returns true if this TypeViewModel represents void.
@@ -151,12 +151,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
         /// </summary>
-        public bool IsDateTime => PureType.Name == "DateTime";
+        public bool IsDateTime => NullableUnderlyingType.Name == "DateTime";
 
         /// <summary>
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
-        public bool IsDateTimeOffset => PureType.Name == "DateTimeOffset";
+        public bool IsDateTimeOffset => NullableUnderlyingType.Name == "DateTimeOffset";
 
         /// <summary>
         /// Returns true if class is a Byte[]
@@ -170,7 +170,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                switch (UnderlyingNullableType.Name)
+                switch (NullableUnderlyingType.Name)
                 {
                     case nameof(Byte):
                     case nameof(Int16):
@@ -193,7 +193,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If this represents a nullable type, returns the underlying type that is nullable.
         /// Otherwise, returns the current instance.
         /// </summary>
-        public TypeViewModel UnderlyingNullableType => IsNullable ? FirstTypeArgument : this;
+        public TypeViewModel NullableUnderlyingType => (IsGeneric && IsNullable) ? FirstTypeArgument : this;
 
         /// <summary>
         /// Gets the type name without any collection or nullable around it.

@@ -208,28 +208,6 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Applies a filter to the query based on the "where" parameter recieved from the client.
-        /// This clause is expected to be in a form that is understood by System.Linq.Dynamic.Core.
-        /// This is called by ApplyListFiltering when constructing a list result.
-        /// </summary>
-        /// <param name="query">The query to filter.</param>
-        /// <returns>The new query with additional filtering applied.</returns>
-        /// <see cref="https://github.com/StefH/System.Linq.Dynamic.Core/wiki/Dynamic-Expressions"/>
-        public virtual IQueryable<T> ApplyListFreeformWhereClause(IQueryable<T> query, IFilterParameters parameters)
-        {
-            // Because this is processed through LINQ Dynamic,
-            // there's no chance for SQL injection here.
-            // However, it can effectively examine your entire data model,
-            // so if this behavior is not desired (clients are untrusted),
-            // overriding the standard data source with one that eliminates this behavior may be desired.
-            if (!string.IsNullOrWhiteSpace(parameters.Where))
-            {
-                return query.Where(parameters.Where);
-            }
-            return query;
-        }
-
-        /// <summary>
         /// Applies a filter to the query based on the search term recieved from the client.
         /// This search term is found in ListParameters.Search.
         /// This is called by ApplyListFiltering when constructing a list result.
@@ -338,7 +316,8 @@ namespace IntelliTect.Coalesce
 
 
         /// <summary>
-        /// Applies all filtering that is done when getting a list of data.
+        /// Applies all filtering that is done when getting a list of data
+        /// (or metadata about a particular set of filters, like a count).
         /// This includes ApplyListPropertyFilters, ApplyListFreeformWhereClause, and ApplyListSearchTerm.
         /// This is called by GetListAsync when constructing a list result.
         /// </summary>
@@ -347,7 +326,6 @@ namespace IntelliTect.Coalesce
         public virtual IQueryable<T> ApplyListFiltering(IQueryable<T> query, IFilterParameters parameters)
         {
             query = ApplyListPropertyFilters(query, parameters);
-            query = ApplyListFreeformWhereClause(query, parameters);
             query = ApplyListSearchTerm(query, parameters);
             return query;
         }

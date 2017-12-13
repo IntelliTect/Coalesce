@@ -4,8 +4,6 @@ namespace IntelliTect.Coalesce.Api
 {
     public class FilterParameters : DataSourceParameters, IFilterParameters
     {
-        public string Where { get; set; }
-
         /// <summary>
         /// Text to search fields for.
         /// </summary>

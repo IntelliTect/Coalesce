@@ -28,8 +28,7 @@ module ListViewModels {
         public modelKeyName = "caseKey";
         public itemClass = ViewModels.Case;
 
-        public query: {
-            where?: string;
+        public filter: {
             caseKey?:number;
             title?:string;
             description?:string;
@@ -44,7 +43,7 @@ module ListViewModels {
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = CaseDataSources;
+        public dataSources: typeof CaseDataSources = CaseDataSources;
 
         /**
             The data source on the server to use when retrieving objects.

@@ -12,7 +12,6 @@
 | Namespace `intellitect.webApi` is now `Coalesce.ModalHelpers` | Replace all references to the old name with the new.
 | Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within. | No changes needed unless your project referenced these files explicitly by name (unlikely).
 | DataSources on models are no longer generated as client-callable static methods on ListViewModels. | Replace usages of these calls with loads of a ListViewModel using the desired data source.
-| API Endpoint `CustomList` has been merged with `List`. Parameters remain unchanged. | Replace all usages of `CustomList` with `List`.
 | `BaseViewController.IndexImplementation` no longer sets `ViewBag.ParentIdName` or `ViewBag.ParentId`. These properties were not used. | If you used these, implement your own custom, robust logic in your controllers that depend upon `IndexImplementation`.
 ----
 
@@ -38,6 +37,16 @@
 | `BaseViewModel.showBusyWhenSaving` is deprecated. | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
 | `BaseViewModel.showFailureAlerts` is deprecated. | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
 | `BaseViewModel.validationIssues` has been removed. | Use `BaseViewModel.message` to get errors that occurred while saving a model. No other methods other than `save` were populating this collection, and it was only being populated with exception messages - not validation issues.
+
+## List API, BaseListViewModel & Generated ListViewModels
+
+| CHANGE | RESOLUTION
+| ------ |----------|
+| Like `BaseViewModel`, `BaseListViewModel` no longer has a self-referential generic type parameter. It now uses TypeScripts polymorphic `this` types for its self-referential needs | Remove any usages of the generic parameter. Replace with [Polymorphic this types](https://www.typescriptlang.org/docs/handbook/advanced-types.html) as needed.
+| API Endpoint `CustomList` has been merged with `List`. Parameters remain unchanged, except where otherwise noted in this section. | Replace all usages of `CustomList` with `List`.
+| Property filter API parameters are now specified using `?filter.propertyName=value` (formerly, this was just `?propertyName=value`). | Adjust manual API calls (that don't use the generated ListViewModels) accordingly.
+| `BaseListViewModel.query` is now `BaseListViewModel.filter` to match the new API signature. | Rename references accordingly.
+| API endpoints that formerly took an arbitrary `where` parameter (stored in `BaseListViewModel.query.where`) no longer do so. This was removed because the security implications were such that a carefully-crafted where statement could reveal information about the state of the database that would be otherwise inaccessible to the user. | In cases where this behavior is needed, create a custom data source (see the "New Features" section below) and add public properties marked with `[Coalesce]` that represent the needed inputs to perform the query in C#.
 
 ## Projects, Namespaces, & Generation
 

@@ -18,8 +18,7 @@ module ListViewModels {
         public modelKeyName = "productId";
         public itemClass = ViewModels.Product;
 
-        public query: {
-            where?: string;
+        public filter: {
             productId?:number;
             name?:string;
         } = null;
@@ -27,7 +26,7 @@ module ListViewModels {
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = ProductDataSources;
+        public dataSources: typeof ProductDataSources = ProductDataSources;
 
         /**
             The data source on the server to use when retrieving objects.

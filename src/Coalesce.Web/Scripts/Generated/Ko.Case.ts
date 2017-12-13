@@ -26,7 +26,7 @@ module ViewModels {
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.CaseDataSources;
+        public dataSources: typeof ListViewModels.CaseDataSources = ListViewModels.CaseDataSources;
 
         /**
             The data source on the server to use when retrieving the object.

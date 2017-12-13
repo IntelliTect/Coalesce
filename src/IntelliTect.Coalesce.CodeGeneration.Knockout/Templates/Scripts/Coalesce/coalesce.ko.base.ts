@@ -226,7 +226,7 @@ module Coalesce {
         protected saveCallbacks: Array<(self: this) => void> = [];
 
         /**
-            String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable.
+            String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes.
         */
         public includes: string = "";
 
@@ -686,14 +686,13 @@ module Coalesce {
 
         /**
             Query string to append to the API call when loading the list of items.
-            If query is non-null, this value will not be used.
         */
         public queryString: string = "";
+
         /**
-            Object that will be serialized to a query string and passed to the API call.
-            Supercedes queryString if set.
+            Object that contains property-level filters to be passed along to API calls.
         */
-        public query: any = null;
+        public filter: any = null;
 
         /** String that is used to control loading and serialization on the server. */
         public includes: string = "";
@@ -714,14 +713,9 @@ module Coalesce {
         */
         public load = (callback?: any): JQueryPromise<any> => {
             this.coalesceConfig.onStartBusy()(this);
-            if (this.query) {
-                this.queryString = $.param(this.query);
-            }
             this.isLoading(true);
 
-            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/List?" + this.queryParams();
-
-            if (this.queryString !== null && this.queryString !== "") url += "&" + this.queryString;
+            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/List?" + this.queryParams('list');
 
             return $.ajax({
                 method: "GET",
@@ -758,16 +752,41 @@ module Coalesce {
         };
 
 
-        /** Returns a query string built from the list's `query` parameter. */
-        protected queryParams = (pageSize?: number): string => {
-            return $.param({
-                includes: this.includes,
-                page: this.page(),
-                pageSize: pageSize || this.pageSize(),
-                search: this.search(),
-                orderBy: this.orderBy(),
-                orderByDescending: this.orderByDescending()
-            }) + "&" + this.dataSource.getQueryString();
+        /** Returns a query string built from the list's various properties, appropriate to the kind of parameters requested. */
+        protected queryParams = (kind: 'dataSource' | 'filter' | 'list', pageSize?: number): string => {
+            var query = this.dataSource.getQueryString();
+
+            const param = (name: string, value: any) => {
+                if (value === null || value === undefined || value === "") {
+                    return;
+                }
+                query += `&${name}=${encodeURIComponent(value)}`;
+            };
+
+            param("includes", this.includes);
+
+            if (kind == 'dataSource') return query;
+
+            if (this.queryString) query += "&" + this.queryString;
+
+            param("search", this.search());
+
+            if (this.filter) {
+                for (var key in this.filter) {
+                    param(`filter.${key}`, this.filter[key]);
+                }
+            }
+
+            if (kind == 'filter') return query;
+
+            if (kind != 'list') throw "unhandled kind " + kind;
+
+            param(`page`, this.page());
+            param(`pageSize`, pageSize || this.pageSize());
+            param(`orderBy`, this.orderBy());
+            param(`orderByDescending`, this.orderByDescending());
+
+            return query;
         };
 
         /** Method which will instantiate a new item of the list's model type. */
@@ -794,12 +813,9 @@ module Coalesce {
         /** Gets the count of items without getting all the items. Result is placed into the count property. */
         public getCount = (callback?: any): JQueryPromise<any> => {
             this.coalesceConfig.onStartBusy()(this);
-            if (this.query) {
-                this.queryString = $.param(this.query);
-            }
             return $.ajax({
                 method: "GET",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + this.dataSource.getQueryString() + "&" + this.queryString,
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + this.queryParams('filter'),
                 xhrFields: { withCredentials: true }
             })
                 .done((data) => {
@@ -875,7 +891,7 @@ module Coalesce {
 
         /** Returns URL to download a CSV for the current list with all items. */
         public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
-            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvDownload?" + this.queryParams(10000);
+            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvDownload?" + this.queryParams('list', 10000);
             return url;
         }, null, { deferEvaluation: true });
 

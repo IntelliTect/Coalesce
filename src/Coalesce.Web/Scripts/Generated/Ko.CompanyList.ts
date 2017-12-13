@@ -18,8 +18,7 @@ module ListViewModels {
         public modelKeyName = "companyId";
         public itemClass = ViewModels.Company;
 
-        public query: {
-            where?: string;
+        public filter: {
             companyId?:number;
             name?:string;
             address1?:string;
@@ -33,7 +32,7 @@ module ListViewModels {
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = CompanyDataSources;
+        public dataSources: typeof CompanyDataSources = CompanyDataSources;
 
         /**
             The data source on the server to use when retrieving objects.

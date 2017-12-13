@@ -8,8 +8,6 @@ namespace IntelliTect.Coalesce
 
     public interface IFilterParameters : IDataSourceParameters
     {
-        string Where { get; }
-
         string Search { get; }
 
         IDictionary<string, string> Filter { get; }

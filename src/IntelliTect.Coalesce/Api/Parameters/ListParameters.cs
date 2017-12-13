@@ -34,22 +34,6 @@ namespace IntelliTect.Coalesce.Api
 
         public ListParameters() { }
 
-        public ListParameters(string fields = null,
-            string includes = null, string orderBy = null, string orderByDescending = null,
-            int? page = null, int? pageSize = null, string where = null,
-            string dataSource = null, string search = null)
-        {
-            Fields = fields;
-            Includes = includes;
-            OrderBy = orderBy;
-            OrderByDescending = orderByDescending;
-            Page = page;
-            PageSize = pageSize;
-            Where = where;
-            DataSource = dataSource;
-            Search = search;
-        }
-
         /// <summary>
         /// List of OrderBy clauses keyed by column and with a value of Asc or Desc.
         /// </summary>

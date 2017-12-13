@@ -34,8 +34,7 @@ module ListViewModels {
         public modelKeyName = "personId";
         public itemClass = ViewModels.Person;
 
-        public query: {
-            where?: string;
+        public filter: {
             personId?:number;
             title?:number;
             firstName?:string;
@@ -49,7 +48,7 @@ module ListViewModels {
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = PersonDataSources;
+        public dataSources: typeof PersonDataSources = PersonDataSources;
 
         /**
             The data source on the server to use when retrieving objects.

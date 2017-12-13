@@ -46,7 +46,7 @@ module @moduleName {
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = ListViewModels.@(model.Name)DataSources;
+        public dataSources: typeof ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources;
 
         /**
             The data source on the server to use when retrieving the object.

@@ -86,15 +86,14 @@ module @moduleName {
         public modelKeyName = "@(model.PrimaryKey.JsVariable)";
         public itemClass = @viewModelFullName;
 
-        public query: {
-            where?: string;
+        public filter: {
             @(string.Join("\n            ", model.BaseViewModel.ClientProperties.Where(f=>f.IsUrlParameter).Select(f=>$"{f.UrlParameterName}?:{f.Type.TsType};")))
         } = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
-        public dataSources = @(model.Name)DataSources;
+        public dataSources: typeof @(model.Name)DataSources = @(model.Name)DataSources;
 
         /**
             The data source on the server to use when retrieving objects.

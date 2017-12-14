@@ -193,7 +193,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If this represents a nullable type, returns the underlying type that is nullable.
         /// Otherwise, returns the current instance.
         /// </summary>
-        public TypeViewModel NullableUnderlyingType => (IsGeneric && IsNullable) ? FirstTypeArgument : this;
+        public TypeViewModel NullableUnderlyingType => (IsNullable && IsA(typeof(Nullable<>))) ? FirstTypeArgument : this;
 
         /// <summary>
         /// Gets the type name without any collection or nullable around it.

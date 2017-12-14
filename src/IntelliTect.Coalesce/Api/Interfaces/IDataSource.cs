@@ -9,11 +9,11 @@ namespace IntelliTect.Coalesce
     public interface IDataSource<T> : IAuthorizable
         where T : class, new()
     {
-        Task<(T item, IncludeTree includeTree)> GetItemAsync(object id, IDataSourceParameters parameters);
+        Task<(T Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters);
         Task<TDto> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
             where TDto : IClassDto<T, TDto>, new();
 
-        Task<(ListResult<T> list, IncludeTree includeTree)> GetListAsync(IListParameters parameters);
+        Task<(ListResult<T> List, IncludeTree IncludeTree)> GetListAsync(IListParameters parameters);
         Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
             where TDto : IClassDto<T, TDto>, new();
 

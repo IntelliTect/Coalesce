@@ -2,12 +2,12 @@
     ViewBag.Title = "Cases";
 }
 <h1>Cases</h1>
-    <div class="row">
-        <div class="col-md-3">
-            <a asp-controller="Cases" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Add New</a>
-        </div>
-        <span class="label label-info" style="float:right" data-bind="fadeVisible: cases.isLoading(), text: 'Loading...'"></span>
+<div class="row">
+    <div class="col-md-3">
+        <a asp-controller="Cases" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Add New</a>
     </div>
+    <span class="label label-info" style="float:right" data-bind="fadeVisible: cases.isLoading(), text: 'Loading...'"></span>
+</div>
 <hr />
 
 <div class="card">

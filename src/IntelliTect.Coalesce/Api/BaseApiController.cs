@@ -187,38 +187,10 @@ namespace IntelliTect.Coalesce.Api
             return dataSource.GetItemAsync(id, parameters);
         }
         
-        protected bool DeleteImplementation(string id)
+        protected Task<ItemResult> DeleteImplementation(string id, [FromServices] CrudContext<TContext> context)
         {
-            T item = DataSource.FindItem(id);
-            if (item != null)
-            {
-                if (BeforeDelete(item))
-                {
-                    // Allow for other cascade deletes.
-                    var validationInfo = new ValidateResult();
-                    if (item is IBeforeDelete<TContext>)
-                    {
-                        validationInfo.Merge((item as IBeforeDelete<TContext>).BeforeDelete(Db, User));
-                    }
-                    if (validationInfo.WasSuccessful)
-                    {
-                        DataSource.Remove(item);
-                        Db.SaveChanges();
-                        if (item is IAfterDelete<TContext>)
-                        {
-                            (item as IAfterDelete<TContext>).AfterDelete(Db, User);
-                        }
-                        return AfterDelete(item, Db);
-                    }
-                    else
-                    {
-                        // TODO: Fix delete to actually return good information rather than a stupid bool.
-                        throw new Exception($"Delete failed: {validationInfo.Message}", null);
-                    }
-                }
-            }
-            Response.StatusCode = (int)System.Net.HttpStatusCode.NotFound;
-            return false;
+            var behaviors = new StandardBehaviors<T, TContext>(context);
+            return behaviors.DeleteAsync(id);
         }
 
         protected async Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, bool returnObject = true)
@@ -507,23 +479,14 @@ namespace IntelliTect.Coalesce.Api
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
-        protected object IdValue(TDto dto)
-        {
-            var propInfo = dto.GetType().GetProperty(DtoViewModel.PrimaryKey.Name);
-            object id = propInfo.GetValue(dto);
-            return id;
-        }
+        protected object IdValue(TDto dto) => DtoViewModel.PrimaryKey.PropertyInfo.GetValue(dto);
 
         /// <summary>
         /// Gets the value of the ID in the DTO object using IdField.
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        protected object IdValue(T item)
-        {
-            object id = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
-            return id;
-        }
+        protected object IdValue(T item) => ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
 
         public DbSet<T> DataSource
         {
@@ -582,26 +545,7 @@ namespace IntelliTect.Coalesce.Api
         {
             return false;
         }
-
-        /// <summary>
-        /// Called before the object is deleted.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        protected virtual bool BeforeDelete(T obj)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Called after the object is deleted.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <remarks>When this is called, the object has been deleted.</remarks>
-        protected virtual bool AfterDelete(T obj, TContext context)
-        {
-            return true;
-        }
+        
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {

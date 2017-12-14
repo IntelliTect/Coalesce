@@ -9,11 +9,6 @@ namespace IntelliTect.Coalesce.Models
 {
     public class GeneratedDto<T, TDto>
     {
-        public virtual bool OnSecurityTrim(IMappingContext context)
-        {
-            return false;
-        }
-
         public virtual bool OnUpdate(T entity, IMappingContext context)
         {
             return false;

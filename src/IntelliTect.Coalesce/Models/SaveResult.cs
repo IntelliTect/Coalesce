@@ -20,6 +20,16 @@ namespace IntelliTect.Coalesce.Models
         {
             Message = ex.Message;
         }
+
+        public static implicit operator ItemResult(bool success)
+        {
+            return new ItemResult(success);
+        }
+
+        public static implicit operator ItemResult(string message)
+        {
+            return new ItemResult(message);
+        }
     }
 
     public class ItemResult<T> : ItemResult
@@ -39,6 +49,17 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(Exception ex) : base(ex)
         {
+        }
+
+
+        public static implicit operator ItemResult<T>(bool success)
+        {
+            return new ItemResult<T>(success);
+        }
+
+        public static implicit operator ItemResult<T>(string message)
+        {
+            return new ItemResult<T>(message);
         }
     }
 }

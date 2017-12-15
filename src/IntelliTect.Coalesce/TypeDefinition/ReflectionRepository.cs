@@ -31,16 +31,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private object _lock = new object();
 
-
         private HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
         private HashSet<EntityTypeUsage> _entities = new HashSet<EntityTypeUsage>();
-        private HashSet<DataSourceTypeUsage> _dataSources = new HashSet<DataSourceTypeUsage>();
+        private HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
+        private HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
         private HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
         private HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
         public ReadOnlyHashSet<EntityTypeUsage> Entities => new ReadOnlyHashSet<EntityTypeUsage>(_entities);
-        public ReadOnlyHashSet<DataSourceTypeUsage> DataSources => new ReadOnlyHashSet<DataSourceTypeUsage>(_dataSources);
+        public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_behaviors);
+        public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_dataSources);
         public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new ReadOnlyHashSet<ClassViewModel>(_externalTypes);
         public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
 
@@ -64,24 +65,35 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (type.HasAttribute<CoalesceAttribute>())
                 {
+                    bool AddCrudStrategy(Type iface, HashSet<CrudStrategyTypeUsage> set)
+                    {
+                        if (!type.IsA(iface)) return false;
+
+                        var servedType = type.GenericArgumentsFor(iface).Single();
+                        if (!servedType.HasClassViewModel)
+                        {
+                            throw new InvalidOperationException($"{servedType} is not a valid type argument for a data source.");
+                        }
+                        var servedClass = servedType.ClassViewModel;
+                        set.Add(new CrudStrategyTypeUsage(type.ClassViewModel, servedClass, servedClass));
+                        return true;
+                    }
+
                     if (type.IsA<DbContext>())
                     {
                         var context = new DbContextTypeUsage(type.ClassViewModel);
                         _contexts.Add(context);
                         _entities.UnionWith(context.Entities);
                     }
-                    else if (type.IsA(typeof(IDataSource<>)))
+                    else if (AddCrudStrategy(typeof(IDataSource<>), _dataSources))
                     {
-                        var genericArgs = type.GenericArgumentsFor(typeof(IDataSource<>));
-                        var servedType = genericArgs.Single();
-                        if (!servedType.HasClassViewModel)
-                        {
-                            throw new InvalidOperationException($"{servedType} is not a valid type argument for a data source.");
-                        }
-
-                        _dataSources.Add(new DataSourceTypeUsage(type.ClassViewModel, servedType.ClassViewModel));
+                        // Handled by helper
                     }
-                    else if (type.IsA(typeof(IClassDto<,>)))
+                    else if (AddCrudStrategy(typeof(IBehaviors<>), _dataSources))
+                    {
+                        // Handled by helper
+                    }
+                    else if (type.IsA(typeof(IClassDto<>)))
                     {
                         var classViewModel = type.ClassViewModel;
 
@@ -92,7 +104,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                         _customDtos.Add(classViewModel);
 
-                        DiscoverNestedDataSourcesOn(classViewModel, classViewModel.DtoBaseViewModel);
+                        DiscoverNestedCrudStrategiesOn(classViewModel, classViewModel.DtoBaseViewModel);
                     }
                 }
             }
@@ -102,7 +114,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var classViewModel = entity.ClassViewModel;
                 DiscoverExternalMethodTypesOn(classViewModel);
                 DiscoverExternalPropertyTypesOn(classViewModel);
-                DiscoverNestedDataSourcesOn(classViewModel);
+                DiscoverNestedCrudStrategiesOn(classViewModel);
             }
         }
 
@@ -162,18 +174,35 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        private void DiscoverNestedDataSourcesOn(ClassViewModel model, ClassViewModel assertSourceFor = null)
+        private void DiscoverNestedCrudStrategiesOn(ClassViewModel model, ClassViewModel assertSourceFor = null)
         {
             assertSourceFor = assertSourceFor ?? model;
 
             foreach (var nestedType in model.ClientNestedTypes.Where(t => t.IsA(typeof(IDataSource<>))))
             {
-                var usage = new DataSourceTypeUsage(nestedType.ClassViewModel, model);
-                if (!usage.ServedType.Equals(assertSourceFor))
+                bool AddCrudStrategy(Type iface, HashSet<CrudStrategyTypeUsage> set)
                 {
-                    throw new Exception($"{nestedType} is not a valid data source for {model} - {nestedType} must inherit from IDataSource<{assertSourceFor}>.");
+                    if (!nestedType.IsA(iface)) return false;
+
+                    var servedType = nestedType.GenericArgumentsFor(iface).Single();
+                    if (!servedType.HasClassViewModel)
+                    {
+                        throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
+                    }
+                    var servedClass = servedType.ClassViewModel;
+
+                    if (!servedClass.Equals(assertSourceFor))
+                    {
+                        throw new InvalidOperationException($"{nestedType} is not a valid {iface} for {model} - " +
+                            $"{nestedType} must satisfy {iface} with type parameter <{assertSourceFor}>.");
+                    }
+
+                    set.Add(new CrudStrategyTypeUsage(nestedType.ClassViewModel, servedClass, model));
+                    return true;
                 }
-                _dataSources.Add(usage);
+
+                AddCrudStrategy(typeof(IDataSource<>), _dataSources);
+                AddCrudStrategy(typeof(IBehaviors<>), _behaviors);
             }
         }
 

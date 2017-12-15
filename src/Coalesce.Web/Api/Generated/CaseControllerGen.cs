@@ -45,35 +45,33 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual Task<CaseDtoGen> Get(string id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<CaseDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual bool Delete(string id)
-            => DeleteImplementation(id);
+        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Case> behaviors)
+            => DeleteImplementation(id, behaviors);
 
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual async Task<ItemResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, bool returnObject = true)
+        public virtual async Task<ItemResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
         {
 
             if (!dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new ItemResult<CaseDtoGen>("Create not allowed on Case objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return result;
+                return "Create not allowed on Case objects.";
             }
             else if (dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new ItemResult<CaseDtoGen>("Edit not allowed on Case objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return result;
+                return "Edit not allowed on Case objects.";
             }
 
-            return await SaveImplementation(dto, parameters, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, behaviors);
         }
 
         [HttpPost("AddToCollection")]
@@ -118,7 +116,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<ItemResult<CaseDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult>> CsvUpload(
+            Microsoft.AspNetCore.Http.IFormFile file,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            bool hasHeader = true)
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -126,8 +128,8 @@ namespace Coalesce.Web.Api
             {
                 using (var reader = new System.IO.StreamReader(stream))
                 {
-                    var csv = reader.ReadToEnd();
-                    return await CsvSave(csv, dataSource, hasHeader);
+                    var csv = await reader.ReadToEndAsync();
+                    return await CsvSave(csv, dataSource, behaviors, hasHeader);
                 }
             }
         }
@@ -137,31 +139,33 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [AllowAnonymous]
-        public virtual async Task<IEnumerable<ItemResult<CaseDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.Case> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult>> CsvSave(
+            string csv,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CaseDtoGen>(csv, hasHeader);
-            var resultList = new List<ItemResult<CaseDtoGen>>();
+            var resultList = new List<ItemResult>();
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
                 if (!dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new ItemResult<CaseDtoGen>("Create not allowed on Case objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add(result);
+                    resultList.Add("Create not allowed on Case objects.");
                 }
                 else if (dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new ItemResult<CaseDtoGen>("Edit not allowed on Case objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add(result);
+                    resultList.Add("Edit not allowed on Case objects.");
                 }
                 else
                 {
                     var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, false);
-                    resultList.Add(result);
+                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
                 }
             }
             return resultList;
@@ -228,7 +232,7 @@ namespace Coalesce.Web.Api
                 IncludeTree includeTree = null;
                 var objResult = Coalesce.Domain.Case.GetCaseSummary(Db);
                 var mappingContext = new MappingContext(User, "");
-                result.Object = Mapper<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>.ObjToDtoMapper(objResult, mappingContext, includeTree);
+                result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(objResult, mappingContext, includeTree);
 
                 result.WasSuccessful = true;
                 result.Message = null;

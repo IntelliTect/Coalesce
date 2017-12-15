@@ -31,8 +31,9 @@
 
     var createIf = "";
     var editElseIf = "";
-    //var dataSourceParameter = $"IDataSource<{model.BaseViewModel.FullyQualifiedName}, {Model.GenerationContext.DbContextType.FullyQualifiedName}> dataSource";
+    var primaryKeyParameter = $"{model.PrimaryKey.Type.FullyQualifiedName} id";
     var dataSourceParameter = $"IDataSource<{model.BaseViewModel.FullyQualifiedName}> dataSource";
+    var behaviorsParameter = $"IBehaviors<{model.BaseViewModel.FullyQualifiedName}> behaviors";
 
 
     // Check if creates/edits aren't allowed
@@ -98,7 +99,7 @@ namespace @(namespaceName).Api
 
         [HttpGet("get/{id}")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<@(model.DtoName)> Get(string id, DataSourceParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<@(model.DtoName)> Get(@primaryKeyParameter, DataSourceParameters parameters, @dataSourceParameter)
             => GetImplementation(id, parameters, dataSource);
         </text>
         }
@@ -107,8 +108,8 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("delete/{id}")]
         @(securityInfo.DeleteAnnotation)
-        @(model.ApiActionAccessModifier) virtual bool Delete(string id)
-            => DeleteImplementation(id);
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(@primaryKeyParameter, @behaviorsParameter)
+            => DeleteImplementation(id, behaviors);
         </text>
         }
 
@@ -116,21 +117,19 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<ItemResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, bool returnObject = true)
+        @(model.ApiActionAccessModifier) virtual async Task<ItemResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, @behaviorsParameter)
         {
 
             @(createIf)
-                var result = new ItemResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return result;
+                return "Create not allowed on @(model.Name) objects.";
             }
             @(editElseIf)
-                var result = new ItemResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return result;
+                return "Edit not allowed on @(model.Name) objects.";
             }
 
-            return await SaveImplementation(dto, parameters, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, behaviors);
         }
 
         [HttpPost("AddToCollection")]
@@ -179,7 +178,11 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvUpload")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<ItemResult<@(model.DtoName)>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, @dataSourceParameter, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<ItemResult>> CsvUpload(
+            Microsoft.AspNetCore.Http.IFormFile file, 
+            @dataSourceParameter, 
+            @behaviorsParameter, 
+            bool hasHeader = true) 
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -187,8 +190,8 @@ namespace @(namespaceName).Api
             {
                 using (var reader = new System.IO.StreamReader(stream))
                 {
-                    var csv = reader.ReadToEnd();
-                    return await CsvSave(csv, dataSource, hasHeader);
+                    var csv = await reader.ReadToEndAsync();
+                    return await CsvSave(csv, dataSource, behaviors, hasHeader);
                 }
             }
         }
@@ -198,27 +201,29 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("CsvSave")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<ItemResult<@(model.DtoName)>>> CsvSave(string csv, @dataSourceParameter, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual async Task<IEnumerable<ItemResult>> CsvSave(
+            string csv, 
+            @dataSourceParameter, 
+            @behaviorsParameter, 
+            bool hasHeader = true) 
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<@(model.DtoName)>(csv, hasHeader);
-            var resultList = new List<ItemResult<@(model.DtoName)>>();
+            var resultList = new List<ItemResult>();
             foreach (var dto in list){
                 // Check if creates/edits aren't allowed
                 @(createIf)
-                    var result = new ItemResult<@(model.DtoName)>("Create not allowed on @(model.Name) objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add(result);
+                    resultList.Add("Create not allowed on @(model.Name) objects.");
                 }
                 @(editElseIf)
-                    var result = new ItemResult<@(model.DtoName)>("Edit not allowed on @(model.Name) objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add(result);
+                    resultList.Add("Edit not allowed on @(model.Name) objects.");
                 }
                 else {
                     var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, false);
-                    resultList.Add(result);
+                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
                 }
             }
             return resultList;
@@ -281,7 +286,7 @@ namespace @(namespaceName).Api
             else if (method.ReturnType.PureType.HasClassViewModel)
             {
                 @:var mappingContext = new MappingContext(User, "");
-                @:result.Object = objResult.ToList().Select(o => Mapper<@(method.ReturnType.PureType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>.ObjToDtoMapper(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+                @:result.Object = objResult.ToList().Select(o => Mapper.MapToDto<@(method.ReturnType.PureType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
             }
             else
             {
@@ -297,7 +302,7 @@ namespace @(namespaceName).Api
             else if (method.ReturnType.HasClassViewModel)
             {
                 @:var mappingContext = new MappingContext(User, "");
-                @:result.Object = Mapper<@(method.ReturnType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.ClassViewModel.DtoName)>.ObjToDtoMapper(objResult, mappingContext, includeTree);
+                @:result.Object = Mapper.MapToDto<@(method.ReturnType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.ClassViewModel.DtoName)>(objResult, mappingContext, includeTree);
             }
             else
             {

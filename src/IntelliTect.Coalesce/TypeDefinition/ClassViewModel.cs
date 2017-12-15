@@ -59,13 +59,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this class implements IClassDto, return true.
         /// </summary>
-        public bool IsDto => Type.IsA(typeof(IClassDto<,>));
+        public bool IsDto => Type.IsA(typeof(IClassDto<>));
 
         /// <summary>
         /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
         /// </summary>
         public ClassViewModel DtoBaseViewModel => IsDto
-            ? Type.GenericArgumentsFor(typeof(IClassDto<,>)).First().ClassViewModel
+            ? Type.GenericArgumentsFor(typeof(IClassDto<>)).First().ClassViewModel
             : null;
 
         /// <summary>
@@ -168,9 +168,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private string[] excludedMethodNames = new[] {
             nameof(Data.IBeforeSave<object, DbContext>.BeforeSave),
             nameof(Data.IAfterSave<object, DbContext>.AfterSave),
-            nameof(Data.IBeforeDelete<DbContext>.BeforeDelete),
-            nameof(Data.IAfterDelete<DbContext>.AfterDelete),
-            nameof(Data.IExcludable.Exclude),
             nameof(object.ToString),
             nameof(object.Equals),
             nameof(object.GetHashCode),
@@ -193,7 +190,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 return _Methods = RawMethods
                     .Where(m => !excludedMethodNames.Contains(m.Name))
-                    .Where(m => !IsDto || (m.Name != nameof(IClassDto<object, object>.Update) && m.Name != nameof(IClassDto<object, object>.CreateInstance)))
+                    .Where(m => !IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo)))
                     .ToList().AsReadOnly();
             }
         }
@@ -206,7 +203,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
             .DataSources
             .Where(d => d.SourceFor.Equals(this))
-            .Select(d => d.DataSourceClass);
+            .Select(d => d.StrategyClass);
 
 
         /// <summary>

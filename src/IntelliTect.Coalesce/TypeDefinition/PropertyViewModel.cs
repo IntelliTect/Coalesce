@@ -719,7 +719,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         sb.Append($".AsQueryable().OrderBy(\"{defaultOrderBy}\").ToList()");
                     }
 
-                    sb.Append($".Select(f => {PureType.Name}DtoGen.Create(f, context, tree?[nameof({objectName}.{Name})])).ToList();");
+                    sb.Append($".Select(f => f.MapToDto<{PureType.FullyQualifiedName}, {PureType.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})])).ToList();");
 
                     sb.AppendLine();
                     sb.Append("            ");
@@ -757,7 +757,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Otherwise, this would break IncludesExternal.
                 string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
                 setter = $@"{treeCheck}
-                {objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, context, tree?[nameof({objectName}.{Name})]);
+                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})]);
 ";
             }
             else

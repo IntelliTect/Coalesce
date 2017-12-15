@@ -11,8 +11,7 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Models
 {
-    public partial class PersonDtoGen : GeneratedDto<Coalesce.Domain.Person, PersonDtoGen>
-        , IClassDto<Coalesce.Domain.Person, PersonDtoGen>
+    public partial class PersonDtoGen : GeneratedDto<Coalesce.Domain.Person>
     {
         public PersonDtoGen() { }
 
@@ -32,10 +31,9 @@ namespace Coalesce.Web.Models
         public int? CompanyId { get; set; }
         public Coalesce.Web.Models.CompanyDtoGen Company { get; set; }
 
-        // Create a new version of this object or use it from the lookup.
-        public static PersonDtoGen Create(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
+        public override void MapFrom(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
         {
-            if (obj == null) return null;
+            if (obj == null) return;
             var includes = context.Includes;
 
             // Applicable includes for Person
@@ -47,62 +45,48 @@ namespace Coalesce.Web.Models
             // Applicable roles for Person
 
 
-
-            // See if the object is already created, but only if we aren't restricting by an includes tree.
-            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
-            if (tree == null && context.TryGetMapping(obj, out PersonDtoGen existing)) return existing;
-
-            var newObject = new PersonDtoGen();
-            if (tree == null) context.AddMapping(obj, newObject);
             // Fill the properties of the object.
-            newObject.PersonId = obj.PersonId;
-            newObject.Title = obj.Title;
-            newObject.FirstName = obj.FirstName;
-            newObject.LastName = obj.LastName;
-            newObject.Email = obj.Email;
-            newObject.Gender = obj.Gender;
-            newObject.BirthDate = obj.BirthDate;
-            newObject.LastBath = obj.LastBath;
-            newObject.NextUpgrade = obj.NextUpgrade;
-            newObject.Name = obj.Name;
-            newObject.CompanyId = obj.CompanyId;
+            this.PersonId = obj.PersonId;
+            this.Title = obj.Title;
+            this.FirstName = obj.FirstName;
+            this.LastName = obj.LastName;
+            this.Email = obj.Email;
+            this.Gender = obj.Gender;
+            this.BirthDate = obj.BirthDate;
+            this.LastBath = obj.LastBath;
+            this.NextUpgrade = obj.NextUpgrade;
+            this.Name = obj.Name;
+            this.CompanyId = obj.CompanyId;
             var propValCasesAssigned = obj.CasesAssigned;
-            if (propValCasesAssigned != null && (tree == null || tree[nameof(newObject.CasesAssigned)] != null))
+            if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
             {
-                newObject.CasesAssigned = propValCasesAssigned.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => CaseDtoGen.Create(f, context, tree?[nameof(newObject.CasesAssigned)])).ToList();
+                this.CasesAssigned = propValCasesAssigned.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
             }
-            else if (propValCasesAssigned == null && tree?[nameof(newObject.CasesAssigned)] != null)
+            else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
             {
-                newObject.CasesAssigned = new CaseDtoGen[0];
+                this.CasesAssigned = new CaseDtoGen[0];
             }
 
             var propValCasesReported = obj.CasesReported;
-            if (propValCasesReported != null && (tree == null || tree[nameof(newObject.CasesReported)] != null))
+            if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
             {
-                newObject.CasesReported = propValCasesReported.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => CaseDtoGen.Create(f, context, tree?[nameof(newObject.CasesReported)])).ToList();
+                this.CasesReported = propValCasesReported.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
             }
-            else if (propValCasesReported == null && tree?[nameof(newObject.CasesReported)] != null)
+            else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)
             {
-                newObject.CasesReported = new CaseDtoGen[0];
+                this.CasesReported = new CaseDtoGen[0];
             }
 
 
-            newObject.PersonStats = PersonStatsDtoGen.Create(obj.PersonStats, context, tree?[nameof(newObject.PersonStats)]);
+            this.PersonStats = obj.PersonStats.MapToDto<Coalesce.Domain.PersonStats, PersonStatsDtoGen>(context, tree?[nameof(this.PersonStats)]);
 
-            if (tree == null || tree[nameof(newObject.Company)] != null)
-                newObject.Company = CompanyDtoGen.Create(obj.Company, context, tree?[nameof(newObject.Company)]);
+            if (tree == null || tree[nameof(this.Company)] != null)
+                this.Company = obj.Company.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(context, tree?[nameof(this.Company)]);
 
-            return newObject;
-        }
-
-        // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public PersonDtoGen CreateInstance(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
-        {
-            return Create(obj, context, tree);
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(Coalesce.Domain.Person entity, IMappingContext context)
+        public override void MapTo(Coalesce.Domain.Person entity, IMappingContext context)
         {
             var includes = context.Includes;
 

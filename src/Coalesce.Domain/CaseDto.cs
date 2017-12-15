@@ -10,7 +10,7 @@ using IntelliTect.Coalesce;
 namespace Coalesce.Domain
 {
     [Coalesce]
-    public class CaseDto : IClassDto<Case, CaseDto>
+    public class CaseDto : IClassDto<Case>
     {
         [Key]
         public int CaseId { get; set; }
@@ -18,21 +18,19 @@ namespace Coalesce.Domain
         [ReadOnly(true)]
         public string AssignedToName { get; set; }
 
-        public void Update(Case obj, IMappingContext context)
+        public void MapTo(Case obj, IMappingContext context)
         {
             obj.Title = Title;
         }
 
-        public CaseDto CreateInstance(Case obj, IMappingContext context = null, IncludeTree tree = null)
+        public void MapFrom(Case obj, IMappingContext context = null, IncludeTree tree = null)
         {
-            var dto = new CaseDto();
-            dto.CaseId = obj.CaseKey;
-            dto.Title = obj.Title;
+            CaseId = obj.CaseKey;
+            Title = obj.Title;
             if (obj.AssignedTo != null)
             {
-                dto.AssignedToName = obj.AssignedTo.Name;
+                AssignedToName = obj.AssignedTo.Name;
             }
-            return dto;
         }
     }
 }

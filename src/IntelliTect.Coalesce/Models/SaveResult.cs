@@ -51,6 +51,11 @@ namespace IntelliTect.Coalesce.Models
         {
         }
 
+        public ItemResult(ItemResult result)
+        {
+            WasSuccessful = result.WasSuccessful;
+            Message = result.Message;
+        }
 
         public static implicit operator ItemResult<T>(bool success)
         {

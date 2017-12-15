@@ -45,35 +45,33 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<CaseProductDtoGen> Get(string id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+        public virtual Task<CaseProductDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual bool Delete(string id)
-            => DeleteImplementation(id);
+        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
+            => DeleteImplementation(id, behaviors);
 
 
         [HttpPost("save")]
         [Authorize]
-        public virtual async Task<ItemResult<CaseProductDtoGen>> Save(CaseProductDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource, bool returnObject = true)
+        public virtual async Task<ItemResult<CaseProductDtoGen>> Save(CaseProductDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource, IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
         {
 
             if (!dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                var result = new ItemResult<CaseProductDtoGen>("Create not allowed on CaseProduct objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return result;
+                return "Create not allowed on CaseProduct objects.";
             }
             else if (dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                var result = new ItemResult<CaseProductDtoGen>("Edit not allowed on CaseProduct objects.");
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return result;
+                return "Edit not allowed on CaseProduct objects.";
             }
 
-            return await SaveImplementation(dto, parameters, dataSource, returnObject);
+            return await SaveImplementation(dto, parameters, dataSource, behaviors);
         }
 
         [HttpPost("AddToCollection")]
@@ -118,7 +116,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvUpload")]
         [Authorize]
-        public virtual async Task<IEnumerable<ItemResult<CaseProductDtoGen>>> CsvUpload(Microsoft.AspNetCore.Http.IFormFile file, IDataSource<Coalesce.Domain.CaseProduct> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult>> CsvUpload(
+            Microsoft.AspNetCore.Http.IFormFile file,
+            IDataSource<Coalesce.Domain.CaseProduct> dataSource,
+            IBehaviors<Coalesce.Domain.CaseProduct> behaviors,
+            bool hasHeader = true)
         {
             if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
 
@@ -126,8 +128,8 @@ namespace Coalesce.Web.Api
             {
                 using (var reader = new System.IO.StreamReader(stream))
                 {
-                    var csv = reader.ReadToEnd();
-                    return await CsvSave(csv, dataSource, hasHeader);
+                    var csv = await reader.ReadToEndAsync();
+                    return await CsvSave(csv, dataSource, behaviors, hasHeader);
                 }
             }
         }
@@ -137,31 +139,33 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("CsvSave")]
         [Authorize]
-        public virtual async Task<IEnumerable<ItemResult<CaseProductDtoGen>>> CsvSave(string csv, IDataSource<Coalesce.Domain.CaseProduct> dataSource, bool hasHeader = true)
+        public virtual async Task<IEnumerable<ItemResult>> CsvSave(
+            string csv,
+            IDataSource<Coalesce.Domain.CaseProduct> dataSource,
+            IBehaviors<Coalesce.Domain.CaseProduct> behaviors,
+            bool hasHeader = true)
         {
             // Get list from CSV
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<CaseProductDtoGen>(csv, hasHeader);
-            var resultList = new List<ItemResult<CaseProductDtoGen>>();
+            var resultList = new List<ItemResult>();
             foreach (var dto in list)
             {
                 // Check if creates/edits aren't allowed
                 if (!dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
                 {
-                    var result = new ItemResult<CaseProductDtoGen>("Create not allowed on CaseProduct objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add(result);
+                    resultList.Add("Create not allowed on CaseProduct objects.");
                 }
                 else if (dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
                 {
-                    var result = new ItemResult<CaseProductDtoGen>("Edit not allowed on CaseProduct objects.");
                     Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add(result);
+                    resultList.Add("Edit not allowed on CaseProduct objects.");
                 }
                 else
                 {
                     var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, false);
-                    resultList.Add(result);
+                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
                 }
             }
             return resultList;

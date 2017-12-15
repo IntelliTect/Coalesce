@@ -144,7 +144,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
             }
             else if (Property.Type.IsNumber)
             {
-                var propertyClrType = (Property.Type as ReflectionTypeViewModel).Info;
+                var propertyClrType = Property.Type.TypeInfo;
                 var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(propertyClrType);
                 // This allows us to check if the conversion is valid without exceptions
                 // (in our code, anyway - the default implementation of this is just a try catch anyway)

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {
-    public class StandardBehaviors<T, TContext>
+    public class StandardBehaviors<T, TContext> : IBehaviors<T>
         where T : class, new()
         where TContext : DbContext
     {
@@ -48,11 +48,7 @@ namespace IntelliTect.Coalesce
 
         public virtual T GetItem(DbSet<T> dbSet, object id) => dbSet.FindItem(id);
 
-#region Delete
-
-        public virtual ItemResult BeforeDelete(T item) => true;
-
-        public virtual void AfterDelete(T item) { }
+        #region Delete
 
         public virtual async Task<ItemResult> DeleteAsync(object id)
         {
@@ -65,7 +61,7 @@ namespace IntelliTect.Coalesce
             }
 
             var beforeDelete = BeforeDelete(item);
-            if (!beforeDelete.WasSuccessful)
+            if (!beforeDelete?.WasSuccessful ?? true)
             {
                 return beforeDelete;
             }
@@ -78,57 +74,37 @@ namespace IntelliTect.Coalesce
             return true;
         }
 
+        public virtual ItemResult BeforeDelete(T item) => true;
+
+        public virtual void AfterDelete(T item) { }
+
         #endregion
+
+
         #region Save
 
-
-        /// <summary>
-        /// Allows for overriding the mapper from Obj to DTO
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        protected virtual TDto MapObjToDto<TDto>(T obj, string includes, IncludeTree tree = null)
-            where TDto : IClassDto<T, TDto>, new()
-        {
-            //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
-            var context = new MappingContext(User, includes);
-            return Mapper<T, TDto>.ObjToDtoMapper(obj, context, tree);
-        }
-
-        /// <summary>
-        /// Allows for overriding the mapper from DTO to Obj
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>        
-        protected virtual void MapDtoToObj<TDto>(TDto dto, T obj, string includes)
-            where TDto : IClassDto<T, TDto>, new()
-        {
-            //dto.Update(obj);
-            var context = new MappingContext(User, includes);
-            Mapper<T, TDto>.DtoToObjMapper(dto, obj, context);
-        }
-
-
-        public virtual async Task<ItemResult<TDto>> Save<TDto>(
+        public virtual async Task<ItemResult<TDto>> SaveAsync<TDto>(
             TDto incomingDto,
             IDataSourceParameters parameters,
             IDataSource<T> dataSource
         )
-            where TDto : IClassDto<T, TDto>, new()
+            where TDto : IClassDto<T>, new()
         {
             var dbSet = GetDbSet();
             var includes = parameters.Includes;
 
-            var result = new ItemResult<TDto>();
-
             T item = null;
+            IncludeTree includeTree = null;
 
-            // All properties on DTOs should be nullable.
-            // We can expect, then, that a "create" scenario should have idValue == null.
-            var dtoClassViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
-            object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
-
-            if (idValue != null)
+            // IsNullable handles nullable value types, and reference types (mainly strings).
+            // !IsNullable handles non-Nullable<T> value types.
+            (SaveKind kind, object idValue) = DetermineSaveKind(incomingDto);
+            if (kind == SaveKind.Create)
+            {
+                item = new T();
+                dbSet.Add(item);
+            }
+            else
             {
                 // Primary Key was defined. This object should exist in the database.
                 item = GetItem(dbSet, idValue);
@@ -137,89 +113,71 @@ namespace IntelliTect.Coalesce
                     return $"Item with {ClassViewModel.PrimaryKey.Name} = {idValue} not found.";
                 }
             }
-            else
-            {
-                item = new T();
-                dbSet.Add(item);
-            }
 
             // Create a shallow copy.
             var originalItem = item.Copy();
 
-            // Allow the user to stop things from saving.
-            IncludeTree includeTree = null;
+            incomingDto.MapToEntity(item, new MappingContext(User, includes));
 
-            MapDtoToObj(incomingDto, item, includes);
-            try
-            {
-                SetFingerprint(item);
-                // Run validation in this controller
-                var validateResult = Validate(originalItem, incomingDto, item);
-                // Run validation from the POCO if it implements IValidatable
-                if (typeof(IBeforeSave<T, TContext>).IsAssignableFrom(typeof(T)))
-                {
-                    var itemAsBeforeSave = item as IBeforeSave<T, TContext>;
-                    validateResult.Merge(itemAsBeforeSave.BeforeSave(originalItem, Db, User, includes));
-                }
+            var beforeSave = BeforeSave(kind, originalItem, item);
+            if (!beforeSave?.WasSuccessful ?? true) return new ItemResult<TDto>(beforeSave);
 
-                if (validateResult.WasSuccessful)
-                {
-                    await Db.SaveChangesAsync();
+            await Db.SaveChangesAsync();
 
-                    // Pull the object to get any changes.
-                    var idString = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
-                    var itemResult = await dataSource.GetItemAsync(idString, parameters);
-                    item = itemResult.Item1;
-                    includeTree = itemResult.Item2;
+            // Pull the object to get any changes.
+            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
+            (item, includeTree) = await dataSource.GetItemAsync(newItemId, parameters);
 
-                    // Call the AfterSave method to support special cases.
-                    var reloadItem = AfterSave(incomingDto, item, originalItem, Db);
+            // Call the AfterSave method to support special cases.
+            var afterSave = AfterSave(kind, originalItem, ref item, ref includeTree);
+            if (!afterSave?.WasSuccessful ?? true) return new ItemResult<TDto>(afterSave);
 
-                    // Call PostSave if the object has that.
-                    if (typeof(IAfterSave<T, TContext>).IsAssignableFrom(typeof(T)))
-                    {
-                        var itemAsAfterSave = item as IAfterSave<T, TContext>;
-                        itemAsAfterSave.AfterSave(originalItem, Db, User, includes);
-                    }
+            // If the user nulled out the item in their AfterSave,
+            // they don't want to send the item back with the save.
+            // This is fine - we won't try to map it if its null.
+            if (item == null) return true;
 
-                    if (reloadItem && returnObject)
-                    {
-                        itemResult = await dataSource.GetItemAsync(idString, parameters);
-                        item = itemResult.Item1;
-                        includeTree = itemResult.Item2;
-                    }
-
-                    result.WasSuccessful = true;
-                }
-                else
-                {
-                    result.WasSuccessful = false;
-                    result.Message = validateResult.Message;
-                    if (validateResult.ReturnObject != null)
-                    {
-                        result.Object = MapObjToDto(validateResult.ReturnObject, includes);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-
-            // Get the key back.
-            if (item != null)
-            {
-                result.Object = MapObjToDto<TDto>(item, includes, includeTree);
-            }
+            var result = new ItemResult<TDto>(true,
+                item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
+            );
 
             return result;
         }
 
-#endregion
+        public virtual (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
+            where TDto : IClassDto<T>, new()
+        {
+            var dtoClassViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
+            object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
+
+            // IsNullable handles nullable value types, and reference types (mainly strings).
+            // !IsNullable handles non-Nullable<T> value types.
+            if (dtoClassViewModel.PrimaryKey.Type.IsNullable
+                ? idValue == null
+                : idValue.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
+            {
+                return (SaveKind.Create, null);
+            }
+            else
+            {
+                return (SaveKind.Update, idValue);
+            }
+        }
+
+        public virtual ItemResult BeforeSave(SaveKind kind, T originalItem, T updatedItem) => true;
+
+        public virtual ItemResult AfterSave(SaveKind kind, T originalItem, ref T updatedItem, ref IncludeTree includeTree) => true;
+
+        #endregion
 
 
 
 
+    }
+
+    public enum SaveKind
+    {
+        Create,
+        Update,
     }
 }

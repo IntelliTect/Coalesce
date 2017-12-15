@@ -129,7 +129,7 @@ namespace IntelliTect.Coalesce.Validation
             // Validate data sources.
             foreach (var sourcesForType in repository.DataSources.GroupBy(s => s.SourceFor))
             {
-                assert.IsTrue(sourcesForType.Count(s => s.DataSourceClass.IsDefaultDataSource) <= 1, $"Cannot have multiple default data sources for {sourcesForType.Key}");
+                assert.IsTrue(sourcesForType.Count(s => s.StrategyClass.IsDefaultDataSource) <= 1, $"Cannot have multiple default data sources for {sourcesForType.Key}");
             }
 
             // Validate the non-DbSet items (DTOs)

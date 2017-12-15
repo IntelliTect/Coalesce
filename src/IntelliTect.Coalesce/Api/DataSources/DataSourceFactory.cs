@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             }
             else
             {
-                return (dataSourceClassViewModel.Type as ReflectionTypeViewModel).Info;
+                return dataSourceClassViewModel.Type.TypeInfo;
             }
         }
 
@@ -60,13 +60,13 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
             if (defaultSource != null)
             {
-                return (defaultSource.Type as ReflectionTypeViewModel).Info;
+                return defaultSource.Type.TypeInfo;
             }
 
             var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
             var dataSourceType = typeof(StandardDataSource<,>).MakeGenericType(
-                (servedType.Type as ReflectionTypeViewModel).Info,
-                (tContext.ClassViewModel.Type as ReflectionTypeViewModel).Info
+                servedType.Type.TypeInfo,
+                tContext.ClassViewModel.Type.TypeInfo
             );
             return dataSourceType;
         }

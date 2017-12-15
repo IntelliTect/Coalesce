@@ -5,10 +5,10 @@ using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
 {
-    public interface IClassDto<T, TDto>
+    public interface IClassDto<in T> 
     {
-        void Update(T obj, IMappingContext context);
+        void MapTo(T obj, IMappingContext context);
 
-        TDto CreateInstance(T obj, IMappingContext context, IncludeTree tree = null);
+        void MapFrom(T obj, IMappingContext context, IncludeTree tree = null);
     }
 }

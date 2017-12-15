@@ -491,7 +491,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <returns>A ListResult with the requested data and paging information,
         /// and an IncludeTree to be used when mapping/serializing the data.</returns>
-        public virtual async Task<(ListResult<T> list, IncludeTree includeTree)> GetListAsync(IListParameters parameters)
+        public virtual async Task<(ListResult<T> List, IncludeTree IncludeTree)> GetListAsync(IListParameters parameters)
         {
             var query = GetQuery(parameters);
 
@@ -521,12 +521,12 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>A ListResult containing the desired data mapped to the desired type.</returns>
         public virtual async Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
-            where TDto : IClassDto<T, TDto>, new()
+            where TDto : IClassDto<T>, new()
         {
             var (result, tree) = await GetListAsync(parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            var mappedResult = result.List.Select(obj => Mapper<T, TDto>.ObjToDtoMapper(obj, mappingContext, tree)).ToList();
+            var mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
 
             if (parameters.Fields.Any())
             {
@@ -555,7 +555,7 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key to find the desired item by.</param>
         /// <returns>The requested item
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
-        public virtual async Task<(T item, IncludeTree includeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
+        public virtual async Task<(T Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = GetQuery(parameters);
 
@@ -577,12 +577,12 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>The desired item, mapped to the desired type.</returns>
         public virtual async Task<TDto> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
-            where TDto : IClassDto<T, TDto>, new()
+            where TDto : IClassDto<T>, new()
         {
             var (result, tree) = await GetItemAsync(id, parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            var mappedResult = Mapper<T, TDto>.ObjToDtoMapper(result, mappingContext, tree);
+            var mappedResult = Mapper.MapToDto<T, TDto>(result, mappingContext, tree);
 
             return mappedResult;
         }

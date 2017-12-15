@@ -210,7 +210,22 @@ namespace Coalesce.Domain
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
                 => Db.People.Include(p => p.Company);
         }
+
+        public class Behaviors : StandardBehaviors<Person, AppDbContext>
+        {
+            public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
+
+            public override ItemResult BeforeSave(SaveKind kind, Person originalItem, Person updatedItem)
+            {
+                if (updatedItem.FirstName?.Contains("[user]") ?? false)
+                {
+                    updatedItem.FirstName = updatedItem.FirstName.Replace("[user]", User.Identity.Name);
+                }
+                return true;
+            }
+        }
     }
+
 
     [Coalesce]
     public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbContext>

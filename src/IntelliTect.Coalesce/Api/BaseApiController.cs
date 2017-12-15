@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.Api
 {
     public abstract class BaseApiController<T, TDto, TContext> : Controller
         where T : class, new()
-        where TDto : class, IClassDto<T, TDto>, new()
+        where TDto : class, IClassDto<T>, new()
         where TContext : DbContext
     {
         protected BaseApiController(TContext db)
@@ -177,178 +177,22 @@ namespace IntelliTect.Coalesce.Api
             }
         }
 
-        protected Task<TDto> GetImplementation(string id, DataSourceParameters parameters, IDataSource<T> dataSource)
+        protected Task<TDto> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
             return dataSource.GetMappedItemAsync<TDto>(id, parameters);
         }
-
-        private Task<(T Item, IncludeTree includeTree)> GetUnmapped(string id, DataSourceParameters parameters, IDataSource<T> dataSource)
-        {
-            return dataSource.GetItemAsync(id, parameters);
-        }
         
-        protected Task<ItemResult> DeleteImplementation(string id, [FromServices] CrudContext<TContext> context)
+        protected Task<ItemResult> DeleteImplementation(object id, IBehaviors<T> behaviors)
         {
-            var behaviors = new StandardBehaviors<T, TContext>(context);
             return behaviors.DeleteAsync(id);
         }
 
-        protected async Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, bool returnObject = true)
+        protected Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
-            var includes = parameters.Includes;
-
-            var result = new ItemResult<TDto>();
-
-            // See if this is new or an update using the key.
-            T item = null;
-
-            object idValue = IdValue(dto);
-
-            if (idValue is int && (int)idValue != 0 || idValue is string && (string)idValue != "")
-            {
-                item = await DataSource.FindItemAsync(idValue);
-                if (item == null)
-                {
-                    result.WasSuccessful = false;
-                    result.Message =
-                        string.Format("Item with {0} = {1} not found.", ClassViewModel.PrimaryKey.Name, IdValue(dto));
-                    Response.StatusCode = (int)System.Net.HttpStatusCode.NotFound;
-                    return result;
-                }
-            }
-
-            // See if we found it.
-            if (item == null)
-            {
-                item = new T();  // This does not work with Lazy Loading because it gives the POCO not the proxy object.
-                DataSource.Add(item);
-            }
-
-            // Create a shallow copy.
-            var origItem = item.Copy();
-
-            // Allow the user to stop things from saving.
-            try
-            {
-                if (BeforeSave(dto, item))
-                {
-                    IncludeTree includeTree = null;
-
-                    var original = item.Copy<T>();
-                    MapDtoToObj(dto, item, includes);
-                    try
-                    {
-                        SetFingerprint(item);
-                        // Run validation in this controller
-                        var validateResult = Validate(original, dto, item);
-                        // Run validation from the POCO if it implements IValidatable
-                        if (typeof(IBeforeSave<T, TContext>).IsAssignableFrom(typeof(T)))
-                        {
-                            var itemAsBeforeSave = item as IBeforeSave<T, TContext>;
-                            validateResult.Merge(itemAsBeforeSave.BeforeSave(original, Db, User, includes));
-                        }
-
-                        if (validateResult.WasSuccessful)
-                        {
-                            await Db.SaveChangesAsync();
-
-                            // Pull the object to get any changes.
-                            var idString = IdValue(item).ToString();
-                            var itemResult = await dataSource.GetItemAsync(idString, parameters);
-                            item = itemResult.Item1;
-                            includeTree = itemResult.Item2;
-
-                            // Call the AfterSave method to support special cases.
-                            var reloadItem = AfterSave(dto, item, origItem, Db);
-
-                            // Call PostSave if the object has that.
-                            if (typeof(IAfterSave<T, TContext>).IsAssignableFrom(typeof(T)))
-                            {
-                                var itemAsAfterSave = item as IAfterSave<T, TContext>;
-                                itemAsAfterSave.AfterSave(original, Db, User, includes);
-                            }
-
-                            if (reloadItem && returnObject)
-                            {
-                                itemResult = await dataSource.GetItemAsync(idString, parameters);
-                                item = itemResult.Item1;
-                                includeTree = itemResult.Item2;
-                            }
-
-                            result.WasSuccessful = true;
-                        }
-                        else
-                        {
-                            result.WasSuccessful = false;
-                            result.Message = validateResult.Message;
-                            if (validateResult.ReturnObject != null)
-                            {
-                                result.Object = MapObjToDto(validateResult.ReturnObject, includes);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
-                        result = new ItemResult<TDto>(ex);
-                        //Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-                    }
-                    // Get the key back.
-                    if (item != null)
-                    {
-                        result.Object = MapObjToDto(item, includes, includeTree);
-                    }
-                }
-                else
-                {
-                    result.WasSuccessful = false;
-                    result.Message = "Canceled";
-                    //Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-                }
-            }
-            catch (Exception ex)
-            {
-
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
-
-            return result;
+            return behaviors.SaveAsync(dto, parameters, dataSource);
         }
 
-
-        protected virtual void SetFingerprint(T item)
-        {
-
-        }
-
-        /// <summary>
-        /// Allows for overriding the mapper from Obj to DTO
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        protected virtual TDto MapObjToDto(T obj, string includes, IncludeTree tree = null)
-        {
-            //return Activator.CreateInstance(typeof(TDto), new object[] { obj, User, includes }) as TDto;
-            var context = new MappingContext(User, includes);
-            return Mapper<T, TDto>.ObjToDtoMapper(obj, context, tree);
-        }
-
-        /// <summary>
-        /// Allows for overriding the mapper from DTO to Obj
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>        
-        protected virtual void MapDtoToObj(TDto dto, T obj, string includes)
-        {
-            //dto.Update(obj);
-            var context = new MappingContext(User, includes);
-            Mapper<T, TDto>.DtoToObjMapper(dto, obj, context);
-        }
-
-
-
-        protected ItemResult<TDto> ChangeCollection(int id, string propertyName, int childId, string method)
+        protected ItemResult<TDto> ChangeCollection(object id, string propertyName, int childId, string method)
         {
             // TODO: this only supports ints
 
@@ -473,21 +317,6 @@ namespace IntelliTect.Coalesce.Api
             //return result;
         }
 
-
-        /// <summary>
-        /// Gets the value of the ID in the DTO object using IdField.
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <returns></returns>
-        protected object IdValue(TDto dto) => DtoViewModel.PrimaryKey.PropertyInfo.GetValue(dto);
-
-        /// <summary>
-        /// Gets the value of the ID in the DTO object using IdField.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        protected object IdValue(T item) => ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
-
         public DbSet<T> DataSource
         {
             get
@@ -513,39 +342,6 @@ namespace IntelliTect.Coalesce.Api
             }
         }
 
-        /// <summary>
-        /// Called after the object is mapped and before it is saved. Allows for returning validation information.
-        /// </summary>
-        /// <param name="original">Property level copy of original object before mapping.</param>
-        /// <param name="dto">Values handed in by the DTO.</param>
-        /// <param name="updated">Values to be saved.</param>
-        /// <returns></returns>
-        protected virtual ValidateResult<T> Validate(T original, TDto dto, T updated)
-        {
-            return new Models.ValidateResult<T>();
-        }
-
-        /// <summary>
-        /// Called before the object is mapped and saved. Returning false will cause the save to stop.
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        protected virtual bool BeforeSave(TDto dto, T obj)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Called after the object is mapped and saved with the new data.
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <param name="obj"></param>
-        protected virtual bool AfterSave(TDto dto, T obj, T orig, TContext context)
-        {
-            return false;
-        }
-        
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {

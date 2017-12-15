@@ -42,6 +42,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool IsA<T>() => IsA(typeof(T));
 
+        /// <summary>
+        /// Convenient accessor for the represented System.Type when in reflection-based contexts.
+        /// </summary>
+        public virtual Type TypeInfo => throw new InvalidOperationException("TypeInfo not available in the current context");
+
         public string CsDefaultValue
         {
             get

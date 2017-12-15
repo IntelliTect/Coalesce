@@ -139,6 +139,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? ReflectionRepository.Global.GetClassViewModel(Info)
             : null;
 
+        public override Type TypeInfo => Info;
+
         public override bool EqualsType(TypeViewModel b) => b is ReflectionTypeViewModel r ? Info == r.Info : false;
     }
 }

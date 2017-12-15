@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
+using IntelliTect.Coalesce.Api.Behaviors;
 
 namespace IntelliTect.Coalesce
 {
@@ -31,6 +32,7 @@ namespace IntelliTect.Coalesce
             services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvc>();
 
             services.TryAddScoped<IDataSourceFactory, DataSourceFactory>();
+            services.TryAddScoped<IBehaviorsFactory, BehaviorsFactory>();
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
             
 
@@ -52,6 +54,7 @@ namespace IntelliTect.Coalesce
             public void Configure(MvcOptions options)
             {
                 options.ModelBinderProviders.Insert(0, new DataSourceModelBinderProvider());
+                options.ModelBinderProviders.Insert(0, new BehaviorsModelBinderProvider());
             }
         }
     }

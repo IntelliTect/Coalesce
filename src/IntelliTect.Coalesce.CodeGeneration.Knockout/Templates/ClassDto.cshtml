@@ -31,9 +31,8 @@
 
 namespace @(namespaceName)
 {
-    public partial class @(model.Name)DtoGen : GeneratedDto<@(model.FullyQualifiedName), @(model.Name)DtoGen>
-        , IClassDto<@(model.FullyQualifiedName), @(model.Name)DtoGen>
-        {
+    public partial class @(model.Name)DtoGen : GeneratedDto<@(model.FullyQualifiedName)>
+    {
         public @(model.Name)DtoGen() { }
 
         @foreach (PropertyViewModel prop in model.ClientProperties)
@@ -41,9 +40,8 @@ namespace @(namespaceName)
         @:public @prop.Type.NullableTypeForDto(namespaceName) @prop.Name { get; set; }
         }
 
-        // Create a new version of this object or use it from the lookup.
-        public static @(model.Name)DtoGen Create(@(model.FullyQualifiedName) obj, IMappingContext context, IncludeTree tree = null) {
-            if (obj == null) return null;
+        public override void MapFrom(@(model.FullyQualifiedName) obj, IMappingContext context, IncludeTree tree = null) {
+            if (obj == null) return;
             var includes = context.Includes;
                         
             // Applicable includes for @(model.Name)
@@ -55,28 +53,15 @@ namespace @(namespaceName)
             // Applicable roles for @(model.Name)
             @(model.PropertyRolesAsCS())
 
-
-            // See if the object is already created, but only if we aren't restricting by an includes tree.
-            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
-            if (tree == null && context.TryGetMapping(obj, out @(model.Name)DtoGen existing)) return existing; 
-
-            var newObject = new @(model.Name)DtoGen();
-            if (tree == null) context.AddMapping(obj, newObject);
             // Fill the properties of the object.
             @foreach (var prop in model.ClientProperties.OrderBy(p => p.PureType.HasClassViewModel))
             {
-                @prop.ObjToDtoPropertySetter("newObject")
-            }            
-            return newObject;
-        }
-
-        // Instance constructor because there is no way to implement a static interface in C#. And generic constructors don't take arguments.
-        public @(model.Name)DtoGen CreateInstance(@(model.FullyQualifiedName) obj, IMappingContext context, IncludeTree tree = null) {
-            return Create(obj, context, tree);
+                @prop.ObjToDtoPropertySetter("this")
+            }
         }
 
         // Updates an object from the database to the state handed in by the DTO.
-        public void Update(@(model.FullyQualifiedName) entity, IMappingContext context)
+        public override void MapTo(@(model.FullyQualifiedName) entity, IMappingContext context)
         {
             var includes = context.Includes;
 

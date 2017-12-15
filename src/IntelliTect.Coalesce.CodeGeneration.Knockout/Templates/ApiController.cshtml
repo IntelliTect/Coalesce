@@ -131,19 +131,6 @@ namespace @(namespaceName).Api
 
             return await SaveImplementation(dto, parameters, dataSource, behaviors);
         }
-
-        [HttpPost("AddToCollection")]
-        @(securityInfo.EditAnnotation)
-        @(model.ApiActionAccessModifier) virtual ItemResult<@(model.DtoName)> AddToCollection(int id, string propertyName, int childId)
-        {
-            return ChangeCollection(id, propertyName, childId, "Add");
-        }
-        [HttpPost("RemoveFromCollection")]
-        @(securityInfo.EditAnnotation)
-        @(model.ApiActionAccessModifier) virtual ItemResult<@(model.DtoName)> RemoveFromCollection(int id, string propertyName, int childId)
-        {
-            return ChangeCollection(id, propertyName, childId, "Remove");
-        }
         </text>
         }
 

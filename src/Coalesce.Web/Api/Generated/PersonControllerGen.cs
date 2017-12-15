@@ -74,19 +74,6 @@ namespace Coalesce.Web.Api
             return await SaveImplementation(dto, parameters, dataSource, behaviors);
         }
 
-        [HttpPost("AddToCollection")]
-        [AllowAnonymous]
-        public virtual ItemResult<PersonDtoGen> AddToCollection(int id, string propertyName, int childId)
-        {
-            return ChangeCollection(id, propertyName, childId, "Add");
-        }
-        [HttpPost("RemoveFromCollection")]
-        [AllowAnonymous]
-        public virtual ItemResult<PersonDtoGen> RemoveFromCollection(int id, string propertyName, int childId)
-        {
-            return ChangeCollection(id, propertyName, childId, "Remove");
-        }
-
         /// <summary>
         /// Downloads CSV of PersonDtoGen
         /// </summary>

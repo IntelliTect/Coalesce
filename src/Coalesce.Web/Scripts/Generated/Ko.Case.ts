@@ -326,12 +326,17 @@ module ViewModels {
             self.devTeamAssignedId.subscribe(self.autoSave);
             self.devTeamAssigned.subscribe(self.autoSave);
         
-            self.products.subscribe(function(changes){
-                if (!self.isLoading() && changes.length > 0){
-                    for (var i in changes){
-                        var change:any = changes[i];
-                        self.autoSaveCollection('products', change.value.productId(), change.status);
-                    }
+            self.products.subscribe<KnockoutArrayChange<Product>[]>(changes => {
+                for (var i in changes){
+                    var change = changes[i];
+                    self.autoSaveCollection(
+                        change.status, 
+                        this.caseProducts, 
+                        CaseProduct, 
+                        'caseId',
+                        'productId',
+                        change.value.productId()
+                    );
                 }
             }, null, "arrayChange");
             

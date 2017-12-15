@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.Api
                 List<string> result = new List<string>();
                 foreach (var prop in properties)
                 {
-                    IQueryable<T> matches = DataSource;
+                    IQueryable<T> matches = Db.Set<T>();
                     matches = matches.Where(string.Format("{0} <> null", prop.Name));
                     if (!string.IsNullOrWhiteSpace(search))
                     {
@@ -192,157 +192,6 @@ namespace IntelliTect.Coalesce.Api
             return behaviors.SaveAsync(dto, parameters, dataSource);
         }
 
-        protected ItemResult<TDto> ChangeCollection(object id, string propertyName, int childId, string method)
-        {
-            // TODO: this only supports ints
-
-
-            // Get the object of the middle class.
-            var manyToManyProperty = ClassViewModel.ClientProperties.First(f => string.Compare(f.ManyToManyCollectionName, propertyName, true) == 0);
-            if (manyToManyProperty != null && manyToManyProperty.Object != null)
-            {
-                // Check security on the collection property that holds the many-to-many objects.
-                if (!manyToManyProperty.SecurityInfo.IsEditable(User))
-                {
-                    Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                    return new ItemResult<TDto>("Unauthorized");
-                }
-
-                var joinClass = manyToManyProperty.Object;
-                string thisKeyName = joinClass.ClientProperties.First(f => f.PureType.EqualsType(ClassViewModel.Type)).ObjectIdProperty.ColumnName;
-                string otherKeyName = joinClass.ClientProperties.First(f => !f.IsPrimaryKey && f.IsId && f.ColumnName != thisKeyName).ColumnName;
-
-                var mapping = Db.Model.FindEntityType(joinClass.FullyQualifiedName).Relational();
-                var tableName = $"{mapping.Schema}.{mapping.TableName}";
-
-                try
-                {
-                    if (method == "Remove")
-                    {
-                        // Check permissions for deleting the many-to-many objects.
-                        if (!joinClass.SecurityInfo.IsDeleteAllowed(User))
-                        {
-                            Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                            return new ItemResult<TDto>("Unauthorized");
-                        }
-                        string sql = "DELETE FROM " + tableName + " WHERE " + thisKeyName + " = {0} AND " + otherKeyName + " = {1}";
-                        Db.Database.ExecuteSqlCommand(sql, id, childId);
-                    }
-                    else if (method == "Add")
-                    {
-                        // Check permissions for creating the many-to-many objects.
-                        if (!joinClass.SecurityInfo.IsCreateAllowed(User))
-                        {
-                            Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                            return new ItemResult<TDto>("Unauthorized");
-                        }
-
-                        // TODO: (maybe?) Check if the user is allowed to read the objects on the other side of the relationship (otherKeyName).
-                        // This prevents an attack where the user just makes up foreign key values, hoping they're valid.
-
-                        string sql = "INSERT INTO " + tableName + " (" + thisKeyName + ", " + otherKeyName + ") VALUES ({0}, {1})";
-                        Db.Database.ExecuteSqlCommand(sql, id, childId);
-                    }
-                    return new ItemResult<TDto>(true, null);
-                }
-                catch (Exception ex)
-                {
-                    return new ItemResult<TDto>(ex);
-                }
-            }
-            else
-            {
-                Response.StatusCode = (int)System.Net.HttpStatusCode.NotFound;
-                return new ItemResult<TDto>("Could not find many-to-many collection: " + propertyName);
-            }
-
-            // GME: This is the code for the collections that are handled by EF, this is not available in EF 7 yet.
-            //// Get the primary object.
-            //T item = DataSource.Includes().FindItem(id);
-            //if (item != null)
-            //{
-            //    PropertyInfo propInfo = item.GetType().GetProperty(propertyName);
-            //    Type childType = propInfo.PropertyType.GenericTypeArguments[0];
-            //    if (childType != null)
-            //    {
-            //        var collection = propInfo.GetValue(item);
-            //        if (collection != null)
-            //        {
-            //            MethodInfo methodInfo = propInfo.PropertyType.GetMethod(method);
-            //            if (methodInfo != null)
-            //            {
-            //                // Get an instance of the object being added
-            //                var childObj = Find(childType, childId);
-            //                if (childObj != null)
-            //                {
-            //                    // Add the object to the collection
-            //                    // Get a reference to the add method
-            //                    // Call the Add method with the parent and the child.
-            //                    methodInfo.Invoke(collection, new object[] { childObj });
-            //                    Db.SaveChanges();
-            //                    result.WasSuccessful = true;
-            //                    TDto dto = new TDto();
-            //                    Mappers.ObjToDtoMapper.Map(item, dto);
-            //                    result.Object = dto;
-            //                }
-            //                else
-            //                {
-            //                    result.Message = "Could not find child with ID: " + childId;
-            //                    result.WasSuccessful = false;
-            //                }
-            //            }
-            //            else
-            //            {
-            //                result.Message = "Property is not collection: " + propertyName;
-            //                result.WasSuccessful = false;
-            //            }
-            //        }
-            //        else
-            //        {
-            //            result.Message = "Could not get collection: " + propertyName;
-            //            result.WasSuccessful = false;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        result.Message = "Could not find property: " + propertyName;
-            //        result.WasSuccessful = false;
-            //    }
-            //}
-            //else
-            //{
-            //    result.Message = "Could not find item: " + id;
-            //    result.WasSuccessful = false;
-            //}
-            //return result;
-        }
-
-        public DbSet<T> DataSource
-        {
-            get
-            {
-                if (_dataSource == null)
-                {
-                    // find the DbSet if we can
-                    foreach (var prop in typeof(TContext).GetProperties())
-                    {
-                        // See if this is the right one
-                        if ((prop.PropertyType.Name == "DbSet`1" ||
-                            prop.PropertyType.Name == "IDbSet`1")
-                            && prop.PropertyType.GenericTypeArguments.Count() == 1
-                            && prop.PropertyType.GenericTypeArguments.First().Name == typeof(T).Name)
-                        {
-                            _dataSource = (DbSet<T>)prop.GetValue(Db);
-                            break;
-                        }
-                    }
-                }
-
-                return _dataSource;
-            }
-        }
-
-
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             //context.ModelState.FindKeysWithPrefix("dataSource")
@@ -358,7 +207,9 @@ namespace IntelliTect.Coalesce.Api
                     // TODO: this could be more robust.
                     // Lots of client methods in the typescript aren't expecting an object that looks like this.
                     // Anything that takes a SaveResult or ListResult should be fine, but other things (Csv..., Count, Delete, Get) won't handle this.
-                    context.Result = this.BadRequest(new ApiResult(string.Join("; ", errors.Select(e => $"Invalid value for parameter {e.key}: {e.error}"))));
+                    context.Result = BadRequest(
+                        new ApiResult(string.Join("; ", errors.Select(e => $"Invalid value for parameter {e.key}: {e.error}")))
+                    );
                     return;
                 }
             }
@@ -368,20 +219,16 @@ namespace IntelliTect.Coalesce.Api
 
         public override void OnActionExecuted(ActionExecutedContext context)
         {
+            
             var response = context.HttpContext.Response;
 
-            if (response.StatusCode == (int)HttpStatusCode.OK)
+            if (response.StatusCode == (int)HttpStatusCode.OK
+                && context.Result is ObjectResult result
+                && result.Value is ApiResult apiResult
+                && !apiResult.WasSuccessful
+            )
             {
-                var contents = context.Result as Microsoft.AspNetCore.Mvc.ObjectResult;
-                if (contents != null)
-                {
-                    var listResult = contents.Value as ListResult<T>;
-                    var saveResult = contents.Value as ItemResult;
-                    if ((listResult != null && !listResult.WasSuccessful) || (saveResult != null && !saveResult.WasSuccessful))
-                    {
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    }
-                }
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
             base.OnActionExecuted(context);
         }

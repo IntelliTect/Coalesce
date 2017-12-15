@@ -516,43 +516,57 @@ module Coalesce {
         };
 
         /** Saves a many-to-many collection change. This is done automatically and doesn't need to be called. */
-        protected saveCollection = (propertyName: string, childId: any, operation: string): JQueryPromise<any> => {
-            var method = (operation === "added" ? "AddToCollection" : "RemoveFromCollection");
-            var currentId = this[this.primaryKeyName]();
-            return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + '/' + method + '?id=' + currentId + '&propertyName=' + propertyName + '&childId=' + childId, xhrFields: { withCredentials: true } })
-                .done((data) => {
-                    this.errorMessage('');
-                    this.loadFromDto(data.object, true);
-                    // The object is now saved. Call any callback.
-                    for (var i in this.saveCallbacks) {
-                        this.saveCallbacks[i](this);
-                    }
-                })
-                .fail((xhr) => {
-                    var errorMsg = "Unknown Error";
-                    //var validationIssues = [];
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                    //if (xhr.responseJSON && xhr.responseJSON.validationIssues) errorMsg = xhr.responseJSON.validationIssues;
-                    this.errorMessage(errorMsg);
-                    //this.validationIssues(validationIssues);
+        protected saveCollection = <TJoin extends BaseViewModel>(
+            operation: 'added' | 'deleted',
+            existingItems: KnockoutObservableArray<TJoin>,
+            constructor: new () => TJoin,
+            localIdProp: keyof TJoin,
+            foreignIdProp: keyof TJoin,
+            foreignId: any
+        ): JQueryPromise<any> | boolean | undefined => {
 
-                    if (this.coalesceConfig.showFailureAlerts())
-                        this.coalesceConfig.onFailure()(this, "Could not save the item: " + errorMsg);
-                })
-                .always(() => {
-                    // Nothing here yet.
+            var currentId = this[this.primaryKeyName]();
+
+            if (operation == 'added') {
+                var newItem = new constructor();
+                newItem.parent = this;
+                newItem.parentCollection = existingItems;
+                newItem.coalesceConfig.autoSaveEnabled(false);
+                newItem[localIdProp](currentId);
+                newItem[foreignIdProp](foreignId);
+                return newItem.save(() => {
+                    // Restore default autosave behavior.
+                    newItem.coalesceConfig.autoSaveEnabled(null);
+                    existingItems.push(newItem);
                 });
+            } else if (operation == 'deleted') {
+                var matchedItems = existingItems().filter(i => i[localIdProp]() === currentId && i[foreignIdProp]() === foreignId);
+                if (matchedItems.length == 0) {
+                    throw `Couldn't find a ${constructor.toString()} object (found ${existingItems.length}) to delete with ${localIdProp}=${currentId} & ${foreignIdProp}=${foreignId}.`
+                } else {
+                    // If we matched more than one item, we're just going to operate on the first one.
+                    var matcheditem = matchedItems[0];
+                    return matcheditem.deleteItem();
+                }
+            }
+
         };
 
         /** Saves a many to many collection if coalesceConfig.autoSaveCollectionsEnabled is true. */
-        protected autoSaveCollection = (property: string, id: any, changeStatus: string) => {
+        protected autoSaveCollection = <TJoin extends BaseViewModel>(
+            operation: string,
+            existingItems: KnockoutObservableArray<TJoin>,
+            constructor: new () => TJoin,
+            localIdProp: keyof TJoin,
+            foreignIdProp: keyof TJoin,
+            foreignId: any
+        ) => {
             if (!this.isLoading() && this.coalesceConfig.autoSaveCollectionsEnabled()) {
+
                 // TODO: Eventually Batch saves for many-to-many collections.
-                if (changeStatus === 'added') {
-                    this.saveCollection(property, id, "added");
-                } else if (changeStatus === 'deleted') {
-                    this.saveCollection(property, id, "deleted");
-                }
+                if (operation != 'added' && operation != 'deleted') return;
+
+                this.saveCollection<TJoin>(operation, existingItems, constructor, localIdProp, foreignIdProp, foreignId);
             }
         };
 

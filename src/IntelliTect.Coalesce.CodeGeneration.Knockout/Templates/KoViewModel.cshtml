@@ -533,12 +533,17 @@ module @moduleName {
         @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => p.IsManytoManyCollection))
         {
             <text>
-            self.@(prop.ManyToManyCollectionName.ToCamelCase()).subscribe(function(changes){
-                if (!self.isLoading() && changes.length > 0){
-                    for (var i in changes){
-                        var change:any = changes[i];
-                        self.autoSaveCollection('@(prop.ManyToManyCollectionName.ToCamelCase())', change.value.@(prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable)(), change.status);
-                    }
+            self.@(prop.ManyToManyCollectionName.ToCamelCase()).subscribe<KnockoutArrayChange<@prop.ManyToManyCollectionProperty.Object.ViewModelClassName>[]>(changes => {
+                for (var i in changes){
+                    var change = changes[i];
+                    self.autoSaveCollection(
+                        change.status, 
+                        this.@prop.JsVariable, 
+                        @prop.Object.ViewModelClassName, 
+                        '@prop.Object.ClientProperties.First(f => f.Type.EqualsType(model.Type)).ObjectIdProperty.JsVariable',
+                        '@prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable',
+                        change.value.@(prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable)()
+                    );
                 }
             }, null, "arrayChange");
             </text>

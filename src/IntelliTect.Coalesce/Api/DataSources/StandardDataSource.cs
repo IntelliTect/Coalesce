@@ -12,10 +12,11 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Api;
 
 namespace IntelliTect.Coalesce
 {
-    public class StandardDataSource<T, TContext> : IDataSource<T>
+    public class StandardDataSource<T, TContext> : StandardCrudStrategy<T, TContext>, IDataSource<T>
         where T : class, new()
         where TContext : DbContext
     {
@@ -36,34 +37,13 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public int DefaultPageSize { get; set; } = 25;
 
-        /// <summary>
-        /// Contains contextual information about the request for data being served.
-        /// </summary>
-        public CrudContext<TContext> Context { get; }
-
-        /// <summary>
-        /// The DbContext to be used for this request.
-        /// </summary>
-        public TContext Db => Context.DbContext;
-
-        /// <summary>
-        /// The user making the request for data.
-        /// </summary>
-        public ClaimsPrincipal User => Context.User;
-
-        /// <summary>
-        /// A ClassViewModel representing the type T that is provided by this data source.
-        /// </summary>
-        public ClassViewModel ClassViewModel { get; protected set; }
-
-        public StandardDataSource(CrudContext<TContext> context)
+        public StandardDataSource(CrudContext<TContext> context) : base(context)
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
-            ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
         }
 
         /// <summary>
-        /// Check if the data source may be used. This method will be called by the framework.
+        /// Check if the data source may be used. 
+        /// This method will be called by the framework.
         /// Use this.User to obtain the current user.
         /// </summary>
         /// <returns>True if the user is authorized, otherwise false.</returns>

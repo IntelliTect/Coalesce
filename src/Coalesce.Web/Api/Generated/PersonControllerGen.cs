@@ -2,7 +2,7 @@
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Models;
@@ -25,8 +25,14 @@ namespace Coalesce.Web.Api
     {
         public PersonController(Coalesce.Domain.AppDbContext db) : base(db)
         {
+            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Person>();
         }
 
+
+        [HttpGet("get/{id}")]
+        [AllowAnonymous]
+        public virtual Task<PersonDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+            => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [AllowAnonymous]
@@ -38,16 +44,6 @@ namespace Coalesce.Web.Api
         public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
             => CountImplementation(parameters, dataSource);
 
-        [HttpGet("propertyValues")]
-        [AllowAnonymous]
-        public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-            => PropertyValuesImplementation(property, page, search);
-
-        [HttpGet("get/{id}")]
-        [AllowAnonymous]
-        public virtual Task<PersonDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
-            => GetImplementation(id, parameters, dataSource);
-
 
         [HttpPost("delete/{id}")]
         [Authorize]
@@ -57,22 +53,8 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual async Task<ItemResult<PersonDtoGen>> Save(PersonDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource, IBehaviors<Coalesce.Domain.Person> behaviors)
-        {
-
-            if (!dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Create not allowed on Person objects.";
-            }
-            else if (dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Edit not allowed on Person objects.";
-            }
-
-            return await SaveImplementation(dto, parameters, dataSource, behaviors);
-        }
+        public virtual Task<ItemResult<PersonDtoGen>> Save(PersonDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource, IBehaviors<Coalesce.Domain.Person> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of PersonDtoGen
@@ -137,23 +119,11 @@ namespace Coalesce.Web.Api
             var resultList = new List<ItemResult>();
             foreach (var dto in list)
             {
-                // Check if creates/edits aren't allowed
-                if (!dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Create not allowed on Person objects.");
-                }
-                else if (dto.PersonId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Edit not allowed on Person objects.");
-                }
-                else
-                {
-                    var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
-                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
-                }
+                var parameters = new DataSourceParameters() { Includes = "none" };
+
+                // Security: SaveImplementation is responsible for checking specific save/edit attribute permissions.
+                var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
             }
             return resultList;
         }
@@ -164,13 +134,15 @@ namespace Coalesce.Web.Api
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]
-        public virtual async Task<ItemResult<PersonDtoGen>> Rename(int id, string name)
+
+        public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
             var result = new ItemResult<PersonDtoGen>();
             try
             {
                 IncludeTree includeTree = null;
-                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
+                var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 var objResult = item.Rename(name);
                 Db.SaveChanges();
                 var mappingContext = new MappingContext(User, "");
@@ -191,12 +163,14 @@ namespace Coalesce.Web.Api
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
-        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName(int id)
+
+        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
             var result = new ItemResult<object>();
             try
             {
-                var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
+                var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();
@@ -217,8 +191,10 @@ namespace Coalesce.Web.Api
         /// Method: Add
         /// </summary>
         [HttpPost("Add")]
-        public virtual ItemResult<int> Add(int numberOne, int numberTwo)
+
+        public virtual ItemResult<int> Add([FromServices] IDataSourceFactory dataSourceFactory, int numberOne, int numberTwo)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
             var result = new ItemResult<int>();
             try
             {
@@ -240,10 +216,10 @@ namespace Coalesce.Web.Api
         /// Method: GetUser
         /// </summary>
         [HttpPost("GetUser")]
-        [Authorize]
-        public virtual ItemResult<string> GetUser()
+        [Authorize(Roles = "Admin")]
+        public virtual ItemResult<string> GetUser([FromServices] IDataSourceFactory dataSourceFactory)
         {
-            if (!ClassViewModel.MethodByName("GetUser").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
             var result = new ItemResult<string>();
             try
             {
@@ -265,8 +241,10 @@ namespace Coalesce.Web.Api
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]
-        public virtual ItemResult<string> GetUserPublic()
+
+        public virtual ItemResult<string> GetUserPublic([FromServices] IDataSourceFactory dataSourceFactory)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
             var result = new ItemResult<string>();
             try
             {
@@ -289,9 +267,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
+        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith([FromServices] IDataSourceFactory dataSourceFactory, string characters)
         {
-            if (!ClassViewModel.MethodByName("NamesStartingWith").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
             var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
             try
             {

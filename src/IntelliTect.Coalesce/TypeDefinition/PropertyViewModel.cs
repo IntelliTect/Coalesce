@@ -205,8 +205,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return false;
         }
 
-        public string ListGroup => this.GetAttributeValue<ListGroupAttribute>(a => a.Group);
-
         public bool HasReadOnlyAttribute => this.HasAttribute<ReadOnlyAttribute>();
 
 #pragma warning disable CS0618 // Type or member is obsolete

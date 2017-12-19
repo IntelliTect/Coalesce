@@ -7,17 +7,20 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
-    /// <summary>
-    /// Class that contains security information for a class or property based on the Read and Edit attributes
-    /// </summary>
     public class SecurityInfoMethod
     {
-        public bool IsExecute { get; set; } = false;
-        public string ExecuteRoles { get; set; } = "";
+        public SecurityInfoMethod(bool isExecute, string executeRoles)
+        {
+            HasAttribute = isExecute;
+            ExecuteRoles = executeRoles;
+        }
+
+        public bool HasAttribute { get; private set; } = false;
+
+        public string ExecuteRoles { get; private set; } = "";
 
 
-
-        public List<string> ExecuteRolesList
+        public IReadOnlyCollection<string> ExecuteRolesList
         {
             get
             {
@@ -33,30 +36,11 @@ namespace IntelliTect.Coalesce.DataAnnotations
                         }
                     }
                 }
-                return result;
+                return result.AsReadOnly();
             }
         }
 
-        public string ExecuteRolesExternal
-        {
-            get
-            {
-                return string.Join(",", ExecuteRolesList);
-            }
-        }
-
-
-        /// <summary>
-        /// Returns true for a property if this property has some sort of security.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsSecuredProperty
-        {
-            get
-            {
-                return IsExecute;
-            }
-        }
+        public string ExecuteRolesExternal => string.Join(",", ExecuteRolesList);
 
         /// <summary>
         /// If true, the user can edit the field.
@@ -65,7 +49,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <returns></returns>
         public bool IsExecutable(ClaimsPrincipal user)
         {
-            if (!IsSecuredProperty) return true;
+            if (!HasAttribute) return true;
             if (user == null) return false;
             if (string.IsNullOrEmpty(ExecuteRoles))
             {
@@ -81,7 +65,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public override string ToString()
         {
             string result = "";
-            if (IsExecute) { result += $"Execute: {ExecuteRolesExternal} "; }
+            if (HasAttribute) { result += $"Execute: {ExecuteRolesExternal} "; }
             if (result == "") result = "None";
             return result;
         }
@@ -94,9 +78,9 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
-                if (!IsExecute) return ""; // Default to that of class
-                if (String.IsNullOrEmpty(ExecuteRolesExternal)) return ("[Authorize]");  // No roles specified if blank.
-                return $"[Authorize]";
+                if (!HasAttribute) return string.Empty; // Default to that of class
+                if (!ExecuteRolesList.Any()) return ("[Authorize]");  // No roles specified if blank.
+                return $"[Authorize(Roles=\"{string.Join(",", ExecuteRolesList)}\")]";
             }
         }
     }

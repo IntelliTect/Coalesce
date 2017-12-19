@@ -1,6 +1,6 @@
-﻿using IntelliTect.Coalesce.Data;
+﻿using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,16 +8,12 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Mapping.IncludeTrees;
-using IntelliTect.Coalesce;
 
 namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
-    public class Person : IBeforeSave<Person, AppDbContext>
+    public class Person
     {
         public enum Genders
         {
@@ -190,18 +186,6 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
-        public ValidateResult<Person> BeforeSave(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
-        {
-            // Check to make sure the name is a certain length after it has been saved.
-            if (PersonId >0 && FirstName != null && FirstName.Length < 2 )
-            {
-                FirstName = original.FirstName;
-                return new ValidateResult<Domain.Person>(false, "First Name cannot be this short. Reverting.", this);
-            }
-
-            return true;
-        }
-
         [Coalesce, DefaultDataSource]
         public class WithoutCases : StandardDataSource<Person, AppDbContext>
         {
@@ -215,11 +199,16 @@ namespace Coalesce.Domain
         {
             public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
 
-            public override ItemResult BeforeSave(SaveKind kind, Person originalItem, Person updatedItem)
+            public override ItemResult BeforeSave(SaveKind kind, Person originalItem, Person item)
             {
-                if (updatedItem.FirstName?.Contains("[user]") ?? false)
+                if (kind == SaveKind.Update && item.FirstName != null && item.FirstName.Length < 2)
                 {
-                    updatedItem.FirstName = updatedItem.FirstName.Replace("[user]", User.Identity.Name);
+                    return "First Name must be at least 2 characters.";
+                }
+
+                if (item.FirstName?.Contains("[user]") ?? false)
+                {
+                    item.FirstName = item.FirstName.Replace("[user]", User.Identity.Name);
                 }
                 return true;
             }
@@ -231,9 +220,6 @@ namespace Coalesce.Domain
     public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbContext>
     {
         public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
-
-        [Coalesce]
-        public string ParamThing { get; set; }
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         {

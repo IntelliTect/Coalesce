@@ -1,8 +1,9 @@
 ﻿using Coalesce.Domain.External;
 using IntelliTect.Coalesce;
-using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -59,9 +60,10 @@ namespace Coalesce.Domain
         [FileDownload]
         public byte[] Attachment { get; set; }
 
-        [ListGroup("Severity")]
         public string Severity { get; set; }
+
         public Statuses Status { get; set; }
+
         [ManyToMany("Products")]
         [Search]
         public ICollection<CaseProduct> CaseProducts { get; set; }

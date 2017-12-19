@@ -21,20 +21,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => "";
 
-        protected override ICollection<PropertyViewModel> RawProperties => Info.GetProperties()
+        protected override IReadOnlyCollection<PropertyViewModel> RawProperties => Info
+            .GetProperties()
             .Select((p, i) => new ReflectionPropertyViewModel(this, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
-            .ToList();
+            .ToList().AsReadOnly();
 
-        protected override ICollection<MethodViewModel> RawMethods => Info.GetMethods()
+        protected override IReadOnlyCollection<MethodViewModel> RawMethods => Info
+            .GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
-            .Select(m => new ReflectionMethodViewModel(m, this))
+            .Select(m => new ReflectionMethodViewModel(this, m))
             .Cast<MethodViewModel>()
-            .ToList();
+            .ToList().AsReadOnly();
 
-        protected override ICollection<TypeViewModel> RawNestedTypes => Info.GetNestedTypes()
+        protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Info
+            .GetNestedTypes()
             .Select(t => new ReflectionTypeViewModel(t))
-            .Cast<TypeViewModel>()
-            .ToList();
+            .ToList().AsReadOnly();
     }
 }

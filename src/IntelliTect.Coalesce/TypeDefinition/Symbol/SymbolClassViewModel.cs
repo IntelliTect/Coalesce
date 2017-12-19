@@ -38,7 +38,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "";
         }
 
-        protected override ICollection<PropertyViewModel> RawProperties
+        protected override IReadOnlyCollection<PropertyViewModel> RawProperties
         {
             get
             {
@@ -55,11 +55,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     var parentSymbol = new SymbolClassViewModel(Symbol.BaseType);
                     result.AddRange(parentSymbol.RawProperties);
                 }
-                return result;
+                return result.AsReadOnly();
             }
         }
 
-        protected override ICollection<MethodViewModel> RawMethods
+        protected override IReadOnlyCollection<MethodViewModel> RawMethods
         {
             get
             {
@@ -81,15 +81,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     ));
                 }
 
-                return result
-                    .Cast<MethodViewModel>()
-                    .ToList();
+                return result.ToList().AsReadOnly();
             }
         }
 
-        protected override ICollection<TypeViewModel> RawNestedTypes => Symbol.GetTypeMembers()
+        protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Symbol
+            .GetTypeMembers()
             .Select(t => new SymbolTypeViewModel(t))
-            .Cast<TypeViewModel>()
-            .ToList();
+            .ToList().AsReadOnly();
     }
 }

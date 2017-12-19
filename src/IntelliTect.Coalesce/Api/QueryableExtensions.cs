@@ -12,9 +12,9 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System.Threading;
 using System.Collections;
 
-namespace IntelliTect.Coalesce.Data
+namespace IntelliTect.Coalesce
 {
-    public static class IncludableExtension
+    public static class QueryableExtensions
     {
         /// <summary>
         /// Includes immediate children, as well as the other side of many-to-many relationships.

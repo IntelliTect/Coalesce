@@ -2,7 +2,7 @@
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Models;
@@ -25,8 +25,14 @@ namespace Coalesce.Web.Api
     {
         public CaseController(Coalesce.Domain.AppDbContext db) : base(db)
         {
+            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Case>();
         }
 
+
+        [HttpGet("get/{id}")]
+        [AllowAnonymous]
+        public virtual Task<CaseDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+            => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [AllowAnonymous]
@@ -38,16 +44,6 @@ namespace Coalesce.Web.Api
         public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
 
-        [HttpGet("propertyValues")]
-        [AllowAnonymous]
-        public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-            => PropertyValuesImplementation(property, page, search);
-
-        [HttpGet("get/{id}")]
-        [AllowAnonymous]
-        public virtual Task<CaseDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
-            => GetImplementation(id, parameters, dataSource);
-
 
         [HttpPost("delete/{id}")]
         [Authorize]
@@ -57,22 +53,8 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual async Task<ItemResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
-        {
-
-            if (!dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Create not allowed on Case objects.";
-            }
-            else if (dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Edit not allowed on Case objects.";
-            }
-
-            return await SaveImplementation(dto, parameters, dataSource, behaviors);
-        }
+        public virtual Task<ItemResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of CaseDtoGen
@@ -137,23 +119,11 @@ namespace Coalesce.Web.Api
             var resultList = new List<ItemResult>();
             foreach (var dto in list)
             {
-                // Check if creates/edits aren't allowed
-                if (!dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Create not allowed on Case objects.");
-                }
-                else if (dto.CaseKey.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Edit not allowed on Case objects.");
-                }
-                else
-                {
-                    var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
-                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
-                }
+                var parameters = new DataSourceParameters() { Includes = "none" };
+
+                // Security: SaveImplementation is responsible for checking specific save/edit attribute permissions.
+                var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
             }
             return resultList;
         }
@@ -164,8 +134,10 @@ namespace Coalesce.Web.Api
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
-        public virtual ItemResult<int> GetAllOpenCasesCount()
+
+        public virtual ItemResult<int> GetAllOpenCasesCount([FromServices] IDataSourceFactory dataSourceFactory)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case>();
             var result = new ItemResult<int>();
             try
             {
@@ -187,8 +159,10 @@ namespace Coalesce.Web.Api
         /// Method: RandomizeDatesAndStatus
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
-        public virtual ItemResult<object> RandomizeDatesAndStatus()
+
+        public virtual ItemResult<object> RandomizeDatesAndStatus([FromServices] IDataSourceFactory dataSourceFactory)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case>();
             var result = new ItemResult<object>();
             try
             {
@@ -211,8 +185,10 @@ namespace Coalesce.Web.Api
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]
-        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
+
+        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary([FromServices] IDataSourceFactory dataSourceFactory)
         {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case>();
             var result = new ItemResult<CaseSummaryDtoGen>();
             try
             {

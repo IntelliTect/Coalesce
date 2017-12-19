@@ -14,7 +14,7 @@
     var namespaces = new List<string>();
     namespaces.Add("IntelliTect.Coalesce");
     namespaces.Add("IntelliTect.Coalesce.Api");
-    namespaces.Add("IntelliTect.Coalesce.Data");
+    namespaces.Add("IntelliTect.Coalesce.Api.DataSources");
     namespaces.Add("IntelliTect.Coalesce.Mapping");
     namespaces.Add("IntelliTect.Coalesce.Mapping.IncludeTrees");
     namespaces.Add("IntelliTect.Coalesce.Models");
@@ -29,29 +29,9 @@
     namespaces.Add("System.Threading.Tasks");
     namespaces.Add($"{namespaceName}.Models");
 
-    var createIf = "";
-    var editElseIf = "";
     var primaryKeyParameter = $"{model.PrimaryKey.Type.FullyQualifiedName} id";
     var dataSourceParameter = $"IDataSource<{model.BaseViewModel.FullyQualifiedName}> dataSource";
     var behaviorsParameter = $"IBehaviors<{model.BaseViewModel.FullyQualifiedName}> behaviors";
-
-
-    // Check if creates/edits aren't allowed
-    if (model.PrimaryKey.Type.IsString)
-    {
-        createIf = $"if (string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !ClassViewModel.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (!string.IsNullOrWhiteSpace(dto.{model.PrimaryKey.Name}) && !ClassViewModel.SecurityInfo.IsEditAllowed(User)) {{";
-    }
-    else if (model.IsDto)
-    {
-        createIf = $"if (dto.{model.PrimaryKey.Name} == 0 && !ClassViewModel.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (dto.{model.PrimaryKey.Name} != 0 && !ClassViewModel.SecurityInfo.IsEditAllowed(User)) {{";
-    }
-    else
-    {
-        createIf = $"if (!dto.{model.PrimaryKey.Name}.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User)) {{";
-        editElseIf = $"else if (dto.{model.PrimaryKey.Name}.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User)) {{";
-    }
 }
 
 @foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)).OrderBy(n => n))
@@ -77,11 +57,17 @@ namespace @(namespaceName).Api
     {
         public @(model.ApiControllerClassName)(@Model.GenerationContext.DbContextType.FullyQualifiedName db) : base(db)
         {
+            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<@(model.FullyQualifiedName)>();
         }
 
         @if (securityInfo.IsReadAllowed())
         {
         <text>
+        [HttpGet("get/{id}")]
+        @(securityInfo.ReadAnnotation)
+        @(model.ApiActionAccessModifier) virtual Task<@(model.DtoName)> Get(@primaryKeyParameter, DataSourceParameters parameters, @dataSourceParameter)
+            => GetImplementation(id, parameters, dataSource);
+
         [HttpGet("list")]
         @(securityInfo.ReadAnnotation)
         @(model.ApiActionAccessModifier) virtual Task<ListResult<@(model.DtoName)>> List(ListParameters parameters, @dataSourceParameter)
@@ -91,16 +77,6 @@ namespace @(namespaceName).Api
         @(securityInfo.ReadAnnotation)
         @(model.ApiActionAccessModifier) virtual Task<int> Count(FilterParameters parameters, @dataSourceParameter)
             => CountImplementation(parameters, dataSource);
-
-        [HttpGet("propertyValues")]
-        @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-            => PropertyValuesImplementation(property, page, search);
-
-        [HttpGet("get/{id}")]
-        @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<@(model.DtoName)> Get(@primaryKeyParameter, DataSourceParameters parameters, @dataSourceParameter)
-            => GetImplementation(id, parameters, dataSource);
         </text>
         }
 
@@ -117,20 +93,8 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual async Task<ItemResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, @behaviorsParameter)
-        {
-
-            @(createIf)
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Create not allowed on @(model.Name) objects.";
-            }
-            @(editElseIf)
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Edit not allowed on @(model.Name) objects.";
-            }
-
-            return await SaveImplementation(dto, parameters, dataSource, behaviors);
-        }
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, @behaviorsParameter)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
         </text>
         }
 
@@ -198,20 +162,11 @@ namespace @(namespaceName).Api
             var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<@(model.DtoName)>(csv, hasHeader);
             var resultList = new List<ItemResult>();
             foreach (var dto in list){
-                // Check if creates/edits aren't allowed
-                @(createIf)
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Create not allowed on @(model.Name) objects.");
-                }
-                @(editElseIf)
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Edit not allowed on @(model.Name) objects.");
-                }
-                else {
-                    var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
-                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
-                }
+                var parameters = new DataSourceParameters() { Includes = "none" };
+
+                // Security: SaveImplementation is responsible for checking specific save/edit attribute permissions.
+                var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
             }
             return resultList;
         }
@@ -228,13 +183,9 @@ namespace @(namespaceName).Api
         /// Method: @method.Name
         /// </summary>
         [HttpPost("@(method.Name)")]
-        @if (!string.IsNullOrEmpty(method.SecurityInfo.ExecuteAnnotation)) {
-@:        @(method.SecurityInfo.ExecuteAnnotation)
-        }
+        @(method.SecurityInfo.ExecuteAnnotation)
         @(model.ApiActionAccessModifier) virtual @returnType @method.Name (@method.CsParameters){
-            @if (method.SecurityInfo.IsExecute) {
-            @:if (!ClassViewModel.MethodByName("@method.Name").SecurityInfo.IsExecutable(User)) throw new Exception("Not authorized");
-            }
+            var dataSource = dataSourceFactory.GetDefaultDataSource<@(model.FullyQualifiedName)>();
             var result = new ItemResult<@method.ReturnTypeNameForApi>();
             try{
                 @if (method.ReturnType.HasClassViewModel ||
@@ -254,7 +205,7 @@ namespace @(namespaceName).Api
                 else
                 {
                     // TODO: this is quite a hack (passing in empty ListParameters). Methods really need to accept IDataSourceParameters.
-@:var (item, _) = await GetDataSource(new ListParameters()).GetItemAsync(id, new ListParameters());
+@:var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 if (method.ReturnType.IsVoid)
                 {
                 @:object objResult = null;

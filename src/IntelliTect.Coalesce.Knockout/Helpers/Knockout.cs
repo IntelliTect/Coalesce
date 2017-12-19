@@ -339,12 +339,13 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString SelectString(PropertyViewModel propertyModel, string placeholder = "")
         {
-            string result = string.Format(@"
-                    <select class=""form-control"" 
-                        data-bind=""select2AjaxText: {0}, url: coalesceConfig.baseApiUrl() + '/{2}', property: '{3}'"" placeholder=""{1}"">
+            // TODO: update me for the removal of PropertyValues
+            string result = string.Format($@"
+                    <select class=""form-control"" placeholder=""{placeholder}""
+                        data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, " + 
+                        $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.Name}/PropertyValues', property: '{propertyModel.Name}'"">
                         <option></option>
-                    </select >",
-                propertyModel.JsVariableForBinding(), placeholder, propertyModel.Parent.Name + "/PropertyValues", propertyModel.Name);
+                    </select >");
             // TODO: this may be wrong? I don't know enough about the code yet to know.
             return new HtmlString(result);
         }

@@ -20,9 +20,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            foreach (var model in this.Model
-                .Entities.Select(e => e.ClassViewModel)
-                .Union(Model.ExternalTypes))
+            foreach (var model in this.Model.Entities.Union(Model.ExternalTypes))
             {
                 yield return Generator<ClassDto>()
                     .WithModel(model)

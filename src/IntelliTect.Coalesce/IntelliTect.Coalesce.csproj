@@ -30,9 +30,6 @@
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.10" />
     <PackageReference Include="System.Net.Http" Version="4.3.2" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
   <!--<ItemGroup>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />

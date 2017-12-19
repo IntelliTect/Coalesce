@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
-                if (AllowAnonymousAll()) return "[AllowAnonymous]";
+                if (AllowAnonymousAll) return "[AllowAnonymous]";
 
                 //if (AllHaveRoles()) return $"[Authorize(Roles=\"{AllRoles()}\")]";
 
@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
-                if (AllowAnonymousAll()) return string.Empty;
+                if (AllowAnonymousAll) return string.Empty;
                 if (Read.AllowAnonymous || Edit.AllowAnonymous || Create.AllowAnonymous || Delete.AllowAnonymous) return "[AllowAnonymous]";
                 if (Read.HasRoles) return $"[Authorize(Roles=\"{AllRoles()}\")]";
 
@@ -55,14 +55,14 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
         }
 
-        ///// <summary>
-        ///// Returns an annotation for editing things (Modify many/many properties)
-        ///// </summary>
+        /// <summary>
+        /// Returns an annotation for editing things
+        /// </summary>
         public string EditAnnotation
         {
             get
             {
-                if (AllowAnonymousAll()) return string.Empty;
+                if (AllowAnonymousAll) return string.Empty;
                 if (Edit.AllowAnonymous) return "[AllowAnonymous]";
                 if (Edit.HasRoles) return $"[Authorize(Roles=\"{Edit.ExternalRoleList}\")]";
 
@@ -70,14 +70,14 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
         }
 
-        ///// <summary>
-        ///// Returns an annotation for deleting things (Delete)
-        ///// </summary>
+        /// <summary>
+        /// Returns an annotation for deleting things (Delete)
+        /// </summary>
         public string DeleteAnnotation
         {
             get
             {
-                if (AllowAnonymousAll()) return string.Empty;
+                if (AllowAnonymousAll) return string.Empty;
                 if (Delete.AllowAnonymous) return "[AllowAnonymous]";
                 if (Delete.HasRoles) return $"[Authorize(Roles=\"{Delete.ExternalRoleList}\")]";
 
@@ -85,14 +85,14 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
         }
 
-        ///// <summary>
-        ///// Returns an annotation for editing things (Save)
-        ///// </summary>
+        /// <summary>
+        /// Returns an annotation for editing things (Save)
+        /// </summary>
         public string SaveAnnotation
         {
             get
             {
-                if (AllowAnonymousAll()) return string.Empty;
+                if (AllowAnonymousAll) return string.Empty;
                 if (Create.AllowAnonymous || Edit.AllowAnonymous) return "[AllowAnonymous]";
 
                 if (Create.HasRoles && Edit.HasRoles)
@@ -117,70 +117,38 @@ namespace IntelliTect.Coalesce.DataAnnotations
             return user == null || user.Identity.IsAuthenticated;
         }
 
-        public bool IsCreateAllowed(ClaimsPrincipal user = null)
+        public bool IsCreateAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Create, user);
+
+        public bool IsDeleteAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Delete, user);
+
+        public bool IsEditAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Edit, user);
+
+        private bool IsMutationActionAllowed(SecurityPermission action, ClaimsPrincipal user = null)
         {
-            if (Create.HasAttribute)
+            if (action.HasAttribute)
             {
-                if (Create.NoAccess) return false;
-                if (Create.AllowAnonymous) return true;
-                if (Create.HasRoles && user != null)
-                    return Create.RoleList.Any(s => user.IsInRole(s));
+                if (action.NoAccess) return false;
+                if (action.AllowAnonymous) return true;
+                if (action.HasRoles && user != null)
+                    return action.RoleList.Any(s => user.IsInRole(s));
             }
 
             return user == null || user.Identity.IsAuthenticated;
         }
 
-        public bool IsDeleteAllowed(ClaimsPrincipal user = null)
-        {
-            if (Delete.HasAttribute)
-            {
-                if (Delete.NoAccess) return false;
-                if (Delete.AllowAnonymous) return true;
-                if (Delete.HasRoles && user != null)
-                    return Delete.RoleList.Any(s => user.IsInRole(s));
-            }
+        public bool AllowAnonymousAny => Read.AllowAnonymous || Edit.AllowAnonymous || Delete.AllowAnonymous || Create.AllowAnonymous;
 
-            return user == null || user.Identity.IsAuthenticated;
-        }
+        public bool AllowAnonymousAll => Read.AllowAnonymous && Edit.AllowAnonymous && Delete.AllowAnonymous && Create.AllowAnonymous;
 
-        public bool IsEditAllowed(ClaimsPrincipal user = null)
-        {
-            if (Edit.HasAttribute)
-            {
-                if (Edit.NoAccess) return false;
-                if (Edit.AllowAnonymous) return true;
-                if (Edit.HasRoles && user != null)
-                    return Edit.RoleList.Any(s => user.IsInRole(s));
-            }
-
-            return user == null || user.Identity.IsAuthenticated;
-        }
-
-        public bool AllowAnonymousAny
-        {
-            get
-            {
-                return Read.AllowAnonymous || Edit.AllowAnonymous || Delete.AllowAnonymous || Create.AllowAnonymous;
-            }
-        }
-
-        public bool AllowAnonymousAll()
-        {
-            return Read.AllowAnonymous && Edit.AllowAnonymous && Delete.AllowAnonymous && Create.AllowAnonymous;
-        }
-
-
-        private bool AllHaveRoles()
-        {
-            return Read.HasRoles && Edit.HasRoles && Create.HasRoles && Delete.HasRoles;
-        }
+        private bool AllHaveRoles => Read.HasRoles && Edit.HasRoles && Create.HasRoles && Delete.HasRoles;
 
         private string AllRoles()
         {
-            var result = Read.RoleList;
-            result.AddUnique(Edit.RoleList);
-            result.AddUnique(Create.RoleList);
-            result.AddUnique(Delete.RoleList);
+            var result = Read.RoleList
+                .Union(Edit.RoleList)
+                .Union(Create.RoleList)
+                .Union(Delete.RoleList)
+                .ToList();
 
             if (result.Count == 0) return "";
             return string.Join(",", result);
@@ -188,8 +156,9 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         private string SaveRoles()
         {
-            var result = Edit.RoleList;
-            result.AddUnique(Create.RoleList);
+            var result = Edit.RoleList
+                .Union(Create.RoleList)
+                .ToList();
 
             if (result.Count == 0) return string.Empty;
             return string.Join(",", result);

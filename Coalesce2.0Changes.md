@@ -47,6 +47,7 @@
 | Property filter API parameters are now specified using `?filter.propertyName=value` (formerly, this was just `?propertyName=value`). | Adjust manual API calls (that don't use the generated ListViewModels) accordingly.
 | `BaseListViewModel.query` is now `BaseListViewModel.filter` to match the new API signature. | Rename references accordingly.
 | API endpoints that formerly took an arbitrary `where` parameter (stored in `BaseListViewModel.query.where`) no longer do so. This was removed because the security implications were such that a carefully-crafted where statement could reveal information about the state of the database that would be otherwise inaccessible to the user. | In cases where this behavior is needed, create a custom data source (see the "New Features" section below) and add public properties marked with `[Coalesce]` that represent the needed inputs to perform the query in C#.
+| The `PropertyValues` endpoint has been removed, as it was deemed too specific a use case to warrant the need to accommodate its existence into your security model for each and every entity type. | Replace usages with a custom static method on the relevant model that will return an `ICollection<string>` with the desired results.
 
 ## Projects, Namespaces, & Generation
 
@@ -74,7 +75,10 @@
 | ------ |----------|
 | Custom DataSources have been completely overhauled. `public static IQueryable<T>` methods on your models are no longer considered data sources. | See the "New Features" section below.
 | The `IIncludable<>` interface has been removed. | Move desired behavior into a custom data source. Override the default data source if needed. 
-| This `IIncludeExternal<>` interface has been removed. | Override the `TransformResults` method of the `StandardDataSource<,>` in a custom data source to attach items from an external location.
+| The `IIncludeExternal<>` interface has been removed. | Override the `TransformResults` method of the `StandardDataSource<,>` in a custom data source to attach items from an external location.
+| The `IBeforeSave<,>`, `IAfterSave<,>`, `ISaveCustomizable<,>`, `IBeforeDelete<,>`, `IAfterDelete<>`, and `IDeleteCustomizable<,>` have been removed. | Override the corresponding methods of the `StandardBehaviors<,>` derivative that you create for the type that formerly used these interfaces. See the "New Features" section below.
+| `ListGroupAttribute` was removed as a consequence of the removal of the `PropertyValues` endpoint. | Remove usages of this attribute. Implement logic for sourcing values from multiple fields in the replacement methods written to replace `PropertyValues`.
+| `Fingerprintable<,>` and `IFingerprintable<,>` have been removed. To implement this functionality in a general way, derive a class from `StandardBehaviors<,>`, register your derived class with your applications `IServiceCollection` (e.g. `services.AddScoped(typeof(StandardBehaviors<,>), typeof(MyFingerprintingBehaviors<,>));`), and implement the fingerprint logic in your custom behavior class (probably in `BeforeSave`).
 
 
 ## New Features:
@@ -82,10 +86,16 @@
 * Modular DataSources
   * Custom DataSources are now implemented as classes that you define. These classes should inherit from `IDataSource<T>`, where `<T>` is the type of the entity served - the same `<T>` in the old `static IQueryable<T>` methods. 
   * However, you will almost certainly want to inherit from `StandardDataSource<T, TContext>` to maintain the standard set of Coalesce behaviors. Override the `GetQuery` method of `StandardDataSource<,>` and replace it with the former contents of your `static IQueryable<T>` method. 
+  * To globally override the standardDataSource, register a custom implementation of `StandardDataSource<T, TContext>` with your applications `IServiceCollection` at startup.
   * Annotate your DataSource with `[Coalesce]` for it to be discovered, or place it as a nested class of a model that belongs to a `DbContext` that is annotated with `[Coalesce]`.
   * To prevent `StandardDataSource<T, TContext>` from being made available for a given type `T`, annotate a custom data source that serves the same `T` with `[DefaultDataSource]`.
   * DataSources may contain primitive (strings, numerics, bools, dates, enums) properties annotated with `[Coalesce]`. These properties will be made available in the generated TypeScript and will be automatically populated on the server with the values specified on the client.
   * In TypeScript, the enum that used to contain all the possible datasources is now a namespace that contains all the possible datasource classes.
+
+* Modular behaviors
+  * The `I(Before/After)(Save/Delete)` interfaces have been removed in favor of placing all such logic into a dedicated class. These classes should inherit from `IBehaviors<T>`, where `<T>` is the type of entity being controlled.
+  * `StandardBehaviors<T, TContext>` contains all of the logic used for saving and deleting items, and can have any of its methods overridden to change this behavior, including complete replacement of the standard save & delete behaviors.
+  * To globally override the standard behaviors, register a custom implementation of `StandardBehaviors<T, TContext>` with your applications `IServiceCollection` at startup.
 
 * Hierarchical configuration system:
   * Many points of configuration for ViewModels and ListViewModels are done via a hierarchical configuration system.

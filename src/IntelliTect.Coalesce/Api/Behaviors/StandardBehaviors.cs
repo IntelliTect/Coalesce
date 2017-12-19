@@ -1,9 +1,9 @@
 ﻿using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -120,13 +120,15 @@ namespace IntelliTect.Coalesce
         )
             where TDto : IClassDto<T>, new()
         {
-            var dbSet = GetDbSet();
-            var includes = parameters.Includes;
+            (SaveKind kind, object idValue) = DetermineSaveKind(incomingDto);
 
+            T originalItem = null;
             T item = null;
             IncludeTree includeTree = null;
-            
-            (SaveKind kind, object idValue) = DetermineSaveKind(incomingDto);
+
+            var includes = parameters.Includes;
+            var dbSet = GetDbSet();
+
             if (kind == SaveKind.Create)
             {
                 item = new T();
@@ -140,10 +142,11 @@ namespace IntelliTect.Coalesce
                 {
                     return $"Item with {ClassViewModel.PrimaryKey.Name} = {idValue} not found.";
                 }
+
+                // Create a shallow copy.
+                originalItem = item.Copy();
             }
 
-            // Create a shallow copy.
-            var originalItem = item.Copy();
 
             // Set all properties on the DB-mapped object to the incoming values.
             incomingDto.MapToEntity(item, new MappingContext(User, includes));
@@ -210,18 +213,20 @@ namespace IntelliTect.Coalesce
         /// The return a failure result will halt the save operation and return any associated message to the client.
         /// </summary>
         /// <param name="kind">Descriminator between a create and a update operation.</param>
-        /// <param name="originalItem">A shallow copy of the original item as it was retrieved from the database.</param>
-        /// <param name="updatedItem">A DbContext-tracked entity with its properties set to incoming, new values.</param>
+        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
+        /// If kind == SaveKind.Create, this will be null.</param>
+        /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
         /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
-        public virtual ItemResult BeforeSave(SaveKind kind, T originalItem, T updatedItem) => true;
+        public virtual ItemResult BeforeSave(SaveKind kind, T oldItem, T item) => true;
 
         /// <summary>
         /// Code to run after a save has been committed to the database.
         /// Allows any cleanup code to run, as well as modification of the object that will be returned to the client.
         /// </summary>
         /// <param name="kind">Descriminator between a create and a update operation.</param>
-        /// <param name="originalItem">A shallow copy of the original item as it was retrieved from the database.</param>
-        /// <param name="updatedItem">
+        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
+        /// If kind == SaveKind.Create, this will be null.</param>
+        /// <param name="item">
         /// A fresh copy of the modified item retrieved from the database,
         /// complete with any relations that were included as a result of being loaded 
         /// from the dataSource that was specified by the client.
@@ -234,7 +239,7 @@ namespace IntelliTect.Coalesce
         /// This ref parameter may have its value changed to send a different object structure to the client.
         /// </param>
         /// <returns>An ItemResult potentially indicating failure. A failure response will be returned immediately without the updatedItem attached to the response.</returns>
-        public virtual ItemResult AfterSave(SaveKind kind, T originalItem, ref T updatedItem, ref IncludeTree includeTree) => true;
+        public virtual ItemResult AfterSave(SaveKind kind, T oldItem, ref T item, ref IncludeTree includeTree) => true;
 
         #endregion
 

@@ -105,9 +105,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Member Info - Properties & Methods
 
-        protected abstract ICollection<PropertyViewModel> RawProperties { get; }
-        protected abstract ICollection<MethodViewModel> RawMethods { get; }
-        protected abstract ICollection<TypeViewModel> RawNestedTypes { get; }
+        protected abstract IReadOnlyCollection<PropertyViewModel> RawProperties { get; }
+        protected abstract IReadOnlyCollection<MethodViewModel> RawMethods { get; }
+        protected abstract IReadOnlyCollection<TypeViewModel> RawNestedTypes { get; }
 
         /// <summary>
         /// All properties for the object.
@@ -166,8 +166,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// List of method names that should not be exposed to the client.
         /// </summary>
         private string[] excludedMethodNames = new[] {
-            nameof(Data.IBeforeSave<object, DbContext>.BeforeSave),
-            nameof(Data.IAfterSave<object, DbContext>.AfterSave),
             nameof(object.ToString),
             nameof(object.Equals),
             nameof(object.GetHashCode),
@@ -390,7 +388,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
-        public bool OnContext { get; set; }
+        public bool OnContext { get; internal set; }
 
         /// <summary>
         /// Has a DbSet property in the Context.
@@ -460,7 +458,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string ToString() => FullyQualifiedName;
 
-        public override bool Equals(object obj) => obj is ClassViewModel that && this.Type.Equals(that.Type);
+        public override bool Equals(object obj) => 
+            Object.ReferenceEquals(this, obj) 
+            || obj is ClassViewModel that && this.Type.Equals(that.Type);
 
         public override int GetHashCode() => this.Type.GetHashCode();
     }

@@ -33,22 +33,21 @@ namespace IntelliTect.Coalesce.Helpers
         public bool NoAccess => PermissionLevel == SecurityPermissionLevels.DenyAll;
         public bool HasRoles => RoleList.Any();
 
-        private List<string> _roleList = null;
-        public List<string> RoleList
+        private IReadOnlyList<string> _roleList = null;
+        public IReadOnlyList<string> RoleList
         {
             get
             {
-                if (_roleList == null)
+                if (_roleList != null) return _roleList;
+
+                var list = new List<string>();
+                if (!string.IsNullOrEmpty(Roles))
                 {
-                    _roleList = new List<string>();
-                    if (!string.IsNullOrEmpty(Roles))
-                    {
-                        var roles = Roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        _roleList.AddUnique(roles.SelectMany(role => RoleMapping.Map(role)));
-                        _roleList.AddUnique(roles);
-                    }
+                    var roles = Roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    list.AddUnique(roles.SelectMany(role => RoleMapping.Map(role)));
+                    list.AddUnique(roles);
                 }
-                return _roleList;
+                return _roleList = list.AsReadOnly();
             }
         }
 

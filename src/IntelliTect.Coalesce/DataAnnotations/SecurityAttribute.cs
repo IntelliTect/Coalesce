@@ -9,6 +9,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         public virtual string Roles { get; set; } = "";
     }
+
     public enum SecurityPermissionLevels
     {
         AllowAll = 1,

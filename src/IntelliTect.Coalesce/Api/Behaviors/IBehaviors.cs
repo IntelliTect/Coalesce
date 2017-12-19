@@ -15,7 +15,10 @@ namespace IntelliTect.Coalesce
             IDataSource<T> dataSource
         ) where TDto : IClassDto<T>, new();
 
-        Task<ItemResult> DeleteAsync(object id);
+        (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
+            where TDto : IClassDto<T>, new();
 
+
+        Task<ItemResult> DeleteAsync(object id);
     }
 }

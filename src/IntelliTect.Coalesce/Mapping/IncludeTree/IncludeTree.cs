@@ -1,6 +1,4 @@
-﻿using IntelliTect.Coalesce.Data;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

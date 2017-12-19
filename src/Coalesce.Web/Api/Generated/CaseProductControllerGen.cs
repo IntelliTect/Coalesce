@@ -2,7 +2,7 @@
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Models;
@@ -25,8 +25,14 @@ namespace Coalesce.Web.Api
     {
         public CaseProductController(Coalesce.Domain.AppDbContext db) : base(db)
         {
+            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.CaseProduct>();
         }
 
+
+        [HttpGet("get/{id}")]
+        [Authorize]
+        public virtual Task<CaseProductDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+            => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
@@ -38,16 +44,6 @@ namespace Coalesce.Web.Api
         public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource)
             => CountImplementation(parameters, dataSource);
 
-        [HttpGet("propertyValues")]
-        [Authorize]
-        public virtual IEnumerable<string> PropertyValues(string property, int page = 1, string search = "")
-            => PropertyValuesImplementation(property, page, search);
-
-        [HttpGet("get/{id}")]
-        [Authorize]
-        public virtual Task<CaseProductDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource)
-            => GetImplementation(id, parameters, dataSource);
-
 
         [HttpPost("delete/{id}")]
         [Authorize]
@@ -57,22 +53,8 @@ namespace Coalesce.Web.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual async Task<ItemResult<CaseProductDtoGen>> Save(CaseProductDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource, IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
-        {
-
-            if (!dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Create not allowed on CaseProduct objects.";
-            }
-            else if (dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return "Edit not allowed on CaseProduct objects.";
-            }
-
-            return await SaveImplementation(dto, parameters, dataSource, behaviors);
-        }
+        public virtual Task<ItemResult<CaseProductDtoGen>> Save(CaseProductDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.CaseProduct> dataSource, IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of CaseProductDtoGen
@@ -137,23 +119,11 @@ namespace Coalesce.Web.Api
             var resultList = new List<ItemResult>();
             foreach (var dto in list)
             {
-                // Check if creates/edits aren't allowed
-                if (!dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsCreateAllowed(User))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Create not allowed on CaseProduct objects.");
-                }
-                else if (dto.CaseProductId.HasValue && !ClassViewModel.SecurityInfo.IsEditAllowed(User))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    resultList.Add("Edit not allowed on CaseProduct objects.");
-                }
-                else
-                {
-                    var parameters = new DataSourceParameters() { Includes = "none" };
-                    var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
-                    resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
-                }
+                var parameters = new DataSourceParameters() { Includes = "none" };
+
+                // Security: SaveImplementation is responsible for checking specific save/edit attribute permissions.
+                var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
             }
             return resultList;
         }

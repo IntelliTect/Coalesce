@@ -14,9 +14,9 @@ namespace IntelliTect.Coalesce.Validation
         {
             var assert = new ValidationHelper();
 
-            assert.IsTrue(repository.AllClassViewModels.Any(), "No models were created. Make sure all models have a DbSet on the context.");
+            assert.IsTrue(repository.DiscoveredClassViewModels.Any(), "No models were created. Make sure all models have a DbSet on the context.");
             // Make sure everyone has an id property
-            foreach (var model in repository.Entities.Select(e => e.ClassViewModel))
+            foreach (var model in repository.Entities)
             {
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
@@ -96,26 +96,6 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.Area = $"{model.Name}: {method.Name}: {param.Name}";
                             assert.IsNotNull(param.Type, "Parameter Type");
-                            // These only work if the names are db and user.
-                            if (param.Name == "user")
-                            {
-                                assert.IsTrue(param.IsAUser, "Is a User");
-                                assert.IsTrue(param.IsDI, "Is DI");
-                            }
-                            else if (param.Name == "db")
-                            {
-                                assert.IsTrue(param.IsAContext, "Is a context");
-                                assert.IsTrue(param.IsDI, "Is DI");
-                            }
-                            else if (param.Name == "includeTree")
-                            {
-                                assert.IsTrue(param.IsAnIncludeTree, "Is an IncludeTree");
-                                assert.IsTrue(param.IsDI, "Is DI");
-                            }
-                            else
-                            {
-                                assert.IsFalse(param.IsManualDI, $"DI properties must be named either 'db' or 'user' or 'out includeTree'. Got {param.Name}");
-                            }
                         }
 
                     }
@@ -138,16 +118,10 @@ namespace IntelliTect.Coalesce.Validation
                 assert.Area = $"DTO: {model.Name}";
                 // Console.WriteLine($"Validating DTO: {model.Name}");
                 // Make sure the key matches the object
-                if (model.IsDto)
+                assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base model for DTO {model.Name}. Add the base model as a DbSet to the context.");
+                if (model.DtoBaseViewModel != null)
                 {
-                    assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base model for DTO {model.Name}. Add the base model as a DbSet to the context.");
-                    if (model.DtoBaseViewModel != null)
-                    {
-                        assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model.Name}. It must be the [name]Id, [base model]Id or marked with the [Key] attribute. ");
-                    }
-                }else
-                {
-                    assert.IsTrue(model.DtoBaseViewModel == null, $"External type should not implement IClassDto. IClassDtos should have an IEnumerable<{model.Name}> in the context.");
+                    assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model.Name}. It must be the [name]Id, [base model]Id or marked with the [Key] attribute. ");
                 }
             }
 
@@ -157,7 +131,7 @@ namespace IntelliTect.Coalesce.Validation
                 assert.Area = $"External Model: {model.Name}";
                 //Console.WriteLine($"Validating Other Object: {model.Name}");
                 // Make sure these don't inherit from IClassDto because they should have an IEnumerable on the Context.
-                assert.IsTrue(model.DtoBaseViewModel == null, $"{model.Name} appears to be a DTO but doesn't have an IEnumerable<{model.Name} entry in the Context. Add to the context or remove IClassDto.");
+                assert.IsTrue(model.DtoBaseViewModel == null, $"{model.FullyQualifiedName} appears to be a DTO but isn't marked with [Coalesce].");
             }
 
             return assert;

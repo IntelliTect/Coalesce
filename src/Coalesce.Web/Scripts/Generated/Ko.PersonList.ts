@@ -13,12 +13,6 @@ module ListViewModels {
         export const Default = WithoutCases;
         
         export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
-            public paramThing: KnockoutObservable<string> = ko.observable(null);
-            public saveToDto = () => {
-                var dto: any = {};
-                dto.paramThing = this.paramThing();
-                return dto;
-            }
         }
         
         /** People whose last name starts with B or c */

@@ -45,11 +45,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     {
                         return Knockout.SelectObject(prop);
                     }
-
-                }
-                else if (prop.ListGroup != null)
-                {
-                    return Knockout.SelectString(prop);
                 }
                 else
                 {
@@ -130,11 +125,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                             //return Knockout.SelectObject(prop);
                         }
 
-                    }
-                    else if (prop.ListGroup != null)
-                    {
-                        return $"@(Knockout.SelectFor<{prop.Parent.FullyQualifiedName}>(p => p.{prop.Name}))";
-                        //return Knockout.SelectString(prop);
                     }
                     else
                     {

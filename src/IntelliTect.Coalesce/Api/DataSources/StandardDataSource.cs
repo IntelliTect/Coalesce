@@ -7,12 +7,12 @@ using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using IntelliTect.Coalesce.Data;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce
 {
@@ -69,7 +69,7 @@ namespace IntelliTect.Coalesce
 
 
         /// <summary>
-        /// Applies the "propertyName=exactValue" filters to a query.
+        /// Applies the "filter.propertyName=exactValue" filters to a query.
         /// These filters may be set when making a list request, and are found in ListParameters.Filters.
         /// This is called by ApplyListFiltering when constructing a list result.
         /// </summary>
@@ -81,7 +81,10 @@ namespace IntelliTect.Coalesce
             foreach (var clause in parameters.Filter)
             {
                 var prop = ClassViewModel.PropertyByName(clause.Key);
-                if (prop != null && prop.IsClientProperty && prop.IsUrlFilterParameter)
+                if (prop != null 
+                    && prop.IsClientProperty 
+                    && prop.IsUrlFilterParameter
+                    && prop.SecurityInfo.IsReadable(User))
                 {
                     query = DatabaseCompareExpression(query, prop, clause.Value);
                 }

@@ -108,15 +108,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
-                // When static add an id that specifies the object to work on.
-                string result = "";
+                var outParameters = new List<string>();
+                outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
+
+                // When not static add an id that specifies the object to work on.
                 if (!IsStatic)
                 {
-                    result = $"{Parent.PrimaryKey.PureType.FullyQualifiedName} id";
-                    if (parameters.Any()) result += ", ";
+                    outParameters.Add($"{Parent.PrimaryKey.PureType.FullyQualifiedName} id");
                 }
-                result += string.Join(", ", parameters.Select(f => f.CsDeclaration));
-                return result;
+                outParameters.AddRange(parameters.Select(f => f.CsDeclaration));
+                return string.Join(", ", outParameters);
             }
         }
 
@@ -195,11 +196,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public SecurityInfoMethod SecurityInfo => new SecurityInfoMethod()
-        {
-            IsExecute = HasAttribute<ExecuteAttribute>(),
-            ExecuteRoles = this.GetAttributeValue<ExecuteAttribute>(a => a.Roles) ?? ""
-        };
+        public SecurityInfoMethod SecurityInfo => 
+            new SecurityInfoMethod(HasAttribute<ExecuteAttribute>(), this.GetAttributeValue<ExecuteAttribute>(a => a.Roles) ?? "");
 
         /// <summary>
         /// If true, this is a method that may be called by a client.

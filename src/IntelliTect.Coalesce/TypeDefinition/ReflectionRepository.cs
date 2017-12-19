@@ -151,9 +151,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return classViewModel;
         }
 
-        private bool IsCached(ClassViewModel classViewModel) => 
-            _allClassViewModels.ContainsKey(GetCacheKey(classViewModel));
-
         private object GetCacheKey(ClassViewModel classViewModel) => 
             (classViewModel.Type as ReflectionTypeViewModel)?.Info as object
             ?? (classViewModel.Type as SymbolTypeViewModel)?.Symbol as object

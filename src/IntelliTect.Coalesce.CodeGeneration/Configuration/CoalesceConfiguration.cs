@@ -16,12 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
     public class InputConfiguration
     {
-        /// <summary>
-        /// Name of the DbContext class to search for in the DataProject when performing code generation.
-        /// If null, Coalesce will attempt to locate a class that inherits from DbContext.
-        /// An error will be thrown if a single such class cannot be located.
-        /// </summary>
-        public string DbContextName { get; set; } = null;
+
     }
 
     public class OutputConfiguration

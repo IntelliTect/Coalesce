@@ -14,6 +14,7 @@
     var namespaces = new List<string>();
     namespaces.Add("IntelliTect.Coalesce");
     namespaces.Add("IntelliTect.Coalesce.Api");
+    namespaces.Add("IntelliTect.Coalesce.Api.Controllers");
     namespaces.Add("IntelliTect.Coalesce.Api.DataSources");
     namespaces.Add("IntelliTect.Coalesce.Mapping");
     namespaces.Add("IntelliTect.Coalesce.Mapping.IncludeTrees");
@@ -52,6 +53,7 @@ namespace @(namespaceName).Api
     }
 }
     @(securityInfo.ClassAnnotation)
+    [ServiceFilter(typeof(IApiActionFilter))]
     public partial class @(model.ApiControllerClassName)
     : LocalBaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName)>
     {
@@ -204,7 +206,6 @@ namespace @(namespaceName).Api
                 }
                 else
                 {
-                    // TODO: this is quite a hack (passing in empty ListParameters). Methods really need to accept IDataSourceParameters.
 @:var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 if (method.ReturnType.IsVoid)
                 {

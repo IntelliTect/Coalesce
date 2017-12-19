@@ -55,16 +55,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 .PrecompileAssemblyTemplates(typeof(TGenerator).Assembly));
 
             genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
-            genContext.DbContextType = FindDbContextType(Config, genContext.DataProject);
-
-
-
 
             // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
             var rr = ReflectionRepository.Global;
             var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
             rr.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
-
+            genContext.DbContextType = rr.DbContexts.FirstOrDefault().ClassViewModel.Type;
+            if (genContext.DbContextType == null)
+            {
+                throw new InvalidOperationException($"Couldn't find a single DbContext to generate from. " +
+                    "Specify the name of your DbContext by adding \"input: {dbContextName: 'MyDbContextClassName'}\" to coalesce.json.");
+            }
 
             var validationResult = ValidateContext.Validate(rr);
             var issues = validationResult.Where(r => !r.WasSuccessful);
@@ -90,27 +91,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             logger.LogInformation("Generation Complete");
 
-        }
-
-        private TypeViewModel FindDbContextType(CoalesceConfiguration config, ProjectContext dataProject)
-        {
-            var dataContextName = config.Input.DbContextName;
-            if (string.IsNullOrWhiteSpace(dataContextName))
-            {
-                var candidates = dataProject.TypeLocator
-                    .FindDerivedTypes(typeof(Microsoft.EntityFrameworkCore.DbContext).FullName)
-                    .ToList();
-                if (candidates.Count() != 1)
-                {
-                    throw new InvalidOperationException($"Couldn't find a single DbContext to generate from. " +
-                        "Specify the name of your DbContext by adding \"input: {dbContextName: 'MyDbContextClassName'}\" to coalesce.json.");
-                }
-                return candidates.Single();
-            }
-            else
-            {
-                return dataProject.TypeLocator.FindType(dataContextName, throwWhenNotFound: false);
-            }
         }
     }
 }

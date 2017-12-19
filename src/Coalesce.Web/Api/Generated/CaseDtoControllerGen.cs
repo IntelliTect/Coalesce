@@ -2,6 +2,7 @@
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
@@ -20,6 +21,7 @@ namespace Coalesce.Web.Api
 {
     [Route("api/[controller]")]
     [Authorize]
+    [ServiceFilter(typeof(IApiActionFilter))]
     public partial class CaseDtoController
     : LocalBaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>
     {

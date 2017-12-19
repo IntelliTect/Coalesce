@@ -436,7 +436,13 @@ ko.bindingHandlers.select2AjaxText = {
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         // See if the value exists. If not, we haven't loaded it from the server yet.
         var value = valueAccessor()();
-        var options = $(element).find('option[value="' + value + '"]');
+        var options;
+        if (value) {
+          options = $(element).find('option[value="' + value.toString().replace(/"/g, '\\"') + '"]');
+        } else {
+          options = $(element).find('option[value="' + value + '"]');
+        }
+
 
         // The option doesn't exist.
         if (options.length == 0) {
@@ -569,6 +575,7 @@ ko.bindingHandlers.saveImmediately = {
     }
 };
 
+
 // Delays the save until the cursor leaves the field even if there is a value change.
 ko.bindingHandlers.delaySave = {
     init: function (element, valueAccessor, allBindings, viewModel: Coalesce.BaseViewModel, bindingContext) {
@@ -576,17 +583,19 @@ ko.bindingHandlers.delaySave = {
             console.error("delaySave binding was used in a context where $data is not a Coalesce.BaseViewModel");
             return;
         }
+        var existingAutoSaveValueRaw: boolean;
 
         // Set up to not save immediately when the cursor enters and return to a regular state when it leaves.
         $(element).on("focus", function () {
+            existingAutoSaveValueRaw = viewModel.coalesceConfig.autoSaveEnabled.raw();
             viewModel.coalesceConfig.autoSaveEnabled(false);
         });
-        // Turn it back on when the cursor leaves.
+        // Turn it back to previous state when the cursor leaves.
         $(element).on("blur", function () {
-            viewModel.coalesceConfig.autoSaveEnabled(true);
-            // Save if there were changes.
-            if (viewModel.isDirty() && !viewModel.isSaving()) {
-                viewModel.save();
+            viewModel.coalesceConfig.autoSaveEnabled(existingAutoSaveValueRaw);
+            // If there were changes, perform an autosave now (autoSave() won't save if autosave is disabled.)
+            if (viewModel.isDirty()) {
+                viewModel.autoSave();
             }
 
         });

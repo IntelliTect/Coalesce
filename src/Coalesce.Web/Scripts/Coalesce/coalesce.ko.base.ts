@@ -246,7 +246,7 @@ module Coalesce {
         set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
 
         /** Parent of this object, if this object was loaded as part of a hierarchy. */
-        public parent: any = null;
+        public parent: BaseViewModel | BaseListViewModel<this> = null;
         /** Parent of this object, if this object was loaded as part of list of objects. */
         public parentCollection: KnockoutObservableArray<this> = null;
         /**
@@ -374,7 +374,7 @@ module Coalesce {
             else
                 this.savingChildCount(this.savingChildCount() - 1);
 
-            if (this.parent && $.isFunction(this.parent.onSavingChildChange)) {
+            if (this.parent instanceof BaseViewModel) {
                 this.parent.onSavingChildChange(isSaving);
             }
         };
@@ -542,14 +542,13 @@ module Coalesce {
             } else if (operation == 'deleted') {
                 var matchedItems = existingItems().filter(i => i[localIdProp]() === currentId && i[foreignIdProp]() === foreignId);
                 if (matchedItems.length == 0) {
-                    throw `Couldn't find a ${constructor.toString()} object (found ${existingItems.length}) to delete with ${localIdProp}=${currentId} & ${foreignIdProp}=${foreignId}.`
+                    throw `Couldn't find a ${constructor.toString()} object to delete with ${localIdProp}=${currentId} & ${foreignIdProp}=${foreignId}.`
                 } else {
                     // If we matched more than one item, we're just going to operate on the first one.
                     var matcheditem = matchedItems[0];
                     return matcheditem.deleteItem();
                 }
             }
-
         };
 
         /** Saves a many to many collection if coalesceConfig.autoSaveCollectionsEnabled is true. */
@@ -584,7 +583,7 @@ module Coalesce {
         };
 
         /** Saves the object is coalesceConfig.autoSaveEnabled is true. */
-        protected autoSave = (): void => {
+        public autoSave = (): void => {
             if (!this.isLoading()) {
                 this.isDirty(true);
                 if (this.coalesceConfig.autoSaveEnabled()) {
@@ -663,7 +662,7 @@ module Coalesce {
 
             // Handles setting the parent savingChildChange
             this.isSaving.subscribe((newValue: boolean) => {
-                if (this.parent && $.isFunction(this.parent.onSavingChildChange)) {
+                if (this.parent instanceof BaseViewModel) {
                     this.parent.onSavingChildChange(newValue);
                 }
             })

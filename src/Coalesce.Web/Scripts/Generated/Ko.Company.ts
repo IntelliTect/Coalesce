@@ -20,19 +20,13 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<Company>(Coalesce.GlobalConfiguration.viewModel);
 
         /** Behavioral configuration for the current Company instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<Company>
+        public coalesceConfig: Coalesce.ViewModelConfiguration<this>
             = new Coalesce.ViewModelConfiguration<Company>(Company.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
         public dataSources: typeof ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources;
-
-        /**
-            The data source on the server to use when retrieving the object.
-            Valid values are in this.dataSources.
-        */
-        public dataSource: Coalesce.DataSource<Company>;
     
 
         public companyId: KnockoutObservable<number> = ko.observable(null);
@@ -152,11 +146,10 @@ module ViewModels {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.companyId();
         });
 
-        constructor(newItem?: any, parent?: any){
-            super();
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CompanyList){
+            super(parent);
             this.baseInitialize();
             var self = this;
-            self.parent = parent;
             self.myId;
 
             // Create computeds for display for objects
@@ -190,8 +183,7 @@ module ViewModels {
             self.zipCode.subscribe(self.autoSave);
         
             if (newItem) {
-                if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem, true);
+                self.loadFromDto(newItem, true);
             }
         }
     }

@@ -20,19 +20,13 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<Case>(Coalesce.GlobalConfiguration.viewModel);
 
         /** Behavioral configuration for the current Case instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<Case>
+        public coalesceConfig: Coalesce.ViewModelConfiguration<this>
             = new Coalesce.ViewModelConfiguration<Case>(Case.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
         public dataSources: typeof ListViewModels.CaseDataSources = ListViewModels.CaseDataSources;
-
-        /**
-            The data source on the server to use when retrieving the object.
-            Valid values are in this.dataSources.
-        */
-        public dataSource: Coalesce.DataSource<Case>;
     
 
         /** The Primary key for the Case object */
@@ -125,40 +119,40 @@ module ViewModels {
                 if (data.assignedToId != this.assignedToId()) {
                     this.assignedTo(null);
                 }
-            }else {
+            } else {
                 if (!this.assignedTo()){
                     this.assignedTo(new Person(data.assignedTo, this));
-                }else{
+                } else {
                     this.assignedTo().loadFromDto(data.assignedTo);
                 }
-                if (this.parent && this.parent.myId == this.assignedTo().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.assignedTo()))
+                if (this.parent instanceof Person && this.parent !== this.assignedTo() && this.parent.personId() == this.assignedTo().personId())
                 {
-                    this.parent.loadFromDto(data.assignedTo, undefined, false);
+                    this.parent.loadFromDto(data.assignedTo, null, false);
                 }
             }
             if (!data.reportedBy) { 
                 if (data.reportedById != this.reportedById()) {
                     this.reportedBy(null);
                 }
-            }else {
+            } else {
                 if (!this.reportedBy()){
                     this.reportedBy(new Person(data.reportedBy, this));
-                }else{
+                } else {
                     this.reportedBy().loadFromDto(data.reportedBy);
                 }
-                if (this.parent && this.parent.myId == this.reportedBy().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.reportedBy()))
+                if (this.parent instanceof Person && this.parent !== this.reportedBy() && this.parent.personId() == this.reportedBy().personId())
                 {
-                    this.parent.loadFromDto(data.reportedBy, undefined, false);
+                    this.parent.loadFromDto(data.reportedBy, null, false);
                 }
             }
             if (!data.devTeamAssigned) { 
                 if (data.devTeamAssignedId != this.devTeamAssignedId()) {
                     this.devTeamAssigned(null);
                 }
-            }else {
+            } else {
                 if (!this.devTeamAssigned()){
                     this.devTeamAssigned(new DevTeam(data.devTeamAssigned, this));
-                }else{
+                } else {
                     this.devTeamAssigned().loadFromDto(data.devTeamAssigned);
                 }
             }
@@ -263,11 +257,10 @@ module ViewModels {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseKey();
         });
 
-        constructor(newItem?: any, parent?: any){
-            super();
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CaseList){
+            super(parent);
             this.baseInitialize();
             var self = this;
-            self.parent = parent;
             self.myId;
 
             // Create computeds for display for objects
@@ -341,8 +334,7 @@ module ViewModels {
             }, null, "arrayChange");
             
             if (newItem) {
-                if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem, true);
+                self.loadFromDto(newItem, true);
             }
         }
     }

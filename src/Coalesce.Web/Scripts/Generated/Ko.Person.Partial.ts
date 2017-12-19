@@ -6,7 +6,7 @@
 
 module ViewModels {
 
-	export class Person extends Coalesce.BaseViewModel
+	export class PersonPartial extends Coalesce.BaseViewModel
     {
         protected modelName = "Person";
         protected primaryKeyName: keyof this = "personId";
@@ -20,19 +20,13 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
 
         /** Behavioral configuration for the current Person instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
-            = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
+        public coalesceConfig: Coalesce.ViewModelConfiguration<this>
+            = new Coalesce.ViewModelConfiguration<PersonPartial>(Person.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
         public dataSources: typeof ListViewModels.PersonDataSources = ListViewModels.PersonDataSources;
-
-        /**
-            The data source on the server to use when retrieving the object.
-            Valid values are in this.dataSources.
-        */
-        public dataSource: Coalesce.DataSource<Person>;
     
 
         /** ID for the person object. */
@@ -229,13 +223,13 @@ module ViewModels {
                 });
             });
         }
-        /** Calls server method (Rename) with an instance of Person.RenameArgs, or the value of renameArgs if not specified. */
-        public renameWithArgs = (args?: Person.RenameArgs, callback?: () => void, reload: boolean = true) => {
+        /** Calls server method (Rename) with an instance of PersonPartial.RenameArgs, or the value of renameArgs if not specified. */
+        public renameWithArgs = (args?: PersonPartial.RenameArgs, callback?: () => void, reload: boolean = true) => {
             if (!args) args = this.renameArgs;
             return this.rename(args.name(), callback, reload);
         }
         /** Object that can be easily bound to fields to allow data entry for the method */
-        public renameArgs = new Person.RenameArgs(); 
+        public renameArgs = new PersonPartial.RenameArgs(); 
         
         
         
@@ -323,10 +317,10 @@ module ViewModels {
             // This handles the issue with populating select lists with correct data because we now have the object.
             if (!data.personStats) { 
                 this.personStats(null);
-            }else {
+            } else {
                 if (!this.personStats()){
                     this.personStats(new PersonStats(data.personStats, this));
-                }else{
+                } else {
                     this.personStats().loadFromDto(data.personStats);
                 }
             }
@@ -334,15 +328,15 @@ module ViewModels {
                 if (data.companyId != this.companyId()) {
                     this.company(null);
                 }
-            }else {
+            } else {
                 if (!this.company()){
                     this.company(new Company(data.company, this));
-                }else{
+                } else {
                     this.company().loadFromDto(data.company);
                 }
-                if (this.parent && this.parent.myId == this.company().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.company()))
+                if (this.parent instanceof Company && this.parent !== this.company() && this.parent.companyId() == this.company().companyId())
                 {
-                    this.parent.loadFromDto(data.company, undefined, false);
+                    this.parent.loadFromDto(data.company, null, false);
                 }
             }
 
@@ -441,11 +435,10 @@ module ViewModels {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.personId();
         });
 
-        constructor(newItem?: any, parent?: any){
-            super();
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.PersonList){
+            super(parent);
             this.baseInitialize();
             var self = this;
-            self.parent = parent;
             self.myId;
 
             // Create computeds for display for objects
@@ -521,8 +514,7 @@ module ViewModels {
             self.company.subscribe(self.autoSave);
         
             if (newItem) {
-                if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem, true);
+                self.loadFromDto(newItem, true);
             }
         }
     }
@@ -531,7 +523,7 @@ module ViewModels {
 
 
 
-    export namespace Person {
+    export namespace PersonPartial {
         export enum TitleEnum {
             Mr = 0,
             Ms = 1,

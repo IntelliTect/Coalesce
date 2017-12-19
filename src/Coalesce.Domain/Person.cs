@@ -13,6 +13,7 @@ namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
+    [TypeScriptPartial]
     public class Person
     {
         public enum Genders

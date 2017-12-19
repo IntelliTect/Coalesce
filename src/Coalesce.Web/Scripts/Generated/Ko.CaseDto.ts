@@ -20,19 +20,13 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<CaseDto>(Coalesce.GlobalConfiguration.viewModel);
 
         /** Behavioral configuration for the current CaseDto instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<CaseDto>
+        public coalesceConfig: Coalesce.ViewModelConfiguration<this>
             = new Coalesce.ViewModelConfiguration<CaseDto>(CaseDto.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
         public dataSources: typeof ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources;
-
-        /**
-            The data source on the server to use when retrieving the object.
-            Valid values are in this.dataSources.
-        */
-        public dataSource: Coalesce.DataSource<CaseDto>;
     
 
         public caseId: KnockoutObservable<number> = ko.observable(null);
@@ -108,11 +102,10 @@ module ViewModels {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseId();
         });
 
-        constructor(newItem?: any, parent?: any){
-            super();
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CaseDtoList){
+            super(parent);
             this.baseInitialize();
             var self = this;
-            self.parent = parent;
             self.myId;
 
             // Create computeds for display for objects
@@ -125,8 +118,7 @@ module ViewModels {
             self.title.subscribe(self.autoSave);
         
             if (newItem) {
-                if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem, true);
+                self.loadFromDto(newItem, true);
             }
         }
     }

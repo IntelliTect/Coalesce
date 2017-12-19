@@ -40,19 +40,13 @@ module @moduleName {
             = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(Coalesce.GlobalConfiguration.viewModel);
 
         /** Behavioral configuration for the current @(model.ViewModelClassName) instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
-            = new Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>(@(model.ViewModelClassName).coalesceConfig);
+        public coalesceConfig: Coalesce.ViewModelConfiguration<this>
+            = new Coalesce.ViewModelConfiguration<@(model.ViewModelGeneratedClassName)>(@(model.ViewModelClassName).coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
         public dataSources: typeof ListViewModels.@(model.Name)DataSources = ListViewModels.@(model.Name)DataSources;
-
-        /**
-            The data source on the server to use when retrieving the object.
-            Valid values are in this.dataSources.
-        */
-        public dataSource: Coalesce.DataSource<@(model.ViewModelClassName)>;
     
 
         @foreach (PropertyViewModel prop in model.ClientProperties)
@@ -350,16 +344,16 @@ module @moduleName {
                 }else{
                 @:this.@(prop.JsVariable)(null);
                 }
-            @:}else {
+            @:} else {
                 @:if (!this.@(prop.JsVariable)()){
                     @:this.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, this));
-                @:}else{
+                @:} else {
                     @:this.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
                 @:}
                 @if (prop.Object.OnContext) { 
-                @:if (this.parent && this.parent.myId == this.@(prop.JsVariable)().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.@(prop.JsVariable)()))
+                @:if (this.parent instanceof @(prop.Object.ViewModelClassName) && this.parent !== this.@(prop.JsVariable)() && this.parent.@(prop.Object.PrimaryKey.JsVariable)() == this.@(prop.JsVariable)().@(prop.Object.PrimaryKey.JsVariable)())
                 @:{
-                    @:this.parent.loadFromDto(data.@prop.JsonName, undefined, false);
+                    @:this.parent.loadFromDto(data.@prop.JsonName, null, false);
                 @:}
                 }
             @:}
@@ -466,11 +460,10 @@ module @moduleName {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.@(model.PrimaryKey.JsVariable)();
         });
 
-        constructor(newItem?: any, parent?: any){
-            super();
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | @(listModuleName).@(model.ListViewModelClassName)){
+            super(parent);
             this.baseInitialize();
             var self = this;
-            self.parent = parent;
             self.myId;
 
             // Create computeds for display for objects
@@ -550,8 +543,7 @@ module @moduleName {
         }
 
             if (newItem) {
-                if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem, true);
+                self.loadFromDto(newItem, true);
             }
         }
     }

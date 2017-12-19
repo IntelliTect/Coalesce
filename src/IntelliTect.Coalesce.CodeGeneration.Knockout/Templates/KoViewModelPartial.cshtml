@@ -6,9 +6,11 @@
 @{
     ClassViewModel model = Model.Model;
     string moduleName = "ViewModels";
+    string listModuleName = "ListViewModels";
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
     {
         moduleName = Model.AreaName + "." + moduleName;
+        listModuleName = Model.AreaName + "." + listModuleName;
     }
     if (!string.IsNullOrWhiteSpace(Model.ModulePrefix))
     {
@@ -24,7 +26,7 @@
 module @moduleName {
 	export class @(model.ViewModelClassName) extends @(model.ViewModelGeneratedClassName) {
 
-        constructor(newItem?: any, parent?: any) {
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | @(listModuleName).@(model.ListViewModelClassName)) {
             super(newItem, parent);
 
         }

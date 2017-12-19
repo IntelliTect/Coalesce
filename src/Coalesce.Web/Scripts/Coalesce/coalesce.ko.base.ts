@@ -197,7 +197,11 @@ module Coalesce {
 
         protected modelName: string;
         protected modelDisplayName: string;
-        protected primaryKeyName: keyof this;
+
+        // Typing this property as keyof this prevents us from using BaseViewModel amorphously.
+        // It prevents assignment of an arbitrary derived type to a variable/parameter expecting BaseViewModel
+        // because primaryKeyName on a derived type is wider than it is on BaseViewModel.
+        protected primaryKeyName: string;
 
         protected apiController: string;
         protected viewController: string;
@@ -436,7 +440,7 @@ module Coalesce {
         /** Loads the object from the server based on the id specified. If no id is specified, the current id, is used if one is set. */
         public load = (id?: any, callback?: (self: this) => void): JQueryPromise<any> | undefined => {
             if (!id) {
-                id = this[this.primaryKeyName]();
+                id = this[this.primaryKeyName as keyof this]();
             }
             if (id) {
                 this.isLoading(true);
@@ -464,7 +468,7 @@ module Coalesce {
 
         /** Deletes the object without any prompt for confirmation. */
         public deleteItem = (callback?: (self: this) => void): JQueryPromise<any> | undefined => {
-            var currentId = this[this.primaryKeyName]();
+            var currentId = this[this.primaryKeyName as keyof this]();
             if (currentId) {
                 return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
                     .done((data) => {
@@ -525,7 +529,7 @@ module Coalesce {
             foreignId: any
         ): JQueryPromise<any> | boolean | undefined => {
 
-            var currentId = this[this.primaryKeyName]();
+            var currentId = this[this.primaryKeyName as keyof this]();
 
             if (operation == 'added') {
                 var newItem = new constructor();
@@ -658,7 +662,8 @@ module Coalesce {
             }
         }
 
-        constructor() {
+        constructor(parent: Coalesce.BaseViewModel | Coalesce.BaseListViewModel<any>) {
+            this.parent = parent;
 
             // Handles setting the parent savingChildChange
             this.isSaving.subscribe((newValue: boolean) => {

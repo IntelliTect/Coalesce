@@ -567,13 +567,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        /// <summary>
-        /// Name of the database column
-        /// </summary>
-        //TODO: Make this more robust
-        public string ColumnName => Name;
-
         public override string ToString() => $"{Name} : {Type.FullyQualifiedName}";
 
         public string SecurityToString()
@@ -592,6 +585,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             return "Allow";
         }
+
         public string SecurityReadToString()
         {
             if (IsInternalUse) return "None";

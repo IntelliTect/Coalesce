@@ -20,19 +20,13 @@ module ViewModels {
             = new Coalesce.ViewModelConfiguration<CaseProduct>(Coalesce.GlobalConfiguration.viewModel);
 
         /** Behavioral configuration for the current CaseProduct instance. */
-        public coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
+        public coalesceConfig: Coalesce.ViewModelConfiguration<this>
             = new Coalesce.ViewModelConfiguration<CaseProduct>(CaseProduct.coalesceConfig);
     
         /** 
             The namespace containing all possible values of this.dataSource.
         */
         public dataSources: typeof ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources;
-
-        /**
-            The data source on the server to use when retrieving the object.
-            Valid values are in this.dataSources.
-        */
-        public dataSource: Coalesce.DataSource<CaseProduct>;
     
 
         public caseProductId: KnockoutObservable<number> = ko.observable(null);
@@ -75,30 +69,30 @@ module ViewModels {
                 if (data.caseId != this.caseId()) {
                     this.case(null);
                 }
-            }else {
+            } else {
                 if (!this.case()){
                     this.case(new Case(data.case, this));
-                }else{
+                } else {
                     this.case().loadFromDto(data.case);
                 }
-                if (this.parent && this.parent.myId == this.case().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.case()))
+                if (this.parent instanceof Case && this.parent !== this.case() && this.parent.caseKey() == this.case().caseKey())
                 {
-                    this.parent.loadFromDto(data.case, undefined, false);
+                    this.parent.loadFromDto(data.case, null, false);
                 }
             }
             if (!data.product) { 
                 if (data.productId != this.productId()) {
                     this.product(null);
                 }
-            }else {
+            } else {
                 if (!this.product()){
                     this.product(new Product(data.product, this));
-                }else{
+                } else {
                     this.product().loadFromDto(data.product);
                 }
-                if (this.parent && this.parent.myId == this.product().myId && Coalesce.Utilities.getClassName(this.parent) == Coalesce.Utilities.getClassName(this.product()))
+                if (this.parent instanceof Product && this.parent !== this.product() && this.parent.productId() == this.product().productId())
                 {
-                    this.parent.loadFromDto(data.product, undefined, false);
+                    this.parent.loadFromDto(data.product, null, false);
                 }
             }
 
@@ -181,11 +175,10 @@ module ViewModels {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseProductId();
         });
 
-        constructor(newItem?: any, parent?: any){
-            super();
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CaseProductList){
+            super(parent);
             this.baseInitialize();
             var self = this;
-            self.parent = parent;
             self.myId;
 
             // Create computeds for display for objects
@@ -229,8 +222,7 @@ module ViewModels {
             self.product.subscribe(self.autoSave);
         
             if (newItem) {
-                if ($.isNumeric(newItem)) self.load(newItem);
-                else self.loadFromDto(newItem, true);
+                self.loadFromDto(newItem, true);
             }
         }
     }

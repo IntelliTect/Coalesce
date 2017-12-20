@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <AssemblyName>IntelliTect.Coalesce.Cli</AssemblyName>
+    <AssemblyName>dotnet-coalesce</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>IntelliTect.Coalesce.Cli</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -14,6 +14,9 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <DebugType>full</DebugType>
     <DebugSymbols>True</DebugSymbols>
+    
+    <PackageType>DotnetCliTool</PackageType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />

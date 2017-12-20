@@ -21,8 +21,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public ProjectContext DataProject { get; set; }
 
-        public TypeViewModel DbContextType { get; set; }
-
         public string OutputNamespaceRoot => WebProject.RootNamespace;
         public string AreaName => CoalesceConfiguration.Output.AreaName;
         public string TypescriptModulePrefix => CoalesceConfiguration.Output.TypescriptModulePrefix;

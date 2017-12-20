@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:10961/",
+      "applicationUrl": "http://localhost:52047/",
       "sslPort": 0
     }
   },
@@ -16,7 +16,12 @@
       }
     },
     "IntelliTect.Coalesce.CodeGeneration": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:52052/"
     }
   }
 }

@@ -1,28 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <VersionPrefix>2.0.0</VersionPrefix>
-    
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <!-- All these frameworks are included for testing code generation. Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
     <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
     
     <PreserveCompilationContext>true</PreserveCompilationContext>
-    <AssemblyName>Coalesce.Web</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>Coalesce.Web</PackageId>
     <UserSecretsId>aspnet-AspNetCoreTest-c1a899d5-70d6-46f0-ba4b-f4986ebe6948</UserSecretsId>
-    <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Content Update="wwwroot\**\*;Views\**\*;appsettings.json;web.config">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -54,10 +42,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.0" />
   </ItemGroup>
   

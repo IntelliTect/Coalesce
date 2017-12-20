@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <Company>IntelliTect</Company>
+    <Authors>IntelliTect</Authors>
+    <Product>Coalesce Web Framework</Product>
+    <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
+    <DefaultLanguage>en-US</DefaultLanguage>
+
+    <VersionPrefix>2.0.0-alpha-</VersionPrefix>
+    <PackageVersionPrefix>2.0.0-alpha-</PackageVersionPrefix>
+    <VersionSuffix Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</VersionSuffix>
+    <PackageVersionSuffix Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</PackageVersionSuffix>
+
+    <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageTags>IntelliTect Coalesce MVC API Web Framework Generation Generator</PackageTags>
+
+    <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <DebugType>full</DebugType>
+    <DebugSymbols>True</DebugSymbols>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+  </PropertyGroup>
+</Project>

@@ -71,6 +71,7 @@ namespace IntelliTect.Coalesce.Cli
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Environment.Exit(-1);
             }
         }
 

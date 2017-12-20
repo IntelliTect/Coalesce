@@ -43,7 +43,7 @@ module ViewModels {
         
 
         /** Add object to employees */
-        public addToEmployees = (autoSave = true): Person => {
+        public addToEmployees = (autoSave?: boolean | null): Person => {
             var newItem = new Person();
             if (typeof(autoSave) == 'boolean'){
                 newItem.coalesceConfig.autoSaveEnabled(autoSave);
@@ -60,12 +60,10 @@ module ViewModels {
         public employeesList: (loadImmediate?: boolean) => ListViewModels.PersonList;
         
         /** Url for a table view of all members of collection Employees for the current object. */
-        public employeesListUrl: KnockoutComputed<string> = ko.computed({
-            read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/Person/Table?filter.companyId=' + this.companyId();
-            },
-            deferEvaluation: true
-        });
+        public employeesListUrl: KnockoutComputed<string> = ko.computed(
+            () => this.coalesceConfig.baseViewUrl() + '/Person/Table?filter.companyId=' + this.companyId(),
+            null, { deferEvaluation: true }
+        );
 
 
 
@@ -128,7 +126,7 @@ module ViewModels {
         */
         public loadChildren = (callback?: () => void) => {
             var loadingCount = 0;
-            if (loadingCount == 0 && $.isFunction(callback)){
+            if (loadingCount == 0 && typeof(callback) == "function"){
                 callback();
             }
         };

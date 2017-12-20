@@ -421,7 +421,7 @@ module Coalesce {
                         })
                         .always(() => {
                             this.isSaving(false);
-                            if ($.isFunction(callback)) {
+                            if (typeof(callback) == "function") {
                                 callback(this);
                             }
                             if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onFinishBusy()(this);
@@ -452,7 +452,7 @@ module Coalesce {
                     .done((data) => {
                         this.loadFromDto(data, true);
                         this.isLoaded(true);
-                        if ($.isFunction(callback)) callback(this);
+                        if (typeof(callback) == "function") callback(this);
                     })
                     .fail(() => {
                      (false);
@@ -490,7 +490,7 @@ module Coalesce {
                             this.coalesceConfig.onFailure()(this, "Could not delete the item");
                     })
                     .always(() => {
-                        if ($.isFunction(callback)) {
+                        if (typeof(callback) == "function") {
                             callback(this);
                         }
                     });
@@ -501,7 +501,7 @@ module Coalesce {
                     this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
                     this.parent.isLoading(false);
                 }
-                if ($.isFunction(callback)) {
+                if (typeof(callback) == "function") {
                     callback(this);
                 }
             }
@@ -579,7 +579,7 @@ module Coalesce {
             @returns true if the callback was registered. false if the callback was already registered. 
         */
         public onSave = (callback: (self: this) => void): boolean => {
-            if ($.isFunction(callback) && !this.saveCallbacks.filter(c => c == callback).length) {
+            if (typeof(callback) == "function" && !this.saveCallbacks.filter(c => c == callback).length) {
                 this.saveCallbacks.push(callback);
                 return true;
             }
@@ -632,7 +632,7 @@ module Coalesce {
                     $('#modal-dialog').modal('show');
                     // Make the callback when the form closes.
                     $("#modal-dialog").on("hidden.bs.modal", () => {
-                        if ($.isFunction(callback)) callback(this);
+                        if (typeof(callback) == "function") callback(this);
                     });
                 })
                 .always(() => {
@@ -753,7 +753,7 @@ module Coalesce {
                     this.page(data.page);
                     this.message(data.message);
                     this.isLoaded(true);
-                    if ($.isFunction(callback)) callback(this);
+                    if (typeof(callback) == "function") callback(this);
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -839,7 +839,7 @@ module Coalesce {
             })
                 .done((data) => {
                     this.count(data);
-                    if ($.isFunction(callback)) callback();
+                    if (typeof(callback) == "function") callback();
                 })
                 .fail(() => {
                     if (this.coalesceConfig.showFailureAlerts())
@@ -944,7 +944,7 @@ module Coalesce {
                     } as any)
                         .done((data) => {
                             this.isLoading(false);
-                            if ($.isFunction(callback)) callback();
+                            if (typeof(callback) == "function") callback();
                         })
                         .fail((data) => {
                             if (this.coalesceConfig.showFailureAlerts())

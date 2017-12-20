@@ -88,7 +88,7 @@ module @moduleName {
         {
         <text>
         /** Add object to @(prop.JsVariable) */
-        public addTo@(prop.Name) = (autoSave = true): @prop.PureType.ClassViewModel.Name => {
+        public addTo@(prop.Name) = (autoSave?: boolean | null): @prop.PureType.ClassViewModel.Name => {
             var newItem = new @(prop.Object.ViewModelClassName)();
             if (typeof(autoSave) == 'boolean'){
                 newItem.coalesceConfig.autoSaveEnabled(autoSave);
@@ -116,19 +116,17 @@ module @moduleName {
         @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.Type.IsCollection && f.PureTypeOnContext))
         {
         @:/** Url for a table view of all members of collection @prop.Name for the current object. */
-        @:public @(prop.ListEditorUrlName): KnockoutComputed<string> = ko.computed({
-            @:read: () => {
-                if (prop.ListEditorUrl == null)
-                {
-                    @:return "Inverse property not set on @(model.Name) for property @(prop.Name)";
-                }
-                else
-                {
-                    @: return this.coalesceConfig.baseViewUrl() + '/@(prop.ListEditorUrl)' + this.@(model.PrimaryKey.JsVariable)();
-                }
-            @:},
-            @:deferEvaluation: true
-        @:});
+        @:public @(prop.ListEditorUrlName): KnockoutComputed<string> = ko.computed(
+            if (prop.ListEditorUrl == null)
+            {
+            @:() => "Inverse property not set on @(model.Name) for property @(prop.Name)",
+            }
+            else
+            {
+            @:() => this.coalesceConfig.baseViewUrl() + '/@(prop.ListEditorUrl)' + this.@(model.PrimaryKey.JsVariable)(),
+            }
+            @:null, { deferEvaluation: true }
+        @:);
         }
 
         @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection))
@@ -166,7 +164,7 @@ module @moduleName {
             this.@(method.JsVariableMessage)('');
             this.@(method.JsVariableWasSuccessful)(null);
             return $.ajax({ method: "POST",
-                        url: this.coalesceConfig.baseApiUrl() + "/@(method.ApiUrl)",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/@(method.Name)",
                         data: @method.JsPostObject,
                         xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -209,7 +207,7 @@ module @moduleName {
                 {
                 @:// The return type is the type of the object, load it.
                 @:this.loadFromDto(data.object, true)
-                @:if ($.isFunction(callback)) {
+                @:if (typeof(callback) == "function") {
                     @:callback();
                 @:}
                 }
@@ -217,7 +215,7 @@ module @moduleName {
                 {
                 @:if (reload) {
                 @:  this.load(null, callback);
-                @:} else if ($.isFunction(callback)) {
+                @:} else if (typeof(callback) == "function") {
                 @:  callback();
                 @:}
                 }
@@ -428,13 +426,13 @@ module @moduleName {
                 @:@(prop.JsVariable)Obj.load(this.@(prop.ObjectIdProperty.JsVariable)(), function() {
                     @:loadingCount--;
                     @:this.@(prop.JsVariable)(@(prop.JsVariable)Obj);
-                    @:if (loadingCount == 0 && $.isFunction(callback)){
+                    @:if (loadingCount == 0 && typeof(callback) == "function"){
                         @:callback();
                     @:}
                 @:});
             @:}
             }
-            if (loadingCount == 0 && $.isFunction(callback)){
+            if (loadingCount == 0 && typeof(callback) == "function"){
                 callback();
             }
         };
@@ -497,10 +495,10 @@ module @moduleName {
                 @:if (self.@(prop.Parent.PrimaryKey.JsVariable)()){
                     if (prop.InverseIdProperty != null)
                     {
-                    @:_@(prop.JsVariable)List.queryString = "@(prop.InverseIdProperty.Name)=" + self.@(prop.Parent.PrimaryKey.JsVariable)();
+                    @:_@(prop.JsVariable)List.queryString = "filter.@(prop.InverseIdProperty.Name)=" + self.@(prop.Parent.PrimaryKey.JsVariable)();
                     }
                     else {
-                    @:_@(prop.JsVariable)List.queryString = "@(model.PrimaryKey.Name)=" + self.@(prop.Parent.PrimaryKey.JsVariable)();
+                    @:_@(prop.JsVariable)List.queryString = "filter.@(model.PrimaryKey.Name)=" + self.@(prop.Parent.PrimaryKey.JsVariable)();
                     }
                     @:_@(prop.JsVariable)List.load();
                 @:}

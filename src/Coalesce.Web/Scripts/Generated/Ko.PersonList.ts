@@ -63,7 +63,7 @@ module ListViewModels {
             this.addMessage('');
             this.addWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Person/Add",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Add",
                      data: { numberOne: numberOne, numberTwo: numberTwo },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -74,7 +74,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })
@@ -132,7 +132,7 @@ module ListViewModels {
             this.getUserMessage('');
             this.getUserWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Person/GetUser",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUser",
                      data: {  },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -143,7 +143,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })
@@ -186,7 +186,7 @@ module ListViewModels {
             this.getUserPublicMessage('');
             this.getUserPublicWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Person/GetUserPublic",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUserPublic",
                      data: {  },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -197,7 +197,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })
@@ -240,7 +240,7 @@ module ListViewModels {
             this.namesStartingWithMessage('');
             this.namesStartingWithWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Person/NamesStartingWith",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/NamesStartingWith",
                      data: { characters: characters },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -251,7 +251,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })

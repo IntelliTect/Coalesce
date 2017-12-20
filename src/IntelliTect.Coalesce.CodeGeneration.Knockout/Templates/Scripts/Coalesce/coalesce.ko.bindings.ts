@@ -503,9 +503,48 @@ ko.bindingHandlers.select2 = {
 
 
 ko.bindingHandlers.datePicker = {
-    init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+    init: function (element, valueAccessor: () => KnockoutObservable<moment.Moment>, allBindings, viewModel, bindingContext) {
         // See if we should use the parent element 
         var theElement = $(element).parent(".input-group.date") || $(element);
+
+        var getValue = (): moment.Moment | null => {
+            var newValue = theElement.data("DateTimePicker").date();
+
+            if (!newValue) {
+                return null;
+            }
+
+            var preserveDate = allBindings.get('preserveDate') || false;
+            var preserveTime = allBindings.get('preserveTime') || false;
+            var unwrappedValue = valueAccessor()();
+
+            if (!preserveDate && !preserveTime) {
+                newValue = newValue;
+            } else if (preserveTime) {
+                // This is a date entry, keep the time. 
+                var unwrappedTime = moment.duration(unwrappedValue.format('HH:mm:ss'));
+                newValue = moment(newValue.format("YYYY/MM/DD"), "YYYY/MM/DD").add(unwrappedTime);
+            } else if (preserveDate) {
+                // This is a time entry, keep the date.
+                var newTime = moment.duration(newValue.format('HH:mm:ss'));
+                newValue = moment(unwrappedValue.format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
+            }
+
+            return newValue;
+        }
+
+        var updateValue = () => {
+            var newValue = getValue();
+
+            // Set the value if it has changed.
+            var currentObservable = valueAccessor()();
+            if (!currentObservable || !newValue || !newValue.isSame(currentObservable)) {
+                valueAccessor()(newValue);
+            }
+        }
+
+
+
         theElement.datetimepicker({
             format: allBindings.get('format') || "M/D/YY h:mm a",
             stepping: allBindings.get('stepping') || 1,
@@ -514,33 +553,17 @@ ko.bindingHandlers.datePicker = {
             keyBinds: allBindings.get('keyBinds') || { left: null, right: null, delete: null },
         })
             .on("dp.change", function (e) {
-                var preserveDate = allBindings.get('preserveDate') || false;
-                var preserveTime = allBindings.get('preserveTime') || false;
-                var unwrappedValue = valueAccessor()();
-                var newValue = moment();
-                if (!preserveDate && !preserveTime) {
-                    newValue = e.date;
-                } else if (preserveTime) {
-                    // This is a date entry, keep the time. 
-                    var unwrappedTime = moment.duration(unwrappedValue.format('HH:mm:ss'));
-                    newValue = moment(e.date.format("YYYY/MM/DD"), "YYYY/MM/DD").add(unwrappedTime);
-                } else if (preserveDate) {
-                    // This is a time entry, keep the date.
-                    var newTime = moment.duration(e.date.format('HH:mm:ss'));
-                    newValue = moment(unwrappedValue.format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
+                if (allBindings.get('updateImmediate')) {
+                    updateValue();
                 }
-
-                // The control represents blank values as false for some reason. Really, guys?
-                if (!newValue) newValue = null;
-
-                // Set the value if it has changed.
-                if (!valueAccessor()() || !newValue || newValue.format() != valueAccessor()().format()) {
-                    valueAccessor()(newValue);
-                }
-
             })
+            .on("dp.hide", updateValue)
             .on('click', e => e.stopPropagation())
             .on('dblclick', e => e.stopPropagation());
+
+        $(element)
+            .on("blur", updateValue);
+
         // Add the validation message
         ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
         // The validation message needs to go after the input group with the button.

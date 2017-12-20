@@ -138,7 +138,7 @@ module ViewModels {
                 caseObj.load(this.caseId(), function() {
                     loadingCount--;
                     this.case(caseObj);
-                    if (loadingCount == 0 && $.isFunction(callback)){
+                    if (loadingCount == 0 && typeof(callback) == "function"){
                         callback();
                     }
                 });
@@ -150,12 +150,12 @@ module ViewModels {
                 productObj.load(this.productId(), function() {
                     loadingCount--;
                     this.product(productObj);
-                    if (loadingCount == 0 && $.isFunction(callback)){
+                    if (loadingCount == 0 && typeof(callback) == "function"){
                         callback();
                     }
                 });
             }
-            if (loadingCount == 0 && $.isFunction(callback)){
+            if (loadingCount == 0 && typeof(callback) == "function"){
                 callback();
             }
         };

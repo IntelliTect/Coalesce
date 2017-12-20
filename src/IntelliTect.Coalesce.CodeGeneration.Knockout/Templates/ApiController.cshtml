@@ -54,8 +54,8 @@ namespace @(namespaceName).Api
 }
     @(securityInfo.ClassAnnotation)
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class @(model.ApiControllerClassName)
-    : LocalBaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName)>
+    public partial class @(model.ApiControllerClassName) 
+        : BaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName), @Model.GenerationContext.DbContextType.FullyQualifiedName>
     {
         public @(model.ApiControllerClassName)(@Model.GenerationContext.DbContextType.FullyQualifiedName db) : base(db)
         {

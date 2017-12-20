@@ -80,7 +80,7 @@ module ViewModels {
         
 
         /** Add object to casesAssigned */
-        public addToCasesAssigned = (autoSave = true): Case => {
+        public addToCasesAssigned = (autoSave?: boolean | null): Case => {
             var newItem = new Case();
             if (typeof(autoSave) == 'boolean'){
                 newItem.coalesceConfig.autoSaveEnabled(autoSave);
@@ -97,7 +97,7 @@ module ViewModels {
         public casesAssignedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
         
         /** Add object to casesReported */
-        public addToCasesReported = (autoSave = true): Case => {
+        public addToCasesReported = (autoSave?: boolean | null): Case => {
             var newItem = new Case();
             if (typeof(autoSave) == 'boolean'){
                 newItem.coalesceConfig.autoSaveEnabled(autoSave);
@@ -114,19 +114,15 @@ module ViewModels {
         public casesReportedList: (loadImmediate?: boolean) => ListViewModels.CaseList;
         
         /** Url for a table view of all members of collection CasesAssigned for the current object. */
-        public casesAssignedListUrl: KnockoutComputed<string> = ko.computed({
-            read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?filter.assignedToId=' + this.personId();
-            },
-            deferEvaluation: true
-        });
+        public casesAssignedListUrl: KnockoutComputed<string> = ko.computed(
+            () => this.coalesceConfig.baseViewUrl() + '/Case/Table?filter.assignedToId=' + this.personId(),
+            null, { deferEvaluation: true }
+        );
         /** Url for a table view of all members of collection CasesReported for the current object. */
-        public casesReportedListUrl: KnockoutComputed<string> = ko.computed({
-            read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/Case/Table?filter.reportedById=' + this.personId();
-            },
-            deferEvaluation: true
-        });
+        public casesReportedListUrl: KnockoutComputed<string> = ko.computed(
+            () => this.coalesceConfig.baseViewUrl() + '/Case/Table?filter.reportedById=' + this.personId(),
+            null, { deferEvaluation: true }
+        );
 
         /** Pops up a stock editor for object personStats */
         public showPersonStatsEditor: (callback?: any) => void;
@@ -160,7 +156,7 @@ module ViewModels {
             this.renameMessage('');
             this.renameWasSuccessful(null);
             return $.ajax({ method: "POST",
-                        url: this.coalesceConfig.baseApiUrl() + "/Person/Rename",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Rename",
                         data: { id: this.myId, name: name },
                         xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -176,7 +172,7 @@ module ViewModels {
 
                 // The return type is the type of the object, load it.
                 this.loadFromDto(data.object, true)
-                if ($.isFunction(callback)) {
+                if (typeof(callback) == "function") {
                     callback();
                 }
             })
@@ -243,7 +239,7 @@ module ViewModels {
             this.changeSpacesToDashesInNameMessage('');
             this.changeSpacesToDashesInNameWasSuccessful(null);
             return $.ajax({ method: "POST",
-                        url: this.coalesceConfig.baseApiUrl() + "/Person/ChangeSpacesToDashesInName",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ChangeSpacesToDashesInName",
                         data: { id: this.myId },
                         xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -255,7 +251,7 @@ module ViewModels {
 
                 if (reload) {
                   this.load(null, callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                   callback();
                 }
             })
@@ -406,12 +402,12 @@ module ViewModels {
                 companyObj.load(this.companyId(), function() {
                     loadingCount--;
                     this.company(companyObj);
-                    if (loadingCount == 0 && $.isFunction(callback)){
+                    if (loadingCount == 0 && typeof(callback) == "function"){
                         callback();
                     }
                 });
             }
-            if (loadingCount == 0 && $.isFunction(callback)){
+            if (loadingCount == 0 && typeof(callback) == "function"){
                 callback();
             }
         };

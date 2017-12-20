@@ -82,7 +82,7 @@ module ViewModels {
         */
         public loadChildren = (callback?: () => void) => {
             var loadingCount = 0;
-            if (loadingCount == 0 && $.isFunction(callback)){
+            if (loadingCount == 0 && typeof(callback) == "function"){
                 callback();
             }
         };

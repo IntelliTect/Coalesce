@@ -171,11 +171,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Gets the name for the API call.
-        /// </summary>
-        public string ApiUrl => $"{Parent.ApiUrl}/{Name}";
-
-        /// <summary>
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>

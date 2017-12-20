@@ -64,12 +64,10 @@ module ViewModels {
         
 
         /** Url for a table view of all members of collection CaseProducts for the current object. */
-        public caseProductsListUrl: KnockoutComputed<string> = ko.computed({
-            read: () => {
-                     return this.coalesceConfig.baseViewUrl() + '/CaseProduct/Table?filter.caseId=' + this.caseKey();
-            },
-            deferEvaluation: true
-        });
+        public caseProductsListUrl: KnockoutComputed<string> = ko.computed(
+            () => this.coalesceConfig.baseViewUrl() + '/CaseProduct/Table?filter.caseId=' + this.caseKey(),
+            null, { deferEvaluation: true }
+        );
 
         /** Pops up a stock editor for object assignedTo */
         public showAssignedToEditor: (callback?: any) => void;
@@ -220,7 +218,7 @@ module ViewModels {
                 assignedToObj.load(this.assignedToId(), function() {
                     loadingCount--;
                     this.assignedTo(assignedToObj);
-                    if (loadingCount == 0 && $.isFunction(callback)){
+                    if (loadingCount == 0 && typeof(callback) == "function"){
                         callback();
                     }
                 });
@@ -232,12 +230,12 @@ module ViewModels {
                 reportedByObj.load(this.reportedById(), function() {
                     loadingCount--;
                     this.reportedBy(reportedByObj);
-                    if (loadingCount == 0 && $.isFunction(callback)){
+                    if (loadingCount == 0 && typeof(callback) == "function"){
                         callback();
                     }
                 });
             }
-            if (loadingCount == 0 && $.isFunction(callback)){
+            if (loadingCount == 0 && typeof(callback) == "function"){
                 callback();
             }
         };

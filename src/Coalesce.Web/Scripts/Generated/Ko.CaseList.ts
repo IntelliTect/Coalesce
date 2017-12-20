@@ -60,7 +60,7 @@ module ListViewModels {
             this.getAllOpenCasesCountMessage('');
             this.getAllOpenCasesCountWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Case/GetAllOpenCasesCount",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetAllOpenCasesCount",
                      data: {  },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -71,7 +71,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })
@@ -113,7 +113,7 @@ module ListViewModels {
             this.randomizeDatesAndStatusMessage('');
             this.randomizeDatesAndStatusWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Case/RandomizeDatesAndStatus",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RandomizeDatesAndStatus",
                      data: {  },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -124,7 +124,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })
@@ -167,7 +167,7 @@ module ListViewModels {
             this.getCaseSummaryMessage('');
             this.getCaseSummaryWasSuccessful(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/Case/GetCaseSummary",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetCaseSummary",
                      data: {  },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -181,7 +181,7 @@ module ListViewModels {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })

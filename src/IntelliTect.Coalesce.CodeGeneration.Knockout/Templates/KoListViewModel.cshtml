@@ -118,7 +118,7 @@ module @moduleName {
             this.@(method.JsVariableMessage)('');
             this.@(method.JsVariableWasSuccessful)(null);
             $.ajax({ method: "POST",
-                     url: this.coalesceConfig.baseApiUrl() + "/@(method.ApiUrl)",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/@(method.Name)",
                      data: @method.JsPostObject,
                      xhrFields: { withCredentials: true } })
             .done((data) => {
@@ -158,7 +158,7 @@ module @moduleName {
         
                 if (reload) {
                     this.load(callback);
-                } else if ($.isFunction(callback)) {
+                } else if (typeof(callback) == "function") {
                     callback();
                 }
             })

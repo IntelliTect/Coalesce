@@ -1,31 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CsvHelper;
-using System.IO;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
+using IntelliTect.Coalesce.TypeDefinition;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.Helpers
 {
     /// <summary>
-    /// Wrapper class for CSvReader so we don't expose this to the other tiers and take a dependency.
+    /// Wrapper class for CsvReader so we don't expose this to the other tiers and take a dependency.
     /// </summary>
     public static class CsvHelper
     {
-        private static void Configure<T>(CsvClassMap map)
+        private static void Configure<T>(ClassMap map)
         {
             map.ReferenceMaps.Clear();
 
             //http://stackoverflow.com/questions/1571022/how-would-i-know-if-a-property-is-a-generic-collection
-            Type tColl = typeof(ICollection<>);
-            foreach (var pm in map.PropertyMaps.Where(p => {
-                    Type t = p.Data.Member.MemberType();
-                    return t.IsGenericType && tColl.IsAssignableFrom(t.GetGenericTypeDefinition()) ||
-                        t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == tColl);
-                }).ToArray())
+            var membersToRemove = map.MemberMaps
+                .Where(p => {
+                    // Remove non-properties. Coalesce only exposes properties.
+                    if (p.Data.Member.MemberType != System.Reflection.MemberTypes.Property) return true;
+
+                    var memberType = new ReflectionTypeViewModel(p.Data.Member.MemberType());
+                    return memberType.IsA(typeof(ICollection<>));
+                })
+                .ToArray();
+
+            foreach (var pm in membersToRemove)
             {
-                map.PropertyMaps.Remove(pm);
+                map.MemberMaps.Remove(pm);
             }
         }
 

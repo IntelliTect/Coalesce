@@ -49,6 +49,18 @@ namespace IntelliTect.Coalesce
         /// <returns>True if the user is authorized, otherwise false.</returns>
         public virtual (bool Authorized, string Message) IsAuthorized() => (true, null);
 
+
+        /// <summary>
+        /// Allows overriding of whether or not queries will run using EF Core Async methods.
+        /// </summary>
+        /// <param name="query"></param>
+        protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
+        {
+            // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
+            // Renable once microsoft releases the fix and we upgrade our references.
+            return false; // query.Provider is IAsyncQueryProvider;
+        }
+
         /// <summary>
         /// Get the initial query that will be compounded upon with various other
         /// clauses in order to ultimately retrieve the final resulting data.
@@ -408,13 +420,9 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="query">The query to retrieve the count of.</param>
         /// <returns>The count of items for the given query.</returns>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public virtual Task<int> GetCountAsync(IQueryable<T> query)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-            // Renable once microsoft releases the fix and we upgrade our references.
-            var canUseAsync = false; // query.Provider is IAsyncQueryProvider;
+            var canUseAsync = CanEvalQueryAsynchronously(query);
             return canUseAsync ? query.CountAsync() : Task.FromResult(query.Count());
         }
 
@@ -486,10 +494,8 @@ namespace IntelliTect.Coalesce
 
             // Add paging after we've gotten the total count.
             query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
-
-            // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-            // Renable once microsoft releases the fix and we upgrade our references.
-            var canUseAsync = false; // query.Provider is IAsyncQueryProvider;
+            
+            var canUseAsync = CanEvalQueryAsynchronously(query);
             ICollection<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
 
             result = TransformResults(result, parameters);
@@ -542,9 +548,7 @@ namespace IntelliTect.Coalesce
         {
             var query = GetQuery(parameters);
 
-            // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-            // Renable once microsoft releases the fix and we upgrade our references.
-            var canUseAsync = false; // query.Provider is IAsyncQueryProvider;
+            var canUseAsync = CanEvalQueryAsynchronously(query);
             T result = canUseAsync ? await query.FindItemAsync(id) : query.FindItem(id);
 
             result = TransformResults(new[] { result }, parameters).SingleOrDefault();

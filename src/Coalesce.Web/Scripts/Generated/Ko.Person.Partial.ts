@@ -468,7 +468,7 @@ module ViewModels {
             }
             function loadCasesAssignedList() {
                 if (self.personId()){
-                    _casesAssignedList.queryString = "AssignedToId=" + self.personId();
+                    _casesAssignedList.queryString = "filter.AssignedToId=" + self.personId();
                     _casesAssignedList.load();
                 }
             }
@@ -484,7 +484,7 @@ module ViewModels {
             }
             function loadCasesReportedList() {
                 if (self.personId()){
-                    _casesReportedList.queryString = "ReportedById=" + self.personId();
+                    _casesReportedList.queryString = "filter.ReportedById=" + self.personId();
                     _casesReportedList.load();
                 }
             }

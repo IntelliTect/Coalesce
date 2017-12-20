@@ -23,7 +23,7 @@ namespace Coalesce.Web.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class PersonController
-    : LocalBaseApiController<Coalesce.Domain.Person, PersonDtoGen>
+        : BaseApiController<Coalesce.Domain.Person, PersonDtoGen, Coalesce.Domain.AppDbContext>
     {
         public PersonController(Coalesce.Domain.AppDbContext db) : base(db)
         {

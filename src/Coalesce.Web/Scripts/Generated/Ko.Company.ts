@@ -165,7 +165,7 @@ module ViewModels {
             }
             function loadEmployeesList() {
                 if (self.companyId()){
-                    _employeesList.queryString = "CompanyId=" + self.companyId();
+                    _employeesList.queryString = "filter.CompanyId=" + self.companyId();
                     _employeesList.load();
                 }
             }

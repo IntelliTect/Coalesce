@@ -22,9 +22,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            yield return Generator<LocalBaseApiController>()
-                .AppendOutputPath($"Api/Generated/LocalBaseApiController.cs");
-
             foreach (var model in this.Model.ApiBackedClasses)
             {
                 yield return Generator<ApiController>()

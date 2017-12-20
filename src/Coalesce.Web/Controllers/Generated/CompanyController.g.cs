@@ -6,43 +6,40 @@ using Microsoft.AspNetCore.Hosting;
 namespace Coalesce.Web.Controllers
 {
     [Authorize]
-    public partial class PersonController
-        : BaseViewController<Coalesce.Domain.Person, Coalesce.Domain.AppDbContext>
+    public partial class CompanyController : BaseViewController<Coalesce.Domain.Company>
     {
-        public PersonController() : base() { }
-
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult Cards()
         {
-            return IndexImplementation(false, @"~/Views/Generated/Person/Cards.cshtml");
+            return IndexImplementation(false, @"~/Views/Generated/Company/Cards.cshtml");
         }
 
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult Table()
         {
-            return IndexImplementation(false, @"~/Views/Generated/Person/Table.cshtml");
+            return IndexImplementation(false, @"~/Views/Generated/Company/Table.cshtml");
         }
 
 
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult TableEdit()
         {
-            return IndexImplementation(true, @"~/Views/Generated/Person/Table.cshtml");
+            return IndexImplementation(true, @"~/Views/Generated/Company/Table.cshtml");
         }
 
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult CreateEdit()
         {
-            return CreateEditImplementation(@"~/Views/Generated/Person/CreateEdit.cshtml");
+            return CreateEditImplementation(@"~/Views/Generated/Company/CreateEdit.cshtml");
         }
 
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
         }
 
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)
         {
             return DocsImplementation(hostingEnvironment);

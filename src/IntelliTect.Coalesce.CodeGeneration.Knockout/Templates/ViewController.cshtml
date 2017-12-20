@@ -3,7 +3,6 @@
 @using IntelliTect.Coalesce.TypeDefinition
 @inherits CoalesceTemplate<ViewController>
 @{
-    var contextInfo = Model.GenerationContext.DbContextType;
     ClassViewModel model = Model.Model;
     string namespaceName = Model.Namespace;
     string viewLocation = "~/Views";
@@ -25,11 +24,8 @@ namespace @(namespaceName).Controllers
     @:[Area("@Model.AreaName")]
     }
     @(model.SecurityInfo.ClassAnnotation)
-    public partial class @(model.ControllerName)Controller 
-        : BaseViewController<@(model.FullyQualifiedName), @contextInfo.FullyQualifiedName> 
+    public partial class @(model.ControllerName)Controller : BaseViewController<@(model.FullyQualifiedName)>
     { 
-        public @(model.ControllerName)Controller() : base() { }
-
         @(model.SecurityInfo.ReadAnnotation)
         public ActionResult Cards(){
             return IndexImplementation(false, @@"@viewLocation/Generated/@(model.Name)/Cards.cshtml");

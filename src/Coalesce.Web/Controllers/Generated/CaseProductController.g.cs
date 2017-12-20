@@ -6,11 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 namespace Coalesce.Web.Controllers
 {
     [Authorize]
-    public partial class CaseProductController
-        : BaseViewController<Coalesce.Domain.CaseProduct, Coalesce.Domain.AppDbContext>
+    public partial class CaseProductController : BaseViewController<Coalesce.Domain.CaseProduct>
     {
-        public CaseProductController() : base() { }
-
         [Authorize]
         public ActionResult Cards()
         {

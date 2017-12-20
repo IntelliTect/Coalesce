@@ -13,6 +13,7 @@
 | Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within. | No changes needed unless your project referenced these files explicitly by name (unlikely).
 | DataSources on models are no longer generated as client-callable static methods on ListViewModels. | Replace usages of these calls with loads of a ListViewModel using the desired data source.
 | `BaseViewController.IndexImplementation` no longer sets `ViewBag.ParentIdName` or `ViewBag.ParentId`. These properties were not used. | If you used these, implement your own custom, robust logic in your controllers that depend upon `IndexImplementation`.
+| The `datePicker` knockout binding no longer requires a `delaySave` supplementary binding in order to prevent spamming saves as a user changes values - this behavior is now default, and can be turned off by adding binding `updateImmediate: true`. | Remove usages of `delaySave` used with `datePicker` bindings if desired. If you used any datePickers where `delaySave` was not desired, add `updateImmediate: true`.
 ----
 
 ## BaseViewModel & Generated ViewModels:

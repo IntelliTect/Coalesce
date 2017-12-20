@@ -6,43 +6,40 @@ using Microsoft.AspNetCore.Hosting;
 namespace Coalesce.Web.Controllers
 {
     [Authorize]
-    public partial class CaseDtoController
-        : BaseViewController<Coalesce.Domain.CaseDto, Coalesce.Domain.AppDbContext>
+    public partial class ProductController : BaseViewController<Coalesce.Domain.Product>
     {
-        public CaseDtoController() : base() { }
-
         [Authorize]
         public ActionResult Cards()
         {
-            return IndexImplementation(false, @"~/Views/Generated/CaseDto/Cards.cshtml");
+            return IndexImplementation(false, @"~/Views/Generated/Product/Cards.cshtml");
         }
 
         [Authorize]
         public ActionResult Table()
         {
-            return IndexImplementation(false, @"~/Views/Generated/CaseDto/Table.cshtml");
+            return IndexImplementation(false, @"~/Views/Generated/Product/Table.cshtml");
         }
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult TableEdit()
         {
-            return IndexImplementation(true, @"~/Views/Generated/CaseDto/Table.cshtml");
+            return IndexImplementation(true, @"~/Views/Generated/Product/Table.cshtml");
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult CreateEdit()
         {
-            return CreateEditImplementation(@"~/Views/Generated/CaseDto/CreateEdit.cshtml");
+            return CreateEditImplementation(@"~/Views/Generated/Product/CreateEdit.cshtml");
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)
         {
             return DocsImplementation(hostingEnvironment);

@@ -6,34 +6,31 @@ using Microsoft.AspNetCore.Hosting;
 namespace Coalesce.Web.Controllers
 {
     [Authorize]
-    public partial class CompanyController
-        : BaseViewController<Coalesce.Domain.Company, Coalesce.Domain.AppDbContext>
+    public partial class CaseController : BaseViewController<Coalesce.Domain.Case>
     {
-        public CompanyController() : base() { }
-
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Cards()
         {
-            return IndexImplementation(false, @"~/Views/Generated/Company/Cards.cshtml");
+            return IndexImplementation(false, @"~/Views/Generated/Case/Cards.cshtml");
         }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult Table()
         {
-            return IndexImplementation(false, @"~/Views/Generated/Company/Table.cshtml");
+            return IndexImplementation(false, @"~/Views/Generated/Case/Table.cshtml");
         }
 
 
         [Authorize]
         public ActionResult TableEdit()
         {
-            return IndexImplementation(true, @"~/Views/Generated/Company/Table.cshtml");
+            return IndexImplementation(true, @"~/Views/Generated/Case/Table.cshtml");
         }
 
         [Authorize]
         public ActionResult CreateEdit()
         {
-            return CreateEditImplementation(@"~/Views/Generated/Company/CreateEdit.cshtml");
+            return CreateEditImplementation(@"~/Views/Generated/Case/CreateEdit.cshtml");
         }
 
         [Authorize]

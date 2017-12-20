@@ -12,7 +12,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
     {
         public ApiController(RazorTemplateServices razorServices) : base(razorServices) { }
 
+        public ClassViewModel DbContext { get; set; }
+
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "ApiController.cshtml");
+
+        public ApiController WithDbContext(ClassViewModel contextViewModel)
+        {
+            DbContext = contextViewModel;
+            return this;
+        }
     }
 }

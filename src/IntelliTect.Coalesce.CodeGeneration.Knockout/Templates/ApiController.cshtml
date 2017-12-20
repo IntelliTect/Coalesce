@@ -55,9 +55,9 @@ namespace @(namespaceName).Api
     @(securityInfo.ClassAnnotation)
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class @(model.ApiControllerClassName) 
-        : BaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName), @Model.GenerationContext.DbContextType.FullyQualifiedName>
+        : BaseApiController<@(model.BaseViewModel.FullyQualifiedName), @(model.DtoName), @Model.DbContext.Type.FullyQualifiedName>
     {
-        public @(model.ApiControllerClassName)(@Model.GenerationContext.DbContextType.FullyQualifiedName db) : base(db)
+        public @(model.ApiControllerClassName)(@Model.DbContext.Type.FullyQualifiedName db) : base(db)
         {
             GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<@(model.FullyQualifiedName)>();
         }

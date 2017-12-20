@@ -60,12 +60,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             var rr = ReflectionRepository.Global;
             var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
             rr.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
-            genContext.DbContextType = rr.DbContexts.FirstOrDefault().ClassViewModel.Type;
-            if (genContext.DbContextType == null)
-            {
-                throw new InvalidOperationException($"Couldn't find a single DbContext to generate from. " +
-                    "Specify the name of your DbContext by adding \"input: {dbContextName: 'MyDbContextClassName'}\" to coalesce.json.");
-            }
 
             var validationResult = ValidateContext.Validate(rr);
             var issues = validationResult.Where(r => !r.WasSuccessful);

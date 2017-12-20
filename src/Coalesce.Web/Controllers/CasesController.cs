@@ -11,9 +11,10 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Coalesce.Web.Controllers
 {
-    public partial class CasesController : BaseViewController<Case, AppDbContext>
+    public partial class CasesController : BaseViewController<Case>
     {
         public CasesController() : base() { }
+
         // GET: /<controller>/
         public IActionResult Index()
         {

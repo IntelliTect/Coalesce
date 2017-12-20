@@ -13,9 +13,8 @@ using System.Net;
 
 namespace IntelliTect.Coalesce.Knockout.Controllers
 {
-    public abstract class BaseViewController<T, TContext> : Controller
+    public abstract class BaseViewController<T> : Controller
         where T : class, new()
-        where TContext : DbContext
     {
         protected ClassViewModel ClassViewModel { get; }
 
@@ -26,7 +25,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
 
         // Page Listing the items in the collection.
         //[OutputCache(Duration = 10000, VaryByParam = "*")]
-        protected ActionResult IndexImplementation(bool editable, string viewName = "~/Views/Api/Index.cshtml")
+        protected ActionResult IndexImplementation(bool editable, string viewName = "~/Views/Api/Table.cshtml")
         {
             ViewBag.Editable = editable;
             ViewBag.Query = "";
@@ -88,12 +87,12 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
             var contentRoot = hostingEnvironment.ContentRootPath;
 
             var baseClassPath = Path.Combine(contentRoot, "Scripts", "Coalesce", "coalesce.ko.base.ts");
-            var path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ViewModelClassName}.{(ClassViewModel.HasTypeScriptPartial ? "Partial." : "")}ts");
+            var path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ViewModelClassName}.{(ClassViewModel.HasTypeScriptPartial ? "Partial." : "")}g.ts");
 
             ViewBag.ObjDoc = GenerateTypeScriptDocs(path, ClassViewModel.ViewModelGeneratedClassName);
             ViewBag.BaseObjDoc = GenerateTypeScriptDocs(baseClassPath, "BaseViewModel");
 
-            path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ListViewModelClassName}.ts");
+            path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ListViewModelClassName}.g.ts");
 
             ViewBag.ListDoc = GenerateTypeScriptDocs(path, ClassViewModel.ListViewModelClassName);
             ViewBag.BaseListDoc = GenerateTypeScriptDocs( baseClassPath, "BaseListViewModel");

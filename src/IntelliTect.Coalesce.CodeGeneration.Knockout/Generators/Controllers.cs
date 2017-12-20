@@ -22,15 +22,27 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            foreach (var model in this.Model.ApiBackedClasses)
+            foreach (var context in this.Model.DbContexts)
             {
-                yield return Generator<ApiController>()
-                    .WithModel(model)
-                    .AppendOutputPath($"Api/Generated/{model.Name}ControllerGen.cs");
+                var entityLookup = context.Entities.ToLookup(e => e.ClassViewModel);
 
-                yield return Generator<ViewController>()
-                    .WithModel(model)
-                    .AppendOutputPath($"Controllers/Generated/{model.Name}ControllerGen.cs");
+                var contextTypes = context.Entities
+                    .Select(e => e.ClassViewModel)
+                    .Union(Model.CustomDtos.Where(dto => 
+                        entityLookup.Contains(dto.DtoBaseViewModel)
+                    ));
+                
+                foreach (var model in contextTypes)
+                {
+                    yield return Generator<ApiController>()
+                        .WithModel(model)
+                        .WithDbContext(context.ClassViewModel)
+                        .AppendOutputPath($"Api/Generated/{model.Name}Controller.g.cs");
+
+                    yield return Generator<ViewController>()
+                        .WithModel(model)
+                        .AppendOutputPath($"Controllers/Generated/{model.Name}Controller.g.cs");
+                }
             }
         }
     }

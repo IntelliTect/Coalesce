@@ -43,17 +43,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<KoViewModel>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
+                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.g.ts");
                 yield return Generator<KoListViewModel>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/Ko.{model.ListViewModelClassName}.ts");
+                    .AppendOutputPath($"Generated/Ko.{model.ListViewModelClassName}.g.ts");
             }
 
             foreach (var model in Model.ExternalTypes)
             {
                 yield return Generator<KoExternalType>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.ts");
+                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.g.ts");
             }
 
             foreach (var model in Model.DiscoveredClassViewModels.Where(c => c.HasTypeScriptPartial))

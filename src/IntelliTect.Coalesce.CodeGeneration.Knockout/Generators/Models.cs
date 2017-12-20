@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<ClassDto>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/{model.Name}DtoGen.cs");
+                    .AppendOutputPath($"Generated/{model.Name}Dto.g.cs");
                 
             }
         }

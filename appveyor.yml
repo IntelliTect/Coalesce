@@ -31,9 +31,10 @@ build:
   project: Coalesce.sln
   verbosity: minimal
 after_build:
-  - dotnet pack -c %CONFIGURATION% --no-build --include-symbols --output "%APPVEYOR_BUILD_FOLDER%\artifacts"
+  - dotnet pack -c %CONFIGURATION% --no-build --include-symbols
 artifacts:
-- path: artifacts\**\*.*
+  - path: '**\*.nupkg'
+  - path: '**\bin\$(configuration)\*.dll'
 deploy:
   provider: NuGet
   server: https://www.myget.org/F/intellitect-coalesce/api/v2/package

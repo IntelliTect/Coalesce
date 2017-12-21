@@ -451,7 +451,7 @@ module Coalesce {
                 return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data) => {
                         this.errorMessage(null);
-                        this.loadFromDto(data, true);
+                        this.loadFromDto(data.object, true);
                         this.isLoaded(true);
                         if (typeof(callback) == "function") callback(this);
                     })

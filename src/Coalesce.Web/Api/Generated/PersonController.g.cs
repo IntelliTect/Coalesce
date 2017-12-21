@@ -34,7 +34,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual Task<PersonDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<ItemResult<PersonDtoGen>> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
@@ -106,7 +106,12 @@ namespace Coalesce.Web.Api
             try
             {
                 IncludeTree includeTree = null;
-                var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                if (!itemResult.WasSuccessful)
+                {
+                    return new ItemResult<PersonDtoGen>(itemResult);
+                }
+                var item = itemResult.Object;
                 var objResult = item.Rename(name);
                 Db.SaveChanges();
                 var mappingContext = new MappingContext(User, "");
@@ -134,7 +139,12 @@ namespace Coalesce.Web.Api
             var result = new ItemResult<object>();
             try
             {
-                var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                if (!itemResult.WasSuccessful)
+                {
+                    return new ItemResult<object>(itemResult);
+                }
+                var item = itemResult.Object;
                 object objResult = null;
                 item.ChangeSpacesToDashesInName();
                 Db.SaveChanges();

@@ -549,17 +549,27 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key to find the desired item by.</param>
         /// <returns>The requested item
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
-        public virtual async Task<(T Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
+        public virtual async Task<(ItemResult<T> Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = GetQuery(parameters);
 
             var canUseAsync = CanEvalQueryAsynchronously(query);
             T result = canUseAsync ? await query.FindItemAsync(id) : query.FindItem(id);
 
+            if (result == null)
+            {
+                return ($"{ClassViewModel.DisplayName} item with ID {id} was not found.", null);
+            }
+
             result = TransformResults(new[] { result }, parameters).SingleOrDefault();
 
+            if (result == null)
+            {
+                return ($"{ClassViewModel.DisplayName} item with ID {id} was not found.", null);
+            }
+
             var tree = GetIncludeTree(query, parameters);
-            return (result, tree);
+            return (new ItemResult<T>(true, result), tree);
         }
 
         /// <summary>
@@ -568,15 +578,20 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key to find the desired item by.</param>
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>The desired item, mapped to the desired type.</returns>
-        public virtual async Task<TDto> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
+        public virtual async Task<ItemResult<TDto>> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
             where TDto : IClassDto<T>, new()
         {
             var (result, tree) = await GetItemAsync(id, parameters);
 
-            var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            var mappedResult = Mapper.MapToDto<T, TDto>(result, mappingContext, tree);
+            if (!result.WasSuccessful || result.Object == null)
+            {
+                return new ItemResult<TDto>(result);
+            }
 
-            return mappedResult;
+            var mappingContext = new MappingContext(Context.User, parameters.Includes);
+            var mappedResult = Mapper.MapToDto<T, TDto>(result.Object, mappingContext, tree);
+
+            return new ItemResult<TDto>(true, mappedResult);
         }
 
         public virtual Task<int> GetCountAsync(IFilterParameters parameters)

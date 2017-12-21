@@ -34,7 +34,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ProductDtoGen> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<ItemResult<ProductDtoGen>> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]

@@ -68,7 +68,7 @@ namespace @(namespaceName).Api
         <text>
         [HttpGet("get/{id}")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<@(model.DtoName)> Get(@primaryKeyParameter, DataSourceParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Get(@primaryKeyParameter, DataSourceParameters parameters, @dataSourceParameter)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
@@ -169,7 +169,12 @@ namespace @(namespaceName).Api
                 }
                 else
                 {
-@:var (item, _) = await dataSource.GetItemAsync(id, new ListParameters());
+@:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                @:if (!itemResult.WasSuccessful)
+                @:{
+                    @:return new ItemResult<@method.ReturnTypeNameForApi>(itemResult);
+                @:}
+                @:var item = itemResult.Object;
                 if (method.ReturnType.IsVoid)
                 {
                 @:object objResult = null;

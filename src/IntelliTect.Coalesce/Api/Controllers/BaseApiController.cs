@@ -41,7 +41,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
         /// </summary>
         protected ClassViewModel GeneratedForClassViewModel { get; set; }
 
-        protected Task<TDto> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
+        protected Task<ItemResult<TDto>> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
             return dataSource.GetMappedItemAsync<TDto>(id, parameters);
         }

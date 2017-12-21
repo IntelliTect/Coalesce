@@ -398,7 +398,7 @@ module Coalesce {
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data) => {
                             this.isDirty(false);
-                            this.errorMessage('');
+                            this.errorMessage(null);
                             if (this.coalesceConfig.loadResponseFromSaves()) {
                                 this.loadFromDto(data.object, true);
                             }
@@ -450,14 +450,20 @@ module Coalesce {
                 
                 return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data) => {
-                        this.loadFromDto(data, true);
+                        this.errorMessage(null);
+                        this.loadFromDto(data.object, true);
                         this.isLoaded(true);
                         if (typeof(callback) == "function") callback(this);
                     })
-                    .fail(() => {
-                     (false);
+                    .fail((xhr: JQueryXHR) => {
+                        this.isLoaded(false);
+
+                        var errorMsg = "Could not load " + this.modelName + " with ID = " + id;
+                        if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+
+                        this.errorMessage(errorMsg);
                         if (this.coalesceConfig.showFailureAlerts())
-                            this.coalesceConfig.onFailure()(this, "Could not load " + this.modelName + " with ID = " + id);
+                            this.coalesceConfig.onFailure()(this, errorMsg);
                     })
                     .always(() => {
                         this.coalesceConfig.onFinishBusy()(this);
@@ -472,22 +478,22 @@ module Coalesce {
             if (currentId) {
                 return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
                     .done((data) => {
-                        if (data) {
-                            this.errorMessage('');
+                        this.errorMessage(null);
 
-                            // Remove it from the parent collection
-                            if (this.parentCollection && this.parent) {
-                                this.parent.isLoading(true);
-                                this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
-                                this.parent.isLoading(false);
-                            }
-                        } else {
-                            this.errorMessage(data.message);
+                        // Remove it from the parent collection
+                        if (this.parentCollection && this.parent) {
+                            this.parent.isLoading(true);
+                            this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
+                            this.parent.isLoading(false);
                         }
                     })
-                    .fail(() => {
+                    .fail((xhr: JQueryXHR) => {
+                        var errorMsg = "Could not delete the item";
+                        if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+
+                        this.errorMessage(errorMsg);
                         if (this.coalesceConfig.showFailureAlerts())
-                            this.coalesceConfig.onFailure()(this, "Could not delete the item");
+                            this.coalesceConfig.onFailure()(this, errorMsg);
                     })
                     .always(() => {
                         if (typeof(callback) == "function") {

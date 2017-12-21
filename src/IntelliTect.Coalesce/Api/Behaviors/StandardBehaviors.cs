@@ -159,7 +159,9 @@ namespace IntelliTect.Coalesce
 
             // Pull the object to get any changes.
             var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
-            (item, includeTree) = await dataSource.GetItemAsync(newItemId, parameters);
+            ItemResult<T> newItem;
+            (newItem, includeTree) = await dataSource.GetItemAsync(newItemId, parameters);
+            item = newItem.Object;
 
             // Call the AfterSave method to allow the user to
             // modify the returned object, the include tree,

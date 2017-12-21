@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>2.0.0</VersionPrefix>
     <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Exe</OutputType>
@@ -8,7 +7,7 @@
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
   </PropertyGroup>
   
   <ItemGroup>

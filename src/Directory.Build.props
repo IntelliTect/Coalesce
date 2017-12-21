@@ -6,10 +6,10 @@
     <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
     <DefaultLanguage>en-US</DefaultLanguage>
 
-    <VersionPrefix>2.0.0-alpha-</VersionPrefix>
-    <PackageVersionPrefix>2.0.0-alpha-</PackageVersionPrefix>
-    <VersionSuffix Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</VersionSuffix>
-    <PackageVersionSuffix Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</PackageVersionSuffix>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <PackageVersionPrefix>2.0.0</PackageVersionPrefix>
+    <VersionSuffix Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">-alpha-$(APPVEYOR_BUILD_VERSION)</VersionSuffix>
+    <PackageVersionSuffix Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">-alpha-$(APPVEYOR_BUILD_VERSION)</PackageVersionSuffix>
 
     <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>

@@ -14,19 +14,14 @@ nuget:
   disable_publish_on_pr: true
 # before_build:
 # - cmd: >-
-	# dotnet restore
-
-	# cd src\Coalesce.Web
-
-	#npm install
-
-	# npm -g install gulp-cli
-
-	# gulp coalesce
-	# Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
-	# cd ..\Coalesce.Domain
-	# dotnet ef database update --framework netcoreapp2.0
-
+# dotnet restore
+# cd src\Coalesce.Web
+#npm install
+# npm -g install gulp-cli
+# gulp coalesce
+# Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
+# cd ..\Coalesce.Domain
+# dotnet ef database update --framework netcoreapp2.0
 build:
   project: Coalesce.sln
   verbosity: minimal

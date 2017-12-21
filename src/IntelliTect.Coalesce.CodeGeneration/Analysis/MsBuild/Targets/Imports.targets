@@ -4,6 +4,11 @@
  -->
 
 <Project ToolsVersion="15.3" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
+  </PropertyGroup>
+  
   <ImportGroup Condition=" '$(TargetFramework)' == '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(CodeGenerationTargetLocation)\buildMultiTargeting\IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets" Condition="Exists('$(CodeGenerationTargetLocation)\buildMultiTargeting\IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets')" />
   </ImportGroup>

@@ -25,8 +25,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
     /// </summary>
     public class MsBuildProjectContextBuilder
     {
-        public const string SuppressedWarnings = "NU1603";
-
         private ProjectContext _context;
         public string TargetsLocation { get; private set; }
         public string Configuration { get; private set; } = "Release";
@@ -102,7 +100,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 {
                     projectPath,
                     "--verbosity", "quiet",
-                    $"/p:nowarn={SuppressedWarnings}"
+                    $"/p:nowarn=NU1603"
                 })
                 .OnOutputLine(l => Logger.LogInformation(l))
                 .OnErrorLine(l => Logger.LogError(l))
@@ -140,7 +138,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 projectPath,
                 "/nologo",
                 "/v:q",
-                $"/p:nowarn={SuppressedWarnings}",
                 $"/t:EvaluateProjectInfoForCodeGeneration",
                 $"/p:CustomBeforeMicrosoftCSharpTargets={TargetsLocation}\\Imports.targets",
                 $"/p:OutputFile={projectInfoFile}",

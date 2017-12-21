@@ -13,8 +13,8 @@ cache:
 nuget:
   disable_publish_on_pr: true
 before_build:
-- cmd: >-
-	dotnet restore
+  - cmd: >-
+      dotnet restore
 # cd src\Coalesce.Web
 #npm install
 # npm -g install gulp-cli

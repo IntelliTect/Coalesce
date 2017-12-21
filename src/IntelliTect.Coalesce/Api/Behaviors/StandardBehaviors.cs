@@ -161,6 +161,12 @@ namespace IntelliTect.Coalesce
             var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
             ItemResult<T> newItem;
             (newItem, includeTree) = await dataSource.GetItemAsync(newItemId, parameters);
+            
+            if (!newItem.WasSuccessful)
+            {
+                return $"The item was saved, but could not be loaded with the requested data source: {newItem.Message}";
+            }
+
             item = newItem.Object;
 
             // Call the AfterSave method to allow the user to

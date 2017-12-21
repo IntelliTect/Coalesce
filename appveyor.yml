@@ -16,12 +16,12 @@ before_build:
 # Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
 # cd ..\Coalesce.Domain
 # dotnet ef database update --framework netcoreapp2.0
-test: off
+# test: off
 build:
   project: Coalesce.sln
   verbosity: minimal
 after_build:
-  - dotnet pack -c %CONFIGURATION% --include-symbols -v n
+  - dotnet pack -c %CONFIGURATION% --include-symbols
 artifacts:
   - path: '**\*.nupkg'
 deploy:

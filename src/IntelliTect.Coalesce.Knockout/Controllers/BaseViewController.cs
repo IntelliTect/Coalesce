@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
         {
             ViewBag.Editable = editable;
             ViewBag.Query = "";
-            string[] pageParams = { "page", "pageSize", "search", "orderBy", "orderByDesc" };
+            string[] pageParams = { "page", "pageSize", "search", "orderBy", "orderByDescending" };
             foreach (var kvp in Request.Query.Where( kvp => !pageParams.Contains(kvp.Key, StringComparer.InvariantCultureIgnoreCase) ))
             {
                 ViewBag.Query = ViewBag.Query + WebUtility.UrlEncode(kvp.Key) + "=" + WebUtility.UrlEncode(kvp.Value) + "&";

@@ -132,15 +132,13 @@ namespace IntelliTect.Coalesce
                         {
                             // Only a date
                             var nextDate = dateTimeOffset.AddDays(1);
-                            return query.Where(string.Format(
-                                "{0} >= @0 && {0} < @1", prop.Name),
+                            return query.Where($"{prop.Name} >= @0 && {prop.Name} < @1",
                                 dateTimeOffset, nextDate);
                         }
                         else
                         {
                             // Date and Time
-                            return query.Where(string.Format("{0} = @0",
-                                prop.Name), dateTimeOffset);
+                            return query.Where($"{prop.Name} = @0", dateTimeOffset);
                         }
                     }
                     else
@@ -150,15 +148,13 @@ namespace IntelliTect.Coalesce
                         {
                             // Only a date
                             var nextDate = parsedValue.AddDays(1);
-                            return query.Where(string.Format(
-                                "{0} >= @0 && {0} < @1", prop.Name),
+                            return query.Where($"{prop.Name} >= @0 && {prop.Name} < @1",
                                 parsedValue, nextDate);
                         }
                         else
                         {
                             // Date and Time
-                            return query.Where(string.Format("{0} = @0",
-                                prop.Name), parsedValue);
+                            return query.Where($"{prop.Name} = @0", parsedValue);
                         }
                     }
 
@@ -171,33 +167,42 @@ namespace IntelliTect.Coalesce
             }
             else if (prop.Type.IsString)
             {
-                if (value.Contains("*")) return query.Where($"{prop.Name}.StartsWith(\"{value.Replace("*", "")}\")");
-                else return query.Where($"{prop.Name} = \"{value}\"");
+                if (value.Contains("*")) return query.Where($"{prop.Name}.StartsWith(@0)", value.Replace("*", ""));
+                else return query.Where($"{prop.Name} == @0", value);
             }
             else if (prop.Type.IsEnum)
             {
-                var expressions = new List<string>();
-                foreach (var valuePart in value.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    expressions.Add($"{prop.Name} = \"{prop.Type.EnumValues.SingleOrDefault(ev => ev.Key == Convert.ToInt32(valuePart)).Value}\"");
-                }
-                return query.Where(string.Join(" || ", expressions));
+                var values = value
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select((item, i) => (
+                        Param: prop.Type.EnumValues.SingleOrDefault(ev => 
+                            int.TryParse(item, out int intVal) 
+                            ? ev.Key == intVal 
+                            : ev.Value.Equals(item, StringComparison.InvariantCultureIgnoreCase)
+                            ).Value,
+                        Clause: $"{prop.Name} == @{i}"
+                    ))
+                    .ToList();
+
+                return query.Where(
+                    string.Join(" || ", values.Select(v => v.Clause)),
+                    values.Select(v => v.Param).ToArray()
+                );
             }
             else
             {
-                if (value.Contains(","))
-                {
-                    var whereList = new List<string>();
-                    foreach (var num in value.Split(','))
-                    {
-                        whereList.Add($"{prop.Name} = {num}");
-                    }
-                    return query.Where(string.Join(" or ", whereList));
-                }
-                else
-                {
-                    return query.Where(string.Format("{0} = {1}", prop.Name, value));
-                }
+                var values = value
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select((item, i) => (
+                        Param: Convert.ChangeType(item, prop.Type.TypeInfo), 
+                        Clause: $"{prop.Name} == @{i}"
+                    ))
+                    .ToList();
+
+                return query.Where(
+                    string.Join(" || ", values.Select(v => v.Clause)),
+                    values.Select(v => v.Param).ToArray()
+                );
             }
         }
 

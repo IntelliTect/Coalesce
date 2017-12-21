@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
         {
             var response = context.HttpContext.Response;
 
-            if (context.Exception != null)
+            if (context.Exception != null && !context.ExceptionHandled)
             {
                 logger?.LogError(context.Exception, context.Exception.Message);
                 context.ExceptionHandled = true;
@@ -54,17 +54,18 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
                 if (context.Result == null)
                 {
+                    var requestId = context.HttpContext.TraceIdentifier;
                     var environment = context.HttpContext.RequestServices.GetRequiredService<IHostingEnvironment>();
                     if (environment.IsDevelopment())
                     {
                         context.Result = new JsonResult(
-                            new ApiResult(context.Exception)
+                            new ApiResult($"{context.Exception.Message} (request {requestId})")
                         );
                     }
                     else
                     {
                         context.Result = new JsonResult(
-                            new ApiResult($"An error occurred while processing request {context.HttpContext.TraceIdentifier}.")
+                            new ApiResult($"An error occurred while processing request {requestId}.")
                         );
                     }
                 }

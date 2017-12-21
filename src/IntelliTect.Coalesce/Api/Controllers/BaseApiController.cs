@@ -62,10 +62,12 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return Task.FromResult<ItemResult<TDto>>($"Creation of {GeneratedForClassViewModel.Name} items not allowed.");
             }
             if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
+                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return Task.FromResult<ItemResult<TDto>>($"Editing of {GeneratedForClassViewModel.Name} items not allowed.");
             }
 
@@ -75,6 +77,56 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected Task<ItemResult> DeleteImplementation(object id, IBehaviors<T> behaviors)
         {
             return behaviors.DeleteAsync(id);
+        }
+
+        protected async Task<FileResult> CsvDownloadImplementation(ListParameters parameters, IDataSource<T> dataSource)
+        {
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(await CsvTextImplementation(parameters, dataSource));
+            return File(bytes, "application/x-msdownload", this.EntityClassViewModel.Name + ".csv");
+        }
+
+        protected async Task<string> CsvTextImplementation(ListParameters parameters, IDataSource<T> dataSource)
+        {
+            var listResult = await ListImplementation(parameters, dataSource);
+            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List);
+        }
+
+        protected async Task<IEnumerable<ItemResult>> CsvUploadImplementation(
+            Microsoft.AspNetCore.Http.IFormFile file,
+            IDataSource<T> dataSource,
+            IBehaviors<T> behaviors,
+            bool hasHeader = true)
+        {
+            if (file == null || file.Length == 0) throw new ArgumentException("No files uploaded");
+
+            using (var stream = file.OpenReadStream())
+            {
+                using (var reader = new System.IO.StreamReader(stream))
+                {
+                    var csv = await reader.ReadToEndAsync();
+                    return await CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
+                }
+            }
+        }
+
+        protected async Task<IEnumerable<ItemResult>> CsvSaveImplementation(
+            string csv,
+            IDataSource<T> dataSource,
+            IBehaviors<T> behaviors,
+            bool hasHeader = true)
+        {
+            // Get list from CSV
+            var list = IntelliTect.Coalesce.Helpers.CsvHelper.ReadCsv<TDto>(csv, hasHeader);
+            var resultList = new List<ItemResult>();
+            foreach (var dto in list)
+            {
+                var parameters = new DataSourceParameters() { Includes = "none" };
+
+                // Security: SaveImplementation is responsible for checking specific save/edit attribute permissions.
+                var result = await SaveImplementation(dto, parameters, dataSource, behaviors);
+                resultList.Add(new ItemResult { WasSuccessful = result.WasSuccessful, Message = result.Message });
+            }
+            return resultList;
         }
     }
 }

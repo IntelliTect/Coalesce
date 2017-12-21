@@ -40,31 +40,18 @@ namespace IntelliTect.Coalesce
         }
 
 
-        // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-        // Renable once microsoft releases the fix and we upgrade our references.
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         /// <summary>
         /// Asynchronously finds an object based on a specific primary key value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="query"></param>
         /// <param name="id"></param>
-        /// <returns></returns>
-        public async static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        /// <returns>The desired item, or null if it was not found.</returns>
+        public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id)
         {
 
             var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
-            if (classViewModel.PrimaryKey.Type.IsString)
-            {
-                // return await query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").FirstAsync();
-                return query.Where($@"{classViewModel.PrimaryKey.Name} = ""{id}""").First();
-            }
-            else
-            {
-                // return await query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).FirstAsync();
-                return query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).First();
-            }
+            return query.Where($"{classViewModel.PrimaryKey.Name} == @0", id).FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -73,18 +60,11 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="T"></typeparam>
         /// <param name="query"></param>
         /// <param name="id"></param>
-        /// <returns></returns>
+        /// <returns>The desired item, or null if it was not found.</returns>
         public static T FindItem<T>(this IQueryable<T> query, object id)
         {
             var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
-            if (classViewModel.PrimaryKey.Type.IsString)
-            {
-                return query.Where(string.Format("{0} = \"{1}\"", classViewModel.PrimaryKey.Name, id)).First();
-            }
-            else
-            {
-                return query.Where(string.Format("{0} = {1}", classViewModel.PrimaryKey.Name, id)).First();
-            }
+            return query.Where($"{classViewModel.PrimaryKey.Name} == @0", id).FirstOrDefault();
         }
     }
 }

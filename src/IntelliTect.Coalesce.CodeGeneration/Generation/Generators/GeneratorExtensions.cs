@@ -73,8 +73,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         /// Fluent configuration of the taget path of a cleaner.
         /// </summary>
         /// <typeparam name="T">The type of the cleaner</typeparam>
-        /// <param name="generator">The cleaner being configured.</param>
-        /// <param name="outputPath">
+        /// <param name="cleaner">The cleaner being configured.</param>
+        /// <param name="targetPath">
         ///     The target path to be appended to the current target path of the cleaner.
         /// </param>
         /// <returns></returns>

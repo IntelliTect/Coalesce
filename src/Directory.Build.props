@@ -5,6 +5,9 @@
     <Product>Coalesce Web Framework</Product>
     <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
     <DefaultLanguage>en-US</DefaultLanguage>
+    
+    <!-- CS1591: Missing XML comment for publicly visible type or member -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <VersionPrefix>2.0.0</VersionPrefix>

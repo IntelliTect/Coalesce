@@ -71,12 +71,12 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 return Task.FromResult<ItemResult<TDto>>($"Editing of {GeneratedForClassViewModel.Name} items not allowed.");
             }
 
-            return behaviors.SaveAsync(dto, parameters, dataSource);
+            return behaviors.SaveAsync(dto, dataSource, parameters);
         }
 
-        protected Task<ItemResult> DeleteImplementation(object id, IBehaviors<T> behaviors)
+        protected Task<ItemResult> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
-            return behaviors.DeleteAsync(id);
+            return behaviors.DeleteAsync(id, dataSource, parameters);
         }
 
         protected async Task<FileResult> CsvDownloadImplementation(ListParameters parameters, IDataSource<T> dataSource)

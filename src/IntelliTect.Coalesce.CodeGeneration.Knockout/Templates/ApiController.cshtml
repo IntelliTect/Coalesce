@@ -87,8 +87,8 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("delete/{id}")]
         @(securityInfo.DeleteAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(@primaryKeyParameter, @behaviorsParameter)
-            => DeleteImplementation(id, behaviors);
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(@primaryKeyParameter, @behaviorsParameter, @dataSourceParameter)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
         </text>
         }
 

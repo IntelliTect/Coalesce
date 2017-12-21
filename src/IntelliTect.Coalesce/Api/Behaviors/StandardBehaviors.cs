@@ -28,75 +28,6 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         protected virtual DbSet<T> GetDbSet() => Db.Set<T>();
 
-        /// <summary>
-        /// Retrieve a item with the specified key from the database without any relations/includes.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public virtual T GetItem(object id) => GetDbSet().FindItem(id);
-
-        #region Delete
-
-        /// <summary>
-        /// Delete the item with the specified key from the database.
-        /// </summary>
-        /// <param name="id">The primary key of the item to delete.</param>
-        /// <returns>An ItemResult indicating success/failure of the operation.</returns>
-        public virtual async Task<ItemResult> DeleteAsync(object id)
-        {
-            T item = GetItem(id);
-            if (item == null)
-            {
-                return $"Item with ID {id} was not found.";
-            }
-
-            var beforeDelete = BeforeDelete(item);
-            if (!beforeDelete?.WasSuccessful ?? true)
-            {
-                return beforeDelete;
-            }
-
-            await ExecuteDeleteAsync(item);
-
-            AfterDelete(item);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Code to run before committing the delete operation to the database.
-        /// If a failure result is returned, the delete operation will not execute.
-        /// This method is called by DeleteAsync.
-        /// This may be used to implement row-level 
-        /// </summary>
-        /// <param name="item">The item being deleted.</param>
-        /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>
-        public virtual ItemResult BeforeDelete(T item) => true;
-
-        /// <summary>
-        /// Executes the delete action against the database and saves the change.
-        /// This may be overridden to change what action is actually performed against the database 
-        /// on deletion of an item (e.g. setting a deleted flag instead of deleting the row).
-        /// </summary>
-        /// <param name="dbSet">The </param>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public virtual Task ExecuteDeleteAsync(T item)
-        {
-            GetDbSet().Remove(item);
-            return Db.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Code to run after the delete operation is committed to the database.
-        /// This can be used to perform cleanup or any other desired actions.
-        /// </summary>
-        /// <param name="item">The item that was deleted.</param>
-        public virtual void AfterDelete(T item) { }
-
-        #endregion
-
-
         #region Save
 
         /// <summary>
@@ -106,17 +37,14 @@ namespace IntelliTect.Coalesce
         ///     The type of the DTO that contains the data to be saved,
         ///     and the type of DTO that the caller expects to recieve the results in.
         /// </typeparam>
-        /// <param name="incomingDto">The DTO that contains the data that needs to be saved.</param>
-        /// <param name="parameters">Parameters pertaining to the dataSource that were provided by the client.</param>
-        /// <param name="dataSource">
-        /// The dataSource requested by the client that should be used to load the object that is returned to the client.
-        /// This dataSource will NOT be used to load the initial object 
-        /// </param>
-        /// <returns></returns>
+        /// <param name="incomingDto">The DTO containing the properties to update.</param>
+        /// <param name="dataSource">The data source that will be used when loading the item to be updated.</param>
+        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
+        /// <returns>A result indicating success or failure, as well as an up-to-date copy of the object being saved.</returns>
         public virtual async Task<ItemResult<TDto>> SaveAsync<TDto>(
             TDto incomingDto,
-            IDataSourceParameters parameters,
-            IDataSource<T> dataSource
+            IDataSource<T> dataSource,
+            IDataSourceParameters parameters
         )
             where TDto : IClassDto<T>, new()
         {
@@ -137,16 +65,16 @@ namespace IntelliTect.Coalesce
             else
             {
                 // Primary Key was defined. This object should exist in the database.
-                item = GetItem(idValue);
-                if (item == null)
+                var (existingItem, _) = await dataSource.GetItemAsync(idValue, parameters);
+                if (!existingItem.WasSuccessful)
                 {
-                    return $"Item with {ClassViewModel.PrimaryKey.Name} = {idValue} not found.";
+                    return new ItemResult<TDto>(existingItem);
                 }
+                item = existingItem.Object;
 
                 // Create a shallow copy.
                 originalItem = item.Copy();
             }
-
 
             // Set all properties on the DB-mapped object to the incoming values.
             incomingDto.MapToEntity(item, new MappingContext(User, includes));
@@ -161,7 +89,7 @@ namespace IntelliTect.Coalesce
             var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
             ItemResult<T> newItem;
             (newItem, includeTree) = await dataSource.GetItemAsync(newItemId, parameters);
-            
+
             if (!newItem.WasSuccessful)
             {
                 return $"The item was saved, but could not be loaded with the requested data source: {newItem.Message}";
@@ -248,6 +176,73 @@ namespace IntelliTect.Coalesce
         /// </param>
         /// <returns>An ItemResult potentially indicating failure. A failure response will be returned immediately without the updatedItem attached to the response.</returns>
         public virtual ItemResult AfterSave(SaveKind kind, T oldItem, ref T item, ref IncludeTree includeTree) => true;
+
+        #endregion
+
+        #region Delete
+
+        /// <summary>
+        /// Delete the item with the specified key from the database.
+        /// </summary>
+        /// <param name="id">The primary key of the object to delete.</param>
+        /// <param name="dataSource">The data source that will be used when loading the item to be deleted.</param>
+        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
+        /// <returns>An ItemResult indicating success/failure of the operation.</returns>
+        public virtual async Task<ItemResult> DeleteAsync(
+            object id,
+            IDataSource<T> dataSource,
+            IDataSourceParameters parameters)
+        {
+            var (existingItem, _) = await dataSource.GetItemAsync(id, parameters);
+            if (!existingItem.WasSuccessful)
+            {
+                return existingItem.Message;
+            }
+
+            var item = existingItem.Object;
+
+            var beforeDelete = BeforeDelete(item);
+            if (!beforeDelete?.WasSuccessful ?? true)
+            {
+                return beforeDelete;
+            }
+
+            await ExecuteDeleteAsync(item);
+
+            AfterDelete(item);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Code to run before committing the delete operation to the database.
+        /// If a failure result is returned, the delete operation will not execute.
+        /// This method is called by DeleteAsync.
+        /// This may be used to implement row-level 
+        /// </summary>
+        /// <param name="item">The item being deleted.</param>
+        /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>
+        public virtual ItemResult BeforeDelete(T item) => true;
+
+        /// <summary>
+        /// Executes the delete action against the database and saves the change.
+        /// This may be overridden to change what action is actually performed against the database 
+        /// on deletion of an item (e.g. setting a deleted flag instead of deleting the row).
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public virtual Task ExecuteDeleteAsync(T item)
+        {
+            GetDbSet().Remove(item);
+            return Db.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Code to run after the delete operation is committed to the database.
+        /// This can be used to perform cleanup or any other desired actions.
+        /// </summary>
+        /// <param name="item">The item that was deleted.</param>
+        public virtual void AfterDelete(T item) { }
 
         #endregion
 

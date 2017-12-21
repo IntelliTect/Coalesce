@@ -306,9 +306,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the fields to search for this object. This could be just the field itself 
         /// or a number of child fields if this is an object or collection.
         /// </summary>
-        /// <param name="depth"></param>
-        /// <param name="maxDepth"></param>
-        /// <returns></returns>
         public IEnumerable<SearchableProperty> SearchProperties(string rootModelName, int depth = 0, int maxDepth = 2)
         {
             if (!IsSearchable(rootModelName)) yield break;
@@ -441,7 +438,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (!IsForeignKey) return null;
 
-                /// Use the ForeignKey Attribute if it is there.
+                // Use the ForeignKey Attribute if it is there.
                 var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
                 if (value != null) return value;
 

@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         /// <summary>
         /// Perform a cleanup with the consideration that the provided list of absolute paths to files should not be removed.
         /// </summary>
-        /// <param name="generators">
+        /// <param name="knownGoodFiles">
         /// A collection of absolute paths to files that should not be modified.
         /// </param>
         /// <returns></returns>

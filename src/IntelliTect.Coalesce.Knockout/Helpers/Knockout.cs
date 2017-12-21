@@ -78,7 +78,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         /// <param name="stepping"></param>
         /// <param name="labelCols"></param>
         /// <param name="inputCols"></param>
-        /// <param name="delaySave"></param>
         /// <returns></returns>
         public static HtmlString DateTimeWithLabel(
             string label, string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, int? labelCols = null, int? inputCols = null)
@@ -93,10 +92,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         /// <param name="format"></param>
         /// <param name="preserve"></param>
         /// <param name="stepping"></param>
-        /// <param name="delaySave">
-        /// Delayed save is turned on for date time pickers because every time the date is changed with the picker the value in the text box is updated. 
-        /// This causes lots of extra updates. By delaying save, the save only happens when the user clicks out of the input box.
-        /// </param>
         /// <returns></returns>
         public static HtmlString DateTime(
             string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)

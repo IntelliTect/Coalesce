@@ -86,6 +86,7 @@ namespace IntelliTect.Coalesce
         /// This is called by ApplyListFiltering when constructing a list result.
         /// </summary>
         /// <param name="query">The query to filter.</param>
+        /// <param name="parameters">The parameters by which to filter.</param>
         /// <returns>The new query with additional filtering applied.</returns>
         public virtual IQueryable<T> ApplyListPropertyFilters(IQueryable<T> query, IFilterParameters parameters)
         {
@@ -212,6 +213,7 @@ namespace IntelliTect.Coalesce
         /// This is called by ApplyListFiltering when constructing a list result.
         /// </summary>
         /// <param name="query">The query to filter.</param>
+        /// <param name="parameters"></param>
         /// <returns>The new query with additional filtering applied.</returns>
         public virtual IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)
         {
@@ -321,6 +323,7 @@ namespace IntelliTect.Coalesce
         /// This is called by GetListAsync when constructing a list result.
         /// </summary>
         /// <param name="query">The query to filter.</param>
+        /// <param name="parameters">The parameters by which to filter.</param>
         /// <returns>The new query with additional filtering applied.</returns>
         public virtual IQueryable<T> ApplyListFiltering(IQueryable<T> query, IFilterParameters parameters)
         {
@@ -331,13 +334,14 @@ namespace IntelliTect.Coalesce
 
 
 
-        
+
         /// <summary>
         /// Applies user-specified sorting to the query.
         /// These sort parameters may be found in ListParameters.OrderByList.
         /// This is called by ApplyListSorting when constructing a list result.
         /// </summary>
         /// <param name="query">The query to sort.</param>
+        /// <param name="parameters">The parameters by which to filter.</param>
         /// <returns>The new query with additional sorting applied.</returns>
         public virtual IQueryable<T> ApplyListClientSpecifiedSorting(IQueryable<T> query, IListParameters parameters)
         {
@@ -403,6 +407,7 @@ namespace IntelliTect.Coalesce
         /// This is called by GetListAsync when constructing a list result.
         /// </summary>
         /// <param name="query">The query to sort.</param>
+        /// <param name="parameters">The parameters by which to filter and paginate.</param>
         /// <returns>The new query with additional sorting applied.</returns>
         public virtual IQueryable<T> ApplyListSorting(IQueryable<T> query, IListParameters parameters)
         {
@@ -417,25 +422,12 @@ namespace IntelliTect.Coalesce
             }
         }
 
-
-
-
         /// <summary>
-        /// Gets a count of items returned by the given query.
-        /// </summary>
-        /// <param name="query">The query to retrieve the count of.</param>
-        /// <returns>The count of items for the given query.</returns>
-        public virtual Task<int> GetCountAsync(IQueryable<T> query)
-        {
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? query.CountAsync() : Task.FromResult(query.Count());
-        }
-
-        /// <summary>
-        /// Applies paging to the query as specified by ListParameters.Page & PageSize.
+        /// Applies paging to the query as specified by ListParameters.Page and PageSize.
         /// This is called by GetListAsync when constructing a list result.
         /// </summary>
         /// <param name="query">The query to filter.</param>
+        /// <param name="parameters">The parameters by which to paginate.</param>
         /// <param name="totalCount">A known total count of results for the query, for limiting the maximum page.</param>
         /// <param name="page">out: The page number that was skipped to.</param>
         /// <param name="pageSize">out: The page size that was used in paging.</param>
@@ -466,8 +458,9 @@ namespace IntelliTect.Coalesce
         /// selecting out new items with specific properties cleared and/or populated,
         /// or any other transformations that must be done post-query evaluation.
         /// </summary>
-        /// <param name="results"></param>
-        /// <returns></returns>
+        /// <param name="results">The items to be transformed.</param>
+        /// <param name="parameters">The parameters by which to filter.</param>
+        /// <returns>The transformed items.</returns>
         public virtual ICollection<T> TransformResults(ICollection<T> results, IDataSourceParameters parameters) => results;
 
         /// <summary>
@@ -475,8 +468,9 @@ namespace IntelliTect.Coalesce
         /// IncludeTree allows you to control the shape of the data returned to the client.
         /// </summary>
         /// <param name="query">The query that may be used to get the IncludeTree from.</param>
+        /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The IncludeTree that will be used to shape the serialized DTOs.</returns>
-        /// <see cref="http://coalesce.readthedocs.io/en/latest/pages/loading-and-serialization/include-tree/"/>
+        /// <see href="http://coalesce.readthedocs.io/en/latest/pages/loading-and-serialization/include-tree/"/>
         public virtual IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
 
@@ -495,12 +489,13 @@ namespace IntelliTect.Coalesce
             query = ApplyListSorting(query, parameters);
 
             // Get a count
-            int totalCount = await GetCountAsync(query);
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            int totalCount = canUseAsync ? await query.CountAsync() : query.Count();
 
             // Add paging after we've gotten the total count.
             query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
             
-            var canUseAsync = CanEvalQueryAsynchronously(query);
+            canUseAsync = CanEvalQueryAsynchronously(query);
             ICollection<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
 
             result = TransformResults(result, parameters);
@@ -542,11 +537,12 @@ namespace IntelliTect.Coalesce
 
             return new ListResult<TDto>(mappedResult, result.Page, result.TotalCount, result.PageSize);
         }
-        
+
         /// <summary>
         /// Get an unmapped single object corresponding to the given primary key.
         /// </summary>
         /// <param name="id">The primary key to find the desired item by.</param>
+        /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The requested item
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
         public virtual async Task<(ItemResult<T> Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
@@ -576,6 +572,7 @@ namespace IntelliTect.Coalesce
         /// Get a mapped single object corresponding to the given primary key.
         /// </summary>
         /// <param name="id">The primary key to find the desired item by.</param>
+        /// <param name="parameters">The parameters by which to query.</param>
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>The desired item, mapped to the desired type.</returns>
         public virtual async Task<ItemResult<TDto>> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
@@ -598,7 +595,9 @@ namespace IntelliTect.Coalesce
         {
             var query = GetQuery(parameters);
             query = ApplyListFiltering(query, parameters);
-            return GetCountAsync(query);
+
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            return canUseAsync ? query.CountAsync() : Task.FromResult(query.Count());
         }
     }
 }

@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         // Handled by helper
                     }
-                    else if (AddCrudStrategy(typeof(IBehaviors<>), _dataSources))
+                    else if (AddCrudStrategy(typeof(IBehaviors<>), _behaviors))
                     {
                         // Handled by helper
                     }
@@ -217,31 +217,33 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             assertSourceFor = assertSourceFor ?? model;
 
-            foreach (var nestedType in model.ClientNestedTypes.Where(t => t.IsA(typeof(IDataSource<>))))
+
+            bool AddCrudStrategy(TypeViewModel nestedType, Type iface, HashSet<CrudStrategyTypeUsage> set)
             {
-                bool AddCrudStrategy(Type iface, HashSet<CrudStrategyTypeUsage> set)
+                if (!nestedType.IsA(iface)) return false;
+
+                var servedType = nestedType.GenericArgumentsFor(iface).Single();
+                if (!servedType.HasClassViewModel)
                 {
-                    if (!nestedType.IsA(iface)) return false;
+                    throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
+                }
+                var servedClass = Cache(servedType.ClassViewModel);
 
-                    var servedType = nestedType.GenericArgumentsFor(iface).Single();
-                    if (!servedType.HasClassViewModel)
-                    {
-                        throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
-                    }
-                    var servedClass = Cache(servedType.ClassViewModel);
-
-                    if (!servedClass.Equals(assertSourceFor))
-                    {
-                        throw new InvalidOperationException($"{nestedType} is not a valid {iface} for {model} - " +
-                            $"{nestedType} must satisfy {iface} with type parameter <{assertSourceFor}>.");
-                    }
-
-                    set.Add(new CrudStrategyTypeUsage(Cache(nestedType.ClassViewModel), servedClass, model));
-                    return true;
+                if (!servedClass.Equals(assertSourceFor))
+                {
+                    throw new InvalidOperationException($"{nestedType} is not a valid {iface} for {model} - " +
+                        $"{nestedType} must satisfy {iface} with type parameter <{assertSourceFor}>.");
                 }
 
-                AddCrudStrategy(typeof(IDataSource<>), _dataSources);
-                AddCrudStrategy(typeof(IBehaviors<>), _behaviors);
+                set.Add(new CrudStrategyTypeUsage(Cache(nestedType.ClassViewModel), servedClass, model));
+                return true;
+            }
+
+
+            foreach (var nestedType in model.ClientNestedTypes)
+            {
+                AddCrudStrategy(nestedType, typeof(IDataSource<>), _dataSources);
+                AddCrudStrategy(nestedType, typeof(IBehaviors<>), _behaviors);
             }
         }
 

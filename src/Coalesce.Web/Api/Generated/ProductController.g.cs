@@ -50,8 +50,8 @@ namespace Coalesce.Web.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Product> behaviors)
-            => DeleteImplementation(id, behaviors);
+        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Product> behaviors, IDataSource<Coalesce.Domain.Product> dataSource)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]

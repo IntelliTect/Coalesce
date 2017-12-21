@@ -48,7 +48,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         /// Override to add logic that determines whether or not the generator needs to run or not.
         /// 
         /// Generators that are conditional on the state of the filesytem should perform that check in here.
-        /// Checking the filesystem should not be done inside GetGenerators() on an ICompositeGenerator<>.
+        /// Checking the filesystem should not be done inside GetGenerators() on an ICompositeGenerator.
         /// </summary>
         /// <returns>False if the generator should not generate output nor persiste it to disk.</returns>
         public virtual bool ShouldGenerate() => true;

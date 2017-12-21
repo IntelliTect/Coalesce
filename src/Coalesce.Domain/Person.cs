@@ -121,8 +121,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Sets the FirstName to the given text.
         /// </summary>
-        /// <param name="addition"></param>
-        /// <returns></returns>
         public Person Rename(string name)
         {
             FirstName = name;
@@ -133,8 +131,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Removes spaces from the name and puts in dashes
         /// </summary>
-        /// <param name="addition"></param>
-        /// <returns></returns>
         public void ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");
@@ -154,8 +150,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Returns the user name
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         [Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
@@ -167,8 +161,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Returns the user name
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string GetUserPublic(ClaimsPrincipal user)
         {
             if (user != null && user.Identity != null) return user.Identity.Name;

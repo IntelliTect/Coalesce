@@ -85,8 +85,6 @@ namespace IntelliTect.Coalesce.Utilities
         /// <summary>
         /// Adds the items in the colleciton to list if they aren't already there.
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="items"></param>
         public static void AddUnique(this List<string> list, IEnumerable<string> items)
         {
             foreach (var item in items)
@@ -98,8 +96,6 @@ namespace IntelliTect.Coalesce.Utilities
         /// <summary>
         /// Adds the items in the colleciton to list if they aren't already there.
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="items"></param>
         public static void AddUnique(this List<string> list, string item)
         {
             if (!list.Contains(item)) list.Add(item);

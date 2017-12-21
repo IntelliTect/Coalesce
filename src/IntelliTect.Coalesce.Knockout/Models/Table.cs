@@ -80,8 +80,6 @@ namespace IntelliTect.Coalesce.Knockout.Models
         /// <summary>
         /// Removes a column. Typically used with AddDefaultColumns.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         public Table<T> RemoveColumn(string name)
         {
             var col = Columns.FirstOrDefault(f => f.ViewModel.Name == name);

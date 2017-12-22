@@ -80,7 +80,7 @@
 | The `IBeforeSave<,>`, `IAfterSave<,>`, `ISaveCustomizable<,>`, `IBeforeDelete<,>`, `IAfterDelete<>`, and `IDeleteCustomizable<,>` have been removed. | Override the corresponding methods of the `StandardBehaviors<,>` derivative that you create for the type that formerly used these interfaces. See the "New Features" section below.
 | `ListGroupAttribute` was removed as a consequence of the removal of the `PropertyValues` endpoint. | Remove usages of this attribute. Implement logic for sourcing values from multiple fields in the replacement methods written to replace `PropertyValues`.
 | `Fingerprintable<,>` and `IFingerprintable<,>` have been removed. To implement this functionality in a general way, derive a class from `StandardBehaviors<,>`, register your derived class with your applications `IServiceCollection` (e.g. `services.AddScoped(typeof(StandardBehaviors<,>), typeof(MyFingerprintingBehaviors<,>));`), and implement the fingerprint logic in your custom behavior class (probably in `BeforeSave`).
-
+| Client-exposed methods on your models must be explicitly exposed by adding the `[Coalesce]` attribute. | Add `[Coalesce]` to methods you wish to expose to the client. Remove `[InternalUse]` from those you don't wish to expose - it is no longer needed for methods.
 
 ## New Features:
 

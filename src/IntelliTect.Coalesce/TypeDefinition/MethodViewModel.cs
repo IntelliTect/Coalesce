@@ -197,16 +197,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsClientMethod => !IsInternalUse && !IsClientDataSource;
-
-        /// <summary>
-        /// If true, this is a method that can be specified by the client as a data source.
-        /// </summary>
-        public bool IsClientDataSource =>
-            !IsInternalUse &&
-            IsStatic && 
-            ReturnType.IsA<IQueryable>() && ReturnType.PureType.EqualsType(Parent.Type);
-
+        public bool IsClientMethod => !IsInternalUse && HasAttribute<CoalesceAttribute>();
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;

@@ -121,16 +121,17 @@ namespace Coalesce.Domain
         /// <summary>
         /// Sets the FirstName to the given text.
         /// </summary>
+        [Coalesce]
         public Person Rename(string name)
         {
             FirstName = name;
             return this;
         }
 
-
         /// <summary>
         /// Removes spaces from the name and puts in dashes
         /// </summary>
+        [Coalesce]
         public void ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");
@@ -142,6 +143,7 @@ namespace Coalesce.Domain
         /// <param name="numberOne"></param>
         /// <param name="numberTwo"></param>
         /// <returns></returns>
+        [Coalesce]
         public static int Add(int numberOne, int numberTwo)
         {
             return numberOne + numberTwo;
@@ -150,7 +152,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Returns the user name
         /// </summary>
-        [Execute(Roles = "Admin")]
+        [Coalesce,Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
             if (user!= null && user.Identity != null) return user.Identity.Name;
@@ -161,6 +163,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Returns the user name
         /// </summary>
+        [Coalesce]
         public static string GetUserPublic(ClaimsPrincipal user)
         {
             if (user != null && user.Identity != null) return user.Identity.Name;
@@ -173,7 +176,7 @@ namespace Coalesce.Domain
         /// <param name="characters"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        [Execute]
+        [Coalesce,Execute]
         public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();

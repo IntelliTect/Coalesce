@@ -85,7 +85,7 @@ module @moduleName {
         public itemClass = @viewModelFullName;
 
         public filter: {
-            @(string.Join("\n            ", model.BaseViewModel.ClientProperties
+            @(string.Join("\r\n            ", model.BaseViewModel.ClientProperties
                 .Where(f=>f.IsUrlFilterParameter)
                 .Select(f=>$"{f.JsonName}?:{"string" /*f.Type.TsType + (f.Type.IsString ? "" : " | string")*/};")))
         } = null;

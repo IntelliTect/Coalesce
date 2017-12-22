@@ -18,6 +18,25 @@ namespace IntelliTect.Coalesce
         where TContext : DbContext
     {
 
+        /// <summary>
+        /// If set, this data source will be used in place of the supplied data source
+        /// when retrieving an object that will be updated in a Save operation.
+        /// </summary>
+        public IDataSource<T> OverrideFetchForUpdateDataSource { get; protected set; }
+
+        /// <summary>
+        /// If set, this data source will be used in place of the supplied data source
+        /// when retrieving an object that will be deleted.
+        /// </summary>
+        public IDataSource<T> OverrideFetchForDeleteDataSource { get; protected set; }
+
+        /// <summary>
+        /// If set, this data source will be used in place of the supplied data source
+        /// when reloading an object after a save operation has completed.
+        /// This is not recommended, as it can cause a client to recieve unexpected results.
+        /// </summary>
+        public IDataSource<T> OverridePostSaveResultDataSource { get; protected set; }
+
         public StandardBehaviors(CrudContext<TContext> context) : base(context)
         {
         }
@@ -65,7 +84,7 @@ namespace IntelliTect.Coalesce
             else
             {
                 // Primary Key was defined. This object should exist in the database.
-                var (existingItem, _) = await dataSource.GetItemAsync(idValue, parameters);
+                var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue, parameters);
                 if (!existingItem.WasSuccessful)
                 {
                     return new ItemResult<TDto>(existingItem);
@@ -88,7 +107,7 @@ namespace IntelliTect.Coalesce
             // Pull the object to get any changes.
             var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
             ItemResult<T> newItem;
-            (newItem, includeTree) = await dataSource.GetItemAsync(newItemId, parameters);
+            (newItem, includeTree) = await (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
 
             if (!newItem.WasSuccessful)
             {
@@ -193,7 +212,7 @@ namespace IntelliTect.Coalesce
             IDataSource<T> dataSource,
             IDataSourceParameters parameters)
         {
-            var (existingItem, _) = await dataSource.GetItemAsync(id, parameters);
+            var (existingItem, _) = await (OverrideFetchForDeleteDataSource ?? dataSource).GetItemAsync(id, parameters);
             if (!existingItem.WasSuccessful)
             {
                 return existingItem.Message;

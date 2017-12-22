@@ -74,12 +74,13 @@ namespace Coalesce.Domain
         [ForeignKey("DevTeamAssignedId")]
         public DevTeam DevTeamAssigned { get; set; }
 
-
+        [Coalesce]
         public static int GetAllOpenCasesCount(AppDbContext db)
         {
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
         }
 
+        [Coalesce]
         public static void RandomizeDatesAndStatus(AppDbContext db)
         {
             Random random = new Random();
@@ -108,7 +109,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Returns a list of summary information about Cases
         /// </summary>
-        /// <returns></returns>
+        [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {
             return CaseSummary.GetCaseSummary(db);

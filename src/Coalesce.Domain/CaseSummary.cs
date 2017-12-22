@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.Coalesce;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace Coalesce.Domain
         public int CloseCases { get; set; }
         public string Description { get; set; }
 
+        [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {
             return new CaseSummary()

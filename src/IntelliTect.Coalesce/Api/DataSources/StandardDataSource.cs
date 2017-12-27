@@ -13,6 +13,7 @@ using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Utilities;
+using System.Collections.ObjectModel;
 
 namespace IntelliTect.Coalesce
 {
@@ -31,11 +32,16 @@ namespace IntelliTect.Coalesce
         /// this is the maximum number of "words" in the input specified by the user that will be processed.
         /// </summary>
         public int MaxSearchTerms { get; set; } = 6;
-
+        
         /// <summary>
         /// If no page size is specified, this value will be used as the page size.
         /// </summary>
         public int DefaultPageSize { get; set; } = 25;
+
+        /// <summary>
+        /// The maximum allowable page size. Sizes larger than this will be limited to this value.
+        /// </summary>
+        public int MaxPageSize { get; set; } = 10_000;
 
         public StandardDataSource(CrudContext<TContext> context) : base(context)
         {
@@ -99,7 +105,7 @@ namespace IntelliTect.Coalesce
                     && prop.IsUrlFilterParameter
                     && prop.SecurityInfo.IsReadable(User))
                 {
-                    query = DatabaseCompareExpression(query, prop, clause.Value);
+                    query = ApplyListPropertyFilter(query, prop, clause.Value);
                 }
             }
 
@@ -115,7 +121,7 @@ namespace IntelliTect.Coalesce
         /// <param name="prop">The property to filter by.</param>
         /// <param name="value">The value to filter on.</param>
         /// <returns>The new query with additional filtering applied.</returns>
-        protected virtual IQueryable<T> DatabaseCompareExpression(
+        protected virtual IQueryable<T> ApplyListPropertyFilter(
             IQueryable<T> query, PropertyViewModel prop, string value)
         {
             if (prop.Type.IsDate)
@@ -436,6 +442,8 @@ namespace IntelliTect.Coalesce
         {
             page = parameters.Page ?? 1;
             pageSize = parameters.PageSize ?? DefaultPageSize;
+            pageSize = Math.Min(pageSize, MaxPageSize);
+            pageSize = Math.Max(pageSize, 1);
             
             // Cap the page number at the last item
             if (totalCount.HasValue && (page - 1) * pageSize > totalCount)
@@ -454,14 +462,15 @@ namespace IntelliTect.Coalesce
 
         /// <summary>
         /// Perform a transformation of the results after the query has been evaluated.
-        /// Examples include: Filtering out specific items, 
-        /// selecting out new items with specific properties cleared and/or populated,
-        /// or any other transformations that must be done post-query evaluation.
+        /// The purpose of this is for populating unmapped propertes on entities.
+        /// If possible, this sort of mutation should be performed in a custom IClassDto.
+        /// 
+        /// DO NOT modify any database-mapped fields in this method - doing so will have adverse
+        /// effects when a data source is used in an IBehaviors implementation - namely, mutations to mapped properties will be persisted.
         /// </summary>
         /// <param name="results">The items to be transformed.</param>
         /// <param name="parameters">The parameters by which to filter.</param>
-        /// <returns>The transformed items.</returns>
-        public virtual ICollection<T> TransformResults(ICollection<T> results, IDataSourceParameters parameters) => results;
+        public virtual void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters) { }
 
         /// <summary>
         /// For the given query, obtain the IncludeTree to be used when serializing the results of this data source.
@@ -473,7 +482,17 @@ namespace IntelliTect.Coalesce
         /// <see href="http://coalesce.readthedocs.io/en/latest/pages/loading-and-serialization/include-tree/"/>
         public virtual IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
-
+        /// <summary>
+        /// Evaluate the given query to determine the total count of items to report to the client.
+        /// </summary>
+        /// <param name="query">The filtered query from which to obtain a count.</param>
+        /// <param name="parameters">The parameters by which to query.</param>
+        /// <returns>The total count of items represented by the query.</returns>
+        public virtual Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
+        {
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            return canUseAsync ? query.CountAsync() : Task.FromResult(query.Count());
+        }
 
 
         /// <summary>
@@ -489,16 +508,13 @@ namespace IntelliTect.Coalesce
             query = ApplyListSorting(query, parameters);
 
             // Get a count
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            int totalCount = canUseAsync ? await query.CountAsync() : query.Count();
+            int totalCount = await GetListTotalCountAsync(query, parameters);
 
             // Add paging after we've gotten the total count.
             query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
             
-            canUseAsync = CanEvalQueryAsynchronously(query);
-            ICollection<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
-
-            result = TransformResults(result, parameters);
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            List<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
 
             var tree = GetIncludeTree(query, parameters);
             return (new ListResult<T>(result, page, totalCount, pageSize), tree);
@@ -513,6 +529,8 @@ namespace IntelliTect.Coalesce
             where TDto : IClassDto<T>, new()
         {
             var (result, tree) = await GetListAsync(parameters);
+
+            TransformResults(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
@@ -557,13 +575,6 @@ namespace IntelliTect.Coalesce
                 return ($"{ClassViewModel.DisplayName} item with ID {id} was not found.", null);
             }
 
-            result = TransformResults(new[] { result }, parameters).SingleOrDefault();
-
-            if (result == null)
-            {
-                return ($"{ClassViewModel.DisplayName} item with ID {id} was not found.", null);
-            }
-
             var tree = GetIncludeTree(query, parameters);
             return (new ItemResult<T>(true, result), tree);
         }
@@ -585,6 +596,8 @@ namespace IntelliTect.Coalesce
                 return new ItemResult<TDto>(result);
             }
 
+            TransformResults(Array.AsReadOnly(new[] { result.Object }), parameters);
+
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = Mapper.MapToDto<T, TDto>(result.Object, mappingContext, tree);
 
@@ -596,8 +609,7 @@ namespace IntelliTect.Coalesce
             var query = GetQuery(parameters);
             query = ApplyListFiltering(query, parameters);
 
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? query.CountAsync() : Task.FromResult(query.Count());
+            return GetListTotalCountAsync(query, parameters);
         }
     }
 }

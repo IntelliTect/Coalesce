@@ -12,19 +12,19 @@ namespace IntelliTect.Coalesce.Models
         public int PageCount { get; set; }
         public int TotalCount { get; set; }
 
-        public ICollection<T> List { get; set; }
+        public IList<T> List { get; set; }
 
         public ListResult() : base()
         {
         }
 
-        public ListResult(ICollection<T> items) 
+        public ListResult(IList<T> items) 
         {
             List = items;
             WasSuccessful = true;
         }
 
-        public ListResult(ICollection<T> items, int page, int totalCount, int pageSize)
+        public ListResult(IList<T> items, int page, int totalCount, int pageSize)
         {
             List = items;
             WasSuccessful = true;

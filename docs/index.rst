@@ -21,7 +21,6 @@ Welcome to Coalesce's documentation!
     pages/modeling/index
     pages/modeling/properties
     pages/modeling/attributes
-    pages/modeling/interfaces
     pages/modeling/methods
     pages/modeling/external-type
 

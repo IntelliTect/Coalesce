@@ -8,19 +8,22 @@ namespace IntelliTect.Coalesce.Api
 {
     public class ListParameters : FilterParameters, IListParameters
     {
-        public string OrderBy { get; set; }
-        public string OrderByDescending { get; set; }
+        /// <inheritdoc />
         public int? Page { get; set; }
+
+        /// <inheritdoc />
         public int? PageSize { get; set; }
 
-        /// <summary>
-        /// CSV list of fields to return
-        /// </summary>
-        public string Fields { get; set; }
+        /// <inheritdoc />
+        public string OrderBy { get; set; }
 
-        /// <summary>
-        /// Calculated list from Fields
-        /// </summary>
+        /// <inheritdoc />
+        public string OrderByDescending { get; set; }
+        
+        /// <inheritdoc />
+        public string Fields { get; set; }
+        
+        /// <inheritdoc cref="IListParameters.Fields" />
         public List<string> FieldList
         {
             get
@@ -29,14 +32,11 @@ namespace IntelliTect.Coalesce.Api
                 return Fields.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
             }
         }
-
+        
+        /// <inheritdoc />
         ICollection<string> IListParameters.Fields => FieldList;
-
-        public ListParameters() { }
-
-        /// <summary>
-        /// List of OrderBy clauses keyed by column and with a value of Asc or Desc.
-        /// </summary>
+        
+        /// <inheritdoc cref="IListParameters.OrderByList" />
         public Dictionary<string, string> OrderByList
         {
             get
@@ -68,20 +68,8 @@ namespace IntelliTect.Coalesce.Api
                 return result;
             }
         }
-
+        
+        /// <inheritdoc />
         IDictionary<string, string> IListParameters.OrderByList => OrderByList;
-
-        /// <summary>
-        /// Adds a name value condition to the Filters list.
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="propertyValue"></param>
-        public void AddFilter(string propertyName, string propertyValue)
-        {
-            if (propertyValue != null)
-            {
-                Filter[propertyName] = propertyValue;
-            }
-        }
     }
 }

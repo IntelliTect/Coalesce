@@ -4,16 +4,13 @@ namespace IntelliTect.Coalesce.Api
 {
     public class FilterParameters : DataSourceParameters, IFilterParameters
     {
-        /// <summary>
-        /// Text to search fields for.
-        /// </summary>
+        /// <inheritdoc />
         public string Search { get; set; }
 
-        /// <summary>
-        /// List of filters added from the controller based on property=value on the URL.
-        /// </summary>
+        /// <inheritdoc cref="IFilterParameters.Filter" />
         public Dictionary<string, string> Filter { get; } = new Dictionary<string, string>();
-
+        
+        /// <inheritdoc />
         IDictionary<string, string> IFilterParameters.Filter => Filter;
     }
 }

@@ -5,18 +5,45 @@ namespace IntelliTect.Coalesce
 {
     public interface IListParameters : IFilterParameters
     {
+        /// <summary>
+        /// The page of data being requested. 
+        /// This is not guaranteed to be a valid page that contains any data.
+        /// </summary>
         int? Page { get; }
 
+        /// <summary>
+        /// The size of pages requested.
+        /// If this value is unacceptable, it may be constrained to some acceptable value,
+        /// or alternatively, an error result may be served.
+        /// </summary>
         int? PageSize { get; }
 
+        /// <summary>
+        /// A comma-delimited list of field names to sort by.
+        /// Each field name may be followed by "ASC" or "DESC" (case insensitive), specifying direction.
+        /// </summary>
         string OrderBy { get; }
-
+        
+        /// <summary>
+        /// A comma-delimited list of field names to sort by in DESCENDING order.
+        /// </summary>
         string OrderByDescending { get; }
 
         // TODO: type this better than string,string.
         // The values are [columnName] = "Asc|Desc"
+
+        /// <summary>
+        /// An interpreted list of both OrderBy and OrderByDescending.
+        /// Keys are field names, and values are directions, either "Asc" or "Desc".
+        /// If both OrderBy and OrderByDescending were populated, the values in OrderBy supercede those in OrderByDescending.
+        /// </summary>
         IDictionary<string, string> OrderByList { get; }
 
+        /// <summary>
+        /// A list of field names being requested.
+        /// If this collection is non-null and contains any values,
+        /// the response should only include those field names which were specified.
+        /// </summary>
         ICollection<string> Fields { get; }
     }
 }

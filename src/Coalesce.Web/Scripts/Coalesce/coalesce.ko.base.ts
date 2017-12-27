@@ -781,7 +781,7 @@ module Coalesce {
         protected queryParams = (kind: 'dataSource' | 'filter' | 'list', pageSize?: number): string => {
             var query = this.dataSource.getQueryString();
 
-            const param = (name: string, value: any) => {
+            const param = function(name: string, value: any) {
                 if (value === null || value === undefined || value === "") {
                     return;
                 }

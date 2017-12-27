@@ -1,7 +1,8 @@
 {
-    "restructuredtext.builtDocumentationPath" : "${workspaceRoot}/_build/html",
-    "restructuredtext.makefilePath"           : ".",
     "restructuredtext.updateOnTextChanged"    : "false",
-    "restructuredtext.sphinxBuildPath": null,
-    "python.linting.pylintEnabled": false
+    "restructuredtext.languageServer.disabled": false,
+    "restructuredtext.confPath": "d:\\Work\\Coalesce\\docs",
+    "restructuredtext.linter.sphinxTextRoles": [
+        "csharp", "ts", "ref", "ctor"
+      ]
 }

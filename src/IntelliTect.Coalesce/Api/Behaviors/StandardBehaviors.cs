@@ -91,6 +91,10 @@ namespace IntelliTect.Coalesce
                 }
                 item = existingItem.Object;
 
+                // Ensure that the entity is tracked.
+                // We want to allow for item retrieval from data sources that build their query with .AsNoTracking().
+                Db.Entry(item).State = EntityState.Unchanged;
+
                 // Create a shallow copy.
                 originalItem = item.Copy();
             }

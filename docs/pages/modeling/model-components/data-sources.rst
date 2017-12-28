@@ -1,15 +1,15 @@
 
 .. _CustomDataSources:
 
-Custom Data Sources
--------------------
+Data Sources
+------------
 
 Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
 
 Defining Data Sources
 .....................
 
-By default, each of your models that Coalesce exposes will expose the standard data source (:csharp:`IntelliTect.Coalesce.StandardDataSource<T, TContext>`). This data source provides all the standard functionality one would expect - paging, sorting, searching, filtering, and so on. Each of these component pieces is implemented in one or more virtual methods, making the :csharp:`StandardDataSource` a great place to start from when implementing your own data source. To suppress this behavior, create your own custom data source and annotate it with :csharp:`[DefaultDataSource]`.
+By default, each of your models that Coalesce exposes will expose the standard data source (:csharp:`IntelliTect.Coalesce.StandardDataSource<T, TContext>`). This data source provides all the standard functionality one would expect - paging, sorting, searching, filtering, and so on. Each of these component pieces is implemented in one or more virtual methods, making the :csharp:`StandardDataSource` a great place to start from when implementing your own data source. To suppress this behavior of always exposing the raw :csharp:`StandardDataSource`, create your own custom data source and annotate it with :csharp:`[DefaultDataSource]`.
 
 To implement your own custom data source, you simply need to define a class that implements :csharp:`IntelliTect.Coalesce.IDataSource<T>`. To expose your data source to Coalesce, either place it as a nested class of the type :csharp:`T` that you data source serves, or annotate it with the :csharp:`[Coalesce]` attribute. Of course, the easiest way to create a data source that doesn't require you to re-engineer a great deal of logic would be to inherit from :csharp:`IntelliTect.Coalesce.StandardDataSource<T, TContext>`, and then override only the parts that you need.
 
@@ -17,10 +17,12 @@ To implement your own custom data source, you simply need to define a class that
 
         public class Person
         {
+            [DefaultDataSource]
             public class IncludeFamily : StandardDataSource<Person, AppDbContext>
             {
                 public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) 
                     => Db.People
+                    .Where(f => User.IsInRole("Admin") || f.CreatedById == User.GetUserId())
                     .Include(f => f.Parents).ThenInclude(s => s.Parents)
                     .Include(f => f.Cousins).ThenInclude(s => s.Parents);
             }
@@ -154,13 +156,13 @@ These methods often call one another, so overriding one method may cause some ot
                 ApplyListSearchTerm
             GetListTotalCountAsync
 
-Details
-'''''''
+Method Details
+''''''''''''''
 
 All of the methods outlined above can be overridden. A description of each of the non-interface inner methods is as follows:
     
     :csharp:`GetQuery`
-        The method will most commonly be overridden in order to implement custom query logic. From this method, one could:
+        The method is the one that you will most commonly be override in order to implement custom query logic. From this method, one could:
 
             - Specify additional query filtering such as row-level security or soft-delete logic.
             - Include additional data using EF's :csharp:`.Include()` and :csharp:`.ThenInclude()`.

@@ -10,7 +10,7 @@ Coalesce provides a number of extension points for loading & serialization which
 .. contents:: Contents
     :local:
     
-    
+
 Includes String
 ---------------
 
@@ -42,6 +42,7 @@ Special Values
             For example, :code:`PersonListGen`
     
 |
+
 DtoIncludes & DtoExcludes
 -------------------------
 

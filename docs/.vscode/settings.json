@@ -3,6 +3,6 @@
     "restructuredtext.languageServer.disabled": false,
     "restructuredtext.confPath": "d:\\Work\\Coalesce\\docs",
     "restructuredtext.linter.sphinxTextRoles": [
-        "csharp", "ts", "ref", "ctor"
+        "csharp", "ts", "ref", "ctor", "html"
       ]
 }

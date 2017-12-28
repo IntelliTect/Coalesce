@@ -192,7 +192,7 @@ Model-Specific Members
         For each :ref:`Instance Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <ModelMethodTypeScript>` will be created.
 
     Enum Members
-        For each :cs:`Enum` property on your POCO, the following will be created:
+        For each :csharp:`enum` property on your POCO, the following will be created:
 
         - A static array of objects with properties :ts:`id` and :ts:`value` that represent all the values of the enum.
     

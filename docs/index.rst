@@ -8,21 +8,31 @@ Welcome to Coalesce's documentation!
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
+    :titlesonly:
     :glob:
     :caption: Coalesce
 
     pages/getting-started/*
+    pages/modeling/index
+
+.. toctree::
+    :maxdepth: 2
+    :titlesonly:
+    :caption: Model Types
+
+    pages/modeling/model-types/entities
+    pages/modeling/model-types/external-types
+    pages/modeling/model-types/dtos
 
 .. toctree::
     :maxdepth: 3
-    :caption: Modeling
+    :caption: Model Components
 
-    pages/modeling/index
-    pages/modeling/properties
-    pages/modeling/attributes
-    pages/modeling/methods
-    pages/modeling/external-type
+    pages/modeling/model-components/properties
+    pages/modeling/model-components/attributes
+    pages/modeling/model-components/methods
+    pages/modeling/model-components/data-sources
 
 .. toctree::
     :maxdepth: 3

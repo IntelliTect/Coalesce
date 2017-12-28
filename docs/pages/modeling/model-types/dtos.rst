@@ -1,8 +1,10 @@
 
 .. _DTOs:
 
-Data Transfer Objects (DTOs)
-----------------------------
+Custom DTOs
+-----------
+
+In addition to the generated :ref:`DTOs` that Coalesce will create for you, you may also create your own implementations of :csharp:`IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities
 
 Data Transfer Objects, or DTOs, allow for transformations
 of data from the data store into a format more suited for transfer and
@@ -16,17 +18,6 @@ Coalesce supports several types of DTOs:
    These are controlled via :ref:`ModelAttributes` on the POCO.
 -  DTOs that are created with IClassDto and create unique ViewModels.
 -  DTOs based on database views.
-
-
-Automatically Generated DTOs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Every POCO database class in Coalesce gets a DTO. These DTOs are used to
-shuttle data back and forth to the client. They are generated classes
-that have nullable versions of all the properties on the POCO class, and are the mechanism by which almost all the techniques described in :ref:`ControllingLoading` function.
-
-:ref:`DtoIncludesExcludesAttr` and the :ref:`Includes` infrastructure can be used to indicate which properties should be transferred to the client in which cases, and :ref:`IncludeTree` is used to dictate how these DTOs are constructed from POCOs retrieved from the database.
-
 
 IClassDtos
 ~~~~~~~~~~

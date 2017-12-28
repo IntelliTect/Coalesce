@@ -1,7 +1,6 @@
 
 .. _ExternalTypes:
 
-
 External Types
 --------------
 
@@ -22,11 +21,19 @@ The collection of external types for a data model looks like this:
     In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with :ref:`InternalUse`, or make those members non-public.
 
 
+Generated Code
+==============
+
+For each external type found in your application's model, Coalesce will generate:
+
+    * A DTO
+    * A :ref:`TypeScriptExternalViewModel <TypeScript Model>`
+
+
 Example Data Model
 ==================
 
-
-For example, in the following scenario, the following classes have external type TypeScript ViewModels:
+For example, in the following scenario, the following classes are considered as external types:
 
     * :csharp:`PluginMetadata`, exposed through a getter-only property on :csharp:`ApplicationPlugin`.
     * :csharp:`PluginResult`, exposed through a method return on :csharp:`ApplicationPlugin`. 
@@ -77,33 +84,6 @@ For example, in the following scenario, the following classes have external type
         public bool Success { get; set; }
         public string Message { get; set; }
     }
-
-
-Generated TypeScript
-====================
-
-    The TypeScript ViewModels for external types do not have a common base class, and do not have any of the behaviors or convenience properties that the regular :ref:`TypeScriptViewModel` for database-mapped classes have.
-
-    Data Properties
-        For each exposed property on the underlying EF POCO, a :ts:`KnockoutObservable<T>` property will exist on the TypeScript model. For POCO properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections, these properties will be :ts:`KnockoutObservableArray<T>` objects.
-
-        .. code-block:: typescript
-
-            public personId: KnockoutObservable<number> = ko.observable(null);
-            public fullName: KnockoutObservable<string> = ko.observable(null);
-            public gender: KnockoutObservable<number> = ko.observable(null);
-            public companyId: KnockoutObservable<number> = ko.observable(null);
-            public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
-            public addresses: KnockoutObservableArray<ViewModels.Address> = ko.observableArray([]);
-            public birthDate: KnockoutObservable<moment.Moment> = ko.observable(moment());
-
-    Computed Text Properties
-        For each Enum property on your POCO, a :ts:`KnockoutComputed<string>` property will be created that will provide the text to display for that property.
-
-        .. code-block:: typescript
-
-            public genderText: () => string;
-
 
             
 Loading & Serialization

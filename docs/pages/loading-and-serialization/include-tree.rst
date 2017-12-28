@@ -54,7 +54,7 @@ Without an :csharp:`IncludeTree` present, Coalesce will map the entire object gr
         .. code-block:: typescript
 
             var employee = new ViewModels.Employee();
-            employee.dataSource = employee.dataSources.WithProjectsAndMembers;
+            employee.dataSource = new employee.dataSources.WithProjectsAndMembers();
             employee.load(1);
 
     If you're already familiar with the fact that an :csharp:`IncludeTree` is implicitly created in this scenario, then imagine for a moment that this is not the case (if you're not familiar with this fact, then keep reading!).

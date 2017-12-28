@@ -38,7 +38,7 @@ To implement your own custom data source, you simply need to define a class that
 The structure of the :csharp:`IQueryable` built by the various methods of :csharp:`StandardDataSource` is used to shape and trim the structure of the DTO as it is serialized and sent out to the client. One may also override method :csharp:`IncludeTree GetIncludeTree(IQueryable<Person> query, IDataSourceParameters parameters)` to control this explicitly. See :ref:`IncludeTree` for more information on how this works.
 
 .. warning::
-    If you create a custom data source that has custom logic for securing your data, be aware that the default implementation of :csharp:`StandardDataSource` is still exposed unless you annotate one of your custom data sources with :csharp:`[DefaultDataSource]`. Doing so will replace the default data source with the annotated class.
+    If you create a custom data source that has custom logic for securing your data, be aware that the default implementation of :csharp:`StandardDataSource` (or your custom default implementation - see below) is still exposed unless you annotate one of your custom data sources with :csharp:`[DefaultDataSource]`. Doing so will replace the default data source with the annotated class for your type :csharp:`T`.
 
 Consuming Data Sources
 ......................
@@ -177,7 +177,7 @@ All of the methods outlined above can be overridden. A description of each of th
 
     :csharp:`TransformResults`
         Allows for transformation of a result set after the query has been evaluated. 
-        This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model 
+        This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by :ref:`CustomBehaviors`) to a DTO, this will not be called..
 
         .. warning::
             
@@ -226,5 +226,35 @@ All of the methods outlined above can be overridden. A description of each of th
     
 
 
+Replacing the Standard Data Source
+..................................
+
+You can, of course, create a custom base data source that all your custom implementations inherit from. But, what if you want to override the standard data source across your entire application, so that :csharp:`StandardDataSource<,>` will never be instantiated? You can do that too!
+
+Simply create a class that implements :csharp:`IEntityFrameworkDataSource<,>` (the :csharp:`StandardDataSource<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
 
+    .. code-block:: c#
+
+        public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
+            where T : class, new()
+            where TContext : DbContext
+        {
+            public MyDataSource(CrudContext<TContext> context) : base(context)
+            {
+            }
+
+            ...
+        }
+
+    .. code-block:: c#
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddCoalesce(b =>
+            {
+                b.AddContext<AppDbContext>();
+                b.UseDefaultDataSource(typeof(MyDataSource<,>));
+            });
+
+Your custom data source must have the same generic type parameters - :csharp:`<T, TContext>`. Otherwise, the Microsoft.Extensions.DependencyInjection service provider won't know how to inject it.

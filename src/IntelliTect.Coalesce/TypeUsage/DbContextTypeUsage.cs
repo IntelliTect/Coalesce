@@ -25,12 +25,17 @@ namespace IntelliTect.Coalesce.TypeUsage
 
                     return usage;
                 })
-                .ToList();
+                .ToList()
+                .AsReadOnly();
 
         }
 
         public ClassViewModel ClassViewModel { get; }
 
-        public ICollection<EntityTypeUsage> Entities { get; }
+        public IReadOnlyList<EntityTypeUsage> Entities { get; }
+
+        public override bool Equals(object obj) => obj is DbContextTypeUsage that && that.ClassViewModel.Equals(ClassViewModel);
+
+        public override int GetHashCode() => ClassViewModel.GetHashCode();
     }
 }

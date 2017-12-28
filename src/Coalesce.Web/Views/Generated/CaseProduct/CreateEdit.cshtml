@@ -19,7 +19,7 @@
             </div>
                 <div class="form-group">
                     <label class="col-md-4 control-label">Case</label>
-<div class="col-md-7 prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</div>                        <div class="col-md-1" data-bind="with: case">
+<div class="col-md-7 prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</div>                        <div class="col-md-1" data-bind="with: $data.case">
                             <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                         </div>
                 </div>

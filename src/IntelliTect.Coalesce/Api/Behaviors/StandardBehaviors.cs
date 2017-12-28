@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {
-    public class StandardBehaviors<T, TContext> : StandardCrudStrategy<T, TContext>, IBehaviors<T>
+    public class StandardBehaviors<T, TContext> : StandardCrudStrategy<T, TContext>, IEntityFrameworkBehaviors<T, TContext>
         where T : class, new()
         where TContext : DbContext
     {
@@ -241,7 +242,7 @@ namespace IntelliTect.Coalesce
         /// Code to run before committing the delete operation to the database.
         /// If a failure result is returned, the delete operation will not execute.
         /// This method is called by DeleteAsync.
-        /// This may be used to implement row-level 
+        /// This may be used to implement row-level security.
         /// </summary>
         /// <param name="item">The item being deleted.</param>
         /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>

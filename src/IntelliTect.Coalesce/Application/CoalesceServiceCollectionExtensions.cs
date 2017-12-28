@@ -33,9 +33,21 @@ namespace IntelliTect.Coalesce
             services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvc>();
 
             services.TryAddScoped<IApiActionFilter, ApiActionFilter>();
+
+            void AddFactoryDefaultTypes(IDictionary<Type, Type> types)
+            {
+                foreach (var type in types) services.TryAddScoped(type.Key, type.Value);
+            }
+            
             services.TryAddScoped<IDataSourceFactory, DataSourceFactory>();
+            AddFactoryDefaultTypes(DataSourceFactory.DefaultTypes);
+
+            services.TryAddScoped<IBehaviorsFactory, BehaviorsFactory>();
+            AddFactoryDefaultTypes(BehaviorsFactory.DefaultTypes);
+
             services.TryAddScoped<IBehaviorsFactory, BehaviorsFactory>();
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
+
             
 
             return services;

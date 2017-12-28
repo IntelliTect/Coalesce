@@ -39,10 +39,13 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCoalesce<AppDbContext>();
-
-            // Proof of concept - override the standard data source.
-            services.AddScoped(typeof(StandardDataSource<,>), typeof(MyDataSource<,>));
+            services.AddCoalesce(b =>
+            {
+                b.AddContext<AppDbContext>();
+                b.AddContext<AppDbContext>();
+                b.UseDefaultDataSource(typeof(MyDataSource<,>));
+                b.UseDefaultBehaviors(typeof(MyBehaviors<,>));
+            });
 
             services.AddMvc().AddJsonOptions(options =>
             {

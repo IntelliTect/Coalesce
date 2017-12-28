@@ -4,6 +4,7 @@
 @using IntelliTect.Coalesce.Utilities
 @using IntelliTect.Coalesce.DataAnnotations
 @using IntelliTect.Coalesce.Knockout.Helpers
+@using IntelliTect.Coalesce.Knockout.TypeDefinition
 @inherits CoalesceTemplate<CreateEditView>
 @{
     ClassViewModel model = Model.Model;
@@ -43,7 +44,7 @@
                     @if (prop.IsPOCO && prop.PureTypeOnContext)
                     {
                         @Display.PropertyHelperWithSurroundingDiv(prop, !prop.IsReadOnly, Model.AreaName, 7)
-                        <div class="col-md-1" data-bind="with: @prop.JsonName">
+                        <div class="col-md-1" data-bind="with: @prop.JsVariableForBinding()">
                             <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                         </div>
                     }

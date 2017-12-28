@@ -18,6 +18,34 @@ namespace IntelliTect.Coalesce.Api.Behaviors
             this.reflectionRepository = reflectionRepository;
         }
 
+        /// <summary>
+        /// Defines all marker interfaces for defaults, along with their default concrete implementation.
+        /// </summary>
+        internal static readonly Dictionary<Type, Type> DefaultTypes = new Dictionary<Type, Type>
+        {
+            { typeof(IEntityFrameworkBehaviors<,>), typeof(StandardBehaviors<,>) }
+            // Future: may be other kinds of defaults (non-EF)
+        };
+
+        protected Type GetDefaultBehaviorsType(ClassViewModel servedType)
+        {
+            // If other kinds of default are handled here in the future, add them to the collection above.
+
+            var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
+            var BehaviorsType = typeof(IEntityFrameworkBehaviors<,>).MakeGenericType(
+                servedType.Type.TypeInfo,
+                tContext.ClassViewModel.Type.TypeInfo
+            );
+            return BehaviorsType;
+        }
+
+        public object GetDefaultBehaviors(ClassViewModel servedType)
+        {
+            var behaviorsType = GetDefaultBehaviorsType(servedType);
+            return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
+        }
+
+
         protected Type GetBehaviorsType(ClassViewModel servedType)
         {
             var behaviorsClassViewModel = reflectionRepository.Behaviors
@@ -37,24 +65,7 @@ namespace IntelliTect.Coalesce.Api.Behaviors
         public object GetBehaviors(ClassViewModel servedType)
         {
             var behaviorsType = GetBehaviorsType(servedType);
-            return ActivatorUtilities.CreateInstance(serviceProvider, behaviorsType);
-        }
-
-
-        protected Type GetDefaultBehaviorsType(ClassViewModel servedType)
-        {
-            var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
-            var BehaviorsType = typeof(StandardBehaviors<,>).MakeGenericType(
-                servedType.Type.TypeInfo,
-                tContext.ClassViewModel.Type.TypeInfo
-            );
-            return BehaviorsType;
-        }
-
-        public object GetDefaultBehaviors(ClassViewModel servedType)
-        {
-            var behaviorsType = GetDefaultBehaviorsType(servedType);
-            return ActivatorUtilities.CreateInstance(serviceProvider, behaviorsType);
+            return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
         }
     }
 

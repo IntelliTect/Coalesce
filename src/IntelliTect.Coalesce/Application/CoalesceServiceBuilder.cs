@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce
 {
@@ -15,6 +16,11 @@ namespace IntelliTect.Coalesce
 
         internal IServiceCollection Services { get; }
 
+        /// <summary>
+        /// Add services related to the given context to the service container.
+        /// This allows the given context to work with the standard data sources and behaviors.
+        /// </summary>
+        /// <typeparam name="TContext">The DbContext that Coalesce needs to be able to handle.</typeparam>
         public CoalesceServiceBuilder AddContext<TContext>()
             where TContext : DbContext
         {
@@ -51,5 +57,49 @@ namespace IntelliTect.Coalesce
             Services.TryAddScoped<ITimeZoneResolver, TResolver>();
             return this;
         }
+
+        private CoalesceServiceBuilder UseDefaultCrudStrategy(Type implementationType, IEnumerable<Type> serviceCandidates)
+        {
+            bool foundMatch = false;
+            foreach (var serviceType in serviceCandidates)
+            {
+                if (new ReflectionTypeViewModel(implementationType).IsA(serviceType))
+                {
+                    Services.AddScoped(serviceType, implementationType);
+                    foundMatch = true;
+                }
+            }
+
+            if (!foundMatch)
+            {
+                throw new ArgumentException(
+                    $"The supplied type {implementationType} did not match any known marker interfaces. " +
+                    $"Valid interfaces are: {string.Join(",", serviceCandidates)}");
+            }
+
+            return this;
+        }
+
+
+        /// <summary>
+        /// Use the given data source type as the default implementation where suitable.
+        /// The data source will be used whenever no custom data source is found.
+        /// This type should be an non-constructed generic class that is compatible with a known marker interface.
+        /// </summary>
+        /// <param name="implementationType"></param>
+        /// <returns></returns>
+        public CoalesceServiceBuilder UseDefaultDataSource(Type implementationType)
+            => UseDefaultCrudStrategy(implementationType, Api.DataSources.DataSourceFactory.DefaultTypes.Keys);
+
+
+        /// <summary>
+        /// Use the given behaviors type as the default implementation where suitable.
+        /// The behaviors will be used whenever no custom behaviors are found.
+        /// This type should be an non-constructed generic class that is compatible with a known marker interface.
+        /// </summary>
+        /// <param name="implementationType"></param>
+        /// <returns></returns>
+        public CoalesceServiceBuilder UseDefaultBehaviors(Type implementationType)
+            => UseDefaultCrudStrategy(implementationType, Api.Behaviors.BehaviorsFactory.DefaultTypes.Keys);
     }
 }

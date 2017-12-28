@@ -14,10 +14,11 @@ using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Utilities;
 using System.Collections.ObjectModel;
+using IntelliTect.Coalesce.Api.DataSources;
 
 namespace IntelliTect.Coalesce
 {
-    public class StandardDataSource<T, TContext> : StandardCrudStrategy<T, TContext>, IDataSource<T>
+    public class StandardDataSource<T, TContext> : StandardCrudStrategy<T, TContext>, IEntityFrameworkDataSource<T, TContext>
         where T : class, new()
         where TContext : DbContext
     {

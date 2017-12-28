@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using IntelliTect.Coalesce.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Coalesce.Domain
 {
     public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
         where T : class, new()
-        where TContext : AppDbContext
+        where TContext : DbContext
     {
         public MyDataSource(CrudContext<TContext> context) : base(context)
         {
@@ -25,6 +27,22 @@ namespace Coalesce.Domain
             }
 
             return base.GetQuery(parameters);
+        }
+    }
+
+
+    public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
+        where T : class, new()
+        where TContext : DbContext
+    {
+        public MyBehaviors(CrudContext<TContext> context) : base(context)
+        {
+        }
+
+        public override ItemResult BeforeSave(SaveKind kind, T oldItem, T item)
+        {
+            // Do nothing - just testing that our custom behaviors will get injected.
+            return base.BeforeSave(kind, oldItem, item);
         }
     }
 }

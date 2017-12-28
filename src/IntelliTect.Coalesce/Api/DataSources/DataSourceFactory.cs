@@ -17,6 +17,15 @@ namespace IntelliTect.Coalesce.Api.DataSources
             this.serviceProvider = serviceProvider;
             this.reflectionRepository = reflectionRepository;
         }
+        
+        /// <summary>
+        /// Defines all marker interfaces for defaults, along with their default concrete implementation.
+        /// </summary>
+        internal static readonly Dictionary<Type, Type> DefaultTypes = new Dictionary<Type, Type>
+        {
+            { typeof(IEntityFrameworkDataSource<,>), typeof(StandardDataSource<,>) }
+            // Future: may be other kinds of defaults (non-EF)
+        };
 
         protected Type GetDataSourceType(ClassViewModel servedType, string dataSourceName)
         {
@@ -49,7 +58,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
         public object GetDataSource(ClassViewModel servedType, string dataSourceName)
         {
             var dataSourceType = GetDataSourceType(servedType, dataSourceName);
-            return ActivatorUtilities.CreateInstance(serviceProvider, dataSourceType);
+            return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
         }
 
 
@@ -63,8 +72,9 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 return defaultSource.Type.TypeInfo;
             }
 
+            // TODO: If other kinds of default data sources are created, add them to the DefaultTypes dictionary above.
             var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
-            var dataSourceType = typeof(StandardDataSource<,>).MakeGenericType(
+            var dataSourceType = typeof(IEntityFrameworkDataSource<,>).MakeGenericType(
                 servedType.Type.TypeInfo,
                 tContext.ClassViewModel.Type.TypeInfo
             );
@@ -80,7 +90,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
         public object GetDefaultDataSource(ClassViewModel servedType)
         {
             var dataSourceType = GetDefaultDataSourceType(servedType);
-            return ActivatorUtilities.CreateInstance(serviceProvider, dataSourceType);
+            return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
         }
     }
 

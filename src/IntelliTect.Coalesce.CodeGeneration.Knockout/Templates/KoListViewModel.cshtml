@@ -80,7 +80,7 @@ module @moduleName {
 
     export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@viewModelFullName> {
         protected modelName = "@(model.Name)";
-        protected apiController = "/@(model.ApiUrl)";
+        protected apiController = "/@(model.ApiRouteControllerPart)";
         public modelKeyName = "@(model.PrimaryKey.JsVariable)";
         public itemClass = @viewModelFullName;
 

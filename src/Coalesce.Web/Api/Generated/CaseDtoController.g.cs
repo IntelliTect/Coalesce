@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Web.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/CaseDto")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class CaseDtoController

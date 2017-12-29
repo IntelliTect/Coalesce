@@ -57,7 +57,6 @@ namespace Coalesce.Domain
         [Display(Name = "Reported By")]
         public Person ReportedBy { get; set; }
 
-        [FileDownload]
         public byte[] Attachment { get; set; }
 
         public string Severity { get; set; }

@@ -98,7 +98,6 @@ namespace Coalesce.Domain
         public PersonStats PersonStats => new PersonStats { Name = Name, Height = 10, Weight = 20 };
 
         [InternalUse]
-        [FileDownload]
         public byte[] ProfilePic { get; set; }
 
         /// <summary>

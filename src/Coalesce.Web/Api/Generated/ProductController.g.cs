@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Web.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/Product")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class ProductController

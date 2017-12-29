@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 {
                     // TODO: this could be more robust.
                     // Lots of client methods in the typescript aren't expecting an object that looks like this.
-                    // Anything that takes a SaveResult or ListResult should be fine, but other things (Csv..., Count, Delete, Get) won't handle this.
+                    // Anything that takes a SaveResult or ListResult should be fine, but other things (Csv..., Count) won't handle this.
                     context.Result = new BadRequestObjectResult(
                         new ApiResult(string.Join("; ", errors.Select(e => $"Invalid value for parameter {e.key}: {e.error}")))
                     );

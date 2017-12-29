@@ -50,8 +50,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? "protected"
             : "public";
 
-        public string ApiName => Name;
-
         public string DtoName => IsDto ? FullyQualifiedName : $"{Name}DtoGen";
 
         public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel : this;
@@ -366,7 +364,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
-        public string ApiUrl => ApiName;
+        public string ApiRouteControllerPart => Name;
 
 
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;

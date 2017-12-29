@@ -87,20 +87,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsTextPropertyName => JsVariable + "Text";
 
         /// <summary>
-        /// Returns true if the property is class outside the system NameSpace, but is not a string, array, or filedownload
+        /// Returns true if the property is class outside the system NameSpace, but is not a string or array
         /// </summary>
-        public bool IsPOCO
-        {
-            get
-            {
-                return !Type.FullNamespace.StartsWith("System") &&
-                  !Type.IsPrimitive &&
-                  Type.IsClass &&
-                  !Type.IsArray &&
-                  !Type.IsCollection &&
-                  !IsFileDownload;
-            }
-        }
+        public bool IsPOCO => Type.IsPOCO;
 
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
@@ -140,11 +129,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public PropertyViewModel ManyToManyCollectionProperty =>
             Object.Properties.FirstOrDefault(prop => prop.IsPOCO && prop.Object.Name != Parent.Name);
-
-        /// <summary>
-        /// Returns true if this property has the FileDownload Attribute.
-        /// </summary>
-        public bool IsFileDownload => HasAttribute<FileDownloadAttribute>();
 
         /// <summary>
         /// True if the property is read only.

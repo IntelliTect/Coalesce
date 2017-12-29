@@ -64,7 +64,7 @@
 
 ## Configuration & Discovery
 | CHANGE | RESOLUTION
-| ------ |----------|
+| ------ |-----------|
 | Your `DbContext` that Coalesce will generate from is now discovered by the presence of a `[Coalesce]` attribute on its class definition. | Place `[Coalesce]` on your `DbContext` that Coalesce should generate from.
 | `IEnumerable<IClassDto<>>` properties on your `DbContext` are no longer used to discover custom `IClassDto<>` implementations that should be generated | Place a `[Coalesce]` attribute on any `IClassDto<>` classes you wish to generate from. Remove the property on the `DbContext`.
 | Added extension methods for `IServiceProvider`: `services.AddCoalesce()`. This replaces the need for the (formerly) required `ReflectionRepository.AddContext` call in Startup.cs. | Replace call to `ReflectionRepository.AddContext` in `Configure` or `ConfigureServices` with `services.AddCoalesce()` in `ConfigureServices` in your `Startup.cs`.
@@ -73,7 +73,7 @@
 
 ## Modeling
 | CHANGE | RESOLUTION
-| ------ |----------|
+| ------ |-----------|
 | Custom DataSources have been completely overhauled. `public static IQueryable<T>` methods on your models are no longer considered data sources. | See the "New Features" section below.
 | The `IIncludable<>` interface has been removed. | Move desired behavior into a custom data source. Override the default data source if needed. 
 | The `IIncludeExternal<>` interface has been removed. | Override the `TransformResults` method of the `StandardDataSource<,>` in a custom data source to attach items from an external location.
@@ -81,6 +81,7 @@
 | `ListGroupAttribute` was removed as a consequence of the removal of the `PropertyValues` endpoint. | Remove usages of this attribute. Implement logic for sourcing values from multiple fields in the replacement methods written to replace `PropertyValues`.
 | `Fingerprintable<,>` and `IFingerprintable<,>` have been removed. To implement this functionality in a general way, derive a class from `StandardBehaviors<,>`, register your derived class with your applications `IServiceCollection` (e.g. `services.AddScoped(typeof(StandardBehaviors<,>), typeof(MyFingerprintingBehaviors<,>));`), and implement the fingerprint logic in your custom behavior class (probably in `BeforeSave`).
 | Client-exposed methods on your models must be explicitly exposed by adding the `[Coalesce]` attribute. | Add `[Coalesce]` to methods you wish to expose to the client. Remove `[InternalUse]` from those you don't wish to expose - it is no longer needed for methods.
+| The `[FileDownload]` attribute was removed, as it served no purpose. At best, it was misleading that Coalesce would generate file download API endpoints, which it does not. | Remove usages of this attribute. Replace with `[InternalUse]` for properties that shouldn't be sent in normal API responses.
 
 ## New Features:
 

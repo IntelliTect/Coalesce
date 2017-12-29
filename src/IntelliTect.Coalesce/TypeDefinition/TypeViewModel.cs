@@ -217,7 +217,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns true if the property is class outside the System namespac, and is not a string, array, or filedownload
+        /// Returns true if the property is class outside the System namespace, and is not a string or array
         /// </summary>
         public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass;
 

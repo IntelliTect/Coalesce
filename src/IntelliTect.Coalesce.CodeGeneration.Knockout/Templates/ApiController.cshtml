@@ -46,11 +46,11 @@ namespace @(namespaceName).Api
 @if (model.ApiRouted) {
     if (!string.IsNullOrWhiteSpace(Model.AreaName))
     {
-    @:[Route("@Model.AreaName/api/[controller]")]
+    @:[Route("@Model.AreaName/api/@(model.ApiRouteControllerPart)")]
     }
     else
     {
-    @:[Route("api/[controller]")]
+    @:[Route("api/@(model.ApiRouteControllerPart)")]
     }
 }
     @(securityInfo.ClassAnnotation)

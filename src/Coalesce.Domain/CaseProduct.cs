@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Coalesce.Domain
 {
     [Table("CaseProduct")]
-    [CreateController(false, false)]
     public class CaseProduct
     {
         public int CaseProductId { get; set; }

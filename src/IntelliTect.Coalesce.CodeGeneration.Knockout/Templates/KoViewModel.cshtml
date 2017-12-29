@@ -32,7 +32,7 @@ module @moduleName {
         protected primaryKeyName: keyof this = "@(model.PrimaryKey.JsVariable)";
         protected modelDisplayName = "@(model.DisplayName)";
 
-        protected apiController = "/@(model.ApiName)";
+        protected apiController = "/@(model.ApiRouteControllerPart)";
         protected viewController = "/@(model.ControllerName)";
 
         /** Behavioral configuration for all instances of @(model.ViewModelClassName). Can be overidden on each instance via instance.coalesceConfig. */

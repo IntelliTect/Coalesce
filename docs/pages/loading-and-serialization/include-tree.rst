@@ -109,10 +109,10 @@ Without an :csharp:`IncludeTree` present, Coalesce will map the entire object gr
 Usage
 -----
 
-Custom Data Sources & IIncludable
-.................................
+Custom Data Sources
+...................
 
-In most cases, you don't have to worry about creating an :csharp:`IncludeTree`. When using :ref:`CustomDataSources`, the structure of the :csharp:`.Include` and :csharp:`.ThenInclude` calls will be captured automatically and be turned into an :csharp:`IncludeTree`. Similarly, when using :ref:`IIncludable`, Coalesce will build an :csharp:`IncludeTree` from the returned :csharp:`IQueryable`.
+In most cases, you don't have to worry about creating an :csharp:`IncludeTree`. When using :ref:`CustomDataSources`, the structure of the :csharp:`.Include` and :csharp:`.ThenInclude` calls will be captured automatically and be turned into an :csharp:`IncludeTree`.
 
 However, there are sometimes cases where you perform complex loading in these methods that involves loading data into the current :csharp:`DbContext` outside of the :csharp:`IQueryable` that is returned from the method. The most common situation for this is needing to conditionally load related data - for example, load all children of an object where the child has a certain value of a Status property.
 
@@ -122,7 +122,7 @@ For example:
 
     .. code-block:: c#
 
-        public static IQueryable<Employee> WithCompleteProjectsAndMembers(AppDbContext db, ClaimsPrincipal user)
+        public override IQueryable<Employee> GetQuery()
         {
             // Load all projects that are complete, and their members, into the db context.
             db.Projects

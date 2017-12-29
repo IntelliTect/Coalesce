@@ -4,7 +4,7 @@
 Methods
 =======
 
-Any public methods you place on your POCO classes that are not annotated with the :ref:`InternalUse` attribute will get built into your TypeScript ViewModels and ListViewModels, and API endpoints will be created for these methods to be called. Both instance methods and static methods are supported.
+Any public methods you place on your POCO classes that are annotated with the :ref:`CoalesceAttribute` will get built into your TypeScript ViewModels and ListViewModels, and API endpoints will be created for these methods to be called. Both instance methods and static methods are supported.
 
 .. contents:: Contents
     :local:
@@ -27,6 +27,7 @@ The following parameters can be added to your methods:
         If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`ControllingLoading` and :ref:`IncludeTree` for more information about this.
 
 |
+
 Return Values
 -------------
 
@@ -42,16 +43,18 @@ You can return virtually anything from these methods:
         Any custom type you define may also be returned from a method. Corresponding TypeScript ViewModels will be created for these types. See :ref:`ExternalTypes`.
 
         .. warning::
-            When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your :ref:`ExternalTypes`, it will also generate ViewModels for the types of any of its properties, and so on down the tree. If a type is encountered from the FCL or another package that your application uses, these generated types will get out of hand extremely quickly.
+            When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your :ref:`ExternalTypes`, it will also generate ViewModels for the types of any of its properties, and so on down the tree. If a type is encountered from the FCL/BCL or another package that your application uses, these generated types will get out of hand extremely quickly.
 
-            Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier.
-    :csharp:`IEnumerable<T>`
-        Enumerables and collections of any of the valid return types above may be returned. Any derived type of :csharp:`IEnumerable<T>` is valid in the signature, but :csharp:`ICollection<T>` is recommended where possible.
+            Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
+    :csharp:`ICollection<T>`
+        Collections of any of the valid return types above are also valid return types.
         
 
 
 |
+
 .. _ModelMethodTypeScript:
+
 Generated TypeScript
 --------------------
 
@@ -93,18 +96,16 @@ Here's an example for a method called Move that takes a single parameter 'int fe
     The generated modal only exists on the generated editor views. If you need it elsewhere, you should copy it from the generated HTML for the editor and place it in your custom page.
 
 |
+
 Instance Methods
 ----------------
 
 Instance methods generate the members above on the TypeScript ViewModel.
 
-The model POCO instance that the method is called on will be loaded according to the following rules:
-
-- :ref:`CustomDataSources` are not used - even if one is set, it is not passed to the server in the API call, and will not be considered. If you would like to load additional data using one of your :ref:`CustomDataSources`, you'll need to manually call it inside your method.
-- If your model implements :ref:`IIncludable`, the :csharp:`Include` method will be called with a includes string of :csharp:`null`. 
-- Otherwise, the model is loaded according to the :ref:`DefaultLoadingBehavior`.
+The model POCO instance that the method is called on will be loaded using the default data source for the POCO's type. If you have a :ref:`Custom Data Source <CustomDataSources>` annotated with :csharp:`[DefaultDataSource]`, that data source will be used. Otherwise, the :ref:`StandardDataSource` will be used.
 
 | 
+
 Static Methods
 --------------
 
@@ -112,7 +113,7 @@ Static methods are created as functions on the TypeScript ListViewModel. All of 
 
 .. code-block:: c#
 
-    public static IEnumerable<string> NamesStartingWith(string characters, DbContext db)
+    public static ICollection<string> NamesStartingWith(string characters, AppDbContext db)
     {
         return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
     }

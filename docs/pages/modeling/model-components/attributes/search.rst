@@ -1,8 +1,8 @@
 
 .. _Searching:
 
-Search
-======
+[Search]
+========
 
 Coalesce supports searching through the generated API in its various implementations, including the generated list views (Table & Cards), in Select2 dropdowns, and directly through the TypeScript ListViewModels' :ts:`search` property.
 

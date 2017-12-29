@@ -44,7 +44,7 @@ Read :ref:`ModelAttributes` to learn more.
 Methods
 ~~~~~~~
 
-You can place both static and interface methods on your model classes. Any public methods will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read :ref:`ModelMethods` to learn more.
+You can place both static and interface methods on your model classes. Any public methods annotated with :ref:`[Coalesce] <CoalesceAttribute>` will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read :ref:`ModelMethods` to learn more.
 
 
 Customizing CRUD Operations
@@ -57,5 +57,7 @@ Data Sources
 
 The method by which you can control what data the users of your application can access through Coalesce's generated APIs is by creating custom data sources. These are classes that allow complete control over the way that data is retrieved from your database and provided to clients. Read :ref:`CustomDataSources` to learn more.
 
+Behaviors
+~~~~~~~~~~~~
 
-TODO: behaviors
+Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read :ref:`CustomBehaviors` to learn more.

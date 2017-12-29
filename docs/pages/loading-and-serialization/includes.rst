@@ -32,7 +32,7 @@ Special Values
     There are a few values of :ts:`includes` that are either set by default in the auto-generated views, or otherwise have special meaning:
 
         :code:`none`
-            Setting :ts:`includes` to ``none`` prevents :csharp:`IIncludable.Include` (see below) from being called, and also suppresses the :ref:`DefaultLoadingBehavior` provided by the :ref:`StandardDataSource`. The resulting data will be the requested object (or list of objects) and nothing more.
+            Setting :ts:`includes` to ``none`` suppresses the :ref:`DefaultLoadingBehavior` provided by the :ref:`StandardDataSource` - The resulting data will be the requested object (or list of objects) and nothing more.
 
         :code:`Editor`
             Used when loading an object in the generated CreateEdit views.

@@ -48,6 +48,6 @@ Read :ref:`IncludeTree` to learn more.
 DtoIncludes & DtoExcludes
 .........................
 
-The :csharp:`DtoIncludes` and :csharp:`DtoExcludes` attributes allow specific properties to be conditionally whitelisted or blacklisted for/from inclusion into the :ref:`DTOs`, and ultimately, serialization to JSON and transmission to the client.
+The :csharp:`DtoIncludes` and :csharp:`DtoExcludes` attributes allow specific properties to be conditionally whitelisted or blacklisted for/from inclusion into the :ref:`GenDTOs`, and ultimately, serialization to JSON and transmission to the client.
 
 Read :ref:`Includes` and :ref:`DtoIncludesExcludesAttr` to learn more.

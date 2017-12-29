@@ -1,8 +1,8 @@
 
 .. _DtoIncludesExcludesAttr:
 
-DtoIncludes & DtoExcludes
-=========================
+[DtoIncludes] & [DtoExcludes]
+=============================
 
 Allows for easily controlling what data gets set to the client. When requesting data from the generated client-side list view models, you can specify an :ts:`includes` property on the ViewModel or ListViewModel. 
 

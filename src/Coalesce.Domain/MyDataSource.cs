@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Coalesce.Domain
 {
@@ -43,6 +44,11 @@ namespace Coalesce.Domain
         {
             // Do nothing - just testing that our custom behaviors will get injected.
             return base.BeforeSave(kind, oldItem, item);
+        }
+
+        public override Task ExecuteDeleteAsync(T item)
+        {
+            return base.ExecuteDeleteAsync(item);
         }
     }
 }

@@ -1,8 +1,8 @@
 
 .. _ListTextAttribute:
 
-List Text
-=========
+[ListText]
+==========
 
 When a dropdown list is used to select a related object, this controls the text shown in the dropdown by default. When using these dropdown, only the key and this field are returned as search results by the API.
 

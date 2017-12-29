@@ -120,47 +120,56 @@ Model-Specific Members
 
     .. _ListViewModelQuery:
 
-    Query Object
-        For each exposed value type instance property on the underlying EF POCO, a property named :ts:`query` will have a strongly-typed property declaration generated for that property. If the :ts:`query` object is set, requests made to the server to retrieve data will be passed all the values in this object via the URL's query string. These parameters will filter the resulting data to only rows where the parameter values match the row's values. For example, if :ts:`query.companyId` is set to a value, only people from that company will be returned. There is also always a property on this object named :ts:`where` that accepts a freeform `LINQ Dynamic <https://github.com/kahanu/System.Linq.Dynamic/wiki>`_ query.
+    Filter Object
+        For each exposed value type instance property on the underlying EF POCO, a property named :ts:`filter` will have a property declaration generated for that property. If the :ts:`filter` object is set, requests made to the server to retrieve data will be passed all the values in this object via the URL's query string. These parameters will filter the resulting data to only rows where the parameter values match the row's values. For example, if :ts:`filter.companyId` is set to a value, only people from that company will be returned.
         
         .. code-block:: typescript
 
-            public query: {
-                where?: string;
-                personId?: number
+            public filter: {
+                personId?: string
                 firstName?: string
                 lastName?: string
-                gender?: number
-                companyId?: number
+                gender?: string
+                companyId?: string
             } = null;
 
 
         .. code-block:: typescript
 
             var list = new ListViewModels.PersonList();
-            list.query = {
-                where: 'Company.Name == "Acme"'
+            list.filter = {
                 lastName: "Erickson",
             };
             list.load();
 
+        These parameters all allow for freeform string values, allowing the server to implement any kind of filtering logic desired. The :ref:`StandardDataSource` will perform simple equality checks, but also the following:
+
+            - Enum properties may have a filter that contains either enum names or integer values. There may be a single such value, or multiple, comma-delimited values where the actual value may match any of the filter values.
+            - The same goes for numeric properties - you can specify a comma-delimited list of numbers to match on any of those values.
+            - Date properties can specify an exact time, or a date with no time component. In the latter case, any times that fall within that day will be matched.
+
     Static Method Members
-        For each :ref:`Static Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <ModelMethodTypeScript>` will be created.
+        For each exposed :ref:`Static Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <ModelMethodTypeScript>` will be created.
 
     DataSources
-        For each of the :ref:`CustomDataSources` on the class, an enum value will be added to an enum named ``ListViewModels.<ClassName>DataSources``. This enum can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and enum values can be assigned to the :ts:`dataSource` property.
+        For each of the :ref:`CustomDataSources` on the class, a corresponding class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This enum can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and enum values can be assigned to the :ts:`dataSource` property.
 
         .. code-block:: typescript
 
             module ListViewModels {
-                export enum PersonDataSources {
-                    Default,
-                    IncludeFamily,
-                    NamesStartingWithA,
+                export namespace PersonDataSources {
+                            
+                    export class WithoutCases extends Coalesce.DataSource<ViewModels.Person> { }
+                    export const Default = WithoutCases;
+                    
+                    export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> { }
+                    
+                    /** People whose last name starts with B or c */
+                    export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> { }
                 }
 
                 export class PersonList extends Coalesce.BaseListViewModel<PersonList, ViewModels.Person> {
                     public dataSources = PersonDataSources;
-                    public dataSource: PersonDataSources = PersonDataSources.Default;
+                    public dataSource: PersonDataSources = new this.dataSources.Default();
                 }
             }

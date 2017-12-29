@@ -1,8 +1,8 @@
 
 .. _InjectAttribute:
 
-Inject
-======
+[Inject]
+========
 
 Used to mark a method parameter for dependency injection from the application's :csharp:`IServiceProvider`.
 

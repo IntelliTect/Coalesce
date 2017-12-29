@@ -1,5 +1,5 @@
 
-Many to Many
+[ManyToMany]
 ============
 
 Used to specify a Many to Many relationship. Because EF core does not

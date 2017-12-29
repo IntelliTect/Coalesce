@@ -1,6 +1,6 @@
 
-Date Type
-=========
+[DateType]
+==========
 
 Specifies whether a DateTime type will have a date and a time, or only a date.
 

@@ -1,6 +1,6 @@
 
-TypeScript Partial
-==================
+[TypeScriptPartial]
+===================
 
 If defined on a model, a typescript file will be generated in
 ./Scripts/Partials if one does not already exist. This 'Partial' TypeScript file contains a class which inherits from the generated TypeScript ViewModel. The partial class has the same name as the generated ViewModel would normally have, and the generated ViewModel is renamed to ``"<ClassName>Partial"``.

@@ -16,10 +16,7 @@ Base Members
 ============
 
 	:ts:`includes: string`
-		String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes & loading control via IIncludable. See :ref:`Includes` for more information.
-
-
-
+		String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes. See :ref:`Includes` for more information.
 
 	:ts:`isChecked: KnockoutObservable<boolean>`
 		Flag to use to determine if this item is checked. Provided for convenience.
@@ -140,7 +137,7 @@ Model-Specific Members
         .. code-block:: typescript
 
             public dataSources = ListViewModels.PersonDataSources;
-            public dataSource: ListViewModels.PersonDataSources = ListViewModels.PersonDataSources.Default;
+            public dataSource: DataSource<Person> = new ListViewModels.PersonDataSources.Default();
 
     Data Properties
         For each exposed property on the underlying EF POCO, a :ts:`KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be :ts:`KnockoutObservableArray<T>` objects.

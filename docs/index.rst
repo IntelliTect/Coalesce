@@ -33,6 +33,7 @@ Welcome to Coalesce's documentation!
     pages/modeling/model-components/attributes
     pages/modeling/model-components/methods
     pages/modeling/model-components/data-sources
+    pages/modeling/model-components/behaviors
 
 .. toctree::
     :maxdepth: 3

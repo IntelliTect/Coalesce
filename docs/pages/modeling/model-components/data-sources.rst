@@ -4,7 +4,13 @@
 Data Sources
 ------------
 
-Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
+In Coalesce, all data that is retrieved from your database through the generated controllers is done so by a data source. These data sources control what data gets loaded and how it gets loaded. By default, there is a single generic data source that serves all data for your models in a generic way that fits many of the most common use cases - the :ref:`StandardDataSource`.
+
+In addition to this standard data source, Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
+
+
+.. contents:: Contents
+    :local:
 
 Defining Data Sources
 .....................
@@ -20,6 +26,8 @@ To implement your own custom data source, you simply need to define a class that
             [DefaultDataSource]
             public class IncludeFamily : StandardDataSource<Person, AppDbContext>
             {
+                public IncludeFamily(CrudContext<AppDbContext> context) : base(context) { }
+
                 public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) 
                     => Db.People
                     .Where(f => User.IsInRole("Admin") || f.CreatedById == User.GetUserId())
@@ -31,6 +39,8 @@ To implement your own custom data source, you simply need to define a class that
         [Coalesce]
         public class NamesStartingWithA : StandardDataSource<Person, AppDbContext>
         {
+            public NamesStartingWithA(CrudContext<AppDbContext> context) : base(context) { }
+
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) 
                 => Db.People.Include(f => f.Siblings).Where(f => f.FirstName.StartsWith("A"));
         }
@@ -39,6 +49,13 @@ The structure of the :csharp:`IQueryable` built by the various methods of :cshar
 
 .. warning::
     If you create a custom data source that has custom logic for securing your data, be aware that the default implementation of :csharp:`StandardDataSource` (or your custom default implementation - see below) is still exposed unless you annotate one of your custom data sources with :csharp:`[DefaultDataSource]`. Doing so will replace the default data source with the annotated class for your type :csharp:`T`.
+
+
+Dependency Injection
+''''''''''''''''''''
+
+All data sources are instantiated using dependency injection and your application's :csharp:`IServiceProvider`. As a result, you can add whatever constructor parameters you desire to your data sources as long as a value for them can be resolved from your application's services. The single parameter to the :csharp:`StandardDataSource` is resolved in this way - the :csharp:`CrudContext<TContext>` contains the common set of objects most commonly used, including the :csharp:`DbContext` and the :csharp:`ClaimsPrincipal` representing the current user.
+
 
 Consuming Data Sources
 ......................
@@ -72,6 +89,8 @@ On any data source that you create, you may add additional properties annotated 
         [Coalesce]
         public class NamesStartingWith : StandardDataSource<Person, AppDbContext>
         {
+            public NamesStartingWith(CrudContext<AppDbContext> context) : base(context) { }
+
             [Coalesce]
             public string StartsWith { get; set; }
 
@@ -104,6 +123,8 @@ Properties
 
 The following properties are availble for use on the :csharp:`StandardDataSource`
 
+    :csharp:`CrudContext<TContext> Context`
+        The object passed to the constructor that contains the set of objects needed by the standard data source, and those that are most likely to be used in custom implementations.
     :csharp:`TContext Db`
         An instance of the db context that contains a :csharp:`DbSet<T>` for the entity served by the data source.
     :csharp:`ClaimsPrincipal User`
@@ -125,7 +146,6 @@ These methods often call one another, so overriding one method may cause some ot
     .. code-block:: c#
 
         IsAuthorized
-        CanEvalQueryAsynchronously
 
         GetMappedItemAsync
             GetItemAsync

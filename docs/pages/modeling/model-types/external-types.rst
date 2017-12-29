@@ -8,8 +8,8 @@ In Coalesce, any type which is connected to your data model but is not directly 
 
 The collection of external types for a data model looks like this:
     
-    #. Take all of the database-mapped types in your data model by examining the :csharp:`DbSet<>` properties of your :csharp:`DbContext`.
-    #. Take all of the property types and method return types of your database-mapped types.
+    #. Take all of the api-served types in your data model. This includes :ref:`EntityModels` and :ref:`CustomDTOs`.
+    #. Take all of the property types and method return types of these types types.
     #. Any of these types which are not primitives and not database-mapped types are external types.
     #. For any external type, any of the property types which qualify under the above rules are also external types.
 
@@ -26,8 +26,8 @@ Generated Code
 
 For each external type found in your application's model, Coalesce will generate:
 
-    * A DTO
-    * A :ref:`TypeScriptExternalViewModel <TypeScript Model>`
+    * A :ref:`Generated DTO <GenDTOs>`
+    * A :ref:`TypeScript Model <TypeScriptExternalViewModel>`
 
 
 Example Data Model

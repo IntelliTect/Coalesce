@@ -1,8 +1,8 @@
 
 .. _InternalUse:
 
-Internal Use
-============
+[InternalUse]
+=============
 
     Used to mark a property or method for internal use. Internal Use members are:
 
@@ -19,7 +19,7 @@ Internal Use
 Example Usage
 -------------
 
-    In this example, :csharp:`Color` is the property exposed to the API, but :csharp:`ColorHex` is the property that maps to the database that stores the value. A helper method also exists for the color generation.
+    In this example, :csharp:`Color` is the property exposed to the API, but :csharp:`ColorHex` is the property that maps to the database that stores the value. A helper method also exists for the color generation, but needs no attribute to be hidden since methods must be explicitly exposed with :ref:`CoalesceAttribute`.
 
     If no color is saved in the database (the user hasn't picked a color), one is deterministically created.
 
@@ -39,7 +39,6 @@ Example Usage
                 set => ColorHex = value;
             }
 
-            [InternalUse]
             public static HSLColor GenerateColor(int? seed = null)
             {
                 var random = seed.HasValue ? new Random(seed.Value) : new Random();

@@ -1,5 +1,5 @@
 
-Default Order By
+[DefaultOrderBy]
 ================
 
 Allows setting of the default manner in which the data returned to the client will be sorted. Multiple fields can be used to sort an object by specifying an index.

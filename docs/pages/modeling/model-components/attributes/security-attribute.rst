@@ -126,4 +126,4 @@ Example Usage
 Execute
 -------
 
-A separate attribute for controlling method execution exists. Its documentation may be found on the ExecuteAttribute_ page.
+A separate attribute for controlling method execution exists. Its documentation may be found on the :ref:`ExecuteAttribute` page.

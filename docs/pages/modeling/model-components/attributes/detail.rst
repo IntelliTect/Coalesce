@@ -1,6 +1,6 @@
 
-Detail
-======
+[Detail]
+========
 
 Provides a detail field. Can be used to expose a tooltip or hint in HTML.
 

@@ -25,7 +25,7 @@ The following kinds of properties may be declared on your models.
         Collection navigation properties can be used in a straightforward manner. In the event where the inverse property on the other side of the relationship cannot be determined, :csharp:`[InversePropertyAttribute]` will need to be used. `EF Core provides documentation <https://docs.microsoft.com/en-us/ef/core/modeling/relationships#data-annotations>`_ on how to use this attribute. Errors will be displayed at generation time if an inverse property cannot be determined without the attribute. We recommend recommended that you declare the type of collection navigations as :csharp:`ICollection<T>`.
 
     Non-mapped POCOs
-        Properties of a type that are not on your :csharp:`DbContext` will also have corresponding properties generated on the :ref:`TypeScriptViewModel`, and the values of such properties will be sent with the object to the client when requested.
+        Properties of a type that are not on your :csharp:`DbContext` will also have corresponding properties generated on the :ref:`TypeScriptViewModel` typed as :ref:`TypeScriptExternalViewModel`, and the values of such properties will be sent with the object to the client when requested.
 
         See :ref:`ExternalTypes` for more information.
 
@@ -35,7 +35,7 @@ The following kinds of properties may be declared on your models.
     Getter-only Properties
         Any property that only has a getter will also have a corresponding property generated in the :ref:`TypeScriptViewModel`, but won't be sent back to the server during any save actions.
 
-        If such a property is defined as an auto-property, the :csharp:`[NotMapped]` attribute should probably be used to prevent EF Core from attempting to map such a property to your database.
+        If such a property is defined as an auto-property, the :csharp:`[NotMapped]` attribute should be used to prevent EF Core from attempting to map such a property to your database.
 
 
 

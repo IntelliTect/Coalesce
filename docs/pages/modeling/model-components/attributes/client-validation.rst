@@ -4,8 +4,8 @@
 
 .. _ClientValidation:
 
-Client Validation
-=================
+[ClientValidation]
+==================
 
 The :csharp:`[IntelliTect.Coalesce.DataAnnotations.ClientValidation]`
 attribute is used to control the behavior of client-side model validation

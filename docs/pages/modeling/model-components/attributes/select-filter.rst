@@ -1,6 +1,6 @@
 
-Select Filter
-=============
+[SelectFilter]
+==============
 
 Specify a property to restrict dropdown menus by. Values presented will
 be only those where the value of the foreign property matches the value

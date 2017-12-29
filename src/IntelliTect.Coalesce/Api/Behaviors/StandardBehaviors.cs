@@ -48,6 +48,34 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         protected virtual DbSet<T> GetDbSet() => Db.Set<T>();
 
+        /// <summary>
+        /// From the incoming DTO, determines if the operation should be a create or update operation.
+        /// Also discerns the primary key of the object that is being operated upon.
+        /// </summary>
+        /// <typeparam name="TDto">The type of the incoming DTO.</typeparam>
+        /// <param name="incomingDto">The incoming DTO to obtain a primary key from.</param>
+        /// <returns>A SaveKind indicating either Create or Update, 
+        /// and the value of the primary key that can be used for database lookups.</returns>
+        public virtual (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
+            where TDto : IClassDto<T>, new()
+        {
+            var dtoClassViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
+            object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
+
+            // IsNullable handles nullable value types, and reference types (mainly strings).
+            // !IsNullable handles non-Nullable<T> value types.
+            if (dtoClassViewModel.PrimaryKey.Type.IsNullable
+                ? idValue == null
+                : idValue.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
+            {
+                return (SaveKind.Create, null);
+            }
+            else
+            {
+                return (SaveKind.Update, idValue);
+            }
+        }
+
         #region Save
 
         /// <summary>
@@ -105,7 +133,9 @@ namespace IntelliTect.Coalesce
 
             // Allow interception of the save.
             var beforeSave = BeforeSave(kind, originalItem, item);
-            if (!beforeSave?.WasSuccessful ?? true) return new ItemResult<TDto>(beforeSave);
+            if (beforeSave == null)
+                throw new InvalidOperationException("Recieved null from result of BeforeSave. Expected an ItemResult.");
+            if (!beforeSave.WasSuccessful) return new ItemResult<TDto>(beforeSave);
 
             await Db.SaveChangesAsync();
 
@@ -125,7 +155,9 @@ namespace IntelliTect.Coalesce
             // modify the returned object, the include tree,
             // or signal an error.
             var afterSave = AfterSave(kind, originalItem, ref item, ref includeTree);
-            if (!afterSave?.WasSuccessful ?? true) return new ItemResult<TDto>(afterSave);
+            if (afterSave == null)
+                throw new InvalidOperationException("Recieved null from result of AfterSave. Expected an ItemResult<TDto>.");
+            if (!afterSave.WasSuccessful) return new ItemResult<TDto>(afterSave);
 
             // If the user nulled out the item in their AfterSave,
             // they don't want to send the item back with the save.
@@ -137,34 +169,6 @@ namespace IntelliTect.Coalesce
             );
 
             return result;
-        }
-
-        /// <summary>
-        /// From the incoming DTO, determines if the operation should be a create or update operation.
-        /// Also discerns the primary key of the object that is being operated upon.
-        /// </summary>
-        /// <typeparam name="TDto">The type of the incoming DTO.</typeparam>
-        /// <param name="incomingDto">The incoming DTO to obtain a primary key from.</param>
-        /// <returns>A SaveKind indicating either Create or Update, 
-        /// and the value of the primary key that can be used for database lookups.</returns>
-        public virtual (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
-            where TDto : IClassDto<T>, new()
-        {
-            var dtoClassViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
-            object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
-
-            // IsNullable handles nullable value types, and reference types (mainly strings).
-            // !IsNullable handles non-Nullable<T> value types.
-            if (dtoClassViewModel.PrimaryKey.Type.IsNullable
-                ? idValue == null
-                : idValue.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
-            {
-                return (SaveKind.Create, null);
-            }
-            else
-            {
-                return (SaveKind.Update, idValue);
-            }
         }
 
         /// <summary>

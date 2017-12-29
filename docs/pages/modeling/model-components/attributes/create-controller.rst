@@ -1,5 +1,5 @@
 
-Create Controller
+[CreateController]
 =================
 
 By default an API and View controller are both created. This allows for

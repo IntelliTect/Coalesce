@@ -1,5 +1,5 @@
 
-.. _DTOs:
+.. _GenDTOs:
 
 Data Transfer Objects (DTOs)
 ----------------------------
@@ -9,8 +9,8 @@ Data Transfer Objects, or DTOs, allow for transformations of data from the data 
 Coalesce supports several types of DTOs:
 
 -  DTOs that are automatically generated for each POCO database object.
-   These are controlled via :ref:`ModelAttributes` on the POCO.
--  DTOs that you create with IClassDto and create unique ViewModels.
+   These are controlled via :ref:`ModelAttributes` on the POCO. These are outlined below.
+-  DTOs that you create with IClassDto and create unique ViewModels. These are outlined at :ref:`CustomDTOs`.
 
 
 Automatically Generated DTOs

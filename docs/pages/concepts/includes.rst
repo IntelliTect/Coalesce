@@ -1,8 +1,8 @@
 
 .. _Includes:
 
-Includes
-========
+Includes String
+===============
 
 Coalesce provides a number of extension points for loading & serialization which make use of a concept called an "includes string" (also referred to as "include string" or just "includes").
 

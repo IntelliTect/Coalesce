@@ -72,4 +72,4 @@ Sometimes, Coalesce (and EF, too) can have trouble figuring out what the foreign
 NotMapped
 .........
 
-Model properties that aren't mapped to the database should be marked with :csharp:`[NotMapped]` so that Coalesce doesn't try to load them from the database when searching or carrying out the :ref:`DefaultLoadingBehavior`.
+Model properties that aren't mapped to the database should be marked with :csharp:`[NotMapped]` so that Coalesce doesn't try to load them from the database when :ref:`searching <Searching>` or carrying out the :ref:`DefaultLoadingBehavior`.

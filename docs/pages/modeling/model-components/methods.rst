@@ -24,7 +24,7 @@ The following parameters can be added to your methods:
     :csharp:`[Inject] <anything>`
         If a parameter is marked with the :ref:`InjectAttribute` attribute, it will be injected from the application's :csharp:`IServiceProvider`.
     :csharp:`out IncludeTree includeTree`
-        If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`ControllingLoading` and :ref:`IncludeTree` for more information about this.
+        If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information.
 
 |
 

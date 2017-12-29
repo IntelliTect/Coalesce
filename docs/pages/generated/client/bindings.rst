@@ -1,5 +1,7 @@
 
 
+.. _KnockoutBindings:
+
 Knockout Bindings
 =================
 

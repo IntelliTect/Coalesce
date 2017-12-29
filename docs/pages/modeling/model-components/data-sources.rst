@@ -118,6 +118,18 @@ Standard Data Source
 
 The standard data source, :csharp:`IntelliTect.Coalesce.StandardDataSource<T, TContext>`, contains a significant number of properties and methods that can be utilized and/or overridden at your leisure.
 
+
+
+.. _DefaultLoadingBehavior:
+
+Default Loading Behavior
+''''''''''''''''''''''''
+
+When an object or list of objects is requested, the default behavior of the the :csharp:`StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of many-to-many relationships. This can be suppressed by settings :ts:`includes = "none"` on your TypeScript :ref:`ViewModel <TypeScriptViewModel>` or :ref:`ListViewModel <TypeScriptListViewModel>` when making a request.
+
+In most cases, however, you'll probably want more or less data than what the default behavior provides. You can achieve this by overriding the :csharp:`GetQuery` method, outlined below.
+
+
 Properties
 ''''''''''
 
@@ -190,7 +202,7 @@ All of the methods outlined above can be overridden. A description of each of th
         
         .. note::
 
-            When :csharp:`GetQuery` is overridden, the :ref:`DefaultLoadingBehavior` is suppressed. To restore this behavior, use the :csharp:`IQueryable<T>.IncludeChildren()` extension method to build your query.
+            When :csharp:`GetQuery` is overridden, the :ref:`DefaultLoadingBehavior` is overridden as well. To restore this behavior, use the :csharp:`IQueryable<T>.IncludeChildren()` extension method to build your query.
 
     :csharp:`IsAuthorized`
         Allows for user-level control over whether or not the data source can be used. Use :csharp:`this.User` to get the current user. This method is called by the model binder that is responsible for injecting data sources into controller actions. If a failure result is returned by this method, a model state error will be added (and handled by default by Coalesce's default implementation of :csharp:`IApiActionFilter`), and no data source instance will be made available to the controller action.

@@ -6,7 +6,7 @@
 
 Controls permissions for executing of a static or instance method through the API.
 
-For other security controls, see :ref:`Security` and :ref:`SecurityAttribute`.
+For other security controls, see :ref:`SecurityAttribute`.
 
 Example Usage
 -------------
@@ -17,12 +17,12 @@ Example Usage
         {
             public int PersonId { get; set; }
             
-            [Execute(Roles = "Payroll,HR")]
+            [Coalesce, Execute(Roles = "Payroll,HR")]
             public void GiveRaise(int centsPerHour) {
                 ...
             }
 
-            ...\
+            ...
         }
 
 

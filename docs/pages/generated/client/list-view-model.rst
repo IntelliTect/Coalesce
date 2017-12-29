@@ -84,8 +84,7 @@ Base Members
         
     :ts:`pageSize: KnockoutObservable<number>`
         Number of items on a page.
-        
-.. _TypeScriptListViewModelOrderBy:
+
     :ts:`orderBy: KnockoutObservable<string>`
         Name of a field by which this list will be loaded in ascending order.
 

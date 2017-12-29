@@ -112,7 +112,7 @@ Usage
 Custom Data Sources
 ...................
 
-In most cases, you don't have to worry about creating an :csharp:`IncludeTree`. When using :ref:`CustomDataSources`, the structure of the :csharp:`.Include` and :csharp:`.ThenInclude` calls will be captured automatically and be turned into an :csharp:`IncludeTree`.
+In most cases, you don't have to worry about creating an :csharp:`IncludeTree`. When using the :ref:`StandardDataSource` (or a derivative), the structure of the :csharp:`.Include` and :csharp:`.ThenInclude` calls will be captured automatically and be turned into an :csharp:`IncludeTree`.
 
 However, there are sometimes cases where you perform complex loading in these methods that involves loading data into the current :csharp:`DbContext` outside of the :csharp:`IQueryable` that is returned from the method. The most common situation for this is needing to conditionally load related data - for example, load all children of an object where the child has a certain value of a Status property.
 
@@ -125,17 +125,27 @@ For example:
         public override IQueryable<Employee> GetQuery()
         {
             // Load all projects that are complete, and their members, into the db context.
-            db.Projects
+            Db.Projects
                 .Include(p => p.EmployeeProjects).ThenInclude(ep => ep.Employee)
                 .Where(p => p.Status == ProjectStatus.Complete)
                 .Load();
 
             // Return an employee query, and notify Coalesce that we loaded the projects in a different query.
-            return db.Employees.IncludedSeparately(e => e.EmployeeProjects)
+            return Db.Employees.IncludedSeparately(e => e.EmployeeProjects)
                                .ThenIncluded(ep => ep.Project.EmployeeProjects)
                                .ThenIncluded(ep => ep.Employee);
         }
 
+You can also override the :csharp:`GetIncludeTree` method of the :ref:`StandardDataSource` to achieve the same result:
+
+    .. code-block:: c#
+
+        public override IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters)
+            => Db.Employees.IncludedSeparately(e => e.EmployeeProjects)
+                           .ThenIncluded(ep => ep.Project.EmployeeProjects)
+                           .ThenIncluded(ep => ep.Employee)
+                           .GetIncludeTree(); 
+         
 
 Model Methods
 .............

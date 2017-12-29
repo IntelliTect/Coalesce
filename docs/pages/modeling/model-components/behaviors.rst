@@ -5,7 +5,7 @@
 Behaviors
 =========
 
-    In a CRUD system, *creating*, *updating*, and *deleting* are considered especially different from *reading*. In Coalesce, the dedicated classes that perform these operations are derivatives of a special interface known as the :csharp:`IBehaviors<T>`. These are their stories.
+    *In a CRUD system, creating, updating, and deleting are considered especially different from reading. In Coalesce, the dedicated classes that perform these operations are derivatives of a special interface known as the* :csharp:`IBehaviors<T>`. *These are their stories*.
 
 .. please dont get rid of my law & order copypasta. - andrew
 
@@ -37,7 +37,7 @@ To create your own behaviors for mutation of a model, you simply need to define 
         }
         
         [Coalesce]
-        public class Behaviors : StandardBehaviors<Case, AppDbContext>
+        public class CaseBehaviors : StandardBehaviors<Case, AppDbContext>
         {
             public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
 
@@ -157,3 +157,38 @@ All of the methods outlined above can be overridden. A description of each of th
 
     :csharp:`AfterDelete`
         Allows for performing any sort of cleanup actions after a delete has completed. This method offers no chance to return feedback to the client, so make sure any necessary feedback is done in :csharp:`BeforeDelete`.
+
+
+
+Replacing the Standard Behaviors
+................................
+
+You can, of course, create a custom base behaviors class that all your custom implementations inherit from. But, what if you want to override the standard behaviors across your entire application, so that :csharp:`StandardBehaviors<,>` will never be instantiated? You can do that too!
+
+Simply create a class that implements :csharp:`IEntityFrameworkBehaviors<,>` (the :csharp:`StandardBehaviors<,>` already does - feel free to inherit from it), then register it at application startup like so:
+
+
+    .. code-block:: c#
+
+        public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
+            where T : class, new()
+            where TContext : DbContext
+        {
+            public MyMyBehaviors(CrudContext<TContext> context) : base(context)
+            {
+            }
+
+            ...
+        }
+
+    .. code-block:: c#
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddCoalesce(b =>
+            {
+                b.AddContext<AppDbContext>();
+                b.UseDefaultBehaviors(typeof(MyBehaviors<,>));
+            });
+
+Your custom behaviors class must have the same generic type parameters - :csharp:`<T, TContext>`. Otherwise, the Microsoft.Extensions.DependencyInjection service provider won't know how to inject it.

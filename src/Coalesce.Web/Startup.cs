@@ -11,7 +11,6 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using IntelliTect.Coalesce.Mapping;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using IntelliTect.Coalesce;
 
@@ -39,13 +38,12 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCoalesce(b =>
-            {
-                b.AddContext<AppDbContext>();
-                b.AddContext<AppDbContext>();
-                b.UseDefaultDataSource(typeof(MyDataSource<,>));
-                b.UseDefaultBehaviors(typeof(MyBehaviors<,>));
-            });
+            services.AddCoalesce(builder => builder
+                .AddContext<AppDbContext>()
+                .UseDefaultDataSource(typeof(MyDataSource<,>))
+                .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+                .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
+            );
 
             services.AddMvc().AddJsonOptions(options =>
             {

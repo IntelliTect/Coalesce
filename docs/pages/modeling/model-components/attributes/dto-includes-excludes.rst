@@ -73,6 +73,6 @@ Properties
 
         .. important::
         
-            :csharp:`DtoIncludes` does not ensure that specific data will be loaded from the database. Only data loaded into current EF DbContext can possibly be returned from the API. See :ref:`ControllingLoading` for more information.
+            :csharp:`DtoIncludes` does not ensure that specific data will be loaded from the database. Only data loaded into current EF DbContext can possibly be returned from the API. See :ref:`Data Sources <CustomDataSources>` for more information.
 
         For :csharp:`DtoExcludes`, this will be the values of :ts:`includes` for which this property will **never** be serialized and sent to the client.

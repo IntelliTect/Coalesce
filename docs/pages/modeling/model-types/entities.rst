@@ -1,8 +1,8 @@
 
 .. _EntityModels:
 
-EF POCO Models
-==============
+EF Entity Models
+================
 
 Overview
 --------
@@ -61,3 +61,4 @@ Behaviors
 ~~~~~~~~~~~~
 
 Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read :ref:`CustomBehaviors` to learn more.
+

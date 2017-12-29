@@ -1,4 +1,6 @@
 
+.. This page is very dated, so it has been excluded from the docs. Most of what it explains is handled by _SecurityAttributes anyway.
+
 .. _Security:
 
 Security
@@ -35,8 +37,7 @@ The Read and Edit attributes can be combined to only allow edits for
 certain users. Below is an example of how to allow read access to anyone
 and write access only for administrators.
 
-::
-
+    .. code-block:: c#
 
         [Edit(Roles='Admin')] [Read(AllowAnonymous = true)]
         public class Person
@@ -61,8 +62,7 @@ must be secured if limited access to certain properties is desired.
 The example below allows only admins to edit the last name.
 Additionally, only admins can read and consequently edit the gender.
 
-::
-
+    .. code-block:: c#
 
         [Edit(Roles='Admin')] [Read(AllowAnonymous = true)]
         public class Person
@@ -83,40 +83,17 @@ argument to specify the list of valid roles that can access the method.
 
 The example below allows only admins to access the method.
 
-::
+    .. code-block:: c#
 
-
-        [Edit(Roles='Admin')] [Read(AllowAnonymous = true)]
         public class Person
         {
             public int PersonId { get; set; }
-            public string FirstName { get; set; }
-            [Edit(Roles="Admin")]
-            public string LastName { get; set; }
-            [Read(Roles="Admin")]
-            public string Gender { get; set; }
+            
             [Execute(Roles="Admin")]
             public string Hello() {
                 return "Hello";
             }
         }
-
-Role Mapping
-~~~~~~~~~~~~
-
-Putting system roles into your models may not be an ideal situation. For
-this case, a role mapping feature is available. This is done via the
-static class RoleMapping. Note that an internal role (the first
-parameter to the Add method) can be mapped to more than one external
-role and vice versa. This allows for a feature style mapping if desired.
-
-The example below maps the "User" role to an internal AD role name of
-AllUsers.
-
-::
-
-
-        RoleMapping.Add("User", "AllUsers");  // Interactive user.
 
 Using AuthorizeAttribute
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,8 +105,7 @@ work in Startup.cs to create policies
 The example below maps the "User" role to an internal AD role name of
 AllUsers.
 
-::
-
+    .. code-block:: c#
 
         RoleMapping.Add("User", "AllUsers");  // Interactive user.
 

@@ -7,8 +7,6 @@ Security Attributes
 
 Coalesce provides a collection of four attributes which can provide class-level (and property-level, where appropriate) security controls over the generated API.
 
-This page serves to document the attributes themselves - for information on their implementation and impact on your generated code, see :ref:`Security`.
-
 
 Properties
 **********
@@ -32,8 +30,7 @@ Class vs. Property Security
 
 .. important::
 
-    There are important differences between class-level security and property-level security, beyond the usage of the attributes themselves.
-    Read the :ref:`Security` page for a detailed explanation of these differences.
+    There are important differences between class-level security and property-level security, beyond the usage of the attributes themselves. In general, class-level security is implemented in the generated API Controllers as :csharp:`[Authorize]` attributes on the generated actions. Property security attributes are implemented in the :ref:`GenDTOs`.
 
 
 Implementations
@@ -44,7 +41,7 @@ Read
 
 Controls permissions for reading of objects and properties through the API.
 
-For **property-level** security only, if a :csharp:`[Read]` attribute is present without an :csharp:`[Edit]` attribute, the property is read-only. See :ref:`Security` for more info.
+For **property-level** security only, if a :csharp:`[Read]` attribute is present without an :csharp:`[Edit]` attribute, the property is read-only. 
 
 Example Usage
 .............
@@ -63,24 +60,25 @@ Example Usage
         }
 
 |
+
 Edit
 ----
 
 Controls permissions for editing of objects and properties through the API.
 
-For **property-level** security only, if a :csharp:`[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified (if any) for the :csharp:`[Edit]` attribute. See :ref:`Security` for more info.
+For **property-level** security only, if a :csharp:`[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified (if any) for the :csharp:`[Edit]` attribute..
 
 Example Usage
 .............
 
 .. code-block:: c#
 
-    [Edit(Roles = "Management", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
+    [Edit(Roles = "Management,Payroll", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
     public class Employee
     {
         public int EmployeeId { get; set; }
 
-        [Edit("Payroll")]
+        [Read("Payroll,HumanResources"), Edit("Payroll")]
         public string LastFourSsn { get; set; }
         
         ...
@@ -88,6 +86,7 @@ Example Usage
 
 
 |
+
 Create
 ------
 
@@ -106,6 +105,7 @@ Example Usage
 
 
 |
+
 Delete
 ------
 

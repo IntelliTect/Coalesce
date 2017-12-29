@@ -38,7 +38,7 @@ C# DTOs
 
 For each of your EF Database-mapped POCO classes, a C# DTO class is created. These classes are used to hold the data that will be serialized and sent to the client, as well as data that has been received from the client before it has been mapped back to your EF POCO class.
 
-See :ref:`ControllingLoading` and :ref:`GenDTOs` for more information.
+See :ref:`GenDTOs` for more information.
 
 
 API Controllers
@@ -46,7 +46,7 @@ API Controllers
 
 For each of your EF Database-mapped POCO classes, an API controller is created in the ``/Api/Generated`` directory of your web project. These controllers provide a number of endpoints for interacting with your data.
 
-See :ref:`Api` for more information.
+.. See :ref:`Api` for more information.
 
 
 View Controllers

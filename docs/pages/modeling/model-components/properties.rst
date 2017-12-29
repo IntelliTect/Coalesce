@@ -48,10 +48,10 @@ For any of the kinds of properties outlined above, the following rules are appli
         Coalesce provides a number of :ref:`ModelAttributes`, and supports a number of other .NET attributes, that allow for further customization of your model.
 
     Security
-        Properties will not be sent to the client and/or will be ignored if received by the client if authorization checks against any property-level :ref:`Security` present fail.
+        Properties will not be sent to the client and/or will be ignored if received by the client if authorization checks against any property-level :ref:`SecurityAttribute` present fail. This security is handled by the :ref:`GenDTOs`.
 
     Loading & Serialization
-        The behaviors outlined in :ref:`ControllingLoading` - especially :ref:`DtoIncludesExcludesAttr` - may also restrict which properties are sent to the client when requested.
+        The :ref:`DefaultLoadingBehavior`, any functionality defined in :ref:`CustomDataSources`, and :ref:`DtoIncludesExcludesAttr` may also restrict which properties are sent to the client when requested.
 
     NotMapped
         While Coalesce does not do anything special for the :csharp:`[NotMapped]` attribute, it is still and important attribute to keep in mind while building your model, as it prevents EF Core from doing anything with the property.

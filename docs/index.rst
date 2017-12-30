@@ -50,7 +50,7 @@ Creating a Project
 
 The quickest and easiest way to create a new Coalesce application is to check out the starter project: https://github.com/IntelliTect/Coalesce.Starter. This project already contains all the needed projects, dependencies, and configuration. In PowerShell:
 
-    .. code-block::
+    ::
 
         mkdir MyProject
         cd MyProject 
@@ -59,7 +59,7 @@ The quickest and easiest way to create a new Coalesce application is to check ou
 
 At this point, you can open up the solution in Visual Studio and run your application. However, your application won't do much without a data model, so you will probably want to do the following before running:
 
-    - Create an initial :ref:`Data Model <EntityModels>` by adding EF entity classes to the data project and the corresponding :csharp:`DbSet<>` properties to :csharp:`AppDbContext`. You will notice that this project includes a single model, :csharp:`ApplicationUser`, to start with. Feel free to change this model or remove it entirely. Read :ref:`EntityModels` for more information about creating a data model. 
+    - Create an initial :ref:`Data Model <EntityModels>` by adding EF entity classes to the data project and the corresponding :csharp:`DbSet<>` properties to :csharp:`AppDbContext`. You will notice that the starter project includes a single model, :csharp:`ApplicationUser`, to start with. Feel free to change this model or remove it entirely. Read :ref:`EntityModels` for more information about creating a data model. 
     
     - Run ``dotnet ef migrations add Init`` (Init can be any name) in the data project to create an initial database migration.
 

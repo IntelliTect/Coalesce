@@ -13,14 +13,14 @@ namespace IntelliTect.Coalesce.Api.Controllers
 {
     public class ApiActionFilter : IApiActionFilter
     {
-        private readonly ILogger<ApiActionFilter> logger;
+        protected readonly ILogger<ApiActionFilter> logger;
 
         public ApiActionFilter(ILogger<ApiActionFilter> logger)
         {
             this.logger = logger;
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
+        public virtual void OnActionExecuting(ActionExecutingContext context)
         {
             if (!context.ModelState.IsValid)
             {
@@ -42,7 +42,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             }
         }
 
-        public void OnActionExecuted(ActionExecutedContext context)
+        public virtual void OnActionExecuted(ActionExecutedContext context)
         {
             var response = context.HttpContext.Response;
 

@@ -14,7 +14,7 @@ Coalesce provides a number of extension points for loading & serialization which
 Includes String
 ---------------
 
-The includes string is simply a string which can be set to any aribitary value. It is passed from the client to the server in order to control data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
+The includes string is simply a string which can be set to any arbitrary value. It is passed from the client to the server in order to control data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
 
     .. code-block:: typescript 
 
@@ -50,5 +50,5 @@ Main document: :ref:`DtoIncludesExcludesAttr`.
 
 There are two C# attributes, :csharp:`DtoIncludes` and :csharp:`DtoExcludes`, that can be used to annotate your data model in order to control what data gets put into the DTOs and ultimately serialized to JSON and sent out to the client.
 
-.. include:: ../modeling/attributes/dto-includes-excludes.rst
+.. include:: ../modeling/model-components/attributes/dto-includes-excludes.rst
     :start-after: see :ref:`Includes`.

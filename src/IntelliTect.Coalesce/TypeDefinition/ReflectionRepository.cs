@@ -59,7 +59,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        public void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
+        internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
         {
             foreach (var type in types)
             {
@@ -127,7 +127,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public void AddAssembly<T>() =>
+        internal void AddAssembly<T>() =>
             DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(t)));
 
         /// <summary>

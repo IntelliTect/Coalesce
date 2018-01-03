@@ -3,7 +3,7 @@
 Custom DTOs
 ===========
 
-In addition to the generated :ref:`DTOs` that Coalesce will create for you, you may also create your own implementations of an :csharp:`IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel`.
+In addition to the generated :ref:`GenDTOs` that Coalesce will create for you, you may also create your own implementations of an :csharp:`IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel`.
 
 The difference between a Custom DTO and the underlying entity that they represent is as follows:
 
@@ -17,7 +17,7 @@ Creating a Custom DTO
 
 To create a custom DTO, define a class that implements :csharp:`IClassDTO<T>`, where :csharp:`T` is an EF Core POCO, and annotate it with :csharp:`[Coalesce]` . Add any :ref:`ModelProperties` to it just as you would add :ref:`model properties <ModelProperties>` to a regular EF model.
 
-Next, ensure that one property is annoted with :csharp:`[Key]` so that Coalesce can know the primary key of your DTO in order to perform database lookups and keep track of your object uniquely in the client-side TypeScript.
+Next, ensure that one property is annotated with :csharp:`[Key]` so that Coalesce can know the primary key of your DTO in order to perform database lookups and keep track of your object uniquely in the client-side TypeScript.
 
 Now, populate the required :csharp:`MapTo` and :csharp:`MapFrom` methods with code for mapping from and to your DTO, respectively (the methods are named with respect to the underlying entity, not the DTO). Most properties probably map one-to-one in both directions, but you probably created a DTO because you wanted some sort of custom mapping - say, mapping a collection on your entity with a comma-delimited string on the DTO. This is also the place to perform any user-based, role-based, property-level security. You can access the current user on the :csharp:`IMappingContext` object. 
 

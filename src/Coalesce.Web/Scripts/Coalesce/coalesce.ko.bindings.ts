@@ -63,7 +63,7 @@ ko.bindingHandlers.select2Ajax = {
                             pageSize: pageSize,
                             fields: allBindings.get('idField') + "," + allBindings.get('textField'),
                         };
-                        if (!allBindings.has('cache') || !allBindings.get('cache'))
+                        if (!allBindings.has('cache') || allBindings.get('cache'))
                             data["_"] = new Date().getTime();
                         return data;
                     },
@@ -184,12 +184,21 @@ ko.bindingHandlers.select2Ajax = {
 // Multi-select Select2 binding that uses an AJAX call for the list of valid values.
 ko.bindingHandlers.select2AjaxMultiple = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        var url = allBindings.get('url');
+        var itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
+
+        // 'idFieldName' was the old name, kept for backwards compat. 'idField' is the new name.
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textField'));
+
+        if (!url) throw "select2AjaxMultiple requires additional binding 'url'";
+        if (!itemViewModel) throw "select2AjaxMultiple requires additional binding 'itemViewModel'."
+            + " This should be a reference to the class of the join table - e.g.ViewModels.PersonCase.";
+        if (!idFieldName) throw "select2AjaxMultiple requires additional binding 'idField'";
+        if (!textFieldName) throw "select2AjaxMultiple requires additional binding 'textField'";
+
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
-        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textFieldName'));
-        var url = allBindings.get('url');
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
         var allowClear = allBindings.get('allowClear') || true
@@ -209,7 +218,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             search: params.term,
                             page: params.page
                         };
-                        if (!allBindings.has('cache') || !allBindings.get('cache'))
+                        if (!allBindings.has('cache') || allBindings.get('cache'))
                             data["_"] = new Date().getTime();
                         return data;
                     },
@@ -317,9 +326,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
         if ($(element).data("select2-ajax-updating")) return;
         $(element).data("select2-ajax-updating", true);
 
-        var itemViewModel = allBindings.has('itemViewModel') ? allBindings.get('itemViewModel') : null;
-        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('idFieldName') ? allBindings.get('idFieldName') : null);
-        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.has('textFieldName') ? allBindings.get('textFieldName') : null);
+        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
+        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textField'));
 
         // See if the value exists. If not, we haven't loaded it from the server yet.
         var select2Value = $(element).val();
@@ -375,11 +383,10 @@ ko.bindingHandlers.select2AjaxText = {
                     data: function (params: any) {
                         myParams = params
                         var data: any = {
-                            property: allBindings.get('property'),
                             search: params.term,
                             page: params.page
                         };
-                        if (!allBindings.has('cache') || !allBindings.get('cache'))
+                        if (!allBindings.has('cache') || allBindings.get('cache'))
                             data["_"] = new Date().getTime();
                         return data;
                     },
@@ -394,12 +401,35 @@ ko.bindingHandlers.select2AjaxText = {
                             result.unshift(blank);
                         }
                         var perfectMatch = false;
-                        for (var i in data) {
-                            if (data[i] == myParams.term) {
+
+                        var items: any[];
+                        if (Array.isArray(data)) {
+                            // Raw endpoint that serves an array response.
+                            items = data;
+                        }
+                        else if (typeof data !== "object") {
+                            throw "Couldn't figure out how to access the text results - response wasn't an object for call to " + url;
+                        }
+                        else if (Array.isArray(data.object)) {
+                            // Endpoint that serves an ItemResult<IEnumerable<string>>
+                            // For example, a custom model method or static method.
+                            items = data.object;
+                        }
+                        else if (Array.isArray(data.list)) {
+                            // Endpoint that serves a ListResult<string>
+                            items = data.list;
+                        }
+                        else {
+                            throw "Couldn't figure out how to access the text results for call to " + url;
+                        }
+
+                        for (var i in items) {
+                            var item = items[i].toString();
+                            if (item == myParams.term) {
                                 perfectMatch = true;
-                                result.push({ id: data[i], text: data[i], selected: true });
+                                result.push({ id: item, text: item, selected: true });
                             } else {
-                                result.push({ id: data[i], text: data[i] });
+                                result.push({ id: item, text: item });
                             }
                         }
                         if (!perfectMatch && myParams.term) {

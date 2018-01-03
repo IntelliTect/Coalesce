@@ -41,6 +41,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             services.AddSingleton<CompositeGeneratorServices>();
             services.AddSingleton<GenerationContext>();
             services.AddTransient<IProjectContextFactory, RoslynProjectContextFactory>();
+
+
+            // TODO: extension point for people implementing their own generators?
+            // would allow for overriding any of the services used. For example, the template resolver.
+
             var provider = services.BuildServiceProvider();
 
             var logger = provider.GetRequiredService<ILogger<GenerationExecutor>>();

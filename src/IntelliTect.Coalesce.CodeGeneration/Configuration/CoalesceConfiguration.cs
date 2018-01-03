@@ -8,9 +8,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
     public class CoalesceConfiguration
     {
         public ProjectConfiguration DataProject { get; set; }
+
         public ProjectConfiguration WebProject { get; set; }
 
-        public InputConfiguration Input { get; set; } = new InputConfiguration();
+        // public InputConfiguration Input { get; set; } = new InputConfiguration();
+
         public OutputConfiguration Output { get; set; } = new OutputConfiguration();
     }
 
@@ -21,6 +23,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
     public class OutputConfiguration
     {
+        // Specify an area name to output MVC components to.
+        // Property is undocumented, implementation is probably incomplete.
         public string AreaName { get; set; } = null;
 
         public string TypescriptModulePrefix { get; set; } = null;
@@ -28,12 +32,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
     public class ProjectConfiguration
     {
-        public bool Build { get; set; }
-
+        /// <summary>
+        /// Path to .csproj file for the project.
+        /// </summary>
         public string ProjectFile { get; set; }
 
-        public string Assembly { get; set; }
-
+        /// <summary>
+        /// Override the root namespace of the target project.
+        /// </summary>
         public string RootNamespace { get; set; }
 
         /// <summary>
@@ -45,5 +51,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
         /// Target Framework to use when building or analyzing projects.
         /// </summary>
         public string Framework { get; set; }
+
+
+        // Reflection project context builder (which is obsolete) only.
+        public bool Build { get; set; }
+
+        // Reflection project context builder (which is obsolete) only.
+        public string Assembly { get; set; }
     }
 }

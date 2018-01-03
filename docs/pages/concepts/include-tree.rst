@@ -184,7 +184,7 @@ To tell Coalesce about the structure of the data returned from a model method, s
 
     In situations where your root object isn't on your :csharp:`DbContext` (see :ref:`ExternalTypes`), you can use :csharp:`Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an :csharp:`IQueryable` to start from. When you do this, you **must** use :csharp:`IncludedSeparately` - the regular EF :csharp:`Include` method won't work without a :csharp:`DbSet`.
 
-Without the outputted :csharp:`IncludeTree` in this scenario, the object graph recieved by the client would have ended up looking like this:
+Without the outputted :csharp:`IncludeTree` in this scenario, the object graph received by the client would have ended up looking like this:
     
     .. code-block:: none
 

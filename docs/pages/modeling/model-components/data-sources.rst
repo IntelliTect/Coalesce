@@ -233,8 +233,8 @@ All of the methods outlined above can be overridden. A description of each of th
             - Dates with a time component will be matched exactly.
             - Dates with no time component will match any dates that fell on that day.
             - Strings will match exactly unless an asterisk is found, in which case they will be matched with :csharp:`string.StartsWith`.
-            - Enums will match by string or numeric value. Mutliple comma-delimited values will create a filter that will match on any of the provided values.
-            - Numeric values will match exactly. Mutliple comma-delimited values will create a filter that will match on any of the provided values.
+            - Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
+            - Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values.
 
     :csharp:`ApplyListSearchTerm`
         Applies filters to the query based on the specified search term. See :ref:`Searching` for a detailed look at how searching works in Coalesce.

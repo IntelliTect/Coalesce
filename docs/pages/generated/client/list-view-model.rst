@@ -5,7 +5,7 @@
 TypeScript ListViewModels
 -------------------------
 
-In addition to :ref:`TypeScriptViewModel` for interacting with instances of your data classes in TypeScript, Coalesce will also generated a List ViewModel for loading searched, sorted, pagninated data from the server.
+In addition to :ref:`TypeScriptViewModel` for interacting with instances of your data classes in TypeScript, Coalesce will also generated a List ViewModel for loading searched, sorted, paginated data from the server.
 
 .. _Knockout: http://knockoutjs.com/
 

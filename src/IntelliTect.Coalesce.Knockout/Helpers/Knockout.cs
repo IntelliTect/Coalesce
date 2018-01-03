@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.Knockout.Helpers
 {
@@ -338,31 +340,34 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         #endregion
 
         #region StringSelect
+
         public static HtmlString SelectFor<T>(Expression<Func<T, string>> propertySelector,
+            string endpointName,
             string placeholder = "")
         {
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             placeholder = placeholder ?? propertyModel.DisplayName;
-            return SelectString(propertyModel, placeholder);
+            return SelectString(propertyModel, endpointName: endpointName, placeholder: placeholder);
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, string>> propertySelector,
+            string endpointActionName,
             int? labelCols = null, int? inputCols = null, string label = null, string placeholder = "")
         {
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            return SelectFor<T>(propertySelector, placeholder).AddLabel(propertyModel.DisplayNameLabel(label), labelCols, inputCols);
+            return SelectFor<T>(propertySelector, endpointActionName, placeholder: placeholder)
+                .AddLabel(propertyModel.DisplayNameLabel(label), labelCols, inputCols);
         }
 
-        public static HtmlString SelectString(PropertyViewModel propertyModel, string placeholder = "")
+        public static HtmlString SelectString(PropertyViewModel propertyModel, string endpointName, string placeholder = "")
         {
-            // TODO: update me for the removal of PropertyValues
             string result = string.Format($@"
                     <select class=""form-control"" placeholder=""{placeholder}""
                         data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, " + 
-                        $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.Name}/PropertyValues', property: '{propertyModel.Name}'"">
+                        $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.Name}/{endpointName}'"">
                         <option></option>
                     </select >");
-            // TODO: this may be wrong? I don't know enough about the code yet to know.
+
             return new HtmlString(result);
         }
 
@@ -480,7 +485,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             string result = string.Format(@"
                 <select data-bind = ""select2AjaxMultiple: {0}{1}, itemViewModel: {6}ViewModels.{2}, 
-                    idFieldName: '{3}', textFieldName: '{4}', url: '/api/{5}/list?includes=none', pageSize: '{7}',""
+                    idField: '{3}', textField: '{4}', url: '/api/{5}/list?includes=none', pageSize: '{7}',""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
                 prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
@@ -490,14 +495,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 pageSize
                 );
             return new HtmlString(result);
-        }
-
-
-        public static HtmlString SelectForWithLabel<T>(Expression<Func<T, string>> propertySelector,
-            string placeholder = "", int? labelCols = null, int? inputCols = null, string label = null)
-        {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            return SelectFor(propertySelector, placeholder).AddLabel(propertyModel.DisplayNameLabel(label), labelCols, inputCols);
         }
         #endregion
 

@@ -189,6 +189,7 @@ From this point, one can start adding more fields, more features, and more flair
     :titlesonly:
     :caption: Generated Code - Server
 
+    pages/topics/generation
     pages/generated/server/dtos
 
 .. toctree::
@@ -215,8 +216,8 @@ From this point, one can start adding more fields, more features, and more flair
     :hidden:
     :maxdepth: 2
     :glob:
-    :caption: Topics
+    :caption: Configuration
 
     pages/topics/startup
-    pages/topics/generation
+    pages/topics/coalesce-json
 

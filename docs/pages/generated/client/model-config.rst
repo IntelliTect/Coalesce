@@ -104,7 +104,7 @@ validateOnLoadFromDto - :ts:`true`
     Whether or not to validate the model after loading it from a DTO from the server. Disabling this can improve performance in some cases.
 
 setupValidationAutomatically - :ts:`true`
-    Whether or not validation on a ViewModel should be setup in its constructor, or if validation must be set up manually by calling viewModel.setupValidation(). Turning this off can improve performance in read-only scenarios.
+    Whether or not validation on a ViewModel should be setup in its constructor, or if validation must be set up manually by calling :ts:`viewModel.setupValidation()`. Turning this off can improve performance in read-only scenarios.
 
 onLoadFromDto - :ts:`null`
     An optional callback to be called when an object is loaded from a response from the server. Callback will be called after all properties on the ViewModel have been set from the server response.

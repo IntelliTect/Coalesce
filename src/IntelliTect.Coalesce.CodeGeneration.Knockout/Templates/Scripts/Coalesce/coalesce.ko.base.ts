@@ -778,7 +778,7 @@ module Coalesce {
 
 
         /** Returns a query string built from the list's various properties, appropriate to the kind of parameters requested. */
-        protected queryParams = (kind: 'dataSource' | 'filter' | 'list', pageSize?: number): string => {
+        public queryParams = (kind: 'dataSource' | 'filter' | 'list', pageSize?: number): string => {
             var query = this.dataSource.getQueryString();
 
             const param = (name: string, value: any) => {

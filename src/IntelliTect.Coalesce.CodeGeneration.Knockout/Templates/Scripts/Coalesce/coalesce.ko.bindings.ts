@@ -39,23 +39,39 @@ interface KnockoutBindingHandlers {
 // Select2 binding for an object that uses an AJAX call for valid values. 
 ko.bindingHandlers.select2Ajax = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+        var url = allBindings.get('url');
+        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
+        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
+
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
         var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
-        var object = allBindings.has('object') ? allBindings.get('object') : null;
+        var itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
+        var object: KnockoutObservable<Coalesce.BaseViewModel> = allBindings.has('object') ? allBindings.get('object') : null;
         var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
         var placeholder = $(element).attr('placeholder') || "select";
-        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
-        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
         var pageSize = allBindings.get('pageSize') || 25;
+
+        if (!url) throw "select2Ajax requires additional binding 'url'";
+        if (!textField) throw "select2Ajax requires additional binding 'textField'";
+        if (!idField) throw "select2Ajax requires additional binding 'idField'";
+        if (setObject && !itemViewModel)
+            throw "select2Ajax with 'setObject' requires additional binding 'itemViewModel'."
+            + " This should be a reference to the class of the join table - e.g.ViewModels.PersonCase.";
+
+        interface ResultItem {
+            id: any,
+            text: string,
+            _apiObject?: object
+        }
 
         // Create the Select2
         $(element)
             .select2({
                 ajax: {
-                    url: allBindings.get('url'),
+                    url: url,
                     dataType: 'json',
                     delay: 250,
                     data: function (params: any) {
@@ -63,29 +79,50 @@ ko.bindingHandlers.select2Ajax = {
                             search: params.term,
                             page: params.page,
                             pageSize: pageSize,
-                            fields: allBindings.get('idField') + "," + allBindings.get('textField'),
                         };
+
+                        if (!setObject) {
+                            // If we're NOT going to populate the object observable with the results from our API call,
+                            // then its safe to only get the two fields that we need to populate the dropdown.
+                            // If we ARE going to set the object (setObject == true), then we should be requesting the entire object from the server.
+
+                            // There may be scenarios where you may want to set the object but still only want the two fields.
+                            // In this case, just specify ".../list?fields=field1,field2" as part of the url in the binding.
+                            data.fields = idField + "," + textField;
+                        };
+
                         if (!allBindings.has('cache') || allBindings.get('cache'))
                             data["_"] = new Date().getTime();
                         return data;
                     },
                     processResults: function (data: any, params: any) {
-                        if (allBindings.has('idField')) {
 
-                            if (allowClear && params.page == 1) {
-                                // Add a blank item
-                                var blank = {
-                                    [idField]: 0,
-                                    [textField]: 'No Selection',
-                                };
-                                data.list.unshift(blank);
-                            }
-                            for (var i in data.list) {
-                                data.list[i].id = data.list[i][idField];
-                            }
-                        }
+                        // Transform our objects into what select2 wants (it needs objects with a key "id").
+                        // We throw the raw object from the API on there as well so we can use it when handling a selection.
+                        var results = (data.list as any[]).map(item => {
+                            return {
+                                id: item[idField],
+                                text: item[textField],
+                                _apiObject: item,
+                            } as ResultItem;
+                        });
+
+
+                        // This doesn't seem to have ever worked. Params doesn't have a property named 'page'.
+                        // Leaving it commented out to maintain that there was some intention to do this, 
+                        // but we seem to have gotten by just fine with out it up until now.
+
+                        //if (allowClear && params.page == 1) {
+                        //    // Add a blank item
+                        //    var blank = {
+                        //        id: 0, // This should probably not be 0, since 0 is a totally valid primary key.
+                        //        text: 'No Selection',
+                        //    };
+                        //    results.unshift(blank);
+                        //}
+
                         return {
-                            results: data.list,
+                            results: results,
                             pagination: {
                                 more: data.page < data.pageCount
                             }
@@ -93,48 +130,66 @@ ko.bindingHandlers.select2Ajax = {
                     },
                     cache: (allBindings.has('cache') ? allBindings.get('cache') : false).toString(),
                 },
-                //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-                //minimumInputLength: 1,
                 placeholder: placeholder,
                 allowClear: allowClear,
                 selectOnClose: selectOnClose,
                 templateResult: function (item: any) {
-                    return format.replace('{0}', (item[textField] || item.text || item));
+                    return format.replace('{0}',
+                        typeof item.text == "string" ? item.text :
+                            typeof item == "string" ? item : ""
+                    );
                 },
                 templateSelection: function (item: any) {
-                    return selectionFormat.replace('{0}', (item[textField] || item.text || item));
+                    return format.replace('{0}',
+                        typeof item.text == "string" ? item.text :
+                            typeof item == "string" ? item : ""
+                    );
                 },
             })
             .on("change", function (e) {
                 // Code to update knockout
-                var value = $(element).val();
+                var value: string = $(element).val();
+
+                // Loose equality is intentional - select2 always provides a string value when asked, 
+                // but our observable is probably an integer number.
                 if (valueAccessor()() != value && (valueAccessor()() || value)) {
+
+                    // Just like we do in the .loadFromDto method in the generated ViewModels,
+                    // we load the object property first BEFORE we load the primary key.
+
+                    if (object) {
+                        // Set the object if such functionality is enabled
+                        if (setObject) {
+                            var selectedData = $(element).select2("data");
+                            if (selectedData && selectedData.length > 0) {
+                                var result = (selectedData[0] as ResultItem)._apiObject;
+
+                                var oldObject = object();
+                                if (oldObject instanceof itemViewModel) {
+                                    oldObject.loadFromDto(result);
+                                } else {
+                                    object(new itemViewModel(result));
+                                }
+                            } else {
+                                object(null);
+                            }
+                        }
+                        else {
+                            // Clear the object because we don't know anything about it.
+                            // It might be reloaded when the parent object is saved.
+                            object(null);
+                        }
+                    }
+
                     // Set the ID.
                     if (value) {
                         valueAccessor()(value);
                     } else {
                         valueAccessor()(null);
                     }
-
-                    // Clear the object because it might be wrong now. It will be reloaded when the parent is saved.
-                    if (object) {
-                        object(null);
-
-                        // Set the object if that is what is needed.
-                        // Note that this DOES NOT RESPECT CORRECT TYPINGS. This will set the observable to a non-Coalesce.BaseViewModel object.
-                        // if this ever gets fixed (do it like we do select2ajaxmultiple - the itemViewModel binding).
-                        // In such a case where this is fixed and itemViewModel is used, itemViewModel MUST be optional UNLESS setObject is specified.
-                        if (setObject) {
-                            var selectedData = $(element).select2("data");
-                            if (selectedData && selectedData.length > 0) {
-                                object(selectedData[0]);
-                            } else {
-                                object(null);
-                            }
-                        }
-                    }
                 }
             });
+
         if (openOnFocus) {
             $.data(element).select2.on("focus", function () {
                 $(element).select2("open");
@@ -151,37 +206,66 @@ ko.bindingHandlers.select2Ajax = {
         var clearOnNull = allBindings.get("clearOnNull") || false;
         var value = valueAccessor()();
         var select2Value = $(element).val();
-        var setValue = true;
         var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
+        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
+        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
+        var object: KnockoutObservable<any> = allBindings.get('object')
 
         // See if something has changed
-        if (value != select2Value && (value || select2Value || setObject)) {
-            var options = $(element).find('option[value="' + value + '"]');
-            // The option doesn't exist.
-            if (options.length == 0 && value === null && clearOnNull) {
-                $(element).val("").trigger("change");
-            } else if (options.length == 0) {
-                // Unless we make it all the way through this section, don't set the value.
-                setValue = false;
-                // Add it based on the object.
-                var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
-                if (allBindings.has('object')) {
-                    var object = allBindings.get('object')();
-                    if (object != null && object.hasOwnProperty(textField)) {
-                        var text = object[textField]();
-                        if (value && text) {
-                            var option = new Option(text, value, true, true);
-                            $(element).append(option);
-                            setValue = true;
-                        }
+        var option: HTMLOptionElement;
+        var triggerSelect2Change = false;
 
-                    }
+        if (value) {
+            let options = $(element).find('option[value="' + value.toString().replace(/"/g, '\\"') + '"]');
+            if (options.length > 0) option = options[0] as HTMLOptionElement;
+        } else {
+            let options = $(element).find('option[value="' + value + '"]');
+            if (options.length > 0) option = options[0] as HTMLOptionElement;
+        }
+
+        if (!option) {
+            option = new Option();
+            option.value = value;
+            option.selected = true;
+            option.defaultSelected = true;
+
+            $(element).append(option);
+            triggerSelect2Change = true;
+        }
+
+
+        if (value === null && clearOnNull) {
+            $(element).val("").trigger("change");
+        } else {
+            // Add it based on the object.
+            var objectUnwrapped = ko.unwrap(object);
+            if (value && objectUnwrapped) {
+                // Get the raw key value from the object that we think represents the selected key.
+                var id = ko.unwrap(objectUnwrapped[idField]);
+                var text = ko.unwrap(objectUnwrapped[textField]);
+
+                // Check id == value here to make sure we're creating an option for the correct object.
+                // If the observable holding the ID changes but the object doesn't, then these won't match,
+                // and we would risk displaying the wrong data if we didn't check for this.
+                if (text && id && id == value) {
+                    option.text = text;
+                    triggerSelect2Change = true;
                 }
             }
-            // Set the element based on the value in the model.
-            if (setValue || setObject) {
-                $(element).val(valueAccessor()()).trigger('change');
+        }
+
+        // Set the element based on the value in the model.
+        if (triggerSelect2Change) {
+
+            // When a change is triggered in select2, it doesn't update its internal option object
+            // to reflect the text of the HTMLOptionElement. So, we have to manually update it,
+            // taking care to only change it if the IDs match.
+            var select2Option = $(element).select2("data")[0];
+            if (select2Option && select2Option.id == option.value) {
+                select2Option.text = option.text;
             }
+
+            $(element).val(value).trigger('change');
         }
     }
 };
@@ -193,14 +277,14 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
 
         // 'idFieldName' was the old name, kept for backwards compat. 'idField' is the new name.
-        var idFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
-        var textFieldName = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textField'));
+        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
+        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textField'));
 
         if (!url) throw "select2AjaxMultiple requires additional binding 'url'";
         if (!itemViewModel) throw "select2AjaxMultiple requires additional binding 'itemViewModel'."
-            + " This should be a reference to the class of the join table - e.g.ViewModels.PersonCase.";
-        if (!idFieldName) throw "select2AjaxMultiple requires additional binding 'idField'";
-        if (!textFieldName) throw "select2AjaxMultiple requires additional binding 'textField'";
+            + " This should be the class of the foreign end of the relationship - e.g.ViewModels.Case.";
+        if (!idField) throw "select2AjaxMultiple requires additional binding 'idField'";
+        if (!textField) throw "select2AjaxMultiple requires additional binding 'textField'";
 
         var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
         var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
@@ -210,6 +294,12 @@ ko.bindingHandlers.select2AjaxMultiple = {
         var placeholder = $(element).attr('placeholder') || "select";
         var updating = false;
         var pageSize = allBindings.get('pageSize') || 25;
+
+        interface ResultItem {
+            id: any,
+            text: string,
+            _apiObject?: object
+        }
 
         // Create the Select2
         $(element)
@@ -228,14 +318,20 @@ ko.bindingHandlers.select2AjaxMultiple = {
                         return data;
                     },
                     processResults: function (data: any, params: any) {
-                        params.page = params.page || 1;
-                        for (var i in data.list) {
-                            data.list[i].id = data.list[i][idFieldName];
-                        }
+                        // Transform our objects into what select2 wants (it needs objects with a key "id").
+                        // We throw the raw object from the API on there as well so we can use it when handling a selection.
+                        var results = (data.list as any[]).map(item => {
+                            return {
+                                id: item[idField],
+                                text: item[textField],
+                                _apiObject: item,
+                            } as ResultItem;
+                        });
+
                         return {
-                            results: data.list,
+                            results: results,
                             pagination: {
-                                more:(params.page*pageSize) < data.totalCount
+                                more: data.page < data.pageCount
                             }
                         };
                     },
@@ -250,11 +346,11 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     if (item.Classes) {
                         // This has a class use the formatting
                         var optionElement = $('<span class="' + item.Classes + '">' +
-                            format.replace('{0}', (item[textFieldName] || item.text || item))
+                            format.replace('{0}', (typeof item.text == "string" ? item.text : item))
                             + '</span>');
                         return optionElement;
                     }
-                    return format.replace('{0}', (item[textFieldName] || item.text || item));
+                    return format.replace('{0}', (typeof item.text == "string" ? item.text : item));
                 },
                 templateSelection: function (item: any) {
                     //if (e.Classes) {
@@ -264,7 +360,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     //        + '</span>');
                     //    return optionElement;
                     //}
-                    return selectionFormat.replace('{0}', (item[textFieldName] || item.text || item));
+                    return selectionFormat.replace('{0}', (item.text || item));
                 },
             })
             .on("change", function (e) {
@@ -276,6 +372,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                 var values: KnockoutObservableArray<Coalesce.BaseViewModel> = valueAccessor();
                 if (values() && selectedItems && values().length != selectedItems.length) {
                     // Add the items to the observable array.
+                    // Warning: this code is O(n^2), but n should always be very reasonably small (if its > 50, you shouldn't be using a control like this.)
                     if (selectedItems.length > values().length) {
                         // Item was added.
                         for (var i = 0; i < selectedItems.length; i++) {
@@ -287,7 +384,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                             }
                             if (!found) {
                                 // This is the missing one.
-                                values.push(new itemViewModel(selectedItem));
+                                values.push(new itemViewModel(selectedItem._apiObject));
                             }
                         }
                     } else if (selectedItems.length < values().length) {
@@ -345,10 +442,10 @@ ko.bindingHandlers.select2AjaxMultiple = {
         // Remove all of the temporary option elements that we had to create.
         // These option elements are created so that select2 can display items that are
         // part of the collection of selected objects, but were not added to the list via select2 -
-        // they came either with the initial data load, or were manually added to the undelying collection programtically.
+        // they came either with the initial data load, or were manually added to the undelying collection programatically.
         // We have to remove these options because if we don't,
-        // and the user decides to remove an option from the selection box and then re-select it,
-        // select2 won't use the fully hydrated object from its ajax call -
+        // and the user decides to remove an option from the selection box and then re-select that same item,
+        // select2 won't use the "options" object from its ajax call (which contains our _apiObject property) -
         // it will use a fake object that it made that contains only and 'id' and 'text' property.
         $(element).find("option").remove();
 

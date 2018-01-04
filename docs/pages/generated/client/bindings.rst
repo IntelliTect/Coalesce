@@ -27,13 +27,13 @@ select2Ajax
 
     Creates a select2 dropdown using the specified url and fields that can be used to select an object from the endpoint specified. Additional complimentary bindings include:
 
-    idField
+    idField (required)
         The name of the field on each item in the results of the AJAX call which contains the ID of the option. The value of this field will be set on the observable specified for the main ``select2Ajax`` binding.
 
-    textField
-        The name of the field on each item in the results of the AJAX call which contain the text to be displayed for each option.
+    textField (required)
+        The name of the field on each item in the results of the AJAX call which contains the text to be displayed for each option.
 
-    url
+    url (required)
         The Coalesce List API url to call to populate the contents of the dropdown.
 
     pageSize
@@ -46,14 +46,15 @@ select2Ajax
         A string containing the substring ``{0}``, which will be replaced with the text value of the selected option of the dropdown list.
 
     object
-        An observable that holds the full object that corresponds to the foreign key property being bound to. If the selected value changes, this will be set to null to avoid representation of incorrect data (unless ``setObject`` is used - see below).
+        An observable that holds the full object corresponding to the foreign key property being bound to. If the selected value changes, this will be set to null to avoid representation of incorrect data (unless ``setObject`` is used - see below).
 
     setObject
-        If true, the observable specified by the :ts:`object` binding will be set to the selected data when an option is chosen in the dropdown. 
+        If true, the observable specified by the :ts:`object` binding will be set to the selected data when an option is chosen in the dropdown. Binding ``itemViewModel`` is required if this binding is set.
 
-        .. danger:: 
+        Additionally, requests to the API to populate the dropdown will request the entire object, as opposed to only the two fields specified for ``idField`` and ``textField`` like is normally done when this binding is missing or set to false. To override this behavior and continue requesting only specific fields even when ``setObject`` is true, add ``fields=field1,field2,...`` to the query string of the ``url`` binding.
 
-            This WILL NOT set the :ts:`object` observable to an instance of the :ref:`TypeScriptViewModel` being selected - it will set :ts:`object` to the raw data returned from the AJAX call. This violates the type contract defined by the generated TypeScript. Use only in situations where this effect is acceptable. This behavior may change in the future.
+    itemViewModel
+        A reference to the class that represents the type of the object held in the ``object`` observable. This is used when constructing new objects from the results of the API call. Not used if ``setObject`` is false or unspecified. For example, :ts:`setObject: true, itemViewModel: ViewModels.Person`
 
     selectOnClose
         Directly maps to select2 option ``selectOnClose``
@@ -79,7 +80,7 @@ select2AjaxMultiple
 | :ts:`select2AjaxMultiple: people, url: '/api/Person/list', idField: 'personId', textField: 'Name', itemViewModel: ViewModels.PersonCase`
 |
 
-    Creates a select2 multiselect input for choosing objects that participate as the foreign object in a many-to-many relationship with the current object. The primary ``select2AjaxMultiple`` binding takes the collection of items that make up the foreign side of the relationship. This is NOT the collection of the join objects (a.k.a. middle table objects) in the relationship.
+    Creates a select2 multi-select input for choosing objects that participate as the foreign object in a many-to-many relationship with the current object. The primary ``select2AjaxMultiple`` binding takes the collection of items that make up the foreign side of the relationship. This is NOT the collection of the join objects (a.k.a. middle table objects) in the relationship.
 
     Additional complimentary bindings include:
 
@@ -90,7 +91,7 @@ select2AjaxMultiple
         The name of the field on each item in the results of the AJAX call which contains the text to be displayed for each option.
 
     url (required)
-        The Coalesce List API url to call to populate the contents of the dropdown.
+        The Coalesce List API url to call to populate the contents of the dropdown. In order to only receive specific fields from the server, add ``fields=field1,field2,...`` to the query string of the url, ensuring that at least the ``idField`` and ``textField`` are included in that collection.
 
     itemViewModel (required)
         A reference to the class that represents the types in the supplied collection. For example, a many-to-many between ``Person`` and ``Case`` objects where ``Case`` is the object being bound to and ``Person`` is the type represented by a child collection, the correct value is  :ts:``ViewModels.Person``. This is used when constructing new objects representing the relationship when a new item is selected.
@@ -178,14 +179,65 @@ select2
 datePicker
 ..........
 
+    .. code-block:: html
+
+        <div class="input-group date">
+            <input data-bind="datePicker: birthDate" type="text" class="form-control" />
+            <span class="input-group-addon">
+                <span class="fa fa-calendar"></span>
+            </span>
+        </div>
+
+    .. _bootstrap-datetimepicker: https://eonasdan.github.io/bootstrap-datetimepicker/
+
+    Creates a date/time picker for changing a :ts:`moment.Moment` property. The control used is bootstrap-datetimepicker_
+
+    preserveDate
+        If true, the date portion of the :ts:`moment.Moment` object will be preserved by the date picker. Only the time portion will be changed by user input.
+
+    preserveTime
+        If true, the time portion of the :ts:`moment.Moment` object will be preserved by the date picker. Only the date portion will be changed by user input.
+
+    format
+        Specify the moment-compatible format string to be used as the display format for the text value shown on the date picker. Defaults to ``M/D/YY h:mm a``. Direct pass-through to bootstrap-datetimepicker_.
+
+    sideBySide
+        if true, places the time picker next to the date picker, visible at the same time. Direct pass-through to corresponding bootstrap-datetimepicker_ option.
+
+    stepping
+        Direct pass-through to corresponding bootstrap-datetimepicker_ option.
+
+    timeZone
+        Direct pass-through to corresponding bootstrap-datetimepicker_ option.
+
+    keyBinds
+        Override key bindings of the date picker. Direct pass-through to corresponding bootstrap-datetimepicker_ option. Defaults to :ts:`{ left: null, right: null, delete: null }`, which disables the default binding for these keys.
+
     updateImmediate
-        If true, the datePicker will update the underlying observable on each input. Otherwise, the observable will only be changed when the datePicker loses focus (on :ts:`blur`).
+        If true, the datePicker will update the underlying observable on each input change. Otherwise, the observable will only be changed when the datePicker loses focus (on :ts:`blur`).
+
 
 saveImmediately
 ...............
 
+    .. code-block:: html
+
+        <div data-bind="with: product">
+            <input type="text" data-bind="textValue: description, saveImmediately: true" />
+        </div>
+
+    When used in a context where :ts:`$data` is a :ts:`Coalesce.BaseViewModel`, that object's :ts:`saveTimeoutMs` configuration property (see :ref:`TSModelConfig`) will be set to :ts:`0` when the element it is placed on gains focus. This value will be reverted to its previous value when the element loses focus. This will cause any changes to the object, including any observable bound as input on the element, to trigger a save immediately rather than after a delay (defaults to 500ms). 
+
 delaySave
 .........
+
+    .. code-block:: html
+
+        <div data-bind="with: product">
+            <input type="text" data-bind="textValue: description, delaySave: true" />
+        </div>
+
+    When used in a context where :ts:`$data` is a :ts:`Coalesce.BaseViewModel`, that object's :ts:`autoSaveEnabled` configuration property (see :ref:`TSModelConfig`) will be set to :ts:`false` when the element it is placed on gains focus. This will cause any changes to the object, including any observable bound as input on the element, to not trigger auto saves while the element has focus. When the element loses focus, the :ts:`autoSaveEnabled` flag will be reverted to its previous value and an attempt will be made to save the object. 
     
 
 
@@ -220,6 +272,7 @@ slideVisible
 moment
 ......
 
+| :html:`<span data-bind="moment: momentObservable"></span>`
 | :ts:`moment: momentObservable`
 | :ts:`moment: momentObservable, format: 'MM/DD/YYYY hh:mm a'`
 |
@@ -229,6 +282,7 @@ moment
 momentFromNow
 .............
 
+| :html:`<span data-bind="momentFromNow: momentObservable"></span>`
 | :ts:`momentFromNow: momentObservable`
 | :ts:`momentFromNow: momentObservable, shorten: true`
 |

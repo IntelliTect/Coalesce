@@ -159,8 +159,7 @@ gulp.task("copy-ts", ['ts'], function () {
 });
 
 gulp.task('ts:watch', function () {
-    gulp.watch([paths.scripts + '/**/*.ts'], ['ts:local']);
-    gulp.watch([paths.scripts + '/Partials/*.ts'], ['ts']);
+    gulp.watch([paths.scripts + '/**/*.ts'], ['ts']);
 });
 
 gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
@@ -169,39 +168,6 @@ gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function
 gulp.task('default', ['copy-lib', 'sass', 'ts', 'watch'], function () {
 });
 
-/*
-
-var componentModelVersion = "1.1.0";
-var codeGeneratorsMvcVersion = componentModelVersion;
-var nlogExtensionsVersion = "1.1.0";
-
-gulp.task('nuget:publish:ComponentModel',
-    shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
-        'push ' +
-        '..\\..\\artifacts\\bin\\IntelliTect.Coalesce\\debug\\IntelliTect.Coalesce.' + componentModelVersion + '.nupkg ' +
-        '536300da-5e23-433c-8f45-f84e9a225b4b ' +
-        '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
-);
-
-gulp.task('nuget:publish:CodeGeneratorsMvc',
-    shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
-        'push ' +
-        '..\\..\\artifacts\\bin\\IntelliTect.Coalesce.CodeGeneration\\debug\\IntelliTect.Coalesce.CodeGeneration.' + codeGeneratorsMvcVersion + '.nupkg ' +
-        '536300da-5e23-433c-8f45-f84e9a225b4b ' +
-        '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
-);
-
-gulp.task('nuget:publish:NLogExtensions',
-    shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
-        'push ' +
-        '..\\..\\artifacts\\bin\\IntelliTect.NLog.Extensions\\debug\\IntelliTect.NLog.Extensions.' + nlogExtensionsVersion + '.nupkg ' +
-        '536300da-5e23-433c-8f45-f84e9a225b4b ' +
-        '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
-);
-
-gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);
-
-*/
 
 var coalesceBuildDir = `${require('os').tmpdir()}/CoalesceExe`;
 

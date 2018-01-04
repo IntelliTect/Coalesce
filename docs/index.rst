@@ -114,7 +114,7 @@ We can create a details page for a Person by creating:
                 <dd data-bind="text: name"></dd>
 
                 <dt>Date of Birth </dt>
-                <dd data-bind="moment: birthBirth, format: 'MM/DD/YYYY hh:mm a'"></dd>
+                <dd data-bind="moment: birthDate, format: 'MM/DD/YYYY hh:mm a'"></dd>
             </dl>
         </div>
 

@@ -1,7 +1,6 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -198,7 +197,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the type name without any collection or nullable around it.
         /// </summary>
-        public TypeViewModel PureType
+        public virtual TypeViewModel PureType
         {
             get
             {
@@ -226,10 +225,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string NullableTypeForDto(string dtoNamespace)
         {
-            var model = this.PureType.ClassViewModel;
+            var model = PureType.ClassViewModel;
             if (model != null)
             {
-                string typeName = "";
+                string typeName;
 
                 if (IsNullable || IsArray || IsCollection)
                     typeName = FullyQualifiedName;
@@ -237,18 +236,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     typeName = Name + "?";
 
                 var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
-                typeName = regex.Replace(typeName, $@"{model.Name}DtoGen$2");
-                typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+                typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+                return typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+            }
 
-                return typeName;
-            }
-            else
-            {
-                if (IsNullable || IsArray)
-                    return FullyQualifiedName;
-                else
-                    return FullyQualifiedName + "?";
-            }
+            if (IsNullable || IsArray)
+                return FullyQualifiedName;
+            return FullyQualifiedName + "?";
         }
 
         public override bool Equals(object obj)

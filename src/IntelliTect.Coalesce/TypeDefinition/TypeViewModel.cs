@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -197,7 +198,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the type name without any collection or nullable around it.
         /// </summary>
-        public virtual TypeViewModel PureType
+        public TypeViewModel PureType
         {
             get
             {
@@ -235,7 +236,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 else
                     typeName = Name + "?";
 
-                typeName += "DtoGen";
+                var regex = new Regex($"({model.Name}(?!(DtoGen)))", RegexOptions.RightToLeft);
+                typeName = regex.Replace(typeName, $"{model.Name}DtoGen", 1);
                 return typeName.Replace(model.Type.FullNamespace, dtoNamespace);
             }
 

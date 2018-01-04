@@ -1,12 +1,6 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -203,7 +197,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the type name without any collection or nullable around it.
         /// </summary>
-        public TypeViewModel PureType
+        public virtual TypeViewModel PureType
         {
             get
             {
@@ -231,28 +225,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string NullableTypeForDto(string dtoNamespace)
         {
-            var model = this.PureType.ClassViewModel;
+            var model = PureType.ClassViewModel;
             if (model != null)
             {
-                string typeName = "";
+                string typeName;
 
                 if (IsNullable || IsArray || IsCollection)
                     typeName = FullyQualifiedName;
                 else
                     typeName = Name + "?";
 
-                typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
-                typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+                typeName += "DtoGen";
+                return typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+            }
 
-                return typeName;
-            }
-            else
-            {
-                if (IsNullable || IsArray)
-                    return FullyQualifiedName;
-                else
-                    return FullyQualifiedName + "?";
-            }
+            if (IsNullable || IsArray)
+                return FullyQualifiedName;
+            return FullyQualifiedName + "?";
         }
 
         public override bool Equals(object obj)

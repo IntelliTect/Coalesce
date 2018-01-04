@@ -19,16 +19,47 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
 
         public ClassViewModel ClassViewModel { get; private set; }
 
-        public ClassViewModelData() { }
-        public ClassViewModelData(Type targetType, Type viewModelType)
+        public ClassViewModelData()
+        {
+            allSymbols = new Lazy<List<INamedTypeSymbol>>(GetAllSymbols);
+        }
+
+        public ClassViewModelData(Type targetType, Type viewModelType) : this()
         {
             TargetType = targetType;
             ViewModelType = viewModelType;
             SetupProps();
         }
 
-        public override string ToString() =>
-            $"{ViewModelType.Name.Replace("ClassViewModel", "")}: {TargetType.Name}";
+        private static Lazy<List<INamedTypeSymbol>> allSymbols;
+
+        private List<INamedTypeSymbol> GetAllSymbols()
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            var streamName = TargetType.FullName + ".cs";
+
+            var trees = asm.GetManifestResourceNames()
+                .AsParallel()
+                .Where(name => name.EndsWith(".cs"))
+                .Select(name =>
+                {
+                    using (var stream = asm.GetManifestResourceStream(name))
+                    {
+                        return CSharpSyntaxTree.ParseText(SourceText.From(stream));
+                    }
+                })
+                .ToList();
+
+            var compilation = CSharpCompilation.Create(
+                "SymbolAsm",
+                trees,
+                new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
+            });
+
+            return compilation.Assembly.GlobalNamespace
+                .Accept(new SymbolDiscoveryVisitor())
+                .ToList();
+        }
 
         private void SetupProps()
         {
@@ -38,34 +69,44 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
             }
             else if (ViewModelType == typeof(SymbolClassViewModel))
             {
-                var asm = Assembly.GetExecutingAssembly();
-                var streamName = TargetType.FullName + ".cs";
-
-                SyntaxTree tree;
-                using (var stream = asm.GetManifestResourceStream(streamName))
-                {
-                    tree = CSharpSyntaxTree.ParseText(SourceText.From(stream));
-                }
-
-                var compilation = CSharpCompilation.Create(
-                    "SymbolAsm",
-                    new[] { tree },
-                    new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
-                });
-                var semanticModel = compilation.GetSemanticModel(tree);
-
-                var node = tree
-                    .GetRoot()
-                    .DescendantNodes()
-                    .OfType<ClassDeclarationSyntax>()
-                    .Select(syntax => semanticModel.GetDeclaredSymbol(syntax))
+                var node = allSymbols.Value
                     .Where(symbol => symbol.Name == TargetType.Name)
                     .SingleOrDefault()
-                    ?? throw new ArgumentException($"Class {TargetType} not found in resource {streamName}.");
+                    ?? throw new ArgumentException($"Class {TargetType} not found in any C# embedded resources.");
 
                 ClassViewModel = new SymbolClassViewModel(node);
             }
         }
+
+        // TODO: this is duplicated from RoslynTypeLocator.cs in Coalesce.CodeGeneration. 
+        // can we avoid this duplication?
+        private class SymbolDiscoveryVisitor : SymbolVisitor<IEnumerable<INamedTypeSymbol>>
+        {
+            public override IEnumerable<INamedTypeSymbol> VisitNamespace(INamespaceSymbol symbol)
+            {
+                foreach (var childSymbol in symbol.GetMembers())
+                {
+                    //We must implement the visitor pattern ourselves and 
+                    //accept the child symbols in order to visit their children
+                    foreach (var result in childSymbol.Accept(this)) yield return result;
+                }
+            }
+
+            public override IEnumerable<INamedTypeSymbol> VisitNamedType(INamedTypeSymbol symbol)
+            {
+                yield return symbol;
+
+                foreach (var childSymbol in symbol.GetTypeMembers())
+                {
+                    //Once againt we must accept the children to visit 
+                    //all of their children
+                    foreach (var result in childSymbol.Accept(this)) yield return result;
+                }
+            }
+        }
+
+
+
 
         public void Deserialize(IXunitSerializationInfo info)
         {
@@ -97,7 +138,12 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
             info.AddValue(nameof(ViewModelType), ViewModelType.Name);
         }
         
+
+
         public static implicit operator ClassViewModel(ClassViewModelData self)
             => self.ClassViewModel;
+
+        public override string ToString() =>
+            $"({(ViewModelType.Name.StartsWith("Sym") ? "Symbol" : "Reflect")}) {TargetType.Name}";
     }
 }

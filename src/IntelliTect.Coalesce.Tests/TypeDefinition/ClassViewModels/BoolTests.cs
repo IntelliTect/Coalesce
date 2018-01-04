@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
         // This is because xunit's implicit conversion support only checks for conversions
         // defined on the parameter's class and not the argument's class.
         // See https://github.com/xunit/xunit/issues/1607
-        public void IsNullable_CorrectForValueTypes(ClassViewModel data)
+        public void IsNullable_CorrectForValueTypes(ClassViewModelData data)
         {
             ClassViewModel vm = data;
 

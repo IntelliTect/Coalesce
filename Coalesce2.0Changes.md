@@ -2,7 +2,7 @@
 
 | CHANGE | RESOLUTION
 | ------ |----------|
-| NPM Packages: Upgraded to `gulp-typescript` 3.0 and `typescript` 2.3. Breaking changes may be found at http://dev.ivogabe.com/gulp-typescript-3/. | Add/update references to `"gulp-typescript": "^3.1.6"` and `"typescript": "~2.3.2"` in your package.json. Newer versions are fine, too.
+| NPM Packages: Upgraded to `gulp-typescript` 3.0 and `typescript` 2.3. Breaking changes may be found at http://dev.ivogabe.com/gulp-typescript-3/. | Add/update references to `"gulp-typescript": "^3.1.6"` and `"typescript": "~2.3.2"` in your package.json. Newer versions are fine, too. Update your `gulpfile.js` according to the breaking changes at http://dev.ivogabe.com/gulp-typescript-3/.
 | TypeScript Global variable `baseUrl` is gone. | Replaced by `Coalesce.GlobalConfiguration.baseApiUrl` and `baseViewUrl`.
 | TypeScript global variable `saveTimeoutInMs` is gone. | Replaced by `Coalesce.GlobalConfiguration.saveTimeoutMs`, and the corresponding configuration in class-level and instance-level `CoalesceConfiguration<>` objects.
 | Various knockout bindings that would interpret a `saveImmediately` supplementary binding no longer do so. | The `saveImmediately` standalone binding still exists, but will only function if the currently scoped binding object is a Coalesce `BaseViewModel`. This is because the binding must access the model's `coalesceConfig` to set the save timeout, since `saveTimeoutInMs` is no longer a global.
@@ -11,7 +11,6 @@
 | Namespace `intellitect.utilities` is now `Coalesce.Utilities` | Replace all references to the old name with the new.
 | Namespace `intellitect.webApi` is now `Coalesce.ModalHelpers` | Replace all references to the old name with the new.
 | Generated API Controllers no longer have "Api" in the file name in order to better match the name of the class within. | No changes needed unless your project referenced these files explicitly by name (unlikely).
-| DataSources on models are no longer generated as client-callable static methods on ListViewModels. | Replace usages of these calls with loads of a ListViewModel using the desired data source.
 | `BaseViewController.IndexImplementation` no longer sets `ViewBag.ParentIdName` or `ViewBag.ParentId`. These properties were not used. | If you used these, implement your own custom, robust logic in your controllers that depend upon `IndexImplementation`.
 | The `datePicker` knockout binding no longer requires a `delaySave` supplementary binding in order to prevent spamming saves as a user changes values - this behavior is now default, and can be turned off by adding binding `updateImmediate: true`. | Remove usages of `delaySave` used with `datePicker` bindings if desired. If you used any datePickers where `delaySave` was not desired, add `updateImmediate: true`.
 | The `select2Ajax` knockout binding no longer violates type contracts set forth by the generated ViewModels when `setObject: true` is used. Instead, when `setObject` is used, the `object` observable will be updated with a proper instance of a `Coalesce.BaseViewModel`. | Update `select2Ajax` bindings which used `setObject: true` to also include another new binding `itemViewModel` which should be set to the class that is being selected. Any dropdowns that need this fix will throw an exception without it. Additionally, update any code that expects that the objects referenced by the `object` binding of `select2Ajax` to be raw JS objects - these observables will now always be populated with instances of a `Coalesce.BaseViewModel`.
@@ -30,27 +29,37 @@
 | `BaseViewModel.afterLoadFromDto` has been changed to `BaseViewModel.coalesceConfig.onLoadFromDto` | Find and replace usages of the old property.
 | `loadValidValues()` is gone, as are the other model-specific methods and collections of a similar nature. | Instantiate a `ListViewModel` of the desired object type and use it to load lists of items.
 | `isSavingWithChildren: boolean` is now named `isThisOrChildSaving` | Simple find-and-replace.
-| `reload()` has been removed. | Replace usages of `reload()` with no-argument calls to `load()`.
+| `reload()` has been removed. | Replace usages of `reload()` with no-argument calls to `load()`. Be wary of places where `reload()` was passed directly as a callback - the replacement call will need to be wrapped in another function in such cases: `() => load()`.
 | `changeIsExpanded(isExpanded)` is now named `toggleIsExpanded`, and no longer takes a parameter. | If a parameter was used, set the `isExpanded` observable directly. Otherwise, replace the old name with the new.
 | `changeIsEditing(isEditing)` is now named `toggleIsEditing`, and no longer takes a parameter. | If a parameter was used, set the `isEditing` observable directly. Otherwise, replace the old name with the new.
 | `isSelectedToggle()` is now named `toggleIsSelected`. | Simple find-and-replace.
 | `originalData: KnockoutObservable<any>` has been removed. | Create a `[TypeScriptPartial]`, create this field, and populate it in your constructor with the value of the first constructor parameter of the stub that will be provided upon regeneration.
-| `public init()` has been removed. | Create a `[TypeScriptPartial]` and add desired behavior into the constructor of the stub that will be provided upon regeneration.
+| `public init()` has been removed from `BaseViewModel`. | Create a `[TypeScriptPartial]` and add desired behavior into the constructor of the stub that will be provided upon regeneration.
 | `BaseViewModel.autoSaveEnabled` is deprecated. | Use `BaseViewModel.coalesceConfig.autoSaveEnabled` observable instead.
 | `BaseViewModel.showBusyWhenSaving` is deprecated. | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
 | `BaseViewModel.showFailureAlerts` is deprecated. | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
 | `BaseViewModel.validationIssues` has been removed. | Use `BaseViewModel.message` to get errors that occurred while saving a model. No other methods other than `save` were populating this collection, and it was only being populated with exception messages - not validation issues.
+
+## API Endpoints
+
+| CHANGE | RESOLUTION
+| ------ |----------|
+| API Endpoint `CustomList` has been merged with `List`. Parameters remain unchanged, except where otherwise noted in this section. | Replace all usages of `CustomList` with `List`.
+| Property filter API parameters are now specified using `?filter.propertyName=value` (formerly, this was just `?propertyName=value`). | Adjust manual API calls (that don't use the generated ListViewModels) accordingly.
+| The `PropertyValues` endpoint has been removed, as it was deemed too specific a use case to warrant the need to accommodate its existence into your security model for each and every entity type. | Replace usages with a custom static method on the relevant model that will return an `ICollection<string>` with the desired results.
+| API endpoints that formerly took an arbitrary `where` parameter (stored in `BaseListViewModel.query.where`) no longer do so. This was removed because the security implications were such that a carefully-crafted where statement could reveal information about the state of the database that would be otherwise inaccessible to the user. | In cases where this behavior is needed, create a custom data source (see the "New Features" section below) and add public properties marked with `[Coalesce]` that represent the needed inputs to perform the query in C#.
+| Endpoint `Get` now returns an `ItemResult<TDto>` instead of a raw `TDto`.
+| Endpoint `Delete` now returns an `ItemResult` instead of a `bool`.
 
 ## List API, BaseListViewModel & Generated ListViewModels
 
 | CHANGE | RESOLUTION
 | ------ |----------|
 | Like `BaseViewModel`, `BaseListViewModel` no longer has a self-referential generic type parameter. It now uses TypeScripts polymorphic `this` types for its self-referential needs | Remove any usages of the generic parameter. Replace with [Polymorphic this types](https://www.typescriptlang.org/docs/handbook/advanced-types.html) as needed.
-| API Endpoint `CustomList` has been merged with `List`. Parameters remain unchanged, except where otherwise noted in this section. | Replace all usages of `CustomList` with `List`.
-| Property filter API parameters are now specified using `?filter.propertyName=value` (formerly, this was just `?propertyName=value`). | Adjust manual API calls (that don't use the generated ListViewModels) accordingly.
+
 | `BaseListViewModel.query` is now `BaseListViewModel.filter` to match the new API signature. | Rename references accordingly.
-| API endpoints that formerly took an arbitrary `where` parameter (stored in `BaseListViewModel.query.where`) no longer do so. This was removed because the security implications were such that a carefully-crafted where statement could reveal information about the state of the database that would be otherwise inaccessible to the user. | In cases where this behavior is needed, create a custom data source (see the "New Features" section below) and add public properties marked with `[Coalesce]` that represent the needed inputs to perform the query in C#.
-| The `PropertyValues` endpoint has been removed, as it was deemed too specific a use case to warrant the need to accommodate its existence into your security model for each and every entity type. | Replace usages with a custom static method on the relevant model that will return an `ICollection<string>` with the desired results.
+
+
 
 ## Projects, Namespaces, & Generation
 

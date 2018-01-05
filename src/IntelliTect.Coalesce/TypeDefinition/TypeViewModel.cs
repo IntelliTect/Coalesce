@@ -236,8 +236,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 else
                     typeName = Name + "?";
 
-                var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
-                typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+                var nonGenericName = Regex.Replace(model.Name, "`.+", string.Empty);  // See https://source.dot.net/#System.Private.CoreLib/src/System/RtType.cs,1536
+                var regex = new Regex($"({nonGenericName}(?!(DtoGen)))", RegexOptions.RightToLeft);
+                typeName = regex.Replace(typeName, $"{nonGenericName}DtoGen", 1);
                 return typeName.Replace(model.Type.FullNamespace, dtoNamespace);
             }
 

@@ -226,29 +226,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string NullableTypeForDto(string dtoNamespace)
         {
-            var model = this.PureType.ClassViewModel;
+            var model = PureType.ClassViewModel;
             if (model != null)
             {
-                string typeName = "";
+                string typeName;
 
                 if (IsNullable || IsArray || IsCollection)
                     typeName = FullyQualifiedName;
                 else
                     typeName = Name + "?";
 
-                var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
-                typeName = regex.Replace(typeName, $@"{model.Name}DtoGen$2");
-                typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+                var nonGenericName = Regex.Replace(model.Name, "`.+", string.Empty);  // See https://source.dot.net/#System.Private.CoreLib/src/System/RtType.cs,1536
+                var regex = new Regex($"({nonGenericName}(?!(DtoGen)))", RegexOptions.RightToLeft);
+                typeName = regex.Replace(typeName, $"{nonGenericName}DtoGen", 1);
+                return typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+            }
 
-                return typeName;
-            }
-            else
-            {
-                if (IsNullable || IsArray)
-                    return FullyQualifiedName;
-                else
-                    return FullyQualifiedName + "?";
-            }
+            if (IsNullable || IsArray)
+                return FullyQualifiedName;
+            return FullyQualifiedName + "?";
         }
 
         public override bool Equals(object obj)

@@ -79,8 +79,8 @@ namespace IntelliTect.Coalesce.Helpers.Search
             {
                 string DateLiteral(DateTime date)
                 {
-                    if (date.Kind != DateTimeKind.Utc)
-                        throw new ArgumentException("date must be a UTC date.");
+                    if (Property.Type.IsDateTimeOffset && date.Kind != DateTimeKind.Utc)
+                        throw new ArgumentException("datetimeoffset comparand must be a UTC date.");
 
                     return $"{Property.PureType.Name}" +
                         $"({date.Year}, {date.Month}, {date.Day}, {date.Hour}, {date.Minute}, {date.Second}" +
@@ -99,7 +99,8 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         out dt
                     ))
                     {
-                        dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
+                        if (Property.Type.IsDateTimeOffset)
+                            dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
 
                         if (formatInfo.Value == (ParseFlags.HaveYear | ParseFlags.HaveMonth))
                         {
@@ -137,7 +138,9 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0, DateTimeKind.Unspecified);
                         range = TimeSpan.FromMinutes(1);
                     }
-                    dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
+
+                    if (Property.Type.IsDateTimeOffset)
+                        dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
 
                     yield return (
                         Property,

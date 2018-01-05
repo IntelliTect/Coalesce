@@ -1,12 +1,44 @@
 Code Generation
 ===============
 
-Coalesce generates a number of bits and pieces of code based on your models.
+The primary function of Coalesce is as a code generation framework. Below, you find an overview of the different components of Coalesce's code generation features.
 
 .. contents:: Contents
     :local:
 
 
+Running Code Generation
+-----------------------
+
+Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In order to invoke this tool, you must have a reference to the package that provides it in your .csproj file:
+
+    .. code-block:: xml
+
+        <Project Sdk="Microsoft.NET.Sdk.Web">
+
+            ...
+
+            <ItemGroup>
+                <PackageReference Include="IntelliTect.Coalesce.Knockout" Version="..." />
+            </ItemGroup>
+
+            <ItemGroup>
+                <DotNetCliToolReference Include="IntelliTect.Coalesce.Tools" Version="..." />
+            </ItemGroup>  
+        </Project>
+
+CLI Options
+...........
+
+All configuration of the way that Coalesce interacts with your projects, including locating, analyzing, and producing generated code, is done in a json configuration file, ``coalesce.json``. Read more about this file at :ref:`CoalesceJson`.
+
+There are a couple of extra options which are only available as CLI parameters to ``dotnet coalesce``. These options do not affect the behavior of the code generation - only the behavior of the CLI itself.
+
+    ``--debug``
+        When this flag is specified when running ``dotnet coalesce``, Coalesce will wait for a debugger to be attached to its process before starting code generation.
+
+    ``-v|--verbosity <level>``
+        Set the verbosity of the output. Options are ``trace``, ``debug``, ``information``, ``warning``, ``error``, ``critical``, and ``none``.
 
 Generated Code
 --------------
@@ -24,13 +56,15 @@ ViewModels
 
     See :ref:`TypeScriptViewModel` for more details.
 
-ListViewModels
+List ViewModels
     One ListViewModel is generated for each of your EF Database-mapped POCO classes. These classes contain functionality for loading sets of objects from the server. They provide searching, paging, sorting, and filtering functionality.
 
     See :ref:`TypeScriptListViewModel` for more details.
 
-ExternalType
+External Type ViewModels
     Any types which are accessible through your Database-mapped POCO classes, either through one of its getter-only :ref:`ModelProperties` or return value from one of its :ref:`ModelMethods`, will have a corresponding TypeScript ViewModel generated for it. These ViewModels only provide a :ts:`KnockoutObservable` field for each property on the C# class.
+
+    see :ref:`TypeScriptExternalViewModel` for more details.
 
 
 C# DTOs

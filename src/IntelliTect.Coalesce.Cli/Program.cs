@@ -3,6 +3,7 @@ using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -38,7 +39,15 @@ namespace IntelliTect.Coalesce.Cli
             Console.WriteLine();
 
             var configFile = app.Argument("[config]", "coalesce.json configuration file that will drive generation.");
-            
+
+            var debug = app.Option("--debug", "Wait for a debugger to be attached before starting generation", CommandOptionType.NoValue);
+            var logLevel = app.Option(
+                "-v|--verbosity <level>",
+                $"Output verbosity. Options are {string.Join(", ", Enum.GetNames(typeof(LogLevel)).Select(l => l.ToLower()))}.",
+                CommandOptionType.SingleValue
+            );
+
+
             app.OnExecute(async () =>
             {
 
@@ -52,7 +61,13 @@ namespace IntelliTect.Coalesce.Cli
 
                 var config = configRoot.Get<CoalesceConfiguration>();
 
-                var executor = new GenerationExecutor(config);
+                var level = LogLevel.Information;
+                if (logLevel.HasValue())
+                {
+                    Enum.TryParse(logLevel.Value(), true, out level);
+                }
+
+                var executor = new GenerationExecutor(config, level);
                 await executor.GenerateAsync<KnockoutSuite>();
 
                 if (Debugger.IsAttached)
@@ -79,7 +94,7 @@ namespace IntelliTect.Coalesce.Cli
         {
             Console.WriteLine($"Attach a debugger to processID: {System.Diagnostics.Process.GetCurrentProcess().Id}. Waiting...");
             var waitStep = 10;
-            for (int i = 120; i > 0; i -= waitStep)
+            for (int i = 60; i > 0; i -= waitStep)
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {

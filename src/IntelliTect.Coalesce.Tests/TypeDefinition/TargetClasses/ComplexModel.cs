@@ -19,7 +19,9 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses
 
         public DateTimeOffset? DateTimeOffsetNullable { get; set; }
 
+        [Search]
         public DateTime DateTime { get; set; }
+
         public DateTime? DateTimeNullable { get; set; }
 
         // Add other kinds of properties, relationships, etc... as needed.

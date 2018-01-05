@@ -1,5 +1,7 @@
 
 
+.. _CoalesceJson:
+
 Code Generation Configuration
 =============================
 
@@ -57,3 +59,15 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             "configuration": "Debug",
         }
     }
+
+
+Additional CLI Options
+----------------------
+
+There are a couple of extra options which are only available as CLI parameters to ``dotnet coalesce``. These options do not affect the behavior of the code generation - only the behavior of the CLI itself.
+
+    ``--debug``
+        When this flag is specified when running ``dotnet coalesce``, Coalesce will wait up to 60 seconds for a debugger to be attached to its process before starting code generation.
+
+    ``-v|--verbosity <level>``
+        Set the verbosity of the output. Options are ``trace``, ``debug``, ``information``, ``warning``, ``error``, ``critical``, and ``none``.

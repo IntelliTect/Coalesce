@@ -17,9 +17,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
     public class GenerationExecutor
     {
-        public GenerationExecutor(CoalesceConfiguration config)
+        private readonly LogLevel logLevel;
+
+        public GenerationExecutor(CoalesceConfiguration config, LogLevel logLevel)
         {
             Config = config;
+            this.logLevel = logLevel;
         }
 
         public CoalesceConfiguration Config { get; }
@@ -28,9 +31,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             where TGenerator : IRootGenerator
         {
             var services = new ServiceCollection();
-            // TODO: configure logging level from command line or config file.
             services.AddLogging(builder => builder
-                //.SetMinimumLevel(LogLevel.Debug)
+                .SetMinimumLevel(logLevel)
                 .AddProvider(new SimpleConsoleLoggerProvider()));
 
             services.AddSingleton(Config);

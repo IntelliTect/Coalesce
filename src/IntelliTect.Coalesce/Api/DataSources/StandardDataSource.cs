@@ -246,7 +246,7 @@ namespace IntelliTect.Coalesce
                     {
                         var expressions = prop
                             .SearchProperties(ClassViewModel.Name, maxDepth: 1)
-                            .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, null, value))
+                            .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", value))
                             .Select(t => t.statement)
                             .ToList();
 
@@ -281,7 +281,7 @@ namespace IntelliTect.Coalesce
                 {
                     var splitOnStringClauses = ClassViewModel
                         .SearchProperties(ClassViewModel.Name)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, null, termWord))
+                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", termWord))
                         .Where(f => f.property.SearchIsSplitOnSpaces)
                         .Select(t => t.statement)
                         .ToList();
@@ -302,7 +302,7 @@ namespace IntelliTect.Coalesce
                 // we only require that the entire search term match at least one of these properties.
                 var searchClauses = ClassViewModel
                     .SearchProperties(ClassViewModel.Name)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, null, searchTerm))
+                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", searchTerm))
                     .Where(f => !f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();

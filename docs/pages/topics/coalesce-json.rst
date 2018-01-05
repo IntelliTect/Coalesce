@@ -38,7 +38,7 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             "framework": "netcoreapp2.0",
 
             // Optional: Build configuration to use when evaluating & building dependencies.
-            // Defaults to "Release".
+            // Defaults to "Debug".
             "configuration": "Debug",
 
             // Optional: Override the namespace prefix for generated C# code.

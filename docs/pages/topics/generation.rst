@@ -10,7 +10,7 @@ The primary function of Coalesce is as a code generation framework. Below, you f
 Running Code Generation
 -----------------------
 
-Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In order to invoke this tool, you must have a reference to the package that provides it in your .csproj file:
+Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In order to invoke this tool, you must have the appropriate references to the package that provides it in your .csproj file:
 
     .. code-block:: xml
 

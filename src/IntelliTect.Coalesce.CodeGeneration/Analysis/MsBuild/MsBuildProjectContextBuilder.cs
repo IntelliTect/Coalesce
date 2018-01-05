@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
     {
         private ProjectContext _context;
         public string TargetsLocation { get; private set; }
-        public string Configuration { get; private set; } = "Release";
+        public string Configuration { get; private set; } = "Debug";
         public string Framework { get; private set; } = null;
         public ILogger Logger { get; }
 

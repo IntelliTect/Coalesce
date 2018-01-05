@@ -1,29 +1,28 @@
 {
   "webProject": {
     "projectFile": "../Coalesce/src/Coalesce.Web/Coalesce.Web.csproj",
-    //"projectFile": "../Coalesce - Copy/src/Coalesce.Web/Coalesce.Web.csproj",
     "framework": "netcoreapp2.0",
-    "configuration": "Debug",
-    "build": true
+    "configuration": "Debug"
   },
   "dataProject": {
     "projectFile": "../Coalesce/src/Coalesce.Domain/Coalesce.Domain.csproj",
-    //"projectFile": "../Coalesce - Copy/src/Coalesce.Domain/Coalesce.Domain.csproj",
     "framework": "netstandard2.0",
-    "configuration": "Debug",
-    "build": true
+    "configuration": "Debug"
   }
 
 
-  //"generators": {
-  //  "IntelliTect.Coalesce.CodeGeneration.Knockout",
-  //},
+  //"rootGenerator": "IntelliTect.Coalesce.CodeGeneration.Knockout",
+
+  //"additionalRootGenerators": [
+  //  {
+  //    "assembly": "C:/blah/foo/bar/MyProject.MyGenerators.dll",
+  //    "type": "MyProject.MyGenerators.RootGenerator",
+  //  }
+  //],
+
   //"generatorConfig": {
-  //  "_Layout": {
-  //    "generate": false
-  //  },
-  //  "KoViewModel": {
-  //    "replace": "MyProject.Generators.ViewImports"
+  //  "GeneratorName": {
+  //    "disable": true,
   //  }
   //}
 }

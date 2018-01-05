@@ -23,165 +23,174 @@
 @@{ ViewBag.Fluid = true; }
 
 <style>
-    td div a{
+    td div a {
         display: block;
     }
-    th.sortable-header{
+
+    th.sortable-header {
         cursor: pointer;
     }
-    th.sortable-header:hover{
+
+    th.sortable-header:hover {
         background-color: #e6e6e6
     }
+    .table-view-header{
+        padding: 10px 15px;
+    }
 </style>
-<div style="padding: 10px 15px">
-    <div class="clearfix">
-        <h1  style="display: inline-block">
-            @(model.Name.ToProperCase()) List
-            @{
-                @:<span style="font-size: .5em; padding-left: 20px;"><a href="~/@(model.ControllerName)/Docs">API Docs</a></span>
-            }
-        </h1>
-        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-    </div>
 
-    <div class="clearfix">
-        <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
-            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
-            Page
-            <input data-bind="value: page" style="width: 35px">
-            of
-            <span data-bind="text: pageCount"></span>
-            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
-        </div>
-        <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
-            <option value="1">1</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1000</option>
-        </select>
-
-        <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
-
-        <div class="btn-group pull-right">
-            @{
-                if (model.SecurityInfo.IsCreateAllowed())
-                {
-                    @:<a href="~/@(model.ControllerName)/CreateEdit?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
-                }
-                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
-                @:@@if (ViewBag.Editable)
-                @:{
-                @:<a href="~/@(model.ControllerName)/Table?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
-                @:}
-                if (model.SecurityInfo.IsEditAllowed())
-                {
-                    @:else
-                    @:{
-                    @:<a href="~/@(model.ControllerName)/TableEdit?@@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
-                    @:}
-                }
-                @:<a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
-                if (model.SecurityInfo.IsCreateAllowed() && model.SecurityInfo.IsEditAllowed())
-                {
-                    @:<button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
-                }
-
-
-}
-        </div>
-    </div>
-</div>
-<hr />
-<div class="card">
-    <div class="card-body">
-        @{
-            @:<table class="table @@(ViewBag.Editable ? " editable" : "" )">
-        }
-        <thead>
-            <tr>
-                @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
-                {
-                    @if (!prop.Type.IsCollection)
-                    {
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('@prop.Name')}">
-                            @prop.DisplayName
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == '@prop.Name', 'fa-caret-down': orderByDescending() == '@prop.Name'}"></i>
-                        </th>
-                    }
-                    else
-                    {
-                        <th>@prop.DisplayName</th>
-                    }
-                }
-                <th style="width: 1%">
-                </th>
-            </tr>
-
-        </thead>
-        <tbody>
-            <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: @(model.PrimaryKey.Name.ToCamelCase())}">
+<div class="table-view obj-@(model.Name.ToCamelCase())">
+    <div class="table-view-header">
+        <div class="clearfix">
+            <h1 style="display: inline-block">
+                @(model.Name.ToProperCase()) List
                 @{
-                    @:@@if (@@ViewBag.Editable)
-                    @:{
-                    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
-                        {
-                        @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)</td>
-                        }
-                    @:}
-                    @:else
-                    @:{
-                    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
-                        {
-                        @:<td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false, null, true)</td>
-                        }
-                    @:}
+                    @:<span style="font-size: .5em; padding-left: 20px;"><a href="~/@(model.ControllerName)/Docs">API Docs</a></span>
                 }
-                <td>
+            </h1>
+            <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+        </div>
 
-                    <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                        @if (model.ClientMethods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
+        <div class="clearfix">
+            <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
+                Page
+                <input data-bind="value: page" style="width: 35px">
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
+            </div>
+            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+
+            <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+
+            <div class="btn-group pull-right">
+                @{
+                    if (model.SecurityInfo.IsCreateAllowed())
+                    {
+                        @:<a href="~/@(model.ControllerName)/CreateEdit?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
+                    }
+                    <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                    @:@@if (ViewBag.Editable)
+                    @:{
+                    @:<a href="~/@(model.ControllerName)/Table?@@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
+                    @:}
+                    if (model.SecurityInfo.IsEditAllowed())
+                    {
+                        @:else
+                        @:{
+                        @:<a href="~/@(model.ControllerName)/TableEdit?@@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
+                        @:}
+                    }
+                    @:<a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                    if (model.SecurityInfo.IsCreateAllowed() && model.SecurityInfo.IsEditAllowed())
+                    {
+                        @:<button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
+                    }
+
+
+                }
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="card table-view-body">
+        <div class="card-body">
+            @{
+                @:<table class="table @@(ViewBag.Editable ? " editable" : "" )">
+            }
+            <thead>
+                <tr>
+                    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                    {
+                        @if (!prop.Type.IsCollection)
+                        {
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('@prop.Name')}">
+                                @prop.DisplayName
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == '@prop.Name', 'fa-caret-down': orderByDescending() == '@prop.Name'}"></i>
+                            </th>
+                        }
+                        else
+                        {
+                            <th>@prop.DisplayName</th>
+                        }
+                    }
+                    <th style="width: 1%">
+                    </th>
+                </tr>
+
+            </thead>
+            <tbody>
+                <!-- ko foreach: items -->
+                <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: @(model.PrimaryKey.Name.ToCamelCase())}">
+                    @{
+                        @:@@if (@@ViewBag.Editable)
+                        @:{
+                        @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                        {
+                            @:
+                            <td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)</td>
+                        }
+                        @:}
+                        @:else
+                        @:{
+                        @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                        {
+                            @:
+                            <td class="prop-@(prop.JsonName)">@Display.PropertyHelper(prop, false, null, true)</td>
+                        }
+                        @:}
+                    }
+                    <td>
+
+                        <!-- Editor buttons -->
+                        <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                            @if (model.ClientMethods.Any(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
                             {
-                        <!-- Action buttons -->
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Actions <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    @foreach (var method in model.ClientMethods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
+                                <!-- Action buttons -->
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Actions <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var method in model.ClientMethods.Where(f => !f.IsHidden(HiddenAttribute.Areas.List) && !f.IsStatic))
                                         {
-                                        <li>@Display.MethodHelper(method)</li>
+                                            <li>@Display.MethodHelper(method)</li>
                                         }
-                                </ul>
-                            </div>
+                                    </ul>
+                                </div>
                             }
-                        @if (model.SecurityInfo.IsEditAllowed())
+                            @if (model.SecurityInfo.IsEditAllowed())
                             {
-                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
+                                <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
                             }
-                        @if (model.SecurityInfo.IsDeleteAllowed())
+                            @if (model.SecurityInfo.IsDeleteAllowed())
                             {
-                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
-                            </button>
+                                <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-remove"></i>
+                                </button>
                             }
 
-                    </div>
-                    <div class="form-control-static" data-bind="text: errorMessage"></div>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </tbody>
-    </table>
+                        </div>
+                        <div class="form-control-static" data-bind="text: errorMessage"></div>
+                    </td>
+                </tr>
+                <!-- /ko -->
+            </tbody>
+        </table>
+    </div>
 </div>
 </div>
-
 
 
 @if (model.ClientMethods.Any(f => f.IsStatic))
@@ -226,7 +235,7 @@
                                 }
                                 else
                                 {
-                                <span class="" data-bind="text: @method.JsVariableResult"></span>
+                                    <span class="" data-bind="text: @method.JsVariableResult"></span>
                                 }
                             </td>
                             <td>
@@ -280,6 +289,6 @@
 @{
     @:@@section Scripts
     @:{
-        @ScriptHelper.StandardBinding(model)
+    @ScriptHelper.StandardBinding(model)
     @:}
 }

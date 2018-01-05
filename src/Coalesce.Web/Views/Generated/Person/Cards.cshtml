@@ -1,269 +1,275 @@
 @using IntelliTect.Coalesce.Knockout.Helpers
 @{ ViewBag.Fluid = true; }
 
+<style>
+    .card-view-header {
+        padding: 10px 15px;
+    }
+</style>
 
-<div style="padding: 10px 15px">
-    <div class="clearfix">
-        <h1 style="display: inline-block">
-            Person List
-                <span style="font-size: .5em; padding-left: 20px;"><a href="~/Person/Docs">API Docs</a></span>
-        </h1>
-        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-    </div>
-
-    <div class="clearfix">
-        <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
-            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
-            Page
-            <input data-bind="value: page" style="width: 35px">
-            of
-            <span data-bind="text: pageCount"></span>
-            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+<div class="card-view obj-person">
+    <div class="card-view-header">
+        <div class="clearfix">
+            <h1 style="display: inline-block">
+                Person List
+                    <span style="font-size: .5em; padding-left: 20px;"><a href="~/Person/Docs">API Docs</a></span>
+            </h1>
+            <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
         </div>
-        <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
-            <option value="1">1</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1000</option>
-        </select>
 
-        <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
-
-        <div class="btn-group pull-right">
-                    <a href="~/Person/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
-                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
-                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
-                    <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
-        </div>
-    </div>
-</div>
-<hr />
-
-
-<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
-    <div class="flex-card ">
-            <div class="card-heading">
-                <h3 class="card-title">
-                    <span data-bind="text: name"></span>
-                </h3>
+        <div class="clearfix">
+            <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+                Page
+                <input data-bind="value: page" style="width: 35px">
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
             </div>
-        <div class="card-body flex">
+            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
 
-            <dl>
-                    <dt>Title</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title, false))
-                    </dd>
-                    <dt>First Name</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName, false))
-                    </dd>
-                    <dt>Last Name</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, false))
-                    </dd>
-                    <dt>Email</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, false))
-                    </dd>
-                    <dt>Gender</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, false))
-                    </dd>
-                    <dt>Cases Assigned</dt>
-                    <dd>
-                        <a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </dd>
-                    <dt>Cases Reported</dt>
-                    <dd>
-                        <a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
-                    </dd>
-                    <dt>Birth Date</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, false))
-                    </dd>
-                    <dt>Name</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))
-                    </dd>
-                    <dt>Company</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, false))
-                    </dd>
+            <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
 
-            </dl>
+            <div class="btn-group pull-right">
+                        <a href="~/Person/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
+                    <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                    <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                        <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
+            </div>
+        </div>
+    </div>
+    <hr />
 
 
-            <div style="margin-top: auto">
-                <!-- Editor buttons -->
-                <div class="pull-right" role="group">
-                        <!-- Action buttons -->
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions <span class="caret"></span>
+    <div class="flex-card-container card-view-body" data-bind="foreach: items, visible: isLoaded" style="display: none">
+        <div class="flex-card ">
+                <div class="card-heading">
+                    <h3 class="card-title">
+                        <span data-bind="text: name"></span>
+                    </h3>
+                </div>
+            <div class="card-body flex">
+
+                <dl>
+                        <dt>Title</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title, false))
+                        </dd>
+                        <dt>First Name</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName, false))
+                        </dd>
+                        <dt>Last Name</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, false))
+                        </dd>
+                        <dt>Email</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, false))
+                        </dd>
+                        <dt>Gender</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, false))
+                        </dd>
+                        <dt>Cases Assigned</dt>
+                        <dd>
+                            <a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                        </dd>
+                        <dt>Cases Reported</dt>
+                        <dd>
+                            <a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                        </dd>
+                        <dt>Birth Date</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, false))
+                        </dd>
+                        <dt>Name</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))
+                        </dd>
+                        <dt>Company</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, false))
+                        </dd>
+
+                </dl>
+
+
+                <div style="margin-top: auto">
+                    <!-- Editor buttons -->
+                    <div class="pull-right" role="group">
+                            <!-- Action buttons -->
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Actions <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                        <li><a href="#" data-bind = 'click: renameUi'>Rename</a></li>
+                                        <li><a href="#" data-bind = 'click: changeSpacesToDashesInNameUi'>Change Spaces To Dashes In Name</a></li>
+                                </ul>
+                            </div>
+                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                <i class="fa fa-remove"></i>
                             </button>
-                            <ul class="dropdown-menu">
-                                    <li><a href="#" data-bind = 'click: renameUi'>Rename</a></li>
-                                    <li><a href="#" data-bind = 'click: changeSpacesToDashesInNameUi'>Change Spaces To Dashes In Name</a></li>
-                            </ul>
-                        </div>
-                                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                            <i class="fa fa-pencil"></i>
-                        </a>
-                                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                            <i class="fa fa-remove"></i>
-                        </button>
 
+                    </div>
+                    <span class="form-control-static" data-bind="text: errorMessage"></span>
                 </div>
-                <span class="form-control-static" data-bind="text: errorMessage"></span>
-            </div>
 
+            </div>
         </div>
     </div>
 </div>
 
 
 
-
-    <div class="card">
-        <div class="card-heading">
-            <h3 class="card-title">Actions</h3>
+        <div class="card">
+            <div class="card-heading">
+                <h3 class="card-title">Actions</h3>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Action</th>
+                            <th style="width: 50%;">Result</th>
+                            <th style="width: 20%;">Successful</th>
+                            <th style="width: 10%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-default btn-xs" data-bind="click: addModal">Add</button>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: addResult"></span>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: addWasSuccessful"></span>
+                                    <span class="" data-bind="text: addMessage"></span>
+                                </td>
+                                <td>
+                                    <span class="label label-info" data-bind="fadeVisible: addIsLoading()">Loading</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-default btn-xs" data-bind="click: getUserModal">Get User</button>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: getUserResult"></span>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: getUserWasSuccessful"></span>
+                                    <span class="" data-bind="text: getUserMessage"></span>
+                                </td>
+                                <td>
+                                    <span class="label label-info" data-bind="fadeVisible: getUserIsLoading()">Loading</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-default btn-xs" data-bind="click: getUserPublicModal">Get User Public</button>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: getUserPublicResult"></span>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: getUserPublicWasSuccessful"></span>
+                                    <span class="" data-bind="text: getUserPublicMessage"></span>
+                                </td>
+                                <td>
+                                    <span class="label label-info" data-bind="fadeVisible: getUserPublicIsLoading()">Loading</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithModal">Names Starting With</button>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: namesStartingWithResult"></span>
+                                </td>
+                                <td>
+                                    <span class="" data-bind="text: namesStartingWithWasSuccessful"></span>
+                                    <span class="" data-bind="text: namesStartingWithMessage"></span>
+                                </td>
+                                <td>
+                                    <span class="label label-info" data-bind="fadeVisible: namesStartingWithIsLoading()">Loading</span>
+                                </td>
+                            </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Action</th>
-                        <th style="width: 50%;">Result</th>
-                        <th style="width: 20%;">Successful</th>
-                        <th style="width: 10%;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: addModal">Add</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: addResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: addWasSuccessful"></span>
-                                <span class="" data-bind="text: addMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: addIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: getUserModal">Get User</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: getUserResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: getUserWasSuccessful"></span>
-                                <span class="" data-bind="text: getUserMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: getUserIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: getUserPublicModal">Get User Public</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: getUserPublicResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: getUserPublicWasSuccessful"></span>
-                                <span class="" data-bind="text: getUserPublicMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: getUserPublicIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithModal">Names Starting With</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: namesStartingWithResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: namesStartingWithWasSuccessful"></span>
-                                <span class="" data-bind="text: namesStartingWithMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: namesStartingWithIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 
 
-    <!-- Modal for method: Add -->
-    <div id='method-Add' class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Add</h4>
-                </div>
-                <div class="modal-body form-horizontal" data-bind="with: addArgs">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Number One</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: numberOne">
+        <!-- Modal for method: Add -->
+        <div id='method-Add' class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Add</h4>
+                    </div>
+                    <div class="modal-body form-horizontal" data-bind="with: addArgs">
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Number One</label>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" data-bind="value: numberOne">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Number Two</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: numberTwo">
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Number Two</label>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" data-bind="value: numberTwo">
+                                </div>
                             </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!-- Modal for method: NamesStartingWith -->
-    <div id='method-NamesStartingWith' class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Names Starting With</h4>
-                </div>
-                <div class="modal-body form-horizontal" data-bind="with: namesStartingWithArgs">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Characters</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: characters">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-ok">OK</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        <!-- Modal for method: NamesStartingWith -->
+        <div id='method-NamesStartingWith' class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Names Starting With</h4>
+                    </div>
+                    <div class="modal-body form-horizontal" data-bind="with: namesStartingWithArgs">
+                            <div class="form-group">
+                                <label class="col-md-4 control-label">Characters</label>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" data-bind="value: characters">
+                                </div>
                             </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-ok">OK</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
 
-    @section Scripts
-    {
+        @section Scripts
+        {
 
     <script>
         @if (!ViewBag.Editable)
@@ -302,4 +308,4 @@
         personList.load();
 
     </script>
-    }
+        }

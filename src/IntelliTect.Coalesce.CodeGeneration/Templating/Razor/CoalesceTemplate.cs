@@ -9,10 +9,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
     public abstract class CoalesceTemplate
     {
         private TextWriter Output { get; set; }
-
-        //public virtual object Model { get; set; }
-
+        /// <summary>
+        /// Used to hold the closing task for attributes while the attribute is being written.
+        /// </summary>
+        private string AttributeSuffix { get; set; }
+        
         public abstract Task ExecuteAsync();
+
+        public abstract void SetModel(object model);
 
         public async Task<Stream> GetOutputAsync()
         {
@@ -60,7 +64,34 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
             }
         }
 
-        public abstract void SetModel(object model);
+        // This works around Razor's propensity to write attributes a special way.
+        public virtual void BeginWriteAttribute(
+            string name,
+            string prefix,
+            int prefixOffset,
+            string suffix,
+            int suffixOffset,
+            int attributeValuesCount)
+        {
+            AttributeSuffix = suffix;
+            WriteLiteral(prefix);
+        }
+
+        public void WriteAttributeValue(
+            string prefix,
+            int prefixOffset,
+            object value,
+            int valueOffset,
+            int valueLength,
+            bool isLiteral)
+        {
+            WriteLiteral($"{prefix}{value}");
+        }
+
+        public virtual void EndWriteAttribute()
+        {
+            WriteLiteral(AttributeSuffix);
+        }
     }
 
     public abstract class CoalesceTemplate<TModel> : CoalesceTemplate

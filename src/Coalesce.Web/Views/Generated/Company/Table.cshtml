@@ -2,146 +2,169 @@
 @{ ViewBag.Fluid = true; }
 
 <style>
-    td div a{
+    td div a {
         display: block;
     }
-    th.sortable-header{
+
+    th.sortable-header {
         cursor: pointer;
     }
-    th.sortable-header:hover{
+
+    th.sortable-header:hover {
         background-color: #e6e6e6
     }
+    .table-view-header{
+        padding: 10px 15px;
+    }
 </style>
-<div style="padding: 10px 15px">
-    <div class="clearfix">
-        <h1  style="display: inline-block">
-            Company List
-                <span style="font-size: .5em; padding-left: 20px;"><a href="~/Company/Docs">API Docs</a></span>
-        </h1>
-        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
-    </div>
 
-    <div class="clearfix">
-        <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
-            <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
-            Page
-            <input data-bind="value: page" style="width: 35px">
-            of
-            <span data-bind="text: pageCount"></span>
-            <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
+<div class="table-view obj-company">
+    <div class="table-view-header">
+        <div class="clearfix">
+            <h1 style="display: inline-block">
+                Company List
+                    <span style="font-size: .5em; padding-left: 20px;"><a href="~/Company/Docs">API Docs</a></span>
+            </h1>
+            <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
         </div>
-        <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
-            <option value="1">1</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1000</option>
-        </select>
 
-        <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+        <div class="clearfix">
+            <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
+                Page
+                <input data-bind="value: page" style="width: 35px">
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
+            </div>
+            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
 
-        <div class="btn-group pull-right">
-                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
-                @if (ViewBag.Editable)
-                {
-                <a href="~/Company/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
-                }
-                    else
+            <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+
+            <div class="btn-group pull-right">
+                    <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                    @if (ViewBag.Editable)
                     {
-                    <a href="~/Company/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
+                    <a href="~/Company/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
                     }
-                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                        else
+                        {
+                        <a href="~/Company/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
+                        }
+                    <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+            </div>
         </div>
     </div>
+    <hr />
+    <div class="card table-view-body">
+        <div class="card-body">
+                <table class="table @(ViewBag.Editable ? " editable" : "" )">
+            <thead>
+                <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                                Name
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Address1')}">
+                                Address1
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address1', 'fa-caret-down': orderByDescending() == 'Address1'}"></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Address2')}">
+                                Address2
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address2', 'fa-caret-down': orderByDescending() == 'Address2'}"></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('City')}">
+                                City
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'City', 'fa-caret-down': orderByDescending() == 'City'}"></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
+                                State
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'State', 'fa-caret-down': orderByDescending() == 'State'}"></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('ZipCode')}">
+                                Zip Code
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ZipCode', 'fa-caret-down': orderByDescending() == 'ZipCode'}"></i>
+                            </th>
+                            <th>Employees</th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('AltName')}">
+                                Alt Name
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AltName', 'fa-caret-down': orderByDescending() == 'AltName'}"></i>
+                            </th>
+                    <th style="width: 1%">
+                    </th>
+                </tr>
+
+            </thead>
+            <tbody>
+                <!-- ko foreach: items -->
+                <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: companyId}">
+                        @if (@ViewBag.Editable)
+                        {
+                            
+                            <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</td>
+                            
+                            <td class="prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</td>
+                            
+                            <td class="prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</td>
+                            
+                            <td class="prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</td>
+                            
+                            <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
+                            
+                            <td class="prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</td>
+                            
+                            <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                            
+                            <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
+                        }
+                        else
+                        {
+                            
+                            <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name, true))</td>
+                            
+                            <td class="prop-address1">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, true))</td>
+                            
+                            <td class="prop-address2">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, true))</td>
+                            
+                            <td class="prop-city">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.City, true))</td>
+                            
+                            <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
+                            
+                            <td class="prop-zipCode">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, true))</td>
+                            
+                            <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                            
+                            <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
+                        }
+                    <td>
+
+                        <!-- Editor buttons -->
+                        <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                                            <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                                            <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-remove"></i>
+                                </button>
+
+                        </div>
+                        <div class="form-control-static" data-bind="text: errorMessage"></div>
+                    </td>
+                </tr>
+                <!-- /ko -->
+            </tbody>
+        </table>
+    </div>
 </div>
-<hr />
-<div class="card">
-    <div class="card-body">
-            <table class="table @(ViewBag.Editable ? " editable" : "" )">
-        <thead>
-            <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
-                            Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Address1')}">
-                            Address1
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address1', 'fa-caret-down': orderByDescending() == 'Address1'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Address2')}">
-                            Address2
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address2', 'fa-caret-down': orderByDescending() == 'Address2'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('City')}">
-                            City
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'City', 'fa-caret-down': orderByDescending() == 'City'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
-                            State
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'State', 'fa-caret-down': orderByDescending() == 'State'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ZipCode')}">
-                            Zip Code
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ZipCode', 'fa-caret-down': orderByDescending() == 'ZipCode'}"></i>
-                        </th>
-                        <th>Employees</th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AltName')}">
-                            Alt Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AltName', 'fa-caret-down': orderByDescending() == 'AltName'}"></i>
-                        </th>
-                <th style="width: 1%">
-                </th>
-            </tr>
-
-        </thead>
-        <tbody>
-            <!-- ko foreach: items -->
-            <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: companyId}">
-                    @if (@ViewBag.Editable)
-                    {
-                        <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</td>
-                        <td class="prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</td>
-                        <td class="prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</td>
-                        <td class="prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</td>
-                        <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
-                        <td class="prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</td>
-                        <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                        <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
-                    }
-                    else
-                    {
-                        <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name, true))</td>
-                        <td class="prop-address1">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, true))</td>
-                        <td class="prop-address2">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, true))</td>
-                        <td class="prop-city">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.City, true))</td>
-                        <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
-                        <td class="prop-zipCode">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, true))</td>
-                        <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                        <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
-                    }
-                <td>
-
-                    <!-- Editor buttons -->
-                    <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
-                            </button>
-
-                    </div>
-                    <div class="form-control-static" data-bind="text: errorMessage"></div>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </tbody>
-    </table>
 </div>
-</div>
-
 
 
 

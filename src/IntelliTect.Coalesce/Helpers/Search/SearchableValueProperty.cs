@@ -63,7 +63,8 @@ namespace IntelliTect.Coalesce.Helpers.Search
             //{ DateTimeFormatInfo.CurrentInfo.UniversalSortableDateTimePattern, ParseFlags.HaveDateTime },
         };
 
-        public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(ClaimsPrincipal user, string propertyParent, string rawSearchTerm)
+        public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
+            ClaimsPrincipal user, TimeZoneInfo timeZone, string propertyParent, string rawSearchTerm)
         {
             if (!Property.SecurityInfo.IsReadable(user))
             {
@@ -76,15 +77,30 @@ namespace IntelliTect.Coalesce.Helpers.Search
 
             if (Property.Type.IsDate)
             {
-                string DateLiteral(DateTime date) =>
-                    $"{Property.PureType.Name}({date.Year}, {date.Month}, {date.Day}, {date.Hour}, {date.Minute}, {date.Second} {(Property.Type.IsDateTimeOffset ? ", TimeSpan(0)" : "")})";
+                string DateLiteral(DateTime date)
+                {
+                    if (Property.Type.IsDateTimeOffset && date.Kind != DateTimeKind.Utc)
+                        throw new ArgumentException("datetimeoffset comparand must be a UTC date.");
+
+                    return $"{Property.PureType.Name}" +
+                        $"({date.Year}, {date.Month}, {date.Day}, {date.Hour}, {date.Minute}, {date.Second}" +
+                        $"{(Property.Type.IsDateTimeOffset ? " , TimeSpan(0)" : "")})";
+                }
+                    
 
                 DateTime dt;
                 foreach (var formatInfo in DateFormats)
                 {
-                    if (DateTime.TryParseExact(rawSearchTerm, formatInfo.Key, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal, out dt))
+                    if (DateTime.TryParseExact(
+                        rawSearchTerm, 
+                        formatInfo.Key, 
+                        CultureInfo.CurrentCulture, 
+                        DateTimeStyles.AllowWhiteSpaces, 
+                        out dt
+                    ))
                     {
-                        dt = dt.ToUniversalTime();
+                        if (Property.Type.IsDateTimeOffset)
+                            dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
 
                         if (formatInfo.Value == (ParseFlags.HaveYear | ParseFlags.HaveMonth))
                         {
@@ -98,31 +114,33 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 }
 
                 // We didn't find any specific format above.
-                // Try general date parsing for either eaching by day or by minute.
-                if (DateTime.TryParse(rawSearchTerm, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal, out dt))
+                // Try general date parsing for either searching by day or by minute.
+                if (DateTime.TryParse(rawSearchTerm, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out dt))
                 {
                     TimeSpan range;
                     if (dt.TimeOfDay == TimeSpan.Zero)
                     {
                         // No time component (or time was midnight - this is a limitation we're willing to take for simplicity).
                         // Search by day.
-                        dt = new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, dt.Kind);
+                        dt = new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, DateTimeKind.Unspecified);
                         range = TimeSpan.FromDays(1);
                     }
                     else if (dt.Minute == 0 && dt.Second == 0)
                     {
                         // Time Component present, but without minutes or seconds.
                         // Search for the entire hour.
-                        dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0, dt.Kind);
+                        dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0, DateTimeKind.Unspecified);
                         range = TimeSpan.FromHours(1);
                     }
                     else
                     {
                         // Time Component present. Search to the minute.
-                        dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0, dt.Kind);
+                        dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0, DateTimeKind.Unspecified);
                         range = TimeSpan.FromMinutes(1);
                     }
-                    dt = dt.ToUniversalTime();
+
+                    if (Property.Type.IsDateTimeOffset)
+                        dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
 
                     yield return (
                         Property,

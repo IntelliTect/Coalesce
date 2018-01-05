@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Web.Tests
+namespace IntelliTect.Coalesce.Tests
 {
     public class ClonerTest
     {

@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
         internal ICollection<SearchableProperty> Children { get; }
 
         public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            ClaimsPrincipal user, string propertyParent, string rawSearchTerm)
+            ClaimsPrincipal user, TimeZoneInfo timeZone, string propertyParent, string rawSearchTerm)
         {
             if (!Property.SecurityInfo.IsReadable(user))
             {
@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
 
             return Children
                 .SelectMany(c => {
-                    return c.GetLinqDynamicSearchStatements(user, null, rawSearchTerm).Select(t =>
+                    return c.GetLinqDynamicSearchStatements(user, timeZone, null, rawSearchTerm).Select(t =>
                     {
                         return (t.property, $"{accessor}.Any({t.statement})");
                     });

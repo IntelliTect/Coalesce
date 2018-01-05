@@ -1,12 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -241,7 +236,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 else
                     typeName = Name + "?";
 
-                typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
+                var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
+                typeName = regex.Replace(typeName, $@"{model.Name}DtoGen$2");
                 typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
 
                 return typeName;

@@ -1,16 +1,21 @@
 ﻿using IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses;
 using IntelliTect.Coalesce.TypeDefinition;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.Common
+namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
 {
-    internal static class BoolPropertyAsserts
+    public class BoolTests
     {
-        internal static void CheckNullableBoolProperties(ClassViewModel vm)
+        [Theory, ClassViewModelData(typeof(Bools))]
+        // Unfortunately, we must specify our parameter type as ClassViewModelData instead of ClassViewModel.
+        // This is because xunit's implicit conversion support only checks for conversions
+        // defined on the parameter's class and not the argument's class.
+        // See https://github.com/xunit/xunit/issues/1607
+        public void IsNullable_CorrectForValueTypes(ClassViewModelData data)
         {
+            ClassViewModel vm = data;
+
             foreach (var prop in new[]
             {
                 vm.PropertyByName(nameof(Bools.NonNullableClassName)),
@@ -79,8 +84,11 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.Common
             }
         }
 
-        internal static void CheckIsBoolForProperties(ClassViewModel vm)
+        [Theory, ClassViewModelData(typeof(Bools))]
+        public void IsBool_CorrectForBoolProperties(ClassViewModelData data)
         {
+            ClassViewModel vm = data;
+
             foreach (var prop in new[]
             {
                 vm.PropertyByName(nameof(Bools.NullableGenericClassName)),
@@ -118,7 +126,5 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.Common
                 Assert.True(prop.PureType.IsBool);
             }
         }
-
-
     }
 }

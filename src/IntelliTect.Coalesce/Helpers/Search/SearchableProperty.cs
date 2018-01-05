@@ -20,6 +20,6 @@ namespace IntelliTect.Coalesce.Helpers.Search
         protected virtual string PropertyNamePath => Property.Name;
 
         public abstract IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            ClaimsPrincipal user, string propertyParent, string rawSearchTerm);
+            ClaimsPrincipal user, TimeZoneInfo timeZone, string propertyParent, string rawSearchTerm);
     }
 }

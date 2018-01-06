@@ -48,7 +48,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public override TypeViewModel[] GenericArgumentsFor(Type type) => 
-            GetSatisfyingBaseType(type)
+            GetSatisfyingBaseType(type)?
             .GenericTypeArguments
             .Select(t => new ReflectionTypeViewModel(t))
             .ToArray();

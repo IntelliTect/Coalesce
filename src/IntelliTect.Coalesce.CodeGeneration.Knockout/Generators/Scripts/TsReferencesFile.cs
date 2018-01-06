@@ -11,9 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class TsReferencesFile : StringBuilderFileGenerator<List<IGenerator>>
     {
-        public TsReferencesFile(ILoggerFactory loggerFactory) : base(loggerFactory)
-        {
-        }
+        public TsReferencesFile(GeneratorServices services, ILoggerFactory loggerFactory) : base(services) { }
 
         public override Task<string> BuildOutputAsync()
         {

@@ -11,14 +11,12 @@ using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
-
     public class StaticFileGenerator : FileGenerator
     {
         protected ITemplateResolver Resolver { get; }
 
-        public StaticFileGenerator(ITemplateResolver resolver, ILoggerFactory loggerFactory)
+        public StaticFileGenerator(GeneratorServices services, ITemplateResolver resolver) : base(services)
         {
-            Logger = loggerFactory.CreateLogger(GetType().Name);
             Resolver = resolver;
         }
 

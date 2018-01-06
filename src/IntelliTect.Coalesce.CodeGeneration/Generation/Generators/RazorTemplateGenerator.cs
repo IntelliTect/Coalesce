@@ -11,10 +11,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
     public abstract class RazorTemplateGenerator<TModel> : FileGenerator, IFileGenerator<TModel>
     {
-        public RazorTemplateGenerator(RazorTemplateServices razorServices)
+        public RazorTemplateGenerator(RazorTemplateServices razorServices) 
+            : base(razorServices)
         {
             RazorServices = razorServices;
-            Logger = razorServices.LoggerFactory.CreateLogger(GetType().Name);
         }
 
         public RazorTemplateServices RazorServices { get; }

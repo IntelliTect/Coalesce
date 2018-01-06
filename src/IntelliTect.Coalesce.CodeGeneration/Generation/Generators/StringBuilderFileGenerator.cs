@@ -14,10 +14,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
     public abstract class StringBuilderFileGenerator<TModel> : FileGenerator, IFileGenerator<TModel>
     {
-        public StringBuilderFileGenerator(ILoggerFactory loggerFactory)
-        {
-            Logger = loggerFactory.CreateLogger(GetType().Name);
-        }
+        public StringBuilderFileGenerator(GeneratorServices services) : base(services) { }
 
         public TModel Model { get; set; }
 

@@ -40,6 +40,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             services.AddSingleton<RazorTemplateCompiler>();
             services.AddSingleton<ITemplateResolver, TemplateResolver>();
             services.AddSingleton<RazorTemplateServices>();
+            services.AddSingleton<GeneratorServices>();
             services.AddSingleton<CompositeGeneratorServices>();
             services.AddSingleton<GenerationContext>();
             services.AddTransient<IProjectContextFactory, RoslynProjectContextFactory>();

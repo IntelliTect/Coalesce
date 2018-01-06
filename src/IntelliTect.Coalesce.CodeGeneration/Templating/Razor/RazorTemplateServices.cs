@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
     /// Wrapper class to encapsulate all services needed for a RazorTemplateGenerator.
     /// This prevents constructors from being enormous due to all the services.
     /// </summary>
-    public class RazorTemplateServices
+    public class RazorTemplateServices : GeneratorServices
     {
         public RazorTemplateServices(
             ReflectionRepository repository,
@@ -17,16 +17,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
             GenerationContext genContext,
             ITemplateResolver resolver,
             RazorTemplateCompiler compiler)
+            : base(genContext.CoalesceConfiguration, loggerFactory)
         {
             ReflectionRepository = repository;
-            LoggerFactory = loggerFactory;
             GenerationContext = genContext;
             Resolver = resolver;
             Compiler = compiler;
         }
 
         public ReflectionRepository ReflectionRepository { get; }
-        public ILoggerFactory LoggerFactory { get; }
         public GenerationContext GenerationContext { get; }
         public ITemplateResolver Resolver { get; }
         public RazorTemplateCompiler Compiler { get; }

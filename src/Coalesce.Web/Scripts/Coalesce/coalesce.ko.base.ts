@@ -437,7 +437,7 @@ module Coalesce {
         }
 
 
-        /** Loads the object from the server based on the id specified. If no id is specified, the current id, is used if one is set. */
+        /** Loads the object from the server based on the id specified. If no id is specified, the current id is used if one is set. */
         public load = (id?: any, callback?: (self: this) => void): JQueryPromise<any> | undefined => {
             if (!id) {
                 id = this[this.primaryKeyName as keyof this]();

@@ -2,8 +2,9 @@
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -55,11 +56,14 @@ namespace IntelliTect.Coalesce.Cli
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(configFilePath));
                 Console.WriteLine($"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
 
-                var configRoot = new ConfigurationBuilder()
-                    .AddJsonFile(configFilePath)
-                    .Build();
+                CoalesceConfiguration config;
 
-                var config = configRoot.Get<CoalesceConfiguration>();
+                using (var reader = new StreamReader(configFilePath))
+                using (var jsonReader = new JsonTextReader(reader))
+                {
+                    var serializer = new JsonSerializer();
+                    config = serializer.Deserialize<CoalesceConfiguration>(jsonReader);
+                }
 
                 var level = LogLevel.Information;
                 if (logLevel.HasValue())

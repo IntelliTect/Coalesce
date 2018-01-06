@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.TypeDefinition;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +13,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
     {
         string OutputPath { get; set; }
 
+        bool IsDisabled { get; }
+
         Task GenerateAsync();
+
+        void Configure(JObject obj);
     }
 
     public interface IGenerator<TModel> : IGenerator

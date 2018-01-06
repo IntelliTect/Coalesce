@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,14 +12,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
         public ProjectConfiguration WebProject { get; set; }
 
-        // public InputConfiguration Input { get; set; } = new InputConfiguration();
-
         public OutputConfiguration Output { get; set; } = new OutputConfiguration();
-    }
 
-    public class InputConfiguration
-    {
-
+        public Dictionary<string, JObject> GeneratorConfig { get; set; } = new Dictionary<string, JObject>();
     }
 
     public class OutputConfiguration

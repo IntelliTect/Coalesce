@@ -17,12 +17,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public CoalesceConfiguration CoalesceConfiguration { get; }
 
-        public ProjectContext WebProject { get; set; }
+        public ProjectContext WebProject { get; internal set; }
 
-        public ProjectContext DataProject { get; set; }
+        public ProjectContext DataProject { get; internal set; }
 
         public string OutputNamespaceRoot => WebProject.RootNamespace;
+
         public string AreaName => CoalesceConfiguration.Output.AreaName;
+
         public string TypescriptModulePrefix => CoalesceConfiguration.Output.TypescriptModulePrefix;
     }
 }

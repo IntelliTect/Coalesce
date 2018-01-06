@@ -5,17 +5,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
-    public abstract class FileGenerator : IFileGenerator
+
+    public abstract class FileGenerator : Generator, IFileGenerator
     {
-        protected ILogger Logger { get; set; }
+        protected FileGenerator(GeneratorServices services) : base(services) { }
 
-        public string OutputPath { get; set; }
-
-        public virtual async Task GenerateAsync()
+        public override async Task GenerateAsync()
         {
+            if (IsDisabled)
+            {
+                Logger?.LogDebug($"Skipped gen of {this}, {DisabledJsonPropertyName} was false");
+                return;
+            }
+
             if (!ShouldGenerate())
             {
                 Logger?.LogDebug($"Skipped gen of {this}, {nameof(ShouldGenerate)} returned false");

@@ -171,16 +171,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Get the generic parameters used to satisfy the inheritance relationship with the given type.
         /// </summary>
-        public override TypeViewModel[] GenericArgumentsFor(Type type)
-        {
-            var baseTypeSymbol = GetSatisfyingBaseTypeSymbol(type);
-            if (baseTypeSymbol == null)
-            {
-                throw new ArgumentException($"{this} does not inherit from {type}");
-            }
-
-            return baseTypeSymbol.TypeArguments.Select(t => new SymbolTypeViewModel(t)).ToArray();
-        }
+        public override TypeViewModel[] GenericArgumentsFor(Type type) =>
+            GetSatisfyingBaseTypeSymbol(type)?
+            .TypeArguments
+            .Select(t => new SymbolTypeViewModel(t))
+            .ToArray();
 
         public override bool IsA(Type typeToCheck) => GetSatisfyingBaseTypeSymbol(typeToCheck) != null;
 

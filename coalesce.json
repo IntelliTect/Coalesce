@@ -8,7 +8,7 @@
     "projectFile": "../Coalesce/src/Coalesce.Domain/Coalesce.Domain.csproj",
     "framework": "netstandard2.0",
     "configuration": "Debug"
-  }
+  },
 
 
   //"rootGenerator": "IntelliTect.Coalesce.CodeGeneration.Knockout",
@@ -20,9 +20,10 @@
   //  }
   //],
 
-  //"generatorConfig": {
-  //  "GeneratorName": {
-  //    "disable": true,
-  //  }
-  //}
+  "generatorConfig": {
+    "KnockoutSuite": {
+      "disabled": false
+      //"key": "value"
+    }
+  }
 }

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
+namespace IntelliTect.Coalesce.Tests.Util
 {
     internal class ClassViewModelDataAttribute : Xunit.Sdk.DataAttribute
     {

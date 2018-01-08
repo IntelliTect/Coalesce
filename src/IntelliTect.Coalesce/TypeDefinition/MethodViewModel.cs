@@ -70,7 +70,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 result = result.Replace("IQueryable", "IEnumerable");
                 if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
                 {
-                    result = result.Replace($"<{ReturnType.PureType.ClassViewModel.Name}>", $"<{ReturnType.PureType.ClassViewModel.DtoName}>");
+                    // We can just straight replace this since the fully qualified name
+                    // that we're replacing should never be a substring of any larger name.
+                    // If this were a possibility, then we would run the risk of clobbering other names.
+                    result = result.Replace(
+                        ReturnType.PureType.ClassViewModel.FullyQualifiedName, 
+                        ReturnType.PureType.ClassViewModel.DtoName);
                 }
                 else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
                 {

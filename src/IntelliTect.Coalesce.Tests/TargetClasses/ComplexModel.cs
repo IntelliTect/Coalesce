@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     public class ComplexModel
     {

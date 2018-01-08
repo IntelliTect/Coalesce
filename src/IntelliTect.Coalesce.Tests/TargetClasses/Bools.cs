@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     internal class Bools
     {

@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 using Xunit.Abstractions;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
+namespace IntelliTect.Coalesce.Tests.Util
 {
     public class ClassViewModelData : IXunitSerializable
     {
@@ -53,8 +53,11 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
             var compilation = CSharpCompilation.Create(
                 "SymbolAsm",
                 trees,
-                new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
-            });
+                AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .Where(a => !a.IsDynamic)
+                    .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray()
+            );
 
             return compilation.Assembly.GlobalNamespace
                 .Accept(new SymbolDiscoveryVisitor())

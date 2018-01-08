@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     // This class is deliberately named "Test", since the name "Test" also occurs in its namespace.
     // This class is intended for testing resolutions to issues like https://github.com/IntelliTect/Coalesce/issues/28

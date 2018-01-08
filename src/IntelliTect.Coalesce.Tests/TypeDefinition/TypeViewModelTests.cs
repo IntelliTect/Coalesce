@@ -1,10 +1,11 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.ClassViewModels
+namespace IntelliTect.Coalesce.Tests.TypeDefinition
 {
     public class TypeViewModelTests
     {

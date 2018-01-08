@@ -1,5 +1,5 @@
 ﻿using IntelliTect.Coalesce.Helpers.Search;
-using IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses;
+using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;

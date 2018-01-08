@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace IntelliTect.Coalesce.Tests.TypeDefinition.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     // IEnumerable is technically duplicated here.
     // We specify it explicitly, and IEnumerable<> also implements IEnumerable.

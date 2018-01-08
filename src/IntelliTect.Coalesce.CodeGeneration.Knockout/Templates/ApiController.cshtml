@@ -34,6 +34,13 @@
     var primaryKeyParameter = $"{model.PrimaryKey.Type.FullyQualifiedName} id";
     var dataSourceParameter = $"IDataSource<{model.BaseViewModel.FullyQualifiedName}> dataSource";
     var behaviorsParameter = $"IBehaviors<{model.BaseViewModel.FullyQualifiedName}> behaviors";
+
+    if (model.IsDto)
+    {
+        var declaredForAttr = $"[DeclaredFor(typeof({model.FullyQualifiedName}))] ";
+        dataSourceParameter = declaredForAttr + dataSourceParameter;
+        behaviorsParameter = declaredForAttr + behaviorsParameter;
+    }
 }
 
 @foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)).OrderBy(n => n))
@@ -68,17 +75,24 @@ namespace @(namespaceName).Api
         <text>
         [HttpGet("get/{id}")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Get(@primaryKeyParameter, DataSourceParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Get(
+            @primaryKeyParameter, 
+            DataSourceParameters parameters, 
+            @dataSourceParameter)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ListResult<@(model.DtoName)>> List(ListParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<ListResult<@(model.DtoName)>> List(
+            ListParameters parameters,
+            @dataSourceParameter)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<int> Count(FilterParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<int> Count(
+            FilterParameters parameters, 
+            @dataSourceParameter)
             => CountImplementation(parameters, dataSource);
         </text>
         }
@@ -87,7 +101,10 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("delete/{id}")]
         @(securityInfo.DeleteAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(@primaryKeyParameter, @behaviorsParameter, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(
+            @primaryKeyParameter, 
+            @behaviorsParameter, 
+            @dataSourceParameter)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
         </text>
         }
@@ -96,7 +113,11 @@ namespace @(namespaceName).Api
         <text>
         [HttpPost("save")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Save(@(model.DtoName) dto, [FromQuery] DataSourceParameters parameters, @dataSourceParameter, @behaviorsParameter)
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Save(
+            @(model.DtoName) dto, 
+            [FromQuery] DataSourceParameters parameters, 
+            @dataSourceParameter, 
+            @behaviorsParameter)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
         </text>
         }
@@ -106,7 +127,9 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("csvDownload")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<FileResult> CsvDownload(ListParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<FileResult> CsvDownload(
+            ListParameters parameters, 
+            @dataSourceParameter)
             => CsvDownloadImplementation(parameters, dataSource);
 
         /// <summary>
@@ -114,7 +137,9 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpGet("csvText")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<string> CsvText(ListParameters parameters, @dataSourceParameter)
+        @(model.ApiActionAccessModifier) virtual Task<string> CsvText(
+            ListParameters parameters, 
+            @dataSourceParameter)
             => CsvTextImplementation(parameters, dataSource);
     
         @if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
@@ -125,7 +150,11 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("csvUpload")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<IEnumerable<ItemResult>> CsvUpload(IFormFile file, @dataSourceParameter, @behaviorsParameter, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual Task<IEnumerable<ItemResult>> CsvUpload(
+            IFormFile file, 
+            @dataSourceParameter, 
+            @behaviorsParameter, 
+            bool hasHeader = true) 
             => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
 
         /// <summary>
@@ -133,7 +162,11 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("csvSave")]
         @(securityInfo.SaveAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<IEnumerable<ItemResult>> CsvSave(string csv, @dataSourceParameter, @behaviorsParameter, bool hasHeader = true) 
+        @(model.ApiActionAccessModifier) virtual Task<IEnumerable<ItemResult>> CsvSave(
+            string csv, 
+            @dataSourceParameter, 
+            @behaviorsParameter, 
+            bool hasHeader = true) 
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
         </text>
         }
@@ -149,8 +182,10 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("@(method.Name)")]
         @(method.SecurityInfo.ExecuteAnnotation)
-        @(model.ApiActionAccessModifier) virtual @returnType @method.Name (@method.CsParameters){
-            var dataSource = dataSourceFactory.GetDefaultDataSource<@(model.FullyQualifiedName)>();
+        @(model.ApiActionAccessModifier) virtual @returnType @method.Name (
+        @method.CsParameters)
+        {
+            var dataSource = dataSourceFactory.GetDefaultDataSource<@(model.BaseViewModel.FullyQualifiedName), @(model.FullyQualifiedName)>();
             var result = new ItemResult<@method.ReturnTypeNameForApi>();
             try{
                 @if (method.ReturnType.HasClassViewModel ||

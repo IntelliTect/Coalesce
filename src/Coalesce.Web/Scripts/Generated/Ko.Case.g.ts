@@ -92,7 +92,7 @@ module ViewModels {
             @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
             @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
         */
-        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true): void => {
             if (!data || (!force && this.isLoading())) return;
             this.isLoading(true);
             // Set the ID 
@@ -209,7 +209,7 @@ module ViewModels {
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.
         */
-        public loadChildren = (callback?: () => void) => {
+        public loadChildren = (callback?: () => void): void => {
             var loadingCount = 0;
             // See if this.assignedTo needs to be loaded.
             if (this.assignedTo() == null && this.assignedToId() != null){
@@ -240,7 +240,7 @@ module ViewModels {
             }
         };
         
-        public setupValidation = () => {
+        public setupValidation = (): void => {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
                 this.title.extend({ required: {params: true, message: "You must enter a title for the case."} }),
@@ -251,7 +251,7 @@ module ViewModels {
         }
     
         // Computed Observable for edit URL
-        public editUrl = ko.pureComputed(() => {
+        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseKey();
         });
 

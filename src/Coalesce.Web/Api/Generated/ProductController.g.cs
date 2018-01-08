@@ -34,29 +34,43 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<ProductDtoGen>> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<ItemResult<ProductDtoGen>> Get(
+            int id,
+            DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<ProductDtoGen>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<ListResult<ProductDtoGen>> List(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
-        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<int> Count(
+            FilterParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource)
             => CountImplementation(parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Product> behaviors, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<ItemResult> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.Product> behaviors,
+            IDataSource<Coalesce.Domain.Product> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]
         [Authorize(Roles = "Admin")]
-        public virtual Task<ItemResult<ProductDtoGen>> Save(ProductDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource, IBehaviors<Coalesce.Domain.Product> behaviors)
+        public virtual Task<ItemResult<ProductDtoGen>> Save(
+            ProductDtoGen dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource,
+            IBehaviors<Coalesce.Domain.Product> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
@@ -64,7 +78,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [Authorize]
-        public virtual Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<FileResult> CsvDownload(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource)
             => CsvDownloadImplementation(parameters, dataSource);
 
         /// <summary>
@@ -72,7 +88,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [Authorize]
-        public virtual Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Product> dataSource)
+        public virtual Task<string> CsvText(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource)
             => CsvTextImplementation(parameters, dataSource);
 
 
@@ -81,7 +99,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvUpload")]
         [Authorize(Roles = "Admin")]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(IFormFile file, IDataSource<Coalesce.Domain.Product> dataSource, IBehaviors<Coalesce.Domain.Product> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
+            IFormFile file,
+            IDataSource<Coalesce.Domain.Product> dataSource,
+            IBehaviors<Coalesce.Domain.Product> behaviors,
+            bool hasHeader = true)
             => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
 
         /// <summary>
@@ -89,7 +111,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvSave")]
         [Authorize(Roles = "Admin")]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(string csv, IDataSource<Coalesce.Domain.Product> dataSource, IBehaviors<Coalesce.Domain.Product> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvSave(
+            string csv,
+            IDataSource<Coalesce.Domain.Product> dataSource,
+            IBehaviors<Coalesce.Domain.Product> behaviors,
+            bool hasHeader = true)
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
 
         // Methods from data class exposed through API Controller.

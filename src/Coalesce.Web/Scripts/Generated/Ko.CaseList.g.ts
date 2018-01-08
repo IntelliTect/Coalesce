@@ -21,10 +21,10 @@ module ListViewModels {
     }
 
     export class CaseList extends Coalesce.BaseListViewModel<ViewModels.Case> {
-        protected modelName = "Case";
-        protected apiController = "/Case";
-        public modelKeyName = "caseKey";
-        public itemClass = ViewModels.Case;
+        protected modelName: string = "Case";
+        protected apiController: string = "/Case";
+        public modelKeyName: string = "caseKey";
+        public itemClass: new () => ViewModels.Case = ViewModels.Case;
 
         public filter: {
             caseKey?:string;
@@ -55,11 +55,11 @@ module ListViewModels {
 
 
         // Call server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCount = (callback: () => void = null, reload: boolean = true) => {
+        public getAllOpenCasesCount = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getAllOpenCasesCountIsLoading(true);
             this.getAllOpenCasesCountMessage('');
             this.getAllOpenCasesCountWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetAllOpenCasesCount",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -108,11 +108,11 @@ module ListViewModels {
         
 
         // Call server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatus = (callback: () => void = null, reload: boolean = true) => {
+        public randomizeDatesAndStatus = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.randomizeDatesAndStatusIsLoading(true);
             this.randomizeDatesAndStatusMessage('');
             this.randomizeDatesAndStatusWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RandomizeDatesAndStatus",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -162,11 +162,11 @@ module ListViewModels {
 
         // Call server method (GetCaseSummary)
         // Returns a list of summary information about Cases
-        public getCaseSummary = (callback: () => void = null, reload: boolean = true) => {
+        public getCaseSummary = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getCaseSummaryIsLoading(true);
             this.getCaseSummaryMessage('');
             this.getCaseSummaryWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetCaseSummary",
                      data: {  },
                      xhrFields: { withCredentials: true } })

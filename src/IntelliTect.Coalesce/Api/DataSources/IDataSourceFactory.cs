@@ -5,10 +5,16 @@ namespace IntelliTect.Coalesce.Api.DataSources
 {
     public interface IDataSourceFactory
     {
-        object GetDataSource(ClassViewModel servedType, string dataSourceName);
-        IDataSource<T> GetDataSource<T>(string dataSourceName) where T : class, new();
+        object GetDataSource(ClassViewModel servedType, ClassViewModel declaredFor, string dataSourceName);
 
-        object GetDefaultDataSource(ClassViewModel servedType);
-        IDataSource<T> GetDefaultDataSource<T>() where T : class, new();
+        IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string dataSourceName)
+             where TServed : class, new()
+             where TDeclaredFor : class, new();
+
+        object GetDefaultDataSource(ClassViewModel servedType, ClassViewModel declaredFor);
+
+        IDataSource<TServed> GetDefaultDataSource<TServed, TDeclaredFor>()
+            where TServed : class, new()
+            where TDeclaredFor : class, new();
     }
 }

@@ -209,7 +209,7 @@ module ViewModels {
             return this.rename(name, callback, reload);
         }
         /** Presents a modal with input boxes to call the server method (Rename). Depends on a modal existing with id #method-Rename. */
-        public renameModal = (callback: () => void = null, reload: boolean = true) => {
+        public renameModal = (callback: () => void = null, reload: boolean = true): void => {
             $('#method-Rename').modal();
             $('#method-Rename').on('shown.bs.modal', () => {
                 $('#method-Rename .btn-ok').unbind('click');
@@ -284,7 +284,7 @@ module ViewModels {
             return this.changeSpacesToDashesInName(callback, reload);
         }
         /** Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName). Depends on a modal existing with id #method-ChangeSpacesToDashesInName. */
-        public changeSpacesToDashesInNameModal = (callback: () => void = null, reload: boolean = true) => {
+        public changeSpacesToDashesInNameModal = (callback: () => void = null, reload: boolean = true): void => {
             this.changeSpacesToDashesInNameUi(callback, reload);
         }
         
@@ -294,7 +294,7 @@ module ViewModels {
             @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
             @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
         */
-        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true): void => {
             if (!data || (!force && this.isLoading())) return;
             this.isLoading(true);
             // Set the ID 
@@ -393,7 +393,7 @@ module ViewModels {
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.
         */
-        public loadChildren = (callback?: () => void) => {
+        public loadChildren = (callback?: () => void): void => {
             var loadingCount = 0;
             // See if this.company needs to be loaded.
             if (this.company() == null && this.companyId() != null){
@@ -412,7 +412,7 @@ module ViewModels {
             }
         };
         
-        public setupValidation = () => {
+        public setupValidation = (): void => {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
                 this.firstName.extend({ minLength: 2, maxLength: 75 }),
@@ -427,7 +427,7 @@ module ViewModels {
         }
     
         // Computed Observable for edit URL
-        public editUrl = ko.pureComputed(() => {
+        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.personId();
         });
 

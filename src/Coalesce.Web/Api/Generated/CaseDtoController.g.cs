@@ -34,29 +34,43 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Get(
+            int id,
+            DataSourceParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<Coalesce.Domain.CaseDto>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<ListResult<Coalesce.Domain.CaseDto>> List(
+            ListParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
-        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<int> Count(
+            FilterParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Case> behaviors, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<ItemResult> Delete(
+            int id,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Save(Coalesce.Domain.CaseDto dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Save(
+            Coalesce.Domain.CaseDto dto,
+            [FromQuery] DataSourceParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
@@ -64,7 +78,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [Authorize]
-        public virtual Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<FileResult> CsvDownload(
+            ListParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => CsvDownloadImplementation(parameters, dataSource);
 
         /// <summary>
@@ -72,7 +88,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [Authorize]
-        public virtual Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<string> CsvText(
+            ListParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => CsvTextImplementation(parameters, dataSource);
 
 
@@ -81,7 +99,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvUpload")]
         [Authorize]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
+            IFormFile file,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
+            bool hasHeader = true)
             => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
 
         /// <summary>
@@ -89,7 +111,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvSave")]
         [Authorize]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(string csv, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvSave(
+            string csv,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
+            bool hasHeader = true)
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
 
         // Methods from data class exposed through API Controller.

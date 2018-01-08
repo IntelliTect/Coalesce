@@ -260,7 +260,7 @@ module @moduleName {
             @:return this.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
         @:}
         @:/** Presents a modal with input boxes to call the server method (@method.Name). Depends on a modal existing with id #method-@method.Name. */
-        @:public @method.JsVariableModal = (callback: () => void = null, reload: boolean = true) => {
+        @:public @method.JsVariableModal = (callback: () => void = null, reload: boolean = true): void => {
             @if (method.ClientParameters.Any()) {
             @:$('#method-@method.Name').modal();
             @:$('#method-@method.Name').on('shown.bs.modal', () => {
@@ -294,7 +294,7 @@ module @moduleName {
             @@param force: Will override the check against isLoading that is done to prevent recursion. False is default.
             @@param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
         */
-        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true) => {
+        public loadFromDto = (data: any, force: boolean = false, allowCollectionDeletes: boolean = true): void => {
             if (!data || (!force && this.isLoading())) return;
             this.isLoading(true);
             // Set the ID 
@@ -415,7 +415,7 @@ module @moduleName {
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.
         */
-        public loadChildren = (callback?: () => void) => {
+        public loadChildren = (callback?: () => void): void => {
             var loadingCount = 0;
         @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsReadOnly && !f.HasNotMapped))
         {
@@ -437,7 +437,7 @@ module @moduleName {
             }
         };
         
-        public setupValidation = () => {
+        public setupValidation = (): void => {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
             @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => !p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs())))
@@ -454,7 +454,7 @@ module @moduleName {
         }
     
         // Computed Observable for edit URL
-        public editUrl = ko.pureComputed(() => {
+        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
             return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.@(model.PrimaryKey.JsVariable)();
         });
 

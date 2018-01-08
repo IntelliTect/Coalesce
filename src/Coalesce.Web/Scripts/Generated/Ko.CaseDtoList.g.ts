@@ -9,22 +9,15 @@ module ListViewModels {
     export namespace CaseDtoDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.CaseDto> { }
                 
-        export class AllOpenCases extends Coalesce.DataSource<ViewModels.CaseDto> {
-            public minDate: KnockoutObservable<moment.Moment> = ko.observable(null);
-            public saveToDto = () => {
-                var dto: any = {};
-                if (!this.minDate()) dto.minDate = null;
-                else dto.minDate = this.minDate().format('YYYY-MM-DDTHH:mm:ssZZ');
-                return dto;
-            }
+        export class CaseDtoSource extends Coalesce.DataSource<ViewModels.CaseDto> {
         }
     }
 
     export class CaseDtoList extends Coalesce.BaseListViewModel<ViewModels.CaseDto> {
-        protected modelName = "CaseDto";
-        protected apiController = "/CaseDto";
-        public modelKeyName = "caseId";
-        public itemClass = ViewModels.CaseDto;
+        protected modelName: string = "CaseDto";
+        protected apiController: string = "/CaseDto";
+        public modelKeyName: string = "caseId";
+        public itemClass: new () => ViewModels.CaseDto = ViewModels.CaseDto;
 
         public filter: {
             caseKey?:string;

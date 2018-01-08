@@ -209,7 +209,7 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3>@vm.ApiUrl</h3>
+                <h3>@vm.ApiRouteControllerPart</h3>
             </div>
             <table class="table">
                 <tr>
@@ -235,9 +235,6 @@
                             <dt>OrderByDescending</dt>
                             <dd>Field to order by with descending order.</dd>
 
-                            <dt>Include</dt>
-                            <dd>Child records to explicitly include if not using lazy loading.</dd>
-
                             <dt>Includes</dt>
                             <dd>The name of the list of child items to include by default, all immediate children are included. Specify 'none' to get no children. Note: this only works if lazy loading is turned off.</dd>
 
@@ -246,27 +243,6 @@
                                 A query parameter with the format filter.[field]=[value] will automatically create a filter.
                             </dd>
 
-                            <dt>Where</dt>
-                            <dd>Free form SQL filter with the syntax [field][operator][value]. eg. name='test', price>10</dd>
-                            
-                            <dt>List of fields</dt>
-                            <dd>
-                                Any other string will be treated as a requested field name. If none are specified,
-                                all fields will be returned, otherwise only specified fields will be returned in a dynamic object.
-                            </dd>
-                        </dl>
-                    </td>
-                </tr>
-                <tr>
-                    <th>CustomList</th>
-                    <td>
-                        <p>
-                            Almost the same as List, but allows for specifying a list of fields that will be returned.  On the server
-                            the standard generated DTO is created, then all properties not in the list of fields will be set to null.
-                        </p>
-                        <dl>
-                            <dt>All parameters from List apply to CustomList, except Dto.</dt>
-                            <dd>&nbsp;</dd>
                             <dt>List of fields</dt>
                             <dd>
                                 Any other string will be treated as a requested field name. If none are specified,
@@ -289,22 +265,6 @@
                             If the Id is zero a new item is created. Validation is performed and passed back in the resultant object.
                             The the save was successful a WasSuccessful flag is set to true. The saved object is passed back
                             in the Object property. A message can be passed back in the Message Property.
-                        </p>
-                </tr>
-                <tr>
-                    <th>PropertyValue</th>
-                    <td>
-                        <p>Gets values of a property. This is typically for drop down suggestion lists.</p>
-                        <p>
-                            <dl>
-                                <dt>property</dt>
-                                <dd>Property name to get</dd>
-                                <dt>page</dt>
-                                <dd>Page to retrieve. Default is 1</dd>
-                                <dt>search</dt>
-                                <dd>Search text</dd>
-                            </dl>
-
                         </p>
                 </tr>
                 <tr>
@@ -342,7 +302,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3>View Model for @vm.Name</h3>
-                <h4>JavaScript Class: @(objDoc.Namespace).@(objDoc.Name)</h4>
+                <h4>TypeScript Class: @(objDoc.Namespace).@(objDoc.Name)</h4>
                 <h5>TypeScript File: @(objDoc.TsFilename)</h5>
             </div>
             <table class="table">
@@ -382,7 +342,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3>View Model for @vm.ListViewModelClassName</h3>
-                <h4>JavaScript Class: @(listDoc.Namespace).@(listDoc.Name)</h4>
+                <h4>TypeScript Class: @(listDoc.Namespace).@(listDoc.Name)</h4>
                 <h5>TypeScript File: @(listDoc.TsFilename)</h5>
             </div>
             <table class="table">

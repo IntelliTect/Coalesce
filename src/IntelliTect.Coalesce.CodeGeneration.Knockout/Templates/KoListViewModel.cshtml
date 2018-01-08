@@ -29,14 +29,14 @@
 module @moduleName {
 
     @{ 
-        var dataSources = model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository);
+        var dataSources = model.ClientDataSources(Model.RazorServices.ReflectionRepository).ToList();
         var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
     }
     export namespace @(model.Name)DataSources {
         @if (defaultSource == null) {
         @:export class Default extends Coalesce.DataSource<@viewModelFullName> { }
         }
-        @foreach (var source in model.BaseViewModel.ClientDataSources(Model.RazorServices.ReflectionRepository))
+        @foreach (var source in dataSources)
         {
         @:
         if (source.Comment.Length > 0)
@@ -79,10 +79,10 @@ module @moduleName {
     }
 
     export class @(model.ListViewModelClassName) extends Coalesce.BaseListViewModel<@viewModelFullName> {
-        protected modelName = "@(model.Name)";
-        protected apiController = "/@(model.ApiRouteControllerPart)";
-        public modelKeyName = "@(model.PrimaryKey.JsVariable)";
-        public itemClass = @viewModelFullName;
+        protected modelName: string = "@(model.Name)";
+        protected apiController: string = "/@(model.ApiRouteControllerPart)";
+        public modelKeyName: string = "@(model.PrimaryKey.JsVariable)";
+        public itemClass: new () => @viewModelFullName = @viewModelFullName;
 
         public filter: {
             @(string.Join("\r\n            ", model.BaseViewModel.ClientProperties
@@ -113,11 +113,11 @@ module @moduleName {
         {
         @:// @(method.Comment)
         }
-        public @method.JsVariable = (@method.TsParameters) => {
+        public @method.JsVariable = (@method.TsParameters): JQueryPromise<any> => {
             this.@(method.JsVariableIsLoading)(true);
             this.@(method.JsVariableMessage)('');
             this.@(method.JsVariableWasSuccessful)(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/@(method.Name)",
                      data: @method.JsPostObject,
                      xhrFields: { withCredentials: true } })

@@ -5,10 +5,13 @@ Custom DTOs
 
 In addition to the generated :ref:`GenDTOs` that Coalesce will create for you, you may also create your own implementations of an :csharp:`IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel`.
 
+.. contents:: Contents
+    :local:
+
 The difference between a Custom DTO and the underlying entity that they represent is as follows:
 
     - The only time your custom DTO will be served is when it is requested directly from one of the endpoints on its generated controller. It will not be used when making a call to an API endpoint that was generated from an entity.
-
+    
     - When mapping data from your database, or unmapping data from the client, the DTO itself must manually map all properties, since there is no corresponding :ref:`Generated DTO <GenDTOs>`. Attributes like :ref:`DtoIncludesExcludesAttr` and property-level security through :ref:`SecurityAttributes` have no effect on custom DTOs, since those attribute only affect what get generated for :ref:`GenDTOs`.
 
 
@@ -76,3 +79,49 @@ If you have any child objects on your DTO, you can invoke the mapper for some ot
             ...
         }
     }
+
+Using Custom DataSources and Behaviors
+--------------------------------------
+
+When you create a custom DTO, it will use the :ref:`StandardDataSource` and :ref:`StandardBehaviors` just like any of your regular :ref:`EntityModels`. If you wish to override this, your custom data source and/or behaviors MUST be declared in one of the following ways:
+
+    #. As a nested class of the DTO. The relationship between your data source or behaviors and your DTO will be picked up automatically.
+
+        .. code-block:: c#
+
+            [Coalesce]
+            public class CaseDto : IClassDto<Case>
+            {
+                [Key]
+                public int CaseId { get; set; }
+
+                public string Title { get; set; }
+                
+                ...
+
+                public class MyCaseDtoSource : StandardDataSource<Case, AppDbContext>
+                {
+                    ...
+                }
+            }
+
+    #. With a :csharp:`[DeclaredFor]` attribute that references the DTO type:
+
+        .. code-block:: c#
+
+            [Coalesce]
+            public class CaseDto : IClassDto<Case>
+            {
+                [Key]
+                public int CaseId { get; set; }
+
+                public string Title { get; set; }
+                
+                ...
+            }
+
+            [Coalesce, DeclaredFor(typeof(CaseDto))]
+            public class MyCaseDtoSource : StandardDataSource<Case, AppDbContext>
+            {
+                ...
+            }

@@ -22,7 +22,7 @@
 
   "generatorConfig": {
     "Views": {
-      "disabled": true
+      "disabled": false
       //"key": "value"
     }
   }

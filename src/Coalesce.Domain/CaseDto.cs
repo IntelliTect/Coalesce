@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using IntelliTect.Coalesce;
+using Microsoft.EntityFrameworkCore;
+using IntelliTect.Coalesce.Models;
 
 namespace Coalesce.Domain
 {
@@ -31,6 +33,32 @@ namespace Coalesce.Domain
             {
                 AssignedToName = obj.AssignedTo.Name;
             }
+        }
+    }
+
+    [Coalesce, DeclaredFor(typeof(CaseDto))]
+    public class CaseDtoSource : StandardDataSource<Case, AppDbContext>
+    {
+        public CaseDtoSource(CrudContext<AppDbContext> context) : base(context)
+        {
+        }
+
+        public override IQueryable<Case> GetQuery(IDataSourceParameters parameters)
+        {
+            return Db.Cases.Include(c => c.AssignedTo);
+        }
+    }
+
+    [Coalesce, DeclaredFor(typeof(CaseDto))]
+    public class CaseDtoBehaviors : StandardBehaviors<Case, AppDbContext>
+    {
+        public CaseDtoBehaviors(CrudContext<AppDbContext> context) : base(context)
+        {
+        }
+
+        public override ItemResult BeforeSave(SaveKind kind, Case oldItem, Case item)
+        {
+            return true;
         }
     }
 }

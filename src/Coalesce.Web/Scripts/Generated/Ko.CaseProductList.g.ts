@@ -11,10 +11,10 @@ module ListViewModels {
             }
 
     export class CaseProductList extends Coalesce.BaseListViewModel<ViewModels.CaseProduct> {
-        protected modelName = "CaseProduct";
-        protected apiController = "/CaseProduct";
-        public modelKeyName = "caseProductId";
-        public itemClass = ViewModels.CaseProduct;
+        protected modelName: string = "CaseProduct";
+        protected apiController: string = "/CaseProduct";
+        public modelKeyName: string = "caseProductId";
+        public itemClass: new () => ViewModels.CaseProduct = ViewModels.CaseProduct;
 
         public filter: {
             caseProductId?:string;

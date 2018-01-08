@@ -198,7 +198,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
             .DataSources
-            .Where(d => d.SourceFor.Equals(this))
+            .Where(d => d.DeclaredFor.Equals(this))
             .Select(d => d.StrategyClass);
 
 

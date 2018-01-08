@@ -46,10 +46,10 @@ namespace IntelliTect.Coalesce.Api.Behaviors
         }
 
 
-        protected Type GetBehaviorsType(ClassViewModel servedType)
+        protected Type GetBehaviorsType(ClassViewModel servedType, ClassViewModel declaredFor)
         {
             var behaviorsClassViewModel = reflectionRepository.Behaviors
-                .SingleOrDefault(usage => usage.SourceFor == servedType)
+                .SingleOrDefault(usage => usage.DeclaredFor == declaredFor)
                 ?.StrategyClass;
 
             if (behaviorsClassViewModel == null)
@@ -62,9 +62,9 @@ namespace IntelliTect.Coalesce.Api.Behaviors
             }
         }
 
-        public object GetBehaviors(ClassViewModel servedType)
+        public object GetBehaviors(ClassViewModel servedType, ClassViewModel declaredFor)
         {
-            var behaviorsType = GetBehaviorsType(servedType);
+            var behaviorsType = GetBehaviorsType(servedType, declaredFor);
             return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
         }
     }

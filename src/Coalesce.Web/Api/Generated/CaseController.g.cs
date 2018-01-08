@@ -34,29 +34,43 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<ItemResult<CaseDtoGen>> Get(
+            int id,
+            DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual Task<ListResult<CaseDtoGen>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<ListResult<CaseDtoGen>> List(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [AllowAnonymous]
-        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<int> Count(
+            FilterParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Case> behaviors, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<ItemResult> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            IDataSource<Coalesce.Domain.Case> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Save(CaseDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        public virtual Task<ItemResult<CaseDtoGen>> Save(
+            CaseDtoGen dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
@@ -64,7 +78,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [AllowAnonymous]
-        public virtual Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<FileResult> CsvDownload(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource)
             => CsvDownloadImplementation(parameters, dataSource);
 
         /// <summary>
@@ -72,7 +88,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [AllowAnonymous]
-        public virtual Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual Task<string> CsvText(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource)
             => CsvTextImplementation(parameters, dataSource);
 
 
@@ -81,7 +99,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvUpload")]
         [AllowAnonymous]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
+            IFormFile file,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            bool hasHeader = true)
             => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
 
         /// <summary>
@@ -89,7 +111,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvSave")]
         [AllowAnonymous]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(string csv, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvSave(
+            string csv,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            bool hasHeader = true)
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
 
         // Methods from data class exposed through API Controller.
@@ -99,9 +125,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
 
-        public virtual ItemResult<int> GetAllOpenCasesCount([FromServices] IDataSourceFactory dataSourceFactory)
+        public virtual ItemResult<int> GetAllOpenCasesCount(
+        [FromServices] IDataSourceFactory dataSourceFactory)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>();
             var result = new ItemResult<int>();
             try
             {
@@ -124,9 +151,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
 
-        public virtual ItemResult<object> RandomizeDatesAndStatus([FromServices] IDataSourceFactory dataSourceFactory)
+        public virtual ItemResult<object> RandomizeDatesAndStatus(
+        [FromServices] IDataSourceFactory dataSourceFactory)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>();
             var result = new ItemResult<object>();
             try
             {
@@ -150,9 +178,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetCaseSummary")]
 
-        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary([FromServices] IDataSourceFactory dataSourceFactory)
+        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary(
+        [FromServices] IDataSourceFactory dataSourceFactory)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>();
             var result = new ItemResult<CaseSummaryDtoGen>();
             try
             {

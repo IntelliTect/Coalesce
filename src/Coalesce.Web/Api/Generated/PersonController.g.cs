@@ -34,29 +34,43 @@ namespace Coalesce.Web.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<PersonDtoGen>> Get(int id, DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<ItemResult<PersonDtoGen>> Get(
+            int id,
+            DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Person> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual Task<ListResult<PersonDtoGen>> List(ListParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<ListResult<PersonDtoGen>> List(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Person> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [AllowAnonymous]
-        public virtual Task<int> Count(FilterParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<int> Count(
+            FilterParameters parameters,
+            IDataSource<Coalesce.Domain.Person> dataSource)
             => CountImplementation(parameters, dataSource);
 
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult> Delete(int id, IBehaviors<Coalesce.Domain.Person> behaviors, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<ItemResult> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.Person> behaviors,
+            IDataSource<Coalesce.Domain.Person> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<PersonDtoGen>> Save(PersonDtoGen dto, [FromQuery] DataSourceParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource, IBehaviors<Coalesce.Domain.Person> behaviors)
+        public virtual Task<ItemResult<PersonDtoGen>> Save(
+            PersonDtoGen dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Person> dataSource,
+            IBehaviors<Coalesce.Domain.Person> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         /// <summary>
@@ -64,7 +78,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvDownload")]
         [AllowAnonymous]
-        public virtual Task<FileResult> CsvDownload(ListParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<FileResult> CsvDownload(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Person> dataSource)
             => CsvDownloadImplementation(parameters, dataSource);
 
         /// <summary>
@@ -72,7 +88,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("csvText")]
         [AllowAnonymous]
-        public virtual Task<string> CsvText(ListParameters parameters, IDataSource<Coalesce.Domain.Person> dataSource)
+        public virtual Task<string> CsvText(
+            ListParameters parameters,
+            IDataSource<Coalesce.Domain.Person> dataSource)
             => CsvTextImplementation(parameters, dataSource);
 
 
@@ -81,7 +99,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvUpload")]
         [AllowAnonymous]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(IFormFile file, IDataSource<Coalesce.Domain.Person> dataSource, IBehaviors<Coalesce.Domain.Person> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
+            IFormFile file,
+            IDataSource<Coalesce.Domain.Person> dataSource,
+            IBehaviors<Coalesce.Domain.Person> behaviors,
+            bool hasHeader = true)
             => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
 
         /// <summary>
@@ -89,7 +111,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("csvSave")]
         [AllowAnonymous]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(string csv, IDataSource<Coalesce.Domain.Person> dataSource, IBehaviors<Coalesce.Domain.Person> behaviors, bool hasHeader = true)
+        public virtual Task<IEnumerable<ItemResult>> CsvSave(
+            string csv,
+            IDataSource<Coalesce.Domain.Person> dataSource,
+            IBehaviors<Coalesce.Domain.Person> behaviors,
+            bool hasHeader = true)
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
 
         // Methods from data class exposed through API Controller.
@@ -99,9 +125,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("Rename")]
 
-        public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
+        public virtual async Task<ItemResult<PersonDtoGen>> Rename(
+        [FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
             var result = new ItemResult<PersonDtoGen>();
             try
             {
@@ -133,9 +160,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
 
-        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName(
+        [FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
             var result = new ItemResult<object>();
             try
             {
@@ -166,9 +194,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("Add")]
 
-        public virtual ItemResult<int> Add([FromServices] IDataSourceFactory dataSourceFactory, int numberOne, int numberTwo)
+        public virtual ItemResult<int> Add(
+        [FromServices] IDataSourceFactory dataSourceFactory, int numberOne, int numberTwo)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
             var result = new ItemResult<int>();
             try
             {
@@ -191,9 +220,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUser")]
         [Authorize(Roles = "Admin")]
-        public virtual ItemResult<string> GetUser([FromServices] IDataSourceFactory dataSourceFactory)
+        public virtual ItemResult<string> GetUser(
+        [FromServices] IDataSourceFactory dataSourceFactory)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
             var result = new ItemResult<string>();
             try
             {
@@ -216,9 +246,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUserPublic")]
 
-        public virtual ItemResult<string> GetUserPublic([FromServices] IDataSourceFactory dataSourceFactory)
+        public virtual ItemResult<string> GetUserPublic(
+        [FromServices] IDataSourceFactory dataSourceFactory)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
             var result = new ItemResult<string>();
             try
             {
@@ -241,9 +272,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith([FromServices] IDataSourceFactory dataSourceFactory, string characters)
+        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(
+        [FromServices] IDataSourceFactory dataSourceFactory, string characters)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
             var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
             try
             {

@@ -21,10 +21,10 @@ module ListViewModels {
     }
 
     export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {
-        protected modelName = "Person";
-        protected apiController = "/Person";
-        public modelKeyName = "personId";
-        public itemClass = ViewModels.Person;
+        protected modelName: string = "Person";
+        protected apiController: string = "/Person";
+        public modelKeyName: string = "personId";
+        public itemClass: new () => ViewModels.Person = ViewModels.Person;
 
         public filter: {
             personId?:string;
@@ -58,11 +58,11 @@ module ListViewModels {
 
         // Call server method (Add)
         // Adds two numbers.
-        public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true) => {
+        public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.addIsLoading(true);
             this.addMessage('');
             this.addWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Add",
                      data: { numberOne: numberOne, numberTwo: numberTwo },
                      xhrFields: { withCredentials: true } })
@@ -127,11 +127,11 @@ module ListViewModels {
 
         // Call server method (GetUser)
         // Returns the user name
-        public getUser = (callback: () => void = null, reload: boolean = true) => {
+        public getUser = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getUserIsLoading(true);
             this.getUserMessage('');
             this.getUserWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUser",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -181,11 +181,11 @@ module ListViewModels {
 
         // Call server method (GetUserPublic)
         // Returns the user name
-        public getUserPublic = (callback: () => void = null, reload: boolean = true) => {
+        public getUserPublic = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getUserPublicIsLoading(true);
             this.getUserPublicMessage('');
             this.getUserPublicWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUserPublic",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -235,11 +235,11 @@ module ListViewModels {
 
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
-        public namesStartingWith = (characters: string, callback: () => void = null, reload: boolean = true) => {
+        public namesStartingWith = (characters: string, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.namesStartingWithIsLoading(true);
             this.namesStartingWithMessage('');
             this.namesStartingWithWasSuccessful(null);
-            $.ajax({ method: "POST",
+            return $.ajax({ method: "POST",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/NamesStartingWith",
                      data: { characters: characters },
                      xhrFields: { withCredentials: true } })

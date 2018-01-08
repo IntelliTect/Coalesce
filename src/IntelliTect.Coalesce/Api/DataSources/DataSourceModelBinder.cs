@@ -1,20 +1,17 @@
-﻿using IntelliTect.Coalesce.Api.DataSources;
-using IntelliTect.Coalesce.DataAnnotations;
+﻿using IntelliTect.Coalesce.Api.CrudStrategy;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Api.DataSources
 {
-    public class DataSourceModelBinder : IModelBinder
+    public class DataSourceModelBinder : CrudStrategyModelBinder, IModelBinder
     {
         private readonly IDataSourceFactory dataSourceFactory;
         private readonly IModelBinderFactory modelBinderFactory;
@@ -38,7 +35,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             // This is the name of the query parameter on the URL.
             if (string.IsNullOrEmpty(bindingContext.BinderModelName))
             {
-                bindingContext.BinderModelName = "dataSource";
+                bindingContext.BinderModelName = bindingContext.ModelName;
             }
 
             var valueProviderResult =
@@ -47,19 +44,12 @@ namespace IntelliTect.Coalesce.Api.DataSources
             // This is the name of the dataSource that has been requested.
             var requestedDataSource = valueProviderResult.FirstValue;
 
-            // Grab the type information about what we need to inject,
-            // and make sure that we're really binding to an IDataSource<>.
-            var typeViewModel = new ReflectionTypeViewModel(bindingContext.ModelType);
-            if (!typeViewModel.IsA(typeof(IDataSource<>))) return;
-
-            // Figure out what type is satisfying the generic parameter of IDataSource<>.
-            // This is the type that our dataSource needs to serve.
-            var servedType = typeViewModel.GenericArgumentsFor(typeof(IDataSource<>)).Single();
+            var (servedType, declaredFor) = GetStrategyTypes(bindingContext, typeof(IDataSource<>));
 
             object dataSource;
             try
             {
-                dataSource = dataSourceFactory.GetDataSource(servedType.ClassViewModel, requestedDataSource);
+                dataSource = dataSourceFactory.GetDataSource(servedType, declaredFor, requestedDataSource);
             }
             catch (DataSourceNotFoundException ex)
             {

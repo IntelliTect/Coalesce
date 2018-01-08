@@ -11,6 +11,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using System.Collections.Concurrent;
 using IntelliTect.Coalesce.TypeUsage;
+using IntelliTect.Coalesce.Api;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -65,20 +66,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (type.HasAttribute<CoalesceAttribute>())
                 {
-                    bool AddCrudStrategy(Type iface, HashSet<CrudStrategyTypeUsage> set)
-                    {
-                        if (!type.IsA(iface)) return false;
-
-                        var servedType = type.GenericArgumentsFor(iface).Single();
-                        if (!servedType.HasClassViewModel)
-                        {
-                            throw new InvalidOperationException($"{servedType} is not a valid type argument for a data source.");
-                        }
-                        var servedClass = servedType.ClassViewModel;
-                        set.Add(new CrudStrategyTypeUsage(Cache(type.ClassViewModel), servedClass, servedClass));
-                        return true;
-                    }
-
                     if (type.IsA<DbContext>())
                     {
                         var context = new DbContextTypeUsage(type.ClassViewModel);
@@ -89,11 +76,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         // TODO: eliminate the need for this.
                         foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
                     }
-                    else if (AddCrudStrategy(typeof(IDataSource<>), _dataSources))
+                    else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
                     {
                         // Handled by helper
                     }
-                    else if (AddCrudStrategy(typeof(IBehaviors<>), _behaviors))
+                    else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
                     {
                         // Handled by helper
                     }
@@ -109,7 +96,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         // Force cache this since it has extra bits of info attached.
                         _customDtos.Add(Cache(classViewModel, force: true));
 
-                        DiscoverNestedCrudStrategiesOn(classViewModel, classViewModel.DtoBaseViewModel);
+                        DiscoverNestedCrudStrategiesOn(classViewModel);
                     }
                 }
             }
@@ -212,38 +199,52 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
             }
         }
-
-        private void DiscoverNestedCrudStrategiesOn(ClassViewModel model, ClassViewModel assertSourceFor = null)
+        private bool AddCrudStrategy(
+            Type iface,
+            TypeViewModel strategyType,
+            HashSet<CrudStrategyTypeUsage> set,
+            ClassViewModel declaredFor = null
+        )
         {
-            assertSourceFor = assertSourceFor ?? model;
+            if (!strategyType.IsA(iface)) return false;
 
-
-            bool AddCrudStrategy(TypeViewModel nestedType, Type iface, HashSet<CrudStrategyTypeUsage> set)
+            var servedType = strategyType.GenericArgumentsFor(iface).Single();
+            if (!servedType.HasClassViewModel)
             {
-                if (!nestedType.IsA(iface)) return false;
+                throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
+            }
+            var servedClass = Cache(servedType.ClassViewModel);
 
-                var servedType = nestedType.GenericArgumentsFor(iface).Single();
-                if (!servedType.HasClassViewModel)
-                {
-                    throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
-                }
-                var servedClass = Cache(servedType.ClassViewModel);
-
-                if (!servedClass.Equals(assertSourceFor))
-                {
-                    throw new InvalidOperationException($"{nestedType} is not a valid {iface} for {model} - " +
-                        $"{nestedType} must satisfy {iface} with type parameter <{assertSourceFor}>.");
-                }
-
-                set.Add(new CrudStrategyTypeUsage(Cache(nestedType.ClassViewModel), servedClass, model));
-                return true;
+            // See if we were expecting that the strategy be declared for a particular type
+            // by virtue of its nesting. If this type has been overridden to something else by an attribute, then that's wrong.
+            var explicitlyDeclaredFor = strategyType.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)?.ClassViewModel;
+            if (explicitlyDeclaredFor != null && declaredFor != null && !explicitlyDeclaredFor.Equals(declaredFor))
+            {
+                throw new InvalidOperationException(
+                    $"Expected that {strategyType} is declared for {declaredFor}, but it was explicitly declared for {explicitlyDeclaredFor} instead.");
             }
 
+            // Any explicit declaration is OK. Use that,
+            // or the passed in value if no explicit value is given via attribute,
+            // or just the type that is served if neither are present.
+            declaredFor = explicitlyDeclaredFor ?? declaredFor ?? servedClass;
 
+            if (declaredFor.IsDto && !servedClass.Equals(declaredFor.DtoBaseViewModel))
+            {
+                throw new InvalidOperationException($"{strategyType} is not a valid {iface} for {declaredFor} - " +
+                    $"{strategyType} must satisfy {iface} with type parameter <{declaredFor.DtoBaseViewModel}>.");
+            }
+
+            set.Add(new CrudStrategyTypeUsage(Cache(strategyType.ClassViewModel), servedClass, declaredFor));
+            return true;
+        }
+
+        private void DiscoverNestedCrudStrategiesOn(ClassViewModel model)
+        {
             foreach (var nestedType in model.ClientNestedTypes)
             {
-                AddCrudStrategy(nestedType, typeof(IDataSource<>), _dataSources);
-                AddCrudStrategy(nestedType, typeof(IBehaviors<>), _behaviors);
+                AddCrudStrategy(typeof(IDataSource<>), nestedType, _dataSources, model);
+                AddCrudStrategy(typeof(IBehaviors<>), nestedType, _behaviors, model);
             }
         }
 

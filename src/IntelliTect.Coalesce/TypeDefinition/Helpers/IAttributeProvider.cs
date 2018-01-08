@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -38,6 +39,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             where TAttribute : Attribute
         {
             return obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name) as string;
+        }
+
+        public static TypeViewModel GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type>> propertyExpression)
+            where TAttribute : Attribute
+        {
+            var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);
+            if (value is Type reflectionValue) return new ReflectionTypeViewModel(reflectionValue);
+            if (value is ITypeSymbol symbolValue) return new SymbolTypeViewModel(symbolValue);
+            return null;
         }
     }
 }

@@ -114,7 +114,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
                 var outParameters = new List<string>();
-                outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
+
+                if (!IsStatic)
+                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
 
                 // When not static add an id that specifies the object to work on.
                 if (!IsStatic)

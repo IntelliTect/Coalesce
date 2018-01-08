@@ -185,26 +185,26 @@ namespace @(namespaceName).Api
         @(model.ApiActionAccessModifier) virtual @returnType @method.Name (
         @method.CsParameters)
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<@(model.BaseViewModel.FullyQualifiedName), @(model.FullyQualifiedName)>();
             var result = new ItemResult<@method.ReturnTypeNameForApi>();
-            try{
-                @if (method.ReturnType.HasClassViewModel ||
-                    (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection))
-                {
+
+            @if (method.ReturnType.HasClassViewModel ||
+                (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection))
+            {
                 @:IncludeTree includeTree = null;
-                }
-                @if (method.IsStatic)
-                {
-                if(method.ReturnType.IsVoid){
-                @:object objResult = null;
-                @:@(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
+            }
+            @if (method.IsStatic)
+            {
+                if(method.ReturnType.IsVoid) {
+                    @:object methodResult = null;
+                    @:@(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
                 }else{
-@:var objResult = @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
+                    @:var methodResult = @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
                 }
-                }
-                else
-                {
-@:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            }
+            else
+            {
+                @:var dataSource = dataSourceFactory.GetDefaultDataSource<@(model.BaseViewModel.FullyQualifiedName), @(model.FullyQualifiedName)>();
+                @:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 @:if (!itemResult.WasSuccessful)
                 @:{
                     @:return new ItemResult<@method.ReturnTypeNameForApi>(itemResult);
@@ -212,52 +212,46 @@ namespace @(namespaceName).Api
                 @:var item = itemResult.Object;
                 if (method.ReturnType.IsVoid)
                 {
-                @:object objResult = null;
-                @:item.@(method.Name)(@(method.CsArguments));
+                    @:object methodResult = null;
+                    @:item.@(method.Name)(@(method.CsArguments));
                 }else{
-                @:var objResult = item.@(method.Name)(@(method.CsArguments));
+                    @:var methodResult = item.@(method.Name)(@(method.CsArguments));
                 }
                 @:Db.SaveChanges();
+            }
+            @if (method.ReturnType.IsCollection)
+            {
+                if (method.ReturnType.PureType.ClassViewModel?.IsDto ?? false)
+                {
+                    @:result.Object = methodResult.ToList();
                 }
-        @if (method.ReturnType.IsCollection)
-        {
-            if (method.ReturnType.PureType.ClassViewModel?.IsDto ?? false)
-            {
-                @:result.Object = objResult.ToList();
-            }
-            else if (method.ReturnType.PureType.HasClassViewModel)
-            {
-                @:var mappingContext = new MappingContext(User, "");
-                @:result.Object = objResult.ToList().Select(o => Mapper.MapToDto<@(method.ReturnType.PureType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>(o, mappingContext, (objResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-            }
-            else
-            {
-                @:result.Object = objResult;
-            }
-        }
-        else
-        {
-            if (method.ReturnType.ClassViewModel?.IsDto ?? false)
-            {
-                @:result.Object = objResult;
-            }
-            else if (method.ReturnType.HasClassViewModel)
-            {
-                @:var mappingContext = new MappingContext(User, "");
-                @:result.Object = Mapper.MapToDto<@(method.ReturnType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.ClassViewModel.DtoName)>(objResult, mappingContext, includeTree);
+                else if (method.ReturnType.PureType.HasClassViewModel)
+                {
+                    @:var mappingContext = new MappingContext(User, "");
+                    @:result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<@(method.ReturnType.PureType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+                }
+                else
+                {
+                    @:result.Object = methodResult;
+                }
             }
             else
             {
-                @:result.Object = objResult;
+                if (method.ReturnType.ClassViewModel?.IsDto ?? false)
+                {
+                    @:result.Object = methodResult;
+                }
+                else if (method.ReturnType.HasClassViewModel)
+                {
+                    @:var mappingContext = new MappingContext(User, "");
+                    @:result.Object = Mapper.MapToDto<@(method.ReturnType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.ClassViewModel.DtoName)>(methodResult, mappingContext, includeTree);
+                }
+                else
+                {
+                    @:result.Object = methodResult;
+                }
             }
-        }
 
-                result.WasSuccessful = true;
-                result.Message = null;
-            }catch(Exception ex){
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
             return result;
         }
 </text>

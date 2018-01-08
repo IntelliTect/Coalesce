@@ -126,23 +126,13 @@ namespace Coalesce.Web.Api
         [HttpPost("GetAllOpenCasesCount")]
 
         public virtual ItemResult<int> GetAllOpenCasesCount(
-        [FromServices] IDataSourceFactory dataSourceFactory)
+        )
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>();
             var result = new ItemResult<int>();
-            try
-            {
-                var objResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
-                result.Object = objResult;
 
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
+            var methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
+            result.Object = methodResult;
+
             return result;
         }
 
@@ -152,24 +142,14 @@ namespace Coalesce.Web.Api
         [HttpPost("RandomizeDatesAndStatus")]
 
         public virtual ItemResult<object> RandomizeDatesAndStatus(
-        [FromServices] IDataSourceFactory dataSourceFactory)
+        )
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>();
             var result = new ItemResult<object>();
-            try
-            {
-                object objResult = null;
-                Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
-                result.Object = objResult;
 
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
+            object methodResult = null;
+            Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
+            result.Object = methodResult;
+
             return result;
         }
 
@@ -179,25 +159,15 @@ namespace Coalesce.Web.Api
         [HttpPost("GetCaseSummary")]
 
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary(
-        [FromServices] IDataSourceFactory dataSourceFactory)
+        )
         {
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>();
             var result = new ItemResult<CaseSummaryDtoGen>();
-            try
-            {
-                IncludeTree includeTree = null;
-                var objResult = Coalesce.Domain.Case.GetCaseSummary(Db);
-                var mappingContext = new MappingContext(User, "");
-                result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(objResult, mappingContext, includeTree);
 
-                result.WasSuccessful = true;
-                result.Message = null;
-            }
-            catch (Exception ex)
-            {
-                result.WasSuccessful = false;
-                result.Message = ex.Message;
-            }
+            IncludeTree includeTree = null;
+            var methodResult = Coalesce.Domain.Case.GetCaseSummary(Db);
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(methodResult, mappingContext, includeTree);
+
             return result;
         }
     }

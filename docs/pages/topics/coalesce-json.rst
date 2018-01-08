@@ -15,8 +15,8 @@ File Resolution
 
 When the code generation is ran by invoking ``dotnet coalesce``, Coalesce will try to find a configuration file via the following means:
 
-#. If a parameter is specified on the command line, it will be used as the location of the file. E.g. ``dotnet coalesce C:/Projects/MyProject/config.json``
-#. If no parameter is given, Coalesce will try to use a file in the working directory named ``coalesce.json``
+#. If an argument is specified on the command line, it will be used as the location of the file. E.g. ``dotnet coalesce C:/Projects/MyProject/config.json``
+#. If no argument is given, Coalesce will try to use a file in the working directory named ``coalesce.json``
 #. If no file is found in the working directory, Coalesce will crawl up the directory tree from the working directory until a file named ``coalesce.json`` is found. If such a file is never found, an error will be thrown.
 
 
@@ -57,6 +57,17 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             // Optional: Build configuration to use when evaluating & building dependencies.
             // Defaults to "Release".
             "configuration": "Debug",
+        }
+        
+        "generatorConfig": {
+            // A set of objects keyed by generator name.
+            // Generator names may optionally be qualified by their full namespace.
+            // All generators are listed when running 'dotnet coalesce' with '--verbosity debug'.
+            // For example, "Views" or "IntelliTect.Coalesce.CodeGeneration.Knockout.Generators.Views".
+            "GeneratorName": {
+                // Optional: true if the generator should be disabled.
+                "disabled": true
+            }
         }
     }
 

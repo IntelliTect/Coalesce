@@ -52,7 +52,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             foreach (var configProp in properties)
             {
                 var propType = configProp.Type.TypeInfo;
-                obj.ToObject(propType);
                 configProp.PropertyInfo.SetValue(this, obj.ToObject(propType));
             }
         }

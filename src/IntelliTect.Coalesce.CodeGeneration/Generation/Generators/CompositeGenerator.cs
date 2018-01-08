@@ -44,23 +44,47 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             // Flatten out all generators.
             // This includes all FileGenerators and all CompositeGenerators in the hierarchy.
-            IEnumerable<IGenerator> Flatten(ICompositeGenerator composite) => composite.IsDisabled
-                ? Enumerable.Empty<IGenerator>()
-                : composite
-                    .GetGenerators()
-                    .Where(g => !g.IsDisabled)
-                    .SelectMany(g => (g is ICompositeGenerator c) ? Flatten(c).Concat(new[] { g }) : new[] { g });
+            IEnumerable<IGenerator> Flatten(ICompositeGenerator composite, int depth = 0)
+            {
+                var prefix = string.Concat(Enumerable.Repeat("  |", depth));
+
+                if (composite.IsDisabled)
+                {
+                    Logger.LogDebug($"{prefix} {composite.GetType().FullName} => DISABLED");
+                    yield break;
+                }
+
+                Logger.LogDebug($"{prefix} {composite.GetType().FullName} => {composite.OutputPath}");
+
+                prefix = string.Concat(Enumerable.Repeat("  |", depth + 1));
+
+                foreach (var generator in composite.GetGenerators().OrderBy(g => g.GetType().FullName))
+                {
+                    if (generator.IsDisabled)
+                    {
+                        Logger.LogDebug($"{prefix} {generator.GetType().FullName} => DISABLED");
+                        yield break;
+                    }
+                    else if (generator is ICompositeGenerator childComposite)
+                    {
+                        foreach (var childGen in Flatten(childComposite, depth + 1)) yield return childGen;
+                    }
+                    else
+                    {
+                        Logger.LogDebug($"{prefix} {generator.GetType().FullName} => {generator.OutputPath}");
+                    }
+
+                    yield return generator;
+                }
+            }
 
             var allGenerators = Flatten(this).ToList();
-
 
             var fileGenerators = allGenerators.OfType<IFileGenerator>().ToList();
             var compositeGenerators = allGenerators.OfType<ICompositeGenerator>().ToList();
             var outputtedFiles = fileGenerators.Select(g => g.OutputPath).ToList();
             var cleaners = compositeGenerators.SelectMany(g => g.GetCleaners()).ToList();
 
-
-            Logger.LogDebug($"Generating {fileGenerators.Count} files from {compositeGenerators.Count} composites");
             await Task.WhenAll(fileGenerators
                 .AsParallel()
                 .Select(g => g.GenerateAsync()));

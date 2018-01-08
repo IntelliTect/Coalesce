@@ -21,8 +21,8 @@
   //],
 
   "generatorConfig": {
-    "KnockoutSuite": {
-      "disabled": false
+    "Views": {
+      "disabled": true
       //"key": "value"
     }
   }

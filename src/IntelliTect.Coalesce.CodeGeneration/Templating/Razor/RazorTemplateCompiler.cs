@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                         var looksLikeTemplate = new String(contents).Contains(searchString);
 
                         if (!looksLikeTemplate)
-                            _logger.LogDebug($"Won't precompile {resolved}, doesn't contain {searchString} in first {contents.Length} chars");
+                            _logger.LogTrace($"Won't precompile {resolved}, doesn't contain {searchString} in first {contents.Length} chars");
                         return looksLikeTemplate;
                     }
                 })
@@ -71,7 +71,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                     try
                     {
                         await GetTemplateInstance(resolved);
-                        _logger.LogDebug($"Successfully precompiled {resolved}");
+                        _logger.LogTrace($"Successfully precompiled {resolved}");
                     }
                     catch
                     {
@@ -150,15 +150,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                 generatorResults = engine.GenerateCode(document);
             }
 
-            if (_logger.IsEnabled(LogLevel.Trace))
-            {
-                // Check log level enabled before trying to log this, since this will allocate a massive string.
-                _logger.LogTrace($"Generated C# from template {template}:\r\n{generatorResults.GeneratedCode}");
-            }
-            else
-            {
-                _logger.LogDebug($"Generated C# from template {template}");
-            }
+            _logger.LogTrace($"Generated C# from template {template}");
 
             if (generatorResults.Diagnostics.Any(d => d.Severity == RazorDiagnosticSeverity.Error))
             {
@@ -168,7 +160,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
 
             var type = Compile(generatorResults.GeneratedCode);
             
-            _logger.LogDebug($"Compiled C# for {template} into in-memory assembly.");
+            _logger.LogTrace($"Compiled C# for {template} into in-memory assembly.");
 
             return type;
         }

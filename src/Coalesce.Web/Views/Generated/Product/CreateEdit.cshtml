@@ -11,7 +11,7 @@
     </div>
     <div class="panel-body">
         <div class="form-horizontal">
-            <div class="form-group btn-warning" data-bind="if: errorMessage()">
+            <div class="form-group btn-warning" sytle="display: none;" data-bind="if: errorMessage(), visible: errorMessage()">
                 <label class="col-md-4 control-label">Error</label>
                 <div class="col-md-8">
                     <div class="form-control-static" data-bind="text: errorMessage"></div>

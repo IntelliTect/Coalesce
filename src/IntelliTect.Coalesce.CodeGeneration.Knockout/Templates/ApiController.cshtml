@@ -182,8 +182,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [HttpPost("@(method.Name)")]
         @(method.SecurityInfo.ExecuteAnnotation)
-        @(model.ApiActionAccessModifier) virtual @returnType @method.Name (
-        @method.CsParameters)
+        @(model.ApiActionAccessModifier) virtual @returnType @method.Name (@method.CsParameters)
         {
             var result = new ItemResult<@method.ReturnTypeNameForApi>();
 

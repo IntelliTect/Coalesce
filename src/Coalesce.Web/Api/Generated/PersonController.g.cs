@@ -125,8 +125,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("Rename")]
 
-        public virtual async Task<ItemResult<PersonDtoGen>> Rename(
-        [FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
+        public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
         {
             var result = new ItemResult<PersonDtoGen>();
 
@@ -151,8 +150,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
 
-        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName(
-        [FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
             var result = new ItemResult<object>();
 
@@ -176,8 +174,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("Add")]
 
-        public virtual ItemResult<int> Add(
-        int numberOne, int numberTwo)
+        public virtual ItemResult<int> Add(int numberOne, int numberTwo)
         {
             var result = new ItemResult<int>();
 
@@ -192,8 +189,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUser")]
         [Authorize(Roles = "Admin")]
-        public virtual ItemResult<string> GetUser(
-        )
+        public virtual ItemResult<string> GetUser()
         {
             var result = new ItemResult<string>();
 
@@ -208,8 +204,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetUserPublic")]
 
-        public virtual ItemResult<string> GetUserPublic(
-        )
+        public virtual ItemResult<string> GetUserPublic()
         {
             var result = new ItemResult<string>();
 
@@ -224,8 +219,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(
-        string characters)
+        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
         {
             var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
 

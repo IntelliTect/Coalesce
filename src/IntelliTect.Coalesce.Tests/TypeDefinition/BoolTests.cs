@@ -46,8 +46,8 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             })
             {
                 Assert.True(prop.Type.IsCollection);
-                //TODO: This assert is broken for Roslyn
-                //Assert.False(prop.Type.IsBool);
+
+                Assert.False(prop.Type.IsBool);
                 Assert.True(prop.PureType.IsBool);
             }
 
@@ -111,7 +111,6 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             })
             {
                 Assert.True(prop.Type.IsCollection);
-                //TODO: This assert is broken for Roslyn
                 Assert.False(prop.Type.IsBool);
                 Assert.True(prop.PureType.IsBool);
             }

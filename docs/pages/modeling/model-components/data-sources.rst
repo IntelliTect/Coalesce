@@ -133,7 +133,7 @@ In most cases, however, you'll probably want more or less data than what the def
 Properties
 ''''''''''
 
-The following properties are availble for use on the :csharp:`StandardDataSource`
+The following properties are available for use on the :csharp:`StandardDataSource`
 
     :csharp:`CrudContext<TContext> Context`
         The object passed to the constructor that contains the set of objects needed by the standard data source, and those that are most likely to be used in custom implementations.
@@ -194,7 +194,7 @@ Method Details
 All of the methods outlined above can be overridden. A description of each of the non-interface inner methods is as follows:
     
     :csharp:`GetQuery`
-        The method is the one that you will most commonly be override in order to implement custom query logic. From this method, one could:
+        The method is the one that you will most commonly be override in order to implement custom query logic. From this method, you could:
 
             - Specify additional query filtering such as row-level security or soft-delete logic.
             - Include additional data using EF's :csharp:`.Include()` and :csharp:`.ThenInclude()`.

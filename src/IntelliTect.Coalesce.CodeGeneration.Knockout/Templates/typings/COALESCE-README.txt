@@ -1,1 +1,0 @@
-Even though Coalesce does not generate typings into target projects, we still put them here so the development story on these typescript files isn't really painful.

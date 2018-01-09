@@ -132,11 +132,11 @@ module Coalesce {
         // This is used to serialize the DOM for storage with the values.
         export function saveValuesInDom() {
             $('input:text').each(function (i, item) {
-                $(item).attr('value', $(item).val());
+                $(item).attr('value', $(item).val() as string);
             });
 
             $('textarea').each(function (i, item) {
-                $(item).html($(item).val());
+                $(item).html($(item).val() as string);
             });
 
             $('input:checkbox').each(function (i, item) {

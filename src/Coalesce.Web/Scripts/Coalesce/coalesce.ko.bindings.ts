@@ -1,23 +1,5 @@
 /// <reference path="../coalesce.dependencies.d.ts" />
 
-// Extend JQuery for Select2 4.0 since type bindings are not available yet.
-interface JQuery {
-    select2(): JQuery;
-
-    select2(any: "data"): Array<any>
-    select2(any: any): JQuery;
-}
-
-// There is an issue with the current data time picker definitely typed definition.
-declare module BootstrapV3DatetimePicker {
-    interface DatetimepickerOptions {
-        stepping: any;
-        keyBinds: any;
-        timeZone: any;
-    }
-}
-
-
 // Extend this class to have the right types.
 interface KnockoutBindingHandlers {
     select2Ajax: KnockoutBindingHandler;
@@ -148,7 +130,7 @@ ko.bindingHandlers.select2Ajax = {
             })
             .on("change", function (e) {
                 // Code to update knockout
-                var value: string = $(element).val();
+                var value: string = $(element).val() as string;
 
                 // Loose equality is intentional - select2 always provides a string value when asked, 
                 // but our observable is probably an integer number.
@@ -844,12 +826,12 @@ ko.bindingHandlers.booleanValue = {
 };
 
 ko.bindingHandlers.formatNumberText = {
-    update: function (element, valueAccessor) {
+    update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var phone = ko.utils.unwrapObservable(valueAccessor());
         var formatPhone = function () {
             return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
         }
-        ko.bindingHandlers.text.update(element, formatPhone);
+        ko.bindingHandlers.text.update(element, formatPhone, allBindings, viewModel, bindingContext);
     }
 };
 

@@ -3,6 +3,13 @@
   "name": "CoalesceDemo",
   "private": true,
   "devDependencies": {
+    "@types/bootstrap": "3.3.36",
+    "@types/bootstrap.v3.datetimepicker": "4.17.46",
+    "@types/jquery": "2.0.48",
+    "@types/knockout": "3.4.47",
+    "@types/knockout.validation": "0.0.36",
+    "@types/select2": "4.0.41",
+    "@types/moment": "2.11.29",
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.0",

@@ -4,5 +4,6 @@
     "noEmitOnError": true,
     "module": "system",
     "target": "es5"
-  }
+  },
+  "include": ["Templates/Scripts"]
 }

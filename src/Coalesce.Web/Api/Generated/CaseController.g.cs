@@ -125,8 +125,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
 
-        public virtual ItemResult<int> GetAllOpenCasesCount(
-        )
+        public virtual ItemResult<int> GetAllOpenCasesCount()
         {
             var result = new ItemResult<int>();
 
@@ -141,8 +140,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
 
-        public virtual ItemResult<object> RandomizeDatesAndStatus(
-        )
+        public virtual ItemResult<object> RandomizeDatesAndStatus()
         {
             var result = new ItemResult<object>();
 
@@ -158,8 +156,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetCaseSummary")]
 
-        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary(
-        )
+        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
             var result = new ItemResult<CaseSummaryDtoGen>();
 

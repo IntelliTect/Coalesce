@@ -21,7 +21,9 @@ namespace IntelliTect.Coalesce.Validation
                 assert.Area = model.Name;
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
                 assert.IsNotNull(model.PrimaryKey, $"Primary key not found for {model.Name}. Primary key should be named {model.Name}Id or have the [Key] attribute.");
-                assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
+                if (model.PrimaryKey != null)
+                    assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
+
                 assert.IsTrue(model.SearchProperties().Any(), $"No searchable properties found for {model.Name}. Annotate a property with [Search].");
                 assert.IsNotNull(model.ListTextProperty, $"No default text for dropdown lists found for {model.Name}. Add a Name property or use the [ListText] annotation on the property to be used.");
                 assert.IsTrue(model.DefaultOrderBy.Any(), $"No default order found for {model.Name}. Use the [DefaultOrderBy] annotation.");

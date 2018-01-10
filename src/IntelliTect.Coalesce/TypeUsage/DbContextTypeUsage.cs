@@ -14,6 +14,13 @@ namespace IntelliTect.Coalesce.TypeUsage
             ClassViewModel = classViewModel;
             Entities = classViewModel
                 .ClientProperties
+
+                // Only use props that were explicitly declared on the dbcontext (and not a base class)
+                // as well as any props that aren't in the Microsoft namespace.
+                // This prevents us from picking up things from Microsoft.AspNetCore.Identity.EntityFrameworkCore
+                // that don't have keys & other properties that Coalesce can work with.
+                .Where(p => p.Parent.Equals(classViewModel) || !p.PureType.FullNamespace.StartsWith(nameof(Microsoft)))
+
                 .Where(p => p.Type.IsA(typeof(DbSet<>)))
                 .Select(p =>
                 {

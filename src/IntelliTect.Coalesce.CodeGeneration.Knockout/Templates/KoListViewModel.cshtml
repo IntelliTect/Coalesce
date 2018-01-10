@@ -156,10 +156,12 @@ module @moduleName {
                 @:this.@(method.JsVariableResult)(data.object);
                 }
         
+                if (typeof(callback) != "function") return;
+                var result = this.@(method.JsVariableResult)();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {

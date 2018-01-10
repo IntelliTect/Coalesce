@@ -91,8 +91,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsByteArray) return "string";
                 if (IsCollection && IsNumber) return "number[]";
-                if (IsCollection) return PureType + "[]";
+                if (IsCollection) return PureType.TsTypePlain + "[]";
                 return TsTypePlain;
             }
         }

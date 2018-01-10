@@ -203,22 +203,24 @@ module @moduleName {
                 @:this.@(method.JsVariableResult)(data.object);
             }
 
-                @if (method.ReturnType.EqualsType(method.Parent.Type))
-                {
+            @if (method.ReturnType.EqualsType(method.Parent.Type))
+            {
                 @:// The return type is the type of the object, load it.
                 @:this.loadFromDto(data.object, true)
                 @:if (typeof(callback) == "function") {
-                    @:callback();
+                    @:callback(result);
                 @:}
-                }
-                else
-                {
+            }
+            else
+            {
+                @:if (typeof(callback) != "function") return;
+                @:var result = this.@(method.JsVariableResult)();
                 @:if (reload) {
-                @:  this.load(null, callback);
-                @:} else if (typeof(callback) == "function") {
-                @:  callback();
+                @:  this.load(null, () => callback(result));
+                @:} else {
+                @:  callback(result);
                 @:}
-                }
+            }
             })
             .fail((xhr) => {
                 var errorMsg = "Unknown Error";

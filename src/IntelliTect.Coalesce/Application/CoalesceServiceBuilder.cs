@@ -60,6 +60,14 @@ namespace IntelliTect.Coalesce
 
         private CoalesceServiceBuilder UseDefaultCrudStrategy(Type implementationType, IEnumerable<Type> serviceCandidates)
         {
+            if (implementationType.IsInterface || implementationType.IsAbstract)
+            {
+                throw new ArgumentException(
+                    "Can't register an interface or abstract class as an implementation type.",
+                    nameof(implementationType));
+            }
+
+
             bool foundMatch = false;
             foreach (var serviceType in serviceCandidates)
             {

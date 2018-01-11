@@ -178,6 +178,7 @@ These methods often call one another, so overriding one method may cause some ot
                     ApplyListDefaultSorting
                 ApplyListPaging
                 GetIncludeTree
+            TrimListFields
             TransformResults
         
         GetCountAsync
@@ -206,14 +207,6 @@ All of the methods outlined above can be overridden. A description of each of th
 
     :csharp:`IsAuthorized`
         Allows for user-level control over whether or not the data source can be used. Use :csharp:`this.User` to get the current user. This method is called by the model binder that is responsible for injecting data sources into controller actions. If a failure result is returned by this method, a model state error will be added (and handled by default by Coalesce's default implementation of :csharp:`IApiActionFilter`), and no data source instance will be made available to the controller action.
-
-    :csharp:`TransformResults`
-        Allows for transformation of a result set after the query has been evaluated. 
-        This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by :ref:`CustomBehaviors`) to a DTO, this will not be called..
-
-        .. warning::
-            
-            It is STRONGLY RECOMMENDED that this method does not modify any database-mapped properties, as any such changes could be inadvertently persisted to the database.
 
     :csharp:`GetIncludeTree`
         Allows for explicitly specifying the :ref:`IncludeTree` that will be used when serializing results obtained from this data source into DTOs. By default, the query that is build up through all the other methods in the data source will be used to build the include tree.
@@ -256,6 +249,16 @@ All of the methods outlined above can be overridden. A description of each of th
     :csharp:`GetListTotalCountAsync`
         Simple wrapper around invoking :csharp:`.Count()` on a query. 
     
+    :csharp:`TransformResults`
+        Allows for transformation of a result set after the query has been evaluated. 
+        This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by :ref:`CustomBehaviors`) to a DTO, this will not be called..
+
+        .. warning::
+            
+            It is STRONGLY RECOMMENDED that this method does not modify any database-mapped properties, as any such changes could be inadvertently persisted to the database.
+
+    :csharp:`TrimListFields`
+        Performs trimming of the fields of the result set based on the parameters given to the data source. Can be overridden to forcibly disable this, override the behavior to always trim specific fields, or any other functionality desired.
 
 
 Replacing the Standard Data Source

@@ -474,6 +474,37 @@ namespace IntelliTect.Coalesce
         public virtual void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters) { }
 
         /// <summary>
+        /// Returns a new collection of DTOs with only the fields specified by the IListParameters having values.
+        /// </summary>
+        /// <param name="mappedResult">The items to be trimmed.</param>
+        /// <param name="parameters">The parameters by which to trim.</param>
+        /// <returns>The trimmed collection of DTOs.</returns>
+        public virtual IList<TDto> TrimListFields<TDto>(IList<TDto> mappedResult, IListParameters parameters)
+            where TDto : IClassDto<T>, new()
+        {
+            if (parameters.Fields.Any())
+            {
+                var allDtoProps = typeof(TDto).GetProperties();
+                var requestedProps = parameters.Fields
+                    .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.InvariantCultureIgnoreCase)))
+                    .Where(prop => prop != null)
+                    .ToList();
+
+                return mappedResult
+                    .Select(dto =>
+                    {
+                        var newDto = new TDto();
+                        foreach (var prop in requestedProps) prop.SetValue(newDto, prop.GetValue(dto));
+                        return newDto;
+                    })
+                    .ToList();
+            }
+
+            return mappedResult;
+        }
+
+
+        /// <summary>
         /// For the given query, obtain the IncludeTree to be used when serializing the results of this data source.
         /// IncludeTree allows you to control the shape of the data returned to the client.
         /// </summary>
@@ -534,25 +565,8 @@ namespace IntelliTect.Coalesce
             TransformResults(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            var mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
-
-            if (parameters.Fields.Any())
-            {
-                var allDtoProps = typeof(TDto).GetProperties();
-                var requestedProps = parameters.Fields
-                    .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.InvariantCultureIgnoreCase)))
-                    .Where(prop => prop != null)
-                    .ToList();
-
-                mappedResult = mappedResult
-                    .Select(dto =>
-                    {
-                        var newDto = new TDto();
-                        foreach (var prop in requestedProps) prop.SetValue(newDto, prop.GetValue(dto));
-                        return newDto;
-                    })
-                    .ToList();
-            }
+            IList<TDto> mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
+            mappedResult = TrimListFields(mappedResult, parameters);
 
             return new ListResult<TDto>(mappedResult, result.Page, result.TotalCount, result.PageSize);
         }

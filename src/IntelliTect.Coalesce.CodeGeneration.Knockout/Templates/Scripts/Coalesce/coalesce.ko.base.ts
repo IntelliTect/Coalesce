@@ -393,7 +393,7 @@ module Coalesce {
                     if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
                     this.isSaving(true);
 
-                    var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}${this.dataSource.getQueryString()}`
+                    var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}&${this.dataSource.getQueryString()}`
 
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data) => {
@@ -446,7 +446,7 @@ module Coalesce {
                 this.isLoading(true);
                 this.coalesceConfig.onStartBusy()(this);
 
-                var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Get/${id}?includes=${this.includes}${this.dataSource.getQueryString()}`
+                var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Get/${id}?includes=${this.includes}&${this.dataSource.getQueryString()}`
                 
                 return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data) => {

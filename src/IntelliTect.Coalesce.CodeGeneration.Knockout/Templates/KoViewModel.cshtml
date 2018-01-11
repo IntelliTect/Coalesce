@@ -425,7 +425,7 @@ module @moduleName {
             @:if (this.@(prop.JsVariable)() == null && this.@(prop.ObjectIdProperty.JsVariable)() != null){
                 @:loadingCount++;
                 @:var @(prop.JsVariable)Obj = new @(prop.Object.ViewModelClassName)();
-                @:@(prop.JsVariable)Obj.load(this.@(prop.ObjectIdProperty.JsVariable)(), function() {
+                @:@(prop.JsVariable)Obj.load(this.@(prop.ObjectIdProperty.JsVariable)(), () => {
                     @:loadingCount--;
                     @:this.@(prop.JsVariable)(@(prop.JsVariable)Obj);
                     @:if (loadingCount == 0 && typeof(callback) == "function"){

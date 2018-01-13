@@ -150,7 +150,7 @@ module ViewModels {
             Invoke server method Rename.
             Sets the FirstName to the given text.
         */
-        public rename = (name: string, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public rename = (name: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
 
             this.renameIsLoading(true);
             this.renameMessage('');
@@ -173,7 +173,7 @@ module ViewModels {
                 // The return type is the type of the object, load it.
                 this.loadFromDto(data.object, true)
                 if (typeof(callback) == "function") {
-                    callback();
+                    callback(result);
                 }
             })
             .fail((xhr) => {
@@ -233,7 +233,7 @@ module ViewModels {
             Invoke server method ChangeSpacesToDashesInName.
             Removes spaces from the name and puts in dashes
         */
-        public changeSpacesToDashesInName = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public changeSpacesToDashesInName = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
 
             this.changeSpacesToDashesInNameIsLoading(true);
             this.changeSpacesToDashesInNameMessage('');
@@ -249,10 +249,12 @@ module ViewModels {
                 this.changeSpacesToDashesInNameWasSuccessful(true);
                 this.changeSpacesToDashesInNameResult(data.object);
 
+                if (typeof(callback) != "function") return;
+                var result = this.changeSpacesToDashesInNameResult();
                 if (reload) {
-                  this.load(null, callback);
-                } else if (typeof(callback) == "function") {
-                  callback();
+                  this.load(null, () => callback(result));
+                } else {
+                  callback(result);
                 }
             })
             .fail((xhr) => {
@@ -399,7 +401,7 @@ module ViewModels {
             if (this.company() == null && this.companyId() != null){
                 loadingCount++;
                 var companyObj = new Company();
-                companyObj.load(this.companyId(), function() {
+                companyObj.load(this.companyId(), () => {
                     loadingCount--;
                     this.company(companyObj);
                     if (loadingCount == 0 && typeof(callback) == "function"){

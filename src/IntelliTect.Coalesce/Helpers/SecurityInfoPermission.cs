@@ -23,10 +23,10 @@ namespace IntelliTect.Coalesce.Helpers
             Name = name;
         }
 
-        public bool HasAttribute { get; private set; } = false;
-        public SecurityPermissionLevels PermissionLevel { get; private set; } = SecurityPermissionLevels.AllowAuthorized;
-        public string Roles { get; private set; } = "";
-        public string Name { get; private set; } = "";
+        public bool HasAttribute { get; } = false;
+        public SecurityPermissionLevels PermissionLevel { get; } = SecurityPermissionLevels.AllowAuthorized;
+        public string Roles { get; } = "";
+        public string Name { get; } = "";
                 
 
         public bool AllowAnonymous => PermissionLevel == SecurityPermissionLevels.AllowAll;

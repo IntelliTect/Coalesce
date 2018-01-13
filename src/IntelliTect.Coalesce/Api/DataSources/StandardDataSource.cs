@@ -102,7 +102,6 @@ namespace IntelliTect.Coalesce
             {
                 var prop = ClassViewModel.PropertyByName(clause.Key);
                 if (prop != null 
-                    && prop.IsClientProperty 
                     && prop.IsUrlFilterParameter
                     && prop.SecurityInfo.IsReadable(User))
                 {
@@ -125,11 +124,14 @@ namespace IntelliTect.Coalesce
         protected virtual IQueryable<T> ApplyListPropertyFilter(
             IQueryable<T> query, PropertyViewModel prop, string value)
         {
+            // If no filter value is specified, do nothing.
+            if (string.IsNullOrWhiteSpace(value))
+                return query;
+
             if (prop.Type.IsDate)
             {
                 // See if they just passed in a date or a date and a time
-                DateTime parsedValue;
-                if (DateTime.TryParse(value, out parsedValue))
+                if (DateTime.TryParse(value, out DateTime parsedValue))
                 {
                     // Correct offset.
                     if (prop.Type.IsDateTimeOffset)
@@ -140,13 +142,13 @@ namespace IntelliTect.Coalesce
                         {
                             // Only a date
                             var nextDate = dateTimeOffset.AddDays(1);
-                            return query.Where($"{prop.Name} >= @0 && {prop.Name} < @1",
+                            return query.Where($"it.{prop.Name} >= @0 && it.{prop.Name} < @1",
                                 dateTimeOffset, nextDate);
                         }
                         else
                         {
                             // Date and Time
-                            return query.Where($"{prop.Name} = @0", dateTimeOffset);
+                            return query.Where($"it.{prop.Name} = @0", dateTimeOffset);
                         }
                     }
                     else
@@ -156,41 +158,55 @@ namespace IntelliTect.Coalesce
                         {
                             // Only a date
                             var nextDate = parsedValue.AddDays(1);
-                            return query.Where($"{prop.Name} >= @0 && {prop.Name} < @1",
+                            return query.Where($"it.{prop.Name} >= @0 && it.{prop.Name} < @1",
                                 parsedValue, nextDate);
                         }
                         else
                         {
                             // Date and Time
-                            return query.Where($"{prop.Name} = @0", parsedValue);
+                            return query.Where($"it.{prop.Name} = @0", parsedValue);
                         }
                     }
-
                 }
                 else
                 {
                     // Could not parse date string.
-                    return null;
+                    return query.Where(q => false);
                 }
             }
             else if (prop.Type.IsString)
             {
-                if (value.Contains("*")) return query.Where($"{prop.Name}.StartsWith(@0)", value.Replace("*", ""));
-                else return query.Where($"{prop.Name} == @0", value);
+                if (value.Contains("*"))
+                {
+                    return query.Where($"it.{prop.Name}.StartsWith(@0)", value.Replace("*", ""));
+                }
+                else
+                {
+                    return query.Where($"it.{prop.Name} == @0", value);
+                }
             }
             else if (prop.Type.IsEnum)
             {
                 var values = value
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select((item, i) => (
-                        Param: prop.Type.EnumValues.SingleOrDefault(ev => 
+                    .Select(item => 
+                        prop.Type.EnumValues.SingleOrDefault(ev => 
                             int.TryParse(item, out int intVal) 
                             ? ev.Key == intVal 
-                            : ev.Value.Equals(item, StringComparison.InvariantCultureIgnoreCase)
-                            ).Value,
-                        Clause: $"{prop.Name} == @{i}"
+                            : ev.Value.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
+                            ).Value)
+                    .Where(item => item != null)
+                    .Select((item, i) => (
+                        Param: item,
+                        Clause: $"it.{prop.Name} == @{i}"
                     ))
                     .ToList();
+                
+                // Something was specified (since we didnt return early), but we couldn't parse it.
+                // Make our query return nothing since the targeted field could never equal an 
+                // unparsable value.
+                if (values.Count == 0)
+                    return query.Where(q => false);
 
                 return query.Where(
                     string.Join(" || ", values.Select(v => v.Clause)),
@@ -201,11 +217,23 @@ namespace IntelliTect.Coalesce
             {
                 var values = value
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(item =>
+                    {
+                        try { return Convert.ChangeType(item, prop.Type.TypeInfo); }
+                        catch { return null; }
+                    })
+                    .Where(item => item != null)
                     .Select((item, i) => (
-                        Param: Convert.ChangeType(item, prop.Type.TypeInfo), 
-                        Clause: $"{prop.Name} == @{i}"
+                        Param: item, 
+                        Clause: $"it.{prop.Name} == @{i}"
                     ))
                     .ToList();
+
+                // Something was specified (since we didnt return early), but we couldn't parse it.
+                // Make our query return nothing since the targeted field could never equal an 
+                // unparsable value.
+                if (values.Count == 0)
+                    return query.Where(q => false);
 
                 return query.Where(
                     string.Join(" || ", values.Select(v => v.Clause)),
@@ -228,92 +256,91 @@ namespace IntelliTect.Coalesce
 
             // Add general search filters.
             // These search specified fields in the class
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            if (string.IsNullOrWhiteSpace(searchTerm)) return query;
+
+            // See if the user has specified a field with a colon and search on that first
+            if (searchTerm.Contains(":"))
             {
-                // See if the user has specified a field with a colon and search on that first
-                if (searchTerm.Contains(":"))
+                var fieldValueParts = searchTerm.Split(new string[] { ":" }, StringSplitOptions.None);
+
+                var field = fieldValueParts[0].Trim();
+                var value = fieldValueParts[1].Trim();
+
+                var prop = ClassViewModel.ClientProperties.FirstOrDefault(f =>
+                    string.Compare(f.Name, field, true) == 0 ||
+                    string.Compare(f.DisplayName, field, true) == 0);
+
+                if (prop != null && !string.IsNullOrWhiteSpace(value))
                 {
-                    var fieldValueParts = searchTerm.Split(new string[] { ":" }, StringSplitOptions.None);
-
-                    var field = fieldValueParts[0].Trim();
-                    var value = fieldValueParts[1].Trim();
-
-                    var prop = ClassViewModel.ClientProperties.FirstOrDefault(f =>
-                        string.Compare(f.Name, field, true) == 0 ||
-                        string.Compare(f.DisplayName, field, true) == 0);
-
-                    if (prop != null && !string.IsNullOrWhiteSpace(value))
-                    {
-                        var expressions = prop
-                            .SearchProperties(ClassViewModel.Name, maxDepth: 1)
-                            .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", value))
-                            .Select(t => t.statement)
-                            .ToList();
-
-                        // Join these together with an 'or'
-                        if (expressions.Any())
-                        {
-                            string finalSearchClause = string.Join(" || ", expressions);
-                            return query.Where(finalSearchClause);
-                        }
-
-                    }
-                }
-
-
-
-                var completeSearchClauses = new List<string>();
-
-                // For all searchable properties where SearchIsSplitOnSpaces is true,
-                // we require that each word in the search terms yields at least one match.
-                // This allows search results to become more refined as more words are typed in.
-                // For example, when searching on properties (FirstName, LastName) with input "steve steverson",
-                // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
-                // of the same records. This will yield people named "steve steverson" or "steverson steve".
-                var splitOnStringTermClauses = new List<string>();
-                var terms = searchTerm
-                        .Split(new string[] { " ", "," }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(term => term.Trim())
-                        .Distinct()
-                        .Where(term => !string.IsNullOrWhiteSpace(term))
-                        .Take(MaxSearchTerms);
-                foreach (var termWord in terms)
-                {
-                    var splitOnStringClauses = ClassViewModel
-                        .SearchProperties(ClassViewModel.Name)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", termWord))
-                        .Where(f => f.property.SearchIsSplitOnSpaces)
+                    var expressions = prop
+                        .SearchProperties(ClassViewModel.Name, maxDepth: 1)
+                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", value))
                         .Select(t => t.statement)
                         .ToList();
 
-                    // For the given term word, allow any of the properties (so we join clauses with OR)
-                    // to match the term word.
-                    if (splitOnStringClauses.Any())
-                        splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+                    // Join these together with an 'or'
+                    if (expressions.Any())
+                    {
+                        string finalSearchClause = string.Join(" || ", expressions);
+                        return query.Where(finalSearchClause);
+                    }
+
                 }
-                // Require each "word clause"
-                if (splitOnStringTermClauses.Any())
-                    completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
+            }
 
 
 
+            var completeSearchClauses = new List<string>();
 
-                // For all searchable properties where SearchIsSplitOnSpaces is false,
-                // we only require that the entire search term match at least one of these properties.
-                var searchClauses = ClassViewModel
+            // For all searchable properties where SearchIsSplitOnSpaces is true,
+            // we require that each word in the search terms yields at least one match.
+            // This allows search results to become more refined as more words are typed in.
+            // For example, when searching on properties (FirstName, LastName) with input "steve steverson",
+            // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
+            // of the same records. This will yield people named "steve steverson" or "steverson steve".
+            var splitOnStringTermClauses = new List<string>();
+            var terms = searchTerm
+                    .Split(new string[] { " ", "," }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(term => term.Trim())
+                    .Distinct()
+                    .Where(term => !string.IsNullOrWhiteSpace(term))
+                    .Take(MaxSearchTerms);
+            foreach (var termWord in terms)
+            {
+                var splitOnStringClauses = ClassViewModel
                     .SearchProperties(ClassViewModel.Name)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", searchTerm))
-                    .Where(f => !f.property.SearchIsSplitOnSpaces)
+                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", termWord))
+                    .Where(f => f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();
-                completeSearchClauses.AddRange(searchClauses);
+
+                // For the given term word, allow any of the properties (so we join clauses with OR)
+                // to match the term word.
+                if (splitOnStringClauses.Any())
+                    splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+            }
+            // Require each "word clause"
+            if (splitOnStringTermClauses.Any())
+                completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
 
 
-                if (completeSearchClauses.Any())
-                {
-                    string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                    query = query.Where(finalSearchClause);
-                }
+
+
+            // For all searchable properties where SearchIsSplitOnSpaces is false,
+            // we only require that the entire search term match at least one of these properties.
+            var searchClauses = ClassViewModel
+                .SearchProperties(ClassViewModel.Name)
+                .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", searchTerm))
+                .Where(f => !f.property.SearchIsSplitOnSpaces)
+                .Select(t => t.statement)
+                .ToList();
+            completeSearchClauses.AddRange(searchClauses);
+
+
+            if (completeSearchClauses.Any())
+            {
+                string finalSearchClause = string.Join(" || ", completeSearchClauses);
+                query = query.Where(finalSearchClause);
             }
 
             // Don't put anything after the searches. The property:value search handling returns early

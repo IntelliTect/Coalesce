@@ -86,9 +86,11 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         $"({date.Year}, {date.Month}, {date.Day}, {date.Hour}, {date.Minute}, {date.Second}" +
                         $"{(Property.Type.IsDateTimeOffset ? " , TimeSpan(0)" : "")})";
                 }
-                    
 
+
+#pragma warning disable IDE0018 // Inline variable declaration. Invalid suggestion - this variable is used more than once.
                 DateTime dt;
+#pragma warning restore IDE0018 // Inline variable declaration
                 foreach (var formatInfo in DateFormats)
                 {
                     if (DateTime.TryParseExact(

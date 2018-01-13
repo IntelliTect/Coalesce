@@ -135,7 +135,7 @@ module ViewModels {
             if (this.case() == null && this.caseId() != null){
                 loadingCount++;
                 var caseObj = new Case();
-                caseObj.load(this.caseId(), function() {
+                caseObj.load(this.caseId(), () => {
                     loadingCount--;
                     this.case(caseObj);
                     if (loadingCount == 0 && typeof(callback) == "function"){
@@ -147,7 +147,7 @@ module ViewModels {
             if (this.product() == null && this.productId() != null){
                 loadingCount++;
                 var productObj = new Product();
-                productObj.load(this.productId(), function() {
+                productObj.load(this.productId(), () => {
                     loadingCount--;
                     this.product(productObj);
                     if (loadingCount == 0 && typeof(callback) == "function"){

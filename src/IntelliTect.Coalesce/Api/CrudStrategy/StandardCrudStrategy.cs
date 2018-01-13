@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.Api
         public StandardCrudStrategy(CrudContext<TContext> context)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            ClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
+            ClassViewModel = Context.ReflectionRepository.GetClassViewModel<T>();
         }
     }
 }

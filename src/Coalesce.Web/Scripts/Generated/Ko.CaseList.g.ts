@@ -55,7 +55,7 @@ module ListViewModels {
 
 
         // Call server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCount = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public getAllOpenCasesCount = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getAllOpenCasesCountIsLoading(true);
             this.getAllOpenCasesCountMessage('');
             this.getAllOpenCasesCountWasSuccessful(null);
@@ -69,10 +69,12 @@ module ListViewModels {
                 this.getAllOpenCasesCountWasSuccessful(true);
                 this.getAllOpenCasesCountResult(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.getAllOpenCasesCountResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {
@@ -108,7 +110,7 @@ module ListViewModels {
         
 
         // Call server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatus = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public randomizeDatesAndStatus = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.randomizeDatesAndStatusIsLoading(true);
             this.randomizeDatesAndStatusMessage('');
             this.randomizeDatesAndStatusWasSuccessful(null);
@@ -122,10 +124,12 @@ module ListViewModels {
                 this.randomizeDatesAndStatusWasSuccessful(true);
                 this.randomizeDatesAndStatusResult(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.randomizeDatesAndStatusResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {
@@ -162,7 +166,7 @@ module ListViewModels {
 
         // Call server method (GetCaseSummary)
         // Returns a list of summary information about Cases
-        public getCaseSummary = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public getCaseSummary = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getCaseSummaryIsLoading(true);
             this.getCaseSummaryMessage('');
             this.getCaseSummaryWasSuccessful(null);
@@ -179,10 +183,12 @@ module ListViewModels {
                 }
                 this.getCaseSummaryResult().loadFromDto(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.getCaseSummaryResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {

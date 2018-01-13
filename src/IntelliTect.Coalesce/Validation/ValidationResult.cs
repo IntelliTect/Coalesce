@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Validation
 {
-    public class ValidationResult
+    internal class ValidationResult
     {
         public bool WasSuccessful { get; set; }
         public bool IsWarning { get; set; }

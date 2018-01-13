@@ -21,7 +21,6 @@ namespace IntelliTect.Coalesce.Tests.Util
 
         public ClassViewModelData()
         {
-            allSymbols = new Lazy<List<INamedTypeSymbol>>(GetAllSymbols);
         }
 
         public ClassViewModelData(Type targetType, Type viewModelType) : this()
@@ -31,85 +30,26 @@ namespace IntelliTect.Coalesce.Tests.Util
             SetupProps();
         }
 
-        private static Lazy<List<INamedTypeSymbol>> allSymbols;
-
-        private List<INamedTypeSymbol> GetAllSymbols()
-        {
-            var asm = Assembly.GetExecutingAssembly();
-            var streamName = TargetType.FullName + ".cs";
-
-            var trees = asm.GetManifestResourceNames()
-                .AsParallel()
-                .Where(name => name.EndsWith(".cs"))
-                .Select(name =>
-                {
-                    using (var stream = asm.GetManifestResourceStream(name))
-                    {
-                        return CSharpSyntaxTree.ParseText(SourceText.From(stream));
-                    }
-                })
-                .ToList();
-
-            var compilation = CSharpCompilation.Create(
-                "SymbolAsm",
-                trees,
-                AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .Where(a => !a.IsDynamic)
-                    .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray()
-            );
-
-            return compilation.Assembly.GlobalNamespace
-                .Accept(new SymbolDiscoveryVisitor())
-                .ToList();
-        }
-
         private void SetupProps()
         {
             if (ViewModelType == typeof(ReflectionClassViewModel))
             {
-                ClassViewModel = new ReflectionClassViewModel(TargetType);
+                ClassViewModel = ReflectionRepositoryFactory.Reflection.GetClassViewModel(TargetType);
             }
             else if (ViewModelType == typeof(SymbolClassViewModel))
             {
-                var node = allSymbols.Value
+                var locatedSymbol = ReflectionRepositoryFactory.Symbols
                     .Where(symbol => symbol.Name == TargetType.Name)
-                    .SingleOrDefault()
-                    ?? throw new ArgumentException($"Class {TargetType} not found in any C# embedded resources.");
+                    .SingleOrDefault();
 
-                ClassViewModel = new SymbolClassViewModel(node);
+                if (locatedSymbol == null)
+                {
+                    throw new ArgumentException($"Class {TargetType} not found in any C# embedded resources.");
+                }
+
+                ClassViewModel = ReflectionRepositoryFactory.Symbol.GetClassViewModel(TargetType);
             }
         }
-
-        // TODO: this is duplicated from RoslynTypeLocator.cs in Coalesce.CodeGeneration. 
-        // can we avoid this duplication?
-        private class SymbolDiscoveryVisitor : SymbolVisitor<IEnumerable<INamedTypeSymbol>>
-        {
-            public override IEnumerable<INamedTypeSymbol> VisitNamespace(INamespaceSymbol symbol)
-            {
-                foreach (var childSymbol in symbol.GetMembers())
-                {
-                    //We must implement the visitor pattern ourselves and 
-                    //accept the child symbols in order to visit their children
-                    foreach (var result in childSymbol.Accept(this)) yield return result;
-                }
-            }
-
-            public override IEnumerable<INamedTypeSymbol> VisitNamedType(INamedTypeSymbol symbol)
-            {
-                yield return symbol;
-
-                foreach (var childSymbol in symbol.GetTypeMembers())
-                {
-                    //Once againt we must accept the children to visit 
-                    //all of their children
-                    foreach (var result in childSymbol.Accept(this)) yield return result;
-                }
-            }
-        }
-
-
-
 
         public void Deserialize(IXunitSerializationInfo info)
         {

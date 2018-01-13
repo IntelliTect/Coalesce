@@ -58,7 +58,7 @@ module ListViewModels {
 
         // Call server method (Add)
         // Adds two numbers.
-        public add = (numberOne: number, numberTwo: number, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public add = (numberOne: number, numberTwo: number, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.addIsLoading(true);
             this.addMessage('');
             this.addWasSuccessful(null);
@@ -72,10 +72,12 @@ module ListViewModels {
                 this.addWasSuccessful(true);
                 this.addResult(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.addResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {
@@ -127,7 +129,7 @@ module ListViewModels {
 
         // Call server method (GetUser)
         // Returns the user name
-        public getUser = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public getUser = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getUserIsLoading(true);
             this.getUserMessage('');
             this.getUserWasSuccessful(null);
@@ -141,10 +143,12 @@ module ListViewModels {
                 this.getUserWasSuccessful(true);
                 this.getUserResult(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.getUserResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {
@@ -181,7 +185,7 @@ module ListViewModels {
 
         // Call server method (GetUserPublic)
         // Returns the user name
-        public getUserPublic = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public getUserPublic = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.getUserPublicIsLoading(true);
             this.getUserPublicMessage('');
             this.getUserPublicWasSuccessful(null);
@@ -195,10 +199,12 @@ module ListViewModels {
                 this.getUserPublicWasSuccessful(true);
                 this.getUserPublicResult(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.getUserPublicResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {
@@ -235,7 +241,7 @@ module ListViewModels {
 
         // Call server method (NamesStartingWith)
         // Gets all the first names starting with the characters.
-        public namesStartingWith = (characters: string, callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public namesStartingWith = (characters: string, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.namesStartingWithIsLoading(true);
             this.namesStartingWithMessage('');
             this.namesStartingWithWasSuccessful(null);
@@ -249,10 +255,12 @@ module ListViewModels {
                 this.namesStartingWithWasSuccessful(true);
                 this.namesStartingWithResult(data.object);
         
+                if (typeof(callback) != "function") return;
+                var result = this.namesStartingWithResult();
                 if (reload) {
-                    this.load(callback);
-                } else if (typeof(callback) == "function") {
-                    callback();
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
                 }
             })
             .fail((xhr) => {

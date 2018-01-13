@@ -215,7 +215,7 @@ module ViewModels {
             if (this.assignedTo() == null && this.assignedToId() != null){
                 loadingCount++;
                 var assignedToObj = new Person();
-                assignedToObj.load(this.assignedToId(), function() {
+                assignedToObj.load(this.assignedToId(), () => {
                     loadingCount--;
                     this.assignedTo(assignedToObj);
                     if (loadingCount == 0 && typeof(callback) == "function"){
@@ -227,7 +227,7 @@ module ViewModels {
             if (this.reportedBy() == null && this.reportedById() != null){
                 loadingCount++;
                 var reportedByObj = new Person();
-                reportedByObj.load(this.reportedById(), function() {
+                reportedByObj.load(this.reportedById(), () => {
                     loadingCount--;
                     this.reportedBy(reportedByObj);
                     if (loadingCount == 0 && typeof(callback) == "function"){

@@ -8,7 +8,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.Validation
 {
-    public static class ValidateContext
+    internal static class ValidateContext
     {
         public static ValidationHelper Validate(ReflectionRepository repository)
         {

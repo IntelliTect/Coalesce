@@ -29,10 +29,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         protected virtual void Configure(CoalesceConfiguration coalesceConfiguration)
         {
             var allConfig = coalesceConfiguration.GeneratorConfig;
-            JObject genConfig;
 
             bool foundConfig =
-                allConfig.TryGetValue(this.GetType().FullName, out genConfig)
+                allConfig.TryGetValue(this.GetType().FullName, out JObject genConfig)
              || allConfig.TryGetValue(this.GetType().Name, out genConfig);
 
             if (foundConfig)

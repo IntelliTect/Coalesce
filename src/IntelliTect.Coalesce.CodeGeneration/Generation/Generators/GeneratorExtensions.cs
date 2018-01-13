@@ -59,7 +59,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             if (model == null)
             {
+#pragma warning disable IDE0016 // Use 'throw' expression - TModel is not strictly a reference type.
+                // This is supposed to be fixed in https://github.com/dotnet/roslyn/issues/22926
                 throw new ArgumentNullException(nameof(model), $"Cannot set null model to {generator}");
+#pragma warning restore IDE0016 // Use 'throw' expression
             }
 
             generator.Model = model;

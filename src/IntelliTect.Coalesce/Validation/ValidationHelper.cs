@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Validation
     /// <summary>
     /// Evaluates various conditions and keeps a list of what succeeded and failed.
     /// </summary>
-    public class ValidationHelper: List<ValidationResult>
+    internal class ValidationHelper: List<ValidationResult>
     {
         public string Area { get; set; } = "";
 

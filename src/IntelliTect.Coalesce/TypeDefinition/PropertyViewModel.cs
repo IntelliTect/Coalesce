@@ -613,7 +613,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 
         /// </summary>
-        public bool IsUrlFilterParameter => IsClientProperty && (Type.IsPrimitive || Type.IsDate);
+        public bool IsUrlFilterParameter => 
+            IsClientProperty && !HasNotMapped && (Type.IsPrimitive || Type.IsDate);
 
         /// <summary>
         /// True if this property has the Includes Attribute

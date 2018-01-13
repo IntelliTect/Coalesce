@@ -12,10 +12,12 @@ namespace IntelliTect.Coalesce.Tests
         [Fact]
         public void CopyTest()
         {
-            var src = new TestClass();
-            src.I = 34;
-            src.S = "My String";
-            src.C = new TestClass();
+            var src = new TestClass
+            {
+                I = 34,
+                S = "My String",
+                C = new TestClass()
+            };
             src.C.I = 12;
             src.Field = "my Field";
             var dest = src.Copy();

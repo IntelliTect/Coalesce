@@ -220,7 +220,7 @@ module ViewModels {
             });
         }
         /** Calls server method (Rename) with an instance of PersonPartial.RenameArgs, or the value of renameArgs if not specified. */
-        public renameWithArgs = (args?: PersonPartial.RenameArgs, callback?: () => void, reload: boolean = true) => {
+        public renameWithArgs = (args?: PersonPartial.RenameArgs, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
             if (!args) args = this.renameArgs;
             return this.rename(args.name(), callback, reload);
         }

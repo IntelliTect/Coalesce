@@ -24,7 +24,6 @@ module ListViewModels {
             city?:string;
             state?:string;
             zipCode?:string;
-            altName?:string;
         } = null;
     
         /** 

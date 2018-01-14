@@ -218,7 +218,7 @@ module @moduleName {
         @if (method.ClientParameters.Any())
         {
             @:// Variable for method arguments to allow for easy binding
-        @:public @method.JsVariableWithArgs = (args?: @(model.ListViewModelClassName).@(method.ArgsName), callback: () => void = null) => {
+        @:public @method.JsVariableWithArgs = (args?: @(model.ListViewModelClassName).@(method.ArgsName), callback: (result: @method.ReturnType.TsType) => void = null) => {
             @:if (!args) args = this.@(method.JsVariableArgs);
             @:this.@(method.JsVariable)(@(method.JsArguments("args", true)));
         @:}

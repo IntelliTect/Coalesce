@@ -281,7 +281,7 @@ module @moduleName {
         @if (method.ClientParameters.Any())
         {
         @:/** Calls server method (@method.Name) with an instance of @(model.ViewModelGeneratedClassName).@(method.ArgsName), or the value of @(method.JsVariableArgs) if not specified. */
-        @:public @method.JsVariableWithArgs = (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback?: () => void, reload: boolean = true) => {
+        @:public @method.JsVariableWithArgs = (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback?: (result: @method.ReturnType.TsType) => void, reload: boolean = true) => {
             @:if (!args) args = this.@(method.JsVariableArgs);
             @:return this.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
         @:}

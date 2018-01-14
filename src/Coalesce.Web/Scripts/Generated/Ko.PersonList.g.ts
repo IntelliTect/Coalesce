@@ -36,7 +36,6 @@ module ListViewModels {
             birthDate?:string;
             lastBath?:string;
             nextUpgrade?:string;
-            name?:string;
             companyId?:string;
         } = null;
     
@@ -120,7 +119,7 @@ module ListViewModels {
             });
         }
             // Variable for method arguments to allow for easy binding
-        public addWithArgs = (args?: PersonList.AddArgs, callback: () => void = null) => {
+        public addWithArgs = (args?: PersonList.AddArgs, callback: (result: number) => void = null) => {
             if (!args) args = this.addArgs;
             this.add(args.numberOne(), args.numberTwo(), callback);
         }
@@ -302,7 +301,7 @@ module ListViewModels {
             });
         }
             // Variable for method arguments to allow for easy binding
-        public namesStartingWithWithArgs = (args?: PersonList.NamesStartingWithArgs, callback: () => void = null) => {
+        public namesStartingWithWithArgs = (args?: PersonList.NamesStartingWithArgs, callback: (result: string[]) => void = null) => {
             if (!args) args = this.namesStartingWithArgs;
             this.namesStartingWith(args.characters(), callback);
         }

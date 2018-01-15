@@ -74,7 +74,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // that we're replacing should never be a substring of any larger name.
                     // If this were a possibility, then we would run the risk of clobbering other names.
                     result = result.Replace(
-                        ReturnType.PureType.ClassViewModel.FullyQualifiedName, 
+                        ReturnType.PureType.ClassViewModel.FullyQualifiedName,
                         ReturnType.PureType.ClassViewModel.DtoName);
                 }
                 else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
@@ -84,7 +84,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return result;
             }
         }
-        
+
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
         /// </summary>
@@ -181,7 +181,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName => 
+        public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
             Regex.Replace(Name, "[A-Z]", " $0").Trim();
@@ -198,13 +198,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public SecurityInfoMethod SecurityInfo => 
+        public SecurityInfoMethod SecurityInfo =>
             new SecurityInfoMethod(HasAttribute<ExecuteAttribute>(), this.GetAttributeValue<ExecuteAttribute>(a => a.Roles) ?? "");
 
         /// <summary>
         /// If true, this is a method that may be called by a client.
         /// </summary>
         public bool IsClientMethod => !IsInternalUse && HasAttribute<CoalesceAttribute>();
+
+        public string LoadFromDataSourceName
+        {
+            get
+            {
+                var type = this.GetAttributeValue<LoadFromDataSourceAttribute>(a => a.DataSourceType);
+                if (type == null) return Api.DataSources.DataSourceFactory.DefaultSourceName;
+                return type.Name;
+            }
+        }
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;

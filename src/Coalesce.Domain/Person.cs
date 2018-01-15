@@ -130,7 +130,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Removes spaces from the name and puts in dashes
         /// </summary>
-        [Coalesce]
+        [Coalesce, LoadFromDataSource(typeof(WithoutCases))]
         public void ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");

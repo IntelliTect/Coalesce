@@ -173,6 +173,7 @@ module ViewModels {
                 // The return type is the type of the object, load it.
                 this.loadFromDto(data.object, true)
                 if (typeof(callback) == "function") {
+                    var result = this.renameResult();
                     callback(result);
                 }
             })

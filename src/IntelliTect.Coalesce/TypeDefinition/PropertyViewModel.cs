@@ -290,9 +290,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the fields to search for this object. This could be just the field itself 
         /// or a number of child fields if this is an object or collection.
         /// </summary>
-        public IEnumerable<SearchableProperty> SearchProperties(string rootModelName, int depth = 0, int maxDepth = 2)
+        public IEnumerable<SearchableProperty> SearchProperties(string rootModelName, int depth = 0, int maxDepth = 2, bool force = false)
         {
-            if (!IsSearchable(rootModelName)) yield break;
+            if (!force && !IsSearchable(rootModelName)) yield break;
 
             if (this.PureType.HasClassViewModel)
             {

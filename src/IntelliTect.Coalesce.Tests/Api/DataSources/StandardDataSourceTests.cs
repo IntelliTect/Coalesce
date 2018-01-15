@@ -263,18 +263,62 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
                 Assert.Empty(query);
         }
 
-        // TODO: WRITE THIS TEST!
-        // [Theory]
+
+
+
+        private (PropertyViewModel, IQueryable<TModel>) SearchTestHelper<TModel, TProp>(
+            Expression<Func<TModel, TProp>> propSelector,
+            TProp propValue,
+            string filterValue
+        )
+            where TModel : class, new()
+        {
+            var filterParams = new FilterParameters
+            {
+                Search = filterValue
+            };
+            var source = Source<TModel>();
+            var propInfo = source.ClassViewModel.PropertyBySelector(propSelector);
+
+            var model = new TModel();
+            propInfo.PropertyInfo.SetValue(model, propValue);
+            Db.Set<TModel>().Add(model);
+            Db.SaveChanges();
+
+            var query = source.ApplyListSearchTerm(Db.Set<TModel>(), filterParams);
+
+            return (propInfo, query);
+        }
+
+        [Theory]
+        [InlineData(true, "propVal", "string:propV")]
+        [InlineData(false, "propVal", "string:proppV")]
         public void ApplyListSearchTerm_WhenTermTargetsField_SearchesField(
             bool shouldMatch, string propValue, string inputValue)
         {
-            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
+            var (prop, query) = SearchTestHelper<ComplexModel, string>(
                 m => m.String, propValue, inputValue);
 
             if (shouldMatch)
                 Assert.Single(query);
             else
                 Assert.Empty(query);
+        }
+
+        [Fact]
+        public void ApplyListSearchTerm_WhenTargetedPropNotAuthorized_IgnoresProp()
+        {
+            const string role = RoleNames.Admin;
+            var (prop, query) = SearchTestHelper<ComplexModel, string>(
+                m => m.AdminReadableString, "propValue", "AdminReadableString:propV");
+
+            // Preconditions
+            Assert.False(CrudContext.User.IsInRole(role));
+            Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
+
+            // Two values - one that would match, one that shouldn't.
+            // Since searching on the prop isn't valid, no filtering happens, so both rows should be returned.
+            Assert.Empty(query);
         }
     }
 }

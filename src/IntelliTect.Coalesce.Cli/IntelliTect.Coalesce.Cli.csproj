@@ -14,7 +14,6 @@
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Knockout\IntelliTect.Coalesce.CodeGeneration.Knockout.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="gitlink" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
 </Project>

@@ -26,5 +26,13 @@
     <DebugType>full</DebugType>
     <DebugSymbols>True</DebugSymbols>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+
+    <SourceLinkCreate Condition="'$(SourceLinkCreate)' == '' and '$(DesignTimeBuild)' != 'true' and $(BuildingForLiveUnitTesting) != 'true'">
+        True
+    </SourceLinkCreate>
   </PropertyGroup>
+  
+  <ItemGroup Condition="$(IsPackable) == 'true'">
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.7.4" PrivateAssets="All" />
+  </ItemGroup>
 </Project>

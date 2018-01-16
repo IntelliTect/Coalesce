@@ -38,6 +38,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         [Read(Roles = "Admin")]
         public string AdminReadableString { get; set; }
 
+        // Default searchable property
+        public string Name { get; set; }
+
+
         public string String { get; set; }
         public int Int { get; set; }
         public long Long { get; set; }

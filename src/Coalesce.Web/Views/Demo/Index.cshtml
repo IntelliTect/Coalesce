@@ -132,7 +132,8 @@
                         <dd data-bind="with: assignedTo"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></dd>
                     </dl>
 
-                    <select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
+                    @* Some tests for dropdowns. *@
+                    @*<select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
 
                     </select>
                     
@@ -141,7 +142,7 @@
                     </select>
                     <select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
 
-                    </select>
+                    </select>*@
                 </div>
             </div>
             <div class="row">

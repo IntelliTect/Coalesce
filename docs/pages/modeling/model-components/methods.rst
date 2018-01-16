@@ -53,6 +53,13 @@ You can return virtually anything from these methods:
 
 |
 
+Security
+--------
+
+You can implement role-based security on a method by placing the :ref:`ExecuteAttribute` on the method. Placing this attribute on the method with no roles specified will simply require that the calling user be authenticated. 
+
+Security for instance methods is also controlled by the data source that loads the instance - if the data source can't provide an instance of the requested model, the method won't be executed.
+
 .. _ModelMethodTypeScript:
 
 Generated TypeScript
@@ -102,7 +109,7 @@ Instance Methods
 
 Instance methods generate the members above on the TypeScript ViewModel.
 
-The model POCO instance that the method is called on will be loaded using the default data source for the POCO's type. If you have a :ref:`Custom Data Source <CustomDataSources>` annotated with :csharp:`[DefaultDataSource]`, that data source will be used. Otherwise, the :ref:`StandardDataSource` will be used.
+The instance of the model will be loaded using the data source specified by an attribute :csharp:`[LoadFromDataSource(typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the POCO's type. If you have a :ref:`Custom Data Source <CustomDataSources>` annotated with :csharp:`[DefaultDataSource]`, that data source will be used. Otherwise, the :ref:`StandardDataSource` will be used.
 
 | 
 

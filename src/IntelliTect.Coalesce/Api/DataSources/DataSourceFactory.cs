@@ -9,6 +9,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
 {
     public class DataSourceFactory : IDataSourceFactory
     {
+        public const string DefaultSourceName = "Default";
+
         private readonly IServiceProvider serviceProvider;
         private readonly ReflectionRepository reflectionRepository;
 
@@ -34,7 +36,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             var dataSourceClassViewModel = dataSources.FirstOrDefault(t => t.Name == dataSourceName);
             if (dataSourceClassViewModel == null)
             {
-                if (dataSourceName == "" || dataSourceName == "Default" || dataSourceName == null)
+                if (dataSourceName == "" || dataSourceName == DefaultSourceName || dataSourceName == null)
                 {
                     return GetDefaultDataSourceType(servedType, declaredFor);
                 }

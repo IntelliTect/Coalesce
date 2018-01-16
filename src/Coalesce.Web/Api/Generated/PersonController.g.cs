@@ -130,7 +130,7 @@ namespace Coalesce.Web.Api
             var result = new ItemResult<PersonDtoGen>();
 
             IncludeTree includeTree = null;
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
             {
@@ -154,7 +154,7 @@ namespace Coalesce.Web.Api
         {
             var result = new ItemResult<object>();
 
-            var dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
             {

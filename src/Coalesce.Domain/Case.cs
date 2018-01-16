@@ -73,6 +73,9 @@ namespace Coalesce.Domain
         [ForeignKey("DevTeamAssignedId")]
         public DevTeam DevTeamAssigned { get; set; }
 
+        // EF does support TimeSpans. Some of our projects also do.
+        public TimeSpan Duration { get; set; }
+
         [Coalesce]
         public static int GetAllOpenCasesCount(AppDbContext db)
         {

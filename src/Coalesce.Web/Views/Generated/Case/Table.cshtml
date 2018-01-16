@@ -108,6 +108,10 @@
                                 Dev Team Assigned
                                 <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'DevTeamAssigned', 'fa-caret-down': orderByDescending() == 'DevTeamAssigned'}"></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Duration')}">
+                                Duration
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Duration', 'fa-caret-down': orderByDescending() == 'Duration'}"></i>
+                            </th>
                     <th style="width: 1%">
                     </th>
                 </tr>
@@ -138,6 +142,8 @@
                             <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
                             
                             <td class="prop-devTeamAssigned">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned))</td>
+                            
+                            <td class="prop-duration">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Duration))</td>
                         }
                         else
                         {
@@ -161,6 +167,8 @@
                             <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>
                             
                             <td class="prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, true))</td>
+                            
+                            <td class="prop-duration">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Duration, true))</td>
                         }
                     <td>
 

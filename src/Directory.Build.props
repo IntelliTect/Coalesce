@@ -23,8 +23,10 @@
     <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
-    <DebugType>full</DebugType>
-    <DebugSymbols>True</DebugSymbols>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
   </PropertyGroup>
+
+  <ItemGroup Condition="$(IsPackable) == 'true'">
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.7.4" PrivateAssets="All" />
+  </ItemGroup>
 </Project>

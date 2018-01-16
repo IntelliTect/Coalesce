@@ -202,7 +202,7 @@ namespace @(namespaceName).Api
             }
             else
             {
-                @:var dataSource = dataSourceFactory.GetDefaultDataSource<@(model.BaseViewModel.FullyQualifiedName), @(model.FullyQualifiedName)>();
+                @:var dataSource = dataSourceFactory.GetDataSource<@(model.BaseViewModel.FullyQualifiedName), @(model.FullyQualifiedName)>("@(method.LoadFromDataSourceName)");
                 @:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 @:if (!itemResult.WasSuccessful)
                 @:{

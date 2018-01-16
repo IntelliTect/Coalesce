@@ -13,7 +13,6 @@
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="gitlink" Version="3.1.0" />
     <!--<PackageReference Include="Microsoft.CSharp" Version="4.3.0" />-->
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />

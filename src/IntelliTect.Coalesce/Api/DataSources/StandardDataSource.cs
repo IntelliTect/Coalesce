@@ -273,7 +273,7 @@ namespace IntelliTect.Coalesce
                 if (prop != null && !string.IsNullOrWhiteSpace(value))
                 {
                     var expressions = prop
-                        .SearchProperties(ClassViewModel.Name, maxDepth: 1)
+                        .SearchProperties(ClassViewModel.Name, maxDepth: 1, force: true)
                         .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", value))
                         .Select(t => t.statement)
                         .ToList();
@@ -317,11 +317,15 @@ namespace IntelliTect.Coalesce
                 // For the given term word, allow any of the properties (so we join clauses with OR)
                 // to match the term word.
                 if (splitOnStringClauses.Any())
+                {
                     splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+                }
             }
             // Require each "word clause"
             if (splitOnStringTermClauses.Any())
+            {
                 completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
+            }
 
 
 
@@ -342,8 +346,15 @@ namespace IntelliTect.Coalesce
                 string finalSearchClause = string.Join(" || ", completeSearchClauses);
                 query = query.Where(finalSearchClause);
             }
+            else
+            {
+                // A search term was specified (we didn't return early from this method), 
+                // but we didn't find any valid properties to search on (we didn't come up with any clauses).
+                // We should therefore return no results since the search term entered can't come up with any results.
+                query = query.Where(q => false);
+            }
 
-            // Don't put anything after the searches. The property:value search handling returns early
+            // Don't put any other code down here. The property:value search handling returns early
             // if it finds a match. If you need code down here, refactor that part.
 
             return query;

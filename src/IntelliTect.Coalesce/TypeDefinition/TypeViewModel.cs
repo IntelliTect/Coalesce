@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsDateTime) { return "DateTime.MinValue"; }
                 if (IsDateTimeOffset) { return "DateTimeOffset.MinValue"; }
                 if (IsBool) { return "false"; }
-                return "null";
+                return $"default({FullyQualifiedName})";
             }
         }
 

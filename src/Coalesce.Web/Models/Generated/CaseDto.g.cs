@@ -29,6 +29,7 @@ namespace Coalesce.Web.Models
         public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts { get; set; }
         public int? DevTeamAssignedId { get; set; }
         public Coalesce.Web.Models.DevTeamDtoGen DevTeamAssigned { get; set; }
+        public System.TimeSpan? Duration { get; set; }
 
         public override void MapFrom(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
         {
@@ -55,6 +56,7 @@ namespace Coalesce.Web.Models
             this.Severity = obj.Severity;
             this.Status = obj.Status;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
+            this.Duration = obj.Duration;
             if (!(excludePersonListGen))
             {
                 if (tree == null || tree[nameof(this.AssignedTo)] != null)
@@ -107,6 +109,7 @@ namespace Coalesce.Web.Models
             entity.Severity = Severity;
             entity.Status = (Status ?? 0);
             entity.DevTeamAssignedId = DevTeamAssignedId;
+            entity.Duration = (Duration ?? default(System.TimeSpan));
         }
 
     }

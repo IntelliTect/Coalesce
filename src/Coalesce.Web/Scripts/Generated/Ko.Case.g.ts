@@ -53,6 +53,7 @@ module ViewModels {
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);
         public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
         public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam> = ko.observable(null);
+        public duration: KnockoutObservable<any> = ko.observable(null);
 
        
         /** Display text for AssignedTo */
@@ -168,6 +169,7 @@ module ViewModels {
             this.severity(data.severity);
             this.status(data.status);
             this.devTeamAssignedId(data.devTeamAssignedId);
+            this.duration(data.duration);
             if (this.coalesceConfig.onLoadFromDto()){
                 this.coalesceConfig.onLoadFromDto()(this as any);
             }
@@ -201,6 +203,7 @@ module ViewModels {
             if (!dto.devTeamAssignedId && this.devTeamAssigned()) {
                 dto.devTeamAssignedId = this.devTeamAssigned().devTeamId();
             }
+            dto.duration = this.duration();
 
             return dto;
         }
@@ -316,6 +319,7 @@ module ViewModels {
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);
             self.devTeamAssigned.subscribe(self.autoSave);
+            self.duration.subscribe(self.autoSave);
         
             self.products.subscribe<KnockoutArrayChange<Product>[]>(changes => {
                 for (var i in changes){

@@ -3,7 +3,6 @@ branches:
   only:
   - master
   - 2.0
-  - ascott/modular-behaviors
 image: Visual Studio 2017
 configuration: Debug
 cache: 
@@ -21,14 +20,12 @@ build:
   project: Coalesce.sln
   verbosity: minimal
 after_build:
-  - dotnet pack -c %CONFIGURATION% --include-symbols
+  - dotnet pack -c %CONFIGURATION% 
 artifacts:
   - path: '**\*.nupkg'
 deploy:
   provider: NuGet
   server: https://www.myget.org/F/intellitect-coalesce/api/v2/package
-  symbol_server: https://www.myget.org/F/intellitect-coalesce/symbols/api/v2/package
   api_key:
     secure: byg3MYXl6/q/Y9tKACVcywkrtdqs4i2ISNSNTDoH/Eg9wz2+CUFHI5ir3zMddwSr
-  skip_symbols: false
   artifact: /.*\.nupkg/

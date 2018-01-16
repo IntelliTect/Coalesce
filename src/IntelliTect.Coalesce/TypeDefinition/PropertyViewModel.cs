@@ -750,7 +750,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                return $"            {setter}\n";
+                return $"            {setter}\r\n";
             }
         }
 

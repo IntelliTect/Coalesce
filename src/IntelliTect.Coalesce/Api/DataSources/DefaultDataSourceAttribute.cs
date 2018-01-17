@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce
     /// This DataSource will displace the standard implementation for its served type.
     /// Any references to "Default", and any requests with no specified DataSource, will use this type.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class DefaultDataSourceAttribute : Attribute
     {
     }

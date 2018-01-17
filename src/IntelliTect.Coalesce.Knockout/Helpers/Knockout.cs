@@ -424,7 +424,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 var foreignProp = propertyModel.Object.PropertyByName(foreignPropName);
                 if (localValue != null)
                 {
-                    filterString = $"?{foreignProp.JsVariable}={localValue}";
+                    filterString = $"?filter.{foreignProp.JsVariable}={localValue}";
                 }
                 else
                 {
@@ -437,12 +437,12 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                         var localPropObj = propertyModel.Parent.PropertyByName(localPropObjName.ToString());
                         var localProp = localPropObj.PureType.ClassViewModel.PropertyByName((localPropName ?? foreignPropName).ToString());
 
-                        filterString = $"?{foreignProp.JsVariable}=' + ({localPropObj.JsVariableForBinding()}() ? {localPropObj.JsVariableForBinding()}().{localProp.JsVariable}() : 'null') + '";
+                        filterString = $"?filter.{foreignProp.JsVariable}=' + ({localPropObj.JsVariableForBinding()}() ? {localPropObj.JsVariableForBinding()}().{localProp.JsVariable}() : 'null') + '";
                     }
                     else
                     {
                         var localProp = propertyModel.Parent.PropertyByName((localPropName ?? foreignPropName).ToString());
-                        filterString = $"?{foreignProp.JsVariable}=' + {localProp.JsVariableForBinding()}() + '";
+                        filterString = $"?filter.{foreignProp.JsVariable}=' + {localProp.JsVariableForBinding()}() + '";
                     }
                 }
             }

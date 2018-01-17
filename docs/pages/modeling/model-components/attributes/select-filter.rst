@@ -64,6 +64,7 @@ Properties
         
         This allows for querying against properties that are one level away from the current object.
 
-    :csharp:`public ValueType StaticPropertyValue { get; set; }`
-        A constant value that the foreign property will be filtered against.
+    :csharp:`public string StaticPropertyValue { get; set; }`
+        A constant value that the foreign property will be filtered against. 
+        This string must be parsable into the foreign property's type to have any effect.
         If this is set, :csharp:`LocalPropertyName` will be ignored.

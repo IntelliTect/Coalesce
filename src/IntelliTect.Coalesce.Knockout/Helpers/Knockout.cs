@@ -418,18 +418,18 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             if (propertyModel.HasAttribute<SelectFilterAttribute>())
             {
-                var foreignPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.ForeignPropertyName)).ToString();
-                var localValue = propertyModel.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.StaticPropertyValue));
+                var foreignPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.ForeignPropertyName);
+                var localValue = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.StaticPropertyValue);
 
                 var foreignProp = propertyModel.Object.PropertyByName(foreignPropName);
                 if (localValue != null)
                 {
-                    filterString = $"?filter.{foreignProp.JsVariable}={localValue}";
+                    filterString = $"?filter.{foreignProp.JsVariable}={System.Net.WebUtility.UrlEncode(localValue)}";
                 }
                 else
                 {
-                    var localPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.LocalPropertyName));
-                    var localPropObjName = propertyModel.GetAttributeValue<SelectFilterAttribute>(nameof(SelectFilterAttribute.LocalPropertyObjectName));
+                    var localPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.LocalPropertyName);
+                    var localPropObjName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.LocalPropertyObjectName);
 
 
                     if (localPropObjName != null)

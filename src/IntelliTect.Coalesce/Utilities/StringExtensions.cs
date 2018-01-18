@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.Utilities
@@ -10,7 +12,7 @@ namespace IntelliTect.Coalesce.Utilities
         public static string ToPascalCase(this string theString)
         {
             // If there are 0 or 1 characters, just return the string.
-            if (theString == null) return theString;
+            if (theString == null) return null;
             if (theString.Length < 2) return theString.ToUpper();
 
             // Split the string into words.
@@ -33,32 +35,9 @@ namespace IntelliTect.Coalesce.Utilities
         // Convert the string to camel case.
         public static string ToCamelCase(this string theString)
         {
-            if (theString == null) return theString;
+            if (theString == null) return null;
             if (theString.Length <= 2) return theString.ToLower();
             else return theString.Substring(0, 1).ToLower() + theString.Substring(1);
-
-            //// If there are 0 or 1 characters, just return the string.
-            //if (theString == null || theString.Length < 2)
-            //    return theString;
-
-            //Regex r = new Regex("([A-Z]+[a-z]+)");
-            //string spaced = r.Replace(theString, m => m + " ");
-
-            //// Split the string into words.
-            //string[] words = spaced.Split(
-            //    new char[] {' '},
-            //    StringSplitOptions.RemoveEmptyEntries);
-
-            //// Combine the words.
-            //string result = words[0].ToLower();
-            //for (int i = 1; i < words.Length; i++)
-            //{
-            //    result +=
-            //        words[i].Substring(0, 1).ToUpper() +
-            //        words[i].Substring(1);
-            //}
-
-            //return result;
         }
 
         // Capitalize the first character and add a space before
@@ -66,7 +45,7 @@ namespace IntelliTect.Coalesce.Utilities
         public static string ToProperCase(this string theString)
         {
             // If there are 0 or 1 characters, just return the string.
-            if (theString == null) return theString;
+            if (theString == null) return null;
             if (theString.Length < 2) return theString.ToUpper();
 
             // Start with the first character.
@@ -108,5 +87,25 @@ namespace IntelliTect.Coalesce.Utilities
         public static string EscapeStringLiteralForCSharp(this string str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\\\"");
+
+        /// <summary>
+        /// Convert a string to a valid C# identifier that conforms to language specification 2.4.2
+        /// </summary>
+        /// <param name="string">The string to convert</param>
+        /// <param name="prefix">(Optional) string to prefix the identifier with.</param>
+        /// <returns>A valid C# identifier</returns>
+        public static string GetValidCSharpIdentifier(this string @string, string prefix = null)
+        {
+            if (!string.IsNullOrWhiteSpace(prefix))
+            {
+                @string = prefix + @string;
+            }
+            @string = @string.Trim();
+            return Regex.Replace(@string, @"[^\w]", match =>
+            {
+                var bytes = Encoding.Unicode.GetBytes(match.Value);
+                return $@"\u{string.Join("", bytes.Select(b => $"{b:X2}"))}";
+            });
+        }
     }
 }

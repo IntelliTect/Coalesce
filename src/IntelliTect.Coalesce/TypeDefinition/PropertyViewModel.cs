@@ -87,7 +87,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsTextPropertyName => JsVariable + "Text";
 
         /// <summary>
-        /// Returns true if the property is class outside the system NameSpace, but is not a string or array
+        /// Returns true if the property is class outside the system Namespace, but is not a string or array
         /// </summary>
         public bool IsPOCO => Type.IsPOCO;
 
@@ -580,14 +580,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var result = new PropertySecurityInfo();
 
-                if (this.HasAttribute<ReadAttribute>())
+                if (HasAttribute<ReadAttribute>())
                 {
                     result.IsRead = true;
                     var roles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
                     result.ReadRoles = roles;
                 }
 
-                if (this.HasAttribute<EditAttribute>())
+                if (HasAttribute<EditAttribute>())
                 {
                     result.IsEdit = true;
                     var roles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
@@ -641,17 +641,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<string> DtoExcludes =>
             (this.GetAttributeValue<DtoExcludesAttribute>(a => a.ContentViews) ?? "")
             .Trim()
-            .Split(new char[] { ',' })
+            .Split(',')
             .Select(s => s.Trim());
 
         private string GetPropertySetterConditional(bool isForEdit)
         {
-            var readRoles = (SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) ?
-                string.Join(" || ", SecurityInfo.ReadRolesList.Select(s => $"is{s}")) : "";
-            var editRoles = isForEdit && (SecurityInfo.IsSecuredProperty && SecurityInfo.EditRolesList.Count() > 0) ?
-                string.Join(" || ", SecurityInfo.EditRolesList.Select(s => $"is{s}")) : "";
-            var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
-            var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+            var readRoles = SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Any() ?
+                string.Join(" || ", SecurityInfo.ReadRolesList.Select(s => s.GetValidCSharpIdentifier("is"))) : "";
+            var editRoles = isForEdit && SecurityInfo.IsSecuredProperty && SecurityInfo.EditRolesList.Any() ?
+                string.Join(" || ", SecurityInfo.EditRolesList.Select(s => s.GetValidCSharpIdentifier("is"))) : "";
+            var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => s.GetValidCSharpIdentifier("include"))) : "";
+            var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => s.GetValidCSharpIdentifier("exclude"))) : "";
 
             var statement = new List<string>();
             if (!string.IsNullOrEmpty(readRoles)) statement.Add($"({readRoles})");

@@ -160,9 +160,9 @@ namespace Coalesce.Domain
 
         [Coalesce]
         [HttpMethod(HttpMethodAttribute.HttpMethodType.Get)]
-        public static long PersonCount(AppDbContext db)
+        public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
         {
-            return db.People.Count();
+            return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
         }
 
         [Coalesce]
@@ -171,6 +171,39 @@ namespace Coalesce.Domain
         {
             return $"{FirstName} {LastName} {BirthDate?.ToString("M/D/YYYY") ?? "None"}";
         }
+
+        [Coalesce]
+        [HttpMethod(HttpMethodAttribute.HttpMethodType.Delete)]
+        public static bool RemovePersonById(AppDbContext db, int id)
+        {
+            var person = db.People.FirstOrDefault(f => f.PersonId == id);
+            if (person != null)
+            {
+                db.People.Remove(person);
+                foreach (var c in db.Cases.Where(f => f.AssignedToId == id))
+                {
+                    c.AssignedToId = null;
+                }
+                foreach (var c in db.Cases.Where(f => f.ReportedById == id))
+                {
+                    c.ReportedById = null;
+                }
+                db.SaveChanges();
+                return true;
+            }
+            return false;
+        }
+
+        [Coalesce]
+        [HttpMethod(HttpMethodAttribute.HttpMethodType.Put)]
+        public string ObfuscateEmail(AppDbContext db)
+        {
+            var random = (new Random()).Next();
+            this.Email = $"test{random}@test.com";
+            return $"New Email is: {this.Email}";
+        }
+
+
 
 
         /// <summary>
@@ -254,5 +287,12 @@ namespace Coalesce.Domain
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
             Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
+    }
+
+    public class PersonCriteria
+    {
+        public string Name { get; set; }
+        public int? BirthdayMonth { get; set; }
+        public string EmailDomain { get; set; }
     }
 }

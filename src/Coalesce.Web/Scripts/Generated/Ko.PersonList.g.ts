@@ -183,13 +183,13 @@ module ListViewModels {
         
 
         // Call server method (PersonCount)
-        public personCount = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public personCount = (lastNameStartsWith: string, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
             this.personCountIsLoading(true);
             this.personCountMessage('');
             this.personCountWasSuccessful(null);
             return $.ajax({ method: "GET",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/PersonCount",
-                     data: {  },
+                     data: { lastNameStartsWith: lastNameStartsWith },
                      xhrFields: { withCredentials: true } })
             .done((data) => {
                 this.personCountResultRaw(data.object);
@@ -229,12 +229,95 @@ module ListViewModels {
         public personCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
         // Presents a series of input boxes to call the server method (PersonCount)
         public personCountUi = (callback: () => void = null) => {
-            this.personCount(callback);
+            var lastNameStartsWith: string = prompt('Last Name Starts With');
+            this.personCount(lastNameStartsWith, callback);
         }
         // Presents a modal with input boxes to call the server method (PersonCount)
         public personCountModal = (callback: () => void = null) => {
-            this.personCountUi(callback);
+            $('#method-PersonCount').modal();
+            $('#method-PersonCount').on('shown.bs.modal', () => {
+                $('#method-PersonCount .btn-ok').unbind('click');
+                $('#method-PersonCount .btn-ok').click(() => {
+                    this.personCountWithArgs(null, callback);
+                    $('#method-PersonCount').modal('hide');
+                });
+            });
         }
+            // Variable for method arguments to allow for easy binding
+        public personCountWithArgs = (args?: PersonList.PersonCountArgs, callback: (result: number) => void = null) => {
+            if (!args) args = this.personCountArgs;
+            this.personCount(args.lastNameStartsWith(), callback);
+        }
+        public personCountArgs = new PersonList.PersonCountArgs(); 
+        
+
+        // Call server method (RemovePersonById)
+        public removePersonById = (id: number, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            this.removePersonByIdIsLoading(true);
+            this.removePersonByIdMessage('');
+            this.removePersonByIdWasSuccessful(null);
+            return $.ajax({ method: "DELETE",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RemovePersonById",
+                     data: { id: id },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.removePersonByIdResultRaw(data.object);
+                this.removePersonByIdMessage('');
+                this.removePersonByIdWasSuccessful(true);
+                this.removePersonByIdResult(data.object);
+        
+                if (typeof(callback) != "function") return;
+                var result = this.removePersonByIdResult();
+                if (reload) {
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.removePersonByIdWasSuccessful(false);
+                this.removePersonByIdMessage(errorMsg);
+
+                //alert("Could not call method removePersonById: " + errorMsg);
+            })
+            .always(() => {
+                this.removePersonByIdIsLoading(false);
+            });
+        } 
+        // Result of server method (RemovePersonById) strongly typed in a observable.
+        public removePersonByIdResult: KnockoutObservable<boolean> = ko.observable(null);
+        // Raw result object of server method (RemovePersonById) simply wrapped in an observable.
+        public removePersonByIdResultRaw: KnockoutObservable<any> = ko.observable();
+        // True while the server method (RemovePersonById) is being called
+        public removePersonByIdIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (RemovePersonById) if it fails.
+        public removePersonByIdMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (RemovePersonById) was successful.
+        public removePersonByIdWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (RemovePersonById)
+        public removePersonByIdUi = (callback: () => void = null) => {
+            var id: number = parseFloat(prompt('Id'));
+            this.removePersonById(id, callback);
+        }
+        // Presents a modal with input boxes to call the server method (RemovePersonById)
+        public removePersonByIdModal = (callback: () => void = null) => {
+            $('#method-RemovePersonById').modal();
+            $('#method-RemovePersonById').on('shown.bs.modal', () => {
+                $('#method-RemovePersonById .btn-ok').unbind('click');
+                $('#method-RemovePersonById .btn-ok').click(() => {
+                    this.removePersonByIdWithArgs(null, callback);
+                    $('#method-RemovePersonById').modal('hide');
+                });
+            });
+        }
+            // Variable for method arguments to allow for easy binding
+        public removePersonByIdWithArgs = (args?: PersonList.RemovePersonByIdArgs, callback: (result: boolean) => void = null) => {
+            if (!args) args = this.removePersonByIdArgs;
+            this.removePersonById(args.id(), callback);
+        }
+        public removePersonByIdArgs = new PersonList.RemovePersonByIdArgs(); 
         
 
         // Call server method (GetUserPublic)
@@ -375,6 +458,12 @@ module ListViewModels {
         export class AddArgs {
             public numberOne: KnockoutObservable<number> = ko.observable(null);
             public numberTwo: KnockoutObservable<number> = ko.observable(null);
+        }
+        export class PersonCountArgs {
+            public lastNameStartsWith: KnockoutObservable<string> = ko.observable(null);
+        }
+        export class RemovePersonByIdArgs {
+            public id: KnockoutObservable<number> = ko.observable(null);
         }
         export class NamesStartingWithArgs {
             public characters: KnockoutObservable<string> = ko.observable(null);

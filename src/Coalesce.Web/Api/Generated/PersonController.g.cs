@@ -204,11 +204,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("PersonCount")]
 
-        public virtual ItemResult<long> PersonCount()
+        public virtual ItemResult<long> PersonCount(string lastNameStartsWith)
         {
             var result = new ItemResult<long>();
 
-            var methodResult = Coalesce.Domain.Person.PersonCount(Db);
+            var methodResult = Coalesce.Domain.Person.PersonCount(Db, lastNameStartsWith);
             result.Object = methodResult;
 
             return result;
@@ -231,6 +231,44 @@ namespace Coalesce.Web.Api
             }
             var item = itemResult.Object;
             var methodResult = item.FullNameAndAge(Db);
+            Db.SaveChanges();
+            result.Object = methodResult;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Method: RemovePersonById
+        /// </summary>
+        [HttpDelete("RemovePersonById")]
+
+        public virtual ItemResult<bool> RemovePersonById(int id)
+        {
+            var result = new ItemResult<bool>();
+
+            var methodResult = Coalesce.Domain.Person.RemovePersonById(Db, id);
+            result.Object = methodResult;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Method: ObfuscateEmail
+        /// </summary>
+        [HttpPut("ObfuscateEmail")]
+
+        public virtual async Task<ItemResult<string>> ObfuscateEmail([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        {
+            var result = new ItemResult<string>();
+
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<string>(itemResult);
+            }
+            var item = itemResult.Object;
+            var methodResult = item.ObfuscateEmail(Db);
             Db.SaveChanges();
             result.Object = methodResult;
 

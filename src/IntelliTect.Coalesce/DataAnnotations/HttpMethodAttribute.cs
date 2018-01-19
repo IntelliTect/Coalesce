@@ -15,6 +15,8 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             Post = 0,
             Get = 1,
+            Put = 2,
+            Delete = 3
         }
 
         public HttpMethodAttribute(HttpMethodType methodType = HttpMethodType.Post)

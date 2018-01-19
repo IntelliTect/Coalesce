@@ -158,6 +158,20 @@ namespace Coalesce.Domain
             return "Unknown";
         }
 
+        [Coalesce]
+        [HttpMethod(HttpMethodAttribute.HttpMethodType.Get)]
+        public static long PersonCount(AppDbContext db)
+        {
+            return db.People.Count();
+        }
+
+        [Coalesce]
+        [HttpMethod(HttpMethodAttribute.HttpMethodType.Get)]
+        public string FullNameAndAge(AppDbContext db)
+        {
+            return $"{FirstName} {LastName} {BirthDate?.ToString("M/D/YYYY") ?? "None"}";
+        }
+
 
         /// <summary>
         /// Returns the user name

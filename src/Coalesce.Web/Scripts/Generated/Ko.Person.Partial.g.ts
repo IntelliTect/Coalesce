@@ -291,6 +291,68 @@ module ViewModels {
             this.changeSpacesToDashesInNameUi(callback, reload);
         }
         
+        
+        
+        /**
+            Invoke server method FullNameAndAge.
+        */
+        public fullNameAndAge = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+
+            this.fullNameAndAgeIsLoading(true);
+            this.fullNameAndAgeMessage('');
+            this.fullNameAndAgeWasSuccessful(null);
+            return $.ajax({ method: "GET",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/FullNameAndAge",
+                        data: { id: this.myId,  },
+                        xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.isDirty(false);
+				this.fullNameAndAgeResultRaw(data.object);
+                this.fullNameAndAgeMessage('');
+                this.fullNameAndAgeWasSuccessful(true);
+                this.fullNameAndAgeResult(data.object);
+
+                if (typeof(callback) != "function") return;
+                var result = this.fullNameAndAgeResult();
+                if (reload) {
+                  this.load(null, () => callback(result));
+                } else {
+                  callback(result);
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.fullNameAndAgeWasSuccessful(false);
+                this.fullNameAndAgeMessage(errorMsg);
+    
+                if (this.coalesceConfig.showFailureAlerts())
+                    this.coalesceConfig.onFailure()(this as any, "Could not call method fullNameAndAge: " + errorMsg);
+            })
+            .always(() => {
+                this.fullNameAndAgeIsLoading(false);
+            });
+        } 
+        /** Result of server method (FullNameAndAge) strongly typed in a observable. */
+        public fullNameAndAgeResult: KnockoutObservable<string> = ko.observable(null);
+        /** Raw result object of server method (FullNameAndAge) simply wrapped in an observable. */
+        public fullNameAndAgeResultRaw: KnockoutObservable<any> = ko.observable();
+        /** True while the server method (FullNameAndAge) is being called */
+        public fullNameAndAgeIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        /** Error message for server method (FullNameAndAge) if it fails. */
+        public fullNameAndAgeMessage: KnockoutObservable<string> = ko.observable(null);
+        /** True if the server method (FullNameAndAge) was successful. */
+        public fullNameAndAgeWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        /** Presents a series of input boxes to call the server method (FullNameAndAge) */
+        public fullNameAndAgeUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            var $promptVal: string = null;
+            return this.fullNameAndAge(callback, reload);
+        }
+        /** Presents a modal with input boxes to call the server method (FullNameAndAge). Depends on a modal existing with id #method-FullNameAndAge. */
+        public fullNameAndAgeModal = (callback: () => void = null, reload: boolean = true): void => {
+            this.fullNameAndAgeUi(callback, reload);
+        }
+        
 
         /** 
             Load the ViewModel object from the DTO. 

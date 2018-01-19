@@ -163,7 +163,7 @@ module @moduleName {
             this.@(method.JsVariableIsLoading)(true);
             this.@(method.JsVariableMessage)('');
             this.@(method.JsVariableWasSuccessful)(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "@(method.HttpMethodName)",
                         url: this.coalesceConfig.baseApiUrl() + this.apiController + "/@(method.Name)",
                         data: @method.JsPostObject,
                         xhrFields: { withCredentials: true } })

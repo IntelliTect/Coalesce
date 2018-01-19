@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using static IntelliTect.Coalesce.DataAnnotations.HttpMethodAttribute;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -49,9 +50,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsVariableModal => JsVariable + "Modal";
         public string JsVariableArgs => JsVariable + "Args";
         public string JsVariableWithArgs => JsVariable + "WithArgs";
+        public string HttpMethodName => HttpMethodType.ToString().ToUpper();
+        public string ApiControllerAnnotation => $"Http{HttpMethodType.ToString()}";
 
 
-
+        public HttpMethodType HttpMethodType
+        {
+            get
+            {
+                if (HasAttribute<HttpMethodAttribute>())
+                {
+                    return this.GetAttributeValue<HttpMethodAttribute, HttpMethodAttribute.HttpMethodType>(a => a.MethodType) ?? HttpMethodType.Post;
+                }
+                return HttpMethodType.Post;
+            }
+        }
 
         /// <summary>
         /// Name of the class that is used for storing arguments on the client.

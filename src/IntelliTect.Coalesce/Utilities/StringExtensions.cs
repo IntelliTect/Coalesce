@@ -91,8 +91,7 @@ namespace IntelliTect.Coalesce.Utilities
             {
                 @string = $"_{@string}";
             }
-
-            if (IsCSharpKeyword(@string))
+            else if (IsCSharpKeyword(@string))
             {
                 @string = $"@{@string}";
             }

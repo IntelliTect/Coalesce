@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
 
             string identifier = input.GetValidCSharpIdentifier();
 
-            Assert.Equal("Oh\u2000No", identifier);
+            Assert.Equal("Oh\\u2000No", identifier);
         }
 
         [Fact]

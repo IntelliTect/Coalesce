@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -59,25 +58,6 @@ namespace IntelliTect.Coalesce.Utilities
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Adds the items in the colleciton to list if they aren't already there.
-        /// </summary>
-        public static void AddUnique(this List<string> list, IEnumerable<string> items)
-        {
-            foreach (var item in items)
-            {
-                list.AddUnique(item);
-            }
-        }
-
-        /// <summary>
-        /// Adds the items in the colleciton to list if they aren't already there.
-        /// </summary>
-        public static void AddUnique(this List<string> list, string item)
-        {
-            if (!list.Contains(item)) list.Add(item);
         }
 
         public static string EscapeStringLiteralForLinqDynamic(this string str) => str?

@@ -353,6 +353,68 @@ module ViewModels {
             this.fullNameAndAgeUi(callback, reload);
         }
         
+        
+        
+        /**
+            Invoke server method ObfuscateEmail.
+        */
+        public obfuscateEmail = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+
+            this.obfuscateEmailIsLoading(true);
+            this.obfuscateEmailMessage('');
+            this.obfuscateEmailWasSuccessful(null);
+            return $.ajax({ method: "PUT",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ObfuscateEmail",
+                        data: { id: this.myId,  },
+                        xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.isDirty(false);
+				this.obfuscateEmailResultRaw(data.object);
+                this.obfuscateEmailMessage('');
+                this.obfuscateEmailWasSuccessful(true);
+                this.obfuscateEmailResult(data.object);
+
+                if (typeof(callback) != "function") return;
+                var result = this.obfuscateEmailResult();
+                if (reload) {
+                  this.load(null, () => callback(result));
+                } else {
+                  callback(result);
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.obfuscateEmailWasSuccessful(false);
+                this.obfuscateEmailMessage(errorMsg);
+    
+                if (this.coalesceConfig.showFailureAlerts())
+                    this.coalesceConfig.onFailure()(this as any, "Could not call method obfuscateEmail: " + errorMsg);
+            })
+            .always(() => {
+                this.obfuscateEmailIsLoading(false);
+            });
+        } 
+        /** Result of server method (ObfuscateEmail) strongly typed in a observable. */
+        public obfuscateEmailResult: KnockoutObservable<string> = ko.observable(null);
+        /** Raw result object of server method (ObfuscateEmail) simply wrapped in an observable. */
+        public obfuscateEmailResultRaw: KnockoutObservable<any> = ko.observable();
+        /** True while the server method (ObfuscateEmail) is being called */
+        public obfuscateEmailIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        /** Error message for server method (ObfuscateEmail) if it fails. */
+        public obfuscateEmailMessage: KnockoutObservable<string> = ko.observable(null);
+        /** True if the server method (ObfuscateEmail) was successful. */
+        public obfuscateEmailWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        /** Presents a series of input boxes to call the server method (ObfuscateEmail) */
+        public obfuscateEmailUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            var $promptVal: string = null;
+            return this.obfuscateEmail(callback, reload);
+        }
+        /** Presents a modal with input boxes to call the server method (ObfuscateEmail). Depends on a modal existing with id #method-ObfuscateEmail. */
+        public obfuscateEmailModal = (callback: () => void = null, reload: boolean = true): void => {
+            this.obfuscateEmailUi(callback, reload);
+        }
+        
 
         /** 
             Load the ViewModel object from the DTO. 

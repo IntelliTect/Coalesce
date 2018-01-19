@@ -24,6 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
         public string AreaName { get; set; } = null;
 
         public string TypescriptModulePrefix { get; set; } = null;
+
     }
 
     public class ProjectConfiguration

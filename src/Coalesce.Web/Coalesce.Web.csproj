@@ -58,5 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Api\" />
+    <Folder Include="Api\Generated\" />
+    <Folder Include="Controllers\Generated\" />
+    <Folder Include="Models\Generated\" />
   </ItemGroup>
 </Project>

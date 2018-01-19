@@ -1,9 +1,7 @@
-﻿using IntelliTect.Coalesce.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
@@ -15,26 +13,20 @@ namespace IntelliTect.Coalesce.DataAnnotations
             ExecuteRoles = executeRoles;
         }
 
-        public bool HasAttribute { get; private set; } = false;
+        public bool HasAttribute { get; }
 
-        public string ExecuteRoles { get; private set; } = "";
+        public string ExecuteRoles { get; } = "";
 
 
         public IReadOnlyCollection<string> ExecuteRolesList
         {
             get
             {
-                List<String> result = new List<string>();
+                List<string> result = new List<string>();
                 if (!string.IsNullOrEmpty(ExecuteRoles))
                 {
-                    var roles = ExecuteRoles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (roles.Length > 0)
-                    {
-                        foreach (var item in roles)
-                        {
-                            if (!result.Contains(item)) result.AddUnique(RoleMapping.Map(item));
-                        }
-                    }
+                    var roles = ExecuteRoles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    result.AddRange(roles.SelectMany(RoleMapping.Map).Distinct());
                 }
                 return result.AsReadOnly();
             }
@@ -58,7 +50,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
             else
             {
-                return ExecuteRolesList.Any(f => user.IsInRole(f));
+                return ExecuteRolesList.Any(user.IsInRole);
             }
         }
 

@@ -1,9 +1,9 @@
 ﻿using IntelliTect.Coalesce.Utilities;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.Util
+namespace IntelliTect.Coalesce.Tests.Utilities
 {
-    public class StringExtensionsTests
+    public class StringExtensionTests
     {
         [Fact]
         public void CanGetIdentifierWithSpaces()
@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 
             string identifier = input.GetValidCSharpIdentifier("_");
 
-            Assert.Equal("_MyIdentifier", identifier);
+            Assert.Equal("_MyVariable", identifier);
         }
 
         [Fact]

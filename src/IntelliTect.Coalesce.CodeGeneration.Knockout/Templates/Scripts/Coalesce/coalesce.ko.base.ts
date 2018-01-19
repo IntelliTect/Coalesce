@@ -155,6 +155,115 @@ module Coalesce {
         parentCollection: object;
     }
 
+    export abstract class ClientMethod<TResult> {
+        /** Result of method strongly typed in a observable. */
+        public abstract result: KnockoutObservable<TResult>;
+
+        /** Raw result object of method simply wrapped in an observable. */
+        public rawResult: KnockoutObservable<any> = ko.observable();
+
+        /** True while the method is being called */
+        public isLoading: KnockoutObservable<boolean> = ko.observable(false);
+
+        /** Error response when method has failed. */
+        public message: KnockoutObservable<string> = ko.observable(null);
+
+        /** True if last invocation of method was successful. */
+        public wasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+
+
+
+        public showBootstrapModal = (callback: (result: TResult) => void = null) => {
+            $('#method-@method.Name').modal();
+            $('#method-@method.Name').on('shown.bs.modal', () => {
+                $('#method-@method.Name .btn-ok').unbind('click');
+                $('#method-@method.Name .btn-ok').click(() => {
+                    this.invokeWithArgs(null, callback);
+                    $('#method-@method.Name').modal('hide');
+                });
+            });
+        }
+
+        constructor(protected name: string, protected parent: BaseViewModel | BaseListViewModel<any>) {
+        }
+
+        protected invoke(postData: object) {
+            this.isLoading(true);
+            this.message('');
+            this.wasSuccessful(null);
+            return $.ajax({
+                method: "POST",
+                url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + this.name,
+                data: postData,
+                xhrFields: { withCredentials: true }
+            })
+                .done((data) => {
+
+                    if (this.parent instanceof BaseViewModel)
+                        this.parent.isDirty(false);
+
+                    this.rawResult(data.object);
+                    this.message('');
+                    this.wasSuccessful(true);
+
+                    @if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel) {
+                        @:if (this.@(method.JsVariableResult)()) {
+                            // Merge the incoming array
+                            @if (method.ReturnType.PureType.ClassViewModel.PrimaryKey != null) {
+                                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
+                            }
+                            else if (method.ReturnType.PureType.IsPrimitive) {
+                                @:this.@(method.JsVariableResult)(data.object);
+                            }
+                            else {
+                                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
+                            }
+                            @:}
+                    }
+                    else if (method.ReturnType.IsPOCO && method.ReturnType.HasClassViewModel) {
+                        @:if (!this.@(method.JsVariableResult)()) {
+                            @:this.@(method.JsVariableResult)(new @(method.ReturnType.ClassViewModel.ViewModelClassName)(data.object));
+                            @:} else {
+                            @:this.@(method.JsVariableResult)().loadFromDto(data.object);
+                            @:}
+                    }
+                    else {
+                        @:this.@(method.JsVariableResult)(data.object);
+                    }
+
+                    @if (method.ReturnType.EqualsType(method.Parent.Type)) {
+                        @:// The return type is the type of the object, load it.
+                        @:this.loadFromDto(data.object, true)
+                        @:if (typeof (callback) == "function") {
+                            @:var result = this.@(method.JsVariableResult)();
+                            @:callback(result);
+                            @:}
+                    }
+                    else {
+                        @:if (typeof (callback) != "function") return;
+                        @:var result = this.@(method.JsVariableResult)();
+                        @:if (reload) {
+                            @:  this.load(null, () => callback(result));
+                            @:} else {
+                            @:  callback(result);
+                            @:}
+                    }
+                })
+                    .fail((xhr) => {
+        var errorMsg = "Unknown Error";
+        if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+        this.@(method.JsVariableWasSuccessful)(false);
+        this.@(method.JsVariableMessage)(errorMsg);
+
+        if (this.coalesceConfig.showFailureAlerts())
+            this.coalesceConfig.onFailure()(this as any, "Could not call method @method.JsVariable: " + errorMsg);
+    })
+        .always(() => {
+            this.@(method.JsVariableIsLoading)(false);
+        });
+}
+    }
+
     export abstract class DataSource<T extends BaseViewModel> {
         protected _name: string;
 
@@ -203,7 +312,7 @@ module Coalesce {
         // because primaryKeyName on a derived type is wider than it is on BaseViewModel.
         protected primaryKeyName: string;
 
-        protected apiController: string;
+        public abstract apiController: string;
         protected viewController: string;
 
         /**
@@ -684,7 +793,7 @@ module Coalesce {
 
         protected abstract modelName: string;
 
-        protected abstract apiController: string;
+        public abstract apiController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.

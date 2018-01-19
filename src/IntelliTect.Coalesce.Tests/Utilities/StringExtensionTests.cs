@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
 
             string identifier = input.GetValidCSharpIdentifier();
 
-            Assert.Equal("Oh\\u2000No", identifier);
+            Assert.Equal("Oh_No", identifier);
         }
 
         [Fact]
@@ -32,7 +32,57 @@ namespace IntelliTect.Coalesce.Tests.Utilities
 
             string identifier = input.GetValidCSharpIdentifier();
 
-            Assert.Equal(input, identifier);
+            Assert.Equal("IamValidCSharp", identifier);
+        }
+
+        [Fact]
+        public void CanGetValidIdentifierWhenSourceContainsUnderscore()
+        {
+            string input = "_in_put_";
+
+            string identifier = input.GetValidCSharpIdentifier();
+
+            Assert.Equal("_in_put_", identifier);
+        }
+
+        [Fact]
+        public void CanGetValidIdentifierWhenSourceContainsUnicode()
+        {
+            string input = @"Uni\u15F0code";
+
+            string identifier = input.GetValidCSharpIdentifier();
+
+            Assert.Equal("Uni\\u15F0code", identifier);
+        }
+
+        [Fact]
+        public void GetGetIdentifierForKeyword()
+        {
+            string input = "class";
+
+            string identifier = input.GetValidCSharpIdentifier();
+
+            Assert.Equal("@class", identifier);
+        }
+
+        [Fact]
+        public void CanGetIdentifierForNumericString()
+        {
+            string input = "0123";
+
+            string identifier = input.GetValidCSharpIdentifier();
+
+            Assert.Equal("_0123", identifier);
+        }
+
+        [Fact]
+        public void CanGetIndetifierFromVerbatimIdentifier()
+        {
+            string input = "@if";
+
+            string identifier = input.GetValidCSharpIdentifier();
+
+            Assert.Equal("@if", identifier);
         }
     }
 }

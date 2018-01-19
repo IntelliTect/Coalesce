@@ -200,6 +200,44 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// Method: PersonCount
+        /// </summary>
+        [HttpGet("PersonCount")]
+
+        public virtual ItemResult<long> PersonCount()
+        {
+            var result = new ItemResult<long>();
+
+            var methodResult = Coalesce.Domain.Person.PersonCount(Db);
+            result.Object = methodResult;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Method: FullNameAndAge
+        /// </summary>
+        [HttpGet("FullNameAndAge")]
+
+        public virtual async Task<ItemResult<string>> FullNameAndAge([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        {
+            var result = new ItemResult<string>();
+
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<string>(itemResult);
+            }
+            var item = itemResult.Object;
+            var methodResult = item.FullNameAndAge(Db);
+            Db.SaveChanges();
+            result.Object = methodResult;
+
+            return result;
+        }
+
+        /// <summary>
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]

@@ -182,6 +182,61 @@ module ListViewModels {
         }
         
 
+        // Call server method (PersonCount)
+        public personCount = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            this.personCountIsLoading(true);
+            this.personCountMessage('');
+            this.personCountWasSuccessful(null);
+            return $.ajax({ method: "GET",
+                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/PersonCount",
+                     data: {  },
+                     xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.personCountResultRaw(data.object);
+                this.personCountMessage('');
+                this.personCountWasSuccessful(true);
+                this.personCountResult(data.object);
+        
+                if (typeof(callback) != "function") return;
+                var result = this.personCountResult();
+                if (reload) {
+                    this.load(() => callback(result));
+                } else {
+                    callback(result);
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.personCountWasSuccessful(false);
+                this.personCountMessage(errorMsg);
+
+                //alert("Could not call method personCount: " + errorMsg);
+            })
+            .always(() => {
+                this.personCountIsLoading(false);
+            });
+        } 
+        // Result of server method (PersonCount) strongly typed in a observable.
+        public personCountResult: KnockoutObservable<number> = ko.observable(null);
+        // Raw result object of server method (PersonCount) simply wrapped in an observable.
+        public personCountResultRaw: KnockoutObservable<any> = ko.observable();
+        // True while the server method (PersonCount) is being called
+        public personCountIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        // Error message for server method (PersonCount) if it fails.
+        public personCountMessage: KnockoutObservable<string> = ko.observable(null);
+        // True if the server method (PersonCount) was successful.
+        public personCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        // Presents a series of input boxes to call the server method (PersonCount)
+        public personCountUi = (callback: () => void = null) => {
+            this.personCount(callback);
+        }
+        // Presents a modal with input boxes to call the server method (PersonCount)
+        public personCountModal = (callback: () => void = null) => {
+            this.personCountUi(callback);
+        }
+        
+
         // Call server method (GetUserPublic)
         // Returns the user name
         public getUserPublic = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {

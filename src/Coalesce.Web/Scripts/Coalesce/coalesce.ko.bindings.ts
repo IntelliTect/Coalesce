@@ -41,7 +41,7 @@ ko.bindingHandlers.select2Ajax = {
         if (!idField) throw "select2Ajax requires additional binding 'idField'";
         if (setObject && !itemViewModel)
             throw "select2Ajax with 'setObject' requires additional binding 'itemViewModel'."
-            + " This should be a reference to the class of the join table - e.g.ViewModels.PersonCase.";
+            + " This should be a reference to the class of object being selected - e.g.ViewModels.Person.";
 
         interface ResultItem {
             id: any,

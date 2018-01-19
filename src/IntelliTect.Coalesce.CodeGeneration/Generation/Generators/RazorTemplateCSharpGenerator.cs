@@ -1,13 +1,14 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
+﻿using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp.Formatting;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
@@ -19,12 +20,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public string Namespace => GenerationContext.OutputNamespaceRoot;
 
+        [GeneratorConfig]
+        public int IndentationSize { get; set; } = 4;
+
         public override async Task<Stream> GetOutputAsync()
         {
             using (var output = await base.GetOutputAsync())
             {
                 await output.FlushAsync();
-                var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(SourceText.From(output));
+                var syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(output));
                 var root = syntaxTree.GetRoot();
 
                 // Abandoned idea for refactoring code with Roslyn to clean up fully qualified names.
@@ -39,15 +43,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 //{
                 //    root = await refactor.RefactorAsync(root as CompilationUnitSyntax);
                 //}
+                using (var workspace = new AdhocWorkspace())
+                {
+                    var options = workspace.Options
+                        .WithChangedOption(FormattingOptions.NewLine, LanguageNames.CSharp, Environment.NewLine)
+                        .WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, false)
+                        .WithChangedOption(FormattingOptions.IndentationSize, LanguageNames.CSharp, IndentationSize)
+                        .WithChangedOption(FormattingOptions.SmartIndent, LanguageNames.CSharp,
+                            FormattingOptions.IndentStyle.Smart)
+                        .WithChangedOption(CSharpFormattingOptions.WrappingKeepStatementsOnSingleLine, true);
 
-                root = Microsoft.CodeAnalysis.Formatting.Formatter.Format(root, new AdhocWorkspace());
+                    root = Formatter.Format(root, workspace, options);
 
-                Stream formattedOutput = new MemoryStream((int)output.Length);
-                var writer = new StreamWriter(formattedOutput, System.Text.Encoding.UTF8);
-                root.WriteTo(writer);
-                await writer.FlushAsync();
-                formattedOutput.Seek(0, SeekOrigin.Begin);
-                return formattedOutput;
+
+                    Stream formattedOutput = new MemoryStream((int) output.Length);
+                    using (var writer = new StreamWriter(formattedOutput, Encoding.UTF8, 1024, true))
+                    {
+                        root.WriteTo(writer);
+                        await writer.FlushAsync();
+                    }
+
+                    formattedOutput.Seek(0, SeekOrigin.Begin);
+                    return formattedOutput;
+                }
             }
         }
     }

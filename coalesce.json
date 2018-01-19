@@ -24,6 +24,16 @@
     "Views": {
       "disabled": false
       //"key": "value"
+    },
+    // Yo dawg, I heard you like configurable formatting. (4 spaces is actually the default)
+    "ApiController": {
+      "indentationSize": 4 
+    },
+    "ClassDto": {
+      "indentationSize": 4 
+    },
+    "ViewController" : {
+      "indentationSize": 4
     }
   }
 }

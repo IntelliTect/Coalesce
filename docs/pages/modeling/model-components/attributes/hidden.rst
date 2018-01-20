@@ -1,4 +1,6 @@
 
+.. _HiddenAttribute:
+
 [Hidden]
 ========
 

@@ -124,3 +124,30 @@ Static methods are created as functions on the TypeScript ListViewModel. All of 
     {
         return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
     }
+
+| 
+
+Generated API HTTP Method
+-------------------------
+
+Methods can be annotated with attributes to control API exposure and TypeScript generation. The following attributes are available for model methods. General annotations can be found on the :ref:`Annotations` page.
+
+    :csharp:`[Coalesce()]`
+        The :ref:`CoalesceAttribute` attribute causes the method to be exposed via a generated API controller.
+
+    :csharp:`[ApiActionHttpMethod(HttpMethod method)]`
+        The :ref:`ApiActionHttpMethod` attribute controls how this method is exposed via HTTP. By default all controller method actions use the POST HTTP method. This behavior can be overridden with this attribute to use GET, POST, PUT, DELETE, or PATCH HTTP methods. Note that when using the GET method, all parameters are sent as part of the URL and are as clear text regardless of encryption.
+
+    :csharp:`[Execute(string roles)]`
+        The :ref:`ExecuteAttribute` attribute specifies which roles can execute this method from the generated API controller.
+
+    :csharp:`[Hidden(Areas area)]`
+        The :ref:`HiddenAttribute` attribute allows for hiding this method on the admin pages both for list/card views and the editor.
+           
+    :csharp:`[LoadFromDataSource(Type dataSourceType)]`
+        The :ref:`LoadFromDataSourceAttribute` attribute specifies that the targeted model instance method should load the instance it is called on from the specified data source when invoked from an API endpoint. By default, whatever the default data source for the model's type will be used.
+    
+        
+        
+       
+

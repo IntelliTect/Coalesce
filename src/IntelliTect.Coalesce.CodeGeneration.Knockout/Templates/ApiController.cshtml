@@ -180,7 +180,7 @@ namespace @(namespaceName).Api
         /// <summary>
         /// Method: @method.Name
         /// </summary>
-        [@(method.ApiControllerAnnotation)("@(method.Name)")]
+        [@(method.ApiActionHttpMethodAnnotation)("@(method.Name)")]
         @(method.SecurityInfo.ExecuteAnnotation)
         @(model.ApiActionAccessModifier) virtual @returnType @method.Name (@method.CsParameters)
         {

@@ -61,7 +61,7 @@ module ListViewModels {
             this.addIsLoading(true);
             this.addMessage('');
             this.addWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Add",
                      data: { numberOne: numberOne, numberTwo: numberTwo },
                      xhrFields: { withCredentials: true } })
@@ -132,7 +132,7 @@ module ListViewModels {
             this.getUserIsLoading(true);
             this.getUserMessage('');
             this.getUserWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUser",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -187,7 +187,7 @@ module ListViewModels {
             this.personCountIsLoading(true);
             this.personCountMessage('');
             this.personCountWasSuccessful(null);
-            return $.ajax({ method: "GET",
+            return $.ajax({ method: "Get",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/PersonCount",
                      data: { lastNameStartsWith: lastNameStartsWith },
                      xhrFields: { withCredentials: true } })
@@ -256,7 +256,7 @@ module ListViewModels {
             this.removePersonByIdIsLoading(true);
             this.removePersonByIdMessage('');
             this.removePersonByIdWasSuccessful(null);
-            return $.ajax({ method: "DELETE",
+            return $.ajax({ method: "Delete",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RemovePersonById",
                      data: { id: id },
                      xhrFields: { withCredentials: true } })
@@ -326,7 +326,7 @@ module ListViewModels {
             this.getUserPublicIsLoading(true);
             this.getUserPublicMessage('');
             this.getUserPublicWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUserPublic",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -382,7 +382,7 @@ module ListViewModels {
             this.namesStartingWithIsLoading(true);
             this.namesStartingWithMessage('');
             this.namesStartingWithWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/NamesStartingWith",
                      data: { characters: characters },
                      xhrFields: { withCredentials: true } })

@@ -155,7 +155,7 @@ module ViewModels {
             this.renameIsLoading(true);
             this.renameMessage('');
             this.renameWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                         url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Rename",
                         data: { id: this.myId, name: name },
                         xhrFields: { withCredentials: true } })
@@ -239,7 +239,7 @@ module ViewModels {
             this.changeSpacesToDashesInNameIsLoading(true);
             this.changeSpacesToDashesInNameMessage('');
             this.changeSpacesToDashesInNameWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                         url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ChangeSpacesToDashesInName",
                         data: { id: this.myId },
                         xhrFields: { withCredentials: true } })
@@ -301,7 +301,7 @@ module ViewModels {
             this.fullNameAndAgeIsLoading(true);
             this.fullNameAndAgeMessage('');
             this.fullNameAndAgeWasSuccessful(null);
-            return $.ajax({ method: "GET",
+            return $.ajax({ method: "Get",
                         url: this.coalesceConfig.baseApiUrl() + this.apiController + "/FullNameAndAge",
                         data: { id: this.myId,  },
                         xhrFields: { withCredentials: true } })
@@ -363,7 +363,7 @@ module ViewModels {
             this.obfuscateEmailIsLoading(true);
             this.obfuscateEmailMessage('');
             this.obfuscateEmailWasSuccessful(null);
-            return $.ajax({ method: "PUT",
+            return $.ajax({ method: "Put",
                         url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ObfuscateEmail",
                         data: { id: this.myId,  },
                         xhrFields: { withCredentials: true } })
@@ -425,7 +425,7 @@ module ViewModels {
             this.changeFirstNameIsLoading(true);
             this.changeFirstNameMessage('');
             this.changeFirstNameWasSuccessful(null);
-            return $.ajax({ method: "PATCH",
+            return $.ajax({ method: "Patch",
                         url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ChangeFirstName",
                         data: { id: this.myId, firstName: firstName },
                         xhrFields: { withCredentials: true } })

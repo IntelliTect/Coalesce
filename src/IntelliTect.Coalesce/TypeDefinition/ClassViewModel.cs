@@ -409,7 +409,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 .Where(p => p.HasDtoIncludes)
                 .SelectMany(p => p.DtoIncludes)
                 .Distinct()
-                .Select(include => $"bool include{include} = includes == \"{include}\";")
+                .Select(include => $"bool {include.GetValidCSharpIdentifier("include")} = includes == \"{include}\";")
                 .ToList();
 
             return string.Join($"{Environment.NewLine}\t\t\t", includeList);
@@ -421,7 +421,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 .Where(p => p.HasDtoExcludes)
                 .SelectMany(p => p.DtoExcludes)
                 .Distinct()
-                .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
+                .Select(exclude => $"bool {exclude.GetValidCSharpIdentifier("exclude")} = includes == \"{exclude}\";")
                 .ToList();
 
             return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
@@ -432,7 +432,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var allPropertyRoles = ClientProperties
                 .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
                 .Distinct()
-                .Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");")
+                .Select(role => $"bool {role.GetValidCSharpIdentifier("is")} = context.IsInRoleCached(\"{role}\");")
                 .ToList();
             
             return string.Join($"{Environment.NewLine}\t\t\t", allPropertyRoles);

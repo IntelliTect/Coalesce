@@ -43,9 +43,8 @@ namespace IntelliTect.Coalesce.Helpers
                 var list = new List<string>();
                 if (!string.IsNullOrEmpty(Roles))
                 {
-                    var roles = Roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    list.AddUnique(roles.SelectMany(role => RoleMapping.Map(role)));
-                    list.AddUnique(roles);
+                    var roles = Roles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    list.AddRange(roles.SelectMany(RoleMapping.Map).Union(roles).Distinct());
                 }
                 return _roleList = list.AsReadOnly();
             }

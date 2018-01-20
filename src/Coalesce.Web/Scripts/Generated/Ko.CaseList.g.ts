@@ -59,7 +59,7 @@ module ListViewModels {
             this.getAllOpenCasesCountIsLoading(true);
             this.getAllOpenCasesCountMessage('');
             this.getAllOpenCasesCountWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetAllOpenCasesCount",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -114,7 +114,7 @@ module ListViewModels {
             this.randomizeDatesAndStatusIsLoading(true);
             this.randomizeDatesAndStatusMessage('');
             this.randomizeDatesAndStatusWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RandomizeDatesAndStatus",
                      data: {  },
                      xhrFields: { withCredentials: true } })
@@ -170,7 +170,7 @@ module ListViewModels {
             this.getCaseSummaryIsLoading(true);
             this.getCaseSummaryMessage('');
             this.getCaseSummaryWasSuccessful(null);
-            return $.ajax({ method: "POST",
+            return $.ajax({ method: "Post",
                      url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetCaseSummary",
                      data: {  },
                      xhrFields: { withCredentials: true } })

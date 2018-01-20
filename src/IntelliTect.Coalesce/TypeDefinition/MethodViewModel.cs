@@ -50,11 +50,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsVariableModal => JsVariable + "Modal";
         public string JsVariableArgs => JsVariable + "Args";
         public string JsVariableWithArgs => JsVariable + "WithArgs";
-        public string HttpMethodName => HttpMethodType.ToString().ToUpper();
-        public string ApiControllerAnnotation => $"Http{HttpMethodType.ToString()}";
+        public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
+        public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
 
 
-        public HttpMethod HttpMethodType =>
+        public HttpMethod ApiActionHttpMethod =>
             this.GetAttributeValue<ApiActionHttpMethodAttribute, ApiActionHttpMethodAttribute.HttpMethod>(a => a.Method) ?? HttpMethod.Post;
 
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using static IntelliTect.Coalesce.DataAnnotations.HttpMethodAttribute;
+using static IntelliTect.Coalesce.DataAnnotations.ApiActionHttpMethodAttribute;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -54,17 +54,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string ApiControllerAnnotation => $"Http{HttpMethodType.ToString()}";
 
 
-        public HttpMethodType HttpMethodType
-        {
-            get
-            {
-                if (HasAttribute<HttpMethodAttribute>())
-                {
-                    return this.GetAttributeValue<HttpMethodAttribute, HttpMethodAttribute.HttpMethodType>(a => a.MethodType) ?? HttpMethodType.Post;
-                }
-                return HttpMethodType.Post;
-            }
-        }
+        public HttpMethod HttpMethodType =>
+            this.GetAttributeValue<ApiActionHttpMethodAttribute, ApiActionHttpMethodAttribute.HttpMethod>(a => a.Method) ?? HttpMethod.Post;
+
 
         /// <summary>
         /// Name of the class that is used for storing arguments on the client.

@@ -127,8 +127,8 @@ Static methods are created as functions on the TypeScript ListViewModel. All of 
 
 | 
 
-Generated API HTTP Method
--------------------------
+Method Annotations
+------------------
 
 Methods can be annotated with attributes to control API exposure and TypeScript generation. The following attributes are available for model methods. General annotations can be found on the :ref:`Annotations` page.
 

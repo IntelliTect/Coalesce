@@ -28,12 +28,11 @@ module @moduleName {
 
 	export class @(model.ViewModelGeneratedClassName) extends Coalesce.BaseViewModel
     {
-        protected modelName = "@(model.Name)";
-        protected primaryKeyName: keyof this = "@(model.PrimaryKey.JsVariable)";
-        protected modelDisplayName = "@(model.DisplayName)";
-
-        protected apiController = "/@(model.ApiRouteControllerPart)";
-        protected viewController = "/@(model.ControllerName)";
+        public readonly modelName = "@(model.Name)";
+        public readonly primaryKeyName: keyof this = "@(model.PrimaryKey.JsVariable)";
+        public readonly modelDisplayName = "@(model.DisplayName)";
+        public readonly apiController = "/@(model.ApiRouteControllerPart)";
+        public readonly viewController = "/@(model.ControllerName)";
 
         /** Behavioral configuration for all instances of @(model.ViewModelClassName). Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<@(model.ViewModelClassName)>
@@ -149,146 +148,89 @@ module @moduleName {
 
         @foreach (var method in model.ClientMethods.Where(m => !m.IsStatic || m.ReturnType.EqualsType(model.Type)))
         {
-        @:
-        @:
-        @:/**
-        @:    Invoke server method @method.Name.
-        if (method.Comment.Length > 0)
-        {
-        @:    @(method.Comment)
-        }
-        @:*/
-        @:public @method.JsVariable = (@method.TsParameters): JQueryPromise<any> => {
-        <text>
-            this.@(method.JsVariableIsLoading)(true);
-            this.@(method.JsVariableMessage)('');
-            this.@(method.JsVariableWasSuccessful)(null);
-            return $.ajax({ method: "@(method.ApiActionHttpMethod)",
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/@(method.Name)",
-                        data: @method.JsPostObject,
-                        xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.isDirty(false);
-				this.@(method.JsVariableResultRaw)(data.object);
-                this.@(method.JsVariableMessage)('');
-                this.@(method.JsVariableWasSuccessful)(true);
+            <text>
+        public static @(method.Name.ToPascalCase()) = class @(method.Name.ToPascalCase()) extends Coalesce.ClientMethod<@(model.ViewModelGeneratedClassName), @(method.ReturnType.TsType)> {
+            public readonly name = "Rename";
+			public readonly verb = "@(method.ApiActionHttpMethod)";
+
+            public result: KnockoutObservable<Person> = ko.observable(null);
+    
+            /** Calls server method (@method.Name) with the given arguments */
+            public invoke = (@method.TsParameters): JQueryPromise<any> => {
+                return this.invokeWithData(@method.JsPostObject, callback, reload);
+            };
+    
+            @if (method.ClientParameters.Any())
+            {
+                
+            @:public static Args = class Args {
+                @foreach (var arg in method.ClientParameters)
+                {
+                @:public @(arg.CsArgumentName): @(arg.Type.TsKnockoutType()) = @(arg.Type.ObservableConstructorCall());
+                }
+            @:}
+            @:/** Calls server method (@method.Name) with an instance of @(method.Name.ToPascalCase()).Args, or the value of this.args if not specified. */
+            // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it. Thankfully, we can implicitly type using the default.
+            @:public invokeWithArgs = (args = this.args, callback?: (result: @method.ReturnType.TsType) => void, reload: boolean = true) => {
+                @:return this.invoke(@(method.JsArguments("args", true)), reload);
+            @:}
+            @:/** Object that can be easily bound to fields to allow data entry for the method */
+            @:public args = new @(method.Name.ToPascalCase()).Args(); 
+            }
+
+            protected loadResponse = (data: any, callback?: (result: @method.ReturnType.TsType) => void, reload?: boolean) => {
             @if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel)
             {
-                @:if (this.@(method.JsVariableResult)()){
-   				// Merge the incoming array
-                    @if (method.ReturnType.PureType.ClassViewModel.PrimaryKey != null)
-                    {
-                        @:Coalesce.KnockoutUtilities.RebuildArray(this.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
-                    }
-                    else if (method.ReturnType.PureType.IsPrimitive)
-                    {
-                        @:this.@(method.JsVariableResult)(data.object);
-                    }
-                    else
-                    {
-                        @:Coalesce.KnockoutUtilities.RebuildArray(this.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
-                    }
-                @:}
+                var keyNameArg = method.ReturnType.PureType.ClassViewModel.PrimaryKey != null
+                    ? $"'{method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
+                    : "null";
+                @:Coalesce.KnockoutUtilities.RebuildArray(this.result, data, @keyNameArg, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
             }
-            else if (method.ReturnType.IsPOCO && method.ReturnType.HasClassViewModel)
+            else if (method.ReturnType.HasClassViewModel)
             {
-                @:if (!this.@(method.JsVariableResult)()){
-                    @:this.@(method.JsVariableResult)(new @(method.ReturnType.ClassViewModel.ViewModelClassName)(data.object));
+                @:if (!this.result()){
+                    @:this.result(new @(method.ReturnType.ClassViewModel.ViewModelClassName)(data));
                 @:} else {
-                    @:this.@(method.JsVariableResult)().loadFromDto(data.object);
+                    @:this.result().loadFromDto(data);
                 @:}
             }
             else
             {
-                @:this.@(method.JsVariableResult)(data.object);
+                @:this.result(data);
             }
 
             @if (method.ReturnType.EqualsType(method.Parent.Type))
             {
                 @:// The return type is the type of the object, load it.
-                @:this.loadFromDto(data.object, true)
+                @:this.parent.loadFromDto(data, true)
                 @:if (typeof(callback) == "function") {
-                    @:var result = this.@(method.JsVariableResult)();
+                    @:var result = this.result();
                     @:callback(result);
                 @:}
             }
             else
             {
                 @:if (typeof(callback) != "function") return;
-                @:var result = this.@(method.JsVariableResult)();
+                @:var result = this.result();
                 @:if (reload) {
-                @:  this.load(null, () => callback(result));
+                @:  this.parent.load(null, () => callback(result));
                 @:} else {
                 @:  callback(result);
                 @:}
             }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.@(method.JsVariableWasSuccessful)(false);
-                this.@(method.JsVariableMessage)(errorMsg);
+            };
+        };
     
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this as any, "Could not call method @method.JsVariable: " + errorMsg);
-            })
-            .always(() => {
-                this.@(method.JsVariableIsLoading)(false);
-            });
-        } </text>
-        @:/** Result of server method (@method.Name) strongly typed in a observable. */
-        @:public @method.JsVariableResult: @method.ReturnType.TsKnockoutType() = @method.ReturnType.ObservableConstructorCall();
-        @:/** Raw result object of server method (@method.Name) simply wrapped in an observable. */
-        @:public @method.JsVariableResultRaw: KnockoutObservable<any> = ko.observable();
-        @:/** True while the server method (@method.Name) is being called */
-        @:public @method.JsVariableIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        @:/** Error message for server method (@method.Name) if it fails. */
-        @:public @method.JsVariableMessage: KnockoutObservable<string> = ko.observable(null);
-        @:/** True if the server method (@method.Name) was successful. */
-        @:public @method.JsVariableWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        @:/** Presents a series of input boxes to call the server method (@method.Name) */
-        @:public @method.JsVariableUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            @:var $promptVal: string = null;
-        @foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
+        /**
+            Methods and properties for invoking server method @method.Name.
+        @if (method.Comment.Length > 0)
         {
-            @:$promptVal = @($"prompt('{param.Name.ToProperCase()}')");
-            @:if ($promptVal === null) return;
-            @:var @param.Name: @param.Type.TsType = @param.Type.TsConvertFromString("$promptVal");
-            @:  
+        @:    @(method.Comment)
         }
-        @foreach (var param in method.ClientParameters.Where(f => !f.ConvertsFromJsString))
-        {
-            @:var @param.Name: @param.Type.TsType = null;
-        }
-            @:return this.@(method.JsVariable)(@(method.JsArguments("", true)), reload);
-        @:}
-        @:/** Presents a modal with input boxes to call the server method (@method.Name). Depends on a modal existing with id #method-@method.Name. */
-        @:public @method.JsVariableModal = (callback: () => void = null, reload: boolean = true): void => {
-            @if (method.ClientParameters.Any()) {
-            @:$('#method-@method.Name').modal();
-            @:$('#method-@method.Name').on('shown.bs.modal', () => {
-                @:$('#method-@method.Name .btn-ok').unbind('click');
-                @:$('#method-@method.Name .btn-ok').click(() => {
-                    @:this.@(method.JsVariableWithArgs)(null, callback, reload);
-                    @:$('#method-@method.Name').modal('hide');
-                @:});
-            @:});
-            }
-            else
-            {
-            @:this.@(method.JsVariableUi)(callback, reload);
-            }
-        @:}
-        @if (method.ClientParameters.Any())
-        {
-        @:/** Calls server method (@method.Name) with an instance of @(model.ViewModelGeneratedClassName).@(method.ArgsName), or the value of @(method.JsVariableArgs) if not specified. */
-        @:public @method.JsVariableWithArgs = (args?: @(model.ViewModelGeneratedClassName).@(method.ArgsName), callback?: (result: @method.ReturnType.TsType) => void, reload: boolean = true) => {
-            @:if (!args) args = this.@(method.JsVariableArgs);
-            @:return this.@(method.JsVariable)(@(method.JsArguments("args", true)), reload);
-        @:}
-        @:/** Object that can be easily bound to fields to allow data entry for the method */
-        @:public @(method.JsVariableArgs) = new @(model.ViewModelGeneratedClassName).@(method.ArgsName)(); 
-        }
+        */
+        public @(method.JsVariable) = new @(model.ViewModelClassName).@(method.Name.ToPascalCase())(this);
+            </text>
+        
         @:
         }
 
@@ -562,16 +504,6 @@ module @moduleName {
             @:@kvp.Value = @kvp.Key,
         }
         @:};
-        }
-
-        // Classes for use in method calls to support data binding for input for arguments
-        @foreach(MethodViewModel method in model.ClientMethods.Where(f => f.ClientParameters.Any() && (!f.IsStatic || f.ReturnType.Name == model.Name))){
-        @:export class @(method.ArgsName) {
-            @foreach (var arg in method.ClientParameters)
-            {
-            @:public @(arg.CsArgumentName): @(arg.Type.TsKnockoutType()) = @(arg.Type.ObservableConstructorCall());
-            }
-        @:}
         }
     }
 }

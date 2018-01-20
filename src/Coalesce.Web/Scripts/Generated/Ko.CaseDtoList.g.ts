@@ -14,8 +14,8 @@ module ListViewModels {
     }
 
     export class CaseDtoList extends Coalesce.BaseListViewModel<ViewModels.CaseDto> {
-        protected modelName: string = "CaseDto";
-        protected apiController: string = "/CaseDto";
+        public readonly modelName: string = "CaseDto";
+        public readonly apiController: string = "/CaseDto";
         public modelKeyName: string = "caseId";
         public itemClass: new () => ViewModels.CaseDto = ViewModels.CaseDto;
 

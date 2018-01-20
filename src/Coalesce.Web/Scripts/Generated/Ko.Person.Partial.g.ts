@@ -8,12 +8,11 @@ module ViewModels {
 
 	export class PersonPartial extends Coalesce.BaseViewModel
     {
-        protected modelName = "Person";
-        protected primaryKeyName: keyof this = "personId";
-        protected modelDisplayName = "Person";
-
-        protected apiController = "/Person";
-        protected viewController = "/Person";
+        public readonly modelName = "Person";
+        public readonly primaryKeyName: keyof this = "personId";
+        public readonly modelDisplayName = "Person";
+        public readonly apiController = "/Person";
+        public readonly viewController = "/Person";
 
         /** Behavioral configuration for all instances of Person. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
@@ -144,359 +143,81 @@ module ViewModels {
             { id: 2, value: 'Female' },
         ];
 
-        
-        
+
+
+        public static Rename = class Rename extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
+            public readonly name = "Rename";
+            public result: KnockoutObservable<Person> = ko.observable(null);
+    
+            /** Calls server method (Rename) with the given arguments */
+            public invoke = (name: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), name: name }, callback, reload);
+            };
+    
+            public static Args = class Args {
+                public name: KnockoutObservable<string> = ko.observable(null);
+            }
+            /** Calls server method (Rename) with an instance of this.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+                return this.invoke(args.name(), callback, reload);
+            }
+            /** Object that can be easily bound to fields to allow data entry for the method */
+            public args = new Rename.Args(); 
+
+            protected loadResponse = (data: any, callback?: (result: ViewModels.Person) => void, reload?: boolean) => {
+                if (!this.result()){
+                    this.result(new Person(data));
+                } else {
+                    this.result().loadFromDto(data);
+                }
+
+                // The return type is the type of the object, load it.
+                this.parent.loadFromDto(data, true)
+                if (typeof(callback) == "function") {
+                    var result = this.result();
+                    callback(result);
+                }
+            };
+        };
+    
         /**
-            Invoke server method Rename.
+            Methods and properties for invoking server method Rename.
             Sets the FirstName to the given text.
         */
-        public rename = (name: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+        public rename = new Person.Rename(this);
+            
+        
 
-            this.renameIsLoading(true);
-            this.renameMessage('');
-            this.renameWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Rename",
-                        data: { id: this.myId, name: name },
-                        xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.isDirty(false);
-				this.renameResultRaw(data.object);
-                this.renameMessage('');
-                this.renameWasSuccessful(true);
-                if (!this.renameResult()){
-                    this.renameResult(new Person(data.object));
-                } else {
-                    this.renameResult().loadFromDto(data.object);
-                }
 
-                // The return type is the type of the object, load it.
-                this.loadFromDto(data.object, true)
-                if (typeof(callback) == "function") {
-                    var result = this.renameResult();
-                    callback(result);
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.renameWasSuccessful(false);
-                this.renameMessage(errorMsg);
+        public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<PersonPartial, any> {
+            public readonly name = "Rename";
+            public result: KnockoutObservable<Person> = ko.observable(null);
     
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this as any, "Could not call method rename: " + errorMsg);
-            })
-            .always(() => {
-                this.renameIsLoading(false);
-            });
-        } 
-        /** Result of server method (Rename) strongly typed in a observable. */
-        public renameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
-        /** Raw result object of server method (Rename) simply wrapped in an observable. */
-        public renameResultRaw: KnockoutObservable<any> = ko.observable();
-        /** True while the server method (Rename) is being called */
-        public renameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        /** Error message for server method (Rename) if it fails. */
-        public renameMessage: KnockoutObservable<string> = ko.observable(null);
-        /** True if the server method (Rename) was successful. */
-        public renameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        /** Presents a series of input boxes to call the server method (Rename) */
-        public renameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            var $promptVal: string = null;
-            $promptVal = prompt('Name');
-            if ($promptVal === null) return;
-            var name: string = $promptVal;
-              
-            return this.rename(name, callback, reload);
-        }
-        /** Presents a modal with input boxes to call the server method (Rename). Depends on a modal existing with id #method-Rename. */
-        public renameModal = (callback: () => void = null, reload: boolean = true): void => {
-            $('#method-Rename').modal();
-            $('#method-Rename').on('shown.bs.modal', () => {
-                $('#method-Rename .btn-ok').unbind('click');
-                $('#method-Rename .btn-ok').click(() => {
-                    this.renameWithArgs(null, callback, reload);
-                    $('#method-Rename').modal('hide');
-                });
-            });
-        }
-        /** Calls server method (Rename) with an instance of PersonPartial.RenameArgs, or the value of renameArgs if not specified. */
-        public renameWithArgs = (args?: PersonPartial.RenameArgs, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
-            if (!args) args = this.renameArgs;
-            return this.rename(args.name(), callback, reload);
-        }
-        /** Object that can be easily bound to fields to allow data entry for the method */
-        public renameArgs = new PersonPartial.RenameArgs(); 
-        
-        
-        
+            /** Calls server method (ChangeSpacesToDashesInName) with the given arguments */
+            public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
+            };
+    
+
+            protected loadResponse = (data: any, callback?: (result: any) => void, reload?: boolean) => {
+                this.result(data);
+
+                if (typeof(callback) != "function") return;
+                var result = this.result();
+                if (reload) {
+                  this.parent.load(null, () => callback(result));
+                } else {
+                  callback(result);
+                }
+            };
+        };
+    
         /**
-            Invoke server method ChangeSpacesToDashesInName.
+            Methods and properties for invoking server method ChangeSpacesToDashesInName.
             Removes spaces from the name and puts in dashes
         */
-        public changeSpacesToDashesInName = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
-
-            this.changeSpacesToDashesInNameIsLoading(true);
-            this.changeSpacesToDashesInNameMessage('');
-            this.changeSpacesToDashesInNameWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ChangeSpacesToDashesInName",
-                        data: { id: this.myId },
-                        xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.isDirty(false);
-				this.changeSpacesToDashesInNameResultRaw(data.object);
-                this.changeSpacesToDashesInNameMessage('');
-                this.changeSpacesToDashesInNameWasSuccessful(true);
-                this.changeSpacesToDashesInNameResult(data.object);
-
-                if (typeof(callback) != "function") return;
-                var result = this.changeSpacesToDashesInNameResult();
-                if (reload) {
-                  this.load(null, () => callback(result));
-                } else {
-                  callback(result);
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.changeSpacesToDashesInNameWasSuccessful(false);
-                this.changeSpacesToDashesInNameMessage(errorMsg);
-    
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this as any, "Could not call method changeSpacesToDashesInName: " + errorMsg);
-            })
-            .always(() => {
-                this.changeSpacesToDashesInNameIsLoading(false);
-            });
-        } 
-        /** Result of server method (ChangeSpacesToDashesInName) strongly typed in a observable. */
-        public changeSpacesToDashesInNameResult: KnockoutObservable<any> = ko.observable(null);
-        /** Raw result object of server method (ChangeSpacesToDashesInName) simply wrapped in an observable. */
-        public changeSpacesToDashesInNameResultRaw: KnockoutObservable<any> = ko.observable();
-        /** True while the server method (ChangeSpacesToDashesInName) is being called */
-        public changeSpacesToDashesInNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        /** Error message for server method (ChangeSpacesToDashesInName) if it fails. */
-        public changeSpacesToDashesInNameMessage: KnockoutObservable<string> = ko.observable(null);
-        /** True if the server method (ChangeSpacesToDashesInName) was successful. */
-        public changeSpacesToDashesInNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        /** Presents a series of input boxes to call the server method (ChangeSpacesToDashesInName) */
-        public changeSpacesToDashesInNameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            var $promptVal: string = null;
-            return this.changeSpacesToDashesInName(callback, reload);
-        }
-        /** Presents a modal with input boxes to call the server method (ChangeSpacesToDashesInName). Depends on a modal existing with id #method-ChangeSpacesToDashesInName. */
-        public changeSpacesToDashesInNameModal = (callback: () => void = null, reload: boolean = true): void => {
-            this.changeSpacesToDashesInNameUi(callback, reload);
-        }
-        
-        
-        
-        /**
-            Invoke server method FullNameAndAge.
-        */
-        public fullNameAndAge = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
-
-            this.fullNameAndAgeIsLoading(true);
-            this.fullNameAndAgeMessage('');
-            this.fullNameAndAgeWasSuccessful(null);
-            return $.ajax({ method: "Get",
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/FullNameAndAge",
-                        data: { id: this.myId,  },
-                        xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.isDirty(false);
-				this.fullNameAndAgeResultRaw(data.object);
-                this.fullNameAndAgeMessage('');
-                this.fullNameAndAgeWasSuccessful(true);
-                this.fullNameAndAgeResult(data.object);
-
-                if (typeof(callback) != "function") return;
-                var result = this.fullNameAndAgeResult();
-                if (reload) {
-                  this.load(null, () => callback(result));
-                } else {
-                  callback(result);
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.fullNameAndAgeWasSuccessful(false);
-                this.fullNameAndAgeMessage(errorMsg);
-    
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this as any, "Could not call method fullNameAndAge: " + errorMsg);
-            })
-            .always(() => {
-                this.fullNameAndAgeIsLoading(false);
-            });
-        } 
-        /** Result of server method (FullNameAndAge) strongly typed in a observable. */
-        public fullNameAndAgeResult: KnockoutObservable<string> = ko.observable(null);
-        /** Raw result object of server method (FullNameAndAge) simply wrapped in an observable. */
-        public fullNameAndAgeResultRaw: KnockoutObservable<any> = ko.observable();
-        /** True while the server method (FullNameAndAge) is being called */
-        public fullNameAndAgeIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        /** Error message for server method (FullNameAndAge) if it fails. */
-        public fullNameAndAgeMessage: KnockoutObservable<string> = ko.observable(null);
-        /** True if the server method (FullNameAndAge) was successful. */
-        public fullNameAndAgeWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        /** Presents a series of input boxes to call the server method (FullNameAndAge) */
-        public fullNameAndAgeUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            var $promptVal: string = null;
-            return this.fullNameAndAge(callback, reload);
-        }
-        /** Presents a modal with input boxes to call the server method (FullNameAndAge). Depends on a modal existing with id #method-FullNameAndAge. */
-        public fullNameAndAgeModal = (callback: () => void = null, reload: boolean = true): void => {
-            this.fullNameAndAgeUi(callback, reload);
-        }
-        
-        
-        
-        /**
-            Invoke server method ObfuscateEmail.
-        */
-        public obfuscateEmail = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
-
-            this.obfuscateEmailIsLoading(true);
-            this.obfuscateEmailMessage('');
-            this.obfuscateEmailWasSuccessful(null);
-            return $.ajax({ method: "Put",
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ObfuscateEmail",
-                        data: { id: this.myId,  },
-                        xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.isDirty(false);
-				this.obfuscateEmailResultRaw(data.object);
-                this.obfuscateEmailMessage('');
-                this.obfuscateEmailWasSuccessful(true);
-                this.obfuscateEmailResult(data.object);
-
-                if (typeof(callback) != "function") return;
-                var result = this.obfuscateEmailResult();
-                if (reload) {
-                  this.load(null, () => callback(result));
-                } else {
-                  callback(result);
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.obfuscateEmailWasSuccessful(false);
-                this.obfuscateEmailMessage(errorMsg);
-    
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this as any, "Could not call method obfuscateEmail: " + errorMsg);
-            })
-            .always(() => {
-                this.obfuscateEmailIsLoading(false);
-            });
-        } 
-        /** Result of server method (ObfuscateEmail) strongly typed in a observable. */
-        public obfuscateEmailResult: KnockoutObservable<string> = ko.observable(null);
-        /** Raw result object of server method (ObfuscateEmail) simply wrapped in an observable. */
-        public obfuscateEmailResultRaw: KnockoutObservable<any> = ko.observable();
-        /** True while the server method (ObfuscateEmail) is being called */
-        public obfuscateEmailIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        /** Error message for server method (ObfuscateEmail) if it fails. */
-        public obfuscateEmailMessage: KnockoutObservable<string> = ko.observable(null);
-        /** True if the server method (ObfuscateEmail) was successful. */
-        public obfuscateEmailWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        /** Presents a series of input boxes to call the server method (ObfuscateEmail) */
-        public obfuscateEmailUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            var $promptVal: string = null;
-            return this.obfuscateEmail(callback, reload);
-        }
-        /** Presents a modal with input boxes to call the server method (ObfuscateEmail). Depends on a modal existing with id #method-ObfuscateEmail. */
-        public obfuscateEmailModal = (callback: () => void = null, reload: boolean = true): void => {
-            this.obfuscateEmailUi(callback, reload);
-        }
-        
-        
-        
-        /**
-            Invoke server method ChangeFirstName.
-        */
-        public changeFirstName = (firstName: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
-
-            this.changeFirstNameIsLoading(true);
-            this.changeFirstNameMessage('');
-            this.changeFirstNameWasSuccessful(null);
-            return $.ajax({ method: "Patch",
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ChangeFirstName",
-                        data: { id: this.myId, firstName: firstName },
-                        xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.isDirty(false);
-				this.changeFirstNameResultRaw(data.object);
-                this.changeFirstNameMessage('');
-                this.changeFirstNameWasSuccessful(true);
-                if (!this.changeFirstNameResult()){
-                    this.changeFirstNameResult(new Person(data.object));
-                } else {
-                    this.changeFirstNameResult().loadFromDto(data.object);
-                }
-
-                // The return type is the type of the object, load it.
-                this.loadFromDto(data.object, true)
-                if (typeof(callback) == "function") {
-                    var result = this.changeFirstNameResult();
-                    callback(result);
-                }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.changeFirstNameWasSuccessful(false);
-                this.changeFirstNameMessage(errorMsg);
-    
-                if (this.coalesceConfig.showFailureAlerts())
-                    this.coalesceConfig.onFailure()(this as any, "Could not call method changeFirstName: " + errorMsg);
-            })
-            .always(() => {
-                this.changeFirstNameIsLoading(false);
-            });
-        } 
-        /** Result of server method (ChangeFirstName) strongly typed in a observable. */
-        public changeFirstNameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
-        /** Raw result object of server method (ChangeFirstName) simply wrapped in an observable. */
-        public changeFirstNameResultRaw: KnockoutObservable<any> = ko.observable();
-        /** True while the server method (ChangeFirstName) is being called */
-        public changeFirstNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        /** Error message for server method (ChangeFirstName) if it fails. */
-        public changeFirstNameMessage: KnockoutObservable<string> = ko.observable(null);
-        /** True if the server method (ChangeFirstName) was successful. */
-        public changeFirstNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        /** Presents a series of input boxes to call the server method (ChangeFirstName) */
-        public changeFirstNameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
-            var $promptVal: string = null;
-            $promptVal = prompt('First Name');
-            if ($promptVal === null) return;
-            var firstName: string = $promptVal;
-              
-            return this.changeFirstName(firstName, callback, reload);
-        }
-        /** Presents a modal with input boxes to call the server method (ChangeFirstName). Depends on a modal existing with id #method-ChangeFirstName. */
-        public changeFirstNameModal = (callback: () => void = null, reload: boolean = true): void => {
-            $('#method-ChangeFirstName').modal();
-            $('#method-ChangeFirstName').on('shown.bs.modal', () => {
-                $('#method-ChangeFirstName .btn-ok').unbind('click');
-                $('#method-ChangeFirstName .btn-ok').click(() => {
-                    this.changeFirstNameWithArgs(null, callback, reload);
-                    $('#method-ChangeFirstName').modal('hide');
-                });
-            });
-        }
-        /** Calls server method (ChangeFirstName) with an instance of PersonPartial.ChangeFirstNameArgs, or the value of changeFirstNameArgs if not specified. */
-        public changeFirstNameWithArgs = (args?: PersonPartial.ChangeFirstNameArgs, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
-            if (!args) args = this.changeFirstNameArgs;
-            return this.changeFirstName(args.firstName(), callback, reload);
-        }
-        /** Object that can be easily bound to fields to allow data entry for the method */
-        public changeFirstNameArgs = new PersonPartial.ChangeFirstNameArgs(); 
+        public changeSpacesToDashesInName = new Person.ChangeSpacesToDashesInName(this);
+            
         
 
         /** 
@@ -741,13 +462,5 @@ module ViewModels {
             Male = 1,
             Female = 2,
         };
-
-        // Classes for use in method calls to support data binding for input for arguments
-        export class RenameArgs {
-            public name: KnockoutObservable<string> = ko.observable(null);
-        }
-        export class ChangeFirstNameArgs {
-            public firstName: KnockoutObservable<string> = ko.observable(null);
-        }
     }
 }

@@ -155,7 +155,9 @@ module Coalesce {
         parentCollection: object;
     }
 
-    export abstract class ClientMethod<TResult> {
+    export abstract class ClientMethod<TParent extends BaseViewModel | BaseListViewModel<any>, TResult> {
+        public abstract readonly name: string;
+
         /** Result of method strongly typed in a observable. */
         public abstract result: KnockoutObservable<TResult>;
 
@@ -171,23 +173,24 @@ module Coalesce {
         /** True if last invocation of method was successful. */
         public wasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
 
-
-
-        public showBootstrapModal = (callback: (result: TResult) => void = null) => {
-            $('#method-@method.Name').modal();
-            $('#method-@method.Name').on('shown.bs.modal', () => {
-                $('#method-@method.Name .btn-ok').unbind('click');
-                $('#method-@method.Name .btn-ok').click(() => {
-                    this.invokeWithArgs(null, callback);
-                    $('#method-@method.Name').modal('hide');
-                });
-            });
+        constructor(protected parent: TParent) {
         }
 
-        constructor(protected name: string, protected parent: BaseViewModel | BaseListViewModel<any>) {
-        }
 
-        protected invoke(postData: object) {
+        protected abstract loadResponse: (data: object, callback?: (result: TResult) => void, reload?: boolean) => void;
+
+        //public showBootstrapModal = (callback: (result: TResult) => void = null) => {
+        //    $('#method-@method.Name').modal();
+        //    $('#method-@method.Name').on('shown.bs.modal', () => {
+        //        $('#method-@method.Name .btn-ok').unbind('click');
+        //        $('#method-@method.Name .btn-ok').click(() => {
+        //            this.invokeWithArgs(null, callback);
+        //            $('#method-@method.Name').modal('hide');
+        //        });
+        //    });
+        //};
+
+        protected invokeWithData(postData: object, callback?: (result: TResult) => void, reload?: boolean) {
             this.isLoading(true);
             this.message('');
             this.wasSuccessful(null);
@@ -206,63 +209,27 @@ module Coalesce {
                     this.message('');
                     this.wasSuccessful(true);
 
-                    @if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel) {
-                        @:if (this.@(method.JsVariableResult)()) {
-                            // Merge the incoming array
-                            @if (method.ReturnType.PureType.ClassViewModel.PrimaryKey != null) {
-                                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(method.JsVariableResult), data.object, '@method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
-                            }
-                            else if (method.ReturnType.PureType.IsPrimitive) {
-                                @:this.@(method.JsVariableResult)(data.object);
-                            }
-                            else {
-                                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(method.JsVariableResult), data.object, null, ViewModels.@method.ReturnType.PureType.ClassViewModel.Name, this, true);
-                            }
-                            @:}
-                    }
-                    else if (method.ReturnType.IsPOCO && method.ReturnType.HasClassViewModel) {
-                        @:if (!this.@(method.JsVariableResult)()) {
-                            @:this.@(method.JsVariableResult)(new @(method.ReturnType.ClassViewModel.ViewModelClassName)(data.object));
-                            @:} else {
-                            @:this.@(method.JsVariableResult)().loadFromDto(data.object);
-                            @:}
-                    }
-                    else {
-                        @:this.@(method.JsVariableResult)(data.object);
-                    }
+                    this.loadResponse(data.object, callback, reload);
+                })
+                .fail((xhr) => {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    this.wasSuccessful(false);
+                    this.message(errorMsg);
 
-                    @if (method.ReturnType.EqualsType(method.Parent.Type)) {
-                        @:// The return type is the type of the object, load it.
-                        @:this.loadFromDto(data.object, true)
-                        @:if (typeof (callback) == "function") {
-                            @:var result = this.@(method.JsVariableResult)();
-                            @:callback(result);
-                            @:}
-                    }
-                    else {
-                        @:if (typeof (callback) != "function") return;
-                        @:var result = this.@(method.JsVariableResult)();
-                        @:if (reload) {
-                            @:  this.load(null, () => callback(result));
-                            @:} else {
-                            @:  callback(result);
-                            @:}
+                    if (this.parent.coalesceConfig.showFailureAlerts()) {
+                        (this.parent.coalesceConfig.onFailure() as (parent: object, message: string) => void)
+                            (this.parent, `Could not call method ${this.name}: ${errorMsg}`);
                     }
                 })
-                    .fail((xhr) => {
-        var errorMsg = "Unknown Error";
-        if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-        this.@(method.JsVariableWasSuccessful)(false);
-        this.@(method.JsVariableMessage)(errorMsg);
-
-        if (this.coalesceConfig.showFailureAlerts())
-            this.coalesceConfig.onFailure()(this as any, "Could not call method @method.JsVariable: " + errorMsg);
-    })
-        .always(() => {
-            this.@(method.JsVariableIsLoading)(false);
-        });
-}
+                .always(() => {
+                    this.isLoading(false);
+                });
+        }
     }
+
+    export abstract class ClientInstanceMethod<TParent extends BaseViewModel, TResult> extends ClientMethod<TParent, TResult> { }
+
 
     export abstract class DataSource<T extends BaseViewModel> {
         protected _name: string;
@@ -304,16 +271,16 @@ module Coalesce {
 
     export abstract class BaseViewModel {
 
-        protected modelName: string;
-        protected modelDisplayName: string;
+        protected readonly abstract modelName: string;
+        protected readonly abstract modelDisplayName: string;
 
         // Typing this property as keyof this prevents us from using BaseViewModel amorphously.
         // It prevents assignment of an arbitrary derived type to a variable/parameter expecting BaseViewModel
         // because primaryKeyName on a derived type is wider than it is on BaseViewModel.
-        protected primaryKeyName: string;
+        protected readonly abstract primaryKeyName: string;
 
-        public abstract apiController: string;
-        protected viewController: string;
+        public readonly abstract apiController: string;
+        protected readonly abstract viewController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.
@@ -791,9 +758,8 @@ module Coalesce {
 
     export abstract class BaseListViewModel<TItem extends BaseViewModel> {
 
-        protected abstract modelName: string;
-
-        public abstract apiController: string;
+        public readonly abstract modelName: string;
+        public readonly abstract apiController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.

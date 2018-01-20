@@ -76,11 +76,11 @@ Here's an example for a method called Move that takes a single parameter 'int fe
             return "I moved " + feet.ToString();
         }
 
-:ts:`public move: (feet: number, callback: () => void = null, reload: boolean = true) => JQueryPromise<any>`
+:ts:`public move: (feet: number, callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
     Function that takes all the method parameters and a callback. If :ts:`reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
 :ts:`public moveArgs: Person.MoveArgs`
     Instance of a generated class that contains observable fields for each parameter that the method takes.
-:ts:`public moveWithArgs: (args?: Person.MoveArgs, callback: () => void = null, reload: boolean = true) => JQueryPromise<any>`
+:ts:`public moveWithArgs: (args?: Person.MoveArgs, callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
     Function that takes an object that contains all the parameters.
     Object is of type [Name]Args which is included as a nested class on the ViewModel.
     If null, the built in instance of this class named [name]Args will be used.

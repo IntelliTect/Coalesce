@@ -24,6 +24,7 @@
     <RepositoryType>git</RepositoryType>
 
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="$(IsPackable) == 'true'">

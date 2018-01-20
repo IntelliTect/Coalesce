@@ -155,6 +155,82 @@ module Coalesce {
         parentCollection: object;
     }
 
+    export abstract class ClientMethod<TParent extends BaseViewModel | BaseListViewModel<any>, TResult> {
+        public abstract readonly name: string;
+
+        /** Result of method strongly typed in a observable. */
+        public abstract result: KnockoutObservable<TResult>;
+
+        /** Raw result object of method simply wrapped in an observable. */
+        public rawResult: KnockoutObservable<any> = ko.observable();
+
+        /** True while the method is being called */
+        public isLoading: KnockoutObservable<boolean> = ko.observable(false);
+
+        /** Error response when method has failed. */
+        public message: KnockoutObservable<string> = ko.observable(null);
+
+        /** True if last invocation of method was successful. */
+        public wasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+
+        constructor(protected parent: TParent) {
+        }
+
+
+        protected abstract loadResponse: (data: object, callback?: (result: TResult) => void, reload?: boolean) => void;
+
+        //public showBootstrapModal = (callback: (result: TResult) => void = null) => {
+        //    $('#method-@method.Name').modal();
+        //    $('#method-@method.Name').on('shown.bs.modal', () => {
+        //        $('#method-@method.Name .btn-ok').unbind('click');
+        //        $('#method-@method.Name .btn-ok').click(() => {
+        //            this.invokeWithArgs(null, callback);
+        //            $('#method-@method.Name').modal('hide');
+        //        });
+        //    });
+        //};
+
+        protected invokeWithData(postData: object, callback?: (result: TResult) => void, reload?: boolean) {
+            this.isLoading(true);
+            this.message('');
+            this.wasSuccessful(null);
+            return $.ajax({
+                method: "POST",
+                url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + this.name,
+                data: postData,
+                xhrFields: { withCredentials: true }
+            })
+                .done((data) => {
+
+                    if (this.parent instanceof BaseViewModel)
+                        this.parent.isDirty(false);
+
+                    this.rawResult(data.object);
+                    this.message('');
+                    this.wasSuccessful(true);
+
+                    this.loadResponse(data.object, callback, reload);
+                })
+                .fail((xhr) => {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    this.wasSuccessful(false);
+                    this.message(errorMsg);
+
+                    if (this.parent.coalesceConfig.showFailureAlerts()) {
+                        (this.parent.coalesceConfig.onFailure() as (parent: object, message: string) => void)
+                            (this.parent, `Could not call method ${this.name}: ${errorMsg}`);
+                    }
+                })
+                .always(() => {
+                    this.isLoading(false);
+                });
+        }
+    }
+
+    export abstract class ClientInstanceMethod<TParent extends BaseViewModel, TResult> extends ClientMethod<TParent, TResult> { }
+
+
     export abstract class DataSource<T extends BaseViewModel> {
         protected _name: string;
 
@@ -195,16 +271,16 @@ module Coalesce {
 
     export abstract class BaseViewModel {
 
-        protected modelName: string;
-        protected modelDisplayName: string;
+        protected readonly abstract modelName: string;
+        protected readonly abstract modelDisplayName: string;
 
         // Typing this property as keyof this prevents us from using BaseViewModel amorphously.
         // It prevents assignment of an arbitrary derived type to a variable/parameter expecting BaseViewModel
         // because primaryKeyName on a derived type is wider than it is on BaseViewModel.
-        protected primaryKeyName: string;
+        protected readonly abstract primaryKeyName: string;
 
-        protected apiController: string;
-        protected viewController: string;
+        public readonly abstract apiController: string;
+        protected readonly abstract viewController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.
@@ -682,9 +758,8 @@ module Coalesce {
 
     export abstract class BaseListViewModel<TItem extends BaseViewModel> {
 
-        protected abstract modelName: string;
-
-        protected abstract apiController: string;
+        public readonly abstract modelName: string;
+        public readonly abstract apiController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.

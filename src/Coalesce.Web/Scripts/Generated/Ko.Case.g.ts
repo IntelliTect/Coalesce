@@ -8,12 +8,11 @@ module ViewModels {
 
 	export class Case extends Coalesce.BaseViewModel
     {
-        protected modelName = "Case";
-        protected primaryKeyName: keyof this = "caseKey";
-        protected modelDisplayName = "Case";
-
-        protected apiController = "/Case";
-        protected viewController = "/Case";
+        public readonly modelName = "Case";
+        public readonly primaryKeyName: keyof this = "caseKey";
+        public readonly modelDisplayName = "Case";
+        public readonly apiController = "/Case";
+        public readonly viewController = "/Case";
 
         /** Behavioral configuration for all instances of Case. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Case>
@@ -353,7 +352,5 @@ module ViewModels {
             ClosedNoSolution = 3,
             Cancelled = 4,
         };
-
-        // Classes for use in method calls to support data binding for input for arguments
     }
 }

@@ -21,8 +21,8 @@ module ListViewModels {
     }
 
     export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {
-        protected modelName: string = "Person";
-        protected apiController: string = "/Person";
+        public readonly modelName: string = "Person";
+        public readonly apiController: string = "/Person";
         public modelKeyName: string = "personId";
         public itemClass: new () => ViewModels.Person = ViewModels.Person;
 

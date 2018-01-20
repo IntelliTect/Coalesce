@@ -171,7 +171,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var result = "{ ";
                 if (!IsStatic)
                 {
-                    result = result + "id: this.myId";
+                    result = result + "id: this.parent[this.parent.primaryKeyName]()";
                     if (Parameters.Any()) result = result + ", ";
                 }
 

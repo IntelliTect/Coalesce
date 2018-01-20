@@ -415,6 +415,89 @@ module ViewModels {
             this.obfuscateEmailUi(callback, reload);
         }
         
+        
+        
+        /**
+            Invoke server method ChangeFirstName.
+        */
+        public changeFirstName = (firstName: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+
+            this.changeFirstNameIsLoading(true);
+            this.changeFirstNameMessage('');
+            this.changeFirstNameWasSuccessful(null);
+            return $.ajax({ method: "PATCH",
+                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/ChangeFirstName",
+                        data: { id: this.myId, firstName: firstName },
+                        xhrFields: { withCredentials: true } })
+            .done((data) => {
+                this.isDirty(false);
+				this.changeFirstNameResultRaw(data.object);
+                this.changeFirstNameMessage('');
+                this.changeFirstNameWasSuccessful(true);
+                if (!this.changeFirstNameResult()){
+                    this.changeFirstNameResult(new Person(data.object));
+                } else {
+                    this.changeFirstNameResult().loadFromDto(data.object);
+                }
+
+                // The return type is the type of the object, load it.
+                this.loadFromDto(data.object, true)
+                if (typeof(callback) == "function") {
+                    var result = this.changeFirstNameResult();
+                    callback(result);
+                }
+            })
+            .fail((xhr) => {
+                var errorMsg = "Unknown Error";
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                this.changeFirstNameWasSuccessful(false);
+                this.changeFirstNameMessage(errorMsg);
+    
+                if (this.coalesceConfig.showFailureAlerts())
+                    this.coalesceConfig.onFailure()(this as any, "Could not call method changeFirstName: " + errorMsg);
+            })
+            .always(() => {
+                this.changeFirstNameIsLoading(false);
+            });
+        } 
+        /** Result of server method (ChangeFirstName) strongly typed in a observable. */
+        public changeFirstNameResult: KnockoutObservable<ViewModels.Person> = ko.observable(null);
+        /** Raw result object of server method (ChangeFirstName) simply wrapped in an observable. */
+        public changeFirstNameResultRaw: KnockoutObservable<any> = ko.observable();
+        /** True while the server method (ChangeFirstName) is being called */
+        public changeFirstNameIsLoading: KnockoutObservable<boolean> = ko.observable(false);
+        /** Error message for server method (ChangeFirstName) if it fails. */
+        public changeFirstNameMessage: KnockoutObservable<string> = ko.observable(null);
+        /** True if the server method (ChangeFirstName) was successful. */
+        public changeFirstNameWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        /** Presents a series of input boxes to call the server method (ChangeFirstName) */
+        public changeFirstNameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            var $promptVal: string = null;
+            $promptVal = prompt('First Name');
+            if ($promptVal === null) return;
+            var firstName: string = $promptVal;
+              
+            return this.changeFirstName(firstName, callback, reload);
+        }
+        /** Presents a modal with input boxes to call the server method (ChangeFirstName). Depends on a modal existing with id #method-ChangeFirstName. */
+        public changeFirstNameModal = (callback: () => void = null, reload: boolean = true): void => {
+            $('#method-ChangeFirstName').modal();
+            $('#method-ChangeFirstName').on('shown.bs.modal', () => {
+                $('#method-ChangeFirstName .btn-ok').unbind('click');
+                $('#method-ChangeFirstName .btn-ok').click(() => {
+                    this.changeFirstNameWithArgs(null, callback, reload);
+                    $('#method-ChangeFirstName').modal('hide');
+                });
+            });
+        }
+        /** Calls server method (ChangeFirstName) with an instance of PersonPartial.ChangeFirstNameArgs, or the value of changeFirstNameArgs if not specified. */
+        public changeFirstNameWithArgs = (args?: PersonPartial.ChangeFirstNameArgs, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+            if (!args) args = this.changeFirstNameArgs;
+            return this.changeFirstName(args.firstName(), callback, reload);
+        }
+        /** Object that can be easily bound to fields to allow data entry for the method */
+        public changeFirstNameArgs = new PersonPartial.ChangeFirstNameArgs(); 
+        
 
         /** 
             Load the ViewModel object from the DTO. 
@@ -662,6 +745,9 @@ module ViewModels {
         // Classes for use in method calls to support data binding for input for arguments
         export class RenameArgs {
             public name: KnockoutObservable<string> = ko.observable(null);
+        }
+        export class ChangeFirstNameArgs {
+            public firstName: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

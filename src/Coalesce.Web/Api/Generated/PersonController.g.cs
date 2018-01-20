@@ -276,6 +276,31 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// Method: ChangeFirstName
+        /// </summary>
+        [HttpPatch("ChangeFirstName")]
+
+        public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName)
+        {
+            var result = new ItemResult<PersonDtoGen>();
+
+            IncludeTree includeTree = null;
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<PersonDtoGen>(itemResult);
+            }
+            var item = itemResult.Object;
+            var methodResult = item.ChangeFirstName(firstName);
+            Db.SaveChanges();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(methodResult, mappingContext, includeTree);
+
+            return result;
+        }
+
+        /// <summary>
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]

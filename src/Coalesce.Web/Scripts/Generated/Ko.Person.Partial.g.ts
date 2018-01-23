@@ -144,20 +144,18 @@ module ViewModels {
         ];
 
 
-
         public static Rename = class Rename extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
             public readonly name = "Rename";
-            public result: KnockoutObservable<Person> = ko.observable(null);
     
             /** Calls server method (Rename) with the given arguments */
             public invoke = (name: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), name: name }, callback, reload);
             };
-    
+             
             public static Args = class Args {
                 public name: KnockoutObservable<string> = ko.observable(null);
             }
-            /** Calls server method (Rename) with an instance of this.Args, or the value of this.args if not specified. */
+            /** Calls server method (Rename) with an instance of Rename.Args, or the value of this.args if not specified. */
             public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 return this.invoke(args.name(), callback, reload);
             }
@@ -165,7 +163,7 @@ module ViewModels {
             public args = new Rename.Args(); 
 
             protected loadResponse = (data: any, callback?: (result: ViewModels.Person) => void, reload?: boolean) => {
-                if (!this.result()){
+                if (!this.result()) {
                     this.result(new Person(data));
                 } else {
                     this.result().loadFromDto(data);
@@ -184,20 +182,40 @@ module ViewModels {
             Methods and properties for invoking server method Rename.
             Sets the FirstName to the given text.
         */
-        public rename = new Person.Rename(this);
-            
+        public readonly $rename = new Person.Rename(this);
+
+        /** Call server method (Rename) */
+        public get rename() { return this.$rename.invoke; }
+        /** Result of server method (Rename) strongly typed in a observable. */
+        public get renameResult() { return this.$rename.result; }
+        /** Raw result object of server method (Rename) simply wrapped in an observable. */
+        public get renameResultRaw() { return this.$rename.rawResult; }
+        /** True while the server method (Rename) is being called */
+        public get renameIsLoading() { return this.$rename.isLoading; }
+        /** Error message for server method (Rename) if it fails. */
+        public get renameMessage() { return this.$rename.message; }
+        /** True if the server method (Rename) was successful. */
+        public get renameWasSuccessful() { return this.$rename.wasSuccessful; }
+        /** Variable for method arguments to allow for easy binding. */
+        public get renameWithArgs() { return this.$rename.invokeWithArgs; }
+        public get renameArgs() { return this.$rename.args }
+        public set renameArgs(value) { this.$rename.args = value; }
+        public renameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            var $promptVal: string = null;
+            $promptVal = prompt('Name');
+            if ($promptVal === null) return;
+            var name: string = $promptVal;
+              
+                    return this.rename(name, callback, reload);
+        }
         
-
-
         public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<PersonPartial, any> {
-            public readonly name = "Rename";
-            public result: KnockoutObservable<Person> = ko.observable(null);
+            public readonly name = "ChangeSpacesToDashesInName";
     
             /** Calls server method (ChangeSpacesToDashesInName) with the given arguments */
             public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
             };
-    
 
             protected loadResponse = (data: any, callback?: (result: any) => void, reload?: boolean) => {
                 this.result(data);
@@ -216,10 +234,25 @@ module ViewModels {
             Methods and properties for invoking server method ChangeSpacesToDashesInName.
             Removes spaces from the name and puts in dashes
         */
-        public changeSpacesToDashesInName = new Person.ChangeSpacesToDashesInName(this);
-            
-        
+        public readonly $changeSpacesToDashesInName = new Person.ChangeSpacesToDashesInName(this);
 
+        /** Call server method (ChangeSpacesToDashesInName) */
+        public get changeSpacesToDashesInName() { return this.$changeSpacesToDashesInName.invoke; }
+        /** Result of server method (ChangeSpacesToDashesInName) strongly typed in a observable. */
+        public get changeSpacesToDashesInNameResult() { return this.$changeSpacesToDashesInName.result; }
+        /** Raw result object of server method (ChangeSpacesToDashesInName) simply wrapped in an observable. */
+        public get changeSpacesToDashesInNameResultRaw() { return this.$changeSpacesToDashesInName.rawResult; }
+        /** True while the server method (ChangeSpacesToDashesInName) is being called */
+        public get changeSpacesToDashesInNameIsLoading() { return this.$changeSpacesToDashesInName.isLoading; }
+        /** Error message for server method (ChangeSpacesToDashesInName) if it fails. */
+        public get changeSpacesToDashesInNameMessage() { return this.$changeSpacesToDashesInName.message; }
+        /** True if the server method (ChangeSpacesToDashesInName) was successful. */
+        public get changeSpacesToDashesInNameWasSuccessful() { return this.$changeSpacesToDashesInName.wasSuccessful; }
+        public changeSpacesToDashesInNameUi = (callback: () => void = null, reload: boolean = true): JQueryPromise<any> => {
+            var $promptVal: string = null;
+                    return this.changeSpacesToDashesInName(callback, reload);
+        }
+        
         /** 
             Load the ViewModel object from the DTO. 
             @param force: Will override the check against isLoading that is done to prevent recursion. False is default.

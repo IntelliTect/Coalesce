@@ -159,19 +159,19 @@ module Coalesce {
         public abstract readonly name: string;
 
         /** Result of method strongly typed in a observable. */
-        public abstract result: KnockoutObservable<TResult>;
+        public result: KnockoutObservable<TResult> = ko.observable<TResult>(null);
 
         /** Raw result object of method simply wrapped in an observable. */
-        public rawResult: KnockoutObservable<any> = ko.observable();
+        public rawResult: KnockoutObservable<any> = ko.observable(null);
 
         /** True while the method is being called */
-        public isLoading: KnockoutObservable<boolean> = ko.observable(false);
+        public isLoading: KnockoutObservable<boolean> = ko.observable<boolean>(false);
 
         /** Error response when method has failed. */
-        public message: KnockoutObservable<string> = ko.observable(null);
+        public message: KnockoutObservable<string> = ko.observable<string>(null);
 
         /** True if last invocation of method was successful. */
-        public wasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
+        public wasSuccessful: KnockoutObservable<boolean | null> = ko.observable(null);
 
         constructor(protected parent: TParent) {
         }
@@ -179,24 +179,13 @@ module Coalesce {
 
         protected abstract loadResponse: (data: object, callback?: (result: TResult) => void, reload?: boolean) => void;
 
-        //public showBootstrapModal = (callback: (result: TResult) => void = null) => {
-        //    $('#method-@method.Name').modal();
-        //    $('#method-@method.Name').on('shown.bs.modal', () => {
-        //        $('#method-@method.Name .btn-ok').unbind('click');
-        //        $('#method-@method.Name .btn-ok').click(() => {
-        //            this.invokeWithArgs(null, callback);
-        //            $('#method-@method.Name').modal('hide');
-        //        });
-        //    });
-        //};
-
         protected invokeWithData(postData: object, callback?: (result: TResult) => void, reload?: boolean) {
             this.isLoading(true);
             this.message('');
             this.wasSuccessful(null);
             return $.ajax({
                 method: "POST",
-                url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + this.name,
+                url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name,
                 data: postData,
                 xhrFields: { withCredentials: true }
             })

@@ -30,10 +30,7 @@ namespace IntelliTect.Coalesce.Utilities
             }
             if (member == null)
             {
-                // Handle the case of a nullable.
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a method, not a property.",
-                    memberLambda.ToString()));
+                throw new ArgumentException($"Expression '{memberLambda}' isn't a member expression.");
             }
 
             return member.Member;
@@ -55,9 +52,6 @@ namespace IntelliTect.Coalesce.Utilities
         }
 
         public static MethodInfo GetExpressedMethod(this LambdaExpression lambda)
-        {
-            return GetExpressedMember(lambda) as MethodInfo 
-                ?? throw new ArgumentException($"Expression '{lambda}' doesn't refer to a property.");
-        }
+            => GetExpressedMember(lambda) as MethodInfo ?? throw new ArgumentException($"Expression '{lambda}' doesn't refer to a method.");
     }
 }

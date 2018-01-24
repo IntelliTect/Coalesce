@@ -48,8 +48,4 @@ module ListViewModels {
             super();
         }
     }
-
-    export namespace CompanyList {
-        // Classes for use in method calls to support data binding for input for arguments
-    }
 }

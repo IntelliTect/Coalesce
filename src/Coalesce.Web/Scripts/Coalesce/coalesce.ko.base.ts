@@ -157,6 +157,7 @@ module Coalesce {
 
     export abstract class ClientMethod<TParent extends BaseViewModel | BaseListViewModel<any>, TResult> {
         public abstract readonly name: string;
+		public abstract readonly verb: string;
 
         /** Result of method strongly typed in a observable. */
         public result: KnockoutObservable<TResult> = ko.observable<TResult>(null);
@@ -184,13 +185,16 @@ module Coalesce {
             this.message('');
             this.wasSuccessful(null);
             return $.ajax({
-                method: "POST",
+                method: this.verb,
                 url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name,
                 data: postData,
                 xhrFields: { withCredentials: true }
             })
                 .done((data) => {
 
+                    // This is here because it was migrated from the old client method calls.
+                    // Whether or not this should be done remains to be see, but it was kept to reduce
+                    // the number of breaking changes being made.
                     if (this.parent instanceof BaseViewModel)
                         this.parent.isDirty(false);
 
@@ -216,9 +220,6 @@ module Coalesce {
                 });
         }
     }
-
-    export abstract class ClientInstanceMethod<TParent extends BaseViewModel, TResult> extends ClientMethod<TParent, TResult> { }
-
 
     export abstract class DataSource<T extends BaseViewModel> {
         protected _name: string;

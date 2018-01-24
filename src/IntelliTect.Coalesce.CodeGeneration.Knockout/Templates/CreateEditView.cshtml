@@ -109,20 +109,20 @@
 @foreach (var method in model.ClientMethods.Where(f => !f.IsStatic && f.ClientParameters.Any()))
 {
     <!-- Modal for method: @method.Name -->
-    <div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog" data-bind="with: $@(method.JsVariable)">
+    <div @($"id='method-{method.Name}'") class="modal fade" tabindex="-1" role="dialog" data-bind="with: @(method.JsVariable)">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">@method.Name.ToProperCase()</h4>
                 </div>
-                <div class="modal-body form-horizontal">
+                <div class="modal-body form-horizontal" data-bind="with: args">
                     @foreach (ParameterViewModel arg in method.ClientParameters)
                     {
                         <div class="form-group">
                             <label class="col-md-4 control-label">@arg.Name.ToProperCase()</label>
                             <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: args.@(arg.CsArgumentName)">
+                                <input type="text" class="form-control" data-bind="value: @(arg.CsArgumentName)">
                             </div>
                         </div>
                     }
@@ -137,8 +137,6 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-
-
 }
 
 @{

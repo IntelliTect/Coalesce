@@ -53,174 +53,100 @@ module ListViewModels {
         public coalesceConfig: Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>
             = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(CaseList.coalesceConfig);
 
-
-        // Call server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCount = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.getAllOpenCasesCountIsLoading(true);
-            this.getAllOpenCasesCountMessage('');
-            this.getAllOpenCasesCountWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetAllOpenCasesCount",
-                     data: {  },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.getAllOpenCasesCountResultRaw(data.object);
-                this.getAllOpenCasesCountMessage('');
-                this.getAllOpenCasesCountWasSuccessful(true);
-                this.getAllOpenCasesCountResult(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.getAllOpenCasesCountResult();
+        public static GetAllOpenCasesCount = class GetAllOpenCasesCount extends Coalesce.ClientMethod<CaseList, number> {
+            public readonly name = 'GetAllOpenCasesCount';
+            
+            /** Calls server method (GetAllOpenCasesCount) with the given arguments */
+            public invoke = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+                this.result(data);
+                if (typeof(callback) != 'function') return;
                 if (reload) {
-                    this.load(() => callback(result));
+                    var result = this.result();
+                    this.parent.load(() => callback(result));
                 } else {
-                    callback(result);
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.getAllOpenCasesCountWasSuccessful(false);
-                this.getAllOpenCasesCountMessage(errorMsg);
-
-                //alert("Could not call method getAllOpenCasesCount: " + errorMsg);
-            })
-            .always(() => {
-                this.getAllOpenCasesCountIsLoading(false);
-            });
-        } 
-        // Result of server method (GetAllOpenCasesCount) strongly typed in a observable.
-        public getAllOpenCasesCountResult: KnockoutObservable<number> = ko.observable(null);
-        // Raw result object of server method (GetAllOpenCasesCount) simply wrapped in an observable.
-        public getAllOpenCasesCountResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (GetAllOpenCasesCount) is being called
-        public getAllOpenCasesCountIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (GetAllOpenCasesCount) if it fails.
-        public getAllOpenCasesCountMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (GetAllOpenCasesCount) was successful.
-        public getAllOpenCasesCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountUi = (callback: () => void = null) => {
-            this.getAllOpenCasesCount(callback);
-        }
-        // Presents a modal with input boxes to call the server method (GetAllOpenCasesCount)
-        public getAllOpenCasesCountModal = (callback: () => void = null) => {
-            this.getAllOpenCasesCountUi(callback);
-        }
+            };
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                return this.invoke(callback, reload);
+            };
+        };
         
-
-        // Call server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatus = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.randomizeDatesAndStatusIsLoading(true);
-            this.randomizeDatesAndStatusMessage('');
-            this.randomizeDatesAndStatusWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RandomizeDatesAndStatus",
-                     data: {  },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.randomizeDatesAndStatusResultRaw(data.object);
-                this.randomizeDatesAndStatusMessage('');
-                this.randomizeDatesAndStatusWasSuccessful(true);
-                this.randomizeDatesAndStatusResult(data.object);
+        /**
+            Methods and properties for invoking server method GetAllOpenCasesCount.
+        */
+        public readonly getAllOpenCasesCount = new CaseList.GetAllOpenCasesCount(this);
         
-                if (typeof(callback) != "function") return;
-                var result = this.randomizeDatesAndStatusResult();
+        public static RandomizeDatesAndStatus = class RandomizeDatesAndStatus extends Coalesce.ClientMethod<CaseList, any> {
+            public readonly name = 'RandomizeDatesAndStatus';
+            
+            /** Calls server method (RandomizeDatesAndStatus) with the given arguments */
+            public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: any) => void, reload?: boolean) => {
+                this.result(data);
+                if (typeof(callback) != 'function') return;
                 if (reload) {
-                    this.load(() => callback(result));
+                    var result = this.result();
+                    this.parent.load(() => callback(result));
                 } else {
-                    callback(result);
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.randomizeDatesAndStatusWasSuccessful(false);
-                this.randomizeDatesAndStatusMessage(errorMsg);
-
-                //alert("Could not call method randomizeDatesAndStatus: " + errorMsg);
-            })
-            .always(() => {
-                this.randomizeDatesAndStatusIsLoading(false);
-            });
-        } 
-        // Result of server method (RandomizeDatesAndStatus) strongly typed in a observable.
-        public randomizeDatesAndStatusResult: KnockoutObservable<any> = ko.observable(null);
-        // Raw result object of server method (RandomizeDatesAndStatus) simply wrapped in an observable.
-        public randomizeDatesAndStatusResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (RandomizeDatesAndStatus) is being called
-        public randomizeDatesAndStatusIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (RandomizeDatesAndStatus) if it fails.
-        public randomizeDatesAndStatusMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (RandomizeDatesAndStatus) was successful.
-        public randomizeDatesAndStatusWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatusUi = (callback: () => void = null) => {
-            this.randomizeDatesAndStatus(callback);
-        }
-        // Presents a modal with input boxes to call the server method (RandomizeDatesAndStatus)
-        public randomizeDatesAndStatusModal = (callback: () => void = null) => {
-            this.randomizeDatesAndStatusUi(callback);
-        }
+            };
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                return this.invoke(callback, reload);
+            };
+        };
         
-
-        // Call server method (GetCaseSummary)
-        // Returns a list of summary information about Cases
-        public getCaseSummary = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.getCaseSummaryIsLoading(true);
-            this.getCaseSummaryMessage('');
-            this.getCaseSummaryWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetCaseSummary",
-                     data: {  },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.getCaseSummaryResultRaw(data.object);
-                this.getCaseSummaryMessage('');
-                this.getCaseSummaryWasSuccessful(true);
-                if (!this.getCaseSummaryResult()){
-                    this.getCaseSummaryResult(new ViewModels.CaseSummary());
+        /**
+            Methods and properties for invoking server method RandomizeDatesAndStatus.
+        */
+        public readonly randomizeDatesAndStatus = new CaseList.RandomizeDatesAndStatus(this);
+        
+        public static GetCaseSummary = class GetCaseSummary extends Coalesce.ClientMethod<CaseList, ViewModels.CaseSummary> {
+            public readonly name = 'GetCaseSummary';
+            
+            /** Calls server method (GetCaseSummary) with the given arguments */
+            public invoke = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: ViewModels.CaseSummary) => void, reload?: boolean) => {
+                if (!this.result()) {
+                    this.result(new ViewModels.CaseSummary(data));
+                } else {
+                    this.result().loadFromDto(data);
                 }
-                this.getCaseSummaryResult().loadFromDto(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.getCaseSummaryResult();
+                if (typeof(callback) != 'function') return;
                 if (reload) {
-                    this.load(() => callback(result));
+                    var result = this.result();
+                    this.parent.load(() => callback(result));
                 } else {
-                    callback(result);
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.getCaseSummaryWasSuccessful(false);
-                this.getCaseSummaryMessage(errorMsg);
-
-                //alert("Could not call method getCaseSummary: " + errorMsg);
-            })
-            .always(() => {
-                this.getCaseSummaryIsLoading(false);
-            });
-        } 
-        // Result of server method (GetCaseSummary) strongly typed in a observable.
-        public getCaseSummaryResult: KnockoutObservable<ViewModels.CaseSummary> = ko.observable(null);
-        // Raw result object of server method (GetCaseSummary) simply wrapped in an observable.
-        public getCaseSummaryResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (GetCaseSummary) is being called
-        public getCaseSummaryIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (GetCaseSummary) if it fails.
-        public getCaseSummaryMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (GetCaseSummary) was successful.
-        public getCaseSummaryWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (GetCaseSummary)
-        public getCaseSummaryUi = (callback: () => void = null) => {
-            this.getCaseSummary(callback);
-        }
-        // Presents a modal with input boxes to call the server method (GetCaseSummary)
-        public getCaseSummaryModal = (callback: () => void = null) => {
-            this.getCaseSummaryUi(callback);
-        }
+            };
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                return this.invoke(callback, reload);
+            };
+        };
+        
+        /**
+            Methods and properties for invoking server method GetCaseSummary.
+            Returns a list of summary information about Cases
+        */
+        public readonly getCaseSummary = new CaseList.GetCaseSummary(this);
         
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Case(newItem, parent);
@@ -228,9 +154,5 @@ module ListViewModels {
         constructor() {
             super();
         }
-    }
-
-    export namespace CaseList {
-        // Classes for use in method calls to support data binding for input for arguments
     }
 }

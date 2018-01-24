@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string TsConvertFromString(string expression)
         {
             if (IsBool) return $"({expression}.toUpperCase() == 'TRUE')";
-            if (IsEnum) return $"parseInt({expression})";
+            if (IsEnum || IsIntegral) return $"parseInt({expression})";
             if (IsNumber) return $"parseFloat({expression})";
             if (IsDate) return $"moment({expression})";
             return expression;
@@ -163,6 +163,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if class is a Byte[]
         /// </summary>
         public bool IsByteArray => PureType.Name == nameof(Byte) && IsArray;
+        
+        /// <summary>
+        /// Returns true if the type is any integral type, except <see cref="char"/>
+        /// </summary>
+        public bool IsIntegral
+        {
+            get 
+            {
+                switch (NullableUnderlyingType.Name)
+                {
+                    case nameof(SByte):
+                    case nameof(Byte):
+                    case nameof(Int16):
+                    case nameof(UInt16):
+                    case nameof(Int32):
+                    case nameof(UInt32):
+                    case nameof(Int64):
+                    case nameof(UInt64):
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
 
         /// <summary>
         /// Returns true if the class is a number.
@@ -171,15 +195,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsIntegral) return true;
+
                 switch (NullableUnderlyingType.Name)
                 {
-                    case nameof(Byte):
-                    case nameof(Int16):
-                    case nameof(UInt16):
-                    case nameof(Int32):
-                    case nameof(UInt32):
-                    case nameof(Int64):
-                    case nameof(UInt64):
                     case nameof(Single):
                     case nameof(Double):
                     case nameof(Decimal):

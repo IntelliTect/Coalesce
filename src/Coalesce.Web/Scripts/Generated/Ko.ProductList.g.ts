@@ -43,8 +43,4 @@ module ListViewModels {
             super();
         }
     }
-
-    export namespace ProductList {
-        // Classes for use in method calls to support data binding for input for arguments
-    }
 }

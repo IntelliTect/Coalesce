@@ -53,8 +53,4 @@ module ListViewModels {
             super();
         }
     }
-
-    export namespace CaseDtoList {
-        // Classes for use in method calls to support data binding for input for arguments
-    }
 }

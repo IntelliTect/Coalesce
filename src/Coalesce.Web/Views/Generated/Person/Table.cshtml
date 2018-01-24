@@ -309,14 +309,14 @@
 
 
     <!-- Modal for method: Add -->
-    <div id='method-Add' class="modal fade" tabindex="-1" role="dialog">
+    <div id='method-Add' class="modal fade" tabindex="-1" role="dialog" data-bind="with: add">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Add</h4>
                 </div>
-                <div class="modal-body form-horizontal" data-bind="with: addArgs">
+                <div class="modal-body form-horizontal" data-bind="with: args">
                         <div class="form-group">
                             <label class="col-md-4 control-label">Number One</label>
                             <div class="col-md-8">
@@ -332,7 +332,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
+                    <button type="button" class="btn btn-primary btn-ok"
+                            data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                        OK
+                    </button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -384,14 +387,14 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     <!-- Modal for method: NamesStartingWith -->
-    <div id='method-NamesStartingWith' class="modal fade" tabindex="-1" role="dialog">
+    <div id='method-NamesStartingWith' class="modal fade" tabindex="-1" role="dialog" data-bind="with: namesStartingWith">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Names Starting With</h4>
                 </div>
-                <div class="modal-body form-horizontal" data-bind="with: namesStartingWithArgs">
+                <div class="modal-body form-horizontal" data-bind="with: args">
                         <div class="form-group">
                             <label class="col-md-4 control-label">Characters</label>
                             <div class="col-md-8">
@@ -401,7 +404,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
+                    <button type="button" class="btn btn-primary btn-ok"
+                            data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                        OK
+                    </button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->

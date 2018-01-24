@@ -31,7 +31,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
         {
             var b = new CodeBuilder(initialLevel: indentLevel);
             var model = this.Model;
-            
+
+
+            // Default instance of the method class.
+            b.Line();
+            b.Line("/**");
+            b.Indented($"Methods and properties for invoking server method {method.Name}.");
+            if (method.Comment.Length > 0) b.Indented(method.Comment);
+            b.Line($"*/");
+            var methodObjectName = method.JsVariable; // $"${method.JsVariable}"
+            b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
+
             // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
             var classBlock = b.TSBlock(
                 $"public static {method.Name} = class {method.Name} extends Coalesce.ClientMethod<{parentClassName}, {method.ReturnType.TsType}>", true);
@@ -53,6 +63,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             {
                 b.Line();
 
+                b.Line($"/** Object that can be easily bound to fields to allow data entry for the method's parameters */");
+                b.Line($"public args = new {method.Name}.Args(); ");
+
                 using (b.TSBlock("public static Args = class Args", true))
                 foreach (var arg in method.ClientParameters)
                 {
@@ -63,14 +76,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
                 // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it.
                 // Thankfully, we can implicitly type using the default.
-                using (b.TSBlock($"public invokeWithArgs = (args = this.args, callback?: (result: {method.ReturnType.TsType}) => void, reload: boolean = true) =>"))
+                using (b.TSBlock($"public invokeWithArgs = (args = this.args, callback?: (result: {method.ReturnType.TsType}) => void, reload: boolean = true): JQueryPromise<any> =>"))
                 {
                     b.Line($"return this.invoke({method.JsArguments("args", true)}, reload);");
                 }
-                b.Line();
-
-                b.Line($"/** Object that can be easily bound to fields to allow data entry for the method's parameters */");
-                b.Line($"public args = new {method.Name}.Args(); ");
             }
 
             // Method response handler - highly dependent on what the response type actually is.
@@ -152,16 +161,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // End of the method class declaration.
             classBlock.Dispose();
-
-            // Default instance of the method class.
-            b.Line();
-            b.Line("/**");
-            b.Indented($"Methods and properties for invoking server method {method.Name}.");
-            if (method.Comment.Length > 0) b.Indented(method.Comment);
-            b.Line($"*/");
-            var methodObjectName = method.JsVariable; // $"${method.JsVariable}"
-            b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
-            b.Line($"");
             
             // Backwards compatibility for the old method call members (this will have a name conflict with the method object)
             // Keeping this in the code so it will still exist in the code history somewhere, but can probably be removed.

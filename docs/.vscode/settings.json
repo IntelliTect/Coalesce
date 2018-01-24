@@ -1,7 +1,7 @@
 {
     "restructuredtext.updateOnTextChanged"    : "false",
     "restructuredtext.languageServer.disabled": false,
-    "restructuredtext.confPath": "${workspaceRoot}",
+    "restructuredtext.confPath": "c:\\Repos\\Coalesce\\docs",
     "restructuredtext.linter.sphinxTextRoles": [
         "csharp", "ts", "ref", "ctor", "html"
       ]

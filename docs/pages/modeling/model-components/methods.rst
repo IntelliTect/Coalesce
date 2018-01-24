@@ -65,42 +65,52 @@ Security for instance methods is also controlled by the data source that loads t
 Generated TypeScript
 --------------------
 
-For each method you define, a number of members will be created on the corresponding TypeScript ViewModel (instance methods) or ListViewModel (static methods). If there are any parameters on the method, an class with the type of :ts:`<MethodName>Args` will be created, and the ViewModel or ListViewModel will have a property for this class that can be easily bound to.
+For each method you define, a class will be created on the corresponding TypeScript ViewModel (instance methods) or ListViewModel (static methods) that contains the properties and functions for interaction with the method. This class is accessible through a static property named after the method. An instance of this class will also be created on each instance of its parent - this instance is in a property with the camel-cased name of the method.
 
-Here's an example for a method called Move that takes a single parameter 'int feet' and returns a string.
+Here's an example for a method called Rename that takes a single parameter 'string name' and returns a string.
 
 .. code-block:: c#
 
-        public string Move(int feet)
+        public string Rename(string name)
         {
-            return "I moved " + feet.ToString();
+            FirstName = name;
+            return FullName; // Return the new full name of the person.
         }
 
-:ts:`public move: (feet: number, callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
+Method-specific Members
+.......................
+
+:ts:`public static Rename = class Rename extends Coalesce.ClientMethod<Person, string> { ... }`
+    Declaration of class that provides invocation methods and status properties for the method.
+:ts:`public readonly rename = new Person.Rename(this)`
+    Default instance of the method for easy calling of the method without needing to manually instantiate the class.
+:ts:`rename.invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>`
     Function that takes all the method parameters and a callback. If :ts:`reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
-:ts:`public moveArgs: Person.MoveArgs`
-    Instance of a generated class that contains observable fields for each parameter that the method takes.
-:ts:`public moveWithArgs: (args?: Person.MoveArgs, callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
-    Function that takes an object that contains all the parameters.
-    Object is of type [Name]Args which is included as a nested class on the ViewModel.
-    If null, the built in instance of this class named [name]Args will be used.
-:ts:`public moveResult: KnockoutObservable<string>`
+
+The following members are only generated for methods with arguments:
+
+:ts:`Rename.Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }`
+    Class with one observable member per method argument for binding method arguments to user input.
+:ts:`rename.args = new Rename.Args()`
+    Default instance of the args class.
+:ts:`rename.invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>`
+    Function for invoking the method using the args class. The default instance of the args class will be used if none is provided.
+:ts:`rename.invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
+    Simple interface using browser :ts:`prompt()` input boxes to prompt the user for the required data for the method call. The call is then made with the data provided.
+
+Base Class Members
+..................
+
+:ts:`rename.result: KnockoutObservable<string>`
     Observable that will contain the results of the method call after it is complete.
-:ts:`public moveResultRaw: KnockoutObservable<any>`
+:ts:`rename.rawResult: KnockoutObservable<any>`
     Observable with the raw, deserialized JSON result of the method call. If the method call returns an object, this will contain the deserialized JSON object from the server before it has been loaded into ViewModels and its properties loaded into observables.
-:ts:`public moveIsLoading: KnockoutObservable<boolean>`
+:ts:`rename.isLoading: KnockoutObservable<boolean>`
     Observable boolean which is true while the call to the server is pending.
-:ts:`public moveMessage: KnockoutObservable<string>`
+:ts:`rename.message: KnockoutObservable<string>`
     If the method was not successful, this contains exception information.
-:ts:`public moveWasSuccessful: KnockoutObservable<boolean>`
+:ts:`rename.wasSuccessful: KnockoutObservable<boolean>`
     Observable boolean that indicates whether the method call was successful or not.
-:ts:`public moveUi: (callback: () => void = null, reload: boolean = true) => JQueryPromise<any>`
-    Simple interface using JavaScript input boxes to prompt the user for
-    the required data for the method call. The call is then made with
-    the data provided.
-:ts:`public moveModal: (callback: () => void = null, reload: boolean = true) => void`
-    Shows a Bootstrap modal with HTML ``id="method-Move"`` to prompt the user for the required data for the method call. The call is then made with the data provided.
-    The generated modal only exists on the generated editor views. If you need it elsewhere, you should copy it from the generated HTML for the editor and place it in your custom page.
 
 |
 
@@ -117,6 +127,8 @@ Static Methods
 --------------
 
 Static methods are created as functions on the TypeScript ListViewModel. All of the same members that are generated for instance methods are also generated for static methods.
+
+If a static method returns the type that it is declared on, it will also be generated on the TypeScript ViewModel of its class.
 
 .. code-block:: c#
 

@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 $"public static {method.Name} = class {method.Name} extends Coalesce.ClientMethod<{parentClassName}, {method.ReturnType.TsType}>", true);
 
             b.Line($"public readonly name = '{method.Name}';");
-            b.Line($"public readonly verbme = '{method.ApiActionHttpMethodName}';");
+            b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
             // Standard invoke method - all CS method parameters as TS method parameters.
             b.Line();
@@ -79,6 +79,28 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 using (b.TSBlock($"public invokeWithArgs = (args = this.args, callback?: (result: {method.ReturnType.TsType}) => void, reload: boolean = true): JQueryPromise<any> =>"))
                 {
                     b.Line($"return this.invoke({method.JsArguments("args", true)}, reload);");
+                }
+
+                b.Line();
+                b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
+                using (b.TSBlock($"public invokeWithPrompts = (callback: (result: {method.ReturnType.TsType}) => void = null, reload: boolean = true): JQueryPromise<any> =>", true))
+                {
+                    b.Line($"var $promptVal: string = null;");
+                    foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
+                    {
+                        b.Line($"$promptVal = {$"prompt('{param.Name.ToProperCase()}')"};");
+                        // AES 1/23/2018 - why do we do this? what about optional params where no value is desired?
+                        b.Line($"if ($promptVal === null) return;");
+                        b.Line($"var {param.Name}: {param.Type.TsType} = {param.Type.TsConvertFromString("$promptVal")};");
+                    }
+
+                    // For all parameters that can't convert from a string (is this even possible with what we support for method parameters now?),
+                    // pass null as the value. I guess we just let happen what's going to happen? Again, not sure when this case would ever be hit.
+                    foreach (var param in method.ClientParameters.Where(f => !f.ConvertsFromJsString))
+                    {
+                        b.Line($"var {param.Name}: {param.Type.TsType} = null;");
+                    }
+                    b.Line($"return this.invoke({method.JsArguments("", true)}, reload);");
                 }
             }
 
@@ -136,27 +158,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Indented("callback(this.result());");
                     b.Line("}");
                 }
-            }
-            
-            b.Line();
-            b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
-            using (b.TSBlock($"public invokeWithPrompts = (callback: (result: {method.ReturnType.TsType}) => void = null, reload: boolean = true): JQueryPromise<any> =>", true)){
-                b.Line($"var $promptVal: string = null;");
-                foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
-                {
-                    b.Line($"$promptVal = {$"prompt('{param.Name.ToProperCase()}')"};");
-                    // AES 1/23/2018 - why do we do this? what about optional params where no value is desired?
-                    b.Line($"if ($promptVal === null) return;");
-                    b.Line($"var {param.Name}: {param.Type.TsType} = {param.Type.TsConvertFromString("$promptVal")};");
-                }
-
-                // For all parameters that can't convert from a string (is this even possible with what we support for method parameters now?),
-                // pass null as the value. I guess we just let happen what's going to happen? Again, not sure when this case would ever be hit.
-                foreach (var param in method.ClientParameters.Where(f => !f.ConvertsFromJsString))
-                {
-                    b.Line($"var {param.Name}: {param.Type.TsType} = null;");
-                }
-                b.Line($"return this.invoke({method.JsArguments("", true)}, reload);");
             }
 
             // End of the method class declaration.

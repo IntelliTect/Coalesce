@@ -143,25 +143,40 @@ module ViewModels {
             { id: 2, value: 'Female' },
         ];
 
+        
+        /**
+            Methods and properties for invoking server method Rename.
+            Sets the FirstName to the given text.
+        */
+        public readonly rename = new PersonPartial.Rename(this);
         public static Rename = class Rename extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
             public readonly name = 'Rename';
+            public readonly verb = 'POST';
             
             /** Calls server method (Rename) with the given arguments */
             public invoke = (name: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), name: name }, callback, reload);
             };
             
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new Rename.Args(); 
             public static Args = class Args {
                 public name: KnockoutObservable<string> = ko.observable(null);
             };
             
             /** Calls server method (Rename) with an instance of Rename.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.name(), callback, reload);
             }
             
-            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
-            public args = new Rename.Args(); 
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Name');
+                if ($promptVal === null) return;
+                var name: string = $promptVal;
+                return this.invoke(name, callback, reload);
+            };
             
             protected loadResponse = (data: any, callback?: (result: ViewModels.Person) => void, reload?: boolean) => {
                 if (!this.result()) {
@@ -176,25 +191,16 @@ module ViewModels {
                     callback(this.result());
                 }
             };
-            
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                $promptVal = prompt('Name');
-                if ($promptVal === null) return;
-                var name: string = $promptVal;
-                return this.invoke(name, callback, reload);
-            };
         };
         
         /**
-            Methods and properties for invoking server method Rename.
-            Sets the FirstName to the given text.
+            Methods and properties for invoking server method ChangeSpacesToDashesInName.
+            Removes spaces from the name and puts in dashes
         */
-        public readonly rename = new PersonPartial.Rename(this);
-        
+        public readonly changeSpacesToDashesInName = new PersonPartial.ChangeSpacesToDashesInName(this);
         public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<PersonPartial, any> {
             public readonly name = 'ChangeSpacesToDashesInName';
+            public readonly verb = 'POST';
             
             /** Calls server method (ChangeSpacesToDashesInName) with the given arguments */
             public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -210,20 +216,103 @@ module ViewModels {
                     callback(this.result());
                 }
             };
+        };
+        
+        /**
+            Methods and properties for invoking server method FullNameAndAge.
+        */
+        public readonly fullNameAndAge = new PersonPartial.FullNameAndAge(this);
+        public static FullNameAndAge = class FullNameAndAge extends Coalesce.ClientMethod<PersonPartial, string> {
+            public readonly name = 'FullNameAndAge';
+            public readonly verb = 'GET';
             
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                return this.invoke(callback, reload);
+            /** Calls server method (FullNameAndAge) with the given arguments */
+            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+                this.result(data);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
             };
         };
         
         /**
-            Methods and properties for invoking server method ChangeSpacesToDashesInName.
-            Removes spaces from the name and puts in dashes
+            Methods and properties for invoking server method ObfuscateEmail.
         */
-        public readonly changeSpacesToDashesInName = new PersonPartial.ChangeSpacesToDashesInName(this);
+        public readonly obfuscateEmail = new PersonPartial.ObfuscateEmail(this);
+        public static ObfuscateEmail = class ObfuscateEmail extends Coalesce.ClientMethod<PersonPartial, string> {
+            public readonly name = 'ObfuscateEmail';
+            public readonly verb = 'PUT';
+            
+            /** Calls server method (ObfuscateEmail) with the given arguments */
+            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+                this.result(data);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
         
+        /**
+            Methods and properties for invoking server method ChangeFirstName.
+        */
+        public readonly changeFirstName = new PersonPartial.ChangeFirstName(this);
+        public static ChangeFirstName = class ChangeFirstName extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
+            public readonly name = 'ChangeFirstName';
+            public readonly verb = 'PATCH';
+            
+            /** Calls server method (ChangeFirstName) with the given arguments */
+            public invoke = (firstName: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), firstName: firstName }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new ChangeFirstName.Args(); 
+            public static Args = class Args {
+                public firstName: KnockoutObservable<string> = ko.observable(null);
+            };
+            
+            /** Calls server method (ChangeFirstName) with an instance of ChangeFirstName.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.firstName(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('First Name');
+                if ($promptVal === null) return;
+                var firstName: string = $promptVal;
+                return this.invoke(firstName, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: ViewModels.Person) => void, reload?: boolean) => {
+                if (!this.result()) {
+                    this.result(new ViewModels.Person(data));
+                } else {
+                    this.result().loadFromDto(data);
+                }
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
 
         /** 
             Load the ViewModel object from the DTO. 

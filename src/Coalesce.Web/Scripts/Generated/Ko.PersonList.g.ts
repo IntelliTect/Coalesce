@@ -54,36 +54,32 @@ module ListViewModels {
         public coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>
             = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
 
+        
+        /**
+            Methods and properties for invoking server method Add.
+            Adds two numbers.
+        */
+        public readonly add = new PersonList.Add(this);
         public static Add = class Add extends Coalesce.ClientMethod<PersonList, number> {
             public readonly name = 'Add';
+            public readonly verb = 'POST';
             
             /** Calls server method (Add) with the given arguments */
             public invoke = (numberOne: number, numberTwo: number, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ numberOne: numberOne, numberTwo: numberTwo }, callback, reload);
             };
             
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new Add.Args(); 
             public static Args = class Args {
                 public numberOne: KnockoutObservable<number> = ko.observable(null);
                 public numberTwo: KnockoutObservable<number> = ko.observable(null);
             };
             
             /** Calls server method (Add) with an instance of Add.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true) => {
+            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.numberOne(), args.numberTwo(), callback, reload);
             }
-            
-            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
-            public args = new Add.Args(); 
-            
-            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
-                this.result(data);
-                if (reload) {
-                    var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
-                } else if (typeof(callback) == 'function') {
-                    callback(this.result());
-                }
-            };
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -96,16 +92,26 @@ module ListViewModels {
                 var numberTwo: number = parseInt($promptVal);
                 return this.invoke(numberOne, numberTwo, callback, reload);
             };
+            
+            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+                this.result(data);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
         };
         
         /**
-            Methods and properties for invoking server method Add.
-            Adds two numbers.
+            Methods and properties for invoking server method GetUser.
+            Returns the user name
         */
-        public readonly add = new PersonList.Add(this);
-        
+        public readonly getUser = new PersonList.GetUser(this);
         public static GetUser = class GetUser extends Coalesce.ClientMethod<PersonList, string> {
             public readonly name = 'GetUser';
+            public readonly verb = 'POST';
             
             /** Calls server method (GetUser) with the given arguments */
             public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -121,22 +127,104 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
+        };
+        
+        /**
+            Methods and properties for invoking server method PersonCount.
+        */
+        public readonly personCount = new PersonList.PersonCount(this);
+        public static PersonCount = class PersonCount extends Coalesce.ClientMethod<PersonList, number> {
+            public readonly name = 'PersonCount';
+            public readonly verb = 'GET';
+            
+            /** Calls server method (PersonCount) with the given arguments */
+            public invoke = (lastNameStartsWith: string, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ lastNameStartsWith: lastNameStartsWith }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new PersonCount.Args(); 
+            public static Args = class Args {
+                public lastNameStartsWith: KnockoutObservable<string> = ko.observable(null);
+            };
+            
+            /** Calls server method (PersonCount) with an instance of PersonCount.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.lastNameStartsWith(), callback, reload);
+            }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
-                return this.invoke(callback, reload);
+                $promptVal = prompt('Last Name Starts With');
+                if ($promptVal === null) return;
+                var lastNameStartsWith: string = $promptVal;
+                return this.invoke(lastNameStartsWith, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+                this.result(data);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
             };
         };
         
         /**
-            Methods and properties for invoking server method GetUser.
+            Methods and properties for invoking server method RemovePersonById.
+        */
+        public readonly removePersonById = new PersonList.RemovePersonById(this);
+        public static RemovePersonById = class RemovePersonById extends Coalesce.ClientMethod<PersonList, boolean> {
+            public readonly name = 'RemovePersonById';
+            public readonly verb = 'DELETE';
+            
+            /** Calls server method (RemovePersonById) with the given arguments */
+            public invoke = (id: number, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: id }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new RemovePersonById.Args(); 
+            public static Args = class Args {
+                public id: KnockoutObservable<number> = ko.observable(null);
+            };
+            
+            /** Calls server method (RemovePersonById) with an instance of RemovePersonById.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: boolean) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.id(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Id');
+                if ($promptVal === null) return;
+                var id: number = parseInt($promptVal);
+                return this.invoke(id, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: boolean) => void, reload?: boolean) => {
+                this.result(data);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
+        /**
+            Methods and properties for invoking server method GetUserPublic.
             Returns the user name
         */
-        public readonly getUser = new PersonList.GetUser(this);
-        
+        public readonly getUserPublic = new PersonList.GetUserPublic(this);
         public static GetUserPublic = class GetUserPublic extends Coalesce.ClientMethod<PersonList, string> {
             public readonly name = 'GetUserPublic';
+            public readonly verb = 'POST';
             
             /** Calls server method (GetUserPublic) with the given arguments */
             public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -152,39 +240,41 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
-            
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                return this.invoke(callback, reload);
-            };
         };
         
         /**
-            Methods and properties for invoking server method GetUserPublic.
-            Returns the user name
+            Methods and properties for invoking server method NamesStartingWith.
+            Gets all the first names starting with the characters.
         */
-        public readonly getUserPublic = new PersonList.GetUserPublic(this);
-        
+        public readonly namesStartingWith = new PersonList.NamesStartingWith(this);
         public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> {
             public readonly name = 'NamesStartingWith';
+            public readonly verb = 'POST';
             
             /** Calls server method (NamesStartingWith) with the given arguments */
             public invoke = (characters: string, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ characters: characters }, callback, reload);
             };
             
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new NamesStartingWith.Args(); 
             public static Args = class Args {
                 public characters: KnockoutObservable<string> = ko.observable(null);
             };
             
             /** Calls server method (NamesStartingWith) with an instance of NamesStartingWith.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true) => {
+            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.characters(), callback, reload);
             }
             
-            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
-            public args = new NamesStartingWith.Args(); 
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Characters');
+                if ($promptVal === null) return;
+                var characters: string = $promptVal;
+                return this.invoke(characters, callback, reload);
+            };
             
             protected loadResponse = (data: any, callback?: (result: string[]) => void, reload?: boolean) => {
                 this.result(data);
@@ -195,23 +285,7 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
-            
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                $promptVal = prompt('Characters');
-                if ($promptVal === null) return;
-                var characters: string = $promptVal;
-                return this.invoke(characters, callback, reload);
-            };
         };
-        
-        /**
-            Methods and properties for invoking server method NamesStartingWith.
-            Gets all the first names starting with the characters.
-        */
-        public readonly namesStartingWith = new PersonList.NamesStartingWith(this);
-        
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Person(newItem, parent);
 

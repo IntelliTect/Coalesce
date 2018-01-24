@@ -169,7 +169,7 @@ namespace Coalesce.Domain
         [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Get)]
         public string FullNameAndAge(AppDbContext db)
         {
-            return $"{FirstName} {LastName} {BirthDate?.ToString("M/D/YYYY") ?? "None"}";
+            return $"{FirstName} {LastName} {BirthDate?.ToShortDateString() ?? "None"}";
         }
 
         [Coalesce]

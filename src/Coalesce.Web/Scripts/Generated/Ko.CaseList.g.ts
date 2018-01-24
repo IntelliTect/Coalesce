@@ -53,8 +53,14 @@ module ListViewModels {
         public coalesceConfig: Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>
             = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(CaseList.coalesceConfig);
 
+        
+        /**
+            Methods and properties for invoking server method GetAllOpenCasesCount.
+        */
+        public readonly getAllOpenCasesCount = new CaseList.GetAllOpenCasesCount(this);
         public static GetAllOpenCasesCount = class GetAllOpenCasesCount extends Coalesce.ClientMethod<CaseList, number> {
             public readonly name = 'GetAllOpenCasesCount';
+            public readonly verb = 'POST';
             
             /** Calls server method (GetAllOpenCasesCount) with the given arguments */
             public invoke = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -70,21 +76,15 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
-            
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                return this.invoke(callback, reload);
-            };
         };
         
         /**
-            Methods and properties for invoking server method GetAllOpenCasesCount.
+            Methods and properties for invoking server method RandomizeDatesAndStatus.
         */
-        public readonly getAllOpenCasesCount = new CaseList.GetAllOpenCasesCount(this);
-        
+        public readonly randomizeDatesAndStatus = new CaseList.RandomizeDatesAndStatus(this);
         public static RandomizeDatesAndStatus = class RandomizeDatesAndStatus extends Coalesce.ClientMethod<CaseList, any> {
             public readonly name = 'RandomizeDatesAndStatus';
+            public readonly verb = 'POST';
             
             /** Calls server method (RandomizeDatesAndStatus) with the given arguments */
             public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -100,21 +100,16 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
-            
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                return this.invoke(callback, reload);
-            };
         };
         
         /**
-            Methods and properties for invoking server method RandomizeDatesAndStatus.
+            Methods and properties for invoking server method GetCaseSummary.
+            Returns a list of summary information about Cases
         */
-        public readonly randomizeDatesAndStatus = new CaseList.RandomizeDatesAndStatus(this);
-        
+        public readonly getCaseSummary = new CaseList.GetCaseSummary(this);
         public static GetCaseSummary = class GetCaseSummary extends Coalesce.ClientMethod<CaseList, ViewModels.CaseSummary> {
             public readonly name = 'GetCaseSummary';
+            public readonly verb = 'POST';
             
             /** Calls server method (GetCaseSummary) with the given arguments */
             public invoke = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
@@ -134,20 +129,7 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
-            
-            /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
-                return this.invoke(callback, reload);
-            };
         };
-        
-        /**
-            Methods and properties for invoking server method GetCaseSummary.
-            Returns a list of summary information about Cases
-        */
-        public readonly getCaseSummary = new CaseList.GetCaseSummary(this);
-        
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Case(newItem, parent);
 

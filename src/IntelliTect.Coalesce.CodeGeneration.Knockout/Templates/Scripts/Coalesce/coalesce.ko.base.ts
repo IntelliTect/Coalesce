@@ -158,6 +158,9 @@ module Coalesce {
     export abstract class ClientMethod<TParent extends BaseViewModel | BaseListViewModel<any>, TResult> {
         public abstract readonly name: string;
 
+        /** HTTP method to be used when calling the API endpoint. */
+        public readonly verb: string = "POST";
+
         /** Result of method strongly typed in a observable. */
         public result: KnockoutObservable<TResult> = ko.observable<TResult>(null);
 
@@ -184,7 +187,7 @@ module Coalesce {
             this.message('');
             this.wasSuccessful(null);
             return $.ajax({
-                method: "POST",
+                method: this.verb,
                 url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name,
                 data: postData,
                 xhrFields: { withCredentials: true }

@@ -157,7 +157,9 @@ module Coalesce {
 
     export abstract class ClientMethod<TParent extends BaseViewModel | BaseListViewModel<any>, TResult> {
         public abstract readonly name: string;
-		public abstract readonly verb: string;
+
+        /** HTTP method to be used when calling the API endpoint. */
+        public readonly verb: string = "POST";
 
         /** Result of method strongly typed in a observable. */
         public result: KnockoutObservable<TResult> = ko.observable<TResult>(null);

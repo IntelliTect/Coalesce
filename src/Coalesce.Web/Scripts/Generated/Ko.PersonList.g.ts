@@ -73,18 +73,18 @@ module ListViewModels {
             }
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
-            public args = new Add.Args();
+            public args = new Add.Args(); 
             
             protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
                 this.result(data);
-                if (typeof(callback) != 'function') return;
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(() => callback(result));
-                } else {
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
+            
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
@@ -114,14 +114,14 @@ module ListViewModels {
             
             protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
                 this.result(data);
-                if (typeof(callback) != 'function') return;
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(() => callback(result));
-                } else {
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
+            
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
@@ -145,14 +145,14 @@ module ListViewModels {
             
             protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
                 this.result(data);
-                if (typeof(callback) != 'function') return;
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(() => callback(result));
-                } else {
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
+            
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
@@ -188,14 +188,14 @@ module ListViewModels {
             
             protected loadResponse = (data: any, callback?: (result: string[]) => void, reload?: boolean) => {
                 this.result(data);
-                if (typeof(callback) != 'function') return;
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(() => callback(result));
-                } else {
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
+            
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;

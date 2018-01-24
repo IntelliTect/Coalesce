@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Utilities
+namespace IntelliTect.Coalesce.Utilities
 {
     /// <summary>
     /// A string builder that simplifies the process of building code.
@@ -111,6 +111,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
             return new Indentation(this, closeWithSemicolon ? "};" : "}");
         }
 
+        public IDisposable ElBlock(string elName, string attributes = null)
+        {
+            if (!onNewLine)
+            {
+                throw new InvalidOperationException("Cannot start a block on a line that isn't empty");
+            }
+
+            Append("<").Append(elName);
+            if (attributes != null)
+            {
+                Append(" ").Append(attributes);
+            }
+            Line(">");
+
+            Level++;
+
+            return new Indentation(this, $"</{elName}>");
+        }
+
         /// <summary>
         /// Convert the value of the instance to a <see cref="System.String"/>.
         /// </summary>
@@ -133,6 +152,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
             public void Dispose()
             {
                 if (disposed) return;
+                disposed = true;
                 this.parent.Level--;
                 if (closeWith != null)
                 {

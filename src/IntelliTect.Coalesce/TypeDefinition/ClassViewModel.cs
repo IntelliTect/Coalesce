@@ -216,11 +216,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns a client method matching the name if it exists.
         /// Non-client-exposed methods will not be returned.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="name">The name of the method to look for. 
+        /// Coalesce doesn't support exposing method overloads - 
+        /// in the case of overloads, the first matching method will be returned.</param>
+        /// <param name="isStatic">Whether to look for a static or instance method. 
+        /// If null, the first match will be returned.</param>
         /// <returns></returns>
-        public MethodViewModel MethodByName(string key)
+        public MethodViewModel MethodByName(string name, bool? isStatic = null)
         {
-            return ClientMethods.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
+            return ClientMethods.FirstOrDefault(f => 
+                string.Equals(f.Name, name, StringComparison.InvariantCultureIgnoreCase)
+                && isStatic == null || f.IsStatic == isStatic);
         }
 
         /// <summary>

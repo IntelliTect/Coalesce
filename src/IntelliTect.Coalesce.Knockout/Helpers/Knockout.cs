@@ -8,6 +8,8 @@ using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.Knockout.Helpers
 {
@@ -35,6 +37,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             return content.ToString().AddFormGroup();
         }
+
         /// <summary>
         /// Wraps an string in a div class=form-group
         /// </summary>
@@ -497,6 +500,59 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             return new HtmlString(result);
         }
         #endregion
+
+        
+        public static HtmlString ModalFor<T>(string methodName, bool? isStatic = null, string elementId = null, bool includeWithBinding = true)
+        {
+            var classModel = ReflectionRepository.Global.GetClassViewModel<T>();
+            var method = classModel.ClientMethods.FirstOrDefault(f => (isStatic == null || isStatic == f.IsStatic) && f.Name == methodName);
+            return ModalFor(method, elementId, includeWithBinding);
+        }
+        
+        public static HtmlString ModalFor(MethodViewModel method, string elementId = null, bool includeWithBinding = true)
+        {
+            if (elementId == null)
+            {
+                elementId = $"method-{method.Name}";
+            }
+
+            var b = new CodeBuilder();
+            b.Line($"<!-- Modal for method: {method.Name} -->");
+            var withBinding = includeWithBinding ? $"data-bind='with: {method.JsVariable}'" : "";
+
+            using (b.ElBlock("div", $"id='{elementId}' class='modal fade' tabindex='-1' role='dialog' {withBinding}"))
+            using (b.ElBlock("div", @"class=""modal-dialog"""))
+            using (b.ElBlock("div", @"class=""modal-content"""))
+            {
+                using (b.ElBlock("div", @"class=""modal-header"""))
+                {
+                    b.Line("<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
+                    b.Line($"<h4 class='modal-title'>{method.Name.ToProperCase()}</h4>");
+                }
+
+                using (b.ElBlock("div", @"class='modal-body form-horizontal' data-bind='with: args'"))
+                foreach (ParameterViewModel arg in method.ClientParameters)
+                using (b.ElBlock("div", @"class=""form-group"""))
+                {
+                    b.Line($"<label class='col-md-4 control-label'>{arg.Name.ToProperCase()}</label>");
+                    using (b.ElBlock("div", @"class=""col-md-8"""))
+                    {
+                        b.Line($"<input type='text' class='form-control' data-bind='value: {arg.CsArgumentName}'>");
+                    }
+                }
+
+                using (b.ElBlock("div", @"class=""modal-footer"""))
+                {
+                    b.Line("<button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>");
+                    b.Line(@"<button type='button' class='btn btn-primary btn-ok'");
+                    b.Indented(@"data-bind=""click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})"">");
+                    b.Indented("OK");
+                    b.Line("</button>");
+                }
+            }
+
+            return new HtmlString(b.ToString());
+        }
 
 
         public static HtmlString InputFor<T>(Expression<Func<T, object>> propertySelector,

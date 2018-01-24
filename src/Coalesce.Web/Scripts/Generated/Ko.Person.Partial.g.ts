@@ -169,14 +169,14 @@ module ViewModels {
                 } else {
                     this.result().loadFromDto(data);
                 }
-                if (typeof(callback) != 'function') return;
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(null, () => callback(result));
-                } else {
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
+            
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
@@ -203,14 +203,14 @@ module ViewModels {
             
             protected loadResponse = (data: any, callback?: (result: any) => void, reload?: boolean) => {
                 this.result(data);
-                if (typeof(callback) != 'function') return;
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(null, () => callback(result));
-                } else {
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
+            
             /** Invokes the method after displaying a browser-native prompt for each argument. */
             public invokeWithPrompts = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;

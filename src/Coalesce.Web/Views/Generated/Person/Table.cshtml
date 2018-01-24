@@ -169,11 +169,8 @@
                                         Actions <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                            <li><a href="#" data-bind = 'click: renameUi'>Rename</a></li>
-                                            <li><a href="#" data-bind = 'click: changeSpacesToDashesInNameUi'>Change Spaces To Dashes In Name</a></li>
-                                            <li><a href="#" data-bind = 'click: fullNameAndAgeUi'>Full Name And Age</a></li>
-                                            <li><a href="#" data-bind = 'click: obfuscateEmailUi'>Obfuscate Email</a></li>
-                                            <li><a href="#" data-bind = 'click: changeFirstNameUi'>Change First Name</a></li>
+                                            <li><a href="#" data-bind='click: function(){ rename.invokeWithPrompts() }'>Rename</a></li>
+                                            <li><a href="#" data-bind='click: function(){ changeSpacesToDashesInName.invoke() }'>Change Spaces To Dashes In Name</a></li>
                                     </ul>
                                 </div>
                                                             <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
@@ -210,96 +207,76 @@
                     </tr>
                 </thead>
                 <tbody>
-                        <tr>
+                        <tr data-bind="with: add">
                             <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: addModal">Add</button>
+                                    <button class="btn btn-default btn-xs"
+                                            data-bind="click: function(){$('#method-Add').modal()}">
+                                        Add
+                                    </button>
                             </td>
                             <td>
-                                    <span class="" data-bind="text: addResult"></span>
+                                    <span data-bind="text: result"></span>
                             </td>
                             <td>
-                                <span class="" data-bind="text: addWasSuccessful"></span>
-                                <span class="" data-bind="text: addMessage"></span>
+                                <span data-bind="text: wasSuccessful"></span>
+                                <span data-bind="text: message"></span>
                             </td>
                             <td>
-                                <span class="label label-info" data-bind="fadeVisible: addIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: getUserModal">Get User</button>
-                            </td>
-                            <td>
-                                    <span class="" data-bind="text: getUserResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: getUserWasSuccessful"></span>
-                                <span class="" data-bind="text: getUserMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: getUserIsLoading()">Loading</span>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
                         </tr>
-                        <tr>
+                        <tr data-bind="with: getUser">
                             <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: personCountModal">Person Count</button>
+                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                                        Get User
+                                    </button>
                             </td>
                             <td>
-                                    <span class="" data-bind="text: personCountResult"></span>
+                                    <span data-bind="text: result"></span>
                             </td>
                             <td>
-                                <span class="" data-bind="text: personCountWasSuccessful"></span>
-                                <span class="" data-bind="text: personCountMessage"></span>
+                                <span data-bind="text: wasSuccessful"></span>
+                                <span data-bind="text: message"></span>
                             </td>
                             <td>
-                                <span class="label label-info" data-bind="fadeVisible: personCountIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: removePersonByIdModal">Remove Person By Id</button>
-                            </td>
-                            <td>
-                                    <span class="" data-bind="text: removePersonByIdResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: removePersonByIdWasSuccessful"></span>
-                                <span class="" data-bind="text: removePersonByIdMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: removePersonByIdIsLoading()">Loading</span>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
                         </tr>
-                        <tr>
+                        <tr data-bind="with: getUserPublic">
                             <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: getUserPublicModal">Get User Public</button>
+                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                                        Get User Public
+                                    </button>
                             </td>
                             <td>
-                                    <span class="" data-bind="text: getUserPublicResult"></span>
+                                    <span data-bind="text: result"></span>
                             </td>
                             <td>
-                                <span class="" data-bind="text: getUserPublicWasSuccessful"></span>
-                                <span class="" data-bind="text: getUserPublicMessage"></span>
+                                <span data-bind="text: wasSuccessful"></span>
+                                <span data-bind="text: message"></span>
                             </td>
                             <td>
-                                <span class="label label-info" data-bind="fadeVisible: getUserPublicIsLoading()">Loading</span>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
                         </tr>
-                        <tr>
+                        <tr data-bind="with: namesStartingWith">
                             <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: namesStartingWithModal">Names Starting With</button>
+                                    <button class="btn btn-default btn-xs"
+                                            data-bind="click: function(){$('#method-NamesStartingWith').modal()}">
+                                        Names Starting With
+                                    </button>
                             </td>
                             <td>
-                                    <ul data-bind="foreach: namesStartingWithResult">
+                                    <ul data-bind="foreach: result">
                                         <li class="" data-bind="text: $data"></li>
                                     </ul>
                             </td>
                             <td>
-                                <span class="" data-bind="text: namesStartingWithWasSuccessful"></span>
-                                <span class="" data-bind="text: namesStartingWithMessage"></span>
+                                <span data-bind="text: wasSuccessful"></span>
+                                <span data-bind="text: message"></span>
                             </td>
                             <td>
-                                <span class="label label-info" data-bind="fadeVisible: namesStartingWithIsLoading()">Loading</span>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
                         </tr>
                 </tbody>
@@ -308,110 +285,64 @@
     </div>
 
 
-    <!-- Modal for method: Add -->
-    <div id='method-Add' class="modal fade" tabindex="-1" role="dialog" data-bind="with: add">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Add</h4>
+<!-- Modal for method: Add -->
+<div id='method-Add' class='modal fade' tabindex='-1' role='dialog' data-bind='with: add'>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Add</h4>
+            </div>
+            <div class='modal-body form-horizontal' data-bind='with: args'>
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Number One</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: numberOne'>
+                    </div>
                 </div>
-                <div class="modal-body form-horizontal" data-bind="with: args">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Number One</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: numberOne">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Number Two</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: numberTwo">
-                            </div>
-                        </div>
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Number Two</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: numberTwo'>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok"
-                            data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
-                        OK
-                    </button>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal for method: NamesStartingWith -->
+<div id='method-NamesStartingWith' class='modal fade' tabindex='-1' role='dialog' data-bind='with: namesStartingWith'>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Names Starting With</h4>
+            </div>
+            <div class='modal-body form-horizontal' data-bind='with: args'>
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Characters</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: characters'>
+                    </div>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!-- Modal for method: PersonCount -->
-    <div id='method-PersonCount' class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Person Count</h4>
-                </div>
-                <div class="modal-body form-horizontal" data-bind="with: personCountArgs">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Last Name Starts With</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: lastNameStartsWith">
-                            </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!-- Modal for method: RemovePersonById -->
-    <div id='method-RemovePersonById' class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Remove Person By Id</h4>
-                </div>
-                <div class="modal-body form-horizontal" data-bind="with: removePersonByIdArgs">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Id</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: id">
-                            </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!-- Modal for method: NamesStartingWith -->
-    <div id='method-NamesStartingWith' class="modal fade" tabindex="-1" role="dialog" data-bind="with: namesStartingWith">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Names Starting With</h4>
-                </div>
-                <div class="modal-body form-horizontal" data-bind="with: args">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Characters</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: characters">
-                            </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok"
-                            data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
-                        OK
-                    </button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
     @section Scripts
     {

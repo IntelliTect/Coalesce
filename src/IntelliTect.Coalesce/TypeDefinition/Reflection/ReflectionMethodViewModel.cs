@@ -32,6 +32,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
 
+        public override MethodInfo MethodInfo => Info;
+
         public override IEnumerable<ParameterViewModel> Parameters
             => Info.GetParameters().Select(p => new ReflectionParameterViewModel(p));
     }

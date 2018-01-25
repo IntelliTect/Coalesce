@@ -57,7 +57,7 @@ module Coalesce {
             equalityComparer: (existingItem: U, incomingKey: any) => boolean = null
         ) {
 
-            var originalContent = existingArray();
+            var originalContent = existingArray() || [];
 
             // We're going to build a new array from scratch.
             // If we spliced and pushed the existing array one row at a time as needed,
@@ -130,9 +130,11 @@ module Coalesce {
                 ko.utils.compareArrays(newContent, originalContent).every(c => c.status == "retained")) {
                 // Everything is the same (by doing a shallow equality check of the array - objects are checked by reference).
                 // Shallow equality check by reference is perfectly in line with the spec for ObservableArray.
+
+                // Do nothing.
             } else {
                 // Something is different. Update the observable.
-                // See the comments at the top of the file for why we do this conditionally.
+                // See the comments at the top of this method for why we do this conditionally.
                 // Basically, its because this call ALWAYS notifies subscribers, but we can be more intelligent about it.
                 existingArray(newContent);
             }

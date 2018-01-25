@@ -39,17 +39,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Parent = parent;
         }
 
-        public string JsVariable => Name.ToCamelCase();
-
-        public string JsVariableResult => JsVariable + "Result";
-        public string JsVariableResultRaw => JsVariable + "ResultRaw";
-        public string JsVariableIsLoading => JsVariable + "IsLoading";
-        public string JsVariableMessage => JsVariable + "Message";
-        public string JsVariableWasSuccessful => JsVariable + "WasSuccessful";
-        public string JsVariableUi => JsVariable + "Ui";
-        public string JsVariableModal => JsVariable + "Modal";
-        public string JsVariableArgs => JsVariable + "Args";
-        public string JsVariableWithArgs => JsVariable + "WithArgs";
         public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
         public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
 
@@ -59,9 +48,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
-        /// Name of the class that is used for storing arguments on the client.
+        /// Convenient accessor for the MethodInfo when in reflection-based contexts.
         /// </summary>
-        public string ArgsName => Name + "Args";
+        public virtual MethodInfo MethodInfo => throw new InvalidOperationException("MethodInfo not available in the current context");
+
+        public string JsVariable => Name.ToCamelCase();
 
         /// <summary>
         /// Type of the return. Object if void.
@@ -171,7 +162,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var result = "{ ";
                 if (!IsStatic)
                 {
-                    result = result + "id: this.myId";
+                    result = result + "id: this.parent[this.parent.primaryKeyName]()";
                     if (Parameters.Any()) result = result + ", ";
                 }
 

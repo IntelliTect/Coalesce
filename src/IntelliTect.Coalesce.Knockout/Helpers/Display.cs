@@ -3,6 +3,7 @@ using System;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.Knockout.Helpers
 {
@@ -18,7 +19,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                var result = @"<a data-bind = 'attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                var result = $@"<a data-bind = 'attr: {{href: {prop.ListEditorUrlName}}}, text: {prop.JsVariableForBinding()}().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 return new HtmlString(result);
             }
             else if (editable && prop.IsClientWritable && !prop.IsInternalUse)
@@ -146,7 +147,8 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         /// <returns></returns>
         public static string MethodHelper(MethodViewModel method)
         {
-            return $@"<a href=""#"" data-bind = 'click: {method.JsVariableUi}'>{method.DisplayName}</a>";
+            var callFunction = method.ClientParameters.Any() ? "invokeWithPrompts" : "invoke";
+            return $@"<a href=""#"" data-bind='click: function(){{ {method.JsVariable}.{callFunction}() }}'>{method.DisplayName}</a>";
         }
 
         public static string PropertyHelperWithSurroundingDiv(PropertyViewModel prop, bool editable, string areaName = "", int cols = 8)

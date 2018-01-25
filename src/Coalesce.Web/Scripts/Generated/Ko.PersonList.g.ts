@@ -21,8 +21,8 @@ module ListViewModels {
     }
 
     export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {
-        protected modelName: string = "Person";
-        protected apiController: string = "/Person";
+        public readonly modelName: string = "Person";
+        public readonly apiController: string = "/Person";
         public modelKeyName: string = "personId";
         public itemClass: new () => ViewModels.Person = ViewModels.Person;
 
@@ -54,419 +54,243 @@ module ListViewModels {
         public coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>
             = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
 
-
-        // Call server method (Add)
-        // Adds two numbers.
-        public add = (numberOne: number, numberTwo: number, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.addIsLoading(true);
-            this.addMessage('');
-            this.addWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Add",
-                     data: { numberOne: numberOne, numberTwo: numberTwo },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.addResultRaw(data.object);
-                this.addMessage('');
-                this.addWasSuccessful(true);
-                this.addResult(data.object);
         
-                if (typeof(callback) != "function") return;
-                var result = this.addResult();
+        /**
+            Methods and properties for invoking server method Add.
+            Adds two numbers.
+        */
+        public readonly add = new PersonList.Add(this);
+        public static Add = class Add extends Coalesce.ClientMethod<PersonList, number> {
+            public readonly name = 'Add';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (Add) with the given arguments */
+            public invoke = (numberOne: number, numberTwo: number, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ numberOne: numberOne, numberTwo: numberTwo }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new Add.Args(); 
+            public static Args = class Args {
+                public numberOne: KnockoutObservable<number> = ko.observable(null);
+                public numberTwo: KnockoutObservable<number> = ko.observable(null);
+            };
+            
+            /** Calls server method (Add) with an instance of Add.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.numberOne(), args.numberTwo(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Number One');
+                if ($promptVal === null) return;
+                var numberOne: number = parseInt($promptVal);
+                $promptVal = prompt('Number Two');
+                if ($promptVal === null) return;
+                var numberTwo: number = parseInt($promptVal);
+                return this.invoke(numberOne, numberTwo, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+                this.result(data);
                 if (reload) {
-                    this.load(() => callback(result));
-                } else {
-                    callback(result);
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.addWasSuccessful(false);
-                this.addMessage(errorMsg);
-
-                //alert("Could not call method add: " + errorMsg);
-            })
-            .always(() => {
-                this.addIsLoading(false);
-            });
-        } 
-        // Result of server method (Add) strongly typed in a observable.
-        public addResult: KnockoutObservable<number> = ko.observable(null);
-        // Raw result object of server method (Add) simply wrapped in an observable.
-        public addResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (Add) is being called
-        public addIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (Add) if it fails.
-        public addMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (Add) was successful.
-        public addWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (Add)
-        public addUi = (callback: () => void = null) => {
-            var numberOne: number = parseFloat(prompt('Number One'));
-            var numberTwo: number = parseFloat(prompt('Number Two'));
-            this.add(numberOne, numberTwo, callback);
-        }
-        // Presents a modal with input boxes to call the server method (Add)
-        public addModal = (callback: () => void = null) => {
-            $('#method-Add').modal();
-            $('#method-Add').on('shown.bs.modal', () => {
-                $('#method-Add .btn-ok').unbind('click');
-                $('#method-Add .btn-ok').click(() => {
-                    this.addWithArgs(null, callback);
-                    $('#method-Add').modal('hide');
-                });
-            });
-        }
-            // Variable for method arguments to allow for easy binding
-        public addWithArgs = (args?: PersonList.AddArgs, callback: (result: number) => void = null) => {
-            if (!args) args = this.addArgs;
-            this.add(args.numberOne(), args.numberTwo(), callback);
-        }
-        public addArgs = new PersonList.AddArgs(); 
+            };
+        };
         
-
-        // Call server method (GetUser)
-        // Returns the user name
-        public getUser = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.getUserIsLoading(true);
-            this.getUserMessage('');
-            this.getUserWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUser",
-                     data: {  },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.getUserResultRaw(data.object);
-                this.getUserMessage('');
-                this.getUserWasSuccessful(true);
-                this.getUserResult(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.getUserResult();
+        /**
+            Methods and properties for invoking server method GetUser.
+            Returns the user name
+        */
+        public readonly getUser = new PersonList.GetUser(this);
+        public static GetUser = class GetUser extends Coalesce.ClientMethod<PersonList, string> {
+            public readonly name = 'GetUser';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (GetUser) with the given arguments */
+            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+                this.result(data);
                 if (reload) {
-                    this.load(() => callback(result));
-                } else {
-                    callback(result);
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.getUserWasSuccessful(false);
-                this.getUserMessage(errorMsg);
-
-                //alert("Could not call method getUser: " + errorMsg);
-            })
-            .always(() => {
-                this.getUserIsLoading(false);
-            });
-        } 
-        // Result of server method (GetUser) strongly typed in a observable.
-        public getUserResult: KnockoutObservable<string> = ko.observable(null);
-        // Raw result object of server method (GetUser) simply wrapped in an observable.
-        public getUserResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (GetUser) is being called
-        public getUserIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (GetUser) if it fails.
-        public getUserMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (GetUser) was successful.
-        public getUserWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (GetUser)
-        public getUserUi = (callback: () => void = null) => {
-            this.getUser(callback);
-        }
-        // Presents a modal with input boxes to call the server method (GetUser)
-        public getUserModal = (callback: () => void = null) => {
-            this.getUserUi(callback);
-        }
+            };
+        };
         
-
-        // Call server method (PersonCount)
-        public personCount = (lastNameStartsWith: string, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.personCountIsLoading(true);
-            this.personCountMessage('');
-            this.personCountWasSuccessful(null);
-            return $.ajax({ method: "Get",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/PersonCount",
-                     data: { lastNameStartsWith: lastNameStartsWith },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.personCountResultRaw(data.object);
-                this.personCountMessage('');
-                this.personCountWasSuccessful(true);
-                this.personCountResult(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.personCountResult();
+        /**
+            Methods and properties for invoking server method PersonCount.
+        */
+        public readonly personCount = new PersonList.PersonCount(this);
+        public static PersonCount = class PersonCount extends Coalesce.ClientMethod<PersonList, number> {
+            public readonly name = 'PersonCount';
+            public readonly verb = 'GET';
+            
+            /** Calls server method (PersonCount) with the given arguments */
+            public invoke = (lastNameStartsWith: string, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ lastNameStartsWith: lastNameStartsWith }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new PersonCount.Args(); 
+            public static Args = class Args {
+                public lastNameStartsWith: KnockoutObservable<string> = ko.observable(null);
+            };
+            
+            /** Calls server method (PersonCount) with an instance of PersonCount.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.lastNameStartsWith(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Last Name Starts With');
+                if ($promptVal === null) return;
+                var lastNameStartsWith: string = $promptVal;
+                return this.invoke(lastNameStartsWith, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+                this.result(data);
                 if (reload) {
-                    this.load(() => callback(result));
-                } else {
-                    callback(result);
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.personCountWasSuccessful(false);
-                this.personCountMessage(errorMsg);
-
-                //alert("Could not call method personCount: " + errorMsg);
-            })
-            .always(() => {
-                this.personCountIsLoading(false);
-            });
-        } 
-        // Result of server method (PersonCount) strongly typed in a observable.
-        public personCountResult: KnockoutObservable<number> = ko.observable(null);
-        // Raw result object of server method (PersonCount) simply wrapped in an observable.
-        public personCountResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (PersonCount) is being called
-        public personCountIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (PersonCount) if it fails.
-        public personCountMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (PersonCount) was successful.
-        public personCountWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (PersonCount)
-        public personCountUi = (callback: () => void = null) => {
-            var lastNameStartsWith: string = prompt('Last Name Starts With');
-            this.personCount(lastNameStartsWith, callback);
-        }
-        // Presents a modal with input boxes to call the server method (PersonCount)
-        public personCountModal = (callback: () => void = null) => {
-            $('#method-PersonCount').modal();
-            $('#method-PersonCount').on('shown.bs.modal', () => {
-                $('#method-PersonCount .btn-ok').unbind('click');
-                $('#method-PersonCount .btn-ok').click(() => {
-                    this.personCountWithArgs(null, callback);
-                    $('#method-PersonCount').modal('hide');
-                });
-            });
-        }
-            // Variable for method arguments to allow for easy binding
-        public personCountWithArgs = (args?: PersonList.PersonCountArgs, callback: (result: number) => void = null) => {
-            if (!args) args = this.personCountArgs;
-            this.personCount(args.lastNameStartsWith(), callback);
-        }
-        public personCountArgs = new PersonList.PersonCountArgs(); 
+            };
+        };
         
-
-        // Call server method (RemovePersonById)
-        public removePersonById = (id: number, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.removePersonByIdIsLoading(true);
-            this.removePersonByIdMessage('');
-            this.removePersonByIdWasSuccessful(null);
-            return $.ajax({ method: "Delete",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/RemovePersonById",
-                     data: { id: id },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.removePersonByIdResultRaw(data.object);
-                this.removePersonByIdMessage('');
-                this.removePersonByIdWasSuccessful(true);
-                this.removePersonByIdResult(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.removePersonByIdResult();
+        /**
+            Methods and properties for invoking server method RemovePersonById.
+        */
+        public readonly removePersonById = new PersonList.RemovePersonById(this);
+        public static RemovePersonById = class RemovePersonById extends Coalesce.ClientMethod<PersonList, boolean> {
+            public readonly name = 'RemovePersonById';
+            public readonly verb = 'DELETE';
+            
+            /** Calls server method (RemovePersonById) with the given arguments */
+            public invoke = (id: number, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: id }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new RemovePersonById.Args(); 
+            public static Args = class Args {
+                public id: KnockoutObservable<number> = ko.observable(null);
+            };
+            
+            /** Calls server method (RemovePersonById) with an instance of RemovePersonById.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: boolean) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.id(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Id');
+                if ($promptVal === null) return;
+                var id: number = parseInt($promptVal);
+                return this.invoke(id, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: boolean) => void, reload?: boolean) => {
+                this.result(data);
                 if (reload) {
-                    this.load(() => callback(result));
-                } else {
-                    callback(result);
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.removePersonByIdWasSuccessful(false);
-                this.removePersonByIdMessage(errorMsg);
-
-                //alert("Could not call method removePersonById: " + errorMsg);
-            })
-            .always(() => {
-                this.removePersonByIdIsLoading(false);
-            });
-        } 
-        // Result of server method (RemovePersonById) strongly typed in a observable.
-        public removePersonByIdResult: KnockoutObservable<boolean> = ko.observable(null);
-        // Raw result object of server method (RemovePersonById) simply wrapped in an observable.
-        public removePersonByIdResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (RemovePersonById) is being called
-        public removePersonByIdIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (RemovePersonById) if it fails.
-        public removePersonByIdMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (RemovePersonById) was successful.
-        public removePersonByIdWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (RemovePersonById)
-        public removePersonByIdUi = (callback: () => void = null) => {
-            var id: number = parseFloat(prompt('Id'));
-            this.removePersonById(id, callback);
-        }
-        // Presents a modal with input boxes to call the server method (RemovePersonById)
-        public removePersonByIdModal = (callback: () => void = null) => {
-            $('#method-RemovePersonById').modal();
-            $('#method-RemovePersonById').on('shown.bs.modal', () => {
-                $('#method-RemovePersonById .btn-ok').unbind('click');
-                $('#method-RemovePersonById .btn-ok').click(() => {
-                    this.removePersonByIdWithArgs(null, callback);
-                    $('#method-RemovePersonById').modal('hide');
-                });
-            });
-        }
-            // Variable for method arguments to allow for easy binding
-        public removePersonByIdWithArgs = (args?: PersonList.RemovePersonByIdArgs, callback: (result: boolean) => void = null) => {
-            if (!args) args = this.removePersonByIdArgs;
-            this.removePersonById(args.id(), callback);
-        }
-        public removePersonByIdArgs = new PersonList.RemovePersonByIdArgs(); 
+            };
+        };
         
-
-        // Call server method (GetUserPublic)
-        // Returns the user name
-        public getUserPublic = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.getUserPublicIsLoading(true);
-            this.getUserPublicMessage('');
-            this.getUserPublicWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/GetUserPublic",
-                     data: {  },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.getUserPublicResultRaw(data.object);
-                this.getUserPublicMessage('');
-                this.getUserPublicWasSuccessful(true);
-                this.getUserPublicResult(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.getUserPublicResult();
+        /**
+            Methods and properties for invoking server method GetUserPublic.
+            Returns the user name
+        */
+        public readonly getUserPublic = new PersonList.GetUserPublic(this);
+        public static GetUserPublic = class GetUserPublic extends Coalesce.ClientMethod<PersonList, string> {
+            public readonly name = 'GetUserPublic';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (GetUserPublic) with the given arguments */
+            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({  }, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+                this.result(data);
                 if (reload) {
-                    this.load(() => callback(result));
-                } else {
-                    callback(result);
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.getUserPublicWasSuccessful(false);
-                this.getUserPublicMessage(errorMsg);
-
-                //alert("Could not call method getUserPublic: " + errorMsg);
-            })
-            .always(() => {
-                this.getUserPublicIsLoading(false);
-            });
-        } 
-        // Result of server method (GetUserPublic) strongly typed in a observable.
-        public getUserPublicResult: KnockoutObservable<string> = ko.observable(null);
-        // Raw result object of server method (GetUserPublic) simply wrapped in an observable.
-        public getUserPublicResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (GetUserPublic) is being called
-        public getUserPublicIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (GetUserPublic) if it fails.
-        public getUserPublicMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (GetUserPublic) was successful.
-        public getUserPublicWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (GetUserPublic)
-        public getUserPublicUi = (callback: () => void = null) => {
-            this.getUserPublic(callback);
-        }
-        // Presents a modal with input boxes to call the server method (GetUserPublic)
-        public getUserPublicModal = (callback: () => void = null) => {
-            this.getUserPublicUi(callback);
-        }
+            };
+        };
         
-
-        // Call server method (NamesStartingWith)
-        // Gets all the first names starting with the characters.
-        public namesStartingWith = (characters: string, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-            this.namesStartingWithIsLoading(true);
-            this.namesStartingWithMessage('');
-            this.namesStartingWithWasSuccessful(null);
-            return $.ajax({ method: "Post",
-                     url: this.coalesceConfig.baseApiUrl() + this.apiController + "/NamesStartingWith",
-                     data: { characters: characters },
-                     xhrFields: { withCredentials: true } })
-            .done((data) => {
-                this.namesStartingWithResultRaw(data.object);
-                this.namesStartingWithMessage('');
-                this.namesStartingWithWasSuccessful(true);
-                this.namesStartingWithResult(data.object);
-        
-                if (typeof(callback) != "function") return;
-                var result = this.namesStartingWithResult();
+        /**
+            Methods and properties for invoking server method NamesStartingWith.
+            Gets all the first names starting with the characters.
+        */
+        public readonly namesStartingWith = new PersonList.NamesStartingWith(this);
+        public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> {
+            public readonly name = 'NamesStartingWith';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (NamesStartingWith) with the given arguments */
+            public invoke = (characters: string, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ characters: characters }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new NamesStartingWith.Args(); 
+            public static Args = class Args {
+                public characters: KnockoutObservable<string> = ko.observable(null);
+            };
+            
+            /** Calls server method (NamesStartingWith) with an instance of NamesStartingWith.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.characters(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                $promptVal = prompt('Characters');
+                if ($promptVal === null) return;
+                var characters: string = $promptVal;
+                return this.invoke(characters, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback?: (result: string[]) => void, reload?: boolean) => {
+                this.result(data);
                 if (reload) {
-                    this.load(() => callback(result));
-                } else {
-                    callback(result);
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
                 }
-            })
-            .fail((xhr) => {
-                var errorMsg = "Unknown Error";
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                this.namesStartingWithWasSuccessful(false);
-                this.namesStartingWithMessage(errorMsg);
-
-                //alert("Could not call method namesStartingWith: " + errorMsg);
-            })
-            .always(() => {
-                this.namesStartingWithIsLoading(false);
-            });
-        } 
-        // Result of server method (NamesStartingWith) strongly typed in a observable.
-        public namesStartingWithResult: KnockoutObservableArray<string> = ko.observableArray([]);
-        // Raw result object of server method (NamesStartingWith) simply wrapped in an observable.
-        public namesStartingWithResultRaw: KnockoutObservable<any> = ko.observable();
-        // True while the server method (NamesStartingWith) is being called
-        public namesStartingWithIsLoading: KnockoutObservable<boolean> = ko.observable(false);
-        // Error message for server method (NamesStartingWith) if it fails.
-        public namesStartingWithMessage: KnockoutObservable<string> = ko.observable(null);
-        // True if the server method (NamesStartingWith) was successful.
-        public namesStartingWithWasSuccessful: KnockoutObservable<boolean> = ko.observable(null);
-        // Presents a series of input boxes to call the server method (NamesStartingWith)
-        public namesStartingWithUi = (callback: () => void = null) => {
-            var characters: string = prompt('Characters');
-            this.namesStartingWith(characters, callback);
-        }
-        // Presents a modal with input boxes to call the server method (NamesStartingWith)
-        public namesStartingWithModal = (callback: () => void = null) => {
-            $('#method-NamesStartingWith').modal();
-            $('#method-NamesStartingWith').on('shown.bs.modal', () => {
-                $('#method-NamesStartingWith .btn-ok').unbind('click');
-                $('#method-NamesStartingWith .btn-ok').click(() => {
-                    this.namesStartingWithWithArgs(null, callback);
-                    $('#method-NamesStartingWith').modal('hide');
-                });
-            });
-        }
-            // Variable for method arguments to allow for easy binding
-        public namesStartingWithWithArgs = (args?: PersonList.NamesStartingWithArgs, callback: (result: string[]) => void = null) => {
-            if (!args) args = this.namesStartingWithArgs;
-            this.namesStartingWith(args.characters(), callback);
-        }
-        public namesStartingWithArgs = new PersonList.NamesStartingWithArgs(); 
-        
+            };
+        };
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Person(newItem, parent);
 
         constructor() {
             super();
-        }
-    }
-
-    export namespace PersonList {
-        // Classes for use in method calls to support data binding for input for arguments
-        export class AddArgs {
-            public numberOne: KnockoutObservable<number> = ko.observable(null);
-            public numberTwo: KnockoutObservable<number> = ko.observable(null);
-        }
-        export class PersonCountArgs {
-            public lastNameStartsWith: KnockoutObservable<string> = ko.observable(null);
-        }
-        export class RemovePersonByIdArgs {
-            public id: KnockoutObservable<number> = ko.observable(null);
-        }
-        export class NamesStartingWithArgs {
-            public characters: KnockoutObservable<string> = ko.observable(null);
         }
     }
 }

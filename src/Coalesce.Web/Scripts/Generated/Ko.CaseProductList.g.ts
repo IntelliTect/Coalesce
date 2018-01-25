@@ -11,8 +11,8 @@ module ListViewModels {
             }
 
     export class CaseProductList extends Coalesce.BaseListViewModel<ViewModels.CaseProduct> {
-        protected modelName: string = "CaseProduct";
-        protected apiController: string = "/CaseProduct";
+        public readonly modelName: string = "CaseProduct";
+        public readonly apiController: string = "/CaseProduct";
         public modelKeyName: string = "caseProductId";
         public itemClass: new () => ViewModels.CaseProduct = ViewModels.CaseProduct;
 
@@ -43,9 +43,5 @@ module ListViewModels {
         constructor() {
             super();
         }
-    }
-
-    export namespace CaseProductList {
-        // Classes for use in method calls to support data binding for input for arguments
     }
 }

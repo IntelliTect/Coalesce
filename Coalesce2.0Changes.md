@@ -39,6 +39,7 @@
 | `BaseViewModel.showBusyWhenSaving` is deprecated. | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
 | `BaseViewModel.showFailureAlerts` is deprecated. | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
 | `BaseViewModel.validationIssues` has been removed. | Use `BaseViewModel.message` to get errors that occurred while saving a model. No other methods other than `save` were populating this collection, and it was only being populated with exception messages - not validation issues.
+| Members generated for model methods have changed significantly. | See the documentation for model methods to see the new names and locations of the generated members. All except the "modal" function have a corresponding member post-change. 
 
 ## API Endpoints
 
@@ -56,9 +57,8 @@
 | CHANGE | RESOLUTION
 | ------ |----------|
 | Like `BaseViewModel`, `BaseListViewModel` no longer has a self-referential generic type parameter. It now uses TypeScripts polymorphic `this` types for its self-referential needs | Remove any usages of the generic parameter. Replace with [Polymorphic this types](https://www.typescriptlang.org/docs/handbook/advanced-types.html) as needed.
-
 | `BaseListViewModel.query` is now `BaseListViewModel.filter` to match the new API signature. | Rename references accordingly.
-
+| Members generated for model methods have changed significantly. | See the documentation for model methods to see the new names and locations of the generated members. All except the "modal" function have a corresponding member post-change. 
 
 
 ## Projects, Namespaces, & Generation

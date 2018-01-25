@@ -8,12 +8,11 @@ module ViewModels {
 
 	export class Company extends Coalesce.BaseViewModel
     {
-        protected modelName = "Company";
-        protected primaryKeyName: keyof this = "companyId";
-        protected modelDisplayName = "Company";
-
-        protected apiController = "/Company";
-        protected viewController = "/Company";
+        public readonly modelName = "Company";
+        public readonly primaryKeyName: keyof this = "companyId";
+        public readonly modelDisplayName = "Company";
+        public readonly apiController = "/Company";
+        public readonly viewController = "/Company";
 
         /** Behavioral configuration for all instances of Company. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Company>
@@ -191,7 +190,5 @@ module ViewModels {
 
 
     export namespace Company {
-
-        // Classes for use in method calls to support data binding for input for arguments
     }
 }

@@ -15,42 +15,43 @@ namespace IntelliTect.Coalesce.Utilities
             return propertyLambda.GetExpressedProperty(typeof(T));
         }
 
-        public static PropertyInfo GetExpressedProperty(this LambdaExpression propertyLambda, Type paramType)
+        public static MemberInfo GetExpressedMember(this LambdaExpression memberLambda)
         {
-            Type type = paramType;
             MemberExpression member;
 
             // Check to see if the node type is a Convert type (this is the case with enums)
-            if (propertyLambda.Body.NodeType == ExpressionType.Convert)
+            if (memberLambda.Body.NodeType == ExpressionType.Convert)
             {
-                member = ((UnaryExpression)propertyLambda.Body).Operand as MemberExpression;
+                member = ((UnaryExpression)memberLambda.Body).Operand as MemberExpression;
             }
             else
             {
-                member = propertyLambda.Body as MemberExpression;
+                member = memberLambda.Body as MemberExpression;
             }
             if (member == null)
             {
-                // Handle the case of a nullable.
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a method, not a property.",
-                    propertyLambda.ToString()));
+                throw new ArgumentException($"Expression '{memberLambda}' isn't a member expression.");
             }
 
-            PropertyInfo propInfo = member.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, not a property.",
-                    propertyLambda.ToString()));
+            return member.Member;
+        }
 
-            if (type != propInfo.ReflectedType &&
-                !type.IsSubclassOf(propInfo.ReflectedType))
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a property that is not from type {1}.",
-                    propertyLambda.ToString(),
-                    type));
+        public static PropertyInfo GetExpressedProperty(this LambdaExpression lambda, Type paramType)
+        {
+            MemberInfo member = GetExpressedMember(lambda);
+            PropertyInfo propInfo = member as PropertyInfo;
+
+            if (propInfo == null)
+                throw new ArgumentException($"Expression '{lambda}' doesn't refer to a property.");
+
+            if (paramType != propInfo.ReflectedType &&
+                !paramType.IsSubclassOf(propInfo.ReflectedType))
+                throw new ArgumentException($"Expression '{lambda}' refers to a property that is not from type {paramType}.");
 
             return propInfo;
         }
+
+        public static MethodInfo GetExpressedMethod(this LambdaExpression lambda)
+            => GetExpressedMember(lambda) as MethodInfo ?? throw new ArgumentException($"Expression '{lambda}' doesn't refer to a method.");
     }
 }

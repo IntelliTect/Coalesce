@@ -68,6 +68,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsClass => Info.IsClass;
 
+        public override bool IsInterface => Info.IsInterface;
+
         public override bool IsInternalUse => base.IsInternalUse || !Info.IsVisible;
 
         public override Dictionary<int, string> EnumValues

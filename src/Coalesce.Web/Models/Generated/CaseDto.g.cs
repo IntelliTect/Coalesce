@@ -36,13 +36,9 @@ namespace Coalesce.Web.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for Case
 
-
-            // Applicable excludes for Case
             bool excludePersonListGen = includes == "PersonListGen";
 
-            // Applicable roles for Case
 
 
             // Fill the properties of the object.
@@ -91,13 +87,9 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            // Applicable includes for Case
 
-
-            // Applicable excludes for Case
             bool excludePersonListGen = includes == "PersonListGen";
 
-            // Applicable roles for Case
 
 
             entity.Title = Title;

@@ -44,13 +44,8 @@ namespace @(namespaceName)
             if (obj == null) return;
             var includes = context.Includes;
                         
-            // Applicable includes for @(model.Name)
             @(model.DtoIncludesAsCS())
-
-            // Applicable excludes for @(model.Name)
             @(model.DtoExcludesAsCS())
-
-            // Applicable roles for @(model.Name)
             @(model.PropertyRolesAsCS())
 
             // Fill the properties of the object.
@@ -67,13 +62,8 @@ namespace @(namespaceName)
 
             if (OnUpdate(entity, context)) return;
 
-            // Applicable includes for @(model.Name)
             @(model.DtoIncludesAsCS())
-
-            // Applicable excludes for @(model.Name)
             @(model.DtoExcludesAsCS())
-
-            // Applicable roles for @(model.Name)
             @(model.PropertyRolesAsCS())
 
             @foreach (var conditionGroup in model.ClientProperties

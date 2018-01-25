@@ -26,13 +26,8 @@ namespace Coalesce.Web.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for CaseSummary
 
 
-            // Applicable excludes for CaseSummary
-
-
-            // Applicable roles for CaseSummary
 
 
             // Fill the properties of the object.
@@ -50,13 +45,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            // Applicable includes for CaseSummary
 
 
-            // Applicable excludes for CaseSummary
-
-
-            // Applicable roles for CaseSummary
 
 
             entity.OpenCases = (OpenCases ?? 0);

@@ -21,4 +21,6 @@
 /// <reference path="Generated/Ko.PersonStats.g.ts" />
 /// <reference path="Generated/Ko.Product.g.ts" />
 /// <reference path="Generated/Ko.ProductList.g.ts" />
+/// <reference path="Generated/Ko.WeatherData.g.ts" />
+/// <reference path="Generated/Ko.WeatherServiceClient.g.ts" />
 /// <reference path="Partials/Ko.Person.partial.ts" />

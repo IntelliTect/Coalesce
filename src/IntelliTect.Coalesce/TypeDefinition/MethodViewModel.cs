@@ -111,12 +111,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
                 var outParameters = new List<string>();
 
-                if (!IsStatic)
-                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
-
-                // When not static add an id that specifies the object to work on.
-                if (!IsStatic)
+                // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
+                if (!IsStatic && !Parent.IsService)
                 {
+                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
                     outParameters.Add($"{Parent.PrimaryKey.PureType.FullyQualifiedName} id");
                 }
                 outParameters.AddRange(parameters.Select(f => f.CsDeclaration));
@@ -160,7 +158,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var result = "{ ";
-                if (!IsStatic)
+                if (!IsStatic && !Parent.IsService)
                 {
                     result = result + "id: this.parent[this.parent.primaryKeyName]()";
                     if (Parameters.Any()) result = result + ", ";
@@ -200,7 +198,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsClientMethod => !IsInternalUse && HasAttribute<CoalesceAttribute>();
+        public bool IsClientMethod => !IsInternalUse && 
+            // Services only have instance methods - no static methods.
+            (!Parent.IsService || !IsStatic) && 
+            // Interface services always expose all their declared methods.
+            ((Parent.IsService && Parent.Type.IsInterface) || HasAttribute<CoalesceAttribute>());
 
         public string LoadFromDataSourceName
         {

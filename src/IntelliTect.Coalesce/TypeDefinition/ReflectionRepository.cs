@@ -15,17 +15,6 @@ using IntelliTect.Coalesce.Api;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public enum TypeCategory
-    {
-        Unknown = 0,
-        DbContext = 1,
-        Entity = 2,
-        DataSource = 3,
-        Behaviors = 4,
-        Dto = 5,
-        ExternalType = 6,
-    }
-
     public class ReflectionRepository
     {
         public static readonly ReflectionRepository Global = new ReflectionRepository();
@@ -38,6 +27,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
         private HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
         private HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
+        private HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
         public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
@@ -45,6 +35,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_dataSources);
         public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new ReadOnlyHashSet<ClassViewModel>(_externalTypes);
         public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
+        public ReadOnlyHashSet<ClassViewModel> Services => new ReadOnlyHashSet<ClassViewModel>(_services);
 
         public IEnumerable<ClassViewModel> ApiBackedClasses => Entities.Union(CustomDtos);
 
@@ -98,6 +89,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                         DiscoverNestedCrudStrategiesOn(classViewModel);
                     }
+                    else if (type.ClassViewModel?.IsService ?? false)
+                    {
+                        var classViewModel = type.ClassViewModel;
+                        _services.Add(Cache(classViewModel));
+                    }
                 }
             }
 
@@ -106,6 +102,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 DiscoverExternalMethodTypesOn(entity);
                 DiscoverExternalPropertyTypesOn(entity);
                 DiscoverNestedCrudStrategiesOn(entity);
+            }
+            foreach (var service in Services)
+            {
+                DiscoverExternalMethodTypesOn(service);
             }
         }
 

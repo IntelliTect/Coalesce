@@ -27,11 +27,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
         /// </summary>
         protected bool ParentLoadHasIdParameter { get; set; }
 
+        protected bool MethodParentCanLoad { get; set; } = true;
+
         public string ClientMethodDeclaration(MethodViewModel method, string parentClassName, int indentLevel = 2)
         {
             var b = new CodeBuilder(initialLevel: indentLevel);
             var model = this.Model;
 
+            string reloadArg = MethodParentCanLoad ? ", reload" : "";
+            string reloadParam = MethodParentCanLoad ? ", reload: boolean = true" : "";
 
             // Default instance of the method class.
             b.Line();
@@ -54,7 +58,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
             using (b.TSBlock($"public invoke = ({method.TsParameters}): JQueryPromise<any> =>", true))
             {
-                b.Line($"return this.invokeWithData({method.JsPostObject}, callback, reload);");
+                b.Line($"return this.invokeWithData({method.JsPostObject}, callback{reloadArg});");
             }
 
 
@@ -76,14 +80,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
                 // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it.
                 // Thankfully, we can implicitly type using the default.
-                using (b.TSBlock($"public invokeWithArgs = (args = this.args, callback?: (result: {method.ReturnType.TsType}) => void, reload: boolean = true): JQueryPromise<any> =>"))
+                using (b.TSBlock($"public invokeWithArgs = (args = this.args, callback?: (result: {method.ReturnType.TsType}) => void{reloadParam}): JQueryPromise<any> =>"))
                 {
-                    b.Line($"return this.invoke({method.JsArguments("args", true)}, reload);");
+                    b.Line($"return this.invoke({method.JsArguments("args", true)}{reloadArg});");
                 }
 
                 b.Line();
                 b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
-                using (b.TSBlock($"public invokeWithPrompts = (callback: (result: {method.ReturnType.TsType}) => void = null, reload: boolean = true): JQueryPromise<any> =>", true))
+                using (b.TSBlock($"public invokeWithPrompts = (callback: (result: {method.ReturnType.TsType}) => void = null{reloadParam}): JQueryPromise<any> =>", true))
                 {
                     b.Line($"var $promptVal: string = null;");
                     foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
@@ -100,7 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     {
                         b.Line($"var {param.Name}: {param.Type.TsType} = null;");
                     }
-                    b.Line($"return this.invoke({method.JsArguments("", true)}, reload);");
+                    b.Line($"return this.invoke({method.JsArguments("", true)}{reloadArg});");
                 }
             }
 
@@ -134,7 +138,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("this.result(data);");
                 }
 
-                if (method.ReturnType.EqualsType(method.Parent.Type) && !MethodsLoadParent)
+                if (!MethodParentCanLoad)
+                {
+                    b.Line("if (typeof(callback) == 'function')");
+                    b.Indented("callback(this.result());");
+                }
+                else if (method.ReturnType.EqualsType(method.Parent.Type) && !MethodsLoadParent)
                 {
                     // The return type is the type of the method's parent. Load the parent with the results of the method.
                     // Parameter 'reload' has no meaning here, since we're reloading the object with the result of the method.

@@ -25,6 +25,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsClass { get; }
 
+        public abstract bool IsInterface { get; }
+
         public abstract Dictionary<int, string> EnumValues { get; }
         public abstract bool IsEnum { get; }
 

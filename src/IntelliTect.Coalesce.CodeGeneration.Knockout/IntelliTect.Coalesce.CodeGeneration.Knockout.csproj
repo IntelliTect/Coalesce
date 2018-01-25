@@ -21,6 +21,11 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Remove="Templates\KoServiceClient.cshtml" />
+    <None Remove="Templates\ServiceController.cshtml" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.Knockout\IntelliTect.Coalesce.Knockout.csproj" />
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
   </ItemGroup>

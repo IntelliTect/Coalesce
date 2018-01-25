@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public string FullyQualifiedName => Type.FullyQualifiedName;
 
-        public string ControllerName => Name;
+        public string ControllerName => IsService ? ServiceName : Name;
 
         public string ApiControllerClassName
         {
@@ -44,6 +44,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return $"{ControllerName}Controller";
             }
         }
+
+        public string ApiRouteControllerPart => ControllerName;
+
+        public string ViewControllerClassName => $"{ControllerName}Controller";
 
         public string ApiActionAccessModifier =>
             this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiActionsProtected) ?? false
@@ -92,6 +96,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Name of the List ViewModelClass
         /// </summary>
         public string ListViewModelClassName => Name + "List";
+
+
+
+        public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
+
+        public string ServiceName => Type.IsInterface && Name.StartsWith("I") ? Name.Substring(1) : Name;
+
+        public string ServiceClientClassName => ServiceName + "Client";
+
+
 
         /// <summary>
         /// Name of an instance of the List ViewModelClass
@@ -370,8 +384,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
-        public string ApiRouteControllerPart => Name;
-
 
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
@@ -409,40 +421,31 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
 
-        public string DtoIncludesAsCS()
-        {
-            var includeList = ClientProperties
+        public string DtoIncludesAsCS() => new CodeBuilder(3)
+            .Lines(ClientProperties
                 .Where(p => p.HasDtoIncludes)
                 .SelectMany(p => p.DtoIncludes)
                 .Distinct()
-                .Select(include => $"bool {include.GetValidCSharpIdentifier("include")} = includes == \"{include}\";")
-                .ToList();
+                .Select(include => $"bool {include.GetValidCSharpIdentifier("include")} = includes == \"{include.EscapeStringLiteralForCSharp()}\";")
+            )
+            .ToString();
 
-            return string.Join($"{Environment.NewLine}\t\t\t", includeList);
-        }
-
-        public string DtoExcludesAsCS()
-        {
-            var excludeList = ClientProperties
+        public string DtoExcludesAsCS() => new CodeBuilder(3)
+            .Lines(ClientProperties
                 .Where(p => p.HasDtoExcludes)
                 .SelectMany(p => p.DtoExcludes)
                 .Distinct()
-                .Select(exclude => $"bool {exclude.GetValidCSharpIdentifier("exclude")} = includes == \"{exclude}\";")
-                .ToList();
+                .Select(exclude => $"bool {exclude.GetValidCSharpIdentifier("exclude")} = includes == \"{exclude.EscapeStringLiteralForCSharp()}\";")
+            )
+            .ToString();
 
-            return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
-        }
-
-        public string PropertyRolesAsCS()
-        {
-            var allPropertyRoles = ClientProperties
+        public string PropertyRolesAsCS() => new CodeBuilder(3)
+            .Lines(ClientProperties
                 .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
                 .Distinct()
-                .Select(role => $"bool {role.GetValidCSharpIdentifier("is")} = context.IsInRoleCached(\"{role}\");")
-                .ToList();
-            
-            return string.Join($"{Environment.NewLine}\t\t\t", allPropertyRoles);
-        }
+                .Select(role => $"bool {role.GetValidCSharpIdentifier("is")} = context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\");")
+            )
+            .ToString();
 
         public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
             Type.GetAttributeValue<TAttribute>(valueName);

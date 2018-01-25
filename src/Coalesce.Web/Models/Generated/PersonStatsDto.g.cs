@@ -24,13 +24,8 @@ namespace Coalesce.Web.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for PersonStats
 
 
-            // Applicable excludes for PersonStats
-
-
-            // Applicable roles for PersonStats
 
 
             // Fill the properties of the object.
@@ -46,13 +41,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            // Applicable includes for PersonStats
 
 
-            // Applicable excludes for PersonStats
-
-
-            // Applicable roles for PersonStats
 
 
             entity.Height = (Height ?? 0);

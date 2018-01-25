@@ -56,6 +56,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.g.ts");
             }
 
+            foreach (var model in Model.Services)
+            {
+                yield return Generator<KoServiceClient>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Generated/Ko.{model.ServiceClientClassName}.g.ts");
+            }
+
             foreach (var model in Model.DiscoveredClassViewModels.Where(c => c.HasTypeScriptPartial))
             {
                 yield return Generator<KoTsPartialStub>()

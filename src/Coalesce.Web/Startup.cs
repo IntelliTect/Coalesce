@@ -13,6 +13,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using IntelliTect.Coalesce;
+using Coalesce.Domain.Services;
 
 namespace Coalesce.Web
 {
@@ -56,6 +57,8 @@ namespace Coalesce.Web
 
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
+
+            services.AddScoped<IWeatherService, WeatherService>();
 
             services.AddAuthentication(DemoMiddleware.AuthenticationScheme)
                 .AddCookie(DemoMiddleware.AuthenticationScheme, options => {

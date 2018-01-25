@@ -39,16 +39,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         yield return Generator<ApiController>()
                             .WithModel(model)
                             .WithDbContext(context.ClassViewModel)
-                            .AppendOutputPath($"Api/Generated/{model.Name}Controller.g.cs");
+                            .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
                     }
 
                     if (model.WillCreateViewController)
                     {
                         yield return Generator<ViewController>()
                             .WithModel(model)
-                            .AppendOutputPath($"Controllers/Generated/{model.Name}Controller.g.cs");
+                            .AppendOutputPath($"Controllers/Generated/{model.ViewControllerClassName}.g.cs");
                     }
                 }
+            }
+
+            foreach (var model in Model.Services)
+            {
+                yield return Generator<ServiceController>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Controllers/Generated/{model.ApiControllerClassName}.g.cs");
             }
         }
     }

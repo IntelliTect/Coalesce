@@ -545,7 +545,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 {
                     b.Line("<button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>");
                     b.Line(@"<button type='button' class='btn btn-primary btn-ok'");
-                    b.Indented(@"data-bind=""click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})"">");
+                    b.Indented(@"data-bind=""click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)"">");
                     b.Indented("OK");
                     b.Line("</button>");
                 }

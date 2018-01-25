@@ -18,8 +18,8 @@ module Coalesce {
         }
 
         protected prop = function <TProp>(name: string): ComputedConfiguration<TProp> {
-            var k = "_" + name;
-            var raw = this[k] = ko.observable<TProp>(null);
+            const k = "_" + name;
+            const raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
             computed = ko.computed<TProp>({
                 deferEvaluation: true, // This is essential. If not deferred, the observable will be immediately evaluated without parentConfig being set.
@@ -52,6 +52,13 @@ module Coalesce {
         public onStartBusy = this.prop<(object: T) => void>("onStartBusy");
         /** A callback to be called when an AJAX request completes. */
         public onFinishBusy = this.prop<(object: T) => void>("onFinishBusy");
+
+        /**
+            Gets the underlying observable that stores the object's explicit configuration value.
+        */
+        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
+            return (this as any)["_" + name];
+        }
     }
 
     export class ViewModelConfiguration<T extends BaseViewModel> extends CoalesceConfiguration<T> {
@@ -96,35 +103,25 @@ module Coalesce {
             E.g. ViewModels.MyModel.coalesceConfig.initialDataSource(MyModel.dataSources.MyDataSource);
         */
         public initialDataSource = this.prop<DataSource<T> | (new () => DataSource<T>)>("initialDataSource");
-
-        /**
-            Gets the underlying observable that stores the object's explicit configuration value.
-        */
-        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
-            return (this as any)["_" + name];
-        }
     }
 
     export class ListViewModelConfiguration<T extends BaseListViewModel<TItem>, TItem extends BaseViewModel> extends CoalesceConfiguration<T> {
+    }
 
-        /**
-            Gets the underlying observable that stores the object's explicit configuration value.
-        */
-        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
-            return (this as any)["_" + name];
-        }
+    export class ServiceClientConfiguration<T extends ServiceClient> extends CoalesceConfiguration<T> {
     }
 
     class RootConfig extends CoalesceConfiguration<any> {
-        public viewModel = new ViewModelConfiguration<BaseViewModel>(this);
-        public listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
+        public readonly viewModel = new ViewModelConfiguration<BaseViewModel>(this);
+        public readonly listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
+        public readonly serviceClient = new ServiceClientConfiguration<ServiceClient>(this);
     }
 
-    var invalidPropFunc: () => any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
-    var invalidProp: any = invalidPropFunc;
+    const invalidPropFunc: () => any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
+    const invalidProp: any = invalidPropFunc;
     invalidProp.raw = invalidProp;
 
-    export var GlobalConfiguration = new RootConfig();
+    export const GlobalConfiguration = new RootConfig();
     GlobalConfiguration.baseApiUrl("/api");
     GlobalConfiguration.baseViewUrl("");
     GlobalConfiguration.showFailureAlerts(true);
@@ -155,7 +152,12 @@ module Coalesce {
         parentCollection: object;
     }
 
-    export abstract class ClientMethod<TParent extends BaseViewModel | BaseListViewModel<any>, TResult> {
+    export interface ClientMethodParent {
+        coalesceConfig: CoalesceConfiguration<this>;
+        apiController: string;
+    }
+
+    export abstract class ClientMethod<TParent extends ClientMethodParent, TResult> {
         public abstract readonly name: string;
 
         /** HTTP method to be used when calling the API endpoint. */
@@ -176,9 +178,7 @@ module Coalesce {
         /** True if last invocation of method was successful. */
         public wasSuccessful: KnockoutObservable<boolean | null> = ko.observable(null);
 
-        constructor(protected parent: TParent) {
-        }
-
+        constructor (protected parent: TParent) { }
 
         protected abstract loadResponse: (data: object, callback?: (result: TResult) => void, reload?: boolean) => void;
 
@@ -213,8 +213,7 @@ module Coalesce {
                     this.message(errorMsg);
 
                     if (this.parent.coalesceConfig.showFailureAlerts()) {
-                        (this.parent.coalesceConfig.onFailure() as (parent: object, message: string) => void)
-                            (this.parent, `Could not call method ${this.name}: ${errorMsg}`);
+                        this.parent.coalesceConfig.onFailure()(this.parent, `Could not call method ${this.name}: ${errorMsg}`);
                     }
                 })
                 .always(() => {
@@ -259,6 +258,10 @@ module Coalesce {
         constructor() {
             this._name = Coalesce.Utilities.getClassName(this);
         }
+    }
+
+    export abstract class ServiceClient {
+        public readonly abstract apiController: string;
     }
 
     export abstract class BaseViewModel {

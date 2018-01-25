@@ -23,13 +23,8 @@ namespace Coalesce.Web.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for DevTeam
 
 
-            // Applicable excludes for DevTeam
-
-
-            // Applicable roles for DevTeam
 
 
             // Fill the properties of the object.
@@ -44,13 +39,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            // Applicable includes for DevTeam
 
 
-            // Applicable excludes for DevTeam
-
-
-            // Applicable roles for DevTeam
 
 
             entity.Name = Name;

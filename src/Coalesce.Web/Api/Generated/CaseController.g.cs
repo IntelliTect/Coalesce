@@ -32,7 +32,7 @@ namespace Coalesce.Web.Api
         }
 
 
-        [HttpGet("get/{id}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseDtoGen>> Get(
             int id,
@@ -64,9 +64,18 @@ namespace Coalesce.Web.Api
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
-        [HttpPost("save")]
+        [HttpPut()]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Save(
+        public virtual Task<ItemResult<CaseDtoGen>> Create(
+            CaseDtoGen dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost()]
+        [AllowAnonymous]
+        public virtual Task<ItemResult<CaseDtoGen>> Update(
             CaseDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource,

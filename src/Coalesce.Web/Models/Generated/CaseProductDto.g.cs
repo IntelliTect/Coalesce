@@ -26,13 +26,8 @@ namespace Coalesce.Web.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for CaseProduct
 
 
-            // Applicable excludes for CaseProduct
-
-
-            // Applicable roles for CaseProduct
 
 
             // Fill the properties of the object.
@@ -54,13 +49,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            // Applicable includes for CaseProduct
 
 
-            // Applicable excludes for CaseProduct
-
-
-            // Applicable roles for CaseProduct
 
 
             entity.CaseId = (CaseId ?? 0);

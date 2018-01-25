@@ -49,6 +49,15 @@ namespace IntelliTect.Coalesce.Utilities
         }
 
         /// <summary>
+        /// Calls <see cref="Line(string)"/> for each line.
+        /// </summary>
+        public CodeBuilder Lines(IEnumerable<string> lines)
+        {
+            foreach (var line in lines) Line(line);
+            return this;
+        }
+
+        /// <summary>
         /// Write a line that is indented one level past the current indentation level.
         /// </summary>
         /// <exception cref="InvalidOperationException">Not currently at the start of a blank line - cannot add indented text at the current location.</exception>

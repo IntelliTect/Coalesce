@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 return null;
             }
-            return new Nullable<T>((T)result);
+            return new T?((T)result);
         }
 
         public static T? GetAttributeValue<TAttribute, T>(this IAttributeProvider obj, Expression<Func<TAttribute, T>> propertyExpression)

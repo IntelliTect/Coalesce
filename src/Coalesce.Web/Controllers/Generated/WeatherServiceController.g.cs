@@ -20,8 +20,7 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Web.Api
 {
-    [Route("api/IWeatherService")]
-    [Authorize]
+    [Route("api/WeatherService")]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class WeatherServiceController : Controller
     {
@@ -36,13 +35,13 @@ namespace Coalesce.Web.Api
         /// Method: GetWeather
         /// </summary>
         [HttpPost("GetWeather")]
-
-        public virtual ItemResult<WeatherDataDtoGen> GetWeather()
+        [Authorize]
+        public virtual ItemResult<WeatherDataDtoGen> GetWeather(System.DateTimeOffset? dateTime)
         {
             var result = new ItemResult<WeatherDataDtoGen>();
 
             IncludeTree includeTree = null;
-            var methodResult = Service.GetWeather();
+            var methodResult = Service.GetWeather(dateTime);
 
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);

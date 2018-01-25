@@ -49,8 +49,9 @@
 | Property filter API parameters are now specified using `?filter.propertyName=value` (formerly, this was just `?propertyName=value`). | Adjust manual API calls (that don't use the generated ListViewModels) accordingly.
 | The `PropertyValues` endpoint has been removed, as it was deemed too specific a use case to warrant the need to accommodate its existence into your security model for each and every entity type. | Replace usages with a custom static method on the relevant model that will return an `ICollection<string>` with the desired results.
 | API endpoints that formerly took an arbitrary `where` parameter (stored in `BaseListViewModel.query.where`) no longer do so. This was removed because the security implications were such that a carefully-crafted where statement could reveal information about the state of the database that would be otherwise inaccessible to the user. | In cases where this behavior is needed, create a custom data source (see the "New Features" section below) and add public properties marked with `[Coalesce]` that represent the needed inputs to perform the query in C#.
-| Endpoint `Get` now returns an `ItemResult<TDto>` instead of a raw `TDto`.
-| Endpoint `Delete` now returns an `ItemResult` instead of a `bool`.
+| Endpoint `Get` now returns an `ItemResult<TDto>` instead of a raw `TDto`. | If you had any manual invocations of this endpoint not through the generated typescript, update those calls.
+| Endpoint `Delete` now returns an `ItemResult` instead of a `bool`. | If you had any manual invocations of this endpoint not through the generated typescript, update those calls.
+| Endpoints generated for model methods now emit an `[Authorize]` attribute by default. | Any model methods that were intentionally public should be annotated with `[Execute(PermissionLevel = AllowAll)]`.
 
 ## List API, BaseListViewModel & Generated ListViewModels
 

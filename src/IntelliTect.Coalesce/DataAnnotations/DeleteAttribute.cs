@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// Should users be allowed to delete an entity via the API/button.
     /// </summary>    
     [AttributeUsage(AttributeTargets.Class)]
-    public class DeleteAttribute: SecurityAttribute
+    public class DeleteAttribute : SecurityAttribute
     {
     }
 }

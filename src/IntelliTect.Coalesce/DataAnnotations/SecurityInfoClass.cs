@@ -47,6 +47,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
+                if (Read.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
                 if (Read.AllowAnonymous || Edit.AllowAnonymous || Create.AllowAnonymous || Delete.AllowAnonymous) return "[AllowAnonymous]";
                 if (Read.HasRoles) return $"[Authorize(Roles=\"{AllRoles()}\")]";
@@ -62,6 +63,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
+                if (Edit.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
                 if (Edit.AllowAnonymous) return "[AllowAnonymous]";
                 if (Edit.HasRoles) return $"[Authorize(Roles=\"{Edit.ExternalRoleList}\")]";
@@ -77,6 +79,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
+                if (Delete.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
                 if (Delete.AllowAnonymous) return "[AllowAnonymous]";
                 if (Delete.HasRoles) return $"[Authorize(Roles=\"{Delete.ExternalRoleList}\")]";
@@ -92,6 +95,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             get
             {
+                if (Create.NoAccess && Edit.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
                 if (Create.AllowAnonymous || Edit.AllowAnonymous) return "[AllowAnonymous]";
 
@@ -106,10 +110,19 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
         }
 
+        /// <summary>
+        /// This is checked, and this exception thrown, to prevent accidents in code generation.
+        /// </summary>
+        /// <returns></returns>
+        private Exception NoAccessException()
+            => new InvalidOperationException(
+                $"Cannot emit an annotation for permission level {SecurityPermissionLevels.DenyAll}. Templates shouldn't emit anything in such cases.");
+
         public bool IsReadAllowed(ClaimsPrincipal user = null)
         {
             if (Read.HasAttribute)
             {
+                if (Read.NoAccess) return false;
                 if (AllowAnonymousAny) return true;
                 if (Read.HasRoles && user != null)
                     return Read.RoleList.Any(s => user.IsInRole(s));

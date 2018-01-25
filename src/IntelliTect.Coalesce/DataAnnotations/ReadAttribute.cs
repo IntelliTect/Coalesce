@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// If specified on a property with no [Edit] attribute, the property is read-only.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
-    public class ReadAttribute: SecurityAttribute
+    public class ReadAttribute : SecurityAttribute
     {
     }
 }

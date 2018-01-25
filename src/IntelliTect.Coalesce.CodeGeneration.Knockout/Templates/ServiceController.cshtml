@@ -9,7 +9,6 @@
     {
         namespaceName += "." + Model.AreaName;
     }
-    var securityInfo = model.SecurityInfo;
 
     var namespaces = new List<string>();
     namespaces.Add("IntelliTect.Coalesce");
@@ -49,7 +48,7 @@ namespace @(namespaceName).Api
     @:[Route("api/@(model.ApiRouteControllerPart)")]
     }
 }
-    @(securityInfo.ClassAnnotation)
+    @{ /** No controller-level security annotation is applied - all security for service controllers is on a per-action basis. */ } 
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class @(model.ApiControllerClassName) : Controller
     {

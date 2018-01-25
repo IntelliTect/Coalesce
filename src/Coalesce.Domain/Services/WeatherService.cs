@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Coalesce.Domain.Services
     [Coalesce, Service]
     public interface IWeatherService
     {
-        WeatherData GetWeather();
+        WeatherData GetWeather(DateTimeOffset? dateTime);
     }
 
     public class WeatherService : IWeatherService
@@ -21,7 +22,7 @@ namespace Coalesce.Domain.Services
             this.db = db;
         }
 
-        public WeatherData GetWeather() => new WeatherData { TempFahrenheit = 42, Humidity = db.Cases.Count() };
+        public WeatherData GetWeather(DateTimeOffset? dateTime) => new WeatherData { TempFahrenheit = 42, Humidity = db.Cases.Count() };
     }
 
     public class WeatherData

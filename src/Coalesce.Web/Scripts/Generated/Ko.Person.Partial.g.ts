@@ -165,7 +165,7 @@ module ViewModels {
             };
             
             /** Calls server method (Rename) with an instance of Rename.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.name(), callback, reload);
             }
             
@@ -178,7 +178,7 @@ module ViewModels {
                 return this.invoke(name, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: ViewModels.Person) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data));
                 } else {
@@ -207,7 +207,7 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: any) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: any) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -231,7 +231,7 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -255,7 +255,7 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -286,7 +286,7 @@ module ViewModels {
             };
             
             /** Calls server method (ChangeFirstName) with an instance of ChangeFirstName.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.firstName(), callback, reload);
             }
             
@@ -299,7 +299,7 @@ module ViewModels {
                 return this.invoke(firstName, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: ViewModels.Person) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data));
                 } else {

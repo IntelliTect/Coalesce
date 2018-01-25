@@ -31,6 +31,8 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+import datetime
+
 extensions = []
 
 def setup(app):
@@ -52,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Coalesce'
-copyright = '2017, IntelliTect'
+copyright = str(datetime.datetime.now().year) + ', IntelliTect'
 author = 'IntelliTect'
 
 # The version info for the project you're documenting, acts as replacement for

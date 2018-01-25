@@ -6,6 +6,7 @@ Allows for control over the generated MVC Controllers.
 
 Currently only controls over the API controllers are present, but additional properties may be added in the future.
     
+This attribute may be placed on any type from which an API controller is generated, including :ref:`EntityModels`, :ref:`CustomDTOs`, and :ref:`Services`.
 
 Example Usage
 -------------

@@ -12,7 +12,7 @@ module Demo {
             this.allOpenCases.dataSource.subscribe(this.allOpenCases);
             this.allOpenCases.load();
 
-            this.weatherService.getWeather.invoke();
+            this.weatherService.getWeather.invoke(null);
         }
     }
 

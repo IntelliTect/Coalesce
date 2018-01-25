@@ -32,7 +32,7 @@ namespace Coalesce.Web.Api
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("get/{id}")]
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseDtoGen>> Get(
             int id,
@@ -64,18 +64,9 @@ namespace Coalesce.Web.Api
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
-        [HttpPut()]
+        [HttpPost("save")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Create(
-            CaseDtoGen dto,
-            [FromQuery] DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.Case> dataSource,
-            IBehaviors<Coalesce.Domain.Case> behaviors)
-            => SaveImplementation(dto, parameters, dataSource, behaviors);
-
-        [HttpPost()]
-        [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Update(
+        public virtual Task<ItemResult<CaseDtoGen>> Save(
             CaseDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource,
@@ -133,7 +124,7 @@ namespace Coalesce.Web.Api
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
-
+        [Authorize]
         public virtual ItemResult<int> GetAllOpenCasesCount()
         {
             var result = new ItemResult<int>();
@@ -148,7 +139,7 @@ namespace Coalesce.Web.Api
         /// Method: RandomizeDatesAndStatus
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
-
+        [Authorize]
         public virtual ItemResult<object> RandomizeDatesAndStatus()
         {
             var result = new ItemResult<object>();
@@ -164,7 +155,7 @@ namespace Coalesce.Web.Api
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]
-
+        [Authorize]
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
             var result = new ItemResult<CaseSummaryDtoGen>();

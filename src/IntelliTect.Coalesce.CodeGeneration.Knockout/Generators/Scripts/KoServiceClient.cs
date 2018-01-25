@@ -11,10 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KoServiceClient : KnockoutVMGenerator
     {
-        public KoServiceClient(RazorTemplateServices razorServices) : base(razorServices)
-        {
-            this.MethodParentCanLoad = false;
-        }
+        public KoServiceClient(RazorTemplateServices razorServices) : base(razorServices) { }
 
         public override TemplateDescriptor Template =>
             new TemplateDescriptor("Templates", "KoServiceClient.cshtml");

@@ -87,21 +87,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ParameterViewModel> ClientParameters => Parameters.Where(f => !f.IsDI);
 
         /// <summary>
-        /// Gets the TypeScript parameters for this method call.
-        /// </summary>
-        public string TsParameters
-        {
-            get
-            {
-                string result = "";
-                result = string.Join(", ", ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
-                if (!string.IsNullOrWhiteSpace(result)) result = result + ", ";
-                result = result + $"callback: (result: {ReturnType.TsType}) => void = null, reload: boolean = true";
-                return result;
-            }
-        }
-
-        /// <summary>
         /// Gets the CS parameters for this method call.
         /// </summary>
         public string CsParameters
@@ -192,13 +177,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public SecurityInfoMethod SecurityInfo =>
-            new SecurityInfoMethod(HasAttribute<ExecuteAttribute>(), this.GetAttributeValue<ExecuteAttribute>(a => a.Roles) ?? "");
+        public ExecuteSecurityInfo SecurityInfo => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
 
         /// <summary>
         /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsClientMethod => !IsInternalUse && 
+        public bool IsClientMethod => !IsInternalUse && !SecurityInfo.Execute.NoAccess && 
             // Services only have instance methods - no static methods.
             (!Parent.IsService || !IsStatic) && 
             // Interface services always expose all their declared methods.

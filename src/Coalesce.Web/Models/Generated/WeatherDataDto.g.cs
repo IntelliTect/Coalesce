@@ -18,30 +18,28 @@ namespace Coalesce.Web.Models
         public double? TempFahrenheit { get; set; }
         public double? Humidity { get; set; }
 
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
         public override void MapFrom(Coalesce.Domain.Services.WeatherData obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
-
-
-
-
             // Fill the properties of the object.
+
             this.TempFahrenheit = obj.TempFahrenheit;
             this.Humidity = obj.Humidity;
         }
 
-        // Updates an object from the database to the state handed in by the DTO.
+        /// <summary>
+        /// Map from the current DTO instance to the domain object.
+        /// </summary>
         public override void MapTo(Coalesce.Domain.Services.WeatherData entity, IMappingContext context)
         {
             var includes = context.Includes;
 
             if (OnUpdate(entity, context)) return;
-
-
-
-
 
             entity.TempFahrenheit = (TempFahrenheit ?? 0);
             entity.Humidity = (Humidity ?? 0);

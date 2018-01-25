@@ -77,7 +77,7 @@ module ListViewModels {
             };
             
             /** Calls server method (Add) with an instance of Add.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.numberOne(), args.numberTwo(), callback, reload);
             }
             
@@ -93,7 +93,7 @@ module ListViewModels {
                 return this.invoke(numberOne, numberTwo, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -118,7 +118,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -149,7 +149,7 @@ module ListViewModels {
             };
             
             /** Calls server method (PersonCount) with an instance of PersonCount.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.lastNameStartsWith(), callback, reload);
             }
             
@@ -162,7 +162,7 @@ module ListViewModels {
                 return this.invoke(lastNameStartsWith, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -193,7 +193,7 @@ module ListViewModels {
             };
             
             /** Calls server method (RemovePersonById) with an instance of RemovePersonById.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: boolean) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.id(), callback, reload);
             }
             
@@ -206,7 +206,7 @@ module ListViewModels {
                 return this.invoke(id, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: boolean) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: boolean) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -231,7 +231,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: string) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -263,7 +263,7 @@ module ListViewModels {
             };
             
             /** Calls server method (NamesStartingWith) with an instance of NamesStartingWith.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.characters(), callback, reload);
             }
             
@@ -276,7 +276,7 @@ module ListViewModels {
                 return this.invoke(characters, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: string[]) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: string[]) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();

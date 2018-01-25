@@ -27,15 +27,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
         /// </summary>
         protected bool ParentLoadHasIdParameter { get; set; }
 
-        protected bool MethodParentCanLoad { get; set; } = true;
-
         public string ClientMethodDeclaration(MethodViewModel method, string parentClassName, int indentLevel = 2)
         {
             var b = new CodeBuilder(initialLevel: indentLevel);
             var model = this.Model;
+            var isService = method.Parent.IsService;
 
-            string reloadArg = MethodParentCanLoad ? ", reload" : "";
-            string reloadParam = MethodParentCanLoad ? ", reload: boolean = true" : "";
+            string reloadArg = !isService ? ", reload" : "";
+            string reloadParam = !isService ? ", reload: boolean = true" : "";
+            string callbackAndReloadParam = $"callback: (result: {method.ReturnType.TsType}) => void = null{reloadParam}";
 
             // Default instance of the method class.
             b.Line();
@@ -56,7 +56,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             // Standard invoke method - all CS method parameters as TS method parameters.
             b.Line();
             b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
-            using (b.TSBlock($"public invoke = ({method.TsParameters}): JQueryPromise<any> =>", true))
+
+            string parameters = "";
+            parameters = string.Join(", ", method.ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
+            if (!string.IsNullOrWhiteSpace(parameters)) parameters = parameters + ", ";
+            parameters = parameters + callbackAndReloadParam;
+
+            using (b.TSBlock($"public invoke = ({parameters}): JQueryPromise<any> =>", true))
             {
                 b.Line($"return this.invokeWithData({method.JsPostObject}, callback{reloadArg});");
             }
@@ -80,14 +86,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
                 // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it.
                 // Thankfully, we can implicitly type using the default.
-                using (b.TSBlock($"public invokeWithArgs = (args = this.args, callback?: (result: {method.ReturnType.TsType}) => void{reloadParam}): JQueryPromise<any> =>"))
+                using (b.TSBlock($"public invokeWithArgs = (args = this.args, {callbackAndReloadParam}): JQueryPromise<any> =>"))
                 {
                     b.Line($"return this.invoke({method.JsArguments("args", true)}{reloadArg});");
                 }
 
                 b.Line();
                 b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
-                using (b.TSBlock($"public invokeWithPrompts = (callback: (result: {method.ReturnType.TsType}) => void = null{reloadParam}): JQueryPromise<any> =>", true))
+                using (b.TSBlock($"public invokeWithPrompts = ({callbackAndReloadParam}): JQueryPromise<any> =>", true))
                 {
                     b.Line($"var $promptVal: string = null;");
                     foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
@@ -110,7 +116,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // Method response handler - highly dependent on what the response type actually is.
             b.Line();
-            using (b.TSBlock($"protected loadResponse = (data: any, callback?: (result: {method.ReturnType.TsType}) => void, reload?: boolean) =>", true))
+            using (b.TSBlock($"protected loadResponse = (data: any, {callbackAndReloadParam}) =>", true))
             {
                 if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel) {
                     // Collection of objects that have TypeScript ViewModels. This could be an entity or an external type.
@@ -138,7 +144,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("this.result(data);");
                 }
 
-                if (!MethodParentCanLoad)
+                if (isService)
                 {
                     b.Line("if (typeof(callback) == 'function')");
                     b.Indented("callback(this.result());");

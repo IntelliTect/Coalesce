@@ -413,39 +413,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ClassSecurityInfo _securityInfo;
         public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
-            (GetSecurityAttribute<ReadAttribute>()),
-            (GetSecurityAttribute<EditAttribute>()),
-            (GetSecurityAttribute<DeleteAttribute>()),
-            (GetSecurityAttribute<CreateAttribute>())
+            this.GetSecurityPermission<ReadAttribute>(),
+            this.GetSecurityPermission<EditAttribute>(),
+            this.GetSecurityPermission<DeleteAttribute>(),
+            this.GetSecurityPermission<CreateAttribute>()
         ));
 
+        public ExecuteSecurityInfo ExecuteSecurity => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
+
         public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
-
-        public string DtoIncludesAsCS() => new CodeBuilder(3)
-            .Lines(ClientProperties
-                .Where(p => p.HasDtoIncludes)
-                .SelectMany(p => p.DtoIncludes)
-                .Distinct()
-                .Select(include => $"bool {include.GetValidCSharpIdentifier("include")} = includes == \"{include.EscapeStringLiteralForCSharp()}\";")
-            )
-            .ToString();
-
-        public string DtoExcludesAsCS() => new CodeBuilder(3)
-            .Lines(ClientProperties
-                .Where(p => p.HasDtoExcludes)
-                .SelectMany(p => p.DtoExcludes)
-                .Distinct()
-                .Select(exclude => $"bool {exclude.GetValidCSharpIdentifier("exclude")} = includes == \"{exclude.EscapeStringLiteralForCSharp()}\";")
-            )
-            .ToString();
-
-        public string PropertyRolesAsCS() => new CodeBuilder(3)
-            .Lines(ClientProperties
-                .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
-                .Distinct()
-                .Select(role => $"bool {role.GetValidCSharpIdentifier("is")} = context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\");")
-            )
-            .ToString();
 
         public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
             Type.GetAttributeValue<TAttribute>(valueName);

@@ -67,7 +67,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: number) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -91,7 +91,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: any) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: any) => void = null, reload: boolean = true) => {
                 this.result(data);
                 if (reload) {
                     var result = this.result();
@@ -116,7 +116,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback?: (result: ViewModels.CaseSummary) => void, reload?: boolean) => {
+            protected loadResponse = (data: any, callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.CaseSummary(data));
                 } else {

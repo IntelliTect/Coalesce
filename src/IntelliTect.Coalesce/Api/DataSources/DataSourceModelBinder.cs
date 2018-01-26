@@ -121,18 +121,6 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 // await childBinder.BindModelAsync(bindingContext);
             }
 
-            // Perform auth check after binding parameters,
-            // so that any parameters may be used as part of checking auth
-            // (maybe certain users aren't allowed to query with certain parameters).
-            var authCheck = (dataSource as IAuthorizable).IsAuthorized();
-            if (!authCheck.Authorized)
-            {
-                bindingContext.ModelState.TryAddModelError(
-                    bindingContext.BinderModelName, 
-                    authCheck.Message ?? $"Access to DataSource '{requestedDataSource}' is unauthorized.");
-                return;
-            }
-
             // Everything worked out; we have a dataSource!
             // Hand back our resulting object, and we're done.
             bindingContext.Result = ModelBindingResult.Success(dataSource);

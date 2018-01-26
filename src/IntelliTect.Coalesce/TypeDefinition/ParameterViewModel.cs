@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -31,14 +32,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the parameter to pass to the actual method accounting for DI.
         /// </summary>
-        public string CsArgumentName
+        public string CsArgument
         {
             get
             {
                 if (IsAContext) return "Db";
                 if (IsAUser) return "User";
                 if (IsAnIncludeTree) return "out includeTree";
-                return Name.ToCamelCase();
+                if (Type.HasClassViewModel)
+                {
+                    return $"{CsParameterName}.{nameof(Mapper.MapToModel)}(new {Type.FullyQualifiedName}(), new {nameof(MappingContext)}(User))";
+                }
+                return CsParameterName;
             }
         }
 
@@ -46,7 +51,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
 
-        public string CsDeclaration => $"{(IsInjected ? "[FromServices] " : "")}{Type.FullyQualifiedName} {Name.ToCamelCase()}";
+        public string CsDeclaration
+        {
+            get
+            {
+                var typeName = Type.HasClassViewModel ? Type.ClassViewModel.DtoName : Type.FullyQualifiedName;
+                return $"{(IsInjected ? "[FromServices] " : "")}{typeName} {CsParameterName}";
+            }
+        }
+
+        public string JsVariable => Name.ToCamelCase();
+        public string CsParameterName => Name.ToCamelCase();
+
+
 
         /// <summary>
         /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()

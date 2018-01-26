@@ -129,7 +129,7 @@ namespace IntelliTect.Coalesce
             }
 
             // Set all properties on the DB-mapped object to the incoming values.
-            incomingDto.MapToEntity(item, new MappingContext(User, includes));
+            incomingDto.MapToModel(item, new MappingContext(User, includes));
 
             // Allow interception of the save.
             var beforeSave = BeforeSave(kind, originalItem, item);

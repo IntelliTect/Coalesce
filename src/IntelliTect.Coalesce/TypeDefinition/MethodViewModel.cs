@@ -110,7 +110,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the CS arguments passed to this method call.
         /// </summary>
-        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgumentName));
+        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgument));
 
 
         /// <summary>
@@ -121,11 +121,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string result;
             if (obj != "")
             {
-                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name.ToCamelCase()}()"));
+                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.JsVariable}()"));
             }
             else
             {
-                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name.ToCamelCase()));
+                result = string.Join(", ", ClientParameters.Select(f => obj + f.JsVariable));
             }
             if (callback)
             {
@@ -149,7 +149,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     if (Parameters.Any()) result = result + ", ";
                 }
 
-                result += string.Join(", ", ClientParameters.Select(f => $"{f.Name}: {f.TsConversion(f.Name)}"));
+                result += string.Join(", ", ClientParameters.Select(f => $"{f.JsVariable}: {f.TsConversion(f.JsVariable)}"));
                 result += " }";
                 return result;
 

@@ -235,6 +235,34 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
+
+        /// <summary>
+        /// Gets all the first names starting with the characters.
+        /// </summary>
+        /// <param name="criteria">Search Criteria</param>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        [Coalesce]
+        public static IEnumerable<Person> SearchPeople(PersonCriteria criteria, AppDbContext db)
+        {
+            IQueryable<Person> query = db.People;
+
+            if (!string.IsNullOrEmpty(criteria.Name))
+            {
+                query = query.Where(f => f.FirstName.StartsWith(criteria.Name) || f.LastName.StartsWith(criteria.Name));
+            }
+            if (criteria.BirthdayMonth >= 1 && criteria.BirthdayMonth >= 12)
+            {
+                query = query.Where(f => f.BirthDate != null && f.BirthDate.Value.Month == criteria.BirthdayMonth);
+            }
+            if (!string.IsNullOrWhiteSpace(criteria.EmailDomain))
+            {
+                query = query.Where(f => f.Email.Contains($"@{criteria.EmailDomain}"));
+            }
+
+            return query.ToList();
+        }
+
         [Coalesce, DefaultDataSource]
         public class WithoutCases : StandardDataSource<Person, AppDbContext>
         {

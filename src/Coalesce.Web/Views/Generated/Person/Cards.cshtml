@@ -260,6 +260,26 @@
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
                         </tr>
+                        <tr data-bind="with: searchPeople">
+                            <td>
+                                    <button class="btn btn-default btn-xs"
+                                            data-bind="click: function(){$('#method-SearchPeople').modal()}">
+                                        Search People
+                                    </button>
+                            </td>
+                            <td>
+                                    <ul data-bind="foreach: result">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
+                            </td>
+                            <td>
+                                <span data-bind="text: wasSuccessful"></span>
+                                <span data-bind="text: message"></span>
+                            </td>
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                            </td>
+                        </tr>
                 </tbody>
             </table>
         </div>
@@ -363,6 +383,32 @@
                     <label class='col-md-4 control-label'>Characters</label>
                     <div class="col-md-8">
                         <input type='text' class='form-control' data-bind='value: characters'>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal for method: SearchPeople -->
+<div id='method-SearchPeople' class='modal fade' tabindex='-1' role='dialog' data-bind='with: searchPeople'>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Search People</h4>
+            </div>
+            <div class='modal-body form-horizontal' data-bind='with: args'>
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Criteria</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: criteria'>
                     </div>
                 </div>
             </div>

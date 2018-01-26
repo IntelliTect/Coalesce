@@ -2,13 +2,14 @@
 /// <reference path="../coalesce.dependencies.d.ts" />
 
 module ViewModels {
-    // *** External Type WeatherData
-    export class WeatherData
+    // *** External Type PersonCriteria
+    export class PersonCriteria
     {
 
         // Observables
-        public tempFahrenheit: KnockoutObservable<number> = ko.observable(null);
-        public humidity: KnockoutObservable<number> = ko.observable(null);
+        public name: KnockoutObservable<string> = ko.observable(null);
+        public birthdayMonth: KnockoutObservable<number> = ko.observable(null);
+        public emailDomain: KnockoutObservable<string> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
         public parent: any;
         public parentCollection: any;
@@ -17,8 +18,9 @@ module ViewModels {
             if (!data) return;
 
             // Load the properties.
-            this.tempFahrenheit(data.tempFahrenheit);
-            this.humidity(data.humidity);
+            this.name(data.name);
+            this.birthdayMonth(data.birthdayMonth);
+            this.emailDomain(data.emailDomain);
 
         };
 
@@ -26,8 +28,9 @@ module ViewModels {
         public saveToDto = (): any => {
             var dto: any = {};
             
-            dto.tempFahrenheit = this.tempFahrenheit();
-            dto.humidity = this.humidity();
+            dto.name = this.name();
+            dto.birthdayMonth = this.birthdayMonth();
+            dto.emailDomain = this.emailDomain();
             
             return dto;
         }

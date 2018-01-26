@@ -329,5 +329,22 @@ namespace Coalesce.Web.Api
 
             return result;
         }
+
+        /// <summary>
+        /// Method: SearchPeople
+        /// </summary>
+        [HttpPost("SearchPeople")]
+        [Authorize]
+        public virtual ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>> SearchPeople(PersonCriteriaDtoGen criteria)
+        {
+            var result = new ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>>();
+
+            IncludeTree includeTree = null;
+            var methodResult = Coalesce.Domain.Person.SearchPeople(criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), Db);
+            var mappingContext = new MappingContext(User, "");
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+
+            return result;
+        }
     }
 }

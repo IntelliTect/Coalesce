@@ -287,6 +287,50 @@ module ListViewModels {
                 }
             };
         };
+        
+        /**
+            Methods and properties for invoking server method SearchPeople.
+            Gets all the first names starting with the characters.
+        */
+        public readonly searchPeople = new PersonList.SearchPeople(this);
+        public static SearchPeople = class SearchPeople extends Coalesce.ClientMethod<PersonList, ViewModels.Person[]> {
+            public readonly name = 'SearchPeople';
+            public readonly verb = 'POST';
+            public result: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
+            
+            /** Calls server method (SearchPeople) with the given arguments */
+            public invoke = (criteria: ViewModels.PersonCriteria, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ criteria: criteria }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new SearchPeople.Args(); 
+            public static Args = class Args {
+                public criteria: KnockoutObservable<ViewModels.PersonCriteria> = ko.observable(null);
+            };
+            
+            /** Calls server method (SearchPeople) with an instance of SearchPeople.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.criteria(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                var $promptVal: string = null;
+                var criteria: ViewModels.PersonCriteria = null;
+                return this.invoke(criteria, callback, reload);
+            };
+            
+            protected loadResponse = (data: any, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true) => {
+                Coalesce.KnockoutUtilities.RebuildArray(this.result, data, 'personId', ViewModels.Person, this, true);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
 
         protected createItem = (newItem?: any, parent?: any) => new ViewModels.Person(newItem, parent);
 

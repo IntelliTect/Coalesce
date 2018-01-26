@@ -723,7 +723,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Otherwise, this would break IncludesExternal.
                 string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
                 setter = $@"{treeCheck}
-                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})]);
+                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.ClassViewModel.DtoName}>(context, tree?[nameof({objectName}.{Name})]);
 ";
             }
             else

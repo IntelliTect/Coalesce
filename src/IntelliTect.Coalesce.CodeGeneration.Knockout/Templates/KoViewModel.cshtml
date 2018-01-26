@@ -241,38 +241,7 @@ module @moduleName {
             if (this.coalesceConfig.validateOnLoadFromDto()) this.validate();
         };
     
-        /** Saves this object into a data transfer object to send to the server. */
-        public saveToDto = (): any => {
-            var dto: any = {};
-            dto.@(model.PrimaryKey.JsonName) = this.@(model.PrimaryKey.JsVariable)();
-
-            @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsClientWritable && !f.IsPOCO ))
-            {
-                if (prop.Type.IsDate)
-                {
-            @:if (!this.@(prop.JsVariable)()) dto.@prop.JsonName = null;
-            @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss@(prop.Type.IsDateTimeOffset ? "ZZ" : "")');
-            }
-            else if (prop.IsForeignKey)
-            {
-            @:dto.@prop.JsonName = this.@(prop.JsVariable)();
-            if (prop.IdPropertyObjectProperty != null && !prop.IsPrimaryKey)
-            {
-            // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact. 
-            @:if (!dto.@prop.JsonName && this.@(prop.IdPropertyObjectProperty.JsVariable)()) {
-                @:dto.@prop.JsonName = this.@(prop.IdPropertyObjectProperty.JsVariable)().@(prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable)();
-            @:}
-            }
-            }
-            else if (!prop.Type.IsCollection)
-            {
-            @:dto.@prop.JsonName = this.@(prop.JsVariable)();
-            }
-            }
-
-            return dto;
-        }
-    
+@(Model.SaveToDto())
         /**
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.

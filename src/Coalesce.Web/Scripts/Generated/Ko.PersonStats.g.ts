@@ -7,31 +7,41 @@ module ViewModels {
     {
 
         // Observables
-		public height: KnockoutObservable<number> = ko.observable(null);
-		public weight: KnockoutObservable<number> = ko.observable(null);
-		public name: KnockoutObservable<string> = ko.observable(null);
+        public height: KnockoutObservable<number> = ko.observable(null);
+        public weight: KnockoutObservable<number> = ko.observable(null);
+        public name: KnockoutObservable<string> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
-        public loadFromDto: (data: any) => void;
         public parent: any;
         public parentCollection: any;
 
+        public loadFromDto = (data: any) => {
+            if (!data) return;
+
+            // Load the properties.
+            this.height(data.height);
+            this.weight(data.weight);
+            this.name(data.name);
+
+        };
+
+                /** Saves this object into a data transfer object to send to the server. */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            
+            dto.height = this.height();
+            dto.weight = this.weight();
+            dto.name = this.name();
+            
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
-            var self = this;
-            self.parent = parent;
+            this.parent = parent;
             // Load the object
-			self.loadFromDto = function(data: any) {
-				if (!data) return;
-
-                // Load the properties.
-                self.height(data.height);
-                self.weight(data.weight);
-                self.name(data.name);
-                
-            };
 
             if (newItem) {
-                self.loadFromDto(newItem);
+                this.loadFromDto(newItem);
             }
         }
     }

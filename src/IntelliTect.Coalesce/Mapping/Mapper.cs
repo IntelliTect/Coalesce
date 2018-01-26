@@ -23,10 +23,11 @@ namespace IntelliTect.Coalesce.Mapping
             return dto;
         }
 
-        public static void MapToEntity<T, TDto>(this TDto dto, T entity, IMappingContext context)
+        public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)
              where TDto : IClassDto<T>, new()
         {
             dto.MapTo(entity, context);
+            return entity;
         }
     }
 }

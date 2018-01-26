@@ -537,7 +537,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     b.Line($"<label class='col-md-4 control-label'>{arg.Name.ToProperCase()}</label>");
                     using (b.ElBlock("div", @"class=""col-md-8"""))
                     {
-                        b.Line($"<input type='text' class='form-control' data-bind='value: {arg.CsArgumentName}'>");
+                        b.Line($"<input type='text' class='form-control' data-bind='value: {arg.JsVariable}'>");
                     }
                 }
 

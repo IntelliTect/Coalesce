@@ -82,10 +82,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line($"public args = new {method.Name}.Args(); ");
 
                 using (b.TSBlock("public static Args = class Args", true))
-                foreach (var arg in method.ClientParameters)
-                {
-                    b.Line($@"public {arg.CsArgumentName}: {arg.Type.TsKnockoutType()} = {arg.Type.ObservableConstructorCall()};");
-                }
+                    foreach (var arg in method.ClientParameters)
+                    {
+                        b.Line($@"public {arg.JsVariable}: {arg.Type.TsKnockoutType()} = {arg.Type.ObservableConstructorCall()};");
+                    }
 
                 b.Line();
                 b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
@@ -144,7 +144,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Indented($"this.result().loadFromDto(data);");
                     b.Line("}");
                 }
-                else {
+                else
+                {
                     // Uninteresting return type. Either void, a primitive, or a collection of primitives.
                     // In any case, regardless of the type of the 'result' observable, this is how we set the results.
                     b.Line("this.result(data);");
@@ -183,7 +184,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // End of the method class declaration.
             classBlock.Dispose();
-            
+
             // Backwards compatibility for the old method call members (this will have a name conflict with the method object)
             // Keeping this in the code so it will still exist in the code history somewhere, but can probably be removed.
             // We collectively decided that we would introduce this significant breaking change in 2.0.0 and not maintain backwards-compat.
@@ -210,5 +211,50 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             return b.ToString();
         }
+        public string SaveToDto(int indentLevel = 2)
+        {
+            var b = new CodeBuilder(indentLevel);
+            b.Line($"/** Saves this object into a data transfer object to send to the server. */");
+            using (b.TSBlock($"public saveToDto = (): any =>"))
+            {
+                b.Line("var dto: any = {};");
+                if (Model.PrimaryKey != null)
+                {
+                    b.Line($"dto.{Model.PrimaryKey.JsonName} = this.{Model.PrimaryKey.JsVariable}();");
+                }
+                b.Line($"");
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsClientWritable && !f.IsPOCO))
+                {
+                    if (prop.Type.IsDate)
+                    {
+                        b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
+                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}().format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
+                    }
+                    else if (prop.IsForeignKey)
+                    {
+                        b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+                        if (prop.IdPropertyObjectProperty != null && !prop.IsPrimaryKey)
+                        {
+                            // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact.
+                            using (b.TSBlock($"if (!dto.{prop.JsonName} && this.{prop.IdPropertyObjectProperty.JsVariable}())"))
+                            {
+                                b.Line($"dto.{prop.JsonName} = this.{prop.IdPropertyObjectProperty.JsVariable}().{prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable}();");
+                            }
+                        }
+                    }
+                    else if (!prop.Type.IsCollection)
+                    {
+                        b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+                    }
+                }
+                b.Line();
+                b.Line($"return dto;");
+            }
+            return b.ToString();
+        }
     }
+
+
+
+
 }

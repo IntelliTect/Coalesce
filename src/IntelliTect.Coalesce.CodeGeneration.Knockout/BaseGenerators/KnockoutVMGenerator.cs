@@ -53,6 +53,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
+            if (method.ReturnType.IsCollection || method.ReturnType.IsArray)
+            {
+                b.Line($"public result: {method.ReturnType.TsKnockoutType()} = {method.ReturnType.ObservableConstructorCall()};");
+            }
+
             // Standard invoke method - all CS method parameters as TS method parameters.
             b.Line();
             b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
@@ -118,7 +123,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line();
             using (b.TSBlock($"protected loadResponse = (data: any, {callbackAndReloadParam}) =>", true))
             {
-                if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel) {
+                if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel)
+                {
                     // Collection of objects that have TypeScript ViewModels. This could be an entity or an external type.
 
                     // If the models have a key, rebuild our collection using that key so that we can reuse objects when the data matches.

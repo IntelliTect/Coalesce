@@ -250,6 +250,7 @@ module ListViewModels {
         public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> {
             public readonly name = 'NamesStartingWith';
             public readonly verb = 'POST';
+            public result: KnockoutObservableArray<string> = ko.observableArray([]);
             
             /** Calls server method (NamesStartingWith) with the given arguments */
             public invoke = (characters: string, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {

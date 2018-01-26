@@ -121,6 +121,23 @@ namespace Coalesce.Web.Api
         // Methods from data class exposed through API Controller.
 
         /// <summary>
+        /// Method: GetSomeCases
+        /// </summary>
+        [HttpPost("GetSomeCases")]
+        [Authorize]
+        public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
+        {
+            var result = new ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>>();
+
+            IncludeTree includeTree = null;
+            var methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
+            var mappingContext = new MappingContext(User, "");
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+
+            return result;
+        }
+
+        /// <summary>
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]

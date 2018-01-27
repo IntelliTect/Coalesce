@@ -35,6 +35,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override MethodInfo MethodInfo => Info;
 
         public override IEnumerable<ParameterViewModel> Parameters
-            => Info.GetParameters().Select(p => new ReflectionParameterViewModel(p));
+            => Info.GetParameters().Select(p => new ReflectionParameterViewModel(this, p));
     }
 }

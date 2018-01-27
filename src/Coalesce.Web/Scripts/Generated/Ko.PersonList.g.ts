@@ -300,7 +300,7 @@ module ListViewModels {
             
             /** Calls server method (SearchPeople) with the given arguments */
             public invoke = (criteria: ViewModels.PersonCriteria, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ criteria: criteria }, callback, reload);
+                return this.invokeWithData({ criteria: criteria ? criteria.saveToDto() : null }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */

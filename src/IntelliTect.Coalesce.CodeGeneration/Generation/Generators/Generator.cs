@@ -52,8 +52,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             foreach (var configProp in properties)
             {
                 var propType = configProp.Type.TypeInfo;
-                JToken value = obj.GetValue(configProp.Name, StringComparison.OrdinalIgnoreCase);
-                configProp.PropertyInfo.SetValue(this, value.ToObject(propType));
+                if (obj.TryGetValue(configProp.Name, StringComparison.OrdinalIgnoreCase, out JToken value))
+                {
+                    configProp.PropertyInfo.SetValue(this, value.ToObject(propType));
+                }
             }
         }
     }

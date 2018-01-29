@@ -67,6 +67,17 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             "GeneratorName": {
                 // Optional: true if the generator should be disabled.
                 "disabled": true
+            },
+            // Indentation for generated C# is configurable by type (API controllers, DTO classes and regular View controllers)
+            // It defaults to 4 spaces
+            "ApiController": {
+                "indentationSize": 2 
+            },
+            "ClassDto": {
+                "indentationSize": 2 
+            },
+            "ViewController" : {
+                "indentationSize": 2
             }
         }
     }

@@ -44,7 +44,21 @@
         </div>
     </div>
 </div>
-<div class="card" style="margin-left: 0; margin-right: 0; margin-top: 20px">
+
+<div class="card">
+    <div class="card-body">
+        <h2>Weather</h2>
+
+        <dl class="dl-horizontal" data-bind="with: weatherService.getWeather.result">
+            <dt>Temp</dt>
+            <dd data-bind="text: tempFahrenheit"></dd>
+            <dt>Humidity</dt>
+            <dd data-bind="text: humidity"></dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card" style="margin-left: 0; margin-right: 0; margin-top: 20px" data-bind="with: allOpenCases">
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
@@ -89,13 +103,13 @@
                 <label style="display: block">
                     Call Server Methods:
                 </label>
-                <button class="btn btn-primary" data-bind="click: randomizeDatesAndStatus">Randomize Dates & Status</button>
+                <button class="btn btn-primary" data-bind="click: randomizeDatesAndStatus.invoke">Randomize Dates & Status</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+<div class="flex-card-container" data-bind="foreach: allOpenCases.items, visible: allOpenCases.isLoaded" style="display: none">
     <div class="flex-card ">
         <div class="card-heading">
             <h3 class="card-title">

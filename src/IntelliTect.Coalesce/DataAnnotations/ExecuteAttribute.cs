@@ -9,8 +9,8 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// The method can be excuted by the specified role.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method)]
-    public class ExecuteAttribute: System.Attribute
+    public class ExecuteAttribute : SecurityAttribute
     {
-        public string Roles { get; set; }
+
     }
 }

@@ -24,7 +24,7 @@ namespace @(namespaceName).Controllers
     @:[Area("@Model.AreaName")]
     }
     @(model.SecurityInfo.ClassAnnotation)
-    public partial class @(model.ControllerName)Controller : BaseViewController<@(model.FullyQualifiedName)>
+    public partial class @(model.ViewControllerClassName): BaseViewController<@(model.FullyQualifiedName)>
     { 
         @(model.SecurityInfo.ReadAnnotation)
         public ActionResult Cards(){
@@ -53,13 +53,13 @@ namespace @(namespaceName).Controllers
         {
             return EditorHtmlImplementation(simple);
         }
-        </text>
-        }
-                      
+
         @(model.SecurityInfo.EditAnnotation)
         public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)
         {
             return DocsImplementation(hostingEnvironment);
         }    
+        </text>
+        }
     }
 }

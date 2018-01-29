@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
+using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class KoExternalType : RazorTemplateGenerator<ClassViewModel>
+    public class KoExternalType : KnockoutVMGenerator
     {
         public KoExternalType(RazorTemplateServices razorServices) : base(razorServices) { }
 

@@ -87,7 +87,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsTextPropertyName => JsVariable + "Text";
 
         /// <summary>
-        /// Returns true if the property is class outside the system NameSpace, but is not a string or array
+        /// Returns true if the property is class outside the system Namespace, but is not a string or array
         /// </summary>
         public bool IsPOCO => Type.IsPOCO;
 
@@ -580,14 +580,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var result = new PropertySecurityInfo();
 
-                if (this.HasAttribute<ReadAttribute>())
+                if (HasAttribute<ReadAttribute>())
                 {
                     result.IsRead = true;
                     var roles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
                     result.ReadRoles = roles;
                 }
 
-                if (this.HasAttribute<EditAttribute>())
+                if (HasAttribute<EditAttribute>())
                 {
                     result.IsEdit = true;
                     var roles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
@@ -617,23 +617,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsClientProperty && !HasNotMapped && (Type.IsPrimitive || Type.IsDate);
 
         /// <summary>
-        /// True if this property has the Includes Attribute
-        /// </summary>
-        public bool HasDtoIncludes => HasAttribute<DtoIncludesAttribute>();
-
-        /// <summary>
         /// Returns a list of content views from the Includes attribute
         /// </summary>
         public IEnumerable<string> DtoIncludes =>
             (this.GetAttributeValue<DtoIncludesAttribute>(a => a.ContentViews) ?? "")
             .Trim()
-            .Split(new char[] { ',' })
-            .Select(s => s.Trim());
-
-        /// <summary>
-        /// True if this property has the Excludes Attribute
-        /// </summary>
-        public bool HasDtoExcludes => this.HasAttribute<DtoExcludesAttribute>();
+            .Split(',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s));
 
         /// <summary>
         /// Returns a list of content views from the Excludes attribute
@@ -641,17 +632,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<string> DtoExcludes =>
             (this.GetAttributeValue<DtoExcludesAttribute>(a => a.ContentViews) ?? "")
             .Trim()
-            .Split(new char[] { ',' })
-            .Select(s => s.Trim());
+            .Split(',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s));
 
         private string GetPropertySetterConditional(bool isForEdit)
         {
-            var readRoles = (SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) ?
-                string.Join(" || ", SecurityInfo.ReadRolesList.Select(s => $"is{s}")) : "";
-            var editRoles = isForEdit && (SecurityInfo.IsSecuredProperty && SecurityInfo.EditRolesList.Count() > 0) ?
-                string.Join(" || ", SecurityInfo.EditRolesList.Select(s => $"is{s}")) : "";
-            var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
-            var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
+            string RoleCheck(string role) => $"context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\")";
+            string IncludesCheck(string include) => $"includes == \"{include.EscapeStringLiteralForCSharp()}\"";
+
+            string readRoles = default, editRoles = default;
+            if (SecurityInfo.IsSecuredProperty)
+            {
+                readRoles = string.Join(" || ", SecurityInfo.ReadRolesList.Select(RoleCheck));
+
+                if (isForEdit)
+                {
+                    editRoles = string.Join(" || ", SecurityInfo.EditRolesList.Select(RoleCheck));
+                }
+            }
+
+            var includes = string.Join(" || ", DtoIncludes.Select(IncludesCheck));
+            var excludes = string.Join(" || ", DtoExcludes.Select(IncludesCheck));
 
             var statement = new List<string>();
             if (!string.IsNullOrEmpty(readRoles)) statement.Add($"({readRoles})");
@@ -662,7 +664,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return string.Join(" && ", statement);
         }
 
-        public string ObjToDtoPropertySetter(string objectName)
+        public (string conditional, string setter)? ObjToDtoPropertySetter(string objectName)
         {
             string setter;
             if (Type.IsCollection)
@@ -671,52 +673,42 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     // Only check the includes tree for things that are in the database.
                     // Otherwise, this would break IncludesExternal.
-                    var sb = new StringBuilder();
+                    var sb = new CodeBuilder(3);
 
                     // Set this as a variable once and then use it below. This prevents multiple-evaluation of computed getter-only properties.
-                    sb.AppendLine($"var propVal{Name} = obj.{Name};");
-
-                    sb.Append("            ");
+                    sb.Line($"var propVal{Name} = obj.{Name};");
                     sb.Append($"if (propVal{Name} != null");
                     if (PureType.ClassViewModel.HasDbSet)
                     {
                         sb.Append($" && (tree == null || tree[nameof({objectName}.{Name})] != null)");
                     }
-                    sb.Append(") {");
-                    sb.AppendLine();
-                    sb.Append("                ");
-                    sb.Append($"{objectName}.{Name} = propVal{Name}");
-
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
-                    if (defaultOrderBy != null)
+                    sb.Line(") {");
+                    using (sb.Block())
                     {
-                        sb.Append($".AsQueryable().OrderBy(\"{defaultOrderBy}\").ToList()");
+                        sb.Line($"{objectName}.{Name} = propVal{Name}");
+
+                        var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
+                        if (defaultOrderBy != null)
+                        {
+                            sb.Indented($".AsQueryable().OrderBy(\"{defaultOrderBy}\").AsEnumerable<{PureType.FullyQualifiedName}>()");
+                        }
+
+                        sb.Indented($".Select(f => f.MapToDto<{PureType.FullyQualifiedName}, {PureType.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})])).ToList();");
                     }
 
-                    sb.Append($".Select(f => f.MapToDto<{PureType.FullyQualifiedName}, {PureType.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})])).ToList();");
-
-                    sb.AppendLine();
-                    sb.Append("            ");
                     if (PureType.ClassViewModel.HasDbSet)
                     {
-                        sb.Append("}");
                         // If we know for sure that we're loading these things (becuse the IncludeTree said so),
                         // but EF didn't load any, then add a blank collection so the client will delete any that already exist.
-                        sb.Append($" else if (propVal{Name} == null && tree?[nameof({objectName}.{Name})] != null)");
-                        sb.Append(" {");
-                        sb.AppendLine();
-                        sb.Append("                ");
-                        sb.Append($"{objectName}.{Name} = new {PureType.Name}DtoGen[0];");
-                        sb.AppendLine();
-                        sb.Append("            ");
-                        sb.Append("}");
+                        sb.Line($"}} else if (propVal{Name} == null && tree?[nameof({objectName}.{Name})] != null) {{");
+                        sb.Indented($"{objectName}.{Name} = new {PureType.Name}DtoGen[0];");
+                        sb.Line("}");
                     }
                     else
                     {
-                        sb.Append("}");
+                        sb.Line("}");
                     }
 
-                    sb.AppendLine();
                     setter = sb.ToString();
                 }
                 else
@@ -731,7 +723,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Otherwise, this would break IncludesExternal.
                 string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
                 setter = $@"{treeCheck}
-                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})]);
+                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.ClassViewModel.DtoName}>(context, tree?[nameof({objectName}.{Name})]);
 ";
             }
             else
@@ -742,15 +734,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var statement = GetPropertySetterConditional(false);
             if (!string.IsNullOrWhiteSpace(statement))
             {
-                return $@"            if ({statement})
-            {{
-                {setter}
-            }}
-";
+                return (statement, setter);
             }
             else
             {
-                return $"            {setter}\r\n";
+                return (null, setter);
             }
         }
 

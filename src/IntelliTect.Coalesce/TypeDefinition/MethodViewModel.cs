@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using static IntelliTect.Coalesce.DataAnnotations.ApiActionHttpMethodAttribute;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -38,25 +39,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Parent = parent;
         }
 
-        public string JsVariable => Name.ToCamelCase();
-
-        public string JsVariableResult => JsVariable + "Result";
-        public string JsVariableResultRaw => JsVariable + "ResultRaw";
-        public string JsVariableIsLoading => JsVariable + "IsLoading";
-        public string JsVariableMessage => JsVariable + "Message";
-        public string JsVariableWasSuccessful => JsVariable + "WasSuccessful";
-        public string JsVariableUi => JsVariable + "Ui";
-        public string JsVariableModal => JsVariable + "Modal";
-        public string JsVariableArgs => JsVariable + "Args";
-        public string JsVariableWithArgs => JsVariable + "WithArgs";
+        public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
+        public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
 
 
+        public HttpMethod ApiActionHttpMethod =>
+            this.GetAttributeValue<ApiActionHttpMethodAttribute, ApiActionHttpMethodAttribute.HttpMethod>(a => a.Method) ?? HttpMethod.Post;
 
 
         /// <summary>
-        /// Name of the class that is used for storing arguments on the client.
+        /// Convenient accessor for the MethodInfo when in reflection-based contexts.
         /// </summary>
-        public string ArgsName => Name + "Args";
+        public virtual MethodInfo MethodInfo => throw new InvalidOperationException("MethodInfo not available in the current context");
+
+        public string JsVariable => Name.ToCamelCase();
 
         /// <summary>
         /// Type of the return. Object if void.
@@ -91,21 +87,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ParameterViewModel> ClientParameters => Parameters.Where(f => !f.IsDI);
 
         /// <summary>
-        /// Gets the TypeScript parameters for this method call.
-        /// </summary>
-        public string TsParameters
-        {
-            get
-            {
-                string result = "";
-                result = string.Join(", ", ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
-                if (!string.IsNullOrWhiteSpace(result)) result = result + ", ";
-                result = result + $"callback: (result: {ReturnType.TsType}) => void = null, reload: boolean = true";
-                return result;
-            }
-        }
-
-        /// <summary>
         /// Gets the CS parameters for this method call.
         /// </summary>
         public string CsParameters
@@ -115,12 +96,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
                 var outParameters = new List<string>();
 
-                if (!IsStatic)
-                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
-
-                // When not static add an id that specifies the object to work on.
-                if (!IsStatic)
+                // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
+                if (!IsStatic && !Parent.IsService)
                 {
+                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
                     outParameters.Add($"{Parent.PrimaryKey.PureType.FullyQualifiedName} id");
                 }
                 outParameters.AddRange(parameters.Select(f => f.CsDeclaration));
@@ -131,7 +110,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the CS arguments passed to this method call.
         /// </summary>
-        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgumentName));
+        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgument));
 
 
         /// <summary>
@@ -142,11 +121,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string result;
             if (obj != "")
             {
-                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name.ToCamelCase()}()"));
+                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.JsVariable}()"));
             }
             else
             {
-                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name.ToCamelCase()));
+                result = string.Join(", ", ClientParameters.Select(f => obj + f.JsVariable));
             }
             if (callback)
             {
@@ -164,13 +143,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var result = "{ ";
-                if (!IsStatic)
+                if (!IsStatic && !Parent.IsService)
                 {
-                    result = result + "id: this.myId";
+                    result = result + "id: this.parent[this.parent.primaryKeyName]()";
                     if (Parameters.Any()) result = result + ", ";
                 }
 
-                result += string.Join(", ", ClientParameters.Select(f => $"{f.Name}: {f.TsConversion(f.Name)}"));
+                result += string.Join(", ", ClientParameters.Select(f => $"{f.JsVariable}: {f.TsConversion(f.JsVariable)}"));
                 result += " }";
                 return result;
 
@@ -198,13 +177,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public SecurityInfoMethod SecurityInfo =>
-            new SecurityInfoMethod(HasAttribute<ExecuteAttribute>(), this.GetAttributeValue<ExecuteAttribute>(a => a.Roles) ?? "");
+        public ExecuteSecurityInfo SecurityInfo => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
 
         /// <summary>
         /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsClientMethod => !IsInternalUse && HasAttribute<CoalesceAttribute>();
+        public bool IsClientMethod => !IsInternalUse && !SecurityInfo.Execute.NoAccess && 
+            // Services only have instance methods - no static methods.
+            (!Parent.IsService || !IsStatic) && 
+            // Interface services always expose all their declared methods.
+            ((Parent.IsService && Parent.Type.IsInterface) || HasAttribute<CoalesceAttribute>());
 
         public string LoadFromDataSourceName
         {

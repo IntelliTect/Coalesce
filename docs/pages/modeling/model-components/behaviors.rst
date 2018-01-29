@@ -13,7 +13,10 @@ Behaviors
 
 Coalesce separates out the parts of your API that read your data from the parts that mutate it. The read portion is performed by :ref:`CustomDataSources`, and the mutations are performed by behaviors. Like data sources, there exists a standard set of behaviors that Coalesce provides out-of-the-box that cover the most common use cases for creating, updating, and deleting objects in your data model.
 
-Also like data sources, these functions can be easily overridden on a per-model basis, allowing complete control over the ways in which your data is mutated by the APIs that Coalesce generates. However, unlike data sources which can have as many implementations per model as you like, you can only have one set of behaviors. The rationale is quite simple: it is acceptable for clients to be able to load your data in different ways for different pages or other usage scenarios, but the client should not be responsible nor be able to choose the underlying mechanisms by which they mutate that data. Such decisions should only ever be the concern of the server, decided upon by examining the incoming request, incoming data, and the state of existing data prior to mutation.
+Also like data sources, these functions can be easily overridden on a per-model basis, allowing complete control over the ways in which your data is mutated by the APIs that Coalesce generates. However, unlike data sources which can have as many implementations per model as you like, you can only have one set of behaviors.
+
+.. Andrew note: I wrote this originally, but is a bit verbose for an intro section, so I've taken it out.
+.. The rationale is quite simple: it is acceptable for clients to be able to load your data in different ways for different pages or other usage scenarios, but the client should not be responsible nor be able to choose the underlying mechanisms by which they mutate that data. Such decisions should only ever be the concern of the server, decided upon by examining the incoming request, incoming data, and the state of existing data prior to mutation.
 
 
 .. contents:: Contents
@@ -22,9 +25,13 @@ Also like data sources, these functions can be easily overridden on a per-model 
 Defining Behaviors
 ------------------
 
-By default, each of your models that Coalesce exposes will expose the standard behaviors (:csharp:`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`). These behaviors provide the standard set of features one would expect - creating, updating, and deleting from an EF Core :csharp:`DbContext`. Each of the three parts are implemented in one or more virtual methods, making the :csharp:`StandardBehaviors` a great place to start from when implementing your own behaviors. To override the standard behaviors, simple create your own custom behaviors class, outlined below. Unlike data sources which require an annotation to override the standard Coalesce-provided class, the simple presence of an explicitly declared set of behaviors will suppress the standard behaviors.
+By default, each of your models that Coalesce exposes will utilize the standard behaviors (:csharp:`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`) for the out-of-the-box API endpoints that Coalesce provides. These behaviors provide a set of create, update, and delete methods for an EF Core :csharp:`DbContext`, as well as a plethora of virtual methods that make the :csharp:`StandardBehaviors` a great base class for your custom implementations. Unlike data sources which require an annotation to override the Coalesce-provided standard class, the simple presence of an explicitly declared set of behaviors will suppress the standard behaviors.
 
-To create your own behaviors for mutation of a model, you simply need to define a class that implements :csharp:`IntelliTect.Coalesce.IBehaviors<T>`. To expose your behaviors to Coalesce, either place it as a nested class of the type :csharp:`T` that your behaviors are for, or annotate it with the :csharp:`[Coalesce]` attribute. Of course, the easiest way to create behaviors that doesn't require you to re-engineer a great deal of logic would be to inherit from :csharp:`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, and then override only the parts that you need.
+    .. note::
+
+        When you define a set of custom behaviors, take note that these are only used by the standard set of API endpoints that Coalesce always provides. They will not be used to handle any mutations in any :ref:`ModelMethods` you write for your models.
+
+To create your own behaviors, you simply need to define a class that implements :csharp:`IntelliTect.Coalesce.IBehaviors<T>`. To expose your behaviors to Coalesce, either place it as a nested class of the type :csharp:`T` that your behaviors are for, or annotate it with the :csharp:`[Coalesce]` attribute. Of course, the easiest way to create behaviors that doesn't require you to re-engineer a great deal of logic would be to inherit from :csharp:`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, and then override only the parts that you need.
 
     .. code-block:: c#
 
@@ -66,7 +73,6 @@ To create your own behaviors for mutation of a model, you simply need to define 
                 return Db.SaveChangesAsync();
             }
         }
-
 
 Dependency Injection
 ''''''''''''''''''''

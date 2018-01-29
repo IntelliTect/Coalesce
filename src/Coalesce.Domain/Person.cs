@@ -158,6 +158,60 @@ namespace Coalesce.Domain
             return "Unknown";
         }
 
+        [Coalesce]
+        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Get)]
+        public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
+        {
+            return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
+        }
+
+        [Coalesce]
+        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Get)]
+        public string FullNameAndAge(AppDbContext db)
+        {
+            return $"{FirstName} {LastName} {BirthDate?.ToShortDateString() ?? "None"}";
+        }
+
+        [Coalesce]
+        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Delete)]
+        public static bool RemovePersonById(AppDbContext db, int id)
+        {
+            var person = db.People.FirstOrDefault(f => f.PersonId == id);
+            if (person != null)
+            {
+                db.People.Remove(person);
+                foreach (var c in db.Cases.Where(f => f.AssignedToId == id))
+                {
+                    c.AssignedToId = null;
+                }
+                foreach (var c in db.Cases.Where(f => f.ReportedById == id))
+                {
+                    c.ReportedById = null;
+                }
+                db.SaveChanges();
+                return true;
+            }
+            return false;
+        }
+
+        [Coalesce]
+        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Put)]
+        public string ObfuscateEmail(AppDbContext db)
+        {
+            var random = (new Random()).Next();
+            this.Email = $"test{random}@test.com";
+            return $"New Email is: {this.Email}";
+        }
+
+        [Coalesce]
+        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Patch)]
+        public Person ChangeFirstName (string firstName)
+        {
+            this.FirstName = firstName;
+            return this;
+        }
+
+
 
         /// <summary>
         /// Returns the user name
@@ -179,6 +233,34 @@ namespace Coalesce.Domain
         public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
+        }
+
+
+        /// <summary>
+        /// Gets all the first names starting with the characters.
+        /// </summary>
+        /// <param name="criteria">Search Criteria</param>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        [Coalesce]
+        public static IEnumerable<Person> SearchPeople(PersonCriteria criteria, AppDbContext db)
+        {
+            IQueryable<Person> query = db.People;
+
+            if (!string.IsNullOrEmpty(criteria.Name))
+            {
+                query = query.Where(f => f.FirstName.StartsWith(criteria.Name) || f.LastName.StartsWith(criteria.Name));
+            }
+            if (criteria.BirthdayMonth >= 1 && criteria.BirthdayMonth >= 12)
+            {
+                query = query.Where(f => f.BirthDate != null && f.BirthDate.Value.Month == criteria.BirthdayMonth);
+            }
+            if (!string.IsNullOrWhiteSpace(criteria.EmailDomain))
+            {
+                query = query.Where(f => f.Email.Contains($"@{criteria.EmailDomain}"));
+            }
+
+            return query.ToList();
         }
 
         [Coalesce, DefaultDataSource]
@@ -240,5 +322,12 @@ namespace Coalesce.Domain
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
             Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
+    }
+
+    public class PersonCriteria
+    {
+        public string Name { get; set; }
+        public int? BirthdayMonth { get; set; }
+        public string EmailDomain { get; set; }
     }
 }

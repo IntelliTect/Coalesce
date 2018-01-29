@@ -23,7 +23,9 @@
     <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
+    <LangVersion>7.1</LangVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="$(IsPackable) == 'true'">

@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
             }
             ViewBag.Query = ViewBag.Query == "" ? null : new HtmlString( ViewBag.Query );
 
-            @ViewBag.Title = ClassViewModel.Name + " List";
+            @ViewBag.Title = ClassViewModel.DisplayName + " List";
 
             return View(viewName, ClassViewModel);
         }
@@ -51,19 +51,25 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
 
             foreach (var kvp in Request.Query)
             {
-                if (kvp.Key == "id") id = kvp.Value;
-                else if (kvp.Key != string.Empty)
+                var propName = kvp.Key;
+                const string filterPrefix = "filter.";
+                if (propName.StartsWith(filterPrefix))
                 {
-                    var varName = ClassViewModel.PropertyByName(kvp.Key)?.JsVariable;
+                    propName = propName.Substring(filterPrefix.Length);
+                }
+
+                if (propName == "id") id = kvp.Value;
+                else if (propName != string.Empty)
+                {
+                    var varName = ClassViewModel.PropertyByName(propName)?.JsVariable;
                     if (varName != null)
                     {
                         parentIds.Add(varName, kvp.Value);
                     }
-                    ViewBag.Query = kvp.Key + "=" + kvp.Value;
                 }
             }
 
-            @ViewBag.Title = ClassViewModel.Name + " Edit";
+            ViewBag.Title = ClassViewModel.DisplayName + " Edit";
             ViewBag.Id = id;
             return View(viewName, ClassViewModel);
         }

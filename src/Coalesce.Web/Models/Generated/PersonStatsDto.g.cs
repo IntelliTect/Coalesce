@@ -19,41 +19,29 @@ namespace Coalesce.Web.Models
         public double? Weight { get; set; }
         public string Name { get; set; }
 
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
         public override void MapFrom(Coalesce.Domain.PersonStats obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for PersonStats
-
-
-            // Applicable excludes for PersonStats
-
-
-            // Applicable roles for PersonStats
-
-
             // Fill the properties of the object.
+
             this.Height = obj.Height;
             this.Weight = obj.Weight;
             this.Name = obj.Name;
         }
 
-        // Updates an object from the database to the state handed in by the DTO.
+        /// <summary>
+        /// Map from the current DTO instance to the domain object.
+        /// </summary>
         public override void MapTo(Coalesce.Domain.PersonStats entity, IMappingContext context)
         {
             var includes = context.Includes;
 
             if (OnUpdate(entity, context)) return;
-
-            // Applicable includes for PersonStats
-
-
-            // Applicable excludes for PersonStats
-
-
-            // Applicable roles for PersonStats
-
 
             entity.Height = (Height ?? 0);
             entity.Weight = (Weight ?? 0);

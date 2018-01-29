@@ -49,15 +49,6 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Check if the data source may be used. 
-        /// This method will be called by the framework.
-        /// Use this.User to obtain the current user.
-        /// </summary>
-        /// <returns>True if the user is authorized, otherwise false.</returns>
-        public virtual (bool Authorized, string Message) IsAuthorized() => (true, null);
-
-
-        /// <summary>
         /// Allows overriding of whether or not queries will run using EF Core Async methods.
         /// </summary>
         /// <param name="query"></param>

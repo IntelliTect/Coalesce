@@ -8,12 +8,11 @@ module ViewModels {
 
 	export class CaseProduct extends Coalesce.BaseViewModel
     {
-        protected modelName = "CaseProduct";
-        protected primaryKeyName: keyof this = "caseProductId";
-        protected modelDisplayName = "Case Product";
-
-        protected apiController = "/CaseProduct";
-        protected viewController = "/CaseProduct";
+        public readonly modelName = "CaseProduct";
+        public readonly primaryKeyName: keyof this = "caseProductId";
+        public readonly modelDisplayName = "Case Product";
+        public readonly apiController = "/CaseProduct";
+        public readonly viewController = "/CaseProduct";
 
         /** Behavioral configuration for all instances of CaseProduct. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseProduct>
@@ -112,7 +111,7 @@ module ViewModels {
         public saveToDto = (): any => {
             var dto: any = {};
             dto.caseProductId = this.caseProductId();
-
+            
             dto.caseId = this.caseId();
             if (!dto.caseId && this.case()) {
                 dto.caseId = this.case().caseKey();
@@ -121,10 +120,10 @@ module ViewModels {
             if (!dto.productId && this.product()) {
                 dto.productId = this.product().productId();
             }
-
+            
             return dto;
         }
-    
+
         /**
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.
@@ -232,7 +231,5 @@ module ViewModels {
 
 
     export namespace CaseProduct {
-
-        // Classes for use in method calls to support data binding for input for arguments
     }
 }

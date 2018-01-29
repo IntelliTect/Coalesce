@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public string FullyQualifiedName => Type.FullyQualifiedName;
 
-        public string ControllerName => Name;
+        public string ControllerName => IsService ? ServiceName : Name;
 
         public string ApiControllerClassName
         {
@@ -44,6 +44,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return $"{ControllerName}Controller";
             }
         }
+
+        public string ApiRouteControllerPart => ControllerName;
+
+        public string ViewControllerClassName => $"{ControllerName}Controller";
 
         public string ApiActionAccessModifier =>
             this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiActionsProtected) ?? false
@@ -92,6 +96,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Name of the List ViewModelClass
         /// </summary>
         public string ListViewModelClassName => Name + "List";
+
+
+
+        public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
+
+        public string ServiceName => Type.IsInterface && Name.StartsWith("I") ? Name.Substring(1) : Name;
+
+        public string ServiceClientClassName => ServiceName + "Client";
+
+
 
         /// <summary>
         /// Name of an instance of the List ViewModelClass
@@ -216,11 +230,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns a client method matching the name if it exists.
         /// Non-client-exposed methods will not be returned.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="name">The name of the method to look for. 
+        /// Coalesce doesn't support exposing method overloads - 
+        /// in the case of overloads, the first matching method will be returned.</param>
+        /// <param name="isStatic">Whether to look for a static or instance method. 
+        /// If null, the first match will be returned.</param>
         /// <returns></returns>
-        public MethodViewModel MethodByName(string key)
+        public MethodViewModel MethodByName(string name, bool? isStatic = null)
         {
-            return ClientMethods.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
+            return ClientMethods.FirstOrDefault(f => 
+                string.Equals(f.Name, name, StringComparison.InvariantCultureIgnoreCase)
+                && isStatic == null || f.IsStatic == isStatic);
         }
 
         /// <summary>
@@ -364,8 +384,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
-        public string ApiRouteControllerPart => Name;
-
 
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
@@ -395,48 +413,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ClassSecurityInfo _securityInfo;
         public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
-            (GetSecurityAttribute<ReadAttribute>()),
-            (GetSecurityAttribute<EditAttribute>()),
-            (GetSecurityAttribute<DeleteAttribute>()),
-            (GetSecurityAttribute<CreateAttribute>())
+            this.GetSecurityPermission<ReadAttribute>(),
+            this.GetSecurityPermission<EditAttribute>(),
+            this.GetSecurityPermission<DeleteAttribute>(),
+            this.GetSecurityPermission<CreateAttribute>()
         ));
 
+        public ExecuteSecurityInfo ExecuteSecurity => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
+
         public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
-
-        public string DtoIncludesAsCS()
-        {
-            var includeList = ClientProperties
-                .Where(p => p.HasDtoIncludes)
-                .SelectMany(p => p.DtoIncludes)
-                .Distinct()
-                .Select(include => $"bool include{include} = includes == \"{include}\";")
-                .ToList();
-
-            return string.Join($"{Environment.NewLine}\t\t\t", includeList);
-        }
-
-        public string DtoExcludesAsCS()
-        {
-            var excludeList = ClientProperties
-                .Where(p => p.HasDtoExcludes)
-                .SelectMany(p => p.DtoExcludes)
-                .Distinct()
-                .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
-                .ToList();
-
-            return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
-        }
-
-        public string PropertyRolesAsCS()
-        {
-            var allPropertyRoles = ClientProperties
-                .SelectMany(p => p.SecurityInfo.EditRolesList.Union(p.SecurityInfo.ReadRolesList))
-                .Distinct()
-                .Select(role => $"bool is{role} = context.IsInRoleCached(\"{role}\");")
-                .ToList();
-            
-            return string.Join($"{Environment.NewLine}\t\t\t", allPropertyRoles);
-        }
 
         public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
             Type.GetAttributeValue<TAttribute>(valueName);

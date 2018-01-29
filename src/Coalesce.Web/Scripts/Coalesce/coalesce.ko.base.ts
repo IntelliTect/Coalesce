@@ -18,8 +18,8 @@ module Coalesce {
         }
 
         protected prop = function <TProp>(name: string): ComputedConfiguration<TProp> {
-            var k = "_" + name;
-            var raw = this[k] = ko.observable<TProp>(null);
+            const k = "_" + name;
+            const raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
             computed = ko.computed<TProp>({
                 deferEvaluation: true, // This is essential. If not deferred, the observable will be immediately evaluated without parentConfig being set.
@@ -52,6 +52,13 @@ module Coalesce {
         public onStartBusy = this.prop<(object: T) => void>("onStartBusy");
         /** A callback to be called when an AJAX request completes. */
         public onFinishBusy = this.prop<(object: T) => void>("onFinishBusy");
+
+        /**
+            Gets the underlying observable that stores the object's explicit configuration value.
+        */
+        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
+            return (this as any)["_" + name];
+        }
     }
 
     export class ViewModelConfiguration<T extends BaseViewModel> extends CoalesceConfiguration<T> {
@@ -96,35 +103,25 @@ module Coalesce {
             E.g. ViewModels.MyModel.coalesceConfig.initialDataSource(MyModel.dataSources.MyDataSource);
         */
         public initialDataSource = this.prop<DataSource<T> | (new () => DataSource<T>)>("initialDataSource");
-
-        /**
-            Gets the underlying observable that stores the object's explicit configuration value.
-        */
-        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
-            return (this as any)["_" + name];
-        }
     }
 
     export class ListViewModelConfiguration<T extends BaseListViewModel<TItem>, TItem extends BaseViewModel> extends CoalesceConfiguration<T> {
+    }
 
-        /**
-            Gets the underlying observable that stores the object's explicit configuration value.
-        */
-        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
-            return (this as any)["_" + name];
-        }
+    export class ServiceClientConfiguration<T extends ServiceClient> extends CoalesceConfiguration<T> {
     }
 
     class RootConfig extends CoalesceConfiguration<any> {
-        public viewModel = new ViewModelConfiguration<BaseViewModel>(this);
-        public listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
+        public readonly viewModel = new ViewModelConfiguration<BaseViewModel>(this);
+        public readonly listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
+        public readonly serviceClient = new ServiceClientConfiguration<ServiceClient>(this);
     }
 
-    var invalidPropFunc: () => any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
-    var invalidProp: any = invalidPropFunc;
+    const invalidPropFunc: () => any = function () { if (arguments.length) throw "property is not valid at this level"; return null; };
+    const invalidProp: any = invalidPropFunc;
     invalidProp.raw = invalidProp;
 
-    export var GlobalConfiguration = new RootConfig();
+    export const GlobalConfiguration = new RootConfig();
     GlobalConfiguration.baseApiUrl("/api");
     GlobalConfiguration.baseViewUrl("");
     GlobalConfiguration.showFailureAlerts(true);
@@ -153,6 +150,76 @@ module Coalesce {
         loadFromDto: (data: object) => void;
         parent: object;
         parentCollection: object;
+    }
+
+    export interface ClientMethodParent {
+        coalesceConfig: CoalesceConfiguration<this>;
+        apiController: string;
+    }
+
+    export abstract class ClientMethod<TParent extends ClientMethodParent, TResult> {
+        public abstract readonly name: string;
+
+        /** HTTP method to be used when calling the API endpoint. */
+        public readonly verb: string = "POST";
+
+        /** Result of method strongly typed in a observable. */
+        public result: KnockoutObservable<TResult> = ko.observable<TResult>(null);
+
+        /** Raw result object of method simply wrapped in an observable. */
+        public rawResult: KnockoutObservable<any> = ko.observable(null);
+
+        /** True while the method is being called */
+        public isLoading: KnockoutObservable<boolean> = ko.observable<boolean>(false);
+
+        /** Error response when method has failed. */
+        public message: KnockoutObservable<string> = ko.observable<string>(null);
+
+        /** True if last invocation of method was successful. */
+        public wasSuccessful: KnockoutObservable<boolean | null> = ko.observable(null);
+
+        constructor (protected parent: TParent) { }
+
+        protected abstract loadResponse: (data: object, callback?: (result: TResult) => void, reload?: boolean) => void;
+
+        protected invokeWithData(postData: object, callback?: (result: TResult) => void, reload?: boolean) {
+            this.isLoading(true);
+            this.message('');
+            this.wasSuccessful(null);
+            return $.ajax({
+                method: this.verb,
+                url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name,
+                data: postData,
+                xhrFields: { withCredentials: true }
+            })
+                .done((data) => {
+
+                    // This is here because it was migrated from the old client method calls.
+                    // Whether or not this should be done remains to be see, but it was kept to reduce
+                    // the number of breaking changes being made.
+                    if (this.parent instanceof BaseViewModel)
+                        this.parent.isDirty(false);
+
+                    this.rawResult(data.object);
+                    this.message('');
+                    this.wasSuccessful(true);
+
+                    this.loadResponse(data.object, callback, reload);
+                })
+                .fail((xhr) => {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    this.wasSuccessful(false);
+                    this.message(errorMsg);
+
+                    if (this.parent.coalesceConfig.showFailureAlerts()) {
+                        this.parent.coalesceConfig.onFailure()(this.parent, `Could not call method ${this.name}: ${errorMsg}`);
+                    }
+                })
+                .always(() => {
+                    this.isLoading(false);
+                });
+        }
     }
 
     export abstract class DataSource<T extends BaseViewModel> {
@@ -193,18 +260,22 @@ module Coalesce {
         }
     }
 
+    export abstract class ServiceClient {
+        public readonly abstract apiController: string;
+    }
+
     export abstract class BaseViewModel {
 
-        protected modelName: string;
-        protected modelDisplayName: string;
+        protected readonly abstract modelName: string;
+        protected readonly abstract modelDisplayName: string;
 
         // Typing this property as keyof this prevents us from using BaseViewModel amorphously.
         // It prevents assignment of an arbitrary derived type to a variable/parameter expecting BaseViewModel
         // because primaryKeyName on a derived type is wider than it is on BaseViewModel.
-        protected primaryKeyName: string;
+        protected readonly abstract primaryKeyName: string;
 
-        protected apiController: string;
-        protected viewController: string;
+        public readonly abstract apiController: string;
+        protected readonly abstract viewController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.
@@ -682,9 +753,8 @@ module Coalesce {
 
     export abstract class BaseListViewModel<TItem extends BaseViewModel> {
 
-        protected abstract modelName: string;
-
-        protected abstract apiController: string;
+        public readonly abstract modelName: string;
+        public readonly abstract apiController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.

@@ -11,7 +11,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal ParameterInfo Info { get; internal set; }
 
-        public ReflectionParameterViewModel(ParameterInfo info)
+        public ReflectionParameterViewModel(MethodViewModel parent, ParameterInfo info) : base(parent)
         {
             Info = info;
             if (info.ParameterType.IsByRef)

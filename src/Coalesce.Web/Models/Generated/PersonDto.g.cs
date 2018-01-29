@@ -31,21 +31,16 @@ namespace Coalesce.Web.Models
         public int? CompanyId { get; set; }
         public Coalesce.Web.Models.CompanyDtoGen Company { get; set; }
 
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
         public override void MapFrom(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for Person
-
-
-            // Applicable excludes for Person
-
-
-            // Applicable roles for Person
-
-
             // Fill the properties of the object.
+
             this.PersonId = obj.PersonId;
             this.Title = obj.Title;
             this.FirstName = obj.FirstName;
@@ -60,7 +55,9 @@ namespace Coalesce.Web.Models
             var propValCasesAssigned = obj.CasesAssigned;
             if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
             {
-                this.CasesAssigned = propValCasesAssigned.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
+                this.CasesAssigned = propValCasesAssigned
+                    .AsQueryable().OrderBy("CaseKey ASC").AsEnumerable<Coalesce.Domain.Case>()
+                    .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
             }
             else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
             {
@@ -70,7 +67,9 @@ namespace Coalesce.Web.Models
             var propValCasesReported = obj.CasesReported;
             if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
             {
-                this.CasesReported = propValCasesReported.AsQueryable().OrderBy("CaseKey ASC").ToList().Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
+                this.CasesReported = propValCasesReported
+                    .AsQueryable().OrderBy("CaseKey ASC").AsEnumerable<Coalesce.Domain.Case>()
+                    .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
             }
             else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)
             {
@@ -85,21 +84,14 @@ namespace Coalesce.Web.Models
 
         }
 
-        // Updates an object from the database to the state handed in by the DTO.
+        /// <summary>
+        /// Map from the current DTO instance to the domain object.
+        /// </summary>
         public override void MapTo(Coalesce.Domain.Person entity, IMappingContext context)
         {
             var includes = context.Includes;
 
             if (OnUpdate(entity, context)) return;
-
-            // Applicable includes for Person
-
-
-            // Applicable excludes for Person
-
-
-            // Applicable roles for Person
-
 
             entity.Title = (Title ?? 0);
             entity.FirstName = FirstName;

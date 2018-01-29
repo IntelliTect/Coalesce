@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
+using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class KoListViewModel : RazorTemplateGenerator<ClassViewModel>
+    public class KoListViewModel : KnockoutVMGenerator
     {
         public KoListViewModel(RazorTemplateServices razorServices) : base(razorServices) { }
 

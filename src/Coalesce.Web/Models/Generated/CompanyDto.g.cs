@@ -25,21 +25,16 @@ namespace Coalesce.Web.Models
         public System.Collections.Generic.ICollection<Coalesce.Web.Models.PersonDtoGen> Employees { get; set; }
         public string AltName { get; set; }
 
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
         public override void MapFrom(Coalesce.Domain.Company obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for Company
-
-
-            // Applicable excludes for Company
-
-
-            // Applicable roles for Company
-
-
             // Fill the properties of the object.
+
             this.CompanyId = obj.CompanyId;
             this.Name = obj.Name;
             this.Address1 = obj.Address1;
@@ -51,7 +46,9 @@ namespace Coalesce.Web.Models
             var propValEmployees = obj.Employees;
             if (propValEmployees != null && (tree == null || tree[nameof(this.Employees)] != null))
             {
-                this.Employees = propValEmployees.AsQueryable().OrderBy("PersonId ASC").ToList().Select(f => f.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.Employees)])).ToList();
+                this.Employees = propValEmployees
+                    .AsQueryable().OrderBy("PersonId ASC").AsEnumerable<Coalesce.Domain.Person>()
+                    .Select(f => f.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.Employees)])).ToList();
             }
             else if (propValEmployees == null && tree?[nameof(this.Employees)] != null)
             {
@@ -60,21 +57,14 @@ namespace Coalesce.Web.Models
 
         }
 
-        // Updates an object from the database to the state handed in by the DTO.
+        /// <summary>
+        /// Map from the current DTO instance to the domain object.
+        /// </summary>
         public override void MapTo(Coalesce.Domain.Company entity, IMappingContext context)
         {
             var includes = context.Includes;
 
             if (OnUpdate(entity, context)) return;
-
-            // Applicable includes for Company
-
-
-            // Applicable excludes for Company
-
-
-            // Applicable roles for Company
-
 
             entity.Name = Name;
             entity.Address1 = Address1;

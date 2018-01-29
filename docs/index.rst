@@ -170,6 +170,7 @@ From this point, one can start adding more fields, more features, and more flair
     pages/modeling/model-types/entities
     pages/modeling/model-types/external-types
     pages/modeling/model-types/dtos
+    pages/modeling/model-types/services
 
 .. toctree::
     :hidden:

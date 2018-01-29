@@ -8,31 +8,40 @@ module ViewModels {
         public myId: any = 0;
 
         // Observables
-		public devTeamId: KnockoutObservable<number> = ko.observable(null);
-		public name: KnockoutObservable<string> = ko.observable(null);
+        public devTeamId: KnockoutObservable<number> = ko.observable(null);
+        public name: KnockoutObservable<string> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
-        public loadFromDto: (data: any) => void;
         public parent: any;
         public parentCollection: any;
 
+        public loadFromDto = (data: any) => {
+            if (!data) return;
+            // Set the ID
+            this.myId = data.devTeamId;
+
+            // Load the properties.
+            this.devTeamId(data.devTeamId);
+            this.name(data.name);
+
+        };
+
+                /** Saves this object into a data transfer object to send to the server. */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            dto.devTeamId = this.devTeamId();
+            
+            dto.name = this.name();
+            
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
-            var self = this;
-            self.parent = parent;
+            this.parent = parent;
             // Load the object
-			self.loadFromDto = function(data: any) {
-				if (!data) return;
-                // Set the ID
-                self.myId = data.devTeamId;
-
-                // Load the properties.
-                self.devTeamId(data.devTeamId);
-                self.name(data.name);
-                
-            };
 
             if (newItem) {
-                self.loadFromDto(newItem);
+                this.loadFromDto(newItem);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -12,17 +13,26 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class ParameterViewModel : IAttributeProvider
     {
+        public ParameterViewModel(MethodViewModel parent)
+        {
+            Parent = parent;
+        }
+
+        public MethodViewModel Parent { get; }
+
         public abstract string Name { get; }
 
         public TypeViewModel Type { get; protected set; }
 
-        public bool IsManualDI => IsAContext || IsAUser || IsAnIncludeTree;
+        public bool IsManualDI => IsAutoInjectedContext || IsAUser || IsAnIncludeTree;
 
-        public bool IsInjected => HasAttribute<InjectAttribute>();
+        public bool ShouldInjectFromServices => HasInjectAttribute || (IsAutoInjectedContext && Parent.Parent.IsService);
 
-        public bool IsDI => IsManualDI || IsInjected;
+        public bool HasInjectAttribute => HasAttribute<InjectAttribute>();
 
-        public bool IsAContext => Type.IsA<DbContext>();
+        public bool IsDI => IsManualDI || ShouldInjectFromServices;
+
+        public bool IsAutoInjectedContext => Type.IsA<DbContext>() && !HasInjectAttribute;
 
         public bool IsAUser => Type.IsA<ClaimsPrincipal>();
 
@@ -31,14 +41,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the parameter to pass to the actual method accounting for DI.
         /// </summary>
-        public string CsArgumentName
+        public string CsArgument
         {
             get
             {
-                if (IsAContext) return "Db";
+                if (IsAutoInjectedContext) return "Db";
                 if (IsAUser) return "User";
                 if (IsAnIncludeTree) return "out includeTree";
-                return Name.ToCamelCase();
+                if (!IsDI && Type.HasClassViewModel)
+                {
+                    return $"{CsParameterName}.{nameof(Mapper.MapToModel)}(new {Type.FullyQualifiedName}(), new {nameof(MappingContext)}(User))";
+                }
+                return CsParameterName;
             }
         }
 
@@ -46,13 +60,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
 
-        public string CsDeclaration => $"{(IsInjected ? "[FromServices] " : "")}{Type.FullyQualifiedName} {Name.ToCamelCase()}";
+        public string CsDeclaration
+        {
+            get
+            {
+                var typeName = !IsDI && Type.HasClassViewModel ? Type.ClassViewModel.DtoName : Type.FullyQualifiedName;
+                return $"{(ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {CsParameterName}";
+            }
+        }
+
+        public string JsVariable => Name.ToCamelCase();
+        public string CsParameterName => Name.ToCamelCase();
+
+
+
 
         /// <summary>
         /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()
         /// </summary>
         public string TsConversion(string argument)
         {
+            if (Type.HasClassViewModel)
+            {
+                return $"{argument} ? {argument}.saveToDto() : null";
+            }
             if (Type.IsDate)
             {
                 return $"{argument} ? {argument}.format() : null";

@@ -16,9 +16,11 @@ Parameters
 The following parameters can be added to your methods:
 
     Primitives & Dates
-        Only primitive values and dates are accepted as parameters to be passed from the client to the method call. Complex objects or collections are not supported at this time.
+        Primitive values (numerics, strings, booleans, enums) and dates (:csharp:`DateTime`, :csharp:`DateTimeOffset`, and nullable variants) are accepted as parameters to be passed from the client to the method call. 
+    Objects
+        Any object types may be passed to the method call. These may be existing :ref:`EntityModels` or :ref:`ExternalTypes`. When invoking the method on the client, the object's properties will only be serialized one level deep. If an object parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be serialized.
     :csharp:`<YourDbContext> db`
-        If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method call.
+        If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method call. For :ref:`Services` which don't have a defined backing EF context, this is treated as having an implicit :csharp:`[Inject]` attribute.
     :csharp:`ClaimsPrincipal user`
         If the method has a parameter of type ClaimsPrincipal, the current user will be passed to the method call.
     :csharp:`[Inject] <anything>`

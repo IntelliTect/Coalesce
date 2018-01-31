@@ -47,6 +47,8 @@ $ apt-get install python-restructuredtext-lint
 * Download and install Visual Studio Code [here](https://code.visualstudio.com/Download).
 * Launch VS Code and install the reStructuredText extension from [LeXtudio](https://marketplace.visualstudio.com/items?itemName=lextudio.restructuredtext).
 
+## Command-line 
+* The docs may also be built from the command-line. Inside the ``docs`` folder, run either ``make.bat`` or ``make`` using the included ``makefile``, depending on your platform. Output will be in ``_build/html`` with ``index.html`` being the home page.
 
 ## Configuration
 * Open the ``docs`` folder of your cloned Coalesce repo in VS Code

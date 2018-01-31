@@ -12,7 +12,11 @@ module Demo {
             this.allOpenCases.dataSource.subscribe(this.allOpenCases);
             this.allOpenCases.load();
 
-            this.weatherService.getWeather.invoke(null);
+            var location = new ViewModels.Location();
+            location.city("Spokane");
+            location.state("WA");
+            location.zip("99201");
+            this.weatherService.getWeather.invoke(location, null);
         }
     }
 

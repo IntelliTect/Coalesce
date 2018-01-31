@@ -16,6 +16,7 @@
 /// <reference path="Generated/Ko.Company.g.ts" />
 /// <reference path="Generated/Ko.CompanyList.g.ts" />
 /// <reference path="Generated/Ko.DevTeam.g.ts" />
+/// <reference path="Generated/Ko.Location.g.ts" />
 /// <reference path="Generated/Ko.Person.Partial.g.ts" />
 /// <reference path="Generated/Ko.PersonCriteria.g.ts" />
 /// <reference path="Generated/Ko.PersonList.g.ts" />

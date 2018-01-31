@@ -83,6 +83,12 @@ namespace Coalesce.Web
 
             app.UseDeveloperExceptionPage();
 
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:19926");
+                await next();
+            });
+
             // *** DEMO ONLY ***
             app.UseAuthentication();
             app.UseMiddleware<DemoMiddleware>();

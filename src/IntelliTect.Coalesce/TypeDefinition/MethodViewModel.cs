@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
+                var parameters = Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
                 var outParameters = new List<string>();
 
                 // For entity instance methods, add an id that specifies the object to work on, and a data source factory.

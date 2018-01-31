@@ -17,6 +17,7 @@ namespace Coalesce.Web.Models
 
         public double? TempFahrenheit { get; set; }
         public double? Humidity { get; set; }
+        public Coalesce.Web.Models.LocationDtoGen Location { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -30,6 +31,9 @@ namespace Coalesce.Web.Models
 
             this.TempFahrenheit = obj.TempFahrenheit;
             this.Humidity = obj.Humidity;
+
+            this.Location = obj.Location.MapToDto<Coalesce.Domain.Services.Location, LocationDtoGen>(context, tree?[nameof(this.Location)]);
+
         }
 
         /// <summary>

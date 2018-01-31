@@ -8,7 +8,7 @@ Contributing
   * [Unit tests](#unit-tests)
 * [Contributing process](#contributing-process)
   * [Get buyoff or find open community issues or features](#get-buyoff-or-find-open-community-issues-or-features)
-  * [Set up your environment](#Set-up-your-environment)
+  * [Set up your environment](#set-up-your-environment)
   * [Prepare commits](#prepare-commits)
   * [Submit pull request](#Submit-pull-request)
   * [Respond to feedback on pull request](#respond-to-feedback-on-pull-request)
@@ -23,7 +23,7 @@ By contributing to IntelliTect, you assert that:
 * The contribution is your own original work.
 * You have the right to assign the copyright for the work (it is not owned by your employer, or
   you have been given copyright assignment in writing).
-* You [license](https://raw.githubusercontent.com/IntelliTect/Coalesce/master/license.txt) the contribution under the terms applied to the rest of the IntelliTect project.
+* You [license](https://github.com/IntelliTect/Coalesce/blob/2.0/license.txt) the contribution under the terms applied to the rest of the IntelliTect project.
 
 ## Code
 ### Code style
@@ -64,11 +64,11 @@ Any new code should also have reasonable unit test coverage.
  * Test your changes and please help us out by updating and implementing some automated tests.
    It is recommended that all contributors spend some time looking over the tests in the source code.
    You can't go wrong emulating one of the existing tests and then changing it specific to the behavior you are testing.
- * See the [debugging/development guide]() for more info.
+ * See the [debugging/environment guide](https://github.com/IntelliTect/Coalesce/blob/2.0/ENVIRONMENT.md) for more details.
 
  ### Update documentation
  * Make sure you update or add documentation for the feature or bug you are fixing.
- * For help in setting up an environment to edit reStructuredText (VS Code is the recommended platform), see the [DOC_ENVIRONMENT.md file](https://github.com/IntelliTect/Coalesce/blob/2.0/DOC_ENVIRONMENT.md).
+ * For help in setting up an environment to edit reStructuredText (VS Code is the recommended platform), see the [documentation environment guide](https://github.com/IntelliTect/Coalesce/blob/2.0/DOC_ENVIRONMENT.md) for more details.
 
  ### Prepare commits
 This section serves to help you understand what makes a good commit.

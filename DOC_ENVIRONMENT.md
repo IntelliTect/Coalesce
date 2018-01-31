@@ -7,6 +7,9 @@ Setting Up VS Code With reStructuredText Tools
 
 ## Software
 
+* [Windows](#windows)
+* [Linux](#linux)
+
 ### Windows
 * Download the latest stable point release of Python 2 for your windows architecture from [here](https://www.python.org/downloads/windows/).
 * Download the "executable installer" flavor of the binary (.msi file)
@@ -29,11 +32,16 @@ PS> pip install sphinx
 PS> pip install restructuredtext_lint
 ```
 
-
-
-### OSX / Linux
-* TBD
-
+### Linux
+* For Debian/Ubuntu: (other distros YMMV)
+* Install python-sphinx package
+```
+$ apt-get install python-sphinx
+```
+* Install python-restructured-lint package
+```
+$ apt-get install python-restructuredtext-lint 
+```
 
 ## VS Code
 * Download and install Visual Studio Code [here](https://code.visualstudio.com/Download).

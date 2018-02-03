@@ -1,0 +1,9 @@
+{
+  "webProject": {
+    "projectFile": "./Coalesce.Web.Vue.csproj"
+  },
+  "dataProject": {
+    "projectFile": "../Coalesce.Domain/Coalesce.Domain.csproj",
+    "framework": "netstandard2.0"
+  }
+}

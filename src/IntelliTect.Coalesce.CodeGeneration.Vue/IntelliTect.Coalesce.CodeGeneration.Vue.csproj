@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Knockout code generation for Coalesce</Description>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputType>Library</OutputType>
+
+    <!-- Hide node_modules in the solution explorer -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);**\node_modules\**;node_modules\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- Add capabilities that enable automatic npm integration in visual studio (for our typings references) -->
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWeb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\**" />
+    <EmbeddedResource Remove="Templates\Scripts\tsconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
+  </ItemGroup>
+
+</Project>

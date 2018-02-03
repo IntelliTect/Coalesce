@@ -272,7 +272,8 @@ namespace Coalesce.Domain
             public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
-                => Db.People.Include(p => p.Company);
+                //=> Db.People.Include(p => p.Company);
+                => Db.People.IncludeChildren();
         }
 
         public class Behaviors : StandardBehaviors<Person, AppDbContext>

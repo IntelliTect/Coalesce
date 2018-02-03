@@ -76,7 +76,8 @@ namespace IntelliTect.Coalesce.Cli
 
 
             var executor = new GenerationExecutor(config, logLevel);
-            await executor.GenerateAsync<KnockoutSuite>();
+            // TODO: configure root generator.
+            await executor.GenerateAsync<CodeGeneration.Vue.Generators.VueSuite>();
 
             if (!Debugger.IsAttached) return 0;
             Console.WriteLine("Press Enter to quit");

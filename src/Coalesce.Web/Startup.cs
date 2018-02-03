@@ -87,6 +87,15 @@ namespace Coalesce.Web
             app.UseAuthentication();
             app.UseMiddleware<DemoMiddleware>();
 
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:16825");
+                context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+                // Do work that doesn't write to the Response.
+                await next.Invoke();
+                // Do logging or other work that doesn't write to the Response.
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

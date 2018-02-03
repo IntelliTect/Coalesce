@@ -16,11 +16,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder();
 
-            b.Line("import { Domain, getEnumMeta } from './coalesce/metadata' ");
+            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/metadata' ");
             b.Line();
             // Assigning each property as a member of domain ensures we don't break type contracts.
             // Exporting each model individually lets us access the full structure of the model from other ts files
-            b.Line("const domain: Domain = {}");
+            b.Line("const domain: Domain = { types: {}, enums: {} }");
+            //b.Line("const domain: Domain = { models: {}, externalTypes: {}, enums: {} }");
             b.Line("export default domain");
 
 
@@ -28,12 +29,35 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 b.StringProp("name", model.Name.ToCamelCase());
                 b.StringProp("displayName", model.DisplayName);
-                b.Line($"get displayProp() {{ return this.props.{model.ListTextProperty.JsVariable} }}, ");
+                if (model.ListTextProperty != null)
+                {
+                    // This might not be defined for external types, because sometimes it just doesn't make sense. We'll accommodate on the client.
+                    b.Line($"get displayProp() {{ return this.props.{model.ListTextProperty.JsVariable} }}, ");
+                }
+            }
+
+            foreach (var model in Model.ClientEnums)
+            {
+                using (b.Block($"export const {model.Name} = domain.enums.{model.Name} ="))
+                {
+                    b.StringProp("name", model.Name.ToCamelCase());
+                    b.StringProp("displayName", model.DisplayName);
+                    b.StringProp("type", "enum");
+                    
+                    b.Line("...getEnumMeta([");
+                    foreach (var value in model.EnumValues)
+                    {
+                        // TODO: allow for localization of displayName
+                        b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value}' }},");
+                    }
+                    b.Line("]),");
+                }
             }
 
             foreach (var model in Model.ApiBackedClasses)
             { 
-                using (b.Block($"export const {model.ViewModelClassName} = domain.{model.ViewModelClassName} ="))
+                //using (b.Block($"export const {model.ViewModelClassName} = domain.models.{model.ViewModelClassName} ="))
+                using (b.Block($"export const {model.ViewModelClassName} = domain.types.{model.ViewModelClassName} ="))
                 {
                     WriteCommon(model);
                     b.StringProp("type", "model");
@@ -48,7 +72,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             foreach (var model in Model.ExternalTypes)
             {
-                using (b.Block($"export const {model.ViewModelClassName} = domain.{model.ViewModelClassName} ="))
+                //using (b.Block($"export const {model.ViewModelClassName} = domain.externalTypes.{model.ViewModelClassName} ="))
+                using (b.Block($"export const {model.ViewModelClassName} = domain.types.{model.ViewModelClassName} ="))
                 {
                     WriteCommon(model);
                     b.StringProp("type", "object");
@@ -58,6 +83,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
 
             return Task.FromResult(b.ToString());
+        }
+
+        private string GetValueTypeString(TypeViewModel type)
+        {
+            if (type.IsNumber
+                || type.IsBool
+                || type.IsString
+                || type.IsByteArray
+            ) return type.TsType;
+
+            if (type.IsEnum) return "enum";
+            if (type.IsDate) return "date";
+            return null;
         }
 
         private void WriteProps(ClassViewModel model, TypeScriptCodeBuilder b)
@@ -70,38 +108,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     {
                         b.StringProp("name", prop.JsVariable);
                         b.StringProp("displayName", prop.DisplayName);
-
-                        if (   prop.Type.IsNumber 
-                            || prop.Type.IsBool 
-                            || prop.Type.IsString 
-                            || prop.Type.IsByteArray
-                        )
+                        var valueTypeString = GetValueTypeString(prop.Type);
+                        if (valueTypeString != null)
                         {
-                            b.StringProp("type", prop.Type.TsType);
-                        }
-                        else if (prop.Type.IsEnum)
-                        {
-                            b.StringProp("type", "enum");
-                            // Maybe don't have an 'enum' property. This doesn't feel like a concern of the metadata - 
-                            // more a concern of the implementation classes. Not sure. Can add later if wanted here.
-                            // b.Prop("enum", "String");
-                            // b.Line("...getEnumMeta<typeof Gender>([");
+                            b.StringProp("type", valueTypeString);
 
-                            b.Line("...getEnumMeta([");
-                            foreach (var value in prop.Type.EnumValues)
+                            if (prop.Type.IsEnum)
                             {
-                                // TODO: allow for localization of displayName
-                                b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value}' }},");
+                                b.Line($"get typeDef() {{ return domain.enums.{prop.Type.Name} }},");
                             }
-                            b.Line("]),");
-                        }
-                        else if (prop.Type.IsDate)
-                        {
-                            b.StringProp("type", "date");
                         }
                         else if (prop.Type.TsTypePlain == "any")
                         {
-                            // We assume any known props are strings.
+                            // We assume any unknown props are strings.
                             b.StringProp("type", "string");
                         }
                                 
@@ -109,27 +128,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
                         if (prop.Object != null)
                         {
-                            var classMeta = $"domain.{prop.Object.ViewModelClassName}";
+                            string classMeta = $"(domain.types.{prop.Object.ViewModelClassName} as ModelType)";
+                            //string classMeta = $"domain.models.{prop.Object.ViewModelClassName}";
 
                             if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
                             {
+                                // Reference navigations
                                 b.StringProp("type", "model");
                                 b.StringProp("role", "referenceNavigation");
-                                b.Line($"get keyProp() {{ return {classMeta}.props.{prop.ObjectIdProperty.JsVariable} }},");
+                                b.Line($"get foreignKey() {{ return {classMeta}.props.{prop.ObjectIdProperty.JsVariable} }},");
                             }
                             else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
                             {
+                                // Collection navigations
                                 b.StringProp("type", "collection");
                                 b.StringProp("role", "collectionNavigation");
-                                b.Line($"get keyProp() {{ return {classMeta}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} }},");
+                                b.Line($"get foreignKey() {{ return {classMeta}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} }},");
                             }
                             else
                             {
-                                // External types
+                                // External type collections
                                 b.StringProp("type", "object");
                                 b.StringProp("role", "value");
+                                //classMeta = $"domain.externalTypes.{prop.Object.ViewModelClassName}";
+                                classMeta = $"domain.types.{prop.Object.ViewModelClassName} as ExternalType";
                             }
-                            b.Line($"get model() {{ return {classMeta} }},");
+                            b.Line($"get typeDef() {{ return {classMeta} }},");
+                        }
+                        else if (prop.Type.IsCollection)
+                        {
+                            // Primitive collections
+                            b.StringProp("type", "collection");
+                            b.StringProp("role", "value");
+                            b.StringProp("model", GetValueTypeString(prop.PureType));
                         }
                         else
                         {

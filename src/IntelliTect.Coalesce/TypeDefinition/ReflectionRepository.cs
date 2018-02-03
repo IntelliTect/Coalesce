@@ -39,10 +39,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public IEnumerable<ClassViewModel> ApiBackedClasses => Entities.Union(CustomDtos);
 
+        public IEnumerable<ClassViewModel> ClientClasses => ApiBackedClasses.Union(ExternalTypes);
+
+        public IEnumerable<TypeViewModel> ClientEnums => this.ClientClasses
+            .SelectMany(c => c.ClientProperties.Select(p => p.Type).Where(t => t.IsEnum))
+            .Distinct();
+
         public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
-            .Union(ApiBackedClasses)
-            .Union(ExternalTypes);
+            .Union(ClientClasses);
 
         private ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
             = new ConcurrentDictionary<object, ClassViewModel>();

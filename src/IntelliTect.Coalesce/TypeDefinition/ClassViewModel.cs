@@ -402,7 +402,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
+        public string DisplayName => Type.DisplayName;
 
         public bool OnContext { get; internal set; }
 

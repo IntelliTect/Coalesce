@@ -1,4 +1,4 @@
-import { Domain, getEnumMeta, ModelType, ExternalType, Property } from './coalesce/metadata' 
+import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/metadata' 
 
 const domain: Domain = { types: {}, enums: {} }
 export default domain

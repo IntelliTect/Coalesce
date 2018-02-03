@@ -48,6 +48,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Convenient accessor for the represented System.Type when in reflection-based contexts.
         /// </summary>
         public virtual Type TypeInfo => throw new InvalidOperationException("TypeInfo not available in the current context");
+        
+
+        /// <summary>
+        /// Returns the DisplayName Attribute or 
+        /// puts a space before every upper class letter aside from the first one.
+        /// </summary>
+        public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
         public string CsDefaultValue
         {

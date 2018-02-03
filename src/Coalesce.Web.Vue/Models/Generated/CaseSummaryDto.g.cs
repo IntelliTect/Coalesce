@@ -21,21 +21,16 @@ namespace Coalesce.Web.Vue.Models
         public int? CloseCases { get; set; }
         public string Description { get; set; }
 
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
         public override void MapFrom(Coalesce.Domain.CaseSummary obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Applicable includes for CaseSummary
-
-
-            // Applicable excludes for CaseSummary
-
-
-            // Applicable roles for CaseSummary
-
-
             // Fill the properties of the object.
+
             this.CaseSummaryId = obj.CaseSummaryId;
             this.OpenCases = obj.OpenCases;
             this.CaseCount = obj.CaseCount;
@@ -43,21 +38,14 @@ namespace Coalesce.Web.Vue.Models
             this.Description = obj.Description;
         }
 
-        // Updates an object from the database to the state handed in by the DTO.
+        /// <summary>
+        /// Map from the current DTO instance to the domain object.
+        /// </summary>
         public override void MapTo(Coalesce.Domain.CaseSummary entity, IMappingContext context)
         {
             var includes = context.Includes;
 
             if (OnUpdate(entity, context)) return;
-
-            // Applicable includes for CaseSummary
-
-
-            // Applicable excludes for CaseSummary
-
-
-            // Applicable roles for CaseSummary
-
 
             entity.OpenCases = (OpenCases ?? 0);
             entity.CaseCount = (CaseCount ?? 0);

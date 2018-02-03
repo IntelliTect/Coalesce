@@ -1,15 +1,16 @@
 <template>
   <v-text-field v-if="propMeta.type === 'string' || propMeta.type === 'number'" 
     v-model="item[propMeta.name]" 
-    :label="propMeta.displayName"
+    :label="propMeta.displayName"  color="red" 
     :type="propMeta.type">
   </v-text-field>
 
   <v-select v-else-if="propMeta.type === 'enum' "
     v-model="item[propMeta.name]" 
-    :items="propMeta.values"
+    :items="propMeta.model.values"
     :label="propMeta.displayName"
     item-text="displayName"
+    item-value="value"
     autocomplete
     dense
   >
@@ -22,19 +23,13 @@
   </c-select>
 
   <div v-else-if="propMeta.type === 'collection' " @click="collectionEdit = true"> 
-    <div tabindex="-1" data-uid="54" role="combobox" class="input-group input-group--dirty input-group--text-field input-group--select input-group--multiple primary--text">
+    <div role="combobox" class="input-group input-group--dirty input-group--text-field input-group--select input-group--multiple">
       <label>{{propMeta.displayName}}</label>
       <div class="input-group__input">
         <div class="input-group__selections" style="overflow: hidden;">
-            <c-display :item="item" :prop="propMeta" class="input-group__selections__comma"></c-display>
-          <!-- <div v-for="(child, index) in item[propMeta.name]" :key="child[propMeta.model.keyProp.name]"
-            class="input-group__selections__comma">
-            <c-display :item="child"></c-display>
-            <template v-if="index < item[propMeta.name].length - 1">, </template>
-          </div> -->
+          <c-display :item="item" :prop="propMeta" ></c-display>
         </div>
-        <div class="menu menu--disabled" style="display: inline-block;"></div>
-        <i aria-hidden="true" class="icon icon--disabled material-icons input-group__append-icon input-group__icon-cb">mode_edit</i>
+        <v-icon>mode_edit</v-icon>
       </div>
       <div class="input-group__details">
       <!---->
@@ -87,14 +82,18 @@
   </div>
 
   <div v-else>
-    <c-display :item="item" :prop="prop"></c-display>
+    <div class="input-group input-group--dirty input-group--text-field">
+      <label>{{prop.displayName}}</label>
+      <p>
+        <c-display :item="item" :prop="prop" class="subheading"></c-display>
+      </p>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import { IHaveMetadata, PropertyMetadata, EnumPropertyMetadata, ModelPropertyMetadata } from './metadata'
 import MetadataComponent from './c-metadata-component'
 import CSelect from './c-select.vue'
 import CDisplay from './c-display';

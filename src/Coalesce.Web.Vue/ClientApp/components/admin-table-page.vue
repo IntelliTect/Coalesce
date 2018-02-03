@@ -1,13 +1,13 @@
 <template>
-  <v-container grid-list-xl>
+  <v-container grid-list-lg>
       
-    <v-layout row wrap v-if="person != null" >
+    <v-layout v-if="person != null" >
       <v-flex xs12>
         <v-card >
           <v-card-actions>
-            <v-container>
-              <v-layout wrap>
-                <v-flex xs6 v-for="prop in showProps" :key="prop.name">
+            <v-container >
+              <v-layout  wrap >
+                <v-flex sm6 md4 xl3 v-for="prop in showProps" :key="prop.name" class="py-0">
                   <c-input :item="person" :prop="prop"/>
                 </v-flex>
               </v-layout>
@@ -28,7 +28,7 @@
       </v-flex>
       
     </v-layout>
-    <v-layout row wrap>
+    <v-layout >
 
       <v-flex xs12>
         <v-data-table
@@ -41,7 +41,7 @@
           class="elevation-1"
           >
           <template slot="items" slot-scope="props">
-            <td v-for="prop in showProps" :key="prop.name" :class="'prop-' + prop.name" @click="selectItem(props.item)">
+            <td v-for="prop in showProps" :key="prop.name" :class="'prop-' + prop.name" >
               <c-display :item="props.item" :prop="prop.name"/>
             </td>
           </template>
@@ -59,7 +59,6 @@
   
   import * as moment from 'moment';
   import { Vue, Component, Watch } from 'vue-property-decorator';
-  import { ModelMetadata, ModelPropertyMetadata, EnumPropertyMetadata } from '../coalesce/metadata'
   import CDisplay from '../coalesce/c-display';
   import CInput from '../coalesce/c-input.vue';
   import * as $metadata from '../model.g';
@@ -88,16 +87,6 @@
           this.loading = false;
         });
     }
-
-
-    selectItem(item: any) {
-      console.log(item);
-      console.log(this.selected);
-      this.inputItems.push(item);
-      this.selected.push(item);
-    }
-
-
 
     isLoading: boolean = false;
 

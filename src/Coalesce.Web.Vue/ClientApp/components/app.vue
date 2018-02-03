@@ -1,12 +1,12 @@
 <template>
 
-    <v-app>
-        <v-navigation-drawer
-      clipped
-      fixed
-      v-model="drawer"
-      app
-    >
+    <v-app class="grey lighten-2">
+      <v-navigation-drawer
+        clipped
+        fixed
+        v-model="drawer"
+        app
+      >
       <v-list dense>
         <v-list-tile >
           <v-list-tile-action>
@@ -31,15 +31,13 @@
       <v-toolbar-title>Application</v-toolbar-title>
     </v-toolbar>
     <v-content>
-      <v-container fluid fill-height>
-        <v-layout child-flex>
-          <router-view></router-view>
-        </v-layout>
-      </v-container>
+      <router-view>
+        <v-container fluid></v-container>
+      </router-view>
     </v-content>
-    <v-footer app fixed>
+    <!-- <v-footer app fixed>
       <span>&copy; 2017</span>
-    </v-footer>
+    </v-footer> -->
     </v-app>
 </template>
 

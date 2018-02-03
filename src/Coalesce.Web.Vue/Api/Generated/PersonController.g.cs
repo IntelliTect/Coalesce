@@ -124,7 +124,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]
-
+        [Authorize]
         public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
         {
             var result = new ItemResult<PersonDtoGen>();
@@ -149,7 +149,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
-
+        [Authorize]
         public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
             var result = new ItemResult<object>();
@@ -173,7 +173,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: Add
         /// </summary>
         [HttpPost("Add")]
-
+        [Authorize]
         public virtual ItemResult<int> Add(int numberOne, int numberTwo)
         {
             var result = new ItemResult<int>();
@@ -203,7 +203,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: PersonCount
         /// </summary>
         [HttpGet("PersonCount")]
-
+        [Authorize]
         public virtual ItemResult<long> PersonCount(string lastNameStartsWith)
         {
             var result = new ItemResult<long>();
@@ -218,7 +218,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: FullNameAndAge
         /// </summary>
         [HttpGet("FullNameAndAge")]
-
+        [Authorize]
         public virtual async Task<ItemResult<string>> FullNameAndAge([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
             var result = new ItemResult<string>();
@@ -241,7 +241,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: RemovePersonById
         /// </summary>
         [HttpDelete("RemovePersonById")]
-
+        [Authorize]
         public virtual ItemResult<bool> RemovePersonById(int id)
         {
             var result = new ItemResult<bool>();
@@ -256,7 +256,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: ObfuscateEmail
         /// </summary>
         [HttpPut("ObfuscateEmail")]
-
+        [Authorize]
         public virtual async Task<ItemResult<string>> ObfuscateEmail([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
             var result = new ItemResult<string>();
@@ -279,7 +279,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: ChangeFirstName
         /// </summary>
         [HttpPatch("ChangeFirstName")]
-
+        [Authorize]
         public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName)
         {
             var result = new ItemResult<PersonDtoGen>();
@@ -304,7 +304,7 @@ namespace Coalesce.Web.Vue.Api
         /// Method: GetUserPublic
         /// </summary>
         [HttpPost("GetUserPublic")]
-
+        [Authorize]
         public virtual ItemResult<string> GetUserPublic()
         {
             var result = new ItemResult<string>();
@@ -326,6 +326,23 @@ namespace Coalesce.Web.Vue.Api
 
             var methodResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
             result.Object = methodResult;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Method: SearchPeople
+        /// </summary>
+        [HttpPost("SearchPeople")]
+        [Authorize]
+        public virtual ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>> SearchPeople(PersonCriteriaDtoGen criteria)
+        {
+            var result = new ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>>();
+
+            IncludeTree includeTree = null;
+            var methodResult = Coalesce.Domain.Person.SearchPeople(criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), Db);
+            var mappingContext = new MappingContext(User, "");
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
 
             return result;
         }

@@ -11,37 +11,41 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue.Models
 {
-    public partial class ProductDtoGen : GeneratedDto<Coalesce.Domain.Product>
+    public partial class PersonCriteriaDtoGen : GeneratedDto<Coalesce.Domain.PersonCriteria>
     {
-        public ProductDtoGen() { }
+        public PersonCriteriaDtoGen() { }
 
-        public int? ProductId { get; set; }
         public string Name { get; set; }
+        public int? BirthdayMonth { get; set; }
+        public string EmailDomain { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.Product obj, IMappingContext context, IncludeTree tree = null)
+        public override void MapFrom(Coalesce.Domain.PersonCriteria obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
             // Fill the properties of the object.
 
-            this.ProductId = obj.ProductId;
             this.Name = obj.Name;
+            this.BirthdayMonth = obj.BirthdayMonth;
+            this.EmailDomain = obj.EmailDomain;
         }
 
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.Product entity, IMappingContext context)
+        public override void MapTo(Coalesce.Domain.PersonCriteria entity, IMappingContext context)
         {
             var includes = context.Includes;
 
             if (OnUpdate(entity, context)) return;
 
             entity.Name = Name;
+            entity.BirthdayMonth = BirthdayMonth;
+            entity.EmailDomain = EmailDomain;
         }
 
     }

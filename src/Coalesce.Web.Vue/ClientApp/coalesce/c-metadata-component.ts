@@ -1,6 +1,6 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-import { IHaveMetadata, PropertyMetadata, EnumPropertyMetadata, ModelPropertyMetadata } from './metadata'
+import { IHaveMetadata, Property } from './metadata'
 
 export default abstract class extends Vue {
 
@@ -8,9 +8,9 @@ export default abstract class extends Vue {
     public item?: IHaveMetadata;
 
     @Prop({required: false, type: [String, Object]})
-    public prop?: string | PropertyMetadata;
+    public prop?: string | Property;
 
-    get propMeta(): PropertyMetadata {
+    get propMeta(): Property {
         if (this.item == null) {
             throw `Item is required`;
         }

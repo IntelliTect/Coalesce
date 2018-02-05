@@ -35,6 +35,7 @@ module ViewModels {
         public city: KnockoutObservable<string> = ko.observable(null);
         public state: KnockoutObservable<string> = ko.observable(null);
         public zipCode: KnockoutObservable<string> = ko.observable(null);
+        public isDeleted: KnockoutObservable<boolean> = ko.observable(null);
         public employees: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         public altName: KnockoutObservable<string> = ko.observable(null);
 
@@ -94,6 +95,7 @@ module ViewModels {
             this.city(data.city);
             this.state(data.state);
             this.zipCode(data.zipCode);
+            this.isDeleted(data.isDeleted);
             this.altName(data.altName);
             if (this.coalesceConfig.onLoadFromDto()){
                 this.coalesceConfig.onLoadFromDto()(this as any);
@@ -115,6 +117,7 @@ module ViewModels {
             dto.city = this.city();
             dto.state = this.state();
             dto.zipCode = this.zipCode();
+            dto.isDeleted = this.isDeleted();
             
             return dto;
         }
@@ -178,6 +181,7 @@ module ViewModels {
             self.city.subscribe(self.autoSave);
             self.state.subscribe(self.autoSave);
             self.zipCode.subscribe(self.autoSave);
+            self.isDeleted.subscribe(self.autoSave);
         
             if (newItem) {
                 self.loadFromDto(newItem, true);

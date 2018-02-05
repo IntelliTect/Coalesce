@@ -98,10 +98,12 @@ Properties
         The user making the current request.
     :csharp:`IDataSource<T> OverrideFetchForUpdateDataSource`
         A data source that, if set, will override the data source that is used to retrieve the target of an update operation from the database. The incoming values will then be set on this retrieved object. Null by default; override by setting a value in the constructor.
-    :csharp:`IDataSource<T> OverrideFetchForDeleteDataSource`
-        A data source that, if set, will override the data source that is used to retrieve the target of an delete operation from the database. The retrieved object will then be deleted. Null by default; override by setting a value in the constructor.
     :csharp:`IDataSource<T> OverridePostSaveResultDataSource`
         A data source that, if set, will override the data source that is used to retrieve a newly-created or just-updated object from the database after a save. The retrieved object will be returned to the client. Null by default; override by setting a value in the constructor.
+    :csharp:`IDataSource<T> OverrideFetchForDeleteDataSource`
+        A data source that, if set, will override the data source that is used to retrieve the target of an delete operation from the database. The retrieved object will then be deleted. Null by default; override by setting a value in the constructor.
+    :csharp:`IDataSource<T> OverridePostDeleteResultDataSource`
+        A data source that, if set, will override the data source that is used to retrieve the target of an delete operation from the database after it has been deleted. If an object is able to be retrieved from this data source, it will be sent back to the client. This allows soft-deleted items to be returned to the client when the user is able to see them. Null by default; override by setting a value in the constructor.
 
 Method Overview
 '''''''''''''''
@@ -162,7 +164,7 @@ All of the methods outlined above can be overridden. A description of each of th
         Overriding this allows for changing this row-deletion implementation to something else, like setting of a soft delete flag, or copying the data into another archival table before deleting.
 
     :csharp:`AfterDelete`
-        Allows for performing any sort of cleanup actions after a delete has completed. This method offers no chance to return feedback to the client, so make sure any necessary feedback is done in :csharp:`BeforeDelete`.
+        Allows for performing any sort of cleanup actions after a delete has completed. If the item was still able to be retrieved from the database after the delete operation completed, this method allows lets you modify or replace the item that is sent back to the client by setting :csharp:`ref T item` to another object or to null. Setting :csharp:`ref IncludeTree includeTree` will override the :ref:`IncludeTree` used to shape the response object.
 
 
 

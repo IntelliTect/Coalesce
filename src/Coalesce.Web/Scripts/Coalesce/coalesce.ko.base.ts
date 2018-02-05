@@ -76,6 +76,18 @@ module Coalesce {
 
         /** Whether or not to reload the ViewModel with the state of the object received from the server after a call to .save(). */
         public loadResponseFromSaves = this.prop<boolean>("loadResponseFromSaves");
+        
+        /**
+            Whether or not to reload the ViewModel with the state of the object recieved from the server after a call to .deleteItem().
+            This only applies to delete calls which respond with an object, which can be done through the model's behaviors.
+        */
+        public loadResponseFromDeletes = this.prop<boolean>("loadResponseFromDeletes");
+
+        /**
+            Whether or not the object should be removed from its parent after a call to /delete is made where the object is returned in the response.
+            If no object is recieved from a /delete call, this option has no effect - it will always be removed from its parent in these cases.
+        */
+        public removeFromParentAfterSoftDelete = this.prop<boolean>("removeFromParentAfterSoftDelete");
 
         /**
             Whether or not to validate the model after loading it from a DTO from the server.
@@ -134,6 +146,8 @@ module Coalesce {
     GlobalConfiguration.viewModel.autoSaveCollectionsEnabled(true);
     GlobalConfiguration.viewModel.showBusyWhenSaving(false);
     GlobalConfiguration.viewModel.loadResponseFromSaves(true);
+    GlobalConfiguration.viewModel.loadResponseFromDeletes(true);
+    GlobalConfiguration.viewModel.removeFromParentAfterSoftDelete(false);
     GlobalConfiguration.viewModel.validateOnLoadFromDto(true);
     GlobalConfiguration.viewModel.setupValidationAutomatically(true);
     GlobalConfiguration.viewModel.initialDataSource = invalidProp;
@@ -551,11 +565,21 @@ module Coalesce {
                     .done((data) => {
                         this.errorMessage(null);
 
+                        if (data.object != null && this.coalesceConfig.loadResponseFromDeletes()) {
+                            this.loadFromDto(data.object, true);
+                        }
+
                         // Remove it from the parent collection
                         if (this.parentCollection && this.parent) {
-                            this.parent.isLoading(true);
-                            this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
-                            this.parent.isLoading(false);
+                            var shouldRemoveFromParent = (data.object == null || this.coalesceConfig.removeFromParentAfterSoftDelete());
+                            if (!shouldRemoveFromParent) {
+                                // be a Good Citizen and tell the user why the item they just deleted wasn't removed from the parent collection, as this isn't always super intuitive.
+                                console.warn("Deleted item was not removed from its parent because the API call returned an object and this.coalesceConfig.removeFromParentAfterSoftDelete() == false")
+                            } else {
+                                this.parent.isLoading(true);
+                                this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
+                                this.parent.isLoading(false);
+                            }
                         }
                     })
                     .fail((xhr: JQueryXHR) => {

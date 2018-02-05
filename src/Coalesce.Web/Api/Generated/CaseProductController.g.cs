@@ -55,15 +55,6 @@ namespace Coalesce.Web.Api
             => CountImplementation(parameters, dataSource);
 
 
-        [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual Task<ItemResult> Delete(
-            int id,
-            IBehaviors<Coalesce.Domain.CaseProduct> behaviors,
-            IDataSource<Coalesce.Domain.CaseProduct> dataSource)
-            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
-
-
         [HttpPost("save")]
         [Authorize]
         public virtual Task<ItemResult<CaseProductDtoGen>> Save(
@@ -72,6 +63,15 @@ namespace Coalesce.Web.Api
             IDataSource<Coalesce.Domain.CaseProduct> dataSource,
             IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+
+        [HttpPost("delete/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<CaseProductDtoGen>> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.CaseProduct> behaviors,
+            IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of CaseProductDtoGen

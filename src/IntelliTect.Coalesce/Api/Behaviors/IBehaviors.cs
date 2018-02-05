@@ -40,10 +40,12 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key of the object to delete.</param>
         /// <param name="dataSource">The data source that will be used when loading the item to be deleted.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
-        /// <returns></returns>
-        Task<ItemResult> DeleteAsync(
+        /// <returns>A result indicating success or failure, 
+        /// potentially including an up-to-date copy of the item being deleted if the delete action is non-destructive.</returns>
+        Task<ItemResult<TDto>> DeleteAsync<TDto>(
             object id,
             IDataSource<T> dataSource,
-            IDataSourceParameters parameters);
+            IDataSourceParameters parameters
+        ) where TDto : IClassDto<T>, new();
     }
 }

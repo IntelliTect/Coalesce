@@ -97,18 +97,6 @@ namespace @(namespaceName).Api
         </text>
         }
 
-        @if (securityInfo.IsDeleteAllowed()) {
-        <text>
-        [HttpPost("delete/{id}")]
-        @(securityInfo.DeleteAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(
-            @primaryKeyParameter, 
-            @behaviorsParameter, 
-            @dataSourceParameter)
-            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
-        </text>
-        }
-
         @if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed()) {
         <text>
         [HttpPost("save")]
@@ -119,6 +107,18 @@ namespace @(namespaceName).Api
             @dataSourceParameter, 
             @behaviorsParameter)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+        </text>
+        }
+
+        @if (securityInfo.IsDeleteAllowed()) {
+        <text>
+        [HttpPost("delete/{id}")]
+        @(securityInfo.DeleteAnnotation)
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Delete(
+            @primaryKeyParameter, 
+            @behaviorsParameter, 
+            @dataSourceParameter)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
         </text>
         }
 

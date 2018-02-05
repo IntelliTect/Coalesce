@@ -93,6 +93,10 @@
                                 Zip Code
                                 <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ZipCode', 'fa-caret-down': orderByDescending() == 'ZipCode'}"></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('IsDeleted')}">
+                                Is Deleted
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'IsDeleted', 'fa-caret-down': orderByDescending() == 'IsDeleted'}"></i>
+                            </th>
                             <th>Employees</th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('AltName')}">
                                 Alt Name
@@ -121,6 +125,8 @@
                             
                             <td class="prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</td>
                             
+                            <td class="prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</td>
+                            
                             <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                             
                             <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
@@ -139,6 +145,8 @@
                             <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
                             
                             <td class="prop-zipCode">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, true))</td>
+                            
+                            <td class="prop-isDeleted">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.IsDeleted, true))</td>
                             
                             <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                             

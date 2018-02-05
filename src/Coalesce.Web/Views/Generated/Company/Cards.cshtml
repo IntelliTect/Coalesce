@@ -81,6 +81,10 @@
                         <dd>
                             @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, false))
                         </dd>
+                        <dt>Is Deleted</dt>
+                        <dd>
+                            @(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.IsDeleted, false))
+                        </dd>
                         <dt>Employees</dt>
                         <dd>
                             <a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a>

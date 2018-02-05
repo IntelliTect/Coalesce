@@ -110,7 +110,6 @@
 
     @Watch('pagination')
     getData() {
-      
       this.isLoading = true;
       fetch(`http://localhost:11202/api/Person/List?page=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}&search=${this.search}&orderBy=${this.pagination.descending ? '' : this.pagination.sortBy}&orderByDescending=${this.pagination.descending ? this.pagination.sortBy : ''}`)
         .then(response => response.json())

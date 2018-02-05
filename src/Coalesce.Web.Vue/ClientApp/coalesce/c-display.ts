@@ -55,15 +55,15 @@ export default class extends Vue {
         }
     }
 
-    getDisplayForModel(modelMeta: ExternalType | ModelType, value: any): string | null {
+    getDisplayForModel(modelMeta: ExternalType | ModelType, object: any): string | null {
         if (modelMeta.displayProp)
-            return this.getPropDisplay(modelMeta.displayProp, value);
+            return this.getPropDisplay(object, modelMeta.displayProp);
         else {
             // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
             try {
-                return JSON.stringify(value, function (k, v) { return k ? "" + v : v; });
+                return JSON.stringify(object, function (k, v) { return k ? "" + v : v; });
             } catch {
-                return value.toString();
+                return object.toString();
             }
         }
     }

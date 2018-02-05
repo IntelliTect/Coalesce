@@ -7,7 +7,7 @@
 
   <v-select v-else-if="propMeta.type === 'enum' "
     v-model="item[propMeta.name]" 
-    :items="propMeta.model.values"
+    :items="propMeta.typeDef.values"
     :label="propMeta.displayName"
     item-text="displayName"
     item-value="value"
@@ -50,14 +50,14 @@
         </v-toolbar>
         <v-card-text>
           <v-list >
-            <v-list-tile avatar v-for="child in item[propMeta.name]" :key="child[propMeta.model.keyProp.name]">
+            <v-list-tile avatar v-for="child in item[propMeta.name]" :key="child[propMeta.typeDef.keyProp.name]">
               <v-list-tile-content>
                 <v-list-tile-title>
                   <c-display :item="child"></c-display>
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
-                  {{propMeta.model.keyProp.displayName}}:
-                  {{child[propMeta.model.keyProp.name]}}
+                  {{propMeta.typeDef.keyProp.displayName}}:
+                  {{child[propMeta.typeDef.keyProp.name]}}
                 </v-list-tile-sub-title>
               </v-list-tile-content>
             </v-list-tile>

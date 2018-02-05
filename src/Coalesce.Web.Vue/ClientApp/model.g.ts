@@ -442,7 +442,7 @@ export const PersonCriteria = domain.types.PersonCriteria = {
 export const PersonStats = domain.types.PersonStats = {
   name: "personStats",
   displayName: "Person Stats",
-  get displayProp() { return this.props.name }, 
+  // get displayProp() { return this.props.name }, 
   type: "object",
   props: {
     height: {

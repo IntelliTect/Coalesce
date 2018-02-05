@@ -4,8 +4,8 @@
         :loading="loading"
         :items="listItems"
         :search-input.sync="search"
-        :item-text="propMeta.model.displayProp.name"
-        :item-value="propMeta.model.keyProp.name"
+        :item-text="propMeta.typeDef.displayProp.name"
+        :item-value="propMeta.typeDef.keyProp.name"
         :return-object="true"
         v-model="item[propMeta.name]"
         :filter="() => true"
@@ -22,7 +22,7 @@
             <!-- <c-display :item="data.item" /> -->
             <v-list-tile-content>
                 <v-list-tile-title >
-                    <c-display :item="data.item" :prop="propMeta.model.displayProp" />
+                    <c-display :item="data.item" :prop="propMeta.typeDef.displayProp" />
                 </v-list-tile-title>
             </v-list-tile-content>
         </template>
@@ -79,7 +79,7 @@
                 .then(response => response.json())
                 .then(resp => {
                     this.items = resp.list.map((i: any) => {
-                        Object.assign(i, {$metadata: propMeta.typeDef})
+                        return Object.assign(i, {$metadata: propMeta.typeDef})
                     });
                     this.loading = false;
                 });

@@ -131,13 +131,14 @@ Method Details
 
 All of the methods outlined above can be overridden. A description of each of the methods is as follows:
 
+
+    :csharp:`SaveAsync`
+        Save the given item. This is the main entry point for saving, and takes a DTO as a parameter. This method is responsible for performing mapping to your EF models and ultimately saving to your database. If it is required that you access properties from the incoming DTO in this method, a set of extension methods :csharp:`GetValue` and :csharp:`GetObject` are available on the DTO for accessing properties that are mapped 1:1 with your EF models.
+
     :csharp:`DetermineSaveKind`
         Given the incoming DTO on which Save has been called, examine its properties to determine if the operation is meant to be a create or an update operation. Return this distinction along with the key that was used to make the distinction.
 
         This method is called outside of the standard data source by the base API controller to perform role-based security on saves at the controller level.
-
-    :csharp:`SaveAsync`
-        Save the given item.
 
     :csharp:`GetDbSet`
         Fetch a :csharp:`DbSet<T>` that items can be added to (creates) or remove from (deletes).

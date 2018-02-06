@@ -5,10 +5,6 @@ namespace IntelliTect.Coalesce.Models
 {
     public class ItemResult : ApiResult
     {
-        // TODO (FUTURE): When behaviors are implemented,
-        // bring validation issues back into this object, and incorporate them into the generated typescript.
-
-        //public List<ValidationIssue> ValidationIssues { get; set; }
         
         public ItemResult(): base() { }
 
@@ -20,6 +16,14 @@ namespace IntelliTect.Coalesce.Models
         {
             Message = ex.Message;
         }
+        
+        // TODO: incorporate validation issues into the generated typescript
+
+        /// <summary>
+        /// A collection of validation issues to send to the client.
+        /// Currently, this is not accommodated for in the typescript that is generated.
+        /// </summary>
+        public ICollection<ValidationIssue> ValidationIssues { get; set; }
 
         public static implicit operator ItemResult(bool success)
         {

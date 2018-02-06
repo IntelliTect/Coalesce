@@ -16,6 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             yield return Cleaner<DirectoryCleaner>()
                 .AppendTargetPath("Api/Generated");
+            
             yield return Cleaner<DirectoryCleaner>()
                 .AppendTargetPath("Controllers/Generated");
         }
@@ -55,7 +56,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<ServiceController>()
                     .WithModel(model)
-                    .AppendOutputPath($"Controllers/Generated/{model.ApiControllerClassName}.g.cs");
+                    .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
             }
         }
     }

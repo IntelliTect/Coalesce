@@ -131,9 +131,10 @@ namespace Coalesce.Domain
         /// Removes spaces from the name and puts in dashes
         /// </summary>
         [Coalesce, LoadFromDataSource(typeof(WithoutCases))]
-        public void ChangeSpacesToDashesInName()
+        public ItemResult ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");
+            return true;
         }
 
         /// <summary>
@@ -143,9 +144,16 @@ namespace Coalesce.Domain
         /// <param name="numberTwo"></param>
         /// <returns></returns>
         [Coalesce]
-        public static int Add(int numberOne, int numberTwo)
+        public static ItemResult<int> Add(int numberOne, int numberTwo)
         {
-            return numberOne + numberTwo;
+            try
+            {
+                return new ItemResult<int>(numberOne + numberTwo);
+            }
+            catch
+            {
+                return "Integers too large";
+            }
         }
 
         /// <summary>
@@ -154,7 +162,7 @@ namespace Coalesce.Domain
         [Coalesce,Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
-            if (user!= null && user.Identity != null) return user.Identity.Name;
+            if (user != null && user.Identity != null) return user.Identity.Name;
             return "Unknown";
         }
 

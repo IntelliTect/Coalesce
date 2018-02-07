@@ -127,8 +127,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
         {
-            var result = new ItemResult<PersonDtoGen>();
-
             IncludeTree includeTree = null;
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -139,9 +137,9 @@ namespace Coalesce.Web.Api
             var item = itemResult.Object;
             var methodResult = item.Rename(name);
             Db.SaveChanges();
+            var result = new ItemResult<PersonDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(methodResult, mappingContext, includeTree);
-
             return result;
         }
 
@@ -152,8 +150,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
-            var result = new ItemResult<object>();
-
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
@@ -164,8 +160,8 @@ namespace Coalesce.Web.Api
             object methodResult = null;
             item.ChangeSpacesToDashesInName();
             Db.SaveChanges();
+            var result = new ItemResult<object>(methodResult);
             result.Object = methodResult;
-
             return result;
         }
 
@@ -176,11 +172,10 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<int> Add(int numberOne, int numberTwo)
         {
-            var result = new ItemResult<int>();
-
             var methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
-            result.Object = methodResult;
-
+            var unwrappedResult = methodResult.Object;
+            var result = new ItemResult<int>(methodResult);
+            result.Object = unwrappedResult;
             return result;
         }
 
@@ -191,11 +186,9 @@ namespace Coalesce.Web.Api
         [Authorize(Roles = "Admin")]
         public virtual ItemResult<string> GetUser()
         {
-            var result = new ItemResult<string>();
-
             var methodResult = Coalesce.Domain.Person.GetUser(User);
+            var result = new ItemResult<string>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -206,11 +199,9 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<long> PersonCount(string lastNameStartsWith)
         {
-            var result = new ItemResult<long>();
-
             var methodResult = Coalesce.Domain.Person.PersonCount(Db, lastNameStartsWith);
+            var result = new ItemResult<long>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -221,8 +212,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<string>> FullNameAndAge([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
-            var result = new ItemResult<string>();
-
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
@@ -232,8 +221,8 @@ namespace Coalesce.Web.Api
             var item = itemResult.Object;
             var methodResult = item.FullNameAndAge(Db);
             Db.SaveChanges();
+            var result = new ItemResult<string>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -244,11 +233,9 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<bool> RemovePersonById(int id)
         {
-            var result = new ItemResult<bool>();
-
             var methodResult = Coalesce.Domain.Person.RemovePersonById(Db, id);
+            var result = new ItemResult<bool>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -259,8 +246,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<string>> ObfuscateEmail([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
-            var result = new ItemResult<string>();
-
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
@@ -270,8 +255,8 @@ namespace Coalesce.Web.Api
             var item = itemResult.Object;
             var methodResult = item.ObfuscateEmail(Db);
             Db.SaveChanges();
+            var result = new ItemResult<string>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -282,8 +267,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName)
         {
-            var result = new ItemResult<PersonDtoGen>();
-
             IncludeTree includeTree = null;
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -294,9 +277,9 @@ namespace Coalesce.Web.Api
             var item = itemResult.Object;
             var methodResult = item.ChangeFirstName(firstName);
             Db.SaveChanges();
+            var result = new ItemResult<PersonDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(methodResult, mappingContext, includeTree);
-
             return result;
         }
 
@@ -307,11 +290,9 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<string> GetUserPublic()
         {
-            var result = new ItemResult<string>();
-
             var methodResult = Coalesce.Domain.Person.GetUserPublic(User);
+            var result = new ItemResult<string>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -322,11 +303,9 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
         {
-            var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
-
             var methodResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
+            var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -337,13 +316,11 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>> SearchPeople(PersonCriteriaDtoGen criteria)
         {
-            var result = new ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>>();
-
             IncludeTree includeTree = null;
             var methodResult = Coalesce.Domain.Person.SearchPeople(criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), Db);
+            var result = new ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>>();
             var mappingContext = new MappingContext(User, "");
             result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-
             return result;
         }
     }

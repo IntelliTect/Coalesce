@@ -38,7 +38,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     if (model.WillCreateApiController)
                     {
-                        yield return Generator<ApiController>()
+                        yield return Generator<ModelApiController>()
                             .WithModel(model)
                             .WithDbContext(context.ClassViewModel)
                             .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
             foreach (var model in Model.Services)
             {
-                yield return Generator<ServiceController>()
+                yield return Generator<ServiceApiController>()
                     .WithModel(model)
                     .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
             }

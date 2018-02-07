@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             string reloadArg = !isService ? ", reload" : "";
             string reloadParam = !isService ? ", reload: boolean = true" : "";
-            string callbackAndReloadParam = $"callback: (result: {method.ReturnType.TsType}) => void = null{reloadParam}";
+            string callbackAndReloadParam = $"callback: (result: {method.ResultType.TsType}) => void = null{reloadParam}";
 
             // Default instance of the method class.
             b.Line();
@@ -48,14 +48,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
             var classBlock = b.Block(
-                $"public static {method.Name} = class {method.Name} extends Coalesce.ClientMethod<{parentClassName}, {method.ReturnType.TsType}>", ';');
+                $"public static {method.Name} = class {method.Name} extends Coalesce.ClientMethod<{parentClassName}, {method.ResultType.TsType}>", ';');
 
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
-            if (method.ReturnType.IsCollection || method.ReturnType.IsArray)
+            if (method.ResultType.IsCollection || method.ResultType.IsArray)
             {
-                b.Line($"public result: {method.ReturnType.TsKnockoutType()} = {method.ReturnType.ObservableConstructorCall()};");
+                b.Line($"public result: {method.ResultType.TsKnockoutType()} = {method.ResultType.ObservableConstructorCall()};");
             }
 
             // Standard invoke method - all CS method parameters as TS method parameters.
@@ -123,23 +123,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line();
             using (b.Block($"protected loadResponse = (data: any, {callbackAndReloadParam}) =>", ';'))
             {
-                if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel)
+                if (method.ResultType.IsCollection && method.ResultType.PureType.HasClassViewModel)
                 {
                     // Collection of objects that have TypeScript ViewModels. This could be an entity or an external type.
 
                     // If the models have a key, rebuild our collection using that key so that we can reuse objects when the data matches.
-                    var keyNameArg = method.ReturnType.PureType.ClassViewModel.PrimaryKey != null
-                        ? $"'{method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
+                    var keyNameArg = method.ResultType.PureType.ClassViewModel.PrimaryKey != null
+                        ? $"'{method.ResultType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
                         : "null";
 
-                    b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, data, {keyNameArg}, ViewModels.{method.ReturnType.PureType.ClassViewModel.Name}, this, true);");
+                    b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, data, {keyNameArg}, ViewModels.{method.ResultType.PureType.ClassViewModel.Name}, this, true);");
                 }
-                else if (method.ReturnType.HasClassViewModel)
+                else if (method.ResultType.HasClassViewModel)
                 {
                     // Single view model return type.
 
                     b.Line("if (!this.result()) {");
-                    b.Indented($"this.result(new ViewModels.{method.ReturnType.PureType.ClassViewModel.Name}(data));");
+                    b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.Name}(data));");
                     b.Line("} else {");
                     b.Indented($"this.result().loadFromDto(data);");
                     b.Line("}");
@@ -156,7 +156,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("if (typeof(callback) == 'function')");
                     b.Indented("callback(this.result());");
                 }
-                else if (method.ReturnType.EqualsType(method.Parent.Type) && !MethodsLoadParent)
+                else if (method.ResultType.EqualsType(method.Parent.Type) && !MethodsLoadParent)
                 {
                     // The return type is the type of the method's parent. Load the parent with the results of the method.
                     // Parameter 'reload' has no meaning here, since we're reloading the object with the result of the method.

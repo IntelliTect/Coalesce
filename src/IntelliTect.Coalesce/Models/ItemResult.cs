@@ -16,7 +16,13 @@ namespace IntelliTect.Coalesce.Models
         {
             Message = ex.Message;
         }
-        
+
+        public ItemResult(ApiResult result)
+        {
+            WasSuccessful = result.WasSuccessful;
+            Message = result.Message;
+        }
+
         // TODO: incorporate validation issues into the generated typescript
 
         /// <summary>
@@ -46,20 +52,19 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(string problem) : base(problem) { }
 
+        public ItemResult(T result) : this(true)
+        {
+            Object = result;
+        }
+
         public ItemResult(bool wasSuccessful, T obj) : base(wasSuccessful)
         {
             Object = obj;
         }
 
-        public ItemResult(Exception ex) : base(ex)
-        {
-        }
+        public ItemResult(Exception ex) : base(ex) { }
 
-        public ItemResult(ItemResult result)
-        {
-            WasSuccessful = result.WasSuccessful;
-            Message = result.Message;
-        }
+        public ItemResult(ApiResult result) : base(result) { }
 
         public static implicit operator ItemResult<T>(bool success)
         {

@@ -50,6 +50,8 @@ You can return virtually anything from these methods:
             Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
     :csharp:`ICollection<T>`
         Collections of any of the valid return types above are also valid return types.
+    :csharp:`ItemResult<T>`
+        An :csharp:`ItemResult<T>` of any of the valid return types above, including collections, is valid. The :csharp:`WasSuccessful` and :csharp:`Message` properties on the result object will be sent along to the client to indicate success or failure of the method. The type :csharp:`T` will be mapped to the appropriate DTO object before being serialized as normal.
         
 
 

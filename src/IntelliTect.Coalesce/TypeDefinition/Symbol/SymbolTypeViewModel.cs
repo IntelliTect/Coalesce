@@ -67,6 +67,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
 
+        public override bool IsVoid => Symbol.SpecialType == SpecialType.System_Void;
+
         public override Dictionary<int, string> EnumValues
         {
             get

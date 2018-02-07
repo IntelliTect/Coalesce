@@ -110,7 +110,14 @@
                                 </button>
                             </td>
                             <td>
-                                    <span data-bind="text: result"></span>
+                                    <dl class="dl-horizontal" data-bind="with: result">
+                                            <dt>Validation Issues</dt>
+                                            <dd data-bind="text: validationIssues"></dd>
+                                            <dt>Was Successful</dt>
+                                            <dd data-bind="text: wasSuccessful"></dd>
+                                            <dt>Message</dt>
+                                            <dd data-bind="text: message"></dd>
+                                    </dl>
                             </td>
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>

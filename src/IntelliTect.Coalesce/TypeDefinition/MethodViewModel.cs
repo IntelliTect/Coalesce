@@ -12,6 +12,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using static IntelliTect.Coalesce.DataAnnotations.ApiActionHttpMethodAttribute;
+using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -24,6 +25,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Name { get; }
 
         public abstract TypeViewModel ReturnType { get; }
+
+        /// <summary>
+        /// The return type of the method, discounting any <see cref="ItemResult{T}"/> wrapped around it.
+        /// </summary>
+        public TypeViewModel ResultType =>
+              ReturnType.IsA(typeof(ItemResult<>))
+            ? ReturnType.PureType
+            : ReturnType.IsA(typeof(ItemResult))
+            ? new ReflectionTypeViewModel(typeof(void))
+            : ReturnType;
 
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
@@ -61,21 +72,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                string result = ReturnType.FullyQualifiedName;
-                if (result == "void") return "object";
+                var returnType = ResultType;
+                if (returnType.IsVoid) return "object";
+                string result = returnType.FullyQualifiedName;
                 result = result.Replace("IQueryable", "IEnumerable");
-                if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
+                if (returnType.IsCollection && returnType.PureType.HasClassViewModel)
                 {
+                    // Return type is a collection of objects that need to be mapped to DTOs.
+
                     // We can just straight replace this since the fully qualified name
                     // that we're replacing should never be a substring of any larger name.
                     // If this were a possibility, then we would run the risk of clobbering other names.
                     result = result.Replace(
-                        ReturnType.PureType.ClassViewModel.FullyQualifiedName,
-                        ReturnType.PureType.ClassViewModel.DtoName);
+                        returnType.PureType.ClassViewModel.FullyQualifiedName,
+                        returnType.PureType.ClassViewModel.DtoName);
                 }
-                else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
+                else if (!returnType.IsCollection && returnType.HasClassViewModel)
                 {
-                    result = $"{ReturnType.ClassViewModel.DtoName}";
+                    // Return type is a single object that needs to be mapped to a DTO.
+                    result = $"{returnType.ClassViewModel.DtoName}";
                 }
                 return result;
             }

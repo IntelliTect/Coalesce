@@ -27,6 +27,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsInterface { get; }
 
+        /// <summary>
+        /// Returns true if this TypeViewModel represents void.
+        /// </summary>
+        public abstract bool IsVoid { get; }
+
         public abstract Dictionary<int, string> EnumValues { get; }
         public abstract bool IsEnum { get; }
 
@@ -78,11 +83,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if this is a boolean.
         /// </summary>
         public bool IsBool => NullableUnderlyingType.Name == nameof(Boolean);
-
-        /// <summary>
-        /// Returns true if this TypeViewModel represents void.
-        /// </summary>
-        public bool IsVoid => Name.ToLowerInvariant() == "void";
 
         public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 

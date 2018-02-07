@@ -6,7 +6,7 @@ using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
+namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
     public class ApiController : RazorTemplateCSharpGenerator<ClassViewModel>
     {

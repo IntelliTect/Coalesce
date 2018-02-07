@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Knockout code generation for Coalesce</Description>
+    <Description>Shared API code generation for Coalesce</Description>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
@@ -14,21 +14,13 @@
   <ItemGroup>
     <ProjectCapability Include="DotNetCoreWeb" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="Templates\**" />
-    <EmbeddedResource Remove="Templates\Scripts\tsconfig.json" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <None Remove="Templates\KoServiceClient.cshtml" />
-    <None Remove="Templates\ServiceController.cshtml" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\IntelliTect.Coalesce.Knockout\IntelliTect.Coalesce.Knockout.csproj" />
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
-    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
   </ItemGroup>
 
 </Project>

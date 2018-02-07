@@ -34,26 +34,31 @@ namespace IntelliTect.Coalesce.Api
         }
         
         /// <inheritdoc />
-        ICollection<string> IListParameters.Fields => FieldList;
+        IReadOnlyCollection<string> IListParameters.Fields => FieldList;
         
         /// <inheritdoc cref="IListParameters.OrderByList" />
-        public Dictionary<string, string> OrderByList
+        public Dictionary<string, SortDirection> OrderByList
         {
             get
             {
-                var result = new Dictionary<string, string>();
+                var result = new Dictionary<string, SortDirection>();
                 // Add order by
                 if (OrderBy != null)
                 {
                     foreach (var orderBy in OrderBy.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         var parts = orderBy.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length == 2 && parts[1].ToUpper().StartsWith("D"))
+                        if (parts.Length == 0)
                         {
-                            result.Add(parts[0], "Desc");
+                            // Ignore if all entries were empty.
                         }
-                        else {
-                            result.Add(parts[0], "Asc");
+                        else if (parts.Length == 2 && parts[1].ToUpper().StartsWith("D"))
+                        {
+                            result.Add(parts[0], SortDirection.Desc);
+                        }
+                        else
+                        {
+                            result.Add(parts[0], SortDirection.Asc);
                         }
                     }
                 }
@@ -62,7 +67,15 @@ namespace IntelliTect.Coalesce.Api
                 {
                     foreach (var orderBy in OrderByDescending.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                     {
-                        result.Add(orderBy, "Desc");
+                        var parts = orderBy.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 0)
+                        {
+                            // Ignore if all entries were empty.
+                        }
+                        else
+                        {
+                            result.Add(parts[0], SortDirection.Desc);
+                        }
                     }
                 }
                 return result;
@@ -70,6 +83,6 @@ namespace IntelliTect.Coalesce.Api
         }
         
         /// <inheritdoc />
-        IDictionary<string, string> IListParameters.OrderByList => OrderByList;
+        IReadOnlyDictionary<string, SortDirection> IListParameters.OrderByList => OrderByList;
     }
 }

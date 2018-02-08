@@ -25,16 +25,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Name { get; }
 
         public abstract TypeViewModel ReturnType { get; }
+        
+        public bool ReturnsListResult => ReturnType.IsA(typeof(ListResult<>));
 
         /// <summary>
         /// The return type of the method, discounting any <see cref="ItemResult{T}"/> wrapped around it.
         /// </summary>
         public TypeViewModel ResultType =>
-              ReturnType.IsA(typeof(ItemResult<>))
+              ReturnsListResult
+            ? ReturnType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type // Will be a constructed generic IList<T>
+            : ReturnType.IsA(typeof(ItemResult<>))
             ? ReturnType.PureType
             : ReturnType.IsA(typeof(ItemResult))
             ? new ReflectionTypeViewModel(typeof(void))
             : ReturnType;
+
+        public string TsResultType =>
+            ReturnsListResult
+            ? $"Coalesce.ListResult<{ResultType.PureType.TsType}>"
+            : ResultType.TsType;
 
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
@@ -66,33 +75,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsVariable => Name.ToCamelCase();
 
         /// <summary>
-        /// Type of the return. Object if void.
+        /// Return type of the controller action for the method.
         /// </summary>
         public string ReturnTypeNameForApi
         {
             get
             {
-                var returnType = ResultType;
-                if (returnType.IsVoid) return "object";
-                string result = returnType.FullyQualifiedName;
-                result = result.Replace("IQueryable", "IEnumerable");
-                if (returnType.IsCollection && returnType.PureType.HasClassViewModel)
-                {
-                    // Return type is a collection of objects that need to be mapped to DTOs.
+                var resultType = ResultType;
 
-                    // We can just straight replace this since the fully qualified name
-                    // that we're replacing should never be a substring of any larger name.
-                    // If this were a possibility, then we would run the risk of clobbering other names.
-                    result = result.Replace(
-                        returnType.PureType.ClassViewModel.FullyQualifiedName,
-                        returnType.PureType.ClassViewModel.DtoName);
-                }
-                else if (!returnType.IsCollection && returnType.HasClassViewModel)
+                if (resultType.IsVoid)
                 {
-                    // Return type is a single object that needs to be mapped to a DTO.
-                    result = $"{returnType.ClassViewModel.DtoName}";
+                    return nameof(ItemResult);
                 }
-                return result;
+
+                if (ReturnsListResult)
+                {
+                    return $"{nameof(ListResult<object>)}<{ReturnType.PureType.DtoFullyQualifiedName}>";
+                }
+
+                return $"{nameof(ItemResult)}<{resultType.DtoFullyQualifiedName}>";
             }
         }
 

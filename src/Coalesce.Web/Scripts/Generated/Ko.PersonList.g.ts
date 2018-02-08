@@ -94,7 +94,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -119,7 +119,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -163,7 +163,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -207,7 +207,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: boolean) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -232,7 +232,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -278,7 +278,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: string[]) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -290,39 +290,49 @@ module ListViewModels {
         
         /**
             Methods and properties for invoking server method SearchPeople.
-            Gets all the first names starting with the characters.
+            Gets people matching the criteria, paginated by parameter 'page'.
         */
         public readonly searchPeople = new PersonList.SearchPeople(this);
-        public static SearchPeople = class SearchPeople extends Coalesce.ClientMethod<PersonList, ViewModels.Person[]> {
+        public static SearchPeople = class SearchPeople extends Coalesce.ClientMethod<PersonList, Coalesce.ListResult<ViewModels.Person>> {
             public readonly name = 'SearchPeople';
             public readonly verb = 'POST';
-            public result: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
+            public result: KnockoutObservable<Coalesce.ListResult<ViewModels.Person>> = ko.observable(null);
             
             /** Calls server method (SearchPeople) with the given arguments */
-            public invoke = (criteria: ViewModels.PersonCriteria, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ criteria: criteria ? criteria.saveToDto() : null }, callback, reload);
+            public invoke = (criteria: ViewModels.PersonCriteria, page: number, callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ criteria: criteria ? criteria.saveToDto() : null, page: page }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new SearchPeople.Args(); 
             public static Args = class Args {
                 public criteria: KnockoutObservable<ViewModels.PersonCriteria> = ko.observable(null);
+                public page: KnockoutObservable<number> = ko.observable(null);
             };
             
             /** Calls server method (SearchPeople) with an instance of SearchPeople.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                return this.invoke(args.criteria(), callback, reload);
+            public invokeWithArgs = (args = this.args, callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.criteria(), args.page(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithPrompts = (callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
+                $promptVal = prompt('Page');
+                if ($promptVal === null) return;
+                var page: number = parseInt($promptVal);
                 var criteria: ViewModels.PersonCriteria = null;
-                return this.invoke(criteria, callback, reload);
+                return this.invoke(criteria, page, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true) => {
-                Coalesce.KnockoutUtilities.RebuildArray(this.result, data, 'personId', ViewModels.Person, this, true);
+            protected loadResponse = (data: any, callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true) => {
+                var result = this.result();
+                if (!result) this.result(result = new Coalesce.ListResult<ViewModels.Person>());
+                result.page(data.page)
+                result.pageSize(data.pageSize)
+                result.totalCount(data.totalCount)
+                result.pageCount(data.pageCount)
+                Coalesce.KnockoutUtilities.RebuildArray(result.items, data.list, 'personId', ViewModels.Person, this, true);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);

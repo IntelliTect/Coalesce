@@ -234,25 +234,20 @@ namespace Coalesce.Domain
         /// <summary>
         /// Gets all the first names starting with the characters.
         /// </summary>
-        /// <param name="characters"></param>
-        /// <param name="db"></param>
-        /// <returns></returns>
         [Coalesce,Execute]
-        public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
+        public static IEnumerable<string> NamesStartingWith(AppDbContext db, string characters)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
 
         /// <summary>
-        /// Gets all the first names starting with the characters.
+        /// Gets people matching the criteria, paginated by parameter 'page'.
         /// </summary>
-        /// <param name="criteria">Search Criteria</param>
-        /// <param name="db"></param>
-        /// <returns></returns>
         [Coalesce]
-        public static IEnumerable<Person> SearchPeople(PersonCriteria criteria, AppDbContext db)
+        public static ListResult<Person> SearchPeople(AppDbContext db, PersonCriteria criteria, int page)
         {
+            const int pageSize = 10;
             IQueryable<Person> query = db.People;
 
             if (!string.IsNullOrEmpty(criteria.Name))
@@ -268,7 +263,7 @@ namespace Coalesce.Domain
                 query = query.Where(f => f.Email.Contains($"@{criteria.EmailDomain}"));
             }
 
-            return query.ToList();
+            return new ListResult<Person>(query, page, pageSize);
         }
 
         [Coalesce, DefaultDataSource]

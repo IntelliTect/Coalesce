@@ -583,7 +583,7 @@ namespace IntelliTect.Coalesce
             List<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ListResult<T>(result, page, totalCount, pageSize), tree);
+            return (new ListResult<T>(result, page: page, totalCount: totalCount, pageSize: pageSize), tree);
         }
 
         /// <summary>
@@ -602,7 +602,7 @@ namespace IntelliTect.Coalesce
             IList<TDto> mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
             mappedResult = TrimListFields(mappedResult, parameters);
 
-            return new ListResult<TDto>(mappedResult, result.Page, result.TotalCount, result.PageSize);
+            return new ListResult<TDto>(result, mappedResult);
         }
 
         /// <summary>
@@ -625,7 +625,7 @@ namespace IntelliTect.Coalesce
             }
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ItemResult<T>(true, result), tree);
+            return (new ItemResult<T>(result), tree);
         }
 
         /// <summary>
@@ -650,7 +650,7 @@ namespace IntelliTect.Coalesce
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = Mapper.MapToDto<T, TDto>(result.Object, mappingContext, tree);
 
-            return new ItemResult<TDto>(true, mappedResult);
+            return new ItemResult<TDto>(result, mappedResult);
         }
 
         public virtual Task<int> GetCountAsync(IFilterParameters parameters)

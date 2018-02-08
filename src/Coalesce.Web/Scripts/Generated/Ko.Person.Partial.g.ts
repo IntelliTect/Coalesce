@@ -180,7 +180,7 @@ module ViewModels {
             
             protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
-                    this.result(new ViewModels.Person(data));
+                    this.result(new ViewModels.Person(data.object));
                 } else {
                     this.result().loadFromDto(data);
                 }
@@ -208,7 +208,7 @@ module ViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: any) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
@@ -232,7 +232,7 @@ module ViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
@@ -256,7 +256,7 @@ module ViewModels {
             };
             
             protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
-                this.result(data);
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
@@ -301,7 +301,7 @@ module ViewModels {
             
             protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
-                    this.result(new ViewModels.Person(data));
+                    this.result(new ViewModels.Person(data.object));
                 } else {
                     this.result().loadFromDto(data);
                 }

@@ -136,7 +136,7 @@ namespace Coalesce.Web.Api
             }
             var item = itemResult.Object;
             var methodResult = item.Rename(name);
-            Db.SaveChanges();
+            await Db.SaveChangesAsync();
             var result = new ItemResult<PersonDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(methodResult, mappingContext, includeTree);
@@ -148,20 +148,18 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
         [Authorize]
-        public virtual async Task<ItemResult<object>> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
             {
-                return new ItemResult<object>(itemResult);
+                return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            object methodResult = null;
-            item.ChangeSpacesToDashesInName();
-            Db.SaveChanges();
-            var result = new ItemResult<object>(methodResult);
-            result.Object = methodResult;
+            var methodResult = item.ChangeSpacesToDashesInName();
+            await Db.SaveChangesAsync();
+            var result = new ItemResult(methodResult);
             return result;
         }
 
@@ -173,9 +171,8 @@ namespace Coalesce.Web.Api
         public virtual ItemResult<int> Add(int numberOne, int numberTwo)
         {
             var methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
-            var unwrappedResult = methodResult.Object;
             var result = new ItemResult<int>(methodResult);
-            result.Object = unwrappedResult;
+            result.Object = methodResult.Object;
             return result;
         }
 
@@ -220,7 +217,7 @@ namespace Coalesce.Web.Api
             }
             var item = itemResult.Object;
             var methodResult = item.FullNameAndAge(Db);
-            Db.SaveChanges();
+            await Db.SaveChangesAsync();
             var result = new ItemResult<string>();
             result.Object = methodResult;
             return result;
@@ -254,7 +251,7 @@ namespace Coalesce.Web.Api
             }
             var item = itemResult.Object;
             var methodResult = item.ObfuscateEmail(Db);
-            Db.SaveChanges();
+            await Db.SaveChangesAsync();
             var result = new ItemResult<string>();
             result.Object = methodResult;
             return result;
@@ -276,7 +273,7 @@ namespace Coalesce.Web.Api
             }
             var item = itemResult.Object;
             var methodResult = item.ChangeFirstName(firstName);
-            Db.SaveChanges();
+            await Db.SaveChangesAsync();
             var result = new ItemResult<PersonDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(methodResult, mappingContext, includeTree);
@@ -301,11 +298,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.IEnumerable<string>> NamesStartingWith(string characters)
+        public virtual ItemResult<ICollection<string>> NamesStartingWith(string characters)
         {
-            var methodResult = Coalesce.Domain.Person.NamesStartingWith(characters, Db);
-            var result = new ItemResult<System.Collections.Generic.IEnumerable<string>>();
-            result.Object = methodResult;
+            var methodResult = Coalesce.Domain.Person.NamesStartingWith(Db, characters);
+            var result = new ItemResult<ICollection<string>>();
+            result.Object = methodResult.ToList();
             return result;
         }
 
@@ -314,13 +311,13 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("SearchPeople")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>> SearchPeople(PersonCriteriaDtoGen criteria)
+        public virtual ListResult<PersonDtoGen> SearchPeople(PersonCriteriaDtoGen criteria, int page)
         {
             IncludeTree includeTree = null;
-            var methodResult = Coalesce.Domain.Person.SearchPeople(criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), Db);
-            var result = new ItemResult<System.Collections.Generic.IEnumerable<PersonDtoGen>>();
+            var methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), page);
+            var result = new ListResult<PersonDtoGen>(methodResult);
             var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+            result.List = methodResult.List.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, includeTree)).ToList();
             return result;
         }
     }

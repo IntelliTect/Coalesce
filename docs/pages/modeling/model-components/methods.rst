@@ -18,7 +18,7 @@ The following parameters can be added to your methods:
     Primitives & Dates
         Primitive values (numerics, strings, booleans, enums) and dates (:csharp:`DateTime`, :csharp:`DateTimeOffset`, and nullable variants) are accepted as parameters to be passed from the client to the method call. 
     Objects
-        Any object types may be passed to the method call. These may be existing :ref:`EntityModels` or :ref:`ExternalTypes`. When invoking the method on the client, the object's properties will only be serialized one level deep. If an object parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be serialized.
+        Any object types may be passed to the method call. These may be existing :ref:`EntityModels` or :ref:`ExternalTypes`. When invoking the method on the client, the object's properties will only be serialized one level deep. If an object parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be deserialized from the client.
     :csharp:`<YourDbContext> db`
         If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method call. For :ref:`Services` which don't have a defined backing EF context, this is treated as having an implicit :csharp:`[Inject]` attribute.
     :csharp:`ClaimsPrincipal user`
@@ -26,7 +26,7 @@ The following parameters can be added to your methods:
     :csharp:`[Inject] <anything>`
         If a parameter is marked with the :ref:`InjectAttribute` attribute, it will be injected from the application's :csharp:`IServiceProvider`.
     :csharp:`out IncludeTree includeTree`
-        If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information.
+        If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information. If the method returns an :csharp:`IQueryable`, this will supercede the include tree obtained from inspecting the query.
 
 |
 
@@ -35,7 +35,7 @@ Return Values
 
 You can return virtually anything from these methods:
 
-    Primitives
+    Primitives & Dates
         Any primitive data types may be returned - :csharp:`string`, :csharp:`int`, etc.
     Model Types
         Any of the types of your models may be returned. The generated TypeScript for calling the method will use the generated TypeScript ViewModels of your models to store the returned value.
@@ -48,11 +48,16 @@ You can return virtually anything from these methods:
             When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your :ref:`ExternalTypes`, it will also generate ViewModels for the types of any of its properties, and so on down the tree. If a type is encountered from the FCL/BCL or another package that your application uses, these generated types will get out of hand extremely quickly.
 
             Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
-    :csharp:`ICollection<T>`
-        Collections of any of the valid return types above are also valid return types.
-    :csharp:`ItemResult<T>`
+    :csharp:`ICollection<T>` or :csharp:`IEnumerable<T>`
+        Collections of any of the above valid return types above are also valid return types. IEnumerables are useful for generator functions using :csharp:`yield`. :csharp:`ICollection` is highly suggested over :csharp:`IEnumerable` whenever appropriate, though.
+    :csharp:`IQueryable<T>`
+        Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an :ref:`IncludeTree` from the queryable to shape the response. When :ref:`IncludeTree` functionality is needed to shape the response but an :csharp:`IQueryable<>` return type is not feasible, an :csharp:`out IncludeTree includeTree` parameter will do the trick as well.
+    :csharp:`IntelliTect.Coalesce.Models.ItemResult<T>` or :csharp:`ItemResult`
         An :csharp:`ItemResult<T>` of any of the valid return types above, including collections, is valid. The :csharp:`WasSuccessful` and :csharp:`Message` properties on the result object will be sent along to the client to indicate success or failure of the method. The type :csharp:`T` will be mapped to the appropriate DTO object before being serialized as normal.
-        
+    :csharp:`IntelliTect.Coalesce.Models.ListResult<T>`
+        A :csharp:`ListResult<T>` of any of the non-collection types above, is valid. The :csharp:`WasSuccessful` :csharp:`Message`, and all paging information on the result object will be sent along to the client. The type :csharp:`T` will be mapped to the appropriate DTO objects before being serialized as normal.
+
+        A special object in TypeScript will be used to hold the paging information included in the ListResult.
 
 
 |

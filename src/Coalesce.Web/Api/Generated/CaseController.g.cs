@@ -125,13 +125,13 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetSomeCases")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
+        public virtual ItemResult<ICollection<CaseDtoGen>> GetSomeCases()
         {
             IncludeTree includeTree = null;
             var methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
-            var result = new ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>>();
+            var result = new ItemResult<ICollection<CaseDtoGen>>();
             var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, includeTree)).ToList();
             return result;
         }
 
@@ -153,12 +153,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
         [Authorize]
-        public virtual ItemResult<object> RandomizeDatesAndStatus()
+        public virtual ItemResult RandomizeDatesAndStatus()
         {
-            object methodResult = null;
             Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
-            var result = new ItemResult<object>();
-            result.Object = methodResult;
+            var result = new ItemResult();
             return result;
         }
 

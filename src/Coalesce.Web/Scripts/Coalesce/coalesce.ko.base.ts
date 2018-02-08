@@ -218,7 +218,7 @@ module Coalesce {
                     this.message('');
                     this.wasSuccessful(true);
 
-                    this.loadResponse(data.object, callback, reload);
+                    this.loadResponse(data, callback, reload);
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -234,6 +234,21 @@ module Coalesce {
                     this.isLoading(false);
                 });
         }
+    }
+
+    export class ListResult<TItem extends LoadableViewModel> {
+        
+        /** Page number. */
+        public page: KnockoutObservable<number> = ko.observable(null);
+        /** Number of items on a page. */
+        public pageSize: KnockoutObservable<number> = ko.observable(null);
+        /** Total count of items, even ones that are not on the page. */
+        public totalCount: KnockoutObservable<number> = ko.observable(null);
+        /** Total page count */
+        public pageCount: KnockoutObservable<number> = ko.observable(null);
+        
+        /** The collection of items that have been loaded from the server. */
+        public items: KnockoutObservableArray<TItem> = ko.observableArray([]);
     }
 
     export abstract class DataSource<T extends BaseViewModel> {

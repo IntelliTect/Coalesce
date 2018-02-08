@@ -229,16 +229,31 @@
                                 }
                             </td>
                             <td>
-                                @if (method.ReturnType.IsCollection)
+                                @if (method.ReturnsListResult)
+                                {
+                                    <dl class="dl-horizontal" data-bind="with: result">
+                                        <dt>Page</dt><dd data-bind="text: page"></dd>
+                                        <dt>Page Size</dt><dd data-bind="text: pageSize"></dd>
+                                        <dt>Total Count</dt><dd data-bind="text: totalCount"></dd>
+                                        <dt>Page Count</dt><dd data-bind="text: pageCount"></dd>
+                                        <dt>Items</dt>
+                                        <dd>
+                                            <ul data-bind="foreach: items">
+                                                <li data-bind="text: $data"></li>
+                                            </ul>
+                                        </dd>
+                                    </dl>
+                                }
+                                else if (method.ResultType.IsCollection)
                                 {
                                     <ul data-bind="foreach: result">
                                         <li class="" data-bind="text: $data"></li>
                                     </ul>
                                 }
-                                else if (method.ReturnType.HasClassViewModel)
+                                else if (method.ResultType.HasClassViewModel)
                                 {
                                     <dl class="dl-horizontal" data-bind="with: result">
-                                        @foreach (var prop in method.ReturnType.ClassViewModel.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)))
+                                        @foreach (var prop in method.ResultType.ClassViewModel.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)))
                                         {
                                             <dt>@prop.DisplayName</dt>
                                             <dd data-bind="text: @prop.JsVariableForBinding()"></dd>
@@ -253,7 +268,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>

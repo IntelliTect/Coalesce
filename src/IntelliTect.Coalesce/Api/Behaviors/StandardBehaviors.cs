@@ -172,7 +172,7 @@ namespace IntelliTect.Coalesce
             // This is fine - we won't try to map it if its null.
             if (item == null) return true;
 
-            var result = new ItemResult<TDto>(true,
+            var result = new ItemResult<TDto>(
                 item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
             );
 
@@ -283,7 +283,7 @@ namespace IntelliTect.Coalesce
                      return true;
                 }
 
-                return new ItemResult<TDto>(true,
+                return new ItemResult<TDto>(
                     deletedItem.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
                 );
             }

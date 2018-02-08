@@ -174,7 +174,7 @@ namespace @(namespaceName).Api
         // Methods from data class exposed through API Controller.
         @foreach (var method in model.ClientMethods)
         {
-            var returnType = $"ItemResult<{method.ReturnTypeNameForApi}>";
+            var returnType = method.ReturnTypeNameForApi;
             if (!method.IsStatic) { returnType = $"async Task<{returnType}>"; }
         <text>
         /// <summary>
@@ -191,10 +191,9 @@ namespace @(namespaceName).Api
             }
             @if (method.IsStatic)
             {
-                if(method.ResultType.IsVoid) {
-                    @:object methodResult = null;
+                if (method.ReturnType.IsVoid) {
                     @:@(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
-                }else{
+                } else {
                     @:var methodResult = @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
                 }
             }
@@ -204,17 +203,16 @@ namespace @(namespaceName).Api
                 @:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 @:if (!itemResult.WasSuccessful)
                 @:{
-                    @:return new ItemResult<@method.ReturnTypeNameForApi>(itemResult);
+                    @:return new @(method.ReturnTypeNameForApi)(itemResult);
                 @:}
                 @:var item = itemResult.Object;
-                if (method.ResultType.IsVoid)
+                if (method.ReturnType.IsVoid)
                 {
-                    @:object methodResult = null;
                     @:item.@(method.Name)(@(method.CsArguments));
-                }else{
+                } else {
                     @:var methodResult = item.@(method.Name)(@(method.CsArguments));
                 }
-                @:Db.SaveChanges();
+                @:await Db.SaveChangesAsync();
             }
             @(Model.MethodResultProcessBlock(method))
         }

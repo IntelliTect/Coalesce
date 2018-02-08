@@ -50,7 +50,7 @@ module Services {
             
             protected loadResponse = (data: any, callback: (result: ViewModels.WeatherData) => void = null) => {
                 if (!this.result()) {
-                    this.result(new ViewModels.WeatherData(data));
+                    this.result(new ViewModels.WeatherData(data.object));
                 } else {
                     this.result().loadFromDto(data);
                 }

@@ -57,7 +57,7 @@ You can return virtually anything from these methods:
     :csharp:`IntelliTect.Coalesce.Models.ListResult<T>`
         A :csharp:`ListResult<T>` of any of the non-collection types above, is valid. The :csharp:`WasSuccessful` :csharp:`Message`, and all paging information on the result object will be sent along to the client. The type :csharp:`T` will be mapped to the appropriate DTO objects before being serialized as normal.
 
-        A special object in TypeScript will be used to hold the paging information included in the ListResult.
+        The class created for the method in TypeScript will be used to hold the paging information included in the ListResult. See below for more information about this class.
 
 
 |
@@ -93,33 +93,45 @@ Method-specific Members
     Declaration of class that provides invocation methods and status properties for the method.
 :ts:`public readonly rename = new Person.Rename(this)`
     Default instance of the method for easy calling of the method without needing to manually instantiate the class.
-:ts:`rename.invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>`
+:ts:`public invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>`
     Function that takes all the method parameters and a callback. If :ts:`reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
 
 The following members are only generated for methods with arguments:
 
-:ts:`Rename.Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }`
+:ts:`public static Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }`
     Class with one observable member per method argument for binding method arguments to user input.
-:ts:`rename.args = new Rename.Args()`
+:ts:`public args = new Rename.Args()`
     Default instance of the args class.
-:ts:`rename.invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>`
+:ts:`public invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>`
     Function for invoking the method using the args class. The default instance of the args class will be used if none is provided.
-:ts:`rename.invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
+:ts:`public invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
     Simple interface using browser :ts:`prompt()` input boxes to prompt the user for the required data for the method call. The call is then made with the data provided.
 
 Base Class Members
 ..................
 
-:ts:`rename.result: KnockoutObservable<string>`
+:ts:`public result: KnockoutObservable<string>`
     Observable that will contain the results of the method call after it is complete.
-:ts:`rename.rawResult: KnockoutObservable<any>`
+:ts:`public rawResult: KnockoutObservable<Coalesce.ApiResult>`
     Observable with the raw, deserialized JSON result of the method call. If the method call returns an object, this will contain the deserialized JSON object from the server before it has been loaded into ViewModels and its properties loaded into observables.
-:ts:`rename.isLoading: KnockoutObservable<boolean>`
+:ts:`public isLoading: KnockoutObservable<boolean>`
     Observable boolean which is true while the call to the server is pending.
-:ts:`rename.message: KnockoutObservable<string>`
+:ts:`public message: KnockoutObservable<string>`
     If the method was not successful, this contains exception information.
-:ts:`rename.wasSuccessful: KnockoutObservable<boolean>`
+:ts:`public wasSuccessful: KnockoutObservable<boolean>`
     Observable boolean that indicates whether the method call was successful or not.
+
+ListResult<T> Method Members
+............................
+
+:ts:`public page: KnockoutObservable<number>`
+    Page number of the results.
+:ts:`public pageSize: KnockoutObservable<number>`
+    Page size of the results.
+:ts:`public pageCount: KnockoutObservable<number>`
+    Total number of possible result pages.
+:ts:`public totalCount: KnockoutObservable<number>`
+    Total number of results.
 
 |
 

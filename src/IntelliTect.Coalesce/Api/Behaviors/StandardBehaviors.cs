@@ -136,6 +136,12 @@ namespace IntelliTect.Coalesce
                 originalItem = item.Copy();
             }
 
+            // Allow validation on the raw DTO before its been mapped.
+            var validateDto = ValidateDto(kind, incomingDto);
+            if (validateDto == null)
+                throw new InvalidOperationException("Recieved null from result of ValidateDto. Expected an ItemResult.");
+            if (!validateDto.WasSuccessful) return new ItemResult<TDto>(validateDto);
+
             // Set all properties on the DB-mapped object to the incoming values.
             incomingDto.MapToModel(item, new MappingContext(User, includes));
 
@@ -178,6 +184,18 @@ namespace IntelliTect.Coalesce
 
             return result;
         }
+
+        /// <summary>
+        /// Code to run before mapping the DTO to its model type.
+        /// Allows for the chance to perform validation on the DTO itself rather than the mapped model in <see cref="BeforeSave(SaveKind, T, T)"/>.
+        /// For generated DTOs where the type is not available, there are a variety of methods for retrieving expected 
+        /// properties from the object based on its model type, although reflection is always an option as well.
+        /// For behaviors on custom DTOs, a simple cast will allow access to all properties.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="dto">The incoming item from the client.</param>
+        /// <returns></returns>
+        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto) => true;
 
         /// <summary>
         /// Code to run before committing a save to the database.

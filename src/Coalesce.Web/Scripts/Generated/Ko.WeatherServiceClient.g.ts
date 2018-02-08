@@ -48,7 +48,7 @@ module Services {
                 return this.invoke(location, dateTime, callback);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.WeatherData) => void = null) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.WeatherData) => void = null) => {
                 if (!this.result()) {
                     this.result(new ViewModels.WeatherData(data.object));
                 } else {

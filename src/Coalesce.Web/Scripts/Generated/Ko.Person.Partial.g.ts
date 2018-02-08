@@ -178,7 +178,7 @@ module ViewModels {
                 return this.invoke(name, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -207,7 +207,7 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: any) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: any) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -231,7 +231,7 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -255,7 +255,7 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -299,7 +299,7 @@ module ViewModels {
                 return this.invoke(firstName, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {

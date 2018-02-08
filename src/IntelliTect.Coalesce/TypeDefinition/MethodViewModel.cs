@@ -40,11 +40,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? new ReflectionTypeViewModel(typeof(void))
             : ReturnType;
 
-        public string TsResultType =>
-            ReturnsListResult
-            ? $"Coalesce.ListResult<{ResultType.PureType.TsType}>"
-            : ResultType.TsType;
-
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
         /// <summary>

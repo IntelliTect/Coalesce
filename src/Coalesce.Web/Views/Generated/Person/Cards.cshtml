@@ -160,7 +160,16 @@
                                     </button>
                             </td>
                             <td>
-                                    <span data-bind="text: result"></span>
+                                    <dl class="dl-horizontal" data-bind="with: result">
+                                            <dt>Object</dt>
+                                            <dd data-bind="text: object"></dd>
+                                            <dt>Validation Issues</dt>
+                                            <dd data-bind="text: validationIssues"></dd>
+                                            <dt>Was Successful</dt>
+                                            <dd data-bind="text: wasSuccessful"></dd>
+                                            <dt>Message</dt>
+                                            <dd data-bind="text: message"></dd>
+                                    </dl>
                             </td>
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
@@ -269,16 +278,20 @@
                             </td>
                             <td>
                                     <dl class="dl-horizontal" data-bind="with: result">
-                                        <dt>Page</dt><dd data-bind="text: page"></dd>
-                                        <dt>Page Size</dt><dd data-bind="text: pageSize"></dd>
-                                        <dt>Total Count</dt><dd data-bind="text: totalCount"></dd>
-                                        <dt>Page Count</dt><dd data-bind="text: pageCount"></dd>
-                                        <dt>Items</dt>
-                                        <dd>
-                                            <ul data-bind="foreach: items">
-                                                <li data-bind="text: $data"></li>
-                                            </ul>
-                                        </dd>
+                                            <dt>Page</dt>
+                                            <dd data-bind="text: page"></dd>
+                                            <dt>Page Size</dt>
+                                            <dd data-bind="text: pageSize"></dd>
+                                            <dt>Page Count</dt>
+                                            <dd data-bind="text: pageCount"></dd>
+                                            <dt>Total Count</dt>
+                                            <dd data-bind="text: totalCount"></dd>
+                                            <dt>List</dt>
+                                            <dd data-bind="text: list"></dd>
+                                            <dt>Was Successful</dt>
+                                            <dd data-bind="text: wasSuccessful"></dd>
+                                            <dt>Message</dt>
+                                            <dd data-bind="text: message"></dd>
                                     </dl>
                             </td>
                             <td>

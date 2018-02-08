@@ -93,7 +93,7 @@ module ListViewModels {
                 return this.invoke(numberOne, numberTwo, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: number) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -118,7 +118,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -162,7 +162,7 @@ module ListViewModels {
                 return this.invoke(lastNameStartsWith, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: number) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -206,7 +206,7 @@ module ListViewModels {
                 return this.invoke(id, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: boolean) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: boolean) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -231,7 +231,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -277,7 +277,7 @@ module ListViewModels {
                 return this.invoke(characters, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string[]) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string[]) => void = null, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -293,13 +293,13 @@ module ListViewModels {
             Gets people matching the criteria, paginated by parameter 'page'.
         */
         public readonly searchPeople = new PersonList.SearchPeople(this);
-        public static SearchPeople = class SearchPeople extends Coalesce.ClientMethod<PersonList, Coalesce.ListResult<ViewModels.Person>> {
+        public static SearchPeople = class SearchPeople extends Coalesce.ClientListMethod<PersonList, ViewModels.Person[]> {
             public readonly name = 'SearchPeople';
             public readonly verb = 'POST';
-            public result: KnockoutObservable<Coalesce.ListResult<ViewModels.Person>> = ko.observable(null);
+            public result: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
             
             /** Calls server method (SearchPeople) with the given arguments */
-            public invoke = (criteria: ViewModels.PersonCriteria, page: number, callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (criteria: ViewModels.PersonCriteria, page: number, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ criteria: criteria ? criteria.saveToDto() : null, page: page }, callback, reload);
             };
             
@@ -311,12 +311,12 @@ module ListViewModels {
             };
             
             /** Calls server method (SearchPeople) with an instance of SearchPeople.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.criteria(), args.page(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithPrompts = (callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
                 var $promptVal: string = null;
                 $promptVal = prompt('Page');
                 if ($promptVal === null) return;
@@ -325,14 +325,8 @@ module ListViewModels {
                 return this.invoke(criteria, page, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: Coalesce.ListResult<ViewModels.Person>) => void = null, reload: boolean = true) => {
-                var result = this.result();
-                if (!result) this.result(result = new Coalesce.ListResult<ViewModels.Person>());
-                result.page(data.page)
-                result.pageSize(data.pageSize)
-                result.totalCount(data.totalCount)
-                result.pageCount(data.pageCount)
-                Coalesce.KnockoutUtilities.RebuildArray(result.items, data.list, 'personId', ViewModels.Person, this, true);
+            protected loadResponse = (data: Coalesce.ListResult, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true) => {
+                Coalesce.KnockoutUtilities.RebuildArray(this.result, data.list, 'personId', ViewModels.Person, this, true);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);

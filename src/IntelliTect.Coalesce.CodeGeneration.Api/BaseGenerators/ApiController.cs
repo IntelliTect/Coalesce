@@ -27,14 +27,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
             else if (method.ReturnsListResult)
             {
-                resultVar = "methodResult.List";
                 resultProp = "List";
+                resultVar = "methodResult.List";
             }
-
 
             if (method.ReturnType.IsA<ApiResult>())
             {
                 // For any ApiResult return type, pass it to our ApiResult ctor to grab the WasSuccessful and Message props.
+                // For list results, this also copies paging information.
                 b.Line($"var result = new {method.ReturnTypeNameForApi}(methodResult);");
             }
             else

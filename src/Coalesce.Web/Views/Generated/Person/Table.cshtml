@@ -326,18 +326,9 @@
                                     </button>
                             </td>
                             <td>
-                                    <dl class="dl-horizontal" data-bind="with: result">
-                                        <dt>Page</dt><dd data-bind="text: page"></dd>
-                                        <dt>Page Size</dt><dd data-bind="text: pageSize"></dd>
-                                        <dt>Total Count</dt><dd data-bind="text: totalCount"></dd>
-                                        <dt>Page Count</dt><dd data-bind="text: pageCount"></dd>
-                                        <dt>Items</dt>
-                                        <dd>
-                                            <ul data-bind="foreach: items">
-                                                <li data-bind="text: $data"></li>
-                                            </ul>
-                                        </dd>
-                                    </dl>
+                                    <ul data-bind="foreach: result">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
                             </td>
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>

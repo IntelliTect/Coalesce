@@ -146,7 +146,7 @@ module @moduleName {
         @:];
         }
 
-        @foreach (var method in model.ClientMethods.Where(m => !m.IsStatic || m.ReturnType.EqualsType(model.Type)))
+        @foreach (var method in model.ClientMethods.Where(m => !m.IsStatic || m.ResultType.EqualsType(model.Type)))
         {
             @(Model.ClientMethodDeclaration(method, model.ViewModelGeneratedClassName))
         }

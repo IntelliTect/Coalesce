@@ -108,7 +108,7 @@ Properties
 Method Overview
 '''''''''''''''
 
-The standard behaviors implementation contains 9 different methods which can be overridden in your derived class to control functionality. 
+The standard behaviors implementation contains many different methods which can be overridden in your derived class to control functionality. 
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
@@ -118,6 +118,7 @@ These methods often call one another, so overriding one method may cause some ot
             DetermineSaveKind
             GetDbSet
             ValidateDto
+            MapIncomingDto
             BeforeSave
             AfterSave
 
@@ -143,9 +144,12 @@ All of the methods outlined above can be overridden. A description of each of th
 
     :csharp:`GetDbSet`
         Fetch a :csharp:`DbSet<T>` that items can be added to (creates) or remove from (deletes).
-    
+
     :csharp:`ValidateDto`
         Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in :csharp:`BeforeSave`. A number of extension methods on :csharp:`IClassDto<T>` can be used to access the value of the properties of :ref:`GenDTOs`. For behaviors on :ref:`CustomDTOs` where the DTO type is known, simply cast to the correct type. 
+    
+    :csharp:`MapIncomingDto`
+        Map the properties of the incoming DTO to the model that will be saved to the database. By default, this will call the :csharp:`MapTo` method on the DTO, but if more precise control is needed, the :csharp:`IClassDto<T>` extension methods or a cast to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
     
     :csharp:`BeforeSave`
         Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    

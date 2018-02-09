@@ -23,25 +23,36 @@ namespace IntelliTect.Coalesce
             => GetPropertyInfo(dto, property).GetValue(dto) as TValue?;
 
         /// <summary>
-        /// Get the value of a value type on a generic DTO. Allows accessing properties where the implementation type of the DTO is not known.
+        /// Get the value of a value type on a generic DTO. 
+        /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static TValue? GetValue<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue?>> property)
             where TValue : struct
             => GetPropertyInfo(dto, property).GetValue(dto) as TValue?;
 
         /// <summary>
-        /// Get the value of a string property on a generic DTO. Allows accessing properties where the implementation type of the DTO is not known.
+        /// Get the value of a string property on a generic DTO. 
+        /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static string GetValue<TObject>(this IClassDto<TObject> dto, Expression<Func<TObject, string>> property)
             // This is just a "nice" alias for GetObject so you can still invoke a method called "GetValue" for strings.
             => dto.GetObject(property);
 
         /// <summary>
-        /// Get the value of an object property on a generic DTO. Allows accessing properties where the implementation type of the DTO is not known.
+        /// Get the value of an object property on a generic DTO. 
+        /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static TValue GetObject<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue>> property)
             where TValue : class
             => GetPropertyInfo(dto, property).GetValue(dto) as TValue;
+
+        /// <summary>
+        /// Check if the value of a property on a DTO is not null.
+        /// Allows accessing properties where the implementation type of the DTO is not known.
+        /// </summary>
+        public static bool HasValue<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue>> property)
+            => !(GetPropertyInfo(dto, property).GetValue(dto) is null);
+
 
         private static PropertyInfo GetPropertyInfo(object dto, LambdaExpression property)
         {

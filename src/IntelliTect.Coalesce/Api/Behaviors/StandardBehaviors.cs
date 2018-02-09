@@ -143,7 +143,7 @@ namespace IntelliTect.Coalesce
             if (!validateDto.WasSuccessful) return new ItemResult<TDto>(validateDto);
 
             // Set all properties on the DB-mapped object to the incoming values.
-            incomingDto.MapToModel(item, new MappingContext(User, includes));
+            MapIncomingDto(kind, item, incomingDto, parameters);
 
             // Allow interception of the save.
             var beforeSave = BeforeSave(kind, originalItem, item);
@@ -183,6 +183,19 @@ namespace IntelliTect.Coalesce
             );
 
             return result;
+        }
+
+        /// <summary>
+        /// Maps the incoming DTO's properties to the item that will be saved to the database.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="item">The item that will be saved to the database.</param>
+        /// <param name="dto">The incoming item from the client.</param>
+        /// <param name="parameters">The </param>
+        protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters) 
+            where TDto : IClassDto<T>, new()
+        {
+            dto.MapToModel(item, new MappingContext(User, parameters.Includes));
         }
 
         /// <summary>

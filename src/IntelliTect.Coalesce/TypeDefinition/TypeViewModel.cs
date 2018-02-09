@@ -245,6 +245,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
+        public string DtoFullyQualifiedName => IsCollection
+            // We assume ICollection for all collections. If this doesn't work in a particular context,
+            // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
+            ? $"ICollection<{PureType.DtoFullyQualifiedName}>" 
+            : (HasClassViewModel ? ClassViewModel.DtoName : FullyQualifiedName);
 
         public string NullableTypeForDto(string dtoNamespace)
         {

@@ -18,7 +18,7 @@ The following parameters can be added to your methods:
     Primitives & Dates
         Primitive values (numerics, strings, booleans, enums) and dates (:csharp:`DateTime`, :csharp:`DateTimeOffset`, and nullable variants) are accepted as parameters to be passed from the client to the method call. 
     Objects
-        Any object types may be passed to the method call. These may be existing :ref:`EntityModels` or :ref:`ExternalTypes`. When invoking the method on the client, the object's properties will only be serialized one level deep. If an object parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be serialized.
+        Any object types may be passed to the method call. These may be existing :ref:`EntityModels` or :ref:`ExternalTypes`. When invoking the method on the client, the object's properties will only be serialized one level deep. If an object parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be deserialized from the client.
     :csharp:`<YourDbContext> db`
         If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method call. For :ref:`Services` which don't have a defined backing EF context, this is treated as having an implicit :csharp:`[Inject]` attribute.
     :csharp:`ClaimsPrincipal user`
@@ -26,7 +26,7 @@ The following parameters can be added to your methods:
     :csharp:`[Inject] <anything>`
         If a parameter is marked with the :ref:`InjectAttribute` attribute, it will be injected from the application's :csharp:`IServiceProvider`.
     :csharp:`out IncludeTree includeTree`
-        If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information.
+        If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information. If the method returns an :csharp:`IQueryable`, this will supercede the include tree obtained from inspecting the query.
 
 |
 
@@ -35,7 +35,7 @@ Return Values
 
 You can return virtually anything from these methods:
 
-    Primitives
+    Primitives & Dates
         Any primitive data types may be returned - :csharp:`string`, :csharp:`int`, etc.
     Model Types
         Any of the types of your models may be returned. The generated TypeScript for calling the method will use the generated TypeScript ViewModels of your models to store the returned value.
@@ -48,11 +48,16 @@ You can return virtually anything from these methods:
             When returning custom types from methods, be careful of the types of their properties. As Coalesce generates the TypeScript ViewModels for your :ref:`ExternalTypes`, it will also generate ViewModels for the types of any of its properties, and so on down the tree. If a type is encountered from the FCL/BCL or another package that your application uses, these generated types will get out of hand extremely quickly.
 
             Mark any properties you don't want generated on these TypeScript ViewModels with the :ref:`InternalUse` attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
-    :csharp:`ICollection<T>`
-        Collections of any of the valid return types above are also valid return types.
-    :csharp:`ItemResult<T>`
+    :csharp:`ICollection<T>` or :csharp:`IEnumerable<T>`
+        Collections of any of the above valid return types above are also valid return types. IEnumerables are useful for generator functions using :csharp:`yield`. :csharp:`ICollection` is highly suggested over :csharp:`IEnumerable` whenever appropriate, though.
+    :csharp:`IQueryable<T>`
+        Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an :ref:`IncludeTree` from the queryable to shape the response. When :ref:`IncludeTree` functionality is needed to shape the response but an :csharp:`IQueryable<>` return type is not feasible, an :csharp:`out IncludeTree includeTree` parameter will do the trick as well.
+    :csharp:`IntelliTect.Coalesce.Models.ItemResult<T>` or :csharp:`ItemResult`
         An :csharp:`ItemResult<T>` of any of the valid return types above, including collections, is valid. The :csharp:`WasSuccessful` and :csharp:`Message` properties on the result object will be sent along to the client to indicate success or failure of the method. The type :csharp:`T` will be mapped to the appropriate DTO object before being serialized as normal.
-        
+    :csharp:`IntelliTect.Coalesce.Models.ListResult<T>`
+        A :csharp:`ListResult<T>` of any of the non-collection types above, is valid. The :csharp:`WasSuccessful` :csharp:`Message`, and all paging information on the result object will be sent along to the client. The type :csharp:`T` will be mapped to the appropriate DTO objects before being serialized as normal.
+
+        The class created for the method in TypeScript will be used to hold the paging information included in the ListResult. See below for more information about this class.
 
 
 |
@@ -88,33 +93,45 @@ Method-specific Members
     Declaration of class that provides invocation methods and status properties for the method.
 :ts:`public readonly rename = new Person.Rename(this)`
     Default instance of the method for easy calling of the method without needing to manually instantiate the class.
-:ts:`rename.invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>`
+:ts:`public invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>`
     Function that takes all the method parameters and a callback. If :ts:`reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
 
 The following members are only generated for methods with arguments:
 
-:ts:`Rename.Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }`
+:ts:`public static Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }`
     Class with one observable member per method argument for binding method arguments to user input.
-:ts:`rename.args = new Rename.Args()`
+:ts:`public args = new Rename.Args()`
     Default instance of the args class.
-:ts:`rename.invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>`
+:ts:`public invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>`
     Function for invoking the method using the args class. The default instance of the args class will be used if none is provided.
-:ts:`rename.invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
+:ts:`public invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
     Simple interface using browser :ts:`prompt()` input boxes to prompt the user for the required data for the method call. The call is then made with the data provided.
 
 Base Class Members
 ..................
 
-:ts:`rename.result: KnockoutObservable<string>`
+:ts:`public result: KnockoutObservable<string>`
     Observable that will contain the results of the method call after it is complete.
-:ts:`rename.rawResult: KnockoutObservable<any>`
+:ts:`public rawResult: KnockoutObservable<Coalesce.ApiResult>`
     Observable with the raw, deserialized JSON result of the method call. If the method call returns an object, this will contain the deserialized JSON object from the server before it has been loaded into ViewModels and its properties loaded into observables.
-:ts:`rename.isLoading: KnockoutObservable<boolean>`
+:ts:`public isLoading: KnockoutObservable<boolean>`
     Observable boolean which is true while the call to the server is pending.
-:ts:`rename.message: KnockoutObservable<string>`
+:ts:`public message: KnockoutObservable<string>`
     If the method was not successful, this contains exception information.
-:ts:`rename.wasSuccessful: KnockoutObservable<boolean>`
+:ts:`public wasSuccessful: KnockoutObservable<boolean>`
     Observable boolean that indicates whether the method call was successful or not.
+
+ListResult<T> Method Members
+............................
+
+:ts:`public page: KnockoutObservable<number>`
+    Page number of the results.
+:ts:`public pageSize: KnockoutObservable<number>`
+    Page size of the results.
+:ts:`public pageCount: KnockoutObservable<number>`
+    Total number of possible result pages.
+:ts:`public totalCount: KnockoutObservable<number>`
+    Total number of results.
 
 |
 

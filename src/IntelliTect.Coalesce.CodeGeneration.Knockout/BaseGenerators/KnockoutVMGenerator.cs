@@ -3,6 +3,7 @@ using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System;
@@ -32,6 +33,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             var b = new TypeScriptCodeBuilder(initialLevel: indentLevel, indentSize: 4);
             var model = this.Model;
             var isService = method.Parent.IsService;
+            var returnIsListResult = method.ReturnsListResult;
 
             string reloadArg = !isService ? ", reload" : "";
             string reloadParam = !isService ? ", reload: boolean = true" : "";
@@ -47,13 +49,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
 
             // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
+            string methodClass = returnIsListResult
+                ? "ClientListMethod"
+                : "ClientMethod";
+
             var classBlock = b.Block(
-                $"public static {method.Name} = class {method.Name} extends Coalesce.ClientMethod<{parentClassName}, {method.ResultType.TsType}>", ';');
+                $"public static {method.Name} = class {method.Name} extends Coalesce.{methodClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
 
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
-            if (method.ResultType.IsCollection || method.ResultType.IsArray)
+           if (method.ResultType.IsCollection || method.ResultType.IsArray)
             {
                 b.Line($"public result: {method.ResultType.TsKnockoutType()} = {method.ResultType.ObservableConstructorCall()};");
             }
@@ -121,8 +127,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // Method response handler - highly dependent on what the response type actually is.
             b.Line();
-            using (b.Block($"protected loadResponse = (data: any, {callbackAndReloadParam}) =>", ';'))
+            using (b.Block($"protected loadResponse = (data: Coalesce.{(returnIsListResult ? "List" : "Item")}Result, {callbackAndReloadParam}) =>", ';'))
             {
+                var incomingMainData = returnIsListResult
+                    ? "data.list"
+                    : "data.object";
+
                 if (method.ResultType.IsCollection && method.ResultType.PureType.HasClassViewModel)
                 {
                     // Collection of objects that have TypeScript ViewModels. This could be an entity or an external type.
@@ -131,15 +141,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     var keyNameArg = method.ResultType.PureType.ClassViewModel.PrimaryKey != null
                         ? $"'{method.ResultType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
                         : "null";
-
-                    b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, data, {keyNameArg}, ViewModels.{method.ResultType.PureType.ClassViewModel.Name}, this, true);");
+                    
+                     b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, {incomingMainData}, {keyNameArg}, ViewModels.{method.ResultType.PureType.ClassViewModel.Name}, this, true);");
                 }
                 else if (method.ResultType.HasClassViewModel)
                 {
                     // Single view model return type.
 
                     b.Line("if (!this.result()) {");
-                    b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.Name}(data));");
+                    b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.Name}({incomingMainData}));");
                     b.Line("} else {");
                     b.Indented($"this.result().loadFromDto(data);");
                     b.Line("}");
@@ -148,7 +158,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 {
                     // Uninteresting return type. Either void, a primitive, or a collection of primitives.
                     // In any case, regardless of the type of the 'result' observable, this is how we set the results.
-                    b.Line("this.result(data);");
+                    b.Line($"this.result({incomingMainData});");
                 }
 
                 if (isService)
@@ -160,7 +170,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 {
                     // The return type is the type of the method's parent. Load the parent with the results of the method.
                     // Parameter 'reload' has no meaning here, since we're reloading the object with the result of the method.
-                    b.Line($"this.parent.loadFromDto(data, true)");
+                    b.Line($"this.parent.loadFromDto({incomingMainData}, true)");
                     using (b.Block("if (typeof(callback) == 'function')"))
                     {
                         b.Line($"callback(this.result());");

@@ -218,21 +218,12 @@
                                     </button>
                             </td>
                             <td>
-                                    <dl class="dl-horizontal" data-bind="with: result">
-                                            <dt>Object</dt>
-                                            <dd data-bind="text: object"></dd>
-                                            <dt>Validation Issues</dt>
-                                            <dd data-bind="text: validationIssues"></dd>
-                                            <dt>Was Successful</dt>
-                                            <dd data-bind="text: wasSuccessful"></dd>
-                                            <dt>Message</dt>
-                                            <dd data-bind="text: message"></dd>
-                                    </dl>
+                                    <span data-bind="text: result"></span>
                             </td>
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -249,7 +240,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -267,7 +258,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -285,7 +276,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -302,7 +293,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -322,7 +313,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -342,7 +333,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -476,6 +467,12 @@
                     <label class='col-md-4 control-label'>Criteria</label>
                     <div class="col-md-8">
                         <input type='text' class='form-control' data-bind='value: criteria'>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Page</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: page'>
                     </div>
                 </div>
             </div>

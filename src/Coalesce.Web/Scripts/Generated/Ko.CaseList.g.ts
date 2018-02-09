@@ -68,8 +68,8 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.Case[]) => void = null, reload: boolean = true) => {
-                Coalesce.KnockoutUtilities.RebuildArray(this.result, data, 'caseKey', ViewModels.Case, this, true);
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Case[]) => void = null, reload: boolean = true) => {
+                Coalesce.KnockoutUtilities.RebuildArray(this.result, data.object, 'caseKey', ViewModels.Case, this, true);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -92,8 +92,8 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: number) => void = null, reload: boolean = true) => {
-                this.result(data);
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: number) => void = null, reload: boolean = true) => {
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -116,8 +116,8 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: any) => void = null, reload: boolean = true) => {
-                this.result(data);
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: any) => void = null, reload: boolean = true) => {
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
@@ -141,9 +141,9 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
-                    this.result(new ViewModels.CaseSummary(data));
+                    this.result(new ViewModels.CaseSummary(data.object));
                 } else {
                     this.result().loadFromDto(data);
                 }

@@ -1,45 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.Models
 {
     public class ItemResult : ApiResult
     {
-        
-        public ItemResult(): base() { }
-
-        public ItemResult(bool wasSuccessful) : base(wasSuccessful) { }
-
-        public ItemResult(string problem) : base(problem) { }
-
-        public ItemResult(Exception ex) : this(false)
-        {
-            Message = ex.Message;
-        }
-
-        public ItemResult(ApiResult result)
-        {
-            WasSuccessful = result.WasSuccessful;
-            Message = result.Message;
-        }
-
         // TODO: incorporate validation issues into the generated typescript
-
         /// <summary>
         /// A collection of validation issues to send to the client.
         /// Currently, this is not accommodated for in the typescript that is generated.
         /// </summary>
         public ICollection<ValidationIssue> ValidationIssues { get; set; }
 
-        public static implicit operator ItemResult(bool success)
+        public ItemResult(): base() { }
+
+        public ItemResult(string message) : base(message) { }
+
+        public ItemResult(ItemResult result) : base(result)
         {
-            return new ItemResult(success);
+            ValidationIssues = result.ValidationIssues;
         }
 
-        public static implicit operator ItemResult(string message)
+        public ItemResult(bool wasSuccessful, string message = null, IEnumerable<ValidationIssue> validationIssues = null) 
+            : base(wasSuccessful, message)
         {
-            return new ItemResult(message);
+            ValidationIssues = validationIssues as ICollection<ValidationIssue> ?? validationIssues?.ToList();
         }
+
+        public static implicit operator ItemResult(bool success) => new ItemResult(success);
+
+        public static implicit operator ItemResult(string message) => new ItemResult(message);
     }
 
     public class ItemResult<T> : ItemResult
@@ -48,32 +39,26 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(): base() { }
 
-        public ItemResult(bool wasSuccessful) : base(wasSuccessful) { }
+        public ItemResult(string message) : base(message) { }
 
-        public ItemResult(string problem) : base(problem) { }
-
-        public ItemResult(T result) : this(true)
-        {
-            Object = result;
-        }
-
-        public ItemResult(bool wasSuccessful, T obj) : base(wasSuccessful)
+        public ItemResult(ItemResult result, T obj = default) : base(result)
         {
             Object = obj;
         }
 
-        public ItemResult(Exception ex) : base(ex) { }
-
-        public ItemResult(ApiResult result) : base(result) { }
-
-        public static implicit operator ItemResult<T>(bool success)
+        public ItemResult(bool wasSuccessful, string message = null, T obj = default, IEnumerable<ValidationIssue> validationIssues = null) 
+            : base(wasSuccessful, message, validationIssues)
         {
-            return new ItemResult<T>(success);
+            Object = obj;
         }
 
-        public static implicit operator ItemResult<T>(string message)
+        public ItemResult(T obj) : this(true)
         {
-            return new ItemResult<T>(message);
+            Object = obj;
         }
+
+        public static implicit operator ItemResult<T>(bool success) => new ItemResult<T>(success);
+
+        public static implicit operator ItemResult<T>(string message) => new ItemResult<T>(message);
     }
 }

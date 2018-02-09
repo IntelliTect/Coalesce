@@ -117,6 +117,7 @@ These methods often call one another, so overriding one method may cause some ot
         SaveAsync
             DetermineSaveKind
             GetDbSet
+            ValidateDto
             BeforeSave
             AfterSave
 
@@ -142,6 +143,9 @@ All of the methods outlined above can be overridden. A description of each of th
 
     :csharp:`GetDbSet`
         Fetch a :csharp:`DbSet<T>` that items can be added to (creates) or remove from (deletes).
+    
+    :csharp:`ValidateDto`
+        Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in :csharp:`BeforeSave`. A number of extension methods on :csharp:`IClassDto<T>` can be used to access the value of the properties of :ref:`GenDTOs`. For behaviors on :ref:`CustomDTOs` where the DTO type is known, simply cast to the correct type. 
     
     :csharp:`BeforeSave`
         Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    

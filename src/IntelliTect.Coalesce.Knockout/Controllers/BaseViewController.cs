@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
         protected ActionResult EditorHtmlImplementation(bool simple = false)
         {
             ViewBag.SimpleEditorOnly = simple;
-            return PartialView("~/Views/Api/EditorHtml.cshtml", ClassViewModel);
+            return PartialView("~/Views/Generated/Api/EditorHtml.cshtml", ClassViewModel);
         }
 
         
@@ -103,7 +103,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
             ViewBag.ListDoc = GenerateTypeScriptDocs(path, ClassViewModel.ListViewModelClassName);
             ViewBag.BaseListDoc = GenerateTypeScriptDocs( baseClassPath, "BaseListViewModel");
 
-            return View("~/Views/Api/Docs.cshtml", ClassViewModel);
+            return View("~/Views/Generated/Api/Docs.cshtml", ClassViewModel);
         }
 
         private TypeScriptDocumentation GenerateTypeScriptDocs(string path, string className = null)

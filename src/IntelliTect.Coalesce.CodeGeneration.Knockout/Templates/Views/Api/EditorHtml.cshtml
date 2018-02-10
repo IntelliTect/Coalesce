@@ -21,7 +21,7 @@
         }
     }
 
-    @if (model.ClientMethods.Any(f=>f.SecurityInfo.IsExecutable(User) && !f.IsStatic))
+    @if (model.ClientMethods.Any(f=>f.SecurityInfo.IsExecuteAllowed(User) && !f.IsStatic))
     {
     <div class="row">
         <div class="col-lg-offset-2 col-lg-10">
@@ -37,21 +37,21 @@
                         <label class="col-md-2">Loading</label>
                         <label class="col-md-2 bold">Notes</label>
                     </div>
-                    @foreach (MethodViewModel method in model.ClientMethods.Where(f => f.SecurityInfo.IsExecutable(User) && !f.IsStatic))
+                    @foreach (MethodViewModel method in model.ClientMethods.Where(f => f.SecurityInfo.IsExecuteAllowed(User) && !f.IsStatic))
                         {
-                        <div class="form-group form-horizontal">
+                        <div class="form-group form-horizontal" data-bind="with: @(method.JsVariable)">
                             <div class="col-md-2">
-                                <button class="btn btn-default" data-bind="click: @method.JsVariableUi">@method.Name.ToProperCase()</button>
+                                @Display.MethodHelper(method)
                             </div>
                             <div class="col-md-4 control-label">
-                                <span class="" data-bind="text: @method.JsVariableResult"></span>
+                                <span class="" data-bind="text: result"></span>
                             </div>
                             <div class="col-md-2 control-label">
-                                <span class="" data-bind="text: @method.JsVariableWasSuccessful"></span>
-                                <span class="" data-bind="visible: @(method.JsVariableWasSuccessful)(), text: @method.JsVariableMessage"></span>
+                                <span class="" data-bind="text: wasSuccessful"></span>
+                                <span class="" data-bind="visible: wasSuccessful, text: message"></span>
                             </div>
                             <div class="col-md-2 control-label">
-                                <span class="label label-info" data-bind="fadeVisible: @(method.JsVariableIsLoading)()">Loading</span>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </div>
                             <div class="col-md-2 align-right control-label" style="font-size:.7em;">
                                 Modifies @(model.Name)

@@ -149,6 +149,7 @@ ko.bindingHandlers.select2Ajax = {
                                 var oldObject = object();
                                 if (oldObject instanceof itemViewModel) {
                                     oldObject.loadFromDto(result);
+                                    object.valueHasMutated();
                                 } else {
                                     object(new itemViewModel(result));
                                 }

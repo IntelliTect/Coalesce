@@ -12,6 +12,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using static IntelliTect.Coalesce.DataAnnotations.ApiActionHttpMethodAttribute;
+using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -24,6 +25,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Name { get; }
 
         public abstract TypeViewModel ReturnType { get; }
+        
+        public bool ReturnsListResult => ReturnType.IsA(typeof(ListResult<>));
+
+        /// <summary>
+        /// The return type of the method, discounting any <see cref="ItemResult{T}"/> wrapped around it.
+        /// </summary>
+        public TypeViewModel ResultType =>
+              ReturnsListResult
+            ? ReturnType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type // Will be a constructed generic IList<T>
+            : ReturnType.IsA(typeof(ItemResult<>))
+            ? ReturnType.PureType
+            : ReturnType.IsA(typeof(ItemResult))
+            ? new ReflectionTypeViewModel(typeof(void))
+            : ReturnType;
 
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
@@ -55,29 +70,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string JsVariable => Name.ToCamelCase();
 
         /// <summary>
-        /// Type of the return. Object if void.
+        /// Return type of the controller action for the method.
         /// </summary>
         public string ReturnTypeNameForApi
         {
             get
             {
-                string result = ReturnType.FullyQualifiedName;
-                if (result == "void") return "object";
-                result = result.Replace("IQueryable", "IEnumerable");
-                if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
+                var resultType = ResultType;
+
+                if (resultType.IsVoid)
                 {
-                    // We can just straight replace this since the fully qualified name
-                    // that we're replacing should never be a substring of any larger name.
-                    // If this were a possibility, then we would run the risk of clobbering other names.
-                    result = result.Replace(
-                        ReturnType.PureType.ClassViewModel.FullyQualifiedName,
-                        ReturnType.PureType.ClassViewModel.DtoName);
+                    return nameof(ItemResult);
                 }
-                else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
+
+                if (ReturnsListResult)
                 {
-                    result = $"{ReturnType.ClassViewModel.DtoName}";
+                    return $"{nameof(ListResult<object>)}<{ReturnType.PureType.DtoFullyQualifiedName}>";
                 }
-                return result;
+
+                return $"{nameof(ItemResult)}<{resultType.DtoFullyQualifiedName}>";
             }
         }
 
@@ -93,7 +104,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
+                var parameters = Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
                 var outParameters = new List<string>();
 
                 // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
@@ -110,7 +121,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the CS arguments passed to this method call.
         /// </summary>
-        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgumentName));
+        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgument));
 
 
         /// <summary>
@@ -121,11 +132,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             string result;
             if (obj != "")
             {
-                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name.ToCamelCase()}()"));
+                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.JsVariable}()"));
             }
             else
             {
-                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name.ToCamelCase()));
+                result = string.Join(", ", ClientParameters.Select(f => obj + f.JsVariable));
             }
             if (callback)
             {
@@ -149,7 +160,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     if (Parameters.Any()) result = result + ", ";
                 }
 
-                result += string.Join(", ", ClientParameters.Select(f => $"{f.Name}: {f.TsConversion(f.Name)}"));
+                result += string.Join(", ", ClientParameters.Select(f => $"{f.JsVariable}: {f.TsConversion(f.JsVariable)}"));
                 result += " }";
                 return result;
 

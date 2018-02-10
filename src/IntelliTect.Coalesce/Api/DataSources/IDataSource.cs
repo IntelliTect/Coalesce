@@ -6,7 +6,7 @@ using IntelliTect.Coalesce.Models;
 namespace IntelliTect.Coalesce
 {
 
-    public interface IDataSource<T> : IAuthorizable
+    public interface IDataSource<T>
         where T : class, new()
     {
         Task<(ItemResult<T> Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters);

@@ -183,7 +183,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             foreach (var method in model.ClientMethods)
             {
-                var returnType = method.ReturnType.PureType;
+                var returnType = method.ResultType.PureType;
                 if (returnType.HasClassViewModel)
                 {
                     // Return type looks like an external type.

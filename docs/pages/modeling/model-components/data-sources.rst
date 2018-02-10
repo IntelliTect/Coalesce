@@ -157,8 +157,6 @@ These methods often call one another, so overriding one method may cause some ot
 
     .. code-block:: c#
 
-        IsAuthorized
-
         GetMappedItemAsync
             GetItemAsync
                 GetQuery
@@ -197,16 +195,13 @@ All of the methods outlined above can be overridden. A description of each of th
     :csharp:`GetQuery`
         The method is the one that you will most commonly be override in order to implement custom query logic. From this method, you could:
 
-            - Specify additional query filtering such as row-level security or soft-delete logic.
+            - Specify additional query filtering such as row-level security or soft-delete logic. Or, restrict the data source entirely for users or whole roles by returning an empty query.
             - Include additional data using EF's :csharp:`.Include()` and :csharp:`.ThenInclude()`.
             - Add additional edges to the serialized object graph using Coalesce's :csharp:`.IncludedSeparately()` and :csharp:`.ThenIncluded()`.
         
         .. note::
 
             When :csharp:`GetQuery` is overridden, the :ref:`DefaultLoadingBehavior` is overridden as well. To restore this behavior, use the :csharp:`IQueryable<T>.IncludeChildren()` extension method to build your query.
-
-    :csharp:`IsAuthorized`
-        Allows for user-level control over whether or not the data source can be used. Use :csharp:`this.User` to get the current user. This method is called by the model binder that is responsible for injecting data sources into controller actions. If a failure result is returned by this method, a model state error will be added (and handled by default by Coalesce's default implementation of :csharp:`IApiActionFilter`), and no data source instance will be made available to the controller action.
 
     :csharp:`GetIncludeTree`
         Allows for explicitly specifying the :ref:`IncludeTree` that will be used when serializing results obtained from this data source into DTOs. By default, the query that is build up through all the other methods in the data source will be used to build the include tree.

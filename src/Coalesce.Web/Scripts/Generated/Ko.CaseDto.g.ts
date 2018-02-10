@@ -71,12 +71,12 @@ module ViewModels {
         public saveToDto = (): any => {
             var dto: any = {};
             dto.caseId = this.caseId();
-
+            
             dto.title = this.title();
-
+            
             return dto;
         }
-    
+
         /**
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.

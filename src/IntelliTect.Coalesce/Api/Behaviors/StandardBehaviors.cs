@@ -38,6 +38,14 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public IDataSource<T> OverridePostSaveResultDataSource { get; protected set; }
 
+        /// <summary>
+        /// If set, this data source will be used in place of the supplied data source
+        /// when reloading an object after a delete operation has completed.
+        /// This is not recommended, as it can cause a client to recieve unexpected results.
+        /// </summary>
+        public IDataSource<T> OverridePostDeleteResultDataSource { get; protected set; }
+
+
         public StandardBehaviors(CrudContext<TContext> context) : base(context)
         {
         }
@@ -128,8 +136,14 @@ namespace IntelliTect.Coalesce
                 originalItem = item.Copy();
             }
 
+            // Allow validation on the raw DTO before its been mapped.
+            var validateDto = ValidateDto(kind, incomingDto);
+            if (validateDto == null)
+                throw new InvalidOperationException("Recieved null from result of ValidateDto. Expected an ItemResult.");
+            if (!validateDto.WasSuccessful) return new ItemResult<TDto>(validateDto);
+
             // Set all properties on the DB-mapped object to the incoming values.
-            incomingDto.MapToEntity(item, new MappingContext(User, includes));
+            MapIncomingDto(kind, item, incomingDto, parameters);
 
             // Allow interception of the save.
             var beforeSave = BeforeSave(kind, originalItem, item);
@@ -164,7 +178,7 @@ namespace IntelliTect.Coalesce
             // This is fine - we won't try to map it if its null.
             if (item == null) return true;
 
-            var result = new ItemResult<TDto>(true,
+            var result = new ItemResult<TDto>(
                 item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
             );
 
@@ -172,8 +186,33 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
+        /// Maps the incoming DTO's properties to the item that will be saved to the database.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="item">The item that will be saved to the database.</param>
+        /// <param name="dto">The incoming item from the client.</param>
+        /// <param name="parameters">The </param>
+        protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters) 
+            where TDto : IClassDto<T>, new()
+        {
+            dto.MapToModel(item, new MappingContext(User, parameters.Includes));
+        }
+
+        /// <summary>
+        /// Code to run before mapping the DTO to its model type.
+        /// Allows for the chance to perform validation on the DTO itself rather than the mapped model in <see cref="BeforeSave(SaveKind, T, T)"/>.
+        /// For generated DTOs where the type is not available, there are a variety of methods for retrieving expected 
+        /// properties from the object based on its model type, although reflection is always an option as well.
+        /// For behaviors on custom DTOs, a simple cast will allow access to all properties.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="dto">The incoming item from the client.</param>
+        /// <returns></returns>
+        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto) => true;
+
+        /// <summary>
         /// Code to run before committing a save to the database.
-        /// Any changes made to the properties of <c>updatedItem</c> will be persisted to the database.
+        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
         /// The return a failure result will halt the save operation and return any associated message to the client.
         /// </summary>
         /// <param name="kind">Descriminator between a create and a update operation.</param>
@@ -215,11 +254,13 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The primary key of the object to delete.</param>
         /// <param name="dataSource">The data source that will be used when loading the item to be deleted.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
-        /// <returns>An ItemResult indicating success/failure of the operation.</returns>
-        public virtual async Task<ItemResult> DeleteAsync(
+        /// <returns>A result indicating success or failure, 
+        /// potentially including an up-to-date copy of the item being deleted if the delete action is non-destructive.</returns>
+        public virtual async Task<ItemResult<TDto>> DeleteAsync<TDto>(
             object id,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters)
+            where TDto : IClassDto<T>, new()
         {
             var (existingItem, _) = await (OverrideFetchForDeleteDataSource ?? dataSource).GetItemAsync(id, parameters);
             if (!existingItem.WasSuccessful)
@@ -230,16 +271,54 @@ namespace IntelliTect.Coalesce
             var item = existingItem.Object;
 
             var beforeDelete = BeforeDelete(item);
-            if (!beforeDelete?.WasSuccessful ?? true)
-            {
-                return beforeDelete;
-            }
+            if (beforeDelete == null)
+                throw new InvalidOperationException("Recieved null from result of BeforeDelete. Expected an ItemResult.");
+            if (!beforeDelete.WasSuccessful) return new ItemResult<TDto>(beforeDelete);
 
+            // Perform the delete operation against the database.
+            // By default, this removes the item from its DbSet<> and calls SaveChanges().
+            // This might be overridden to set a deleted flag on the object instead.
             await ExecuteDeleteAsync(item);
 
-            AfterDelete(item);
+            
 
-            return true;
+            // Pull the object to see if it can still be seen by the user.
+            // If so, the operation was a soft delete and the user is allowed to see soft-deleted items.
+            var (postDeleteGetResult, includeTree) = await (OverridePostDeleteResultDataSource ?? dataSource).GetItemAsync(id, parameters);
+
+            var deletedItem = postDeleteGetResult.Object;
+
+
+            if (deletedItem == null)
+            {
+                // If the item was not retrieved, it was actually deleted.
+                // Don't return the item to the client since it no longer exists (in the context of the applicable data source, anyway).
+
+                AfterDelete(ref item, ref includeTree);
+                return true;
+            }
+            else
+            {
+                // If the item WAS retrieved, it was soft deleted and still visible to the current user through a data source.
+                // We return it to the client to signal two things:
+                // 1) Update the item on which delete was called with the new object.
+                // 2) Don't remove the item from its parent collections on the client, since it still exists through the requested data source.
+
+                // Allow the user to override this behavior using the AfterDelete method.
+                AfterDelete(ref deletedItem, ref includeTree);
+
+                // If the user nulled out the item, they don't want to send it back to the client.
+                // This is fine, and is documented behavior.
+                if (deletedItem == null)
+                {
+                     return true;
+                }
+
+                return new ItemResult<TDto>(
+                    deletedItem.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
+                );
+            }
+
         }
 
         /// <summary>
@@ -269,8 +348,21 @@ namespace IntelliTect.Coalesce
         /// Code to run after the delete operation is committed to the database.
         /// This can be used to perform cleanup or any other desired actions.
         /// </summary>
-        /// <param name="item">The item that was deleted.</param>
-        public virtual void AfterDelete(T item) { }
+        /// <param name="item">
+        /// The item that was deleted.
+        /// If the item still exists in the database, this will be a a fresh copy of the item retrieved from the database,
+        /// complete with any relations that were included as a result of being loaded 
+        /// from the dataSource that was specified by the client.
+        /// This ref parameter may have its value changed in order to send a modified object back to the client.
+        /// Set to null to return no object to the client.
+        /// </param>
+        /// <param name="includeTree">
+        /// The includeTree that will be used to map the deleted item for serialization and transmission to the client.
+        /// The includeTree is obtained from the dataSource that was used to load the deleted item.
+        /// This ref parameter may have its value changed to send a different object structure to the client.
+        /// In the case where the deleted item was not retrieved from the database, changing this will have no effect.
+        /// </param>
+        public virtual void AfterDelete(ref T item, ref IncludeTree includeTree) { }
 
         #endregion
 

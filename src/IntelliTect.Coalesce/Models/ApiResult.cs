@@ -2,29 +2,28 @@
 
 namespace IntelliTect.Coalesce.Models
 {
-    public class ApiResult
+    public interface IApiResult
+    {
+        bool WasSuccessful { get; }
+        string Message { get; }
+    }
+
+    public class ApiResult : IApiResult
     {
         public bool WasSuccessful { get; set; } = true;
 
         public string Message { get; set; }
 
-        public ApiResult()
-        {
-        }
+        public ApiResult() { }
 
-        public ApiResult(bool wasSuccessful) : this()
+        public ApiResult(bool wasSuccessful, string message = null) 
         {
             WasSuccessful = wasSuccessful;
+            Message = message;
         }
 
-        public ApiResult(string problem) : this(false)
-        {
-            Message = problem;
-        }
+        public ApiResult(string message) : this(false, message) { }
 
-        public ApiResult(Exception ex) : this(false)
-        {
-            Message = ex.Message;
-        }
+        public ApiResult(ApiResult result) : this(result.WasSuccessful, result.Message) { }
     }
 }

@@ -3,6 +3,7 @@ using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System;
@@ -29,13 +30,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
         public string ClientMethodDeclaration(MethodViewModel method, string parentClassName, int indentLevel = 2)
         {
-            var b = new CodeBuilder(initialLevel: indentLevel);
+            var b = new TypeScriptCodeBuilder(initialLevel: indentLevel, indentSize: 4);
             var model = this.Model;
             var isService = method.Parent.IsService;
+            var returnIsListResult = method.ReturnsListResult;
 
             string reloadArg = !isService ? ", reload" : "";
             string reloadParam = !isService ? ", reload: boolean = true" : "";
-            string callbackAndReloadParam = $"callback: (result: {method.ReturnType.TsType}) => void = null{reloadParam}";
+            string callbackAndReloadParam = $"callback: (result: {method.ResultType.TsType}) => void = null{reloadParam}";
 
             // Default instance of the method class.
             b.Line();
@@ -47,11 +49,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
 
             // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
-            var classBlock = b.TSBlock(
-                $"public static {method.Name} = class {method.Name} extends Coalesce.ClientMethod<{parentClassName}, {method.ReturnType.TsType}>", true);
+            string methodClass = returnIsListResult
+                ? "ClientListMethod"
+                : "ClientMethod";
+
+            var classBlock = b.Block(
+                $"public static {method.Name} = class {method.Name} extends Coalesce.{methodClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
 
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
+
+           if (method.ResultType.IsCollection || method.ResultType.IsArray)
+            {
+                b.Line($"public result: {method.ResultType.TsKnockoutType()} = {method.ResultType.ObservableConstructorCall()};");
+            }
 
             // Standard invoke method - all CS method parameters as TS method parameters.
             b.Line();
@@ -62,7 +73,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             if (!string.IsNullOrWhiteSpace(parameters)) parameters = parameters + ", ";
             parameters = parameters + callbackAndReloadParam;
 
-            using (b.TSBlock($"public invoke = ({parameters}): JQueryPromise<any> =>", true))
+            using (b.Block($"public invoke = ({parameters}): JQueryPromise<any> =>", ';'))
             {
                 b.Line($"return this.invokeWithData({method.JsPostObject}, callback{reloadArg});");
             }
@@ -76,24 +87,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line($"/** Object that can be easily bound to fields to allow data entry for the method's parameters */");
                 b.Line($"public args = new {method.Name}.Args(); ");
 
-                using (b.TSBlock("public static Args = class Args", true))
-                foreach (var arg in method.ClientParameters)
-                {
-                    b.Line($@"public {arg.CsArgumentName}: {arg.Type.TsKnockoutType()} = {arg.Type.ObservableConstructorCall()};");
-                }
+                using (b.Block("public static Args = class Args", ';'))
+                    foreach (var arg in method.ClientParameters)
+                    {
+                        b.Line($@"public {arg.JsVariable}: {arg.Type.TsKnockoutType()} = {arg.Type.ObservableConstructorCall()};");
+                    }
 
                 b.Line();
                 b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
                 // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it.
                 // Thankfully, we can implicitly type using the default.
-                using (b.TSBlock($"public invokeWithArgs = (args = this.args, {callbackAndReloadParam}): JQueryPromise<any> =>"))
+                using (b.Block($"public invokeWithArgs = (args = this.args, {callbackAndReloadParam}): JQueryPromise<any> =>"))
                 {
                     b.Line($"return this.invoke({method.JsArguments("args", true)}{reloadArg});");
                 }
 
                 b.Line();
                 b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
-                using (b.TSBlock($"public invokeWithPrompts = ({callbackAndReloadParam}): JQueryPromise<any> =>", true))
+                using (b.Block($"public invokeWithPrompts = ({callbackAndReloadParam}): JQueryPromise<any> =>", ';'))
                 {
                     b.Line($"var $promptVal: string = null;");
                     foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
@@ -116,32 +127,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // Method response handler - highly dependent on what the response type actually is.
             b.Line();
-            using (b.TSBlock($"protected loadResponse = (data: any, {callbackAndReloadParam}) =>", true))
+            using (b.Block($"protected loadResponse = (data: Coalesce.{(returnIsListResult ? "List" : "Item")}Result, {callbackAndReloadParam}) =>", ';'))
             {
-                if (method.ReturnType.IsCollection && method.ReturnType.PureType.HasClassViewModel) {
+                var incomingMainData = returnIsListResult
+                    ? "data.list"
+                    : "data.object";
+
+                if (method.ResultType.IsCollection && method.ResultType.PureType.HasClassViewModel)
+                {
                     // Collection of objects that have TypeScript ViewModels. This could be an entity or an external type.
 
                     // If the models have a key, rebuild our collection using that key so that we can reuse objects when the data matches.
-                    var keyNameArg = method.ReturnType.PureType.ClassViewModel.PrimaryKey != null
-                        ? $"'{method.ReturnType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
+                    var keyNameArg = method.ResultType.PureType.ClassViewModel.PrimaryKey != null
+                        ? $"'{method.ResultType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
                         : "null";
-
-                    b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, data, {keyNameArg}, ViewModels.{method.ReturnType.PureType.ClassViewModel.Name}, this, true);");
+                    
+                     b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, {incomingMainData}, {keyNameArg}, ViewModels.{method.ResultType.PureType.ClassViewModel.Name}, this, true);");
                 }
-                else if (method.ReturnType.HasClassViewModel)
+                else if (method.ResultType.HasClassViewModel)
                 {
                     // Single view model return type.
 
                     b.Line("if (!this.result()) {");
-                    b.Indented($"this.result(new ViewModels.{method.ReturnType.PureType.ClassViewModel.Name}(data));");
+                    b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.Name}({incomingMainData}));");
                     b.Line("} else {");
                     b.Indented($"this.result().loadFromDto(data);");
                     b.Line("}");
                 }
-                else {
+                else
+                {
                     // Uninteresting return type. Either void, a primitive, or a collection of primitives.
                     // In any case, regardless of the type of the 'result' observable, this is how we set the results.
-                    b.Line("this.result(data);");
+                    b.Line($"this.result({incomingMainData});");
                 }
 
                 if (isService)
@@ -149,12 +166,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("if (typeof(callback) == 'function')");
                     b.Indented("callback(this.result());");
                 }
-                else if (method.ReturnType.EqualsType(method.Parent.Type) && !MethodsLoadParent)
+                else if (method.ResultType.EqualsType(method.Parent.Type) && !MethodsLoadParent)
                 {
                     // The return type is the type of the method's parent. Load the parent with the results of the method.
                     // Parameter 'reload' has no meaning here, since we're reloading the object with the result of the method.
-                    b.Line($"this.parent.loadFromDto(data, true)");
-                    using (b.TSBlock("if (typeof(callback) == 'function')"))
+                    b.Line($"this.parent.loadFromDto({incomingMainData}, true)");
+                    using (b.Block("if (typeof(callback) == 'function')"))
                     {
                         b.Line($"callback(this.result());");
                     }
@@ -177,7 +194,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // End of the method class declaration.
             classBlock.Dispose();
-            
+
             // Backwards compatibility for the old method call members (this will have a name conflict with the method object)
             // Keeping this in the code so it will still exist in the code history somewhere, but can probably be removed.
             // We collectively decided that we would introduce this significant breaking change in 2.0.0 and not maintain backwards-compat.
@@ -204,5 +221,50 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             return b.ToString();
         }
+        public string SaveToDto(int indentLevel = 2)
+        {
+            var b = new TypeScriptCodeBuilder(indentLevel, indentSize: 4);
+            b.Line($"/** Saves this object into a data transfer object to send to the server. */");
+            using (b.Block($"public saveToDto = (): any =>"))
+            {
+                b.Line("var dto: any = {};");
+                if (Model.PrimaryKey != null)
+                {
+                    b.Line($"dto.{Model.PrimaryKey.JsonName} = this.{Model.PrimaryKey.JsVariable}();");
+                }
+                b.Line($"");
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsClientWritable && !f.IsPOCO))
+                {
+                    if (prop.Type.IsDate)
+                    {
+                        b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
+                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}().format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
+                    }
+                    else if (prop.IsForeignKey)
+                    {
+                        b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+                        if (prop.IdPropertyObjectProperty != null && !prop.IsPrimaryKey)
+                        {
+                            // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact.
+                            using (b.Block($"if (!dto.{prop.JsonName} && this.{prop.IdPropertyObjectProperty.JsVariable}())"))
+                            {
+                                b.Line($"dto.{prop.JsonName} = this.{prop.IdPropertyObjectProperty.JsVariable}().{prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable}();");
+                            }
+                        }
+                    }
+                    else if (!prop.Type.IsCollection)
+                    {
+                        b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+                    }
+                }
+                b.Line();
+                b.Line($"return dto;");
+            }
+            return b.ToString();
+        }
     }
+
+
+
+
 }

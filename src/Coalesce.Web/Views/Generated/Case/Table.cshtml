@@ -208,6 +208,25 @@
                     </tr>
                 </thead>
                 <tbody>
+                        <tr data-bind="with: getSomeCases">
+                            <td>
+                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                                        Get Some Cases
+                                    </button>
+                            </td>
+                            <td>
+                                    <ul data-bind="foreach: result">
+                                        <li class="" data-bind="text: $data"></li>
+                                    </ul>
+                            </td>
+                            <td>
+                                <span data-bind="text: wasSuccessful"></span>
+                                <span data-bind="text: message"></span>
+                            </td>.
+                            <td>
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                            </td>
+                        </tr>
                         <tr data-bind="with: getAllOpenCasesCount">
                             <td>
                                     <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
@@ -220,7 +239,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -237,7 +256,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>
@@ -263,7 +282,7 @@
                             <td>
                                 <span data-bind="text: wasSuccessful"></span>
                                 <span data-bind="text: message"></span>
-                            </td>
+                            </td>.
                             <td>
                                 <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                             </td>

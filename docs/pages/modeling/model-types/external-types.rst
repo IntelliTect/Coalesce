@@ -9,7 +9,7 @@ In Coalesce, any type which is connected to your data model but is not directly 
 The collection of external types for a data model looks like this:
     
     #. Take all of the api-served types in your data model. This includes :ref:`EntityModels` and :ref:`CustomDTOs`.
-    #. Take all of the property types and method return types of these types types.
+    #. Take all of the property types, method parameters, and method return types of these types.
     #. Any of these types which are not primitives and not database-mapped types are external types.
     #. For any external type, any of the property types which qualify under the above rules are also external types.
 

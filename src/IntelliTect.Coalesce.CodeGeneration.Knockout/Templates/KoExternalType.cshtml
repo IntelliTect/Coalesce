@@ -23,82 +23,82 @@ module @moduleName {
     // *** External Type @(model.Name)
     export class @(model.ViewModelGeneratedClassName)
     {
-        @if (model.PrimaryKey != null)
-        {
+    @if (model.PrimaryKey != null)
+    {
         // ID of the object.
         @:public myId: any = 0;
-        }
+    }
 
         // Observables
-        @foreach (PropertyViewModel prop in model.ClientProperties)
-        {
-		@:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
+    @foreach (PropertyViewModel prop in model.ClientProperties)
+    {
+        @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
         if (prop.PureType.IsEnum)
-        { 
-        @:public @(prop.JsTextPropertyName) = @(prop.Type.ObservableConstructorCall());  // Enum Text Value
+        {
+            @:public @(prop.JsTextPropertyName) = @(prop.Type.ObservableConstructorCall());  // Enum Text Value
         }
-        }
+    }
         // Loads this object from a data transfer object received from the server.
-        public loadFromDto: (data: any) => void;
         public parent: any;
         public parentCollection: any;
 
-
-        constructor(newItem?: any, parent?: any){
-            var self = this;
-            self.parent = parent;
-            // Load the object
-			self.loadFromDto = function(data: any) {
-				if (!data) return;
-            @if (model.PrimaryKey != null)
-            {
-                @:// Set the ID
-                @:self.myId = data.@(model.PrimaryKey.JsonName);
-            }
-
-                // Load the properties.
-        @foreach (PropertyViewModel prop in model.ClientProperties)
+        public loadFromDto = (data: any) => {
+            if (!data) return;
+        @if (model.PrimaryKey != null)
         {
-            if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
-            {
-                @:if (data.@prop.JsonName != null) {
-                @:// Merge the incoming array
-                @if (prop.Type.PureType.ClassViewModel.PrimaryKey != null)
-                {
-                    @:Coalesce.KnockoutUtilities.RebuildArray(self.@(prop.JsVariable), data.@prop.JsonName, '@prop.Type.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@prop.Type.PureType.ClassViewModel.Name, self, true);
-                }
-                else
-                {
-                    @:Coalesce.KnockoutUtilities.RebuildArray(self.@(prop.JsVariable), data.@prop.JsonName, null, ViewModels.@prop.Type.PureType.ClassViewModel.Name, self, true);
-                }
-                @:}
+            @:// Set the ID
+            @:this.myId = data.@(model.PrimaryKey.JsonName);
+        }
 
-            }
-            else if (prop.Type.IsDate)
+            // Load the properties.
+    @foreach (PropertyViewModel prop in model.ClientProperties)
+    {
+        if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
+        {
+            @:if (data.@prop.JsonName != null) {
+            @:// Merge the incoming array
+            @if (prop.Type.PureType.ClassViewModel.PrimaryKey != null)
             {
-                @:if (data.@prop.JsVariable == null) self.@(prop.JsVariable)(null);
-                @:else if (self.@(prop.JsVariable)() == null || !self.@(prop.JsVariable)().isSame(moment(data.@prop.JsVariable))){
-                @:self.@(prop.JsVariable)(moment(data.@prop.JsVariable));
-                @:}
-            }
-            else if (prop.IsPOCO)
-            {
-                @:if (!self.@(prop.JsVariable)()){
-                    @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, self));
-                @:}else{
-                    @:self.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
-                @:}
+                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(prop.JsVariable), data.@prop.JsonName, '@prop.Type.PureType.ClassViewModel.PrimaryKey.JsVariable', ViewModels.@prop.Type.PureType.ClassViewModel.Name, self, true);
             }
             else
             {
-                @:self.@(prop.JsVariable)(data.@prop.JsVariable);
+                @:Coalesce.KnockoutUtilities.RebuildArray(this.@(prop.JsVariable), data.@prop.JsonName, null, ViewModels.@prop.Type.PureType.ClassViewModel.Name, this, true);
             }
+            @:}
+
         }
-                
-            };
+        else if (prop.Type.IsDate)
+        {
+            @:if (data.@prop.JsVariable == null) this.@(prop.JsVariable)(null);
+            @:else if (this.@(prop.JsVariable)() == null || !this.@(prop.JsVariable)().isSame(moment(data.@prop.JsVariable))){
+            @:this.@(prop.JsVariable)(moment(data.@prop.JsVariable));
+            @:}
+        }
+        else if (prop.IsPOCO)
+        {
+            @:if (!this.@(prop.JsVariable)()){
+            @:this.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, this));
+            @:}else{
+            @:this.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
+            @:}
+        }
+        else
+        {
+            @:this.@(prop.JsVariable)(data.@prop.JsVariable);
+        }
+    }
+
+        };
+
+        @(Model.SaveToDto())
+
+        constructor(newItem?: any, parent?: any){
+            this.parent = parent;
+            // Load the object
 
             if (newItem) {
-                self.loadFromDto(newItem);
+                this.loadFromDto(newItem);
             }
         }
     }

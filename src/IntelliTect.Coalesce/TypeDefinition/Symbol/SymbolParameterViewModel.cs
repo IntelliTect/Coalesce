@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal IParameterSymbol Symbol { get; internal set; }
 
-        public SymbolParameterViewModel(IParameterSymbol symbol)
+        public SymbolParameterViewModel(MethodViewModel parent, IParameterSymbol symbol) : base(parent)
         {
             Symbol = symbol;
             Type = new SymbolTypeViewModel(symbol.Type);

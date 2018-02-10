@@ -167,8 +167,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
             Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
-        public string DisplayNameLabel(string labelOverride) => labelOverride ?? DisplayName;
-
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
@@ -723,7 +721,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Otherwise, this would break IncludesExternal.
                 string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
                 setter = $@"{treeCheck}
-                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.Name}DtoGen>(context, tree?[nameof({objectName}.{Name})]);
+                {objectName}.{Name} = obj.{Name}.MapToDto<{Type.FullyQualifiedName}, {Type.ClassViewModel.DtoName}>(context, tree?[nameof({objectName}.{Name})]);
 ";
             }
             else

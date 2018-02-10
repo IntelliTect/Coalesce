@@ -89,16 +89,16 @@
                                 }
                             </td>
                             <td>
-                                @if (method.ReturnType.IsCollection)
+                                @if (method.ResultType.IsCollection)
                                 {
                                     <ul data-bind="foreach: result">
                                         <li class="" data-bind="text: $data"></li>
                                     </ul>
                                 }
-                                else if (method.ReturnType.HasClassViewModel)
+                                else if (method.ResultType.HasClassViewModel)
                                 {
                                     <dl class="dl-horizontal" data-bind="with: result">
-                                        @foreach (var prop in method.ReturnType.ClassViewModel.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)))
+                                        @foreach (var prop in method.ResultType.ClassViewModel.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)))
                                         {
                                             <dt>@prop.DisplayName</dt>
                                             <dd data-bind="text: @prop.JsVariableForBinding()"></dd>

@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;

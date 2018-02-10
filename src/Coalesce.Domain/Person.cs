@@ -131,9 +131,10 @@ namespace Coalesce.Domain
         /// Removes spaces from the name and puts in dashes
         /// </summary>
         [Coalesce, LoadFromDataSource(typeof(WithoutCases))]
-        public void ChangeSpacesToDashesInName()
+        public ItemResult ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");
+            return true;
         }
 
         /// <summary>
@@ -143,9 +144,16 @@ namespace Coalesce.Domain
         /// <param name="numberTwo"></param>
         /// <returns></returns>
         [Coalesce]
-        public static int Add(int numberOne, int numberTwo)
+        public static ItemResult<int> Add(int numberOne, int numberTwo)
         {
-            return numberOne + numberTwo;
+            try
+            {
+                return new ItemResult<int>(numberOne + numberTwo);
+            }
+            catch
+            {
+                return "Integers too large";
+            }
         }
 
         /// <summary>
@@ -154,7 +162,7 @@ namespace Coalesce.Domain
         [Coalesce,Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
-            if (user!= null && user.Identity != null) return user.Identity.Name;
+            if (user != null && user.Identity != null) return user.Identity.Name;
             return "Unknown";
         }
 
@@ -226,13 +234,36 @@ namespace Coalesce.Domain
         /// <summary>
         /// Gets all the first names starting with the characters.
         /// </summary>
-        /// <param name="characters"></param>
-        /// <param name="db"></param>
-        /// <returns></returns>
         [Coalesce,Execute]
-        public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
+        public static IEnumerable<string> NamesStartingWith(AppDbContext db, string characters)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
+        }
+
+
+        /// <summary>
+        /// Gets people matching the criteria, paginated by parameter 'page'.
+        /// </summary>
+        [Coalesce]
+        public static ListResult<Person> SearchPeople(AppDbContext db, PersonCriteria criteria, int page)
+        {
+            const int pageSize = 10;
+            IQueryable<Person> query = db.People;
+
+            if (!string.IsNullOrEmpty(criteria.Name))
+            {
+                query = query.Where(f => f.FirstName.StartsWith(criteria.Name) || f.LastName.StartsWith(criteria.Name));
+            }
+            if (criteria.BirthdayMonth >= 1 && criteria.BirthdayMonth >= 12)
+            {
+                query = query.Where(f => f.BirthDate != null && f.BirthDate.Value.Month == criteria.BirthdayMonth);
+            }
+            if (!string.IsNullOrWhiteSpace(criteria.EmailDomain))
+            {
+                query = query.Where(f => f.Email.Contains($"@{criteria.EmailDomain}"));
+            }
+
+            return new ListResult<Person>(query, page, pageSize);
         }
 
         [Coalesce, DefaultDataSource]

@@ -36,6 +36,9 @@
                     <label class="col-md-4 control-label">Zip Code</label>
 <div class="col-md-8 prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</div>                </div>
                 <div class="form-group">
+                    <label class="col-md-4 control-label">Is Deleted</label>
+<div class="col-md-8 prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</div>                </div>
+                <div class="form-group">
                     <label class="col-md-4 control-label">Employees</label>
 <div class="col-md-8 prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                </div>
                 <div class="form-group">

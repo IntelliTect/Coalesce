@@ -30,6 +30,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             return Task.Run(() =>
             {
                 logger.LogTrace($"{Owner}: Running cleaner {this}");
+
+                if (!Directory.Exists(TargetPath))
+                {
+                    return;
+                }
+
                 foreach (var file in Directory.EnumerateFiles(TargetPath, "*", Depth))
                 {
                     if (!knownGoodFiles.Any(goodFile => Path.GetFullPath(goodFile) == Path.GetFullPath(file)))

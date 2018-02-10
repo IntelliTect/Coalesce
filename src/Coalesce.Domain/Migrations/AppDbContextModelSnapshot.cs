@@ -83,6 +83,8 @@ namespace Coalesce.Domain.Migrations
 
                     b.Property<string>("City");
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("Name");
 
                     b.Property<string>("State");

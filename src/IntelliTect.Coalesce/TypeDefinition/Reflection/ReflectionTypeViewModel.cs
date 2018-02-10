@@ -72,6 +72,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInternalUse => base.IsInternalUse || !Info.IsVisible;
 
+        public override bool IsVoid => Info == typeof(void);
+
         public override Dictionary<int, string> EnumValues
         {
             get

@@ -98,15 +98,17 @@ Properties
         The user making the current request.
     :csharp:`IDataSource<T> OverrideFetchForUpdateDataSource`
         A data source that, if set, will override the data source that is used to retrieve the target of an update operation from the database. The incoming values will then be set on this retrieved object. Null by default; override by setting a value in the constructor.
-    :csharp:`IDataSource<T> OverrideFetchForDeleteDataSource`
-        A data source that, if set, will override the data source that is used to retrieve the target of an delete operation from the database. The retrieved object will then be deleted. Null by default; override by setting a value in the constructor.
     :csharp:`IDataSource<T> OverridePostSaveResultDataSource`
         A data source that, if set, will override the data source that is used to retrieve a newly-created or just-updated object from the database after a save. The retrieved object will be returned to the client. Null by default; override by setting a value in the constructor.
+    :csharp:`IDataSource<T> OverrideFetchForDeleteDataSource`
+        A data source that, if set, will override the data source that is used to retrieve the target of an delete operation from the database. The retrieved object will then be deleted. Null by default; override by setting a value in the constructor.
+    :csharp:`IDataSource<T> OverridePostDeleteResultDataSource`
+        A data source that, if set, will override the data source that is used to retrieve the target of an delete operation from the database after it has been deleted. If an object is able to be retrieved from this data source, it will be sent back to the client. This allows soft-deleted items to be returned to the client when the user is able to see them. Null by default; override by setting a value in the constructor.
 
 Method Overview
 '''''''''''''''
 
-The standard behaviors implementation contains 9 different methods which can be overridden in your derived class to control functionality. 
+The standard behaviors implementation contains many different methods which can be overridden in your derived class to control functionality. 
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
@@ -115,6 +117,8 @@ These methods often call one another, so overriding one method may cause some ot
         SaveAsync
             DetermineSaveKind
             GetDbSet
+            ValidateDto
+            MapIncomingDto
             BeforeSave
             AfterSave
 
@@ -129,16 +133,23 @@ Method Details
 
 All of the methods outlined above can be overridden. A description of each of the methods is as follows:
 
+
+    :csharp:`SaveAsync`
+        Save the given item. This is the main entry point for saving, and takes a DTO as a parameter. This method is responsible for performing mapping to your EF models and ultimately saving to your database. If it is required that you access properties from the incoming DTO in this method, a set of extension methods :csharp:`GetValue` and :csharp:`GetObject` are available on the DTO for accessing properties that are mapped 1:1 with your EF models.
+
     :csharp:`DetermineSaveKind`
         Given the incoming DTO on which Save has been called, examine its properties to determine if the operation is meant to be a create or an update operation. Return this distinction along with the key that was used to make the distinction.
 
         This method is called outside of the standard data source by the base API controller to perform role-based security on saves at the controller level.
 
-    :csharp:`SaveAsync`
-        Save the given item.
-
     :csharp:`GetDbSet`
         Fetch a :csharp:`DbSet<T>` that items can be added to (creates) or remove from (deletes).
+
+    :csharp:`ValidateDto`
+        Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in :csharp:`BeforeSave`. A number of extension methods on :csharp:`IClassDto<T>` can be used to access the value of the properties of :ref:`GenDTOs`. For behaviors on :ref:`CustomDTOs` where the DTO type is known, simply cast to the correct type. 
+    
+    :csharp:`MapIncomingDto`
+        Map the properties of the incoming DTO to the model that will be saved to the database. By default, this will call the :csharp:`MapTo` method on the DTO, but if more precise control is needed, the :csharp:`IClassDto<T>` extension methods or a cast to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
     
     :csharp:`BeforeSave`
         Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
@@ -162,7 +173,7 @@ All of the methods outlined above can be overridden. A description of each of th
         Overriding this allows for changing this row-deletion implementation to something else, like setting of a soft delete flag, or copying the data into another archival table before deleting.
 
     :csharp:`AfterDelete`
-        Allows for performing any sort of cleanup actions after a delete has completed. This method offers no chance to return feedback to the client, so make sure any necessary feedback is done in :csharp:`BeforeDelete`.
+        Allows for performing any sort of cleanup actions after a delete has completed. If the item was still able to be retrieved from the database after the delete operation completed, this method allows lets you modify or replace the item that is sent back to the client by setting :csharp:`ref T item` to another object or to null. Setting :csharp:`ref IncludeTree includeTree` will override the :ref:`IncludeTree` used to shape the response object.
 
 
 

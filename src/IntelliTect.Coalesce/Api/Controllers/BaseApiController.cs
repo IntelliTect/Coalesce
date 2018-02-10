@@ -74,9 +74,9 @@ namespace IntelliTect.Coalesce.Api.Controllers
             return behaviors.SaveAsync(dto, dataSource, parameters);
         }
 
-        protected Task<ItemResult> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
+        protected Task<ItemResult<TDto>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
-            return behaviors.DeleteAsync(id, dataSource, parameters);
+            return behaviors.DeleteAsync<TDto>(id, dataSource, parameters);
         }
 
         protected async Task<FileResult> CsvDownloadImplementation(ListParameters parameters, IDataSource<T> dataSource)

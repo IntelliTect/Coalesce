@@ -35,7 +35,10 @@ namespace IntelliTect.Coalesce.Cli
             // I added this originally for debugging, but its kinda nice to show regardless.
             var attr = Assembly.GetEntryAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
 
-            Console.WriteLine($"Starting Coalesce, running under {attr.FrameworkName}");
+            // This reflects the version of the nuget package.
+            string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+
+            Console.WriteLine($"Starting Coalesce {version}, running under {attr.FrameworkName}");
             Console.WriteLine("https://github.com/IntelliTect/Coalesce");
             Console.WriteLine();
 

@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Configuration;
+﻿using System;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -51,7 +52,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             foreach (var configProp in properties)
             {
                 var propType = configProp.Type.TypeInfo;
-                configProp.PropertyInfo.SetValue(this, obj.ToObject(propType));
+                if (obj.TryGetValue(configProp.Name, StringComparison.OrdinalIgnoreCase, out JToken value))
+                {
+                    configProp.PropertyInfo.SetValue(this, value.ToObject(propType));
+                }
             }
         }
     }

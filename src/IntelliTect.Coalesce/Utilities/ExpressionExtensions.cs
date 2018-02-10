@@ -44,8 +44,10 @@ namespace IntelliTect.Coalesce.Utilities
             if (propInfo == null)
                 throw new ArgumentException($"Expression '{lambda}' doesn't refer to a property.");
 
-            if (paramType != propInfo.ReflectedType &&
-                !paramType.IsSubclassOf(propInfo.ReflectedType))
+            // If paramType is null, don't check this. Just a safety check where it makes sense, but sometimes, its ok not to check.
+            if (   paramType != null 
+                && paramType != propInfo.ReflectedType 
+                && !paramType.IsSubclassOf(propInfo.ReflectedType))
                 throw new ArgumentException($"Expression '{lambda}' refers to a property that is not from type {paramType}.");
 
             return propInfo;

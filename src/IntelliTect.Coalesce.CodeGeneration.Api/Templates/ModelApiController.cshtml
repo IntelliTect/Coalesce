@@ -1,7 +1,7 @@
 ﻿@using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
-@using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
+@using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 @using IntelliTect.Coalesce.TypeDefinition
-@inherits CoalesceTemplate<ApiController>
+@inherits CoalesceTemplate<ModelApiController>
 @{
     ClassViewModel model = Model.Model;
     string namespaceName = Model.Namespace;
@@ -97,18 +97,6 @@ namespace @(namespaceName).Api
         </text>
         }
 
-        @if (securityInfo.IsDeleteAllowed()) {
-        <text>
-        [HttpPost("delete/{id}")]
-        @(securityInfo.DeleteAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<ItemResult> Delete(
-            @primaryKeyParameter, 
-            @behaviorsParameter, 
-            @dataSourceParameter)
-            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
-        </text>
-        }
-
         @if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed()) {
         <text>
         [HttpPost("save")]
@@ -119,6 +107,18 @@ namespace @(namespaceName).Api
             @dataSourceParameter, 
             @behaviorsParameter)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+        </text>
+        }
+
+        @if (securityInfo.IsDeleteAllowed()) {
+        <text>
+        [HttpPost("delete/{id}")]
+        @(securityInfo.DeleteAnnotation)
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<@(model.DtoName)>> Delete(
+            @primaryKeyParameter, 
+            @behaviorsParameter, 
+            @dataSourceParameter)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
         </text>
         }
 
@@ -174,7 +174,7 @@ namespace @(namespaceName).Api
         // Methods from data class exposed through API Controller.
         @foreach (var method in model.ClientMethods)
         {
-            var returnType = $"ItemResult<{method.ReturnTypeNameForApi}>";
+            var returnType = method.ReturnTypeNameForApi;
             if (!method.IsStatic) { returnType = $"async Task<{returnType}>"; }
         <text>
         /// <summary>
@@ -184,19 +184,16 @@ namespace @(namespaceName).Api
         @(method.SecurityInfo.ExecuteAnnotation)
         @(model.ApiActionAccessModifier) virtual @returnType @method.Name (@method.CsParameters)
         {
-            var result = new ItemResult<@method.ReturnTypeNameForApi>();
-
-            @if (method.ReturnType.HasClassViewModel ||
-                (method.ReturnType.PureType.HasClassViewModel && method.ReturnType.IsCollection))
+            @if (method.ResultType.HasClassViewModel ||
+                (method.ResultType.PureType.HasClassViewModel && method.ResultType.IsCollection))
             {
                 @:IncludeTree includeTree = null;
             }
             @if (method.IsStatic)
             {
-                if(method.ReturnType.IsVoid) {
-                    @:object methodResult = null;
+                if (method.ReturnType.IsVoid) {
                     @:@(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
-                }else{
+                } else {
                     @:var methodResult = @(method.Parent.FullyQualifiedName).@(method.Name)(@(method.CsArguments));
                 }
             }
@@ -206,52 +203,18 @@ namespace @(namespaceName).Api
                 @:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 @:if (!itemResult.WasSuccessful)
                 @:{
-                    @:return new ItemResult<@method.ReturnTypeNameForApi>(itemResult);
+                    @:return new @(method.ReturnTypeNameForApi)(itemResult);
                 @:}
                 @:var item = itemResult.Object;
                 if (method.ReturnType.IsVoid)
                 {
-                    @:object methodResult = null;
                     @:item.@(method.Name)(@(method.CsArguments));
-                }else{
+                } else {
                     @:var methodResult = item.@(method.Name)(@(method.CsArguments));
                 }
-                @:Db.SaveChanges();
+                @:await Db.SaveChangesAsync();
             }
-            @if (method.ReturnType.IsCollection)
-            {
-                if (method.ReturnType.PureType.ClassViewModel?.IsDto ?? false)
-                {
-                    @:result.Object = methodResult.ToList();
-                }
-                else if (method.ReturnType.PureType.HasClassViewModel)
-                {
-                    @:var mappingContext = new MappingContext(User, "");
-                    @:result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<@(method.ReturnType.PureType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.PureType.ClassViewModel.DtoName)>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-                }
-                else
-                {
-                    @:result.Object = methodResult;
-                }
-            }
-            else
-            {
-                if (method.ReturnType.ClassViewModel?.IsDto ?? false)
-                {
-                    @:result.Object = methodResult;
-                }
-                else if (method.ReturnType.HasClassViewModel)
-                {
-                    @:var mappingContext = new MappingContext(User, "");
-                    @:result.Object = Mapper.MapToDto<@(method.ReturnType.ClassViewModel.FullyQualifiedName), @(method.ReturnType.ClassViewModel.DtoName)>(methodResult, mappingContext, includeTree);
-                }
-                else
-                {
-                    @:result.Object = methodResult;
-                }
-            }
-
-            return result;
+            @(Model.MethodResultProcessBlock(method))
         }
 </text>
         }

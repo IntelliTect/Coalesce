@@ -7,29 +7,44 @@ module ViewModels {
     {
 
         // Observables
-		public tempFahrenheit: KnockoutObservable<number> = ko.observable(null);
-		public humidity: KnockoutObservable<number> = ko.observable(null);
+        public tempFahrenheit: KnockoutObservable<number> = ko.observable(null);
+        public humidity: KnockoutObservable<number> = ko.observable(null);
+        public location: KnockoutObservable<ViewModels.Location> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
-        public loadFromDto: (data: any) => void;
         public parent: any;
         public parentCollection: any;
 
+        public loadFromDto = (data: any) => {
+            if (!data) return;
+
+            // Load the properties.
+            this.tempFahrenheit(data.tempFahrenheit);
+            this.humidity(data.humidity);
+            if (!this.location()){
+            this.location(new Location(data.location, this));
+            }else{
+            this.location().loadFromDto(data.location);
+            }
+
+        };
+
+                /** Saves this object into a data transfer object to send to the server. */
+        public saveToDto = (): any => {
+            var dto: any = {};
+            
+            dto.tempFahrenheit = this.tempFahrenheit();
+            dto.humidity = this.humidity();
+            
+            return dto;
+        }
+
 
         constructor(newItem?: any, parent?: any){
-            var self = this;
-            self.parent = parent;
+            this.parent = parent;
             // Load the object
-			self.loadFromDto = function(data: any) {
-				if (!data) return;
-
-                // Load the properties.
-                self.tempFahrenheit(data.tempFahrenheit);
-                self.humidity(data.humidity);
-                
-            };
 
             if (newItem) {
-                self.loadFromDto(newItem);
+                this.loadFromDto(newItem);
             }
         }
     }

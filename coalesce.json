@@ -1,11 +1,11 @@
 {
   "webProject": {
-    "projectFile": "../Coalesce/src/Coalesce.Web/Coalesce.Web.csproj",
+    "projectFile": "./src/Coalesce.Web/Coalesce.Web.csproj",
     "framework": "netcoreapp2.0",
     "configuration": "Debug"
   },
   "dataProject": {
-    "projectFile": "../Coalesce/src/Coalesce.Domain/Coalesce.Domain.csproj",
+    "projectFile": "./src/Coalesce.Domain/Coalesce.Domain.csproj",
     "framework": "netstandard2.0",
     "configuration": "Debug"
   },
@@ -24,6 +24,16 @@
     "Views": {
       "disabled": false
       //"key": "value"
+    },
+    // Yo dawg, I heard you like configurable formatting. (4 spaces is actually the default)
+    "ApiController": {
+      "indentationSize": 4 
+    },
+    "ClassDto": {
+      "indentationSize": 4 
+    },
+    "ViewController" : {
+      "indentationSize": 4
     }
   }
 }

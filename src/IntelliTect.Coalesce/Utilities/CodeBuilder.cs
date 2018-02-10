@@ -19,12 +19,12 @@ namespace IntelliTect.Coalesce.Utilities
             this.indentChar = indentChar;
         }
 
-        public int Level { get; private set; }
+        public int Level { get; protected set; }
 
-        private readonly StringBuilder sb = new StringBuilder();
-        private readonly int indentSize;
-        private readonly char indentChar;
-        private bool onNewLine = true;
+        protected readonly StringBuilder sb = new StringBuilder();
+        protected readonly int indentSize;
+        protected readonly char indentChar;
+        protected bool onNewLine = true;
 
         /// <summary>
         /// Write a blank line at the current indentation level.
@@ -102,23 +102,6 @@ namespace IntelliTect.Coalesce.Utilities
             Level++;
             return new Indentation(this);
         }
-        
-        /// <summary>
-        /// Writes the given text, followed by a space, opening brace, and newline.
-        /// Increases indentation one level, returning an object that can be disposed to decrease indentation and write a closing curly brace
-        /// </summary>
-        public IDisposable TSBlock(string blockPreamble, bool closeWithSemicolon = false)
-        {
-            if (!onNewLine)
-            {
-                throw new InvalidOperationException("Cannot start a block on a line that isn't empty");
-            }
-
-            Append(blockPreamble).Append(" {").Line();
-            Level++;
-
-            return new Indentation(this, closeWithSemicolon ? "};" : "}");
-        }
 
         public IDisposable ElBlock(string elName, string attributes = null)
         {
@@ -146,7 +129,7 @@ namespace IntelliTect.Coalesce.Utilities
         public override string ToString() => sb.ToString();
 
 
-        private class Indentation : IDisposable
+        protected class Indentation : IDisposable
         {
             private readonly CodeBuilder parent;
             private readonly string closeWith;

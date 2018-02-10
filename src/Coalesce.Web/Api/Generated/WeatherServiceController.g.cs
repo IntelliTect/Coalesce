@@ -36,16 +36,14 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetWeather")]
         [Authorize]
-        public virtual ItemResult<WeatherDataDtoGen> GetWeather(System.DateTimeOffset? dateTime)
+        public virtual ItemResult<WeatherDataDtoGen> GetWeather([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime)
         {
-            var result = new ItemResult<WeatherDataDtoGen>();
-
             IncludeTree includeTree = null;
-            var methodResult = Service.GetWeather(dateTime);
+            var methodResult = Service.GetWeather(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), new MappingContext(User)), dateTime);
 
+            var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);
-
             return result;
         }
     }

@@ -76,6 +76,11 @@ namespace Coalesce.Domain
         // EF does support TimeSpans. Some of our projects also do.
         public TimeSpan Duration { get; set; }
 
+
+        // Arbitrary endpoint to "test" method collection return types.
+        [Coalesce]
+        public static ICollection<Case> GetSomeCases(AppDbContext db) => db.Cases.Take(10).ToList();
+
         [Coalesce]
         public static int GetAllOpenCasesCount(AppDbContext db)
         {

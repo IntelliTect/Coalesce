@@ -27,6 +27,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsInterface { get; }
 
+        /// <summary>
+        /// Returns true if this TypeViewModel represents void.
+        /// </summary>
+        public abstract bool IsVoid { get; }
+
         public abstract Dictionary<int, string> EnumValues { get; }
         public abstract bool IsEnum { get; }
 
@@ -78,11 +83,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if this is a boolean.
         /// </summary>
         public bool IsBool => NullableUnderlyingType.Name == nameof(Boolean);
-
-        /// <summary>
-        /// Returns true if this TypeViewModel represents void.
-        /// </summary>
-        public bool IsVoid => Name.ToLowerInvariant() == "void";
 
         public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
@@ -245,6 +245,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
+        public string DtoFullyQualifiedName => IsCollection
+            // We assume ICollection for all collections. If this doesn't work in a particular context,
+            // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
+            ? $"ICollection<{PureType.DtoFullyQualifiedName}>" 
+            : (HasClassViewModel ? ClassViewModel.DtoName : FullyQualifiedName);
 
         public string NullableTypeForDto(string dtoNamespace)
         {

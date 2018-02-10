@@ -31,6 +31,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
 
         public override IEnumerable<ParameterViewModel> Parameters
-            => Symbol.Parameters.Select(p => new SymbolParameterViewModel(p));
+            => Symbol.Parameters.Select(p => new SymbolParameterViewModel(this, p));
     }
 }

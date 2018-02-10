@@ -176,13 +176,13 @@
                     <tr>
                         <th>@method.Name</th>
                         <td>
-                            @method.ReturnType.FullyQualifiedName
+                            @method.ResultType.FullyQualifiedName
                         </td>
                         <td>
                             @method.CsParameters
                         </td>
                         <td>
-                            @method.TsParameters
+                            @method.JsArguments()
                         </td>
                         <td>@method.SecurityInfo.ToString()</td>
                     </tr>

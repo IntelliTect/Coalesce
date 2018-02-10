@@ -178,9 +178,9 @@ module ViewModels {
                 return this.invoke(name, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
-                    this.result(new ViewModels.Person(data));
+                    this.result(new ViewModels.Person(data.object));
                 } else {
                     this.result().loadFromDto(data);
                 }
@@ -207,8 +207,8 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: any) => void = null, reload: boolean = true) => {
-                this.result(data);
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: any) => void = null, reload: boolean = true) => {
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
@@ -231,8 +231,8 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
-                this.result(data);
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
@@ -255,8 +255,8 @@ module ViewModels {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: string) => void = null, reload: boolean = true) => {
-                this.result(data);
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
+                this.result(data.object);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
@@ -299,9 +299,9 @@ module ViewModels {
                 return this.invoke(firstName, callback, reload);
             };
             
-            protected loadResponse = (data: any, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
                 if (!this.result()) {
-                    this.result(new ViewModels.Person(data));
+                    this.result(new ViewModels.Person(data.object));
                 } else {
                     this.result().loadFromDto(data);
                 }
@@ -394,7 +394,7 @@ module ViewModels {
         public saveToDto = (): any => {
             var dto: any = {};
             dto.personId = this.personId();
-
+            
             dto.title = this.title();
             dto.firstName = this.firstName();
             dto.lastName = this.lastName();
@@ -410,10 +410,10 @@ module ViewModels {
             if (!dto.companyId && this.company()) {
                 dto.companyId = this.company().companyId();
             }
-
+            
             return dto;
         }
-    
+
         /**
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.

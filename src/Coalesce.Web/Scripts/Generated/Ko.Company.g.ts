@@ -35,6 +35,7 @@ module ViewModels {
         public city: KnockoutObservable<string> = ko.observable(null);
         public state: KnockoutObservable<string> = ko.observable(null);
         public zipCode: KnockoutObservable<string> = ko.observable(null);
+        public isDeleted: KnockoutObservable<boolean> = ko.observable(null);
         public employees: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         public altName: KnockoutObservable<string> = ko.observable(null);
 
@@ -94,6 +95,7 @@ module ViewModels {
             this.city(data.city);
             this.state(data.state);
             this.zipCode(data.zipCode);
+            this.isDeleted(data.isDeleted);
             this.altName(data.altName);
             if (this.coalesceConfig.onLoadFromDto()){
                 this.coalesceConfig.onLoadFromDto()(this as any);
@@ -108,17 +110,18 @@ module ViewModels {
         public saveToDto = (): any => {
             var dto: any = {};
             dto.companyId = this.companyId();
-
+            
             dto.name = this.name();
             dto.address1 = this.address1();
             dto.address2 = this.address2();
             dto.city = this.city();
             dto.state = this.state();
             dto.zipCode = this.zipCode();
-
+            dto.isDeleted = this.isDeleted();
+            
             return dto;
         }
-    
+
         /**
             Loads any child objects that have an ID set, but not the full object.
             This is useful when creating an object that has a parent object and the ID is set on the new child.
@@ -178,6 +181,7 @@ module ViewModels {
             self.city.subscribe(self.autoSave);
             self.state.subscribe(self.autoSave);
             self.zipCode.subscribe(self.autoSave);
+            self.isDeleted.subscribe(self.autoSave);
         
             if (newItem) {
                 self.loadFromDto(newItem, true);

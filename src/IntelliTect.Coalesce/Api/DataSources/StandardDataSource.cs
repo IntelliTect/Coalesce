@@ -49,15 +49,6 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Check if the data source may be used. 
-        /// This method will be called by the framework.
-        /// Use this.User to obtain the current user.
-        /// </summary>
-        /// <returns>True if the user is authorized, otherwise false.</returns>
-        public virtual (bool Authorized, string Message) IsAuthorized() => (true, null);
-
-
-        /// <summary>
         /// Allows overriding of whether or not queries will run using EF Core Async methods.
         /// </summary>
         /// <param name="query"></param>
@@ -364,7 +355,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// Applies all filtering that is done when getting a list of data
         /// (or metadata about a particular set of filters, like a count).
-        /// This includes ApplyListPropertyFilters, ApplyListFreeformWhereClause, and ApplyListSearchTerm.
+        /// This includes ApplyListPropertyFilters and ApplyListSearchTerm.
         /// This is called by GetListAsync when constructing a list result.
         /// </summary>
         /// <param name="query">The query to filter.</param>
@@ -399,9 +390,14 @@ namespace IntelliTect.Coalesce
                     var prop = ClassViewModel.PropertyByName(fieldName);
                     if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
                     {
+                        // The property is a POCO without any property specified.
+                        // Get the default order by for the object's type to figure out what field to sort by.
                         string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
-                        clause = clause.Replace("ASC", orderByParam.Value.ToUpper());
-                        clause = clause.Replace("DESC", orderByParam.Value.ToUpper());
+
+                        // The default order by clause has an order associated, but we want to override it
+                        // with the order that the client specified. A string replacement will do.
+                        clause = clause.Replace("ASC", orderByParam.Value.ToString().ToUpper());
+                        clause = clause.Replace("DESC", orderByParam.Value.ToString().ToUpper());
                         query = query.OrderBy(clause);
                     }
                     else
@@ -575,19 +571,19 @@ namespace IntelliTect.Coalesce
             var query = GetQuery(parameters);
 
             query = ApplyListFiltering(query, parameters);
-            query = ApplyListSorting(query, parameters);
 
             // Get a count
             int totalCount = await GetListTotalCountAsync(query, parameters);
 
-            // Add paging after we've gotten the total count.
+            // Add paging, sorting only after we've gotten the total count, since they don't affect counts.
+            query = ApplyListSorting(query, parameters);
             query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
             
             var canUseAsync = CanEvalQueryAsynchronously(query);
             List<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ListResult<T>(result, page, totalCount, pageSize), tree);
+            return (new ListResult<T>(result, page: page, totalCount: totalCount, pageSize: pageSize), tree);
         }
 
         /// <summary>
@@ -606,7 +602,7 @@ namespace IntelliTect.Coalesce
             IList<TDto> mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
             mappedResult = TrimListFields(mappedResult, parameters);
 
-            return new ListResult<TDto>(mappedResult, result.Page, result.TotalCount, result.PageSize);
+            return new ListResult<TDto>(result, mappedResult);
         }
 
         /// <summary>
@@ -629,7 +625,7 @@ namespace IntelliTect.Coalesce
             }
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ItemResult<T>(true, result), tree);
+            return (new ItemResult<T>(result), tree);
         }
 
         /// <summary>
@@ -654,7 +650,7 @@ namespace IntelliTect.Coalesce
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = Mapper.MapToDto<T, TDto>(result.Object, mappingContext, tree);
 
-            return new ItemResult<TDto>(true, mappedResult);
+            return new ItemResult<TDto>(result, mappedResult);
         }
 
         public virtual Task<int> GetCountAsync(IFilterParameters parameters)

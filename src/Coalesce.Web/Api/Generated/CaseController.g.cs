@@ -55,15 +55,6 @@ namespace Coalesce.Web.Api
             => CountImplementation(parameters, dataSource);
 
 
-        [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual Task<ItemResult> Delete(
-            int id,
-            IBehaviors<Coalesce.Domain.Case> behaviors,
-            IDataSource<Coalesce.Domain.Case> dataSource)
-            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
-
-
         [HttpPost("save")]
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseDtoGen>> Save(
@@ -72,6 +63,15 @@ namespace Coalesce.Web.Api
             IDataSource<Coalesce.Domain.Case> dataSource,
             IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+
+        [HttpPost("delete/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<CaseDtoGen>> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            IDataSource<Coalesce.Domain.Case> dataSource)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of CaseDtoGen
@@ -121,17 +121,30 @@ namespace Coalesce.Web.Api
         // Methods from data class exposed through API Controller.
 
         /// <summary>
+        /// Method: GetSomeCases
+        /// </summary>
+        [HttpPost("GetSomeCases")]
+        [Authorize]
+        public virtual ItemResult<ICollection<CaseDtoGen>> GetSomeCases()
+        {
+            IncludeTree includeTree = null;
+            var methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
+            var result = new ItemResult<ICollection<CaseDtoGen>>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, includeTree)).ToList();
+            return result;
+        }
+
+        /// <summary>
         /// Method: GetAllOpenCasesCount
         /// </summary>
         [HttpPost("GetAllOpenCasesCount")]
         [Authorize]
         public virtual ItemResult<int> GetAllOpenCasesCount()
         {
-            var result = new ItemResult<int>();
-
             var methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
+            var result = new ItemResult<int>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -140,14 +153,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
         [Authorize]
-        public virtual ItemResult<object> RandomizeDatesAndStatus()
+        public virtual ItemResult RandomizeDatesAndStatus()
         {
-            var result = new ItemResult<object>();
-
-            object methodResult = null;
             Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
-            result.Object = methodResult;
-
+            var result = new ItemResult();
             return result;
         }
 
@@ -158,13 +167,11 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
-            var result = new ItemResult<CaseSummaryDtoGen>();
-
             IncludeTree includeTree = null;
             var methodResult = Coalesce.Domain.Case.GetCaseSummary(Db);
+            var result = new ItemResult<CaseSummaryDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(methodResult, mappingContext, includeTree);
-
             return result;
         }
     }

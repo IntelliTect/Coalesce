@@ -508,8 +508,7 @@ ko.bindingHandlers.select2AjaxText = {
                             throw "Couldn't figure out how to access the text results for call to " + url;
                         }
 
-                        for (var i in items) {
-                            var item = items[i].toString();
+                        for (let item of items) {
                             if (item == myParams.term) {
                                 perfectMatch = true;
                                 result.push({ id: item, text: item, selected: true });

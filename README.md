@@ -70,3 +70,7 @@ We have had great success with what we term hybrid-SPA applications. This is an 
 With this in mind, we have tried to build Coalesce so that another framework could be easily added at a later date. 
 
 Currently, we are pondering support for the latest version of Angular, however some of us have feeling toward Vue.js and Aurelia. Input and of course pull requests are welcome. 
+
+### Contributing
+
+See the contribution guide [here](https://github.com/IntelliTect/Coalesce/blob/2.0/CONTRIBUTING.md).

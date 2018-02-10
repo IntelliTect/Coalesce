@@ -28,22 +28,19 @@ namespace IntelliTect.Coalesce
         /// A comma-delimited list of field names to sort by in DESCENDING order.
         /// </summary>
         string OrderByDescending { get; }
-
-        // TODO: type this better than string,string.
-        // The values are [columnName] = "Asc|Desc"
-
+        
         /// <summary>
         /// An interpreted list of both OrderBy and OrderByDescending.
-        /// Keys are field names, and values are directions, either "Asc" or "Desc".
+        /// Keys are field names, and values are directions.
         /// If both OrderBy and OrderByDescending were populated, the values in OrderBy supercede those in OrderByDescending.
         /// </summary>
-        IDictionary<string, string> OrderByList { get; }
+        IReadOnlyDictionary<string, SortDirection> OrderByList { get; }
 
         /// <summary>
         /// A list of field names being requested.
         /// If this collection is non-null and contains any values,
         /// the response should only include those field names which were specified.
         /// </summary>
-        ICollection<string> Fields { get; }
+        IReadOnlyCollection<string> Fields { get; }
     }
 }

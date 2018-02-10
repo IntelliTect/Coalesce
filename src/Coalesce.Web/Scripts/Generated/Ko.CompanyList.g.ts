@@ -8,7 +8,10 @@ module ListViewModels {
 
     export namespace CompanyDataSources {
         export class Default extends Coalesce.DataSource<ViewModels.Company> { }
-            }
+                
+        export class DefaultSource extends Coalesce.DataSource<ViewModels.Company> {
+        }
+    }
 
     export class CompanyList extends Coalesce.BaseListViewModel<ViewModels.Company> {
         public readonly modelName: string = "Company";
@@ -24,6 +27,7 @@ module ListViewModels {
             city?:string;
             state?:string;
             zipCode?:string;
+            isDeleted?:string;
         } = null;
     
         /** 

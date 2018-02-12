@@ -69,12 +69,13 @@ And a registration:
 
 .. code-block:: c#
 
-    public void ConfigureServices(IServiceCollection services)
+    public class Startup 
     {
-        ...
-        services.AddCoalesce<AppDbContext>();
-        services.AddScoped<IWeatherService, WeatherService>();
-        ...
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddCoalesce<AppDbContext>();
+            services.AddScoped<IWeatherService, WeatherService>();
+        }
     }
 
 

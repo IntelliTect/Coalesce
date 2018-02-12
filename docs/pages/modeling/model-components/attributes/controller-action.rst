@@ -1,6 +1,6 @@
-.. _ApiActionHttpMethodAttribute:
+.. _ControllerActionAttribute:
 
-[ApiActionHttpMethod]
+[ControllerAction]
 =====================
 
 Specifies the HTTP method/verb to use in the generated API controller for the model method. If this attribute is excluded or no 
@@ -18,10 +18,10 @@ Example Usage
             public string {get; set; }
 
             [Coalesce]
-            [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Get)]
+            [ControllerAction(Method = HttpMethod.Get)]
             public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
             {
-                return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
+                return db.People.Count(f => f.LastName.StartsWith(lastNameStartsWith));
             }
         }
 
@@ -32,8 +32,8 @@ Properties
         The HTTP method to use on the generated API Controller.
 
         Enum values are:
-            - :csharp:`ApiActionHttpMethodAttribute.HttpMethod.Post` Use the POST method.
-            - :csharp:`ApiActionHttpMethodAttribute.HttpMethod.Get` Use the GET method.
-            - :csharp:`ApiActionHttpMethodAttribute.HttpMethod.Put` Use the PUT method.
-            - :csharp:`ApiActionHttpMethodAttribute.HttpMethod.Delete` Use the DELETE method.
-            - :csharp:`ApiActionHttpMethodAttribute.HttpMethod.Patch` Use the PATCH method.
+            - :csharp:`HttpMethod.Post` Use the POST method.
+            - :csharp:`HttpMethod.Get` Use the GET method.
+            - :csharp:`HttpMethod.Put` Use the PUT method.
+            - :csharp:`HttpMethod.Delete` Use the DELETE method.
+            - :csharp:`HttpMethod.Patch` Use the PATCH method.

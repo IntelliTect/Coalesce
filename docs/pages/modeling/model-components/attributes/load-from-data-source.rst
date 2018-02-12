@@ -1,6 +1,6 @@
 .. _LoadFromDataSourceAttribute:
 
-[ApiActionHttpMethod]
+[LoadFromDataSource]
 =====================
 
 Specifies that the targeted model instance method should load the instance it is called on from the 

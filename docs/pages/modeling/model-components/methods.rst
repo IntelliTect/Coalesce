@@ -163,13 +163,13 @@ If a static method returns the type that it is declared on, it will also be gene
 Method Annotations
 ------------------
 
-Methods can be annotated with attributes to control API exposure and TypeScript generation. The following attributes are available for model methods. General annotations can be found on the :ref:`Annotations` page.
+Methods can be annotated with attributes to control API exposure and TypeScript generation. The following attributes are available for model methods. General annotations can be found on the :ref:`ModelAttributes` page.
 
     :csharp:`[Coalesce]`
         The :ref:`CoalesceAttribute` attribute causes the method to be exposed via a generated API controller. This is not needed for methods defined on an interface marked with :csharp:`[Service]` - Coalesce assumes that all methods on the interface are intended to be exposed. If this is not desired, create a new, more restricted interface with only the desired methods to be exposed.
 
-    :csharp:`[ApiActionHttpMethod(HttpMethod method)]`
-        The :ref:`ApiActionHttpMethod` attribute controls how this method is exposed via HTTP. By default all controller method actions use the POST HTTP method. This behavior can be overridden with this attribute to use GET, POST, PUT, DELETE, or PATCH HTTP methods. Keep in mind that when using the GET method, all parameters are sent as part of the URL, so the typical considerations with sensitive data in a query string applies.
+    :csharp:`[ControllerAction(Method = HttpMethod)]`
+        The :ref:`ControllerActionAttribute` attribute controls how this method is exposed via HTTP. By default all controller method actions use the POST HTTP method. This behavior can be overridden with this attribute to use GET, POST, PUT, DELETE, or PATCH HTTP methods. Keep in mind that when using the GET method, all parameters are sent as part of the URL, so the typical considerations with sensitive data in a query string applies.
 
     :csharp:`[Execute(string roles)]`
         The :ref:`ExecuteAttribute` attribute specifies which roles can execute this method from the generated API controller.

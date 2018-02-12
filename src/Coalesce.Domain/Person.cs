@@ -167,21 +167,21 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Get)]
+        [ControllerAction(Method = HttpMethod.Get)]
         public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
         {
             return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
         }
 
         [Coalesce]
-        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Get)]
+        [ControllerAction(Method = HttpMethod.Get)]
         public string FullNameAndAge(AppDbContext db)
         {
             return $"{FirstName} {LastName} {BirthDate?.ToShortDateString() ?? "None"}";
         }
 
         [Coalesce]
-        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Delete)]
+        [ControllerAction(Method = HttpMethod.Delete)]
         public static bool RemovePersonById(AppDbContext db, int id)
         {
             var person = db.People.FirstOrDefault(f => f.PersonId == id);
@@ -203,7 +203,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Put)]
+        [ControllerAction(Method = HttpMethod.Put)]
         public string ObfuscateEmail(AppDbContext db)
         {
             var random = (new Random()).Next();
@@ -212,7 +212,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ApiActionHttpMethod(ApiActionHttpMethodAttribute.HttpMethod.Patch)]
+        [ControllerAction(Method = HttpMethod.Patch)]
         public Person ChangeFirstName (string firstName)
         {
             this.FirstName = firstName;

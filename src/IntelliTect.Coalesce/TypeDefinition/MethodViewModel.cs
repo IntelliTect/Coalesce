@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using static IntelliTect.Coalesce.DataAnnotations.ApiActionHttpMethodAttribute;
 using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce.TypeDefinition
@@ -56,10 +55,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
         public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
-
-
+        
         public HttpMethod ApiActionHttpMethod =>
-            this.GetAttributeValue<ApiActionHttpMethodAttribute, ApiActionHttpMethodAttribute.HttpMethod>(a => a.Method) ?? HttpMethod.Post;
+            this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ?? HttpMethod.Post;
 
 
         /// <summary>

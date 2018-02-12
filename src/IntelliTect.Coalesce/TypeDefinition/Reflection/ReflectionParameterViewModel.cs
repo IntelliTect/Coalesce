@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -22,6 +23,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public override string Name => Info.Name;
+
+        public override bool HasDefaultValue => Info.HasDefaultValue;
+
+        protected override object RawDefaultValue => Info.RawDefaultValue;
 
         public override object GetAttributeValue<TAttribute>(string valueName)
         {

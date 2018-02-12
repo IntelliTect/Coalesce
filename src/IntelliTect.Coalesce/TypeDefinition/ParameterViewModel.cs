@@ -86,13 +86,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var typeName = !IsDI && Type.HasClassViewModel ? Type.ClassViewModel.DtoName : Type.FullyQualifiedName;
-                return $"{(ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {CsParameterName}";
+                var typeName = !IsDI && Type.HasClassViewModel 
+                    ? Type.ClassViewModel.DtoName 
+                    : Type.FullyQualifiedName;
+                return $"{(ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {CsParameterName}{(HasDefaultValue ? " = " + CsDefaultValue : "")}";
             }
         }
 
         public string JsVariable => Name.ToCamelCase();
         public string CsParameterName => Name.ToCamelCase();
+
+        public abstract bool HasDefaultValue { get; }
+        protected abstract object RawDefaultValue { get; }
+
+        /// <summary>
+        /// C# compile-time constant expression representing the default value of the parameter if HasDefaultValue == true.
+        /// </summary>
+        public string CsDefaultValue
+        {
+            get
+            {
+                if (!HasDefaultValue) throw new InvalidOperationException("Parameter has no default value");
+                return CSharpUtilities.GetCSharpLiteral(Type, RawDefaultValue);
+            }
+        }
 
 
 

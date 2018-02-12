@@ -194,7 +194,7 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpGet("PersonCount")]
         [Authorize]
-        public virtual ItemResult<long> PersonCount(string lastNameStartsWith)
+        public virtual ItemResult<long> PersonCount(string lastNameStartsWith = "")
         {
             var methodResult = Coalesce.Domain.Person.PersonCount(Db, lastNameStartsWith);
             var result = new ItemResult<long>();

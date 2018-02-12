@@ -18,6 +18,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Name => Symbol.Name;
 
+        public override bool HasDefaultValue => Symbol.HasExplicitDefaultValue;
+
+        protected override object RawDefaultValue => Symbol.ExplicitDefaultValue;
+
         public override object GetAttributeValue<TAttribute>(string valueName)
         {
             return Symbol.GetAttributeValue<TAttribute>(valueName);

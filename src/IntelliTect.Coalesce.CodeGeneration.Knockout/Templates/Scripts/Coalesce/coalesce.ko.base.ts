@@ -984,7 +984,8 @@ module Coalesce {
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
-                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    var result: ItemResult<number> = xhr.responseJSON;
+                    if (result && result.message) errorMsg = result.message;
                     this.message(errorMsg);
                     if (this.coalesceConfig.showFailureAlerts())
                         this.coalesceConfig.onFailure()(this, "Could not get count of " + this.modelName + " items: " + errorMsg);

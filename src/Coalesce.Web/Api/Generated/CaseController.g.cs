@@ -49,7 +49,7 @@ namespace Coalesce.Web.Api
 
         [HttpGet("count")]
         [AllowAnonymous]
-        public virtual Task<int> Count(
+        public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);

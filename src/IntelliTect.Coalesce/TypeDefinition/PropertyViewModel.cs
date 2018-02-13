@@ -751,14 +751,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var newValue = Name;
                 if (!Type.IsNullable && Type.CsDefaultValue != "null")
                 {
-                    // TODO: perform validation logic if the DTO doesn't have a value?
-                    // This would be fairly significant breaking change that would have no workarounds if a value isn't desired in certain cases.
-                    
-                    // TODO: Why do dates default to DateTime.Today?
-                    if (Type.IsDate)
-                        newValue = $"({newValue} ?? DateTime.Today)";
-                    else
-                        newValue = $"({newValue} ?? {Type.CsDefaultValue})";
+                    newValue = $"({newValue} ?? entity.{Name})";
                 }
                 var setter = $"entity.{Name} = {newValue};";
 

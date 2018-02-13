@@ -52,6 +52,7 @@
 | Endpoint `Get` now returns an `ItemResult<TDto>` instead of a raw `TDto`. | If you had any manual invocations of this endpoint not through the generated typescript, update those calls.
 | Endpoint `Delete` now returns an `ItemResult` instead of a `bool`. | If you had any manual invocations of this endpoint not through the generated typescript, update those calls.
 | Endpoints generated for model methods now emit an `[Authorize]` attribute by default. | Any model methods that were intentionally public should be annotated with `[Execute(PermissionLevel = AllowAll)]`.
+| Endpoint `Count` now returns an `ItemResult<int>` instead of an `int`. | If you had any manual invocations of this endpoint not through the generated typescript, update those calls.
 
 ## List API, BaseListViewModel & Generated ListViewModels
 

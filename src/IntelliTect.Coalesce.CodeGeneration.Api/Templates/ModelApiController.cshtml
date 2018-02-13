@@ -90,7 +90,7 @@ namespace @(namespaceName).Api
 
         [HttpGet("count")]
         @(securityInfo.ReadAnnotation)
-        @(model.ApiActionAccessModifier) virtual Task<int> Count(
+        @(model.ApiActionAccessModifier) virtual Task<ItemResult<int>> Count(
             FilterParameters parameters, 
             @dataSourceParameter)
             => CountImplementation(parameters, dataSource);

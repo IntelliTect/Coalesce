@@ -23,7 +23,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected BaseApiController(TContext db)
         {
             Db = db;
-
             EntityClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
         }
 
@@ -31,7 +30,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
         /// <summary>
         /// A ClassViewModel representing the entity type T that is served by this controller,
-        /// indepdent of the DTO that will encapsulate the type in inputs and outputs.
+        /// independent of the DTO that will encapsulate the type in inputs and outputs.
         /// </summary>
         protected ClassViewModel EntityClassViewModel { get; }
 
@@ -51,7 +50,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             return dataSource.GetMappedListAsync<TDto>(listParameters);
         }
 
-        protected Task<int> CountImplementation(FilterParameters parameters, IDataSource<T> dataSource)
+        protected Task<ItemResult<int>> CountImplementation(FilterParameters parameters, IDataSource<T> dataSource)
         {
             return dataSource.GetCountAsync(parameters);
         }

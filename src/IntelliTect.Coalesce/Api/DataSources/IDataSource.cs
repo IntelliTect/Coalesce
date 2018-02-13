@@ -17,6 +17,6 @@ namespace IntelliTect.Coalesce
         Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
             where TDto : IClassDto<T>, new();
 
-        Task<int> GetCountAsync(IFilterParameters parameters);
+        Task<ItemResult<int>> GetCountAsync(IFilterParameters parameters);
     }
 }

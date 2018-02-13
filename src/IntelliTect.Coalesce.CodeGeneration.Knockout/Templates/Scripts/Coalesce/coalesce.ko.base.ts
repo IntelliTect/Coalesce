@@ -175,8 +175,8 @@ module Coalesce {
         wasSuccessful?: boolean;
         message?: string;
     }
-    export interface ItemResult extends ApiResult {
-        object?: any;
+    export interface ItemResult<T = any> extends ApiResult {
+        object?: T;
     }
 
     export interface ListResult extends ApiResult {
@@ -977,13 +977,17 @@ module Coalesce {
                 url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Count?" + this.queryParams('filter'),
                 xhrFields: { withCredentials: true }
             })
-                .done((data) => {
-                    this.count(data);
+                .done((data: ItemResult<number>) => {
+                    this.count(data.object);
+                    this.message(data.message);
                     if (typeof(callback) == "function") callback();
                 })
-                .fail(() => {
+                .fail((xhr) => {
+                    var errorMsg = "Unknown Error";
+                    if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                    this.message(errorMsg);
                     if (this.coalesceConfig.showFailureAlerts())
-                        this.coalesceConfig.onFailure()(this, "Could not get count of " + this.modelName + " items.");
+                        this.coalesceConfig.onFailure()(this, "Could not get count of " + this.modelName + " items: " + errorMsg);
                 })
                 .always(() => {
                     this.coalesceConfig.onFinishBusy()(this);
@@ -1037,12 +1041,10 @@ module Coalesce {
             if (this.orderBy() == field && !this.orderByDescending()) {
                 this.orderBy('');
                 this.orderByDescending(field);
-            }
-            else if (!this.orderBy() && this.orderByDescending() == field) {
+            } else if (!this.orderBy() && this.orderByDescending() == field) {
                 this.orderBy('');
                 this.orderByDescending('');
-            }
-            else {
+            } else {
                 this.orderBy(field);
                 this.orderByDescending('');
             }

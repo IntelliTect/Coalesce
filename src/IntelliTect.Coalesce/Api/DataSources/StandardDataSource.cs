@@ -653,12 +653,12 @@ namespace IntelliTect.Coalesce
             return new ItemResult<TDto>(result, mappedResult);
         }
 
-        public virtual Task<int> GetCountAsync(IFilterParameters parameters)
+        public virtual async Task<ItemResult<int>> GetCountAsync(IFilterParameters parameters)
         {
             var query = GetQuery(parameters);
             query = ApplyListFiltering(query, parameters);
 
-            return GetListTotalCountAsync(query, parameters);
+            return new ItemResult<int>(await GetListTotalCountAsync(query, parameters));
         }
     }
 }

@@ -58,11 +58,11 @@ With an implementation:
         public WeatherData GetWeather(string zipCode)
         {
             // Assuming some magic HttpGet method that works as follows...
-            var response = HttpGet($"http://www.example.com/api/weather/{zipCode}");
+            var response = HttpGet("http://www.example.com/api/weather/" + zipCode);
             return response.Body.SerializeTo<WeatherData>();
         }
 
-        public void MethodThatIsntExposedBecauseItIsntOnTheExposedInterface() { ... }
+        public void MethodThatIsntExposedBecauseItIsntOnTheExposedInterface() {  }
     }
 
 And a registration:

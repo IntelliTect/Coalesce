@@ -74,7 +74,7 @@ namespace Coalesce.Web.Models
             entity.City = City;
             entity.State = State;
             entity.ZipCode = ZipCode;
-            entity.IsDeleted = (IsDeleted ?? false);
+            entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
         }
 
     }

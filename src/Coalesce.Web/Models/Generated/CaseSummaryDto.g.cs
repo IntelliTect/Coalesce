@@ -47,9 +47,9 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.OpenCases = (OpenCases ?? 0);
-            entity.CaseCount = (CaseCount ?? 0);
-            entity.CloseCases = (CloseCases ?? 0);
+            entity.OpenCases = (OpenCases ?? entity.OpenCases);
+            entity.CaseCount = (CaseCount ?? entity.CaseCount);
+            entity.CloseCases = (CloseCases ?? entity.CloseCases);
             entity.Description = Description;
         }
 

@@ -43,8 +43,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.Height = (Height ?? 0);
-            entity.Weight = (Weight ?? 0);
+            entity.Height = (Height ?? entity.Height);
+            entity.Weight = (Weight ?? entity.Weight);
             entity.Name = Name;
         }
 

@@ -45,8 +45,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.TempFahrenheit = (TempFahrenheit ?? 0);
-            entity.Humidity = (Humidity ?? 0);
+            entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
+            entity.Humidity = (Humidity ?? entity.Humidity);
         }
 
     }

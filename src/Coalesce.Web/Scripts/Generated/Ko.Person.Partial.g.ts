@@ -184,10 +184,8 @@ module ViewModels {
                 } else {
                     this.result().loadFromDto(data);
                 }
-                if (reload) {
-                    var result = this.result();
-                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
-                } else if (typeof(callback) == 'function') {
+                this.parent.loadFromDto(data.object, true)
+                if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };
@@ -305,10 +303,8 @@ module ViewModels {
                 } else {
                     this.result().loadFromDto(data);
                 }
-                if (reload) {
-                    var result = this.result();
-                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
-                } else if (typeof(callback) == 'function') {
+                this.parent.loadFromDto(data.object, true)
+                if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
             };

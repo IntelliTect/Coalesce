@@ -89,14 +89,14 @@ namespace Coalesce.Web.Models
 
             entity.Title = Title;
             entity.Description = Description;
-            entity.OpenedAt = (OpenedAt ?? DateTime.Today);
+            entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             entity.AssignedToId = AssignedToId;
             entity.ReportedById = ReportedById;
             entity.Attachment = Attachment;
             entity.Severity = Severity;
-            entity.Status = (Status ?? 0);
+            entity.Status = (Status ?? entity.Status);
             entity.DevTeamAssignedId = DevTeamAssignedId;
-            entity.Duration = (Duration ?? default(System.TimeSpan));
+            entity.Duration = (Duration ?? entity.Duration);
         }
 
     }

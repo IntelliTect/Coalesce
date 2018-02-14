@@ -7,9 +7,9 @@ module ViewModels {
     {
 
         // Observables
-        public name: KnockoutObservable<string> = ko.observable(null);
-        public birthdayMonth: KnockoutObservable<number> = ko.observable(null);
-        public emailDomain: KnockoutObservable<string> = ko.observable(null);
+        public name: KnockoutObservable<string | null> = ko.observable(null);
+        public birthdayMonth: KnockoutObservable<number | null> = ko.observable(null);
+        public emailDomain: KnockoutObservable<string | null> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
         public parent: any;
         public parentCollection: any;

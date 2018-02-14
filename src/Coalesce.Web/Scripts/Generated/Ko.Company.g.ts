@@ -28,16 +28,16 @@ module ViewModels {
         public dataSources: typeof ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources;
     
 
-        public companyId: KnockoutObservable<number> = ko.observable(null);
-        public name: KnockoutObservable<string> = ko.observable(null);
-        public address1: KnockoutObservable<string> = ko.observable(null);
-        public address2: KnockoutObservable<string> = ko.observable(null);
-        public city: KnockoutObservable<string> = ko.observable(null);
-        public state: KnockoutObservable<string> = ko.observable(null);
-        public zipCode: KnockoutObservable<string> = ko.observable(null);
-        public isDeleted: KnockoutObservable<boolean> = ko.observable(null);
+        public companyId: KnockoutObservable<number | null> = ko.observable(null);
+        public name: KnockoutObservable<string | null> = ko.observable(null);
+        public address1: KnockoutObservable<string | null> = ko.observable(null);
+        public address2: KnockoutObservable<string | null> = ko.observable(null);
+        public city: KnockoutObservable<string | null> = ko.observable(null);
+        public state: KnockoutObservable<string | null> = ko.observable(null);
+        public zipCode: KnockoutObservable<string | null> = ko.observable(null);
+        public isDeleted: KnockoutObservable<boolean | null> = ko.observable(null);
         public employees: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
-        public altName: KnockoutObservable<string> = ko.observable(null);
+        public altName: KnockoutObservable<string | null> = ko.observable(null);
 
        
         
@@ -140,11 +140,6 @@ module ViewModels {
             this.warnings = ko.validation.group([
             ]);
         }
-    
-        // Computed Observable for edit URL
-        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.companyId();
-        });
 
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CompanyList){
             super(parent);
@@ -156,8 +151,8 @@ module ViewModels {
 
     
             // List Object model for Employees. Allows for loading subsets of data.
-            var _employeesList: ListViewModels.PersonList = null;
-            self.employeesList = function(loadImmediate = true) {
+            var _employeesList: ListViewModels.PersonList;
+            this.employeesList = function(loadImmediate = true) {
                 if (!_employeesList){
                     _employeesList = new ListViewModels.PersonList();
                     if (loadImmediate) loadEmployeesList();

@@ -29,30 +29,31 @@ module ViewModels {
     
 
         /** The Primary key for the Case object */
-        public caseKey: KnockoutObservable<number> = ko.observable(null);
-        public title: KnockoutObservable<string> = ko.observable(null);
-        public description: KnockoutObservable<string> = ko.observable(null);
-        public openedAt: KnockoutObservable<moment.Moment> = ko.observable(moment());
-        public assignedToId: KnockoutObservable<number> = ko.observable(null);
-        public assignedTo: KnockoutObservable<ViewModels.Person> = ko.observable(null);
-        public reportedById: KnockoutObservable<number> = ko.observable(null);
-        public reportedBy: KnockoutObservable<ViewModels.Person> = ko.observable(null);
-        public attachment: KnockoutObservable<string> = ko.observable(null);
-        public severity: KnockoutObservable<string> = ko.observable(null);
-        public status: KnockoutObservable<number> = ko.observable(null);
+        public caseKey: KnockoutObservable<number | null> = ko.observable(null);
+        public title: KnockoutObservable<string | null> = ko.observable(null);
+        public description: KnockoutObservable<string | null> = ko.observable(null);
+        public openedAt: KnockoutObservable<moment.Moment | null> = ko.observable(moment());
+        public assignedToId: KnockoutObservable<number | null> = ko.observable(null);
+        public assignedTo: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
+        public reportedById: KnockoutObservable<number | null> = ko.observable(null);
+        public reportedBy: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
+        public attachment: KnockoutObservable<string | null> = ko.observable(null);
+        public severity: KnockoutObservable<string | null> = ko.observable(null);
+        public status: KnockoutObservable<number | null> = ko.observable(null);
         /** Text value for enumeration Status */
-        public statusText: KnockoutComputed<string> = ko.pureComputed(() => {
+        public statusText: KnockoutComputed<string | null> = ko.pureComputed(() => {
             for(var i = 0; i < this.statusValues.length; i++){
                 if (this.statusValues[i].id == this.status()){
                     return this.statusValues[i].value;
                 }
             }
+            return null;
         });
         public caseProducts: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);
-        public devTeamAssignedId: KnockoutObservable<number> = ko.observable(null);
-        public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam> = ko.observable(null);
-        public duration: KnockoutObservable<any> = ko.observable(null);
+        public devTeamAssignedId: KnockoutObservable<number | null> = ko.observable(null);
+        public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam | null> = ko.observable(null);
+        public duration: KnockoutObservable<any | null> = ko.observable(null);
 
        
         /** Display text for AssignedTo */
@@ -73,12 +74,10 @@ module ViewModels {
         public showAssignedToEditor: (callback?: any) => void;
         /** Pops up a stock editor for object reportedBy */
         public showReportedByEditor: (callback?: any) => void;
-        /** Pops up a stock editor for object devTeamAssigned */
-        public showDevTeamAssignedEditor: (callback?: any) => void;
 
 
         /** Array of all possible names & values of enum status */
-        public statusValues: EnumValue[] = [ 
+        public statusValues: Coalesce.EnumValue[] = [ 
             { id: 0, value: 'Open' },
             { id: 1, value: 'In Progress' },
             { id: 2, value: 'Resolved' },
@@ -121,11 +120,11 @@ module ViewModels {
                 if (!this.assignedTo()){
                     this.assignedTo(new Person(data.assignedTo, this));
                 } else {
-                    this.assignedTo().loadFromDto(data.assignedTo);
+                    this.assignedTo()!.loadFromDto(data.assignedTo);
                 }
-                if (this.parent instanceof Person && this.parent !== this.assignedTo() && this.parent.personId() == this.assignedTo().personId())
+                if (this.parent instanceof Person && this.parent !== this.assignedTo() && this.parent.personId() == this.assignedTo()!.personId())
                 {
-                    this.parent.loadFromDto(data.assignedTo, null, false);
+                    this.parent.loadFromDto(data.assignedTo, undefined, false);
                 }
             }
             if (!data.reportedBy) { 
@@ -136,11 +135,11 @@ module ViewModels {
                 if (!this.reportedBy()){
                     this.reportedBy(new Person(data.reportedBy, this));
                 } else {
-                    this.reportedBy().loadFromDto(data.reportedBy);
+                    this.reportedBy()!.loadFromDto(data.reportedBy);
                 }
-                if (this.parent instanceof Person && this.parent !== this.reportedBy() && this.parent.personId() == this.reportedBy().personId())
+                if (this.parent instanceof Person && this.parent !== this.reportedBy() && this.parent.personId() == this.reportedBy()!.personId())
                 {
-                    this.parent.loadFromDto(data.reportedBy, null, false);
+                    this.parent.loadFromDto(data.reportedBy, undefined, false);
                 }
             }
             if (!data.devTeamAssigned) { 
@@ -151,7 +150,7 @@ module ViewModels {
                 if (!this.devTeamAssigned()){
                     this.devTeamAssigned(new DevTeam(data.devTeamAssigned, this));
                 } else {
-                    this.devTeamAssigned().loadFromDto(data.devTeamAssigned);
+                    this.devTeamAssigned()!.loadFromDto(data.devTeamAssigned);
                 }
             }
 
@@ -159,7 +158,7 @@ module ViewModels {
             this.title(data.title);
             this.description(data.description);
             if (data.openedAt == null) this.openedAt(null);
-            else if (this.openedAt() == null || this.openedAt().valueOf() != new Date(data.openedAt).getTime()){
+            else if (this.openedAt() == null || this.openedAt()!.valueOf() != new Date(data.openedAt).getTime()){
                 this.openedAt(moment(new Date(data.openedAt)));
             }
             this.assignedToId(data.assignedToId);
@@ -186,21 +185,21 @@ module ViewModels {
             dto.title = this.title();
             dto.description = this.description();
             if (!this.openedAt()) dto.openedAt = null;
-            else dto.openedAt = this.openedAt().format('YYYY-MM-DDTHH:mm:ssZZ');
+            else dto.openedAt = this.openedAt()!.format('YYYY-MM-DDTHH:mm:ssZZ');
             dto.assignedToId = this.assignedToId();
             if (!dto.assignedToId && this.assignedTo()) {
-                dto.assignedToId = this.assignedTo().personId();
+                dto.assignedToId = this.assignedTo()!.personId();
             }
             dto.reportedById = this.reportedById();
             if (!dto.reportedById && this.reportedBy()) {
-                dto.reportedById = this.reportedBy().personId();
+                dto.reportedById = this.reportedBy()!.personId();
             }
             dto.attachment = this.attachment();
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
             if (!dto.devTeamAssignedId && this.devTeamAssigned()) {
-                dto.devTeamAssignedId = this.devTeamAssigned().devTeamId();
+                dto.devTeamAssignedId = this.devTeamAssigned()!.devTeamId();
             }
             dto.duration = this.duration();
             
@@ -251,11 +250,6 @@ module ViewModels {
             this.warnings = ko.validation.group([
             ]);
         }
-    
-        // Computed Observable for edit URL
-        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseKey();
-        });
 
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CaseList){
             super(parent);
@@ -264,26 +258,26 @@ module ViewModels {
             self.myId;
 
             // Create computeds for display for objects
-			self.assignedToText = ko.pureComputed(function()
+			this.assignedToText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.assignedTo() && self.assignedTo().name()) {
-					return self.assignedTo().name().toString();
+				if (self.assignedTo() && self.assignedTo()!.name()) {
+					return self.assignedTo()!.name()!.toString();
 				} else {
 					return "None";
 				}
 			});
-			self.reportedByText = ko.pureComputed(function()
+			this.reportedByText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.reportedBy() && self.reportedBy().name()) {
-					return self.reportedBy().name().toString();
+				if (self.reportedBy() && self.reportedBy()!.name()) {
+					return self.reportedBy()!.name()!.toString();
 				} else {
 					return "None";
 				}
 			});
-			self.devTeamAssignedText = ko.pureComputed(function()
+			this.devTeamAssignedText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.devTeamAssigned() && self.devTeamAssigned().name()) {
-					return self.devTeamAssigned().name().toString();
+				if (self.devTeamAssigned() && self.devTeamAssigned()!.name()) {
+					return self.devTeamAssigned()!.name()!.toString();
 				} else {
 					return "None";
 				}
@@ -292,17 +286,17 @@ module ViewModels {
     
 
 
-            self.showAssignedToEditor = function(callback: any) {
+            this.showAssignedToEditor = function(callback: any) {
                 if (!self.assignedTo()) {
                     self.assignedTo(new Person());
                 }
-                self.assignedTo().showEditor(callback)
+                self.assignedTo()!.showEditor(callback)
             };
-            self.showReportedByEditor = function(callback: any) {
+            this.showReportedByEditor = function(callback: any) {
                 if (!self.reportedBy()) {
                     self.reportedBy(new Person());
                 }
-                self.reportedBy().showEditor(callback)
+                self.reportedBy()!.showEditor(callback)
             };
 
             // This stuff needs to be done after everything else is set up.

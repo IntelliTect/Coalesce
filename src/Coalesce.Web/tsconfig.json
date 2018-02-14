@@ -1,7 +1,9 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "noImplicitAny": true,
+    "strict": true,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false,
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,

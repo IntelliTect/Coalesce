@@ -21,20 +21,20 @@ interface KnockoutBindingHandlers {
 // Select2 binding for an object that uses an AJAX call for valid values. 
 ko.bindingHandlers.select2Ajax = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var url = allBindings.get('url');
-        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
-        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
+        const url = allBindings.get('url');
+        const textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textField'));
+        const idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idField'));
 
-        var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
-        var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
-        var itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
-        var object: KnockoutObservable<Coalesce.BaseViewModel> = allBindings.has('object') ? allBindings.get('object') : null;
-        var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
-        var allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
-        var placeholder = $(element).attr('placeholder') || "select";
-        var pageSize = allBindings.get('pageSize') || 25;
+        const selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
+        const format = allBindings.has("format") ? allBindings.get("format") : '{0}';
+        const setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
+        const itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
+        const object: KnockoutObservable<Coalesce.BaseViewModel> = allBindings.has('object') ? allBindings.get('object') : null;
+        const selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
+        const openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
+        const allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
+        const placeholder = $(element).attr('placeholder') || "select";
+        const pageSize = allBindings.get('pageSize') || 25;
 
         if (!url) throw "select2Ajax requires additional binding 'url'";
         if (!textField) throw "select2Ajax requires additional binding 'textField'";
@@ -46,7 +46,7 @@ ko.bindingHandlers.select2Ajax = {
         interface ResultItem {
             id: any,
             text: string,
-            _apiObject?: object
+            _apiObject: object
         }
 
         // Create the Select2
@@ -149,7 +149,7 @@ ko.bindingHandlers.select2Ajax = {
                                 var oldObject = object();
                                 if (oldObject instanceof itemViewModel) {
                                     oldObject.loadFromDto(result);
-                                    object.valueHasMutated();
+                                    if (object.valueHasMutated) object.valueHasMutated();
                                 } else {
                                     object(new itemViewModel(result));
                                 }
@@ -180,7 +180,10 @@ ko.bindingHandlers.select2Ajax = {
         }
 
         // Add the validation message
-        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        const validationCore = ko.bindingHandlers['validationCore'];
+        if (!validationCore.init) throw "Fatal: validationCore.init missing"
+        validationCore.init(element, valueAccessor, allBindings, viewModel, bindingContext)
+
         // The validation message needs to go after the new select2 dropdown, not before it.
         $(element).next(".validationMessage").insertAfter($(element).nextAll(".select2").first());
     },
@@ -195,7 +198,7 @@ ko.bindingHandlers.select2Ajax = {
         var object: KnockoutObservable<any> = allBindings.get('object')
 
         // See if something has changed
-        var option: HTMLOptionElement;
+        var option: HTMLOptionElement | undefined;
         var triggerSelect2Change = false;
 
         if (value) {
@@ -605,7 +608,10 @@ ko.bindingHandlers.select2 = {
 
 
         // Add the validation message
-        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        const validationCore = ko.bindingHandlers['validationCore'];
+        if (!validationCore.init) throw "Fatal: validationCore.init missing"
+        validationCore.init(element, valueAccessor, allBindings, viewModel, bindingContext);
+        
         // The validation message needs to go after the new select2 dropdown, not before it.
         $(element).next(".validationMessage").insertAfter($(element).nextAll(".select2").first());
     },
@@ -679,7 +685,10 @@ ko.bindingHandlers.datePicker = {
             .on("blur", updateValue);
 
         // Add the validation message
-        ko.bindingHandlers['validationCore'].init(element, valueAccessor, allBindings, viewModel, bindingContext)
+        const validationCore = ko.bindingHandlers['validationCore'];
+        if (!validationCore.init) throw "Fatal: validationCore.init missing"
+        validationCore.init(element, valueAccessor, allBindings, viewModel, bindingContext);
+        
         // The validation message needs to go after the input group with the button.
         $(element).next(".validationMessage").insertAfter($(theElement));
     },
@@ -831,6 +840,10 @@ ko.bindingHandlers.formatNumberText = {
         var formatPhone = function () {
             return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
         }
+
+        // Satisfy typescript type guards.
+        if (!ko.bindingHandlers.text.update) throw "Fatal: text binding missing";
+
         ko.bindingHandlers.text.update(element, formatPhone, allBindings, viewModel, bindingContext);
     }
 };
@@ -867,7 +880,7 @@ ko.virtualElements.allowedBindings['let'] = true;
             ko.utils.registerEventHandler(element, 'change', function () {
 
                 var observable = valueAccessor();
-                var val = moment($(element).val());
+                var val = moment(($(element).val() || "").toString());
 
                 observable(val);
 

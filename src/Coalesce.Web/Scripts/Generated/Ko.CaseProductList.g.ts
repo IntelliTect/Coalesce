@@ -20,7 +20,7 @@ module ListViewModels {
             caseProductId?:string;
             caseId?:string;
             productId?:string;
-        } = null;
+        } | null = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.

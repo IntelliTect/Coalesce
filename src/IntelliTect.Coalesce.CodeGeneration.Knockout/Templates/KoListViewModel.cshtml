@@ -52,7 +52,7 @@ module @moduleName {
             {
             @:/** @(prop.Comment) */
             }
-            @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
+            @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType(true)) = @(prop.Type.ObservableConstructorCall());
             }
             @:public saveToDto = () => {
                 @:var dto: any = {};
@@ -61,7 +61,7 @@ module @moduleName {
                 if (prop.Type.IsDate)
                 {
                 @:if (!this.@(prop.JsVariable)()) dto.@prop.JsonName = null;
-                @:else dto.@prop.JsonName = this.@(prop.JsVariable)().format('YYYY-MM-DDTHH:mm:ss@(prop.Type.IsDateTimeOffset ? "ZZ" : "")');
+                @:else dto.@prop.JsonName = this.@(prop.JsVariable)()!.format('YYYY-MM-DDTHH:mm:ss@(prop.Type.IsDateTimeOffset ? "ZZ" : "")');
                 }
                 else
                 {
@@ -88,7 +88,7 @@ module @moduleName {
             @(string.Join("\r\n            ", model.BaseViewModel.ClientProperties
                 .Where(f=>f.IsUrlFilterParameter)
                 .Select(f=>$"{f.JsonName}?:{"string" /*f.Type.TsType + (f.Type.IsString ? "" : " | string")*/};")))
-        } = null;
+        } | null = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.

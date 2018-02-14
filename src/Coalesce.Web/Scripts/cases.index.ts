@@ -2,7 +2,7 @@
 
 module Cases {
     var viewModel: CaseDetailModel;
-    var status: string = Coalesce.Utilities.GetUrlParameter("status");
+    var status: string | null = Coalesce.Utilities.GetUrlParameter("status");
 
     $(function () {
         viewModel = new CaseDetailModel();
@@ -21,7 +21,7 @@ module Cases {
                 }
                 else {
                     let retrievedStatus = new ViewModels.Case().statusValues.filter(function (obj) {
-                        return obj.value.toLowerCase() == status.toLowerCase();
+                        return obj.value.toLowerCase() == (status || "").toLowerCase();
                     });
                     if (retrievedStatus.length > 0) {
                         this.cases.filter = { status: retrievedStatus[0].id.toString() };

@@ -4,10 +4,10 @@ module Coalesce {
     export module KnockoutUtilities {
 
         function BuildLookup<T>(array: T[], idField: string) {
-            var lookup: { [k: string]: T; } = {};
+            const lookup: { [k: string]: T; } = {};
             for (let i = 0; i < array.length; i++) {
-                var item = array[i];
-                var key = ko.unwrap((item as any)[idField]);
+                const item = array[i];
+                const key = ko.unwrap((item as any)[idField]);
 
                 // If an item is missing a value for a key, we can't look it up.
                 // This is OK, because keyless items will never match an incoming item anyway.
@@ -20,17 +20,18 @@ module Coalesce {
             originalContent: U[],
             incomingItem: T,
             incomingItemIndex: number,
-            originalLookup: { [k: string]: U; } = null,
-            idField: string = null,
-            equalityComparer: (existingItem: U, incomingKey: any) => boolean = null
+            originalLookup: { [k: string]: U; } | null = null,
+            idField: string | null = null,
+            equalityComparer: ((existingItem: U, incomingKey: any) => boolean) | null = null
         ) {
-            var matchingItem: U;
+            var matchingItem: U | null;
             if (idField) {
-                let key = ko.unwrap((incomingItem as any)[idField]);
+                const key = ko.unwrap((incomingItem as any)[idField]);
                 if (originalLookup) {
                     matchingItem = originalLookup[key.toString()];
                 } else {
-                    let matchingItems = originalContent.filter(item => equalityComparer(item, key));
+                    if (!equalityComparer) throw "Equality comparer is required if no originalLookup is provided with an idField."
+                    const matchingItems = originalContent.filter(item => equalityComparer(item, key));
 
                     if (matchingItems.length > 1) {
                         // We have a problem because keys are duplicated.
@@ -54,7 +55,7 @@ module Coalesce {
             viewModelClass: new () => U,
             parent: any,
             allowCollectionDeletes: boolean = true,
-            equalityComparer: (existingItem: U, incomingKey: any) => boolean = null
+            equalityComparer: ((existingItem: U, incomingKey: any) => boolean) | null = null
         ) {
 
             var originalContent = existingArray() || [];
@@ -76,8 +77,9 @@ module Coalesce {
 
             // If no specific equality comparison has been requested,
             // use a hash table for O(1) lookups on a single key to prevent O(n^2) from nested for-loops.
+            let originalLookup: { [k: string]: U; } | null = null;
             if (equalityComparer == null && idField) {
-                var originalLookup = BuildLookup(originalContent, idField);
+                originalLookup = BuildLookup(originalContent, idField);
             }
 
             // Can't do for (var i in array) because IE sees new methods added on to the prototype as keys
@@ -145,15 +147,16 @@ module Coalesce {
             existingArray: KnockoutObservableArray<T>,
             incomingArray: T[] | KnockoutObservableArray<T>,
             idField?: string,
-            equalityComparer: (existingItem: T, incomingKey: any) => boolean = null
+            equalityComparer: ((existingItem: T, incomingKey: any) => boolean) | null = null
         ) {
             var incomingArrayUnwrapped = ko.unwrap(incomingArray);
             var originalContent = existingArray().slice();
 
             // If no specific equality comparison has been requested,
             // use a hash table for O(1) lookups on a single key to prevent O(n^2) from nested for-loops.
+            let originalLookup: { [k: string]: T; } | null = null;
             if (equalityComparer == null && idField) {
-                var originalLookup = BuildLookup(originalContent, idField);
+                originalLookup = BuildLookup(originalContent, idField);
             }
 
             for (let i = 0; i < incomingArrayUnwrapped.length; i++) {

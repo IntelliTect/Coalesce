@@ -8,11 +8,11 @@ module ViewModels {
         public myId: any = 0;
 
         // Observables
-        public caseSummaryId: KnockoutObservable<number> = ko.observable(null);
-        public openCases: KnockoutObservable<number> = ko.observable(null);
-        public caseCount: KnockoutObservable<number> = ko.observable(null);
-        public closeCases: KnockoutObservable<number> = ko.observable(null);
-        public description: KnockoutObservable<string> = ko.observable(null);
+        public caseSummaryId: KnockoutObservable<number | null> = ko.observable(null);
+        public openCases: KnockoutObservable<number | null> = ko.observable(null);
+        public caseCount: KnockoutObservable<number | null> = ko.observable(null);
+        public closeCases: KnockoutObservable<number | null> = ko.observable(null);
+        public description: KnockoutObservable<string | null> = ko.observable(null);
         // Loads this object from a data transfer object received from the server.
         public parent: any;
         public parentCollection: any;

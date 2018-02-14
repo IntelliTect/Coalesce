@@ -28,7 +28,7 @@ module ListViewModels {
             state?:string;
             zipCode?:string;
             isDeleted?:string;
-        } = null;
+        } | null = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.

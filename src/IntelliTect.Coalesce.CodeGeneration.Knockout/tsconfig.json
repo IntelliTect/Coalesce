@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "noImplicitAny": true,
+    "strict": true,
     "noEmitOnError": true,
     "module": "system",
     "target": "es5"

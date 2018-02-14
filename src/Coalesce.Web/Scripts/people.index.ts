@@ -2,7 +2,7 @@
 
 module People {
     var viewModel: PeopleModel;
-    var id: string = Coalesce.Utilities.GetUrlParameter("id");
+    var id: string | null = Coalesce.Utilities.GetUrlParameter("id");
 
     $(function () {
         viewModel = new PeopleModel();

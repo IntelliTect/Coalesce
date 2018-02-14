@@ -29,47 +29,49 @@ module ViewModels {
     
 
         /** ID for the person object. */
-        public personId: KnockoutObservable<number> = ko.observable(null);
+        public personId: KnockoutObservable<number | null> = ko.observable(null);
         /** Title of the person, Mr. Mrs, etc. */
-        public title: KnockoutObservable<number> = ko.observable(null);
+        public title: KnockoutObservable<number | null> = ko.observable(null);
         /** Text value for enumeration Title */
-        public titleText: KnockoutComputed<string> = ko.pureComputed(() => {
+        public titleText: KnockoutComputed<string | null> = ko.pureComputed(() => {
             for(var i = 0; i < this.titleValues.length; i++){
                 if (this.titleValues[i].id == this.title()){
                     return this.titleValues[i].value;
                 }
             }
+            return null;
         });
         /** First name of the person. */
-        public firstName: KnockoutObservable<string> = ko.observable(null);
+        public firstName: KnockoutObservable<string | null> = ko.observable(null);
         /** Last name of the person */
-        public lastName: KnockoutObservable<string> = ko.observable(null);
+        public lastName: KnockoutObservable<string | null> = ko.observable(null);
         /** Email address of the person */
-        public email: KnockoutObservable<string> = ko.observable(null);
+        public email: KnockoutObservable<string | null> = ko.observable(null);
         /** Genetic Gender of the person. */
-        public gender: KnockoutObservable<number> = ko.observable(null);
+        public gender: KnockoutObservable<number | null> = ko.observable(null);
         /** Text value for enumeration Gender */
-        public genderText: KnockoutComputed<string> = ko.pureComputed(() => {
+        public genderText: KnockoutComputed<string | null> = ko.pureComputed(() => {
             for(var i = 0; i < this.genderValues.length; i++){
                 if (this.genderValues[i].id == this.gender()){
                     return this.genderValues[i].value;
                 }
             }
+            return null;
         });
         /** List of cases assigned to the person */
         public casesAssigned: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
         /** List of cases reported by the person. */
         public casesReported: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
-        public birthDate: KnockoutObservable<moment.Moment> = ko.observable(null);
-        public lastBath: KnockoutObservable<moment.Moment> = ko.observable(null);
-        public nextUpgrade: KnockoutObservable<moment.Moment> = ko.observable(null);
-        public personStats: KnockoutObservable<ViewModels.PersonStats> = ko.observable(null);
+        public birthDate: KnockoutObservable<moment.Moment | null> = ko.observable(null);
+        public lastBath: KnockoutObservable<moment.Moment | null> = ko.observable(null);
+        public nextUpgrade: KnockoutObservable<moment.Moment | null> = ko.observable(null);
+        public personStats: KnockoutObservable<ViewModels.PersonStats | null> = ko.observable(null);
         /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
-        public name: KnockoutObservable<string> = ko.observable(null);
+        public name: KnockoutObservable<string | null> = ko.observable(null);
         /** Company ID this person is employed by */
-        public companyId: KnockoutObservable<number> = ko.observable(null);
+        public companyId: KnockoutObservable<number | null> = ko.observable(null);
         /** Company loaded from the Company ID */
-        public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
+        public company: KnockoutObservable<ViewModels.Company | null> = ko.observable(null);
 
        
         /** Display text for PersonStats */
@@ -123,21 +125,19 @@ module ViewModels {
             null, { deferEvaluation: true }
         );
 
-        /** Pops up a stock editor for object personStats */
-        public showPersonStatsEditor: (callback?: any) => void;
         /** Pops up a stock editor for object company */
         public showCompanyEditor: (callback?: any) => void;
 
 
         /** Array of all possible names & values of enum title */
-        public titleValues: EnumValue[] = [ 
+        public titleValues: Coalesce.EnumValue[] = [ 
             { id: 0, value: 'Mr' },
             { id: 1, value: 'Ms' },
             { id: 2, value: 'Mrs' },
             { id: 4, value: 'Miss' },
         ];
         /** Array of all possible names & values of enum gender */
-        public genderValues: EnumValue[] = [ 
+        public genderValues: Coalesce.EnumValue[] = [ 
             { id: 0, value: 'Non Specified' },
             { id: 1, value: 'Male' },
             { id: 2, value: 'Female' },
@@ -154,31 +154,31 @@ module ViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (Rename) with the given arguments */
-            public invoke = (name: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (name: string | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), name: name }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new Rename.Args(); 
             public static Args = class Args {
-                public name: KnockoutObservable<string> = ko.observable(null);
+                public name: KnockoutObservable<string | null> = ko.observable(null);
             };
             
             /** Calls server method (Rename) with an instance of Rename.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.name(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Name');
                 if ($promptVal === null) return;
                 var name: string = $promptVal;
                 return this.invoke(name, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -201,15 +201,15 @@ module ViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (ChangeSpacesToDashesInName) with the given arguments */
-            public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: any) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: any) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: any) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -225,15 +225,15 @@ module ViewModels {
             public readonly verb = 'GET';
             
             /** Calls server method (FullNameAndAge) with the given arguments */
-            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -249,15 +249,15 @@ module ViewModels {
             public readonly verb = 'PUT';
             
             /** Calls server method (ObfuscateEmail) with the given arguments */
-            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -273,31 +273,31 @@ module ViewModels {
             public readonly verb = 'PATCH';
             
             /** Calls server method (ChangeFirstName) with the given arguments */
-            public invoke = (firstName: string, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (firstName: string | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), firstName: firstName }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new ChangeFirstName.Args(); 
             public static Args = class Args {
-                public firstName: KnockoutObservable<string> = ko.observable(null);
+                public firstName: KnockoutObservable<string | null> = ko.observable(null);
             };
             
             /** Calls server method (ChangeFirstName) with an instance of ChangeFirstName.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.firstName(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.Person) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('First Name');
                 if ($promptVal === null) return;
                 var firstName: string = $promptVal;
                 return this.invoke(firstName, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Person) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -338,7 +338,7 @@ module ViewModels {
                 if (!this.personStats()){
                     this.personStats(new PersonStats(data.personStats, this));
                 } else {
-                    this.personStats().loadFromDto(data.personStats);
+                    this.personStats()!.loadFromDto(data.personStats);
                 }
             }
             if (!data.company) { 
@@ -349,11 +349,11 @@ module ViewModels {
                 if (!this.company()){
                     this.company(new Company(data.company, this));
                 } else {
-                    this.company().loadFromDto(data.company);
+                    this.company()!.loadFromDto(data.company);
                 }
-                if (this.parent instanceof Company && this.parent !== this.company() && this.parent.companyId() == this.company().companyId())
+                if (this.parent instanceof Company && this.parent !== this.company() && this.parent.companyId() == this.company()!.companyId())
                 {
-                    this.parent.loadFromDto(data.company, null, false);
+                    this.parent.loadFromDto(data.company, undefined, false);
                 }
             }
 
@@ -364,15 +364,15 @@ module ViewModels {
             this.email(data.email);
             this.gender(data.gender);
             if (data.birthDate == null) this.birthDate(null);
-            else if (this.birthDate() == null || this.birthDate().valueOf() != new Date(data.birthDate).getTime()){
+            else if (this.birthDate() == null || this.birthDate()!.valueOf() != new Date(data.birthDate).getTime()){
                 this.birthDate(moment(new Date(data.birthDate)));
             }
             if (data.lastBath == null) this.lastBath(null);
-            else if (this.lastBath() == null || this.lastBath().valueOf() != new Date(data.lastBath).getTime()){
+            else if (this.lastBath() == null || this.lastBath()!.valueOf() != new Date(data.lastBath).getTime()){
                 this.lastBath(moment(new Date(data.lastBath)));
             }
             if (data.nextUpgrade == null) this.nextUpgrade(null);
-            else if (this.nextUpgrade() == null || this.nextUpgrade().valueOf() != new Date(data.nextUpgrade).getTime()){
+            else if (this.nextUpgrade() == null || this.nextUpgrade()!.valueOf() != new Date(data.nextUpgrade).getTime()){
                 this.nextUpgrade(moment(new Date(data.nextUpgrade)));
             }
             this.name(data.name);
@@ -397,14 +397,14 @@ module ViewModels {
             dto.email = this.email();
             dto.gender = this.gender();
             if (!this.birthDate()) dto.birthDate = null;
-            else dto.birthDate = this.birthDate().format('YYYY-MM-DDTHH:mm:ss');
+            else dto.birthDate = this.birthDate()!.format('YYYY-MM-DDTHH:mm:ss');
             if (!this.lastBath()) dto.lastBath = null;
-            else dto.lastBath = this.lastBath().format('YYYY-MM-DDTHH:mm:ss');
+            else dto.lastBath = this.lastBath()!.format('YYYY-MM-DDTHH:mm:ss');
             if (!this.nextUpgrade()) dto.nextUpgrade = null;
-            else dto.nextUpgrade = this.nextUpgrade().format('YYYY-MM-DDTHH:mm:ssZZ');
+            else dto.nextUpgrade = this.nextUpgrade()!.format('YYYY-MM-DDTHH:mm:ssZZ');
             dto.companyId = this.companyId();
             if (!dto.companyId && this.company()) {
-                dto.companyId = this.company().companyId();
+                dto.companyId = this.company()!.companyId();
             }
             
             return dto;
@@ -446,11 +446,6 @@ module ViewModels {
             this.warnings = ko.validation.group([
             ]);
         }
-    
-        // Computed Observable for edit URL
-        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.personId();
-        });
 
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.PersonList){
             super(parent);
@@ -459,18 +454,18 @@ module ViewModels {
             self.myId;
 
             // Create computeds for display for objects
-			self.personStatsText = ko.pureComputed(function()
+			this.personStatsText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.personStats() && self.personStats().name()) {
-					return self.personStats().name().toString();
+				if (self.personStats() && self.personStats()!.name()) {
+					return self.personStats()!.name()!.toString();
 				} else {
 					return "None";
 				}
 			});
-			self.companyText = ko.pureComputed(function()
+			this.companyText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.company() && self.company().altName()) {
-					return self.company().altName().toString();
+				if (self.company() && self.company()!.altName()) {
+					return self.company()!.altName()!.toString();
 				} else {
 					return "None";
 				}
@@ -478,8 +473,8 @@ module ViewModels {
 
     
             // List Object model for CasesAssigned. Allows for loading subsets of data.
-            var _casesAssignedList: ListViewModels.CaseList = null;
-            self.casesAssignedList = function(loadImmediate = true) {
+            var _casesAssignedList: ListViewModels.CaseList;
+            this.casesAssignedList = function(loadImmediate = true) {
                 if (!_casesAssignedList){
                     _casesAssignedList = new ListViewModels.CaseList();
                     if (loadImmediate) loadCasesAssignedList();
@@ -494,8 +489,8 @@ module ViewModels {
                 }
             }
             // List Object model for CasesReported. Allows for loading subsets of data.
-            var _casesReportedList: ListViewModels.CaseList = null;
-            self.casesReportedList = function(loadImmediate = true) {
+            var _casesReportedList: ListViewModels.CaseList;
+            this.casesReportedList = function(loadImmediate = true) {
                 if (!_casesReportedList){
                     _casesReportedList = new ListViewModels.CaseList();
                     if (loadImmediate) loadCasesReportedList();
@@ -511,11 +506,11 @@ module ViewModels {
             }
 
 
-            self.showCompanyEditor = function(callback: any) {
+            this.showCompanyEditor = function(callback: any) {
                 if (!self.company()) {
                     self.company(new Company());
                 }
-                self.company().showEditor(callback)
+                self.company()!.showEditor(callback)
             };
 
             // This stuff needs to be done after everything else is set up.

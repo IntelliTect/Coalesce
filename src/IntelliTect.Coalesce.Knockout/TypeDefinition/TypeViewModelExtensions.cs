@@ -25,11 +25,12 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
         /// <summary>
         /// Type used in knockout for the observable with ViewModels.
         /// </summary>
-        public static string TsKnockoutType(this TypeViewModel typeModel)
+        public static string TsKnockoutType(this TypeViewModel typeModel, bool nullable = false)
         {
-            if (typeModel.IsByteArray) return "KnockoutObservable<string>";
+            string orNull = nullable ? " | null" : "";
+            if (typeModel.IsByteArray) return $"KnockoutObservable<string{orNull}>";
             else if (typeModel.IsCollection || typeModel.IsArray) return $"KnockoutObservableArray<{typeModel.PureType.TsType}>";
-            else return "KnockoutObservable<" + typeModel.TsType + ">";
+            else return $"KnockoutObservable<{typeModel.TsType}{orNull}>";
         }
     }
 }

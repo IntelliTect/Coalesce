@@ -54,16 +54,17 @@ module @moduleName {
         {
         @:/** @(prop.Comment) */
         }
-        @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType()) = @(prop.Type.ObservableConstructorCall());
+        @:public @(prop.JsVariable): @(prop.Type.TsKnockoutType(true)) = @(prop.Type.ObservableConstructorCall());
         if (prop.PureType.IsEnum)
         {
         @:/** Text value for enumeration @prop.Name */
-        @:public @(prop.JsTextPropertyName): KnockoutComputed<string> = ko.pureComputed(() => {
+        @:public @(prop.JsTextPropertyName): KnockoutComputed<string | null> = ko.pureComputed(() => {
             @:for(var i = 0; i < this.@(prop.JsVariable)Values.length; i++){
                 @:if (this.@(prop.JsVariable)Values[i].id == this.@(prop.JsVariable)()){
                     @:return this.@(prop.JsVariable)Values[i].value;
                 @:}
             @:}
+            @:return null;
         @:});
         }
         if (prop.IsManytoManyCollection)
@@ -128,7 +129,7 @@ module @moduleName {
         @:);
         }
 
-        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.PureTypeOnContext))
         {
         @:/** Pops up a stock editor for object @prop.JsVariable */
         @:public show@(prop.Name)Editor: (callback?: any) => void;
@@ -138,7 +139,7 @@ module @moduleName {
         @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.PureType.IsEnum))
         {
         @:/** Array of all possible names & values of enum @prop.JsVariable */
-        @:public @(prop.JsVariable)Values: EnumValue[] = [ 
+        @:public @(prop.JsVariable)Values: Coalesce.EnumValue[] = [ 
         @foreach (var kvp in prop.Type.EnumValues)
         {
             @:{ id: @kvp.Key, value: '@kvp.Value.ToProperCase()' },
@@ -208,12 +209,12 @@ module @moduleName {
                 @:if (!this.@(prop.JsVariable)()){
                     @:this.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)(data.@prop.JsonName, this));
                 @:} else {
-                    @:this.@(prop.JsVariable)().loadFromDto(data.@prop.JsonName);
+                    @:this.@(prop.JsVariable)()!.loadFromDto(data.@prop.JsonName);
                 @:}
                 @if (prop.Object.OnContext) { 
-                @:if (this.parent instanceof @(prop.Object.ViewModelClassName) && this.parent !== this.@(prop.JsVariable)() && this.parent.@(prop.Object.PrimaryKey.JsVariable)() == this.@(prop.JsVariable)().@(prop.Object.PrimaryKey.JsVariable)())
+                @:if (this.parent instanceof @(prop.Object.ViewModelClassName) && this.parent !== this.@(prop.JsVariable)() && this.parent.@(prop.Object.PrimaryKey.JsVariable)() == this.@(prop.JsVariable)()!.@(prop.Object.PrimaryKey.JsVariable)())
                 @:{
-                    @:this.parent.loadFromDto(data.@prop.JsonName, null, false);
+                    @:this.parent.loadFromDto(data.@prop.JsonName, undefined, false);
                 @:}
                 }
             @:}
@@ -225,7 +226,7 @@ module @moduleName {
             if (prop.Type.IsDate)
             {   // Using valueOf/getTime here is a 20x performance increase over moment.isSame(). moment(new Date(...)) is also a 10x perf increase.
             @:if (data.@prop.JsonName == null) this.@(prop.JsVariable)(null);
-            @:else if (this.@(prop.JsVariable)() == null || this.@(prop.JsVariable)().valueOf() != new Date(data.@prop.JsonName).getTime()){
+            @:else if (this.@(prop.JsVariable)() == null || this.@(prop.JsVariable)()!.valueOf() != new Date(data.@prop.JsonName).getTime()){
                 @:this.@(prop.JsVariable)(moment(new Date(data.@prop.JsonName)));
             @:}
             } else if (!prop.IsPOCO && !prop.IsPrimaryKey) {
@@ -283,11 +284,6 @@ module @moduleName {
             }
             ]);
         }
-    
-        // Computed Observable for edit URL
-        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.@(model.PrimaryKey.JsVariable)();
-        });
 
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | @(listModuleName).@(model.ListViewModelClassName)){
             super(parent);
@@ -298,10 +294,10 @@ module @moduleName {
             // Create computeds for display for objects
             @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO))
             {
-			@:self.@prop.JsTextPropertyName = ko.pureComputed(function()
+			@:this.@prop.JsTextPropertyName = ko.pureComputed(function()
 			@:{   // If the object exists, use the text value. Otherwise show 'None'
-				@:if (self.@(prop.JsVariable)() && self.@(prop.JsVariable)().@(prop.Object.ListTextProperty.JsVariable)()) {
-					@:return self.@(prop.JsVariable)().@(prop.Object.ListTextProperty.JsVariable)().toString();
+				@:if (self.@(prop.JsVariable)() && self.@(prop.JsVariable)()!.@(prop.Object.ListTextProperty.JsVariable)()) {
+					@:return self.@(prop.JsVariable)()!.@(prop.Object.ListTextProperty.JsVariable)()!.toString();
 				@:} else {
 					@:return "None";
 				@:}
@@ -312,8 +308,8 @@ module @moduleName {
             @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
             {
             @:// List Object model for @(prop.Name). Allows for loading subsets of data.
-            @:var _@(prop.JsVariable)List: @(listModuleName).@(prop.Object.ListViewModelClassName) = null;
-            @:self.@(prop.JsVariable)List = function(loadImmediate = true) {
+            @:var _@(prop.JsVariable)List: @(listModuleName).@(prop.Object.ListViewModelClassName);
+            @:this.@(prop.JsVariable)List = function(loadImmediate = true) {
                 @:if (!_@(prop.JsVariable)List){
                     @:_@(prop.JsVariable)List = new @(listModuleName).@(prop.Object.ListViewModelClassName)();
                     @:if (loadImmediate) load@(prop.Name)List();
@@ -339,11 +335,11 @@ module @moduleName {
 
             @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.PureType.ClassViewModel.HasDbSet))
             {
-            @:self.show@(prop.Name)Editor = function(callback: any) {
+            @:this.show@(prop.Name)Editor = function(callback: any) {
                 @:if (!self.@(prop.JsVariable)()) {
                     @:self.@(prop.JsVariable)(new @(prop.Object.ViewModelClassName)());
                 @:}
-                @:self.@(prop.JsVariable)().showEditor(callback)
+                @:self.@(prop.JsVariable)()!.showEditor(callback)
             @:};
             }
 

@@ -10,11 +10,11 @@ module ListViewModels {
         export class Default extends Coalesce.DataSource<ViewModels.Case> { }
                 
         export class AllOpenCases extends Coalesce.DataSource<ViewModels.Case> {
-            public minDate: KnockoutObservable<moment.Moment> = ko.observable(null);
+            public minDate: KnockoutObservable<moment.Moment | null> = ko.observable(null);
             public saveToDto = () => {
                 var dto: any = {};
                 if (!this.minDate()) dto.minDate = null;
-                else dto.minDate = this.minDate().format('YYYY-MM-DDTHH:mm:ssZZ');
+                else dto.minDate = this.minDate()!.format('YYYY-MM-DDTHH:mm:ssZZ');
                 return dto;
             }
         }
@@ -36,7 +36,7 @@ module ListViewModels {
             severity?:string;
             status?:string;
             devTeamAssignedId?:string;
-        } = null;
+        } | null = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -64,15 +64,15 @@ module ListViewModels {
             public result: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
             
             /** Calls server method (GetSomeCases) with the given arguments */
-            public invoke = (callback: (result: ViewModels.Case[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: ViewModels.Case[]) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.Case[]) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Case[]) => void, reload: boolean = true) => {
                 Coalesce.KnockoutUtilities.RebuildArray(this.result, data.object, 'caseKey', ViewModels.Case, this, true);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -88,15 +88,15 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (GetAllOpenCasesCount) with the given arguments */
-            public invoke = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: number) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: number) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -112,15 +112,15 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (RandomizeDatesAndStatus) with the given arguments */
-            public invoke = (callback: (result: any) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: any) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: any) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: any) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -137,11 +137,11 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (GetCaseSummary) with the given arguments */
-            public invoke = (callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: ViewModels.CaseSummary) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.CaseSummary) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.CaseSummary) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.CaseSummary(data.object));
                 } else {
@@ -149,7 +149,7 @@ module ListViewModels {
                 }
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }

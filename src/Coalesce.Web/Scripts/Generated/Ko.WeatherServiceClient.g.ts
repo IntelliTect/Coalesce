@@ -22,33 +22,33 @@ module Services {
             public readonly verb = 'POST';
             
             /** Calls server method (GetWeather) with the given arguments */
-            public invoke = (location: ViewModels.Location, dateTime: moment.Moment, callback: (result: ViewModels.WeatherData) => void = null): JQueryPromise<any> => {
+            public invoke = (location: ViewModels.Location | null, dateTime: moment.Moment | null, callback?: (result: ViewModels.WeatherData) => void): JQueryPromise<any> => {
                 return this.invokeWithData({ location: location ? location.saveToDto() : null, dateTime: dateTime ? dateTime.format() : null }, callback);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new GetWeather.Args(); 
             public static Args = class Args {
-                public location: KnockoutObservable<ViewModels.Location> = ko.observable(null);
-                public dateTime: KnockoutObservable<moment.Moment> = ko.observable(null);
+                public location: KnockoutObservable<ViewModels.Location | null> = ko.observable(null);
+                public dateTime: KnockoutObservable<moment.Moment | null> = ko.observable(null);
             };
             
             /** Calls server method (GetWeather) with an instance of GetWeather.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.WeatherData) => void = null): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.WeatherData) => void): JQueryPromise<any> => {
                 return this.invoke(args.location(), args.dateTime(), callback);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.WeatherData) => void = null): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: ViewModels.WeatherData) => void): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Date Time');
                 if ($promptVal === null) return;
                 var dateTime: moment.Moment = moment($promptVal);
-                var location: ViewModels.Location = null;
+                var location: null = null;
                 return this.invoke(location, dateTime, callback);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: ViewModels.WeatherData) => void = null) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.WeatherData) => void) => {
                 if (!this.result()) {
                     this.result(new ViewModels.WeatherData(data.object));
                 } else {

@@ -28,11 +28,11 @@ module ViewModels {
         public dataSources: typeof ListViewModels.CaseProductDataSources = ListViewModels.CaseProductDataSources;
     
 
-        public caseProductId: KnockoutObservable<number> = ko.observable(null);
-        public caseId: KnockoutObservable<number> = ko.observable(null);
-        public case: KnockoutObservable<ViewModels.Case> = ko.observable(null);
-        public productId: KnockoutObservable<number> = ko.observable(null);
-        public product: KnockoutObservable<ViewModels.Product> = ko.observable(null);
+        public caseProductId: KnockoutObservable<number | null> = ko.observable(null);
+        public caseId: KnockoutObservable<number | null> = ko.observable(null);
+        public case: KnockoutObservable<ViewModels.Case | null> = ko.observable(null);
+        public productId: KnockoutObservable<number | null> = ko.observable(null);
+        public product: KnockoutObservable<ViewModels.Product | null> = ko.observable(null);
 
        
         /** Display text for Case */
@@ -72,11 +72,11 @@ module ViewModels {
                 if (!this.case()){
                     this.case(new Case(data.case, this));
                 } else {
-                    this.case().loadFromDto(data.case);
+                    this.case()!.loadFromDto(data.case);
                 }
-                if (this.parent instanceof Case && this.parent !== this.case() && this.parent.caseKey() == this.case().caseKey())
+                if (this.parent instanceof Case && this.parent !== this.case() && this.parent.caseKey() == this.case()!.caseKey())
                 {
-                    this.parent.loadFromDto(data.case, null, false);
+                    this.parent.loadFromDto(data.case, undefined, false);
                 }
             }
             if (!data.product) { 
@@ -87,11 +87,11 @@ module ViewModels {
                 if (!this.product()){
                     this.product(new Product(data.product, this));
                 } else {
-                    this.product().loadFromDto(data.product);
+                    this.product()!.loadFromDto(data.product);
                 }
-                if (this.parent instanceof Product && this.parent !== this.product() && this.parent.productId() == this.product().productId())
+                if (this.parent instanceof Product && this.parent !== this.product() && this.parent.productId() == this.product()!.productId())
                 {
-                    this.parent.loadFromDto(data.product, null, false);
+                    this.parent.loadFromDto(data.product, undefined, false);
                 }
             }
 
@@ -114,11 +114,11 @@ module ViewModels {
             
             dto.caseId = this.caseId();
             if (!dto.caseId && this.case()) {
-                dto.caseId = this.case().caseKey();
+                dto.caseId = this.case()!.caseKey();
             }
             dto.productId = this.productId();
             if (!dto.productId && this.product()) {
-                dto.productId = this.product().productId();
+                dto.productId = this.product()!.productId();
             }
             
             return dto;
@@ -168,11 +168,6 @@ module ViewModels {
             this.warnings = ko.validation.group([
             ]);
         }
-    
-        // Computed Observable for edit URL
-        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseProductId();
-        });
 
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CaseProductList){
             super(parent);
@@ -181,18 +176,18 @@ module ViewModels {
             self.myId;
 
             // Create computeds for display for objects
-			self.caseText = ko.pureComputed(function()
+			this.caseText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.case() && self.case().title()) {
-					return self.case().title().toString();
+				if (self.case() && self.case()!.title()) {
+					return self.case()!.title()!.toString();
 				} else {
 					return "None";
 				}
 			});
-			self.productText = ko.pureComputed(function()
+			this.productText = ko.pureComputed(function()
 			{   // If the object exists, use the text value. Otherwise show 'None'
-				if (self.product() && self.product().name()) {
-					return self.product().name().toString();
+				if (self.product() && self.product()!.name()) {
+					return self.product()!.name()!.toString();
 				} else {
 					return "None";
 				}
@@ -201,17 +196,17 @@ module ViewModels {
     
 
 
-            self.showCaseEditor = function(callback: any) {
+            this.showCaseEditor = function(callback: any) {
                 if (!self.case()) {
                     self.case(new Case());
                 }
-                self.case().showEditor(callback)
+                self.case()!.showEditor(callback)
             };
-            self.showProductEditor = function(callback: any) {
+            this.showProductEditor = function(callback: any) {
                 if (!self.product()) {
                     self.product(new Product());
                 }
-                self.product().showEditor(callback)
+                self.product()!.showEditor(callback)
             };
 
             // This stuff needs to be done after everything else is set up.

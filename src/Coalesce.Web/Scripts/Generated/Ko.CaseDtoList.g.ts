@@ -29,7 +29,7 @@ module ListViewModels {
             severity?:string;
             status?:string;
             devTeamAssignedId?:string;
-        } = null;
+        } | null = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.

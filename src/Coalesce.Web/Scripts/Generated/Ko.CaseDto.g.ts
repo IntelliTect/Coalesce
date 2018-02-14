@@ -28,9 +28,9 @@ module ViewModels {
         public dataSources: typeof ListViewModels.CaseDtoDataSources = ListViewModels.CaseDtoDataSources;
     
 
-        public caseId: KnockoutObservable<number> = ko.observable(null);
-        public title: KnockoutObservable<string> = ko.observable(null);
-        public assignedToName: KnockoutObservable<string> = ko.observable(null);
+        public caseId: KnockoutObservable<number | null> = ko.observable(null);
+        public title: KnockoutObservable<string | null> = ko.observable(null);
+        public assignedToName: KnockoutObservable<string | null> = ko.observable(null);
 
        
         
@@ -95,11 +95,6 @@ module ViewModels {
             this.warnings = ko.validation.group([
             ]);
         }
-    
-        // Computed Observable for edit URL
-        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + this.caseId();
-        });
 
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.CaseDtoList){
             super(parent);

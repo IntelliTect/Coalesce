@@ -1,23 +1,29 @@
 ﻿/// <reference path="../coalesce.dependencies.d.ts" />
 
-class EnumValue {
-    id: number;
-    value: string;
-}
 
 module Coalesce {
+
+    export interface EnumValue {
+        id: number;
+        value: string;
+    }
+
     interface ComputedConfiguration<T> extends KnockoutComputed<T> {
         raw: () => T
     };
 
+    interface CoalesceConfiguration<T> {
+        [prop: string]: ComputedConfiguration<any> | any | undefined;
+    }
+
     class CoalesceConfiguration<T> {
-        protected parentConfig: CoalesceConfiguration<any>;
+        protected parentConfig?: CoalesceConfiguration<any>;
 
         constructor(parentConfig?: CoalesceConfiguration<any>) {
             this.parentConfig = parentConfig;
         }
 
-        protected prop = function <TProp>(name: string): ComputedConfiguration<TProp> {
+        protected prop = function <TProp>(this: CoalesceConfiguration<T>, name: string): ComputedConfiguration<TProp> {
             const k = "_" + name;
             const raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
@@ -162,8 +168,8 @@ module Coalesce {
 
     export interface LoadableViewModel {
         loadFromDto: (data: object) => void;
-        parent: object;
-        parentCollection: object;
+        parent: object | null;
+        parentCollection: object | null;
     }
 
     export interface ClientMethodParent {
@@ -172,7 +178,7 @@ module Coalesce {
     }
 
     export interface ApiResult {
-        wasSuccessful?: boolean;
+        wasSuccessful: boolean;
         message?: string;
     }
     export interface ItemResult<T = any> extends ApiResult {
@@ -181,10 +187,10 @@ module Coalesce {
 
     export interface ListResult extends ApiResult {
         list?: any[];
-        page?: number;
-        pageSize?: number;
-        pageCount?: number;
-        totalCount?: number;
+        page: number;
+        pageSize: number;
+        pageCount: number;
+        totalCount: number;
     }
 
     export abstract class ClientMethod<TParent extends ClientMethodParent, TResult> {
@@ -197,7 +203,7 @@ module Coalesce {
         public result: KnockoutObservable<TResult> = ko.observable<TResult>(null);
 
         /** Raw result object of method simply wrapped in an observable. */
-        public rawResult: KnockoutObservable<ItemResult> = ko.observable(null);
+        public rawResult: KnockoutObservable<ItemResult | null> = ko.observable(null);
 
         /** True while the method is being called */
         public isLoading: KnockoutObservable<boolean> = ko.observable<boolean>(false);
@@ -212,7 +218,7 @@ module Coalesce {
 
         protected abstract loadResponse: (data: ApiResult, callback?: (result: TResult) => void, reload?: boolean) => void;
 
-        protected loadStandardReponse = (data: ApiResult) => { /* Nothing, normally. Other abstract derived classes can use this for non-specific result loading. */ };
+        protected loadStandardResponse = (data: ApiResult) => { /* Nothing, normally. Other abstract derived classes can use this for non-specific result loading. */ };
 
         protected invokeWithData(postData: object, callback?: (result: TResult) => void, reload?: boolean) {
             this.isLoading(true);
@@ -234,7 +240,7 @@ module Coalesce {
                     this.rawResult(data);
                     this.message('');
                     this.wasSuccessful(true);
-                    this.loadStandardReponse(data);
+                    this.loadStandardResponse(data);
                     this.loadResponse(data, callback, reload);
                 })
                 .fail((xhr) => {
@@ -255,22 +261,23 @@ module Coalesce {
 
     export abstract class ClientListMethod<TParent extends ClientMethodParent, TResult> extends ClientMethod<TParent, TResult> {
         /** Page number. */
-        public page: KnockoutObservable<number> = ko.observable(null);
+        public page: KnockoutObservable<number | null> = ko.observable(null);
         /** Number of items on a page. */
-        public pageSize: KnockoutObservable<number> = ko.observable(null);
+        public pageSize: KnockoutObservable<number | null> = ko.observable(null);
         /** Total count of items, even ones that are not on the page. */
-        public totalCount: KnockoutObservable<number> = ko.observable(null);
+        public totalCount: KnockoutObservable<number | null> = ko.observable(null);
         /** Total page count */
-        public pageCount: KnockoutObservable<number> = ko.observable(null);
+        public pageCount: KnockoutObservable<number | null> = ko.observable(null);
 
         /** Raw result object of method simply wrapped in an observable. */
-        public rawResult: KnockoutObservable<ListResult> = ko.observable(null);
+        public rawResult: KnockoutObservable<ListResult | null> = ko.observable(null);
 
-        protected loadStandardReponse = (data: ListResult) => {
-            this.page(data.page);
-            this.pageSize(data.pageSize);
-            this.totalCount(data.totalCount);
-            this.pageCount(data.pageCount);
+        protected loadStandardResponse = (data: ApiResult) => {
+            const listResult = data as ListResult;
+            this.page(listResult.page);
+            this.pageSize(listResult.pageSize);
+            this.totalCount(listResult.totalCount);
+            this.pageCount(listResult.pageCount);
         }
     }
 
@@ -316,7 +323,7 @@ module Coalesce {
         public readonly abstract apiController: string;
     }
 
-    export abstract class BaseViewModel {
+    export abstract class BaseViewModel implements LoadableViewModel, ClientMethodParent {
 
         protected readonly abstract modelName: string;
         protected readonly abstract modelDisplayName: string;
@@ -342,7 +349,7 @@ module Coalesce {
         /**
             Properties which determine how this object behaves.
         */
-        public coalesceConfig: ViewModelConfiguration<this> = null;
+        public abstract coalesceConfig: ViewModelConfiguration<this>;
 
         /** Stack for number of times loading has been called. */
         protected loadingCount: number = 0;
@@ -373,9 +380,9 @@ module Coalesce {
         set showFailureAlerts(value) { this.coalesceConfig.showFailureAlerts(value) }
 
         /** Parent of this object, if this object was loaded as part of a hierarchy. */
-        public parent: BaseViewModel | BaseListViewModel<this> = null;
+        public parent: BaseViewModel | BaseListViewModel<this> | null;
         /** Parent of this object, if this object was loaded as part of list of objects. */
-        public parentCollection: KnockoutObservableArray<this> = null;
+        public parentCollection: KnockoutObservableArray<this> | null = null;
         /**
             Primary Key of the object.
             @deprecated Use the strongly-typed property of the key for this model whenever possible. This property will be removed once Coalesce supports composite keys.
@@ -385,7 +392,7 @@ module Coalesce {
         /** Dirty Flag. Set when a value on the model changes. Reset when the model is saved or reloaded. */
         public isDirty: KnockoutObservable<boolean> = ko.observable(false);
         /** Contains the error message from the last failed call to the server. */
-        public errorMessage: KnockoutObservable<string> = ko.observable(null);
+        public errorMessage: KnockoutObservable<string | null> = ko.observable(null);
 
         /**
             If this is true, all changes will be saved automatically.
@@ -420,7 +427,7 @@ module Coalesce {
             @returns true to bubble additional click events.
         */
         public selectSingle = (): boolean => {
-            if (this.parentCollection()) {
+            if (this.parentCollection && this.parentCollection()) {
                 $.each(this.parentCollection(), (i, obj) => {
                     obj.isSelected(false);
                 });
@@ -431,9 +438,9 @@ module Coalesce {
 
 
         /** List of errors found during validation. Any errors present will prevent saving. */
-        public errors: KnockoutValidationErrors = null;
+        public errors: KnockoutValidationErrors | null = null;
         /** List of warnings found during validation. Saving is still allowed with warnings present. */
-        public warnings: KnockoutValidationErrors = null;
+        public warnings: KnockoutValidationErrors | null = null;
 
         /** True if the object is currently saving. */
         public isSaving: KnockoutObservable<boolean> = ko.observable(false);
@@ -450,22 +457,22 @@ module Coalesce {
             Triggers any validation messages to be shown, and returns a bool that indicates if there are any validation errors.
         */
         public validate = (): boolean => {
-            if (this.errors) {
-                this.errors.showAllMessages();
-                this.warnings.showAllMessages();
-            }
+            if (this.errors) this.errors.showAllMessages();
+            if (this.warnings) this.warnings.showAllMessages();
             return this.isValid();
         };
 
         /** Setup knockout validation on this ViewModel. This is done automatically unless disabled with setupValidationAutomatically(false) */
-        public setupValidation: () => void;
+        public abstract setupValidation: () => void;
 
         /** True if the object is loading. */
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
         /**  True once the data has been loaded. */
         public isLoaded: KnockoutObservable<boolean> = ko.observable(false);
         /** URL to a stock editor for this object. */
-        public editUrl: KnockoutComputed<string>;
+        public editUrl: KnockoutComputed<string> = ko.pureComputed(() => {
+            return this.coalesceConfig.baseViewUrl() + this.viewController + "/CreateEdit?id=" + ((this as any)[this.primaryKeyName])();
+        });
 
 
         /**
@@ -562,9 +569,9 @@ module Coalesce {
 
 
         /** Loads the object from the server based on the id specified. If no id is specified, the current id is used if one is set. */
-        public load = (id?: any, callback?: (self: this) => void): JQueryPromise<any> | undefined => {
+        public load = (id?: any, callback?: ((self: this) => void) | null): JQueryPromise<any> | undefined => {
             if (!id) {
-                id = this[this.primaryKeyName as keyof this]();
+                id = ((this as any)[this.primaryKeyName])();
             }
             if (id) {
                 this.isLoading(true);
@@ -598,7 +605,7 @@ module Coalesce {
 
         /** Deletes the object without any prompt for confirmation. */
         public deleteItem = (callback?: (self: this) => void): JQueryPromise<any> | undefined => {
-            var currentId = this[this.primaryKeyName as keyof this]();
+            var currentId = ((this as any)[this.primaryKeyName])();
             if (currentId) {
                 return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })
                     .done((data: ItemResult) => {
@@ -670,22 +677,22 @@ module Coalesce {
             foreignId: any
         ): JQueryPromise<any> | boolean | undefined => {
 
-            var currentId = this[this.primaryKeyName as keyof this]();
+            var currentId = ((this as any)[this.primaryKeyName])();
 
             if (operation == 'added') {
                 var newItem = new constructor();
                 newItem.parent = this;
                 newItem.parentCollection = existingItems;
                 newItem.coalesceConfig.autoSaveEnabled(false);
-                newItem[localIdProp](currentId);
-                newItem[foreignIdProp](foreignId);
+                (newItem[localIdProp] as any)(currentId);
+                (newItem[foreignIdProp] as any)(foreignId);
                 return newItem.save(() => {
                     // Restore default autosave behavior.
                     newItem.coalesceConfig.autoSaveEnabled(null);
                     existingItems.push(newItem);
                 });
             } else if (operation == 'deleted') {
-                var matchedItems = existingItems().filter(i => i[localIdProp]() === currentId && i[foreignIdProp]() === foreignId);
+                var matchedItems = existingItems().filter((i: any) => i[localIdProp]() === currentId && i[foreignIdProp]() === foreignId);
                 if (matchedItems.length == 0) {
                     throw `Couldn't find a ${constructor.toString()} object to delete with ${localIdProp}=${currentId} & ${foreignIdProp}=${foreignId}.`
                 } else {
@@ -803,8 +810,8 @@ module Coalesce {
             }
         }
 
-        constructor(parent: Coalesce.BaseViewModel | Coalesce.BaseListViewModel<any>) {
-            this.parent = parent;
+        constructor(parent?: Coalesce.BaseViewModel | Coalesce.BaseListViewModel<any> | null) {
+            this.parent = parent || null;
 
             // Handles setting the parent savingChildChange
             this.isSaving.subscribe((newValue: boolean) => {
@@ -815,7 +822,7 @@ module Coalesce {
         }
     }
 
-    export abstract class BaseListViewModel<TItem extends BaseViewModel> {
+    export abstract class BaseListViewModel<TItem extends BaseViewModel> implements ClientMethodParent {
 
         public readonly abstract modelName: string;
         public readonly abstract apiController: string;
@@ -841,7 +848,7 @@ module Coalesce {
         /**
             Properties which determine how this object behaves.
         */
-        public abstract coalesceConfig: ListViewModelConfiguration<this, TItem> = null;
+        public abstract coalesceConfig: ListViewModelConfiguration<this, TItem>;
 
         /**
             Query string to append to the API call when loading the list of items.
@@ -882,16 +889,17 @@ module Coalesce {
                 xhrFields: { withCredentials: true }
             })
                 .done((data: ListResult) => {
+                    const list = data.list || [];
 
-                    Coalesce.KnockoutUtilities.RebuildArray(this.items, data.list, this.modelKeyName, this.itemClass, this, true);
+                    Coalesce.KnockoutUtilities.RebuildArray(this.items, list, this.modelKeyName, this.itemClass, this, true);
                     $.each(this.items(), (_, model) => {
                         model.includes = this.includes;
                     });
-                    this.count(data.list.length);
+                    this.count(list.length);
                     this.totalCount(data.totalCount);
                     this.pageCount(data.pageCount);
                     this.page(data.page);
-                    this.message(data.message);
+                    this.message(typeof(data.message) == "string" ? data.message : null);
                     this.isLoaded(true);
                     if (typeof(callback) == "function") callback(this);
                 })
@@ -959,7 +967,7 @@ module Coalesce {
         };
 
         /** Deletes an item. */
-        public deleteItem = (item: TItem): JQueryPromise<any> => {
+        public deleteItem = (item: TItem): JQueryPromise<any> | undefined => {
             return item.deleteItem();
         };
 
@@ -978,8 +986,8 @@ module Coalesce {
                 xhrFields: { withCredentials: true }
             })
                 .done((data: ItemResult<number>) => {
-                    this.count(data.object);
-                    this.message(data.message);
+                    this.count(data.object || 0);
+                    this.message(typeof(data.message) == "string" ? data.message : null);
                     if (typeof(callback) == "function") callback();
                 })
                 .fail((xhr) => {
@@ -996,22 +1004,22 @@ module Coalesce {
         };
 
         /** The result of getCount() or the total on this page. */
-        public count: KnockoutObservable<number> = ko.observable(null);
+        public count: KnockoutObservable<number | null> = ko.observable(null);
         /** Total count of items, even ones that are not on the page. */
-        public totalCount: KnockoutObservable<number> = ko.observable(null);
+        public totalCount: KnockoutObservable<number | null> = ko.observable(null);
         /** Total page count */
-        public pageCount: KnockoutObservable<number> = ko.observable(null);
+        public pageCount: KnockoutObservable<number | null> = ko.observable(null);
         /** Page number. This can be set to get a new page. */
         public page: KnockoutObservable<number> = ko.observable(1);
         /** Number of items on a page. */
         public pageSize: KnockoutObservable<number> = ko.observable(10);
         /** If a load failed, this is a message about why it failed. */
-        public message: KnockoutObservable<string> = ko.observable(null);
+        public message: KnockoutObservable<string | null> = ko.observable(null);
         /** Search criteria for the list. This can be exposed as a text box for searching. */
         public search: KnockoutObservable<string> = ko.observable("");
 
         /** True if there is another page after the current page. */
-        public nextPageEnabled: KnockoutComputed<boolean> = ko.computed(() => this.page() < this.pageCount());
+        public nextPageEnabled: KnockoutComputed<boolean> = ko.computed(() => this.page() < (this.pageCount() || 0));
 
         /** True if there is another page before the current page. */
         public previousPageEnabled: KnockoutComputed<boolean> = ko.computed(() => this.page() > 1);

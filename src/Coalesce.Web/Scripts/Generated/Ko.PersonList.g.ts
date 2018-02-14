@@ -37,7 +37,7 @@ module ListViewModels {
             lastBath?:string;
             nextUpgrade?:string;
             companyId?:string;
-        } = null;
+        } | null = null;
     
         /** 
             The namespace containing all possible values of this.dataSource.
@@ -65,25 +65,25 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (Add) with the given arguments */
-            public invoke = (numberOne: number, numberTwo: number, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (numberOne: number | null, numberTwo: number | null, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ numberOne: numberOne, numberTwo: numberTwo }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new Add.Args(); 
             public static Args = class Args {
-                public numberOne: KnockoutObservable<number> = ko.observable(null);
-                public numberTwo: KnockoutObservable<number> = ko.observable(null);
+                public numberOne: KnockoutObservable<number | null> = ko.observable(null);
+                public numberTwo: KnockoutObservable<number | null> = ko.observable(null);
             };
             
             /** Calls server method (Add) with an instance of Add.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.numberOne(), args.numberTwo(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Number One');
                 if ($promptVal === null) return;
                 var numberOne: number = parseInt($promptVal);
@@ -93,11 +93,11 @@ module ListViewModels {
                 return this.invoke(numberOne, numberTwo, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: number) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: number) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -114,15 +114,15 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (GetUser) with the given arguments */
-            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -138,35 +138,35 @@ module ListViewModels {
             public readonly verb = 'GET';
             
             /** Calls server method (PersonCount) with the given arguments */
-            public invoke = (lastNameStartsWith: string, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (lastNameStartsWith: string | null, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ lastNameStartsWith: lastNameStartsWith }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new PersonCount.Args(); 
             public static Args = class Args {
-                public lastNameStartsWith: KnockoutObservable<string> = ko.observable(null);
+                public lastNameStartsWith: KnockoutObservable<string | null> = ko.observable(null);
             };
             
             /** Calls server method (PersonCount) with an instance of PersonCount.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.lastNameStartsWith(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: number) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Last Name Starts With');
                 if ($promptVal === null) return;
                 var lastNameStartsWith: string = $promptVal;
                 return this.invoke(lastNameStartsWith, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: number) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: number) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -182,35 +182,35 @@ module ListViewModels {
             public readonly verb = 'DELETE';
             
             /** Calls server method (RemovePersonById) with the given arguments */
-            public invoke = (id: number, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (id: number | null, callback?: (result: boolean) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: id }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new RemovePersonById.Args(); 
             public static Args = class Args {
-                public id: KnockoutObservable<number> = ko.observable(null);
+                public id: KnockoutObservable<number | null> = ko.observable(null);
             };
             
             /** Calls server method (RemovePersonById) with an instance of RemovePersonById.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: boolean) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.id(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: boolean) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: boolean) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Id');
                 if ($promptVal === null) return;
                 var id: number = parseInt($promptVal);
                 return this.invoke(id, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: boolean) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: boolean) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -227,15 +227,15 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (GetUserPublic) with the given arguments */
-            public invoke = (callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -253,35 +253,35 @@ module ListViewModels {
             public result: KnockoutObservableArray<string> = ko.observableArray([]);
             
             /** Calls server method (NamesStartingWith) with the given arguments */
-            public invoke = (characters: string, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (characters: string | null, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ characters: characters }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new NamesStartingWith.Args(); 
             public static Args = class Args {
-                public characters: KnockoutObservable<string> = ko.observable(null);
+                public characters: KnockoutObservable<string | null> = ko.observable(null);
             };
             
             /** Calls server method (NamesStartingWith) with an instance of NamesStartingWith.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.characters(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: string[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Characters');
                 if ($promptVal === null) return;
                 var characters: string = $promptVal;
                 return this.invoke(characters, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback: (result: string[]) => void = null, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string[]) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }
@@ -299,37 +299,37 @@ module ListViewModels {
             public result: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
             
             /** Calls server method (SearchPeople) with the given arguments */
-            public invoke = (criteria: ViewModels.PersonCriteria, page: number, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (criteria: ViewModels.PersonCriteria | null, page: number | null, callback?: (result: ViewModels.Person[]) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ criteria: criteria ? criteria.saveToDto() : null, page: page }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new SearchPeople.Args(); 
             public static Args = class Args {
-                public criteria: KnockoutObservable<ViewModels.PersonCriteria> = ko.observable(null);
-                public page: KnockoutObservable<number> = ko.observable(null);
+                public criteria: KnockoutObservable<ViewModels.PersonCriteria | null> = ko.observable(null);
+                public page: KnockoutObservable<number | null> = ko.observable(null);
             };
             
             /** Calls server method (SearchPeople) with an instance of SearchPeople.Args, or the value of this.args if not specified. */
-            public invokeWithArgs = (args = this.args, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person[]) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.criteria(), args.page(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
-            public invokeWithPrompts = (callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true): JQueryPromise<any> => {
-                var $promptVal: string = null;
+            public invokeWithPrompts = (callback?: (result: ViewModels.Person[]) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
                 $promptVal = prompt('Page');
                 if ($promptVal === null) return;
                 var page: number = parseInt($promptVal);
-                var criteria: ViewModels.PersonCriteria = null;
+                var criteria: null = null;
                 return this.invoke(criteria, page, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ListResult, callback: (result: ViewModels.Person[]) => void = null, reload: boolean = true) => {
-                Coalesce.KnockoutUtilities.RebuildArray(this.result, data.list, 'personId', ViewModels.Person, this, true);
+            protected loadResponse = (data: Coalesce.ListResult, callback?: (result: ViewModels.Person[]) => void, reload: boolean = true) => {
+                Coalesce.KnockoutUtilities.RebuildArray(this.result, data.list || [], 'personId', ViewModels.Person, this, true);
                 if (reload) {
                     var result = this.result();
-                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : null);
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
                 } else if (typeof(callback) == 'function') {
                     callback(this.result());
                 }

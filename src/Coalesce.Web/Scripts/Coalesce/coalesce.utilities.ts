@@ -11,8 +11,8 @@ module Coalesce {
         var busyDepth = 0;
         var _isBusyEnabled = true;
 
-        export function getClassName(object: any) {
-            if (typeof object !== 'object') return null;
+        export function getClassName(object: any): string {
+            if (typeof object !== 'object') throw "Target of getClassName must be an object";
             var funcNameRegex = /function (.{1,})\(/;
             var results = (funcNameRegex).exec(object.constructor.toString());
             return (results && results.length > 1) ? results[1] : "";
@@ -55,21 +55,8 @@ module Coalesce {
             //busyOverlayFailureTimeout = setTimeout(busyFailed, busyOverlayFailureTimeoutInSeconds * 1000);
         }
 
-        // Load a Web API JSON object as a script. This returns the object that the URL returns.
-        // It runs synchronously.
-        export function loadAsScript(url: string): string {
-            var result;
-            $.ajax(url, {
-                type: "GET",
-                async: false
-            }).done(function (data) {
-                result = data;
-            });
-            return result;
-        };
-
         // Get a URL parameter by name.
-        export function GetUrlParameter(sParam: string): string {
+        export function GetUrlParameter(sParam: string): string | null {
             var sPageUrl = window.location.search.substring(1);
             var sUrlVariables = sPageUrl.split('&');
             for (var i = 0; i < sUrlVariables.length; i++) {
@@ -116,17 +103,8 @@ module Coalesce {
 
         export function lowerFirstLetter(string: string) {
             if (string) return string.charAt(0).toLowerCase() + string.slice(1);
-            else return string;
+            else return string; 
         }
-
-        export function warning(question: string, callback: (() => void), myThis: any): (() => void) {
-            return function () {
-                if (confirm(question)) {
-                    callback.bind(myThis || this)();
-                }
-            }
-        }
-        
 
         // Saves the values of inputs into the DOM element.
         // This is used to serialize the DOM for storage with the values.

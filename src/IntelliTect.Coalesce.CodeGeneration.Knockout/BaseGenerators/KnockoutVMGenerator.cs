@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             string reloadArg = !isService ? ", reload" : "";
             string reloadParam = !isService ? ", reload: boolean = true" : "";
-            string callbackAndReloadParam = $"callback: (result: {method.ResultType.TsType}) => void = null{reloadParam}";
+            string callbackAndReloadParam = $"callback?: (result: {method.ResultType.TsType}) => void{reloadParam}";
 
             // Default instance of the method class.
             b.Line();
@@ -69,7 +69,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
 
             string parameters = "";
-            parameters = string.Join(", ", method.ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
+            parameters = string.Join(", ", method.ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name) + " | null"));
             if (!string.IsNullOrWhiteSpace(parameters)) parameters = parameters + ", ";
             parameters = parameters + callbackAndReloadParam;
 
@@ -90,7 +90,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 using (b.Block("public static Args = class Args", ';'))
                     foreach (var arg in method.ClientParameters)
                     {
-                        b.Line($@"public {arg.JsVariable}: {arg.Type.TsKnockoutType()} = {arg.Type.ObservableConstructorCall()};");
+                        b.Line($@"public {arg.JsVariable}: {arg.Type.TsKnockoutType(true)} = {arg.Type.ObservableConstructorCall()};");
                     }
 
                 b.Line();
@@ -104,9 +104,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
                 b.Line();
                 b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
-                using (b.Block($"public invokeWithPrompts = ({callbackAndReloadParam}): JQueryPromise<any> =>", ';'))
+                using (b.Block($"public invokeWithPrompts = ({callbackAndReloadParam}): JQueryPromise<any> | undefined =>", ';'))
                 {
-                    b.Line($"var $promptVal: string = null;");
+                    b.Line($"var $promptVal: string | null = null;");
                     foreach (var param in method.ClientParameters.Where(f => f.ConvertsFromJsString))
                     {
                         b.Line($"$promptVal = {$"prompt('{param.Name.ToProperCase()}')"};");
@@ -119,7 +119,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     // pass null as the value. I guess we just let happen what's going to happen? Again, not sure when this case would ever be hit.
                     foreach (var param in method.ClientParameters.Where(f => !f.ConvertsFromJsString))
                     {
-                        b.Line($"var {param.Name}: {param.Type.TsType} = null;");
+                        b.Line($"var {param.Name}: null = null;");
                     }
                     b.Line($"return this.invoke({method.JsArguments("", true)}{reloadArg});");
                 }
@@ -130,7 +130,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             using (b.Block($"protected loadResponse = (data: Coalesce.{(returnIsListResult ? "List" : "Item")}Result, {callbackAndReloadParam}) =>", ';'))
             {
                 var incomingMainData = returnIsListResult
-                    ? "data.list"
+                    ? "data.list || []"
                     : "data.object";
 
                 if (method.ResultType.IsCollection && method.ResultType.PureType.HasClassViewModel)
@@ -184,7 +184,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     // Only after that's done do we call the method-completion callback.
                     // Store the result locally in case it somehow gets changed by us reloading the parent.
                     b.Indented("var result = this.result();");
-                    b.Indented($"this.parent.load({(ParentLoadHasIdParameter ? "null, " : "")}typeof(callback) == 'function' ? () => callback(result) : null);");
+                    b.Indented($"this.parent.load({(ParentLoadHasIdParameter ? "null, " : "")}typeof(callback) == 'function' ? () => callback(result) : undefined);");
                     b.Line("} else if (typeof(callback) == 'function') {");
                     // If we're not reloading, just call the callback now.
                     b.Indented("callback(this.result());");
@@ -238,7 +238,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     if (prop.Type.IsDate)
                     {
                         b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
-                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}().format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
+                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
                     }
                     else if (prop.IsForeignKey)
                     {
@@ -248,7 +248,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                             // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact.
                             using (b.Block($"if (!dto.{prop.JsonName} && this.{prop.IdPropertyObjectProperty.JsVariable}())"))
                             {
-                                b.Line($"dto.{prop.JsonName} = this.{prop.IdPropertyObjectProperty.JsVariable}().{prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable}();");
+                                b.Line($"dto.{prop.JsonName} = this.{prop.IdPropertyObjectProperty.JsVariable}()!.{prop.IdPropertyObjectProperty.Object.PrimaryKey.JsVariable}();");
                             }
                         }
                     }

@@ -93,6 +93,7 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.PersonId = (PersonId ?? entity.PersonId);
             entity.Title = (Title ?? entity.Title);
             entity.FirstName = FirstName;
             entity.LastName = LastName;

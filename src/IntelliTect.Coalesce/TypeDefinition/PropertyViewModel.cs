@@ -136,9 +136,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsReadOnly => !IsClientWritable && HasGetter;
 
         /// <summary>
+        /// True if the property can be sent from the client to the server.
+        /// This includes normal writable properties, as well as primary keys.
+        /// </summary>
+        public bool IsClientSerializable => (IsClientWritable || IsPrimaryKey) && HasSetter && !IsPOCO && !Type.IsCollection;
+
+        /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool IsClientWritable => HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
+        public bool IsClientWritable => !IsInternalUse && HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
         
         /// <summary>
         /// True if the property has the DateType(DateOnly) Attribute.
@@ -742,35 +748,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public (string conditional, string setter)? DtoToObjPropertySetter()
         {
-            if (IgnorePropertyInUpdates)
+            var newValue = Name;
+            if (!Type.IsNullable && Type.CsDefaultValue != "null")
             {
-                return null;
+                newValue = $"({newValue} ?? entity.{Name})";
+            }
+            var setter = $"entity.{Name} = {newValue};";
+
+            var statement = GetPropertySetterConditional(true);
+            if (!string.IsNullOrWhiteSpace(statement))
+            {
+                return (statement, setter);
             }
             else
             {
-                var newValue = Name;
-                if (!Type.IsNullable && Type.CsDefaultValue != "null")
-                {
-                    newValue = $"({newValue} ?? entity.{Name})";
-                }
-                var setter = $"entity.{Name} = {newValue};";
-
-                var statement = GetPropertySetterConditional(true);
-                if (!string.IsNullOrWhiteSpace(statement))
-                {
-                    return (statement, setter);
-                }
-                else
-                {
-                    return (null, setter);
-                }
+                return (null, setter);
             }
         }
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
-
-        private bool IgnorePropertyInUpdates =>
-            IsReadOnly || IsPOCO || IsManytoManyCollection || Type.IsCollection || IsInternalUse;
     }
 }

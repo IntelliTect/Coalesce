@@ -1,4 +1,6 @@
-﻿namespace IntelliTect.Coalesce.Models
+﻿using System;
+
+namespace IntelliTect.Coalesce.Models
 {
     public class ValidationIssue
     {
@@ -7,8 +9,8 @@
 
         public ValidationIssue(string property, string issue)
         {
-            Property = property;
-            Issue = issue;
+            Property = property ?? throw new ArgumentNullException(nameof(property));
+            Issue = issue ?? throw new ArgumentNullException(nameof(issue));
         }
     }
 }

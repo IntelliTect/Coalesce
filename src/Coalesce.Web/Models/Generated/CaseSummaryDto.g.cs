@@ -47,6 +47,7 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.CaseSummaryId = (CaseSummaryId ?? entity.CaseSummaryId);
             entity.OpenCases = (OpenCases ?? entity.OpenCases);
             entity.CaseCount = (CaseCount ?? entity.CaseCount);
             entity.CloseCases = (CloseCases ?? entity.CloseCases);

@@ -181,8 +181,15 @@ module Coalesce {
         wasSuccessful: boolean;
         message?: string;
     }
+
+    export interface ValidationIssue {
+        property: string;
+        issue: string;
+    }
+
     export interface ItemResult<T = any> extends ApiResult {
         object?: T;
+        validationIssues?: ValidationIssue[];
     }
 
     export interface ListResult extends ApiResult {

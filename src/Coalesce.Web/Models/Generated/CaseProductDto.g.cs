@@ -51,6 +51,7 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.CaseProductId = (CaseProductId ?? entity.CaseProductId);
             entity.CaseId = (CaseId ?? entity.CaseId);
             entity.ProductId = (ProductId ?? entity.ProductId);
         }

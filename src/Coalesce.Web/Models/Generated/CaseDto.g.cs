@@ -87,6 +87,7 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.CaseKey = (CaseKey ?? entity.CaseKey);
             entity.Title = Title;
             entity.Description = Description;
             entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);

@@ -84,7 +84,7 @@ namespace @(namespaceName)
             if (OnUpdate(entity, context)) return;
 
             @foreach (var conditionGroup in model.ClientProperties
-            .Where(p => p.IsClientWritable)
+            .Where(p => p.IsClientSerializable)
             .Select(p => p.DtoToObjPropertySetter())
             .Where(p => p != null)
             .GroupBy(s => s.Value.conditional))

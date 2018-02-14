@@ -68,6 +68,7 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.CompanyId = (CompanyId ?? entity.CompanyId);
             entity.Name = Name;
             entity.Address1 = Address1;
             entity.Address2 = Address2;

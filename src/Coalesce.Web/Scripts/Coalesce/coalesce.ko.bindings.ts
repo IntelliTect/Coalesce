@@ -51,7 +51,8 @@ ko.bindingHandlers.select2Ajax = {
 
         // Create the Select2
         $(element)
-            .select2({
+            .select2(<Select2Options>{
+                theme: Coalesce.GlobalConfiguration.app.select2Theme() || undefined,
                 ajax: {
                     url: url,
                     dataType: 'json',
@@ -289,7 +290,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
 
         // Create the Select2
         $(element)
-            .select2({
+            .select2(<Select2Options>{
+                theme: Coalesce.GlobalConfiguration.app.select2Theme() || undefined,
                 ajax: {
                     url: url,
                     dataType: 'json',
@@ -463,7 +465,8 @@ ko.bindingHandlers.select2AjaxText = {
 
         // Create the Select2
         $(element)
-            .select2({
+            .select2(<Select2Options>{
+                theme: Coalesce.GlobalConfiguration.app.select2Theme() || undefined,
                 ajax: {
                     url: url,
                     dataType: 'json',
@@ -584,7 +587,8 @@ ko.bindingHandlers.select2 = {
 
         // Create the Select2
         $(element)
-            .select2({
+            .select2(<Select2Options>{
+                theme: Coalesce.GlobalConfiguration.app.select2Theme() || undefined,
                 placeholder: placeholder,
                 allowClear: allowClear,
                 selectOnClose: selectOnClose,

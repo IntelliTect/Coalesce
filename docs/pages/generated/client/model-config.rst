@@ -15,29 +15,32 @@ The configuration system has four levels where configuration can be performed, s
 
 Root Configuration
     | :ts:`Coalesce.GlobalConfiguration`
+    | :ts:`Coalesce.GlobalConfiguration.app`
     |
     
-    The root configuration contains all configuration properties which apply to both :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel`.
+    The root configuration contains all configuration properties which apply to class category (:ref:`TypeScriptViewModel`, :ref:`TypeScriptListViewModel`, and :ref:`Services`). The :ts:`app` property contains global app configuration that exists independent of any models. Then, for each class kind, the following are available:
 
 Root ViewModel/ListViewModel Configuration
     | :ts:`Coalesce.GlobalConfiguration.viewModel`
     | :ts:`Coalesce.GlobalConfiguration.listViewModel`
+    | :ts:`Coalesce.GlobalConfiguration.serviceClient`
     |
     
-    An additional two root configuration objects exist, one for :ref:`TypeScriptViewModel` and one for :ref:`TypeScriptListViewModel`. These configuration objects govern behavior that applies to either only ViewModels or only ListViewModels. Root configuration *can* be overridden using these objects, although the practicality of doing so is dubious.
+    Additional root configuration objects exist, one for each class kind. These configuration objects govern behavior that applies to only objects of these types. Root configuration *can* be overridden using these objects, although the practicality of doing so is dubious.
 
 Class Configuration
     | :ts:`ViewModels.<ClassName>.coalesceConfig`
     | :ts:`ListViewModels.<ClassName>List.coalesceConfig`
+    | :ts:`Services.<ServiceName>Client.coalesceConfig`
     | 
 
-    Each generated class - both :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel` - has a static property named :ts:`coalesceConfig` that controls behavior for all instances of that class.
+    Each class kind has a static property named :ts:`coalesceConfig` that controls behavior for all instances of that class.
 
 Instance Configuration
     | :ts:`instance.coalesceConfig`
     |
 
-    Each instance of a :ref:`TypeScriptViewModel` or :ref:`TypeScriptListViewModel` also has a :ts:`coalesceConfig` property that controls behaviors for that instance only.
+    Each instance of these classes also has a :ts:`coalesceConfig` property that controls behaviors for that instance only.
 
 
 
@@ -61,7 +64,7 @@ The following configuration properties are available. Their default values are a
 Root Configuration
 ~~~~~~~~~~~~~~~~~~
 
-These properties are available to both ViewModelConfiguration and ListViewModelConfiguration.
+These properties on :ts:`Coalesce.GlobalConfiguration` are available to both ViewModelConfiguration, ListViewModelConfiguration, and ServiceClientConfiguration.
 
 baseApiUrl - :ts:`"/api"`
     The relative url where the API may be found. 
@@ -80,6 +83,16 @@ onStartBusy - :ts:`obj => Coalesce.Utilities.showBusy()`
 
 onFinishBusy - :ts:`obj => Coalesce.Utilities.hideBusy()`
     A callback to be called when an AJAX request completes.
+
+
+App Configuration
+~~~~~~~~~~~~~~~~~
+
+These properties on :ts:`Coalesce.GlobalConfiguration.app` are not hierarchical - they govern the entire Coalesce application:
+
+select2Theme - :ts:`null`
+    The theme parameter to select2's constructor when called by Coalesce's select2 :ref:`KnockoutBindings`.
+
 
 ViewModelConfiguration
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -117,3 +130,8 @@ ListViewModelConfiguration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     No special configuration is currently available for ListViewModels.
+
+ServiceClientConfiguration
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    No special configuration is currently available for ServiceClients.

@@ -12,18 +12,18 @@ module Coalesce {
         raw: () => T
     };
 
-    interface CoalesceConfiguration<T> {
+    interface CoalesceConfiguration {
         [prop: string]: ComputedConfiguration<any> | any | undefined;
     }
 
-    class CoalesceConfiguration<T> {
-        protected parentConfig?: CoalesceConfiguration<any>;
+    class CoalesceConfiguration {
+        protected parentConfig?: CoalesceConfiguration;
 
-        constructor(parentConfig?: CoalesceConfiguration<any>) {
+        constructor(parentConfig?: CoalesceConfiguration) {
             this.parentConfig = parentConfig;
         }
 
-        protected prop = function <TProp>(this: CoalesceConfiguration<T>, name: string): ComputedConfiguration<TProp> {
+        protected prop = function <TProp>(this: CoalesceConfiguration, name: string): ComputedConfiguration<TProp> {
             const k = "_" + name;
             const raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
@@ -45,6 +45,15 @@ module Coalesce {
             return computed;
         }
 
+        /**
+            Gets the underlying observable that stores the object's explicit configuration value.
+        */
+        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
+            return (this as any)["_" + name];
+        }
+    }
+
+    class ModelConfiguration<T> extends CoalesceConfiguration {
         /** The relative url where the API may be found. */
         public baseApiUrl = this.prop<string>("baseApiUrl");
         /** The relative url where the generated views may be found. */
@@ -58,16 +67,9 @@ module Coalesce {
         public onStartBusy = this.prop<(object: T) => void>("onStartBusy");
         /** A callback to be called when an AJAX request completes. */
         public onFinishBusy = this.prop<(object: T) => void>("onFinishBusy");
-
-        /**
-            Gets the underlying observable that stores the object's explicit configuration value.
-        */
-        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
-            return (this as any)["_" + name];
-        }
     }
 
-    export class ViewModelConfiguration<T extends BaseViewModel> extends CoalesceConfiguration<T> {
+    export class ViewModelConfiguration<T extends BaseViewModel> extends ModelConfiguration<T> {
         /** Time to wait after a change is seen before auto-saving (if autoSaveEnabled is true). Acts as a debouncing timer for multiple simultaneous changes. */
         public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
 
@@ -82,7 +84,7 @@ module Coalesce {
 
         /** Whether or not to reload the ViewModel with the state of the object received from the server after a call to .save(). */
         public loadResponseFromSaves = this.prop<boolean>("loadResponseFromSaves");
-        
+
         /**
             Whether or not to reload the ViewModel with the state of the object recieved from the server after a call to .deleteItem().
             This only applies to delete calls which respond with an object, which can be done through the model's behaviors.
@@ -123,13 +125,23 @@ module Coalesce {
         public initialDataSource = this.prop<DataSource<T> | (new () => DataSource<T>)>("initialDataSource");
     }
 
-    export class ListViewModelConfiguration<T extends BaseListViewModel<TItem>, TItem extends BaseViewModel> extends CoalesceConfiguration<T> {
+    export class ListViewModelConfiguration<T extends BaseListViewModel<TItem>, TItem extends BaseViewModel> extends ModelConfiguration<T> {
     }
 
-    export class ServiceClientConfiguration<T extends ServiceClient> extends CoalesceConfiguration<T> {
+    export class ServiceClientConfiguration<T extends ServiceClient> extends ModelConfiguration<T> {
     }
 
-    class RootConfig extends CoalesceConfiguration<any> {
+    export class AppConfiguration extends CoalesceConfiguration {
+
+        /**
+            A theme to specify on select2 instances created by Coalesce's select2-based bindings.
+        */
+        public select2Theme = this.prop<string | null>("select2Theme");
+    }
+
+    class RootConfig extends ModelConfiguration<any> {
+        /** Application-wide configuration that does not pertain to any models. */
+        public readonly app = new AppConfiguration();
         public readonly viewModel = new ViewModelConfiguration<BaseViewModel>(this);
         public readonly listViewModel = new ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>(this);
         public readonly serviceClient = new ServiceClientConfiguration<ServiceClient>(this);
@@ -140,6 +152,8 @@ module Coalesce {
     invalidProp.raw = invalidProp;
 
     export const GlobalConfiguration = new RootConfig();
+    GlobalConfiguration.app.select2Theme(null);
+
     GlobalConfiguration.baseApiUrl("/api");
     GlobalConfiguration.baseViewUrl("");
     GlobalConfiguration.showFailureAlerts(true);
@@ -173,7 +187,7 @@ module Coalesce {
     }
 
     export interface ClientMethodParent {
-        coalesceConfig: CoalesceConfiguration<this>;
+        coalesceConfig: ModelConfiguration<this>;
         apiController: string;
     }
 

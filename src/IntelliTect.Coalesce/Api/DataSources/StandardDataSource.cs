@@ -210,7 +210,7 @@ namespace IntelliTect.Coalesce
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(item =>
                     {
-                        try { return Convert.ChangeType(item, prop.Type.TypeInfo); }
+                        try { return Convert.ChangeType(item, prop.Type.NullableUnderlyingType.TypeInfo); }
                         catch { return null; }
                     })
                     .Where(item => item != null)

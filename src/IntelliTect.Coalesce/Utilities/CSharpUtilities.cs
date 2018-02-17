@@ -51,6 +51,11 @@ namespace IntelliTect.Coalesce.Utilities
                 return value.ToString();
             }
 
+            if (type.IsBool)
+            {
+                return Convert.ToBoolean(value).ToString().ToLower();
+            }
+
             // Require explicit handling for any additional types.
             // This prevents us from accidentaly converting a value incorrectly that we're not aware of how to handle.
             throw new InvalidOperationException($"Coalesce currently doesn't know how to express value {value} of type {type} as a C# literal.");

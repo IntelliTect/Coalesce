@@ -28,6 +28,12 @@ namespace Coalesce.Domain
         [ListText]
         public string AltName => Name + ": " + City;
 
+        [Coalesce]
+        public static ICollection<Company> GetCertainItems(AppDbContext db, bool isDeleted = false)
+        {
+            return db.Companies.Where(f => f.IsDeleted == isDeleted).ToList();
+        }
+
         public class DefaultSource : StandardDataSource<Company, AppDbContext>
         {
             public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }

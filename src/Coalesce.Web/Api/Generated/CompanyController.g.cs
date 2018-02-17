@@ -119,5 +119,20 @@ namespace Coalesce.Web.Api
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
 
         // Methods from data class exposed through API Controller.
+
+        /// <summary>
+        /// Method: GetCertainItems
+        /// </summary>
+        [HttpPost("GetCertainItems")]
+        [Authorize]
+        public virtual ItemResult<ICollection<CompanyDtoGen>> GetCertainItems(bool isDeleted = false)
+        {
+            IncludeTree includeTree = null;
+            var methodResult = Coalesce.Domain.Company.GetCertainItems(Db, isDeleted);
+            var result = new ItemResult<ICollection<CompanyDtoGen>>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, mappingContext, includeTree)).ToList();
+            return result;
+        }
     }
 }

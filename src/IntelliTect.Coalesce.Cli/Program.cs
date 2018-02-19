@@ -1,7 +1,7 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,8 +14,17 @@ using System.Runtime.Versioning;
 
 namespace IntelliTect.Coalesce.Cli
 {
+    [HelpOption]
     public class Program
     {
+        [Option(CommandOptionType.NoValue, Description = "Wait for a debugger to be attached before starting generation", LongName = "debug", ShortName = "d")]
+        public string Debug { get; }
+
+        [Argument(0, "config", Description = "coalesce.json configuration file that will drive generation." )]
+        public string ConfigFile { get;  }
+
+        [Option(ShortName = "v", LongName = "verbosity", Description = "Output verbosity. Options are Trace, Debug, Information, Warning, Error, Critical, None." )]
+        public LogLevel LogLevel { get; }
 
         public static void Main(string[] args)
         {
@@ -96,6 +105,9 @@ namespace IntelliTect.Coalesce.Cli
                 Environment.Exit(-1);
             }
         }
+
+
+
 
         private static void WaitForDebugger()
         {

@@ -13,7 +13,8 @@ module Coalesce {
 
         export function getClassName(object: any): string {
             if (typeof object !== 'object') throw "Target of getClassName must be an object";
-            var funcNameRegex = /function (.{1,})\(/;
+            // This matches both pre-es2015 constructors and es2015 class ctor tostring() results.
+            var funcNameRegex = /^(?:function|class) ([^\s\(\)]+)/;
             var results = (funcNameRegex).exec(object.constructor.toString());
             return (results && results.length > 1) ? results[1] : "";
         };

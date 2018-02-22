@@ -268,8 +268,9 @@ module @moduleName {
                 callback();
             }
         };
-        
-        public setupValidation = (): void => {
+
+        @* Deliberately not an arrow function to permit proper overrides for partial classes *@
+        public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
             @foreach (PropertyViewModel prop in model.ClientProperties.Where(p => !p.ClientValidationAllowSave && !string.IsNullOrWhiteSpace(p.ClientValidationKnockoutJs())))

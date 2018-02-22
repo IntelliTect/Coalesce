@@ -240,8 +240,8 @@ module ViewModels {
                 callback();
             }
         };
-        
-        public setupValidation = (): void => {
+
+        public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
                 this.title.extend({ required: {params: true, message: "You must enter a title for the case."} }),

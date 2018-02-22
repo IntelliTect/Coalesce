@@ -1,4 +1,4 @@
-import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/metadata' 
+import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' 
 
 const domain: Domain = { types: {}, enums: {} }
 export default domain
@@ -302,6 +302,12 @@ export const Company = domain.types.Company = {
       type: "string",
       role: "value",
     },
+    isDeleted: {
+      name: "isDeleted",
+      displayName: "Is Deleted",
+      type: "boolean",
+      role: "value",
+    },
     employees: {
       name: "employees",
       displayName: "Employees",
@@ -442,7 +448,7 @@ export const PersonCriteria = domain.types.PersonCriteria = {
 export const PersonStats = domain.types.PersonStats = {
   name: "personStats",
   displayName: "Person Stats",
-  // get displayProp() { return this.props.name }, 
+  get displayProp() { return this.props.name }, 
   type: "object",
   props: {
     height: {

@@ -51,8 +51,9 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.CaseId = (CaseId ?? 0);
-            entity.ProductId = (ProductId ?? 0);
+            entity.CaseProductId = (CaseProductId ?? entity.CaseProductId);
+            entity.CaseId = (CaseId ?? entity.CaseId);
+            entity.ProductId = (ProductId ?? entity.ProductId);
         }
 
     }

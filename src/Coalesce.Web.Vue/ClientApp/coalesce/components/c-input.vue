@@ -1,7 +1,7 @@
 <template>
   <v-text-field v-if="propMeta.type === 'string' || propMeta.type === 'number'" 
     v-model="item[propMeta.name]" 
-    :label="propMeta.displayName"  color="red" 
+    :label="propMeta.displayName" 
     :type="propMeta.type">
   </v-text-field>
 
@@ -21,6 +21,13 @@
     :prop="prop"
   >
   </c-select>
+  
+  <c-datetime-picker
+    v-else-if="propMeta.type === 'date' "
+    v-model="item[propMeta.name]"
+    :label="propMeta.displayName"
+  >
+  </c-datetime-picker>
 
   <div v-else-if="propMeta.type === 'collection' " @click="collectionEdit = true"> 
     <div role="combobox" class="input-group input-group--dirty input-group--text-field input-group--select input-group--multiple">
@@ -97,6 +104,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from './c-metadata-component'
 import CSelect from './c-select.vue'
 import CDisplay from './c-display';
+import CDatetimePicker from './c-datetime-picker.vue';
 
 //@ts-ignore
 import { VTextField } from 'vuetify/es5/components/VTextField';
@@ -104,11 +112,12 @@ import { VTextField } from 'vuetify/es5/components/VTextField';
 @Component({
   name: 'c-input',
   components: {
-    CSelect, CDisplay
+    CSelect, CDisplay, CDatetimePicker
   }
 })
 export default class extends MetadataComponent {
   collectionEdit = false;
+  dateMenu = false;
 }
 
 </script>

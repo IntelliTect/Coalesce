@@ -3,20 +3,19 @@ export type PrimitiveType = "string" | "number"  | "boolean"
 export type ValueType = PrimitiveType | "date" | "enum"
 export type SimpleType = PrimitiveType | "date"
 export type ObjectType = "model" | "object"
-export type CustomTypeKind = "model" | "object" | "enum"
 export type NonCollectionType = ValueType | ObjectType
 export type TypeDiscriminator = NonCollectionType | "collection"
 
 export type Role = "value" | "primaryKey" | "foreignKey" | "referenceNavigation" | "collectionNavigation"
 
 export interface IHaveMetadata {
-    readonly $metadata: ModelType
+    readonly $metadata: ClassType
 }
 
 export interface Domain {
     // models: { [modelName: string]: ModelMetadata },
     // externalTypes: { [modelName: string]: ExternalTypeMetadata },
-    types: { [modelName: string]: ModelType | ExternalType }
+    types: { [modelName: string]: ClassType }
     enums: { [modelName: string]: EnumType },
 }
 
@@ -80,16 +79,9 @@ export interface EnumType<TEnum=any> extends Metadata {
 }
 
 
-
-export type CustomType = 
-  ExternalType 
-| ModelType 
-| EnumType
-
+export type ClassType = ExternalType | ModelType 
+export type CustomType = ClassType | EnumType
 export type CollectableType = CustomType | SimpleType
-
-
-
 
 
 interface PropMetaBase extends Metadata {
@@ -127,11 +119,43 @@ export type Property =
 | ModelProperty
 | CollectionProperty
 
-
-
-
-
 export interface Method extends Metadata  {
     readonly params: Property[]
 }
 
+
+
+
+
+
+
+
+
+
+export function hydrateMetadata(object: {[k: string]: any}, metadata: ClassType): IHaveMetadata
+{
+    const hydrated = Object.assign(object, { $metadata: metadata });
+    
+    for (const propName in metadata.props) {
+        const propMeta = metadata.props[propName];
+        const propVal = hydrated[propName];
+        if (propVal !== undefined && typeof(propVal) == "object") {
+            switch (propMeta.type) {
+                case "model":
+                case "object":
+                    hydrateMetadata(propVal, propMeta.typeDef)
+                    break;
+                case "collection":
+                    const typeDef = propMeta.typeDef;
+                    if (Array.isArray(propVal) 
+                        && typeof(typeDef) == 'object' 
+                        && (typeDef.type == "model" || typeDef.type == "object"))
+                    {
+                        propVal.forEach((item: any) => hydrateMetadata(item, typeDef));
+                    }
+                    break;
+            }
+        }
+    }
+    return object as IHaveMetadata;
+}

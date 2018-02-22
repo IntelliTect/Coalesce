@@ -59,8 +59,8 @@
   
   import * as moment from 'moment';
   import { Vue, Component, Watch } from 'vue-property-decorator';
-  import CDisplay from '../coalesce/c-display';
-  import CInput from '../coalesce/c-input.vue';
+  import { CDisplay, CInput } from '../coalesce/components';
+  import { hydrateMetadata } from '../coalesce'
   import * as $metadata from '../model.g';
 
   @Component({
@@ -114,13 +114,9 @@
       fetch(`http://localhost:11202/api/Person/List?page=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}&search=${this.search}&orderBy=${this.pagination.descending ? '' : this.pagination.sortBy}&orderByDescending=${this.pagination.descending ? this.pagination.sortBy : ''}`)
         .then(response => response.json())
         .then(resp => {
-          this.items = resp.list.map((i: any) => {
-            Object.assign(i, {$metadata: $metadata.Person})
-            Object.assign(i.company, {$metadata: $metadata.Company})
-            for (let item of i.casesAssigned) item.$metadata = $metadata.Case;
-            for (let item of i.casesReported) item.$metadata = $metadata.Case;
-            return i;
-          });
+          const list = resp.list;
+          list.forEach((i: any) => hydrateMetadata(i, $metadata.Person));
+          this.items = list;
           this.pagination.page = resp.page;
           this.pagination.rowsPerPage = resp.pageSize;
           this.count = resp.totalCount;

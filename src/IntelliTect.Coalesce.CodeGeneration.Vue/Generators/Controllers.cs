@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
+﻿using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
+using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
@@ -35,7 +36,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     if (model.WillCreateApiController)
                     {
-                        yield return Generator<ApiController>()
+                        yield return Generator<ModelApiController>()
                             .WithModel(model)
                             .WithDbContext(context.ClassViewModel)
                             .AppendOutputPath($"Api/Generated/{model.Name}Controller.g.cs");

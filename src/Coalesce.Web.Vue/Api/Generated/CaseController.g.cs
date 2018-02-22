@@ -49,19 +49,10 @@ namespace Coalesce.Web.Vue.Api
 
         [HttpGet("count")]
         [AllowAnonymous]
-        public virtual Task<int> Count(
+        public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
-
-
-        [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual Task<ItemResult> Delete(
-            int id,
-            IBehaviors<Coalesce.Domain.Case> behaviors,
-            IDataSource<Coalesce.Domain.Case> dataSource)
-            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]
@@ -72,6 +63,15 @@ namespace Coalesce.Web.Vue.Api
             IDataSource<Coalesce.Domain.Case> dataSource,
             IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+
+        [HttpPost("delete/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<CaseDtoGen>> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.Case> behaviors,
+            IDataSource<Coalesce.Domain.Case> dataSource)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of CaseDtoGen
@@ -125,15 +125,13 @@ namespace Coalesce.Web.Vue.Api
         /// </summary>
         [HttpPost("GetSomeCases")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
+        public virtual ItemResult<ICollection<CaseDtoGen>> GetSomeCases()
         {
-            var result = new ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>>();
-
             IncludeTree includeTree = null;
             var methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
+            var result = new ItemResult<ICollection<CaseDtoGen>>();
             var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, (methodResult as IQueryable)?.GetIncludeTree() ?? includeTree)).ToList();
-
+            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, includeTree)).ToList();
             return result;
         }
 
@@ -144,11 +142,9 @@ namespace Coalesce.Web.Vue.Api
         [Authorize]
         public virtual ItemResult<int> GetAllOpenCasesCount()
         {
-            var result = new ItemResult<int>();
-
             var methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
+            var result = new ItemResult<int>();
             result.Object = methodResult;
-
             return result;
         }
 
@@ -157,14 +153,10 @@ namespace Coalesce.Web.Vue.Api
         /// </summary>
         [HttpPost("RandomizeDatesAndStatus")]
         [Authorize]
-        public virtual ItemResult<object> RandomizeDatesAndStatus()
+        public virtual ItemResult RandomizeDatesAndStatus()
         {
-            var result = new ItemResult<object>();
-
-            object methodResult = null;
             Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
-            result.Object = methodResult;
-
+            var result = new ItemResult();
             return result;
         }
 
@@ -175,13 +167,11 @@ namespace Coalesce.Web.Vue.Api
         [Authorize]
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
-            var result = new ItemResult<CaseSummaryDtoGen>();
-
             IncludeTree includeTree = null;
             var methodResult = Coalesce.Domain.Case.GetCaseSummary(Db);
+            var result = new ItemResult<CaseSummaryDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(methodResult, mappingContext, includeTree);
-
             return result;
         }
     }

@@ -41,6 +41,7 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.DevTeamId = (DevTeamId ?? entity.DevTeamId);
             entity.Name = Name;
         }
 

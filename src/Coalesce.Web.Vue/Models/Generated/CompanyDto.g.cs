@@ -22,6 +22,7 @@ namespace Coalesce.Web.Vue.Models
         public string City { get; set; }
         public string State { get; set; }
         public string ZipCode { get; set; }
+        public bool? IsDeleted { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.PersonDtoGen> Employees { get; set; }
         public string AltName { get; set; }
 
@@ -42,6 +43,7 @@ namespace Coalesce.Web.Vue.Models
             this.City = obj.City;
             this.State = obj.State;
             this.ZipCode = obj.ZipCode;
+            this.IsDeleted = obj.IsDeleted;
             this.AltName = obj.AltName;
             var propValEmployees = obj.Employees;
             if (propValEmployees != null && (tree == null || tree[nameof(this.Employees)] != null))
@@ -66,12 +68,14 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
+            entity.CompanyId = (CompanyId ?? entity.CompanyId);
             entity.Name = Name;
             entity.Address1 = Address1;
             entity.Address2 = Address2;
             entity.City = City;
             entity.State = State;
             entity.ZipCode = ZipCode;
+            entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
         }
 
     }

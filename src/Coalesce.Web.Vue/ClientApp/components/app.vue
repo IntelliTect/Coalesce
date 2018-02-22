@@ -44,11 +44,10 @@
 <script lang="ts">
   import Vue from 'vue';
   import { Component } from 'vue-property-decorator';
-  import MenuComponent from './navmenu.vue';
 
   @Component({
     components: {
-      MenuComponent
+      
     }
   })
   export default class AppComponent extends Vue {

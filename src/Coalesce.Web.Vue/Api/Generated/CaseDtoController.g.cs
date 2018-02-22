@@ -49,19 +49,10 @@ namespace Coalesce.Web.Vue.Api
 
         [HttpGet("count")]
         [Authorize]
-        public virtual Task<int> Count(
+        public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
-
-
-        [HttpPost("delete/{id}")]
-        [Authorize]
-        public virtual Task<ItemResult> Delete(
-            int id,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
-            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
 
         [HttpPost("save")]
@@ -72,6 +63,15 @@ namespace Coalesce.Web.Vue.Api
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+
+        [HttpPost("delete/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Delete(
+            int id,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
         /// <summary>
         /// Downloads CSV of Coalesce.Domain.CaseDto

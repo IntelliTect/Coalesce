@@ -99,7 +99,7 @@ namespace IntelliTect.Coalesce.Cli
                     break;
                 }
 
-                if (i % 10 == 0) Console.WriteLine($"Waiting {i}...");
+                Console.WriteLine($"Waiting {i}...");
                 Thread.Sleep(1000 * waitStep);
             }
         }

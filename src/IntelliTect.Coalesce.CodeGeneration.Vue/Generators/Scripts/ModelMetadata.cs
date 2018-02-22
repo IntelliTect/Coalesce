@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder();
 
-            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/metadata' ");
+            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
             // Assigning each property as a member of domain ensures we don't break type contracts.
             // Exporting each model individually lets us access the full structure of the model from other ts files

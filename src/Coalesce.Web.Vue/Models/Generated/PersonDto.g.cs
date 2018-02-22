@@ -93,15 +93,16 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.Title = (Title ?? 0);
+            entity.PersonId = (PersonId ?? entity.PersonId);
+            entity.Title = (Title ?? entity.Title);
             entity.FirstName = FirstName;
             entity.LastName = LastName;
             entity.Email = Email;
-            entity.Gender = (Gender ?? 0);
+            entity.Gender = (Gender ?? entity.Gender);
             entity.BirthDate = BirthDate;
             entity.LastBath = LastBath;
             entity.NextUpgrade = NextUpgrade;
-            entity.CompanyId = (CompanyId ?? 0);
+            entity.CompanyId = (CompanyId ?? entity.CompanyId);
         }
 
     }

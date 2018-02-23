@@ -40,6 +40,7 @@ export const Person = domain.types.Person = {
   displayName: "Person",
   get displayProp() { return this.props.name }, 
   type: "model",
+  controllerRoute: "Person",
   get keyProp() { return this.props.personId }, 
   props: {
     personId: {
@@ -149,6 +150,7 @@ export const Case = domain.types.Case = {
   displayName: "Case",
   get displayProp() { return this.props.title }, 
   type: "model",
+  controllerRoute: "Case",
   get keyProp() { return this.props.caseKey }, 
   props: {
     caseKey: {
@@ -258,6 +260,7 @@ export const Company = domain.types.Company = {
   displayName: "Company",
   get displayProp() { return this.props.altName }, 
   type: "model",
+  controllerRoute: "Company",
   get keyProp() { return this.props.companyId }, 
   props: {
     companyId: {
@@ -330,6 +333,7 @@ export const Product = domain.types.Product = {
   displayName: "Product",
   get displayProp() { return this.props.name }, 
   type: "model",
+  controllerRoute: "Product",
   get keyProp() { return this.props.productId }, 
   props: {
     productId: {
@@ -352,6 +356,7 @@ export const CaseProduct = domain.types.CaseProduct = {
   displayName: "Case Product",
   get displayProp() { return this.props.caseProductId }, 
   type: "model",
+  controllerRoute: "CaseProduct",
   get keyProp() { return this.props.caseProductId }, 
   props: {
     caseProductId: {
@@ -396,6 +401,7 @@ export const CaseDto = domain.types.CaseDto = {
   displayName: "Case Dto",
   get displayProp() { return this.props.caseId }, 
   type: "model",
+  controllerRoute: "CaseDto",
   get keyProp() { return this.props.caseId }, 
   props: {
     caseId: {

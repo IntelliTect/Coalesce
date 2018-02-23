@@ -13,6 +13,7 @@
     :label="label"
     :value="displayedValue"
     @change="textInputChanged"
+    append-icon="date_range"
   ></v-text-field>
   <v-tabs ref="tabs" v-model="selectedTab" grow icons >
     <v-tab key="date">

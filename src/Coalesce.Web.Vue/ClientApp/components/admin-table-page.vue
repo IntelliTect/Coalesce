@@ -19,7 +19,7 @@
               <v-icon left >cancel</v-icon>
               Cancel
             </v-btn>
-            <v-btn flat color="primary">
+            <v-btn flat color="primary" @click="save">
               <v-icon left >save</v-icon>
               Save 
             </v-btn>
@@ -60,7 +60,7 @@
   import * as moment from 'moment';
   import { Vue, Component, Watch } from 'vue-property-decorator';
   import { CDisplay, CInput } from '../coalesce/components';
-  import { hydrateMetadata } from '../coalesce'
+  import { ApiClient, IHaveMetadata, hydrateMetadata } from '../coalesce'
   import * as $metadata from '../model.g';
 
   @Component({
@@ -71,7 +71,7 @@
   })
   export default class extends Vue {
     metadata = $metadata.Person
-    person = null;
+    person: IHaveMetadata | null = null;
 
     selected: any[] = [{name: "Steve"}];
     loading= false;
@@ -79,13 +79,16 @@
     ddSearch = "";
     @Watch('ddSearch')
     queryDropdownItems() {
-      this.loading= true;
-      fetch(`http://localhost:11202/api/Person/List?pageSize=500&search=${this.ddSearch}`)
-        .then(response => response.json())
-        .then(resp => {
-          this.inputItems = resp.list;
-          this.loading = false;
-        });
+      this.loading = true;
+        new ApiClient($metadata.Person)
+          .list({
+            pageSize: 500,
+            search: this.ddSearch
+          })
+          .then(res => {
+            this.inputItems = res.data.list || []
+            this.loading = false;
+          })
     }
 
     isLoading: boolean = false;
@@ -111,18 +114,33 @@
     @Watch('pagination')
     getData() {
       this.isLoading = true;
-      fetch(`http://localhost:11202/api/Person/List?page=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}&search=${this.search}&orderBy=${this.pagination.descending ? '' : this.pagination.sortBy}&orderByDescending=${this.pagination.descending ? this.pagination.sortBy : ''}`)
-        .then(response => response.json())
-        .then(resp => {
-          const list = resp.list;
+
+      new ApiClient($metadata.Person)
+        .list({
+          page: this.pagination.page,
+          pageSize: this.pagination.rowsPerPage,
+          search: this.search,
+          orderBy: this.pagination.descending ? undefined : this.pagination.sortBy,
+          orderByDescending: this.pagination.descending ? this.pagination.sortBy : undefined,
+        })
+        .then(res => {
+          const listResult = res.data;
+          const list = listResult.list;
+          this.isLoading = false;
+          if (!list) return;
+
           list.forEach((i: any) => hydrateMetadata(i, $metadata.Person));
           this.items = list;
-          this.pagination.page = resp.page;
-          this.pagination.rowsPerPage = resp.pageSize;
-          this.count = resp.totalCount;
-          this.isLoading = false;
+          this.pagination.page = listResult.page;
+          this.pagination.rowsPerPage = listResult.pageSize;
+          this.count = listResult.totalCount;
           this.person = this.items[0];
-        });
+        })
+    }
+
+    save() {
+      if (this.person)
+       new ApiClient($metadata.Person).save(this.person)
     }
 
     mounted() {
@@ -131,7 +149,7 @@
 
     
 
-    items = [];
+    items: IHaveMetadata[] = [];
   }
 </script>
 

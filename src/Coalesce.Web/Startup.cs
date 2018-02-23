@@ -80,6 +80,14 @@ namespace Coalesce.Web
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
 
+
+            app.UseCors(b => b
+                .WithOrigins("http://localhost:28421", "http://localhost:64122")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+            );
+
             // Add the platform handler to the request pipeline.
             app.UseStaticFiles();
 
@@ -88,11 +96,6 @@ namespace Coalesce.Web
             // *** DEMO ONLY ***
             app.UseAuthentication();
             app.UseMiddleware<DemoMiddleware>();
-
-            app.UseCors(b => b
-                .WithOrigins("http://localhost:28421")
-                .AllowCredentials()
-            );
 
             app.UseMvc(routes =>
             {

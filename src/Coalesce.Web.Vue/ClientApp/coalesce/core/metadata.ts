@@ -44,6 +44,8 @@ export interface ModelType extends CustomReferenceTypeBase {
 
     // The primary key property.
     readonly keyProp: Property
+
+    readonly controllerRoute: string;
 }
 
 export interface EnumValue<TEnum> {
@@ -130,17 +132,27 @@ export interface Method extends Metadata  {
 
 
 
+import * as moment from 'moment';
 
+export function hydrateMetadata(object: {[k: string]: any}, metadata: ClassType): IHaveMetadata {
+    if (!object) return object;
 
-export function hydrateMetadata(object: {[k: string]: any}, metadata: ClassType): IHaveMetadata
-{
     const hydrated = Object.assign(object, { $metadata: metadata });
     
     for (const propName in metadata.props) {
         const propMeta = metadata.props[propName];
         const propVal = hydrated[propName];
-        if (propVal !== undefined && typeof(propVal) == "object") {
+        if (propVal !== undefined) {
             switch (propMeta.type) {
+                case "date":
+                    // TODO: does hydrating dates into moments really belong here?    
+                    if (!propVal) break;    
+                    var momentInstance = moment(propVal);
+                    if (!momentInstance.isValid()) {
+                        throw `Recieved unparsable date ${propVal}`;
+                    }
+                    hydrated[propName] = momentInstance;    
+                    break;    
                 case "model":
                 case "object":
                     hydrateMetadata(propVal, propMeta.typeDef)
@@ -158,4 +170,32 @@ export function hydrateMetadata(object: {[k: string]: any}, metadata: ClassType)
         }
     }
     return object as IHaveMetadata;
+}
+
+export function mapToDto<T extends IHaveMetadata & { [k: string]: any }>(object: T): any {
+    var dto: { [k: string]: any } = {};
+    for (const propName in object.$metadata.props) {
+        const propMeta = object.$metadata.props[propName];
+
+        var value = object[propName];
+        switch (propMeta.type) {
+            case "date":
+                if (moment.isMoment(value)) {
+                    value = value.toISOString(); // TODO: pass keepOffset property for DateTimeOffset, and not DateTime.
+                } else if (value) {
+                    value = value.toString();
+                }
+            case "string":
+            case "number":
+            case "boolean":
+            case "enum":
+                value = value || null;    
+                break;
+            default:
+                value = undefined;
+        }
+
+        dto[propName] = value;
+    }
+    return dto;
 }

@@ -41,6 +41,7 @@
   import CDisplay from './c-display';
   import MetadataComponent from './c-metadata-component'
   import { ModelProperty } from '../core';
+import { ApiClient } from '../index';
 
   @Component({
     name: 'c-select',
@@ -72,15 +73,10 @@
       if (propMeta.type != "model") 
         throw `Property ${propMeta.name} must be a model property to use c-select.`
 
-      // TODO: this url is obviously totally a hack.
-      fetch(`http://localhost:11202/api/${propMeta.name}/List?pageSize=500&search=${this.search || ''}`, {
-        credentials: 'include'  
-      })
-        .then(response => response.json())
+      new ApiClient(propMeta.typeDef)
+        .list({pageSize: 500, search: this.search || undefined})
         .then(resp => {
-          this.items = resp.list.map((i: any) => {
-            return Object.assign(i, {$metadata: propMeta.typeDef})
-          });
+          this.items = resp.data.list || [];
           this.loading = false;
         });
     }

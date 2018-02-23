@@ -36,7 +36,7 @@
         <div class="input-group__selections" style="overflow: hidden;">
           <c-display :item="item" :prop="propMeta" ></c-display>
         </div>
-        <v-icon>mode_edit</v-icon>
+        <v-icon class="pr-1">more_horiz</v-icon>
       </div>
       <div class="input-group__details">
       <!---->

@@ -61,6 +61,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     WriteCommon(model);
                     b.StringProp("type", "model");
+                    b.StringProp("controllerRoute", model.ApiRouteControllerPart);
                     b.Line($"get keyProp() {{ return this.props.{model.PrimaryKey.JsVariable} }}, ");
 
                     WriteProps(model, b);

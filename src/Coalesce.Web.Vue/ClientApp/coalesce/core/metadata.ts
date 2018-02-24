@@ -48,36 +48,35 @@ export interface ModelType extends CustomReferenceTypeBase {
     readonly controllerRoute: string;
 }
 
-export interface EnumValue<TEnum> {
-    readonly strValue: keyof TEnum
+export interface EnumValue {
+    readonly strValue: string
     readonly displayName: string
     readonly value: number
 }
 
-export type EnumValues<TEnum> = 
-  { [strValue in keyof TEnum]: EnumValue<TEnum> } 
-& { [n: number]: EnumValue<TEnum> | undefined } 
-& object
+export type EnumValues<K extends string> = 
+  { [strValue in K]: EnumValue } 
+& { [n: number]: EnumValue | undefined } 
 
-export function getEnumMeta<TEnum=any>(values: EnumValue<TEnum>[]): {
-    readonly valueLookup: EnumValues<TEnum>,
-    readonly values: EnumValue<TEnum>[]
+export function getEnumMeta<K extends string>(values: EnumValue[]): {
+    readonly valueLookup: EnumValues<K>,
+    readonly values: EnumValue[]
 } {
     return {
         valueLookup: {
             ...values.reduce((obj, v) => Object.assign(obj, {
                 [v.strValue]: v, 
                 [v.value]: v
-            } as EnumValues<TEnum>), {} as any)
+            } as EnumValues<K>), {} as any)
         }, 
         values: values
     }
 }
-export interface EnumType<TEnum=any> extends Metadata {
+export interface EnumType<K extends string = string> extends Metadata {
     readonly type: "enum"
     // readonly enum: TEnum // TODO: does this belong here? Not sure. See the metadata generator for more thoughts.
-    readonly valueLookup: EnumValues<TEnum>
-    readonly values: EnumValue<TEnum>[]
+    readonly valueLookup: EnumValues<K>
+    readonly values: EnumValue[]
 }
 
 

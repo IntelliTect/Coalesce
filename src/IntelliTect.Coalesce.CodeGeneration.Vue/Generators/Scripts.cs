@@ -21,9 +21,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            yield return Generator<ModelMetadata>()
+            yield return Generator<TsMetadata>()
                 .WithModel(Model)
-                .AppendOutputPath("model.g.ts");
+                .AppendOutputPath("metadata.g.ts");
+
+            yield return Generator<TsModels>()
+                .WithModel(Model)
+                .AppendOutputPath("models.g.ts");
 
             //var dynamicGenerators = GetDynamicGenerators().ToList();
             //foreach (var gen in dynamicGenerators)

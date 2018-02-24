@@ -61,7 +61,8 @@
   import { Vue, Component, Watch } from 'vue-property-decorator';
   import { CDisplay, CInput } from '../coalesce/components';
   import { ApiClient, IHaveMetadata, hydrateMetadata } from '../coalesce'
-  import * as $metadata from '../model.g';
+  import * as metadata from '../metadata.g';
+  import * as models from '../models.g';
 
   @Component({
     name: 'admin-table-page',
@@ -70,26 +71,8 @@
     }
   })
   export default class extends Vue {
-    metadata = $metadata.Person
-    person: IHaveMetadata | null = null;
-
-    selected: any[] = [{name: "Steve"}];
-    loading= false;
-    inputItems = this.selected.slice();
-    ddSearch = "";
-    @Watch('ddSearch')
-    queryDropdownItems() {
-      this.loading = true;
-        new ApiClient($metadata.Person)
-          .list({
-            pageSize: 500,
-            search: this.ddSearch
-          })
-          .then(res => {
-            this.inputItems = res.data.list || []
-            this.loading = false;
-          })
-    }
+    metadata = metadata.Person
+    person: models.Person | null = null;
 
     isLoading: boolean = false;
 
@@ -105,7 +88,7 @@
     previousPage(){}
 
     get showProps() { return Object
-      .values($metadata.Person.props)
+      .values(metadata.Person.props)
       .filter(p => p.role != "primaryKey" && p.role != "foreignKey"); 
     };
 
@@ -115,7 +98,7 @@
     getData() {
       this.isLoading = true;
 
-      new ApiClient($metadata.Person)
+      new ApiClient<models.Person>(metadata.Person)
         .list({
           page: this.pagination.page,
           pageSize: this.pagination.rowsPerPage,
@@ -129,18 +112,18 @@
           this.isLoading = false;
           if (!list) return;
 
-          list.forEach((i: any) => hydrateMetadata(i, $metadata.Person));
+          list.forEach((i: any) => hydrateMetadata(i, metadata.Person));
           this.items = list;
           this.pagination.page = listResult.page;
           this.pagination.rowsPerPage = listResult.pageSize;
           this.count = listResult.totalCount;
-          this.person = this.items[0];
+          this.person = list[0];
         })
     }
 
     save() {
       if (this.person)
-       new ApiClient($metadata.Person).save(this.person)
+        new ApiClient<models.Person>(metadata.Person).save(this.person)
     }
 
     mounted() {

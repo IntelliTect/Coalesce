@@ -62,60 +62,60 @@
   })
   export default class extends Vue {
 
-  @Prop({required: false})
-  public value?: moment.Moment | null ;
+    @Prop({required: false})
+    public value?: moment.Moment | null ;
 
-  @Prop({type: String})
-  public label?: string;
+    @Prop({type: String})
+    public label?: string;
 
-  @Prop({default: 'L LT', type: String}) 
-  public dateFormat?: string;
+    @Prop({default: 'L LT', type: String}) 
+    public dateFormat?: string;
 
-  get displayedValue() {
-    return this.value && this.value.format(this.dateFormat) || ''
-  }
-
-  
-  textInputChanged(val: string) {
-    var value = moment(val, this.dateFormat)
-    if (!value || !value.isValid()){
-      value = moment(this.value || undefined)
+    get displayedValue() {
+      return this.value && this.value.format(this.dateFormat) || ''
     }
-    this.$emit('input', value)
-  }
 
-  timeChanged(val: string) {
-    var value = moment(this.value || undefined)
+    
+    textInputChanged(val: string) {
+      var value = moment(val, this.dateFormat)
+      if (!value || !value.isValid()){
+        value = moment(this.value || undefined)
+      }
+      this.$emit('input', value)
+    }
 
-    var parts = /(\d\d):(\d\d)/.exec(val);
-    if (!parts) throw `Time set by vuetify timepicker not in expected format: ${val}`
+    timeChanged(val: string) {
+      var value = moment(this.value || undefined)
 
-    value.set({
-    'hour': parseInt(parts[1]),
-    'minute': parseInt(parts[2]),
-    });
-    this.$emit('input', value)
-  }
+      var parts = /(\d\d):(\d\d)/.exec(val);
+      if (!parts) throw `Time set by vuetify timepicker not in expected format: ${val}`
 
-  dateChanged(val: string) {
-    var value = moment(this.value || undefined)
+      value.set({
+      'hour': parseInt(parts[1]),
+      'minute': parseInt(parts[2]),
+      });
+      this.$emit('input', value)
+    }
 
-    var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
-    if (!parts) throw `Date set by vuetify datepicker not in expected format: ${val}`
+    dateChanged(val: string) {
+      var value = moment(this.value || undefined)
 
-    value.set({
-    'year': parseInt(parts[1]),
-    'month': parseInt(parts[2]) - 1,
-    'date': parseInt(parts[3])
-    });
-    this.$emit('input', value)
-  }
+      var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
+      if (!parts) throw `Date set by vuetify datepicker not in expected format: ${val}`
 
-  menu = false
-  selectedTab: "date" | "time" | null = null; // = "date"
+      value.set({
+      'year': parseInt(parts[1]),
+      'month': parseInt(parts[2]) - 1,
+      'date': parseInt(parts[3])
+      });
+      this.$emit('input', value)
+    }
 
-  get datePart() { return this.value && this.value.format("YYYY-MM-DD") || null }
-  get timePart() { return this.value && this.value.format("HH:mm") || null }
+    menu = false
+    selectedTab: "date" | "time" | null = null; // = "date"
+
+    get datePart() { return this.value && this.value.format("YYYY-MM-DD") || null }
+    get timePart() { return this.value && this.value.format("HH:mm") || null }
   }
 </script>
 

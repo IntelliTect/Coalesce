@@ -29,7 +29,7 @@
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.1",
     "ts-loader": "^3.3.1",
-    "typescript": "^2.6.2",
+    "typescript": "^2.8.0-dev.20180223",
     "url-loader": "^0.6.2",
     "vue-class-component": "^6.1.2",
     "vue-loader": "^13.7.0",

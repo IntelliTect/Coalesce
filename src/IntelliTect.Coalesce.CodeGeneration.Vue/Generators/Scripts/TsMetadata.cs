@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 {
-    public class ModelMetadata : StringBuilderFileGenerator<ReflectionRepository>
+    public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
     {
-        public ModelMetadata(GeneratorServices services) : base(services)
+        public TsMetadata(GeneratorServices services) : base(services)
         {
         }
 
@@ -18,11 +18,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
+
             // Assigning each property as a member of domain ensures we don't break type contracts.
-            // Exporting each model individually lets us access the full structure of the model from other ts files
+            // Exporting each model individually offers easier usage in imports.
             b.Line("const domain: Domain = { types: {}, enums: {} }");
-            //b.Line("const domain: Domain = { models: {}, externalTypes: {}, enums: {} }");
-            b.Line("export default domain");
 
 
             void WriteCommon(ClassViewModel model)
@@ -43,8 +42,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.StringProp("name", model.Name.ToCamelCase());
                     b.StringProp("displayName", model.DisplayName);
                     b.StringProp("type", "enum");
-                    
-                    b.Line("...getEnumMeta([");
+
+                    // TODO: This type here is a bit of a hack. Eventually we should emit a real typescript enum somewhere.
+                    string enumShape = string.Join("|", model.EnumValues.Select(ev => $"\"{ev.Value}\""));
+                    b.Line($"...getEnumMeta<{enumShape}>([");
                     foreach (var value in model.EnumValues)
                     {
                         // TODO: allow for localization of displayName
@@ -82,6 +83,30 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     WriteProps(model, b);
                 }
             }
+
+            // Create an enhanced Domain definition for deep intellisense.
+            b.Line();
+            using (b.Block("interface AppDomain extends Domain"))
+            {
+                using (b.Block("enums:"))
+                {
+                    foreach (var model in Model.ClientEnums)
+                    {
+                        b.Line($"{model.Name}: typeof {model.Name}");
+                    }
+                }
+                using (b.Block("types:"))
+                {
+                    foreach (var model in Model.ClientClasses)
+                    {
+                        b.Line($"{model.ViewModelClassName}: typeof {model.ViewModelClassName}");
+                    }
+                }
+            }
+            
+            b.Line();
+            b.Line("export default domain as AppDomain");
+
 
             return Task.FromResult(b.ToString());
         }

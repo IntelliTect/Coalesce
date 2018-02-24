@@ -1,12 +1,11 @@
 import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' 
 
 const domain: Domain = { types: {}, enums: {} }
-export default domain
 export const Titles = domain.enums.Titles = {
   name: "titles",
   displayName: "Titles",
   type: "enum",
-  ...getEnumMeta([
+  ...getEnumMeta<"Mr"|"Ms"|"Mrs"|"Miss">([
     { value: 0, strValue: 'Mr', displayName: 'Mr' },
     { value: 1, strValue: 'Ms', displayName: 'Ms' },
     { value: 2, strValue: 'Mrs', displayName: 'Mrs' },
@@ -17,7 +16,7 @@ export const Genders = domain.enums.Genders = {
   name: "genders",
   displayName: "Genders",
   type: "enum",
-  ...getEnumMeta([
+  ...getEnumMeta<"NonSpecified"|"Male"|"Female">([
     { value: 0, strValue: 'NonSpecified', displayName: 'NonSpecified' },
     { value: 1, strValue: 'Male', displayName: 'Male' },
     { value: 2, strValue: 'Female', displayName: 'Female' },
@@ -27,7 +26,7 @@ export const Statuses = domain.enums.Statuses = {
   name: "statuses",
   displayName: "Statuses",
   type: "enum",
-  ...getEnumMeta([
+  ...getEnumMeta<"Open"|"InProgress"|"Resolved"|"ClosedNoSolution"|"Cancelled">([
     { value: 0, strValue: 'Open', displayName: 'Open' },
     { value: 1, strValue: 'InProgress', displayName: 'InProgress' },
     { value: 2, strValue: 'Resolved', displayName: 'Resolved' },
@@ -586,3 +585,27 @@ export const Location = domain.types.Location = {
     },
   },
 }
+
+interface AppDomain extends Domain {
+  enums: {
+    Titles: typeof Titles
+    Genders: typeof Genders
+    Statuses: typeof Statuses
+  }
+  types: {
+    Person: typeof Person
+    Case: typeof Case
+    Company: typeof Company
+    Product: typeof Product
+    CaseProduct: typeof CaseProduct
+    CaseDto: typeof CaseDto
+    PersonCriteria: typeof PersonCriteria
+    PersonStats: typeof PersonStats
+    CaseSummary: typeof CaseSummary
+    DevTeam: typeof DevTeam
+    WeatherData: typeof WeatherData
+    Location: typeof Location
+  }
+}
+
+export default domain as AppDomain

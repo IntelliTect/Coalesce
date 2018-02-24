@@ -1,9 +1,10 @@
 
-import { IHaveMetadata, ModelType, hydrateMetadata } from './metadata'
+import { IHaveMetadata, ModelType, hydrateMetadata, ClassType } from './metadata'
 
 import axios, { AxiosPromise, AxiosResponse } from 'axios';
 import * as qs from 'qs';
 import { mapToDto } from '../index';
+import { Model } from './model';
 
 
 
@@ -52,27 +53,30 @@ export const AxiosClient = axios.create();
 AxiosClient.defaults.baseURL = 'http://localhost:11202/api/';
 AxiosClient.defaults.withCredentials = true;
 
-export class ApiClient<T extends IHaveMetadata = IHaveMetadata> {
+type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>
+type AxiosListResult<T> = AxiosResponse<ListResult<T>>
+
+export class ApiClient<T extends Model<ClassType>> {
     
     constructor(public readonly metadata: ModelType) {
         
     }
 
-    public get(id: any, parameters?: DataSourceParameters) {
+    public get(id: string | number, parameters?: DataSourceParameters) {
         return AxiosClient
             .get(`/${this.metadata.controllerRoute}/get/${id}`, {params: this.objectify(parameters)})
-            .then(this.hydrateItemResult.bind(this))
+            .then<AxiosItemResult<T>>(this.hydrateItemResult.bind(this))
     }
     
     public list(parameters?: ListParameters) {
         return AxiosClient
             .get(`/${this.metadata.controllerRoute}/list`, {params: this.objectify(parameters)})
-            .then(this.hydrateListResult.bind(this))
+            .then<AxiosListResult<T>>(this.hydrateListResult.bind(this))
     }
     
     public count(parameters?: FilterParameters) {
         return AxiosClient
-            .get(`/${this.metadata.controllerRoute}/count`, {params: this.objectify(parameters)})
+            .get<AxiosItemResult<number>>(`/${this.metadata.controllerRoute}/count`, {params: this.objectify(parameters)})
     }
     
     public save(item: T, parameters?: DataSourceParameters) {
@@ -82,6 +86,17 @@ export class ApiClient<T extends IHaveMetadata = IHaveMetadata> {
                 qs.stringify(mapToDto(item)),
                 { params: this.objectify(parameters) }
             )
+            .then<AxiosItemResult<T>>(this.hydrateItemResult.bind(this))
+    }
+    
+    public delete(id: string | number, parameters?: DataSourceParameters) {
+        return AxiosClient
+            .post(
+                `/${this.metadata.controllerRoute}/delete/${id}`,
+                null,
+                { params: this.objectify(parameters) }
+            )
+            .then<AxiosItemResult<T>>(this.hydrateItemResult.bind(this))
     }
 
     private objectify(parameters?: ListParameters | FilterParameters | DataSourceParameters) {
@@ -99,7 +114,8 @@ export class ApiClient<T extends IHaveMetadata = IHaveMetadata> {
         return paramsObject;
     }
 
-    private hydrateItemResult<T extends IHaveMetadata>(value: AxiosResponse<ItemResult<T>>) {
+    private hydrateItemResult(value: AxiosItemResult<T>) {
+        // This function is NOT PURE - we mutate the result object on the response.
         const object = value.data.object;
         if (object) {
             hydrateMetadata(object, this.metadata)
@@ -107,7 +123,8 @@ export class ApiClient<T extends IHaveMetadata = IHaveMetadata> {
         return value;
     }
 
-    private hydrateListResult<T extends IHaveMetadata>(value: AxiosResponse<ListResult<T>>) {
+    private hydrateListResult(value: AxiosListResult<T>) {
+        // This function is NOT PURE - we mutate the result object on the response.
         const list = value.data.list;
         if (Array.isArray(list)) {
             list.forEach(item => hydrateMetadata(item, this.metadata))

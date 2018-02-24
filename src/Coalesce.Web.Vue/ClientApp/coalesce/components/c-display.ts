@@ -12,10 +12,10 @@ export default class extends MetadataComponent {
   // @Prop() public value?: any;
 
   @Prop({default: 'span', type: String}) 
-  public element: string;
+  public element!: string;
 
   @Prop({default: 'L LT', type: String}) 
-  public dateFormat?: string;
+  public dateFormat!: string;
 
   getDisplayForModel(modelMeta: ExternalType | ModelType, object: any): string | null {
     if (modelMeta.displayProp)

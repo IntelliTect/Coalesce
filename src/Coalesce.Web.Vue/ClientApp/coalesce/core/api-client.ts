@@ -64,19 +64,28 @@ export class ApiClient<T extends Model<ClassType>> {
 
     public get(id: string | number, parameters?: DataSourceParameters) {
         return AxiosClient
-            .get(`/${this.metadata.controllerRoute}/get/${id}`, {params: this.objectify(parameters)})
+            .get(
+                `/${this.metadata.controllerRoute}/get/${id}`, 
+                {params: this.objectify(parameters) }
+            )
             .then<AxiosItemResult<T>>(this.hydrateItemResult.bind(this))
     }
     
     public list(parameters?: ListParameters) {
         return AxiosClient
-            .get(`/${this.metadata.controllerRoute}/list`, {params: this.objectify(parameters)})
+            .get(
+                `/${this.metadata.controllerRoute}/list`, 
+                { params: this.objectify(parameters) }
+            )
             .then<AxiosListResult<T>>(this.hydrateListResult.bind(this))
     }
     
     public count(parameters?: FilterParameters) {
         return AxiosClient
-            .get<AxiosItemResult<number>>(`/${this.metadata.controllerRoute}/count`, {params: this.objectify(parameters)})
+            .get<AxiosItemResult<number>>(
+                `/${this.metadata.controllerRoute}/count`, 
+                { params: this.objectify(parameters) }
+            )
     }
     
     public save(item: T, parameters?: DataSourceParameters) {

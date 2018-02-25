@@ -1,7 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const bundleOutputDir = './wwwroot/dist';
 
 module.exports = (env) => {
@@ -78,7 +77,9 @@ module.exports = (env) => {
             ]
         },
         plugins: [
-            new CheckerPlugin(),
+            // Exclude unneeded moment locales - these can be very large.
+            new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en|es|fr/),
+            
             new webpack.DefinePlugin({
                 'process.env': {
                     NODE_ENV: JSON.stringify(isDevBuild ? 'development' : 'production')
@@ -89,7 +90,10 @@ module.exports = (env) => {
             new webpack.SourceMapDevToolPlugin({
                 filename: '[file].map', // Remove this line if you prefer inline source maps
                 moduleFilenameTemplate: path.relative(bundleOutputDir, '[resourcePath]') // Point sourcemap entries to the original file locations on disk
-            })
+            }),
+
+            // Turn on in order to display a visual representation of the size and contents of the bundle.
+            // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
         ] : [
                 // Plugins that apply in production builds only
                 new webpack.optimize.UglifyJsPlugin(),

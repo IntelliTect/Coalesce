@@ -64,6 +64,9 @@
   import * as metadata from '../metadata.g';
   import * as models from '../models.g';
 
+  import { PersonViewModel } from '../viewmodels-sandbox'
+
+
   @Component({
     name: 'admin-table-page',
     components: {
@@ -72,10 +75,10 @@
   })
   export default class extends Vue {
     metadata = metadata.Person
-    person: models.Person | null = null;
+    person: PersonViewModel | null = null;
 
     isLoading: boolean = false;
-
+    
     pagination = {
       sortBy: '', 
       page: 1, 
@@ -117,7 +120,8 @@
           this.pagination.page = listResult.page;
           this.pagination.rowsPerPage = listResult.pageSize;
           this.count = listResult.totalCount;
-          this.person = list[0];
+          this.person = new PersonViewModel(list[0]);
+          this.person!.$startAutoSave(this);
         })
     }
 

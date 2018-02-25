@@ -10,6 +10,10 @@ export interface Model<TMeta extends ClassType> extends IHaveMetadata {
 // } & IHaveMetadata
 
 
+// e.g. 
+
+/*
+
 type DeepTransport<T> = 
     T extends any[] ? DeepTransportArray<T[number]> :
     T extends Date ? string :
@@ -23,9 +27,6 @@ export type Transport<T> = DeepTransport<Pick<T, Exclude<keyof T, keyof IHaveMet
 
 
 
-// e.g. 
-
-/*
     type CaseTransport = Transport<Case>
     var a: CaseTransport;
 

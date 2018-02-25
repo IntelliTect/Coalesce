@@ -124,7 +124,7 @@ export interface Method extends Metadata  {
     readonly params: Property[]
 }
 
-
+export type PropNames<T extends ClassType> = keyof T["props"];
 
 
 

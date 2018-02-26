@@ -92,7 +92,7 @@
                             
                             <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Name))</td>
                             
-                            <td class="prop-details">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Details))</td>
+                            <td class="prop-details">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Details, true))</td>
                         }
                         else
                         {

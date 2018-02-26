@@ -18,6 +18,7 @@ namespace Coalesce.Domain
 
     public class ProductDetails
     {
+        [ListText]
         public StreetAddress ManufacturingAddress { get; set; }
 
         public StreetAddress CompanyHqAddress { get; set; }
@@ -26,6 +27,7 @@ namespace Coalesce.Domain
 
     public class StreetAddress
     {
+        [ListText]
         public string Address { get; set; }
 
         public string City { get; set; }

@@ -30,8 +30,11 @@ module ViewModels {
 
         public productId: KnockoutObservable<number | null> = ko.observable(null);
         public name: KnockoutObservable<string | null> = ko.observable(null);
+        public details: KnockoutObservable<ViewModels.ProductDetails | null> = ko.observable(null);
 
        
+        /** Display text for Details */
+        public detailsText: KnockoutComputed<string>;
         
 
 
@@ -53,6 +56,15 @@ module ViewModels {
             // Load the lists of other objects
             // Objects are loaded first so that they are available when the IDs get loaded.
             // This handles the issue with populating select lists with correct data because we now have the object.
+            if (!data.details) { 
+                this.details(null);
+            } else {
+                if (!this.details()){
+                    this.details(new ProductDetails(data.details, this));
+                } else {
+                    this.details()!.loadFromDto(data.details);
+                }
+            }
 
             // The rest of the objects are loaded now.
             this.name(data.name);
@@ -101,6 +113,14 @@ module ViewModels {
             self.myId;
 
             // Create computeds for display for objects
+			this.detailsText = ko.pureComputed(function()
+			{   // If the object exists, use the text value. Otherwise show 'None'
+				if (self.details() && self.details()!.manufacturingAddress()) {
+					return self.details()!.manufacturingAddress()!.toString();
+				} else {
+					return "None";
+				}
+			});
 
     
 

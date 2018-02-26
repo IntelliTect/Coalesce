@@ -144,7 +144,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool IsClientWritable => !IsInternalUse && HasSetter && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
+        public bool IsClientWritable => 
+            !IsInternalUse 
+            && HasSetter 
+            // Exclude object properties with setters that aren't DB mapped - 
+            // these are probably Owned Types, which we don't currently support editing.
+            && (!IsPOCO || Object.HasDbSet) 
+
+            && !IsPrimaryKey 
+            && !HasReadOnlyAttribute
+            && !HasReadOnlyApiAttribute 
+            && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
         
         /// <summary>
         /// True if the property has the DateType(DateOnly) Attribute.

@@ -42,12 +42,13 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
-                        if (prop.IsPOCO && prop.Object.HasDbSet) //TODO: Added to get around Owned-Type errors
+                        if (prop.IsPOCO)
                         {
-                            assert.IsNotNull(prop.Object, "The target object for the property was not found. Make sure naming is consistent.");
-                            assert.IsNotNull(prop.Object.ListTextProperty, "The target object for the property has no discernable list text. Add a [ListTextAttribute] to one of its properties.");
-                            if (!prop.IsReadOnly && !prop.HasNotMapped)
+                            assert.IsNotNull(prop.Object.ListTextProperty, "The target object for the property has no discernable display text. Add a [ListTextAttribute] to one of its properties.");
+                            if (!prop.IsReadOnly && !prop.HasNotMapped && prop.Object.HasDbSet)
                             {
+                                // Validate navigation properties
+
                                 assert.IsNotNull(prop.ObjectIdPropertyName, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
                                 if (!prop.Object.IsOneToOne)
                                 {

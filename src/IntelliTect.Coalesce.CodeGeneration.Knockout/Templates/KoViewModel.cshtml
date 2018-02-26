@@ -249,7 +249,7 @@ module @moduleName {
         */
         public loadChildren = (callback?: () => void): void => {
             var loadingCount = 0;
-        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsReadOnly && !f.HasNotMapped))
+        @foreach (PropertyViewModel prop in model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsReadOnly && !f.HasNotMapped && f.Object.HasDbSet))
         {
             @:// See if this.@(prop.JsVariable) needs to be loaded.
             @:if (this.@(prop.JsVariable)() == null && this.@(prop.ObjectIdProperty.JsVariable)() != null){

@@ -10,6 +10,7 @@
       (no space between the dashes; space is there because double dash is illegal in XML comments).
     -->
     <TargetFrameworks>netstandard2.0;netcoreapp2.0;net462</TargetFrameworks>
+    <RuntimeFrameworkVersion>2.0.5</RuntimeFrameworkVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>

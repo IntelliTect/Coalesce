@@ -75,6 +75,10 @@
                                 Name
                                 <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Details')}">
+                                Details
+                                <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Details', 'fa-caret-down': orderByDescending() == 'Details'}"></i>
+                            </th>
                     <th style="width: 1%">
                     </th>
                 </tr>
@@ -87,11 +91,15 @@
                         {
                             
                             <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Name))</td>
+                            
+                            <td class="prop-details">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Details))</td>
                         }
                         else
                         {
                             
                             <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Name, true))</td>
+                            
+                            <td class="prop-details">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Details, true))</td>
                         }
                     <td>
 

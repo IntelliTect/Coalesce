@@ -24,5 +24,17 @@ namespace Coalesce.Domain
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Product>().OwnsOne(p => p.Details, cb =>
+            {
+                cb.OwnsOne(c => c.ManufacturingAddress);
+                cb.OwnsOne(c => c.CompanyHqAddress);
+            });
+
+        }
     }
 }

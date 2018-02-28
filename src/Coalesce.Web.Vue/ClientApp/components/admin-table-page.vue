@@ -18,8 +18,8 @@
               <v-icon left >cancel</v-icon>
               Cancel
             </v-btn>
-            {{person.$save.isLoading}}
-            <v-btn color="primary"  
+            
+            <v-btn flat color="primary"  
               @click.native="person.$save()" 
               :loading="person.$save.isLoading"
               :disabled="person.$save.isLoading"

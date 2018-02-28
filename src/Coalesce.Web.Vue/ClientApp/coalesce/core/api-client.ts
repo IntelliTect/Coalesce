@@ -1,10 +1,20 @@
 
+// Undocumented (but exposed) vue method for making properties reactive.
+declare module "vue/types/vue" {
+    interface VueConstructor<V extends Vue = Vue> {
+        util: {
+            defineReactive: (obj: any, key: string, val: any, setter: Function | null, shallow: boolean) => void
+        }
+    }
+}
+
 import { IHaveMetadata, ModelType, ClassType } from './metadata'
 import { Model, hydrateModel, mapToDto } from './model'
 import { OwnProps } from './util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource } from 'axios'
 import * as qs from 'qs'
+import Vue from 'vue';
 
 
 /* Api Response Objects */
@@ -51,56 +61,6 @@ export interface ListParameters extends FilterParameters {
     fields?: string[]
 }
 
-
-/* Stateful Endpoint Representations */
-
-export interface ApiState<T> {
-    /** True if a request is currently pending. */
-    isLoading: boolean
-    
-    /** True if the previous request was successful. */
-    wasSuccessful: boolean | null
-    
-    /** Error message returned by the previous request. */
-    message: string | null
-
-    /** Principal data returned by the previous request. */
-    result: T | null
-
-    /** 
-     * Function that can be called to cancel a pending request.
-    */
-    cancel: Canceler | null
-
-    /**
-     * Attach a callback to be invoked when the request to this endpoint succeeds.
-     * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
-     */
-    onFulfilled(onFulfilled: (state: this) => void): this
-
-    /**
-     * Attach a callback to be invoked when the request to this endpoint fails.
-     * @param onFulfilled A callback to be called when a request to this endpoint fails.
-     */
-    onRejected(onRejected: (state: this) => void): this
-}
-
-export interface ItemApiState<T> extends ApiState<T> {
-    /** Validation issues returned by the previous request. */
-    validationIssues: ValidationIssue[] | null
-}
-
-export interface ListApiState<T> extends ApiState<Array<T>> {
-    /** Page number returned by the previous request. */
-    page: number | null
-    /** Page size returned by the previous request. */
-    pageSize: number | null
-    /** Page count returned by the previous request. */
-    pageCount: number | null
-    /** Total Count returned by the previous request. */
-    totalCount: number | null
-}
-
 export type ApiResponse<T> = Promise<AxiosResponse<T>>
 export type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>
 export type AxiosListResult<T> = AxiosResponse<ListResult<T>>
@@ -115,7 +75,6 @@ export type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T
 export const AxiosClient = axios.create()
 AxiosClient.defaults.baseURL = 'http://localhost:11202/api/'
 AxiosClient.defaults.withCredentials = true
-
 
 export class ApiClient<T extends Model<ClassType>> {
     
@@ -183,7 +142,7 @@ export class ApiClient<T extends Model<ClassType>> {
     $caller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>>(
         resultType: "item",
         invokerFactory: (client: this) => TCall
-    ): TCall & ItemApiState<T>
+    ): ItemApiState<TCall, T> & TCall
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
@@ -192,129 +151,26 @@ export class ApiClient<T extends Model<ClassType>> {
     $caller<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>>(
         resultType: "list",
         invokerFactory: (client: this) => TCall
-    ): TCall & ListApiState<T>
+    ): ListApiState<TCall, T> & TCall
     
-    $caller<TCall extends (this: null, ...args: any[]) => ApiResultPromise<T>>(
+    $caller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
         resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
         invokerFactory: (client: this) => TCall
-    ): TCall & (ItemApiState<T> | ListApiState<T>)
+    ): ApiState<TCall, T> & TCall
     {
-        type ApiStateInternal = {
-            _callbacks: {
-                onFulfilled: Array<(state: typeof fn) => void>
-                onRejected: Array<(state: typeof fn) => void>
-            }
+        var instance: ApiState<TCall, T>;
+        switch (resultType){
+            case "item": 
+                instance = new ItemApiState<TCall, T>(this, invokerFactory(this));
+                break;
+            // Typescript is unhappy with giving TCall to ListApiState. No idea why, since the item one is fine.
+            case "list": 
+                instance = new ListApiState<any, T>(this, invokerFactory(this));
+                break;
+            default: throw `Unknown result type ${resultType}`
         }
-
-        var fn: TCall & (ItemApiState<T> | ListApiState<T>) & ApiStateInternal
-
-        const _this = this
-        const invoker = invokerFactory(_this)
-        // Can't use arrow function, need access to 'arguments'.
-        function invoke() {
-            if (fn.isLoading) {
-                throw `Request is already pending for invoker ${invoker.toString()}`
-            }
-            fn.wasSuccessful = null
-            fn.message = null
-            fn.isLoading = true
-
-            // Inject a cancellation token into the request.
-            var promise: ApiResultPromise<T>
-            try {
-                const token = _this._nextCancelToken = axios.CancelToken.source()
-                fn.cancel = token.cancel
-                promise = invoker.apply(null, arguments)
-            } finally {
-                _this._nextCancelToken = null
-            }
-
-            function setResponseProps(data: ItemResult<T> | ListResult<T>) {
-                fn.wasSuccessful = data.wasSuccessful
-                fn.message = data.message || null
-
-                if ("validationIssues" in fn) {
-                    fn.validationIssues = "validationIssues" in data && data.validationIssues || null
-                }
-
-                if ("list" in data) {
-                    fn.result = data.list || []
-                } else if ("object" in data) {
-                    fn.result = data.object || null
-                } else {
-                    fn.result = null
-                }
-            }
-
-            return promise
-                .then(resp => {
-                    const data = resp.data
-                    fn.cancel = null
-                    setResponseProps(data)
-
-                    fn._callbacks.onFulfilled.forEach(cb => cb.apply(fn, [fn]))
-
-                    fn.isLoading = false
-
-                    // We have to maintain the shape of the promise of the stateless invoke method.
-                    // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
-                    // The reason for this is that we can't change the return type of TCall while maintaining 
-                    // the param signature (unless we required a full, explicit type annotation as a type parameter,
-                    // but this would make the usability of apiCallers very unpleasant.)
-                    // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
-                    // but changing the implementation would be a significant breaking change by then.
-                    return resp
-                }, (error: AxiosError) => {
-                    fn.cancel = null
-                    fn.wasSuccessful = false
-                    const result = error.response as AxiosResponse<ListResult<T> | ItemResult<T>> | undefined
-                    if (result) {
-                        const data = result.data
-                        setResponseProps(data)
-                    } else {
-                        // TODO: i18n
-                        fn.message = error.message || "A network error occurred"
-                    }
-
-                    fn._callbacks.onRejected.forEach(cb => cb.apply(fn, [fn]))
-
-                    fn.isLoading = false
-
-                    return error
-                })
-        }
-
-        const stateProps = Object.assign({
-            isLoading: false,
-            wasSuccessful: null,
-            message: null,
-            result: null,
-            cancel: null,
-            onFulfilled: function onFulfilled(cb: (state: typeof fn) => void): typeof fn {
-                this._callbacks.onFulfilled.push(cb)
-                return fn;
-            },
-            onRejected: function onRejected(cb: (state: typeof fn) => void): typeof fn {
-                this._callbacks.onFulfilled.push(cb)
-                return fn;
-            },
-            _callbacks: Object.freeze({onFulfilled: [], onRejected: []})
-        } as ApiState<T> & ApiStateInternal, resultType == "list" 
-            ? {
-                page: null,
-                pageSize: null,
-                pageCount: null,
-                totalCount: null,
-            } as OwnProps<ListApiState<T>, ApiState<T>> 
-            : {
-                validationIssues: null
-            } as OwnProps<ItemApiState<T>, ApiState<T>>
-        ) as (ItemApiState<T> | ListApiState<T>) & ApiStateInternal
-
-        return fn = Object.assign(
-            invoke as TCall, 
-            stateProps
-        )
+        
+        return instance as any;
     }
 
     private $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig) {
@@ -362,5 +218,177 @@ export class ApiClient<T extends Model<ClassType>> {
             list.forEach(item => hydrateModel(item, this.$metadata))
         }
         return value
+    }
+}
+
+abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<T>, T extends Model<ClassType>> extends Function {
+
+    /** True if a request is currently pending. */
+    isLoading: boolean = false
+    
+    /** True if the previous request was successful. */
+    wasSuccessful: boolean | null = null
+    
+    /** Error message returned by the previous request. */
+    message: string | null = null
+
+    /** 
+     * Function that can be called to cancel a pending request.
+    */
+    cancel: Canceler | null = null
+
+    // Frozen to prevent unneeded reactivity.
+    private _callbacks = Object.freeze<{
+        onFulfilled: Array<Function>, 
+        onRejected: Array<Function>
+    }>({onFulfilled: [], onRejected: []})
+
+    /**
+     * Attach a callback to be invoked when the request to this endpoint succeeds.
+     * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
+     */
+    onFulfilled(callback: (state: this) => void): this {
+        this._callbacks.onFulfilled.push(callback)
+        return this;
+    }
+
+    /**
+     * Attach a callback to be invoked when the request to this endpoint fails.
+     * @param onFulfilled A callback to be called when a request to this endpoint fails.
+     */
+    onRejected(callback: (state: this) => void): this {
+        this._callbacks.onFulfilled.push(callback)
+        return this;
+    }
+
+    abstract setResponseProps(data: ApiResult): void
+
+    invoke!: TCall
+
+    _invokeInternal() {
+        if (this.isLoading) {
+            throw `Request is already pending for invoker ${this.invoker.toString()}`
+        }
+        this.wasSuccessful = null
+        this.message = null
+        this.isLoading = true
+
+        // Inject a cancellation token into the request.
+        var promise: ApiResultPromise<T>
+        try {
+            const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
+            this.cancel = token.cancel
+            promise = this.invoker.apply(null, arguments)
+        } finally {
+            (this.apiClient as any)._nextCancelToken = null
+        }
+
+        return promise
+            .then(resp => {
+                const data = resp.data
+                this.cancel = null
+                this.setResponseProps(data)
+
+                this._callbacks.onFulfilled.forEach(cb => cb.apply(this, [this]))
+
+                this.isLoading = false
+
+                // We have to maintain the shape of the promise of the stateless invoke method.
+                // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
+                // The reason for this is that we can't change the return type of TCall while maintaining 
+                // the param signature (unless we required a full, explicit type annotation as a type parameter,
+                // but this would make the usability of apiCallers very unpleasant.)
+                // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
+                // but changing the implementation would be a significant breaking change by then.
+                return resp
+            }, (error: AxiosError) => {
+                this.cancel = null
+                this.wasSuccessful = false
+                const result = error.response as AxiosResponse<ListResult<T> | ItemResult<T>> | undefined
+                if (result) {
+                    const data = result.data
+                    this.setResponseProps(data)
+                } else {
+                    // TODO: i18n
+                    this.message = error.message || "A network error occurred"
+                }
+
+                this._callbacks.onRejected.forEach(cb => cb.apply(this, [this]))
+
+                this.isLoading = false
+
+                return error
+            })
+    }
+
+    constructor(
+        private readonly apiClient: ApiClient<T>,
+        private readonly invoker: TCall
+    ) { 
+        super();
+        const self = this;
+        // Create our invoker function that will ultimately be our instance object.
+        const invokeFunc: TCall = function invokeFunc() {
+            return invoke._invokeInternal.apply(invoke, arguments);
+        } as TCall
+        // Copy all properties from the class to the function.
+        const invoke = Object.assign(invokeFunc, this);
+        invoke.invoke = invoke;
+        
+        // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
+        for (const stateProp in self) {
+            const value = self[stateProp]
+            // Don't define sealed object properties (e.g. this._callbacks)
+            if (value != null && typeof value !== "object" || !Object.isSealed(value)) {
+                Vue.util.defineReactive(invoke, stateProp, self[stateProp], null, true)
+            }
+        }
+
+        Object.setPrototypeOf(invoke, new.target.prototype);
+        return invoke
+    }
+}
+
+export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>, T extends Model<ClassType>> extends ApiState<TCall, T> {
+    /** Validation issues returned by the previous request. */
+    validationIssues: ValidationIssue[] | null = null
+
+    /** Principal data returned by the previous request. */
+    result: T | null = null
+
+    setResponseProps(data: ItemResult<T>) {
+        this.wasSuccessful = data.wasSuccessful
+        this.message = data.message || null
+
+        if ("object" in data) {
+            this.result = data.object || null
+        } else {
+            this.result = null
+        }
+    }
+}
+
+export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>, T extends Model<ClassType>> extends ApiState<TCall, T> {
+    /** Page number returned by the previous request. */
+    page: number | null = null
+    /** Page size returned by the previous request. */
+    pageSize: number | null = null
+    /** Page count returned by the previous request. */
+    pageCount: number | null = null
+    /** Total Count returned by the previous request. */
+    totalCount: number | null = null
+
+    /** Principal data returned by the previous request. */
+    result: T[] | null = null
+
+    setResponseProps(data: ListResult<T>) {
+        this.wasSuccessful = data.wasSuccessful
+        this.message = data.message || null
+
+        if ("list" in data) {
+            this.result = data.list || []
+        } else {
+            this.result = null
+        }
     }
 }

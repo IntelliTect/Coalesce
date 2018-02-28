@@ -9,7 +9,7 @@ declare module "vue/types/vue" {
 }
 
 import { IHaveMetadata, ModelType, ClassType } from './metadata'
-import { Model, hydrateModel, mapToDto } from './model'
+import { Model, convertToModel, mapToDto } from './model'
 import { OwnProps } from './util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource } from 'axios'
@@ -206,7 +206,7 @@ export class ApiClient<T extends Model<ClassType>> {
         // This function is NOT PURE - we mutate the result object on the response.
         const object = value.data.object
         if (object) {
-            hydrateModel(object, this.$metadata)
+            convertToModel(object, this.$metadata)
         }
         return value
     }
@@ -215,7 +215,7 @@ export class ApiClient<T extends Model<ClassType>> {
         // This function is NOT PURE - we mutate the result object on the response.
         const list = value.data.list
         if (Array.isArray(list)) {
-            list.forEach(item => hydrateModel(item, this.$metadata))
+            list.forEach(item => convertToModel(item, this.$metadata))
         }
         return value
     }

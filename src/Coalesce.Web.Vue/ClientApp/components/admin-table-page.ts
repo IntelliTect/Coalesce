@@ -2,8 +2,9 @@
 import { DateTime } from 'luxon';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
-import { ApiClient, IHaveMetadata, hydrateModel } from '../coalesce'
+import { ApiClient, IHaveMetadata, convertToModel } from '../coalesce'
 import * as metadata from '../metadata.g';
+import { Person } from '../metadata.g';
 import * as models from '../models.g';
 
 import { PersonViewModel } from '../viewmodels-sandbox'
@@ -67,9 +68,13 @@ export default class extends Vue {
 
   mounted() {
     //this.getData();
-    this.person = new PersonViewModel();
-    this.person.$load(1);
-    this.person.$startAutoSave(this);
+    this.person = new PersonViewModel()
+    this.person.$load(1)
+    this.person.$startAutoSave(this)
+    this.person.$display()
+    this.person.$add()
+    this.person.personId
+    
   }
 
   

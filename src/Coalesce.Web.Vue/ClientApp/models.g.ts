@@ -1,4 +1,5 @@
 import * as metadata from './metadata.g'
+import * as moment from 'moment'
 import { Model } from './coalesce/core/model'
 
 export enum Titles {
@@ -7,11 +8,13 @@ export enum Titles {
   Mrs = 2,
   Miss = 4,
 }
+
 export enum Genders {
   NonSpecified = 0,
   Male = 1,
   Female = 2,
 }
+
 export enum Statuses {
   Open = 0,
   InProgress = 1,
@@ -19,6 +22,7 @@ export enum Statuses {
   ClosedNoSolution = 3,
   Cancelled = 4,
 }
+
 export interface Person extends Model<typeof metadata.Person> {
   personId: number | null
   title: Titles | null
@@ -28,9 +32,9 @@ export interface Person extends Model<typeof metadata.Person> {
   gender: Genders | null
   casesAssigned: Case[] | null
   casesReported: Case[] | null
-  birthDate: Date | null
-  lastBath: Date | null
-  nextUpgrade: Date | null
+  birthDate: moment.Moment | null
+  lastBath: moment.Moment | null
+  nextUpgrade: moment.Moment | null
   personStats: PersonStats | null
   name: string | null
   companyId: number | null
@@ -41,7 +45,7 @@ export interface Case extends Model<typeof metadata.Case> {
   caseKey: number | null
   title: string | null
   description: string | null
-  openedAt: Date | null
+  openedAt: moment.Moment | null
   assignedToId: number | null
   assignedTo: Person | null
   reportedById: number | null

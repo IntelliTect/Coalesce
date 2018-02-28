@@ -1,4 +1,4 @@
-import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' 
+import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from './coalesce/core/metadata' 
 
 const domain: Domain = { types: {}, enums: {} }
 export const Titles = domain.enums.Titles = {
@@ -85,7 +85,7 @@ export const Person = domain.types.Person = {
       displayName: "Cases Assigned",
       type: "collection",
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId },
+      get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as PrimitiveProperty },
       get typeDef() { return (domain.types.Case as ModelType) },
     },
     casesReported: {
@@ -93,7 +93,7 @@ export const Person = domain.types.Person = {
       displayName: "Cases Reported",
       type: "collection",
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.reportedById },
+      get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as PrimitiveProperty },
       get typeDef() { return (domain.types.Case as ModelType) },
     },
     birthDate: {
@@ -117,9 +117,9 @@ export const Person = domain.types.Person = {
     personStats: {
       name: "personStats",
       displayName: "Person Stats",
-      type: "object",
+      type: "collection",
       role: "value",
-      get typeDef() { return domain.types.PersonStats as ExternalType },
+      get typeDef() { return (domain.types.PersonStats as ExternalType) },
     },
     name: {
       name: "name",
@@ -138,7 +138,8 @@ export const Person = domain.types.Person = {
       displayName: "Company",
       type: "model",
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Company as ModelType).props.companyId },
+      get foreignKey() { return (domain.types.Person as ModelType).props.companyId as PrimitiveProperty },
+      get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimitiveProperty },
       get typeDef() { return (domain.types.Company as ModelType) },
     },
   },
@@ -187,7 +188,8 @@ export const Case = domain.types.Case = {
       displayName: "Assigned To",
       type: "model",
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Person as ModelType).props.assignedToId },
+      get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as PrimitiveProperty },
+      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimitiveProperty },
       get typeDef() { return (domain.types.Person as ModelType) },
     },
     reportedById: {
@@ -201,7 +203,8 @@ export const Case = domain.types.Case = {
       displayName: "Reported By",
       type: "model",
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Person as ModelType).props.reportedById },
+      get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as PrimitiveProperty },
+      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimitiveProperty },
       get typeDef() { return (domain.types.Person as ModelType) },
     },
     attachment: {
@@ -228,7 +231,7 @@ export const Case = domain.types.Case = {
       displayName: "Case Products",
       type: "collection",
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId },
+      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as PrimitiveProperty },
       get typeDef() { return (domain.types.CaseProduct as ModelType) },
     },
     devTeamAssignedId: {
@@ -240,10 +243,9 @@ export const Case = domain.types.Case = {
     devTeamAssigned: {
       name: "devTeamAssigned",
       displayName: "Dev Team Assigned",
-      type: "model",
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.DevTeam as ModelType).props.devTeamAssignedId },
-      get typeDef() { return (domain.types.DevTeam as ModelType) },
+      type: "collection",
+      role: "value",
+      get typeDef() { return (domain.types.DevTeam as ExternalType) },
     },
     duration: {
       name: "duration",
@@ -315,7 +317,7 @@ export const Company = domain.types.Company = {
       displayName: "Employees",
       type: "collection",
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.Person as ModelType).props.companyId },
+      get foreignKey() { return (domain.types.Person as ModelType).props.companyId as PrimitiveProperty },
       get typeDef() { return (domain.types.Person as ModelType) },
     },
     altName: {
@@ -375,7 +377,8 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Case",
       type: "model",
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.caseId },
+      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as PrimitiveProperty },
+      get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimitiveProperty },
       get typeDef() { return (domain.types.Case as ModelType) },
     },
     productId: {
@@ -389,7 +392,8 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Product",
       type: "model",
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Product as ModelType).props.productId },
+      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.productId as PrimitiveProperty },
+      get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimitiveProperty },
       get typeDef() { return (domain.types.Product as ModelType) },
     },
   },
@@ -554,9 +558,9 @@ export const WeatherData = domain.types.WeatherData = {
     location: {
       name: "location",
       displayName: "Location",
-      type: "object",
+      type: "collection",
       role: "value",
-      get typeDef() { return domain.types.Location as ExternalType },
+      get typeDef() { return (domain.types.Location as ExternalType) },
     },
   },
 }

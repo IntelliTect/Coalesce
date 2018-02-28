@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder();
 
-            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
+            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from './coalesce/core/metadata' ");
             b.Line();
 
             // Assigning each property as a member of domain ensures we don't break type contracts.
@@ -150,36 +150,56 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             b.StringProp("type", "string");
                         }
                                 
-                        // Some getters need to qualify with "domain." instead of the exported const
-                        // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
+                        
                         if (prop.Object != null)
                         {
-                            string classMeta = $"(domain.types.{prop.Object.ViewModelClassName} as ModelType)";
-                            //string classMeta = $"domain.models.{prop.Object.ViewModelClassName}";
+                            // Note in this section: Some getters need to qualify with "domain." instead of the exported const
+                            // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
 
-                            if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
+                            string classMeta(ClassViewModel obj = null)
                             {
-                                // Reference navigations
-                                b.StringProp("type", "model");
-                                b.StringProp("role", "referenceNavigation");
-                                b.Line($"get foreignKey() {{ return {classMeta}.props.{prop.ObjectIdProperty.JsVariable} }},");
+                                obj = (obj ?? prop.Object);
+                                return $"(domain.types.{obj.ViewModelClassName} as {(obj.OnContext ? "ModelType" : "ExternalType")})";
                             }
-                            else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
+
+                            //string classMeta = $"domain.models.{prop.Object.ViewModelClassName}";
+                            if (prop.Object.OnContext)
                             {
-                                // Collection navigations
-                                b.StringProp("type", "collection");
-                                b.StringProp("role", "collectionNavigation");
-                                b.Line($"get foreignKey() {{ return {classMeta}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} }},");
+                                if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
+                                {
+                                    // Reference navigations
+                                    b.StringProp("type", "model");
+                                    b.StringProp("role", "referenceNavigation");
+                                    b.Line($"get foreignKey() {{ return {classMeta(model)}.props.{prop.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
+                                    b.Line($"get principalKey() {{ return {classMeta()}.props.{prop.Object.PrimaryKey.JsVariable} as PrimitiveProperty }},");
+                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
+                                }
+                                else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
+                                {
+                                    // Collection navigations
+                                    b.StringProp("type", "collection");
+                                    b.StringProp("role", "collectionNavigation");
+                                    b.Line($"get foreignKey() {{ return {classMeta()}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
+                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
+                                }
                             }
                             else
                             {
-                                // External type collections
-                                b.StringProp("type", "object");
-                                b.StringProp("role", "value");
-                                //classMeta = $"domain.externalTypes.{prop.Object.ViewModelClassName}";
-                                classMeta = $"domain.types.{prop.Object.ViewModelClassName} as ExternalType";
+                                if (prop.Type.IsPOCO)
+                                {
+                                    // External type objects
+                                    b.StringProp("type", "collection");
+                                    b.StringProp("role", "value");
+                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
+                                }
+                                else if (prop.Type.IsCollection)
+                                {
+                                    // External type collections
+                                    b.StringProp("type", "object");
+                                    b.StringProp("role", "value");
+                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
+                                }
                             }
-                            b.Line($"get typeDef() {{ return {classMeta} }},");
                         }
                         else if (prop.Type.IsCollection)
                         {
@@ -193,7 +213,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             // All non-object/collection properties:
                             if (prop.IsPrimaryKey)
                                 b.StringProp("role", "primaryKey");
-                            else if (prop.IsForeignKey)
+                            else if (prop.IsForeignKey && prop.IdPropertyObjectProperty.PureTypeOnContext)
                                 b.StringProp("role", "foreignKey");
                             else
                                 b.StringProp("role", "value");

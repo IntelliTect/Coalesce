@@ -2,18 +2,34 @@
 import * as metadata from './metadata.g'
 import * as models from './models.g'
 import * as api from './coalesce/core/api-client'
-import { mapToDto, ApiClient, ClassType, ModelType, ApiResult, ItemResult, ListResult, hydrateModel } from './coalesce';
+import { mapToDto, ApiClient, ClassType, ModelType, ApiResult, ItemResult, ListResult, convertToModel, PropNames, Property, CollectionProperty, resolvePropMeta, PropertyOrName, isClassType } from './coalesce';
 import Vue from 'vue';
-import { Model } from './coalesce/core/model';
+import { Model, modelDisplay, propDisplay } from './coalesce/core/model';
 import { AxiosResponse, AxiosError } from 'axios';
 import * as _ from 'underscore';
 
+/*
+DESIGN NOTES
+    - ViewModel deliberately has TModel as its only type parameter.
+        The type of the metadata is always accessed off of TModel as TModel["$metadata"].
+        This makes the intellisense in IDEs quite nice. If TMeta is a type param,
+        we end up with the type of implemented classes taking several pages of the intellisense tooltip.
+        With this, we can still strongly type off of known information of TMeta (like PropNames<TModel["$metadata"]>),
+        but without it cluttering up tooltips with basically the entire type structure of the metadata.
+*/
 
-abstract class ViewModel<TMeta extends ModelType, TModel extends Model<TMeta>> implements Model<TMeta> {
-    abstract readonly $metadata: TMeta
+abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TModel["$metadata"]> {
+    abstract readonly $metadata: TModel["$metadata"]
     public $data: TModel
 
     private _pristineDto: any;
+
+    /**
+     * Gets or sets the primary key of the ViewModel's data.
+     */
+    public get $primaryKey() { return this.$data[this.$metadata.keyProp.name] }
+    public set $primaryKey(val) { this.$data[this.$metadata.keyProp.name] = val }
+
     /**
      * Returns true if the values of the savable data properties of this ViewModel 
      * have changed since the last load, save, or the last time $isDirty was set to false.
@@ -31,7 +47,7 @@ abstract class ViewModel<TMeta extends ModelType, TModel extends Model<TMeta>> i
      * A function for invoking the /get endpoint, and a set of properties about the state of the last call.
      */
     public $load = this.$apiClient.$caller("item",
-        c => (id?: string | number) => c.get(id != null ? id : (this as any)[this.$metadata.keyProp.name]))
+        c => (id?: string | number) => c.get(id != null ? id : this.$primaryKey))
         // TODO: merge in the result, don't replace the existing one.
         .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
 
@@ -104,7 +120,40 @@ abstract class ViewModel<TMeta extends ModelType, TModel extends Model<TMeta>> i
         this._autoSaveState.debouncer!.cancel()
     }
 
-    constructor($metadata: TMeta, initialData?: TModel) {
+    /**
+     * Returns a string representation of the object, or one of its properties, suitable for display.
+     * @param prop If provided, specifies a property whose value will be displayed. 
+     * If omitted, the whole object will be represented.
+     */
+    public $display(prop?: PropertyOrName<TModel["$metadata"]>) {
+        if (!prop) return modelDisplay(this);
+        return propDisplay(this, prop);
+    }
+
+    public $addChild(prop: PropertyOrName<TModel["$metadata"], CollectionProperty>) {
+        const propMeta = resolvePropMeta<CollectionProperty>(this.$metadata, prop)
+        var collection: Array<any> = this.$data[propMeta.name];
+
+        if (!Array.isArray(collection)) {
+            collection = this.$data[propMeta.name] = [];
+        }
+        const typeDef = propMeta.typeDef;
+        
+        if (isClassType(typeDef)) {
+            var newModel = convertToModel({}, typeDef);
+            const foreignKey = propMeta.foreignKey
+            if (foreignKey){
+                newModel[foreignKey.name] = this.$primaryKey
+            }
+            collection.push(newModel);
+            return newModel;
+        } else {
+            collection.push(null);
+            return null;
+        }
+    }
+
+    constructor($metadata: TModel["$metadata"], initialData?: TModel) {
         // Late-initialize the metadata of the api client, 
         // since it isn't actually available in the field initializer.
         this.$apiClient.$metadata = $metadata
@@ -119,14 +168,17 @@ abstract class ViewModel<TMeta extends ModelType, TModel extends Model<TMeta>> i
             }
         }
         else {
-            this.$data = hydrateModel({}, $metadata);
+            this.$data = convertToModel({}, $metadata);
         }
 
         this.$isDirty = false;
     }
 }
 
-export class PersonViewModel extends ViewModel<typeof metadata.Person, models.Person> implements models.Person {
+// TODO: should this really be typeof metadata.Person?
+export interface PersonViewModel extends models.Person {}
+export class PersonViewModel extends ViewModel<models.Person> {
+//export class PersonViewModel extends ViewModel<typeof metadata.Person, models.Person, PropNames<typeof metadata.Person>> implements models.Person {
     readonly $metadata = metadata.Person
 
     get personId() { return this.$data.personId }

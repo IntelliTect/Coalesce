@@ -341,6 +341,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (!Parent.OnContext)
+                    return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;
                 else if (string.Equals(Name, "Id", StringComparison.InvariantCultureIgnoreCase))
@@ -355,7 +357,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns true if this property's name ends with Id.
+        /// Returns true if this property is a foreign key.
         /// </summary>
         public bool IsForeignKey
         {
@@ -363,7 +365,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (IsPOCO) return false;
-                if (this.HasAttribute<ForeignKeyAttribute>() && !IsPOCO)
+                if (!Parent.OnContext) return false;
+                
+                if (this.HasAttribute<ForeignKeyAttribute>())
                 {
                     return true;
                 }

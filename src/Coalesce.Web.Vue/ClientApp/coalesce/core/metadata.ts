@@ -105,12 +105,13 @@ export interface ObjectProperty extends PropMetaBase {
 export interface ModelProperty extends PropMetaBase {
     readonly type: "model"
     readonly typeDef: ModelType
-    readonly foreignKey: Property
+    readonly foreignKey: PrimitiveProperty
+    readonly principalKey: PrimitiveProperty
 }
 export interface CollectionProperty extends PropMetaBase {
     readonly type: "collection"
     readonly typeDef: CollectableType
-    readonly foreignKey?: Property
+    readonly foreignKey?: PrimitiveProperty
 }
 export type Property = 
   PrimitiveProperty
@@ -124,6 +125,29 @@ export interface Method extends Metadata  {
     readonly params: Property[]
 }
 
-export type PropNames<T extends ClassType> = keyof T["props"];
+export type PropNames<TMeta extends ClassType, Kind extends Property = Property>
+    = { [K in keyof TMeta["props"]]: TMeta["props"][K] extends Kind ? K : never }[keyof TMeta["props"]];
+
+export type PropertyOrName<TMeta extends ClassType, TProp extends Property = Property>
+    = TProp | PropNames<TMeta, TProp>
+
+export function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string) : Exclude<TProp, string>
+export function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string, slient: true) : Exclude<TProp, string> | undefined
+export function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string, slient: boolean = false)
+{
+    const propMeta = typeof propOrString == "string" ? metadata.props[propOrString] : propOrString
+    if (!propMeta) {
+        if (slient) return undefined
+        throw `Unknown property ${propOrString}`
+    } else if (metadata.props[propMeta.name] !== propMeta) {
+        if (slient) return undefined
+        throw `Property ${propMeta.name} does not belong to object of type ${metadata.name}`
+    }
+    return propMeta
+}
 
 
+
+export function isClassType(prop: CollectableType): prop is ClassType {
+    return typeof(prop) === "object" && (prop.type === "model" || prop.type === "object")
+}

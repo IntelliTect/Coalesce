@@ -1,6 +1,5 @@
 <template>
   <v-container grid-list-lg>
-      
     <v-layout v-if="person != null" >
       <v-flex xs12>
         <v-card >
@@ -19,7 +18,12 @@
               <v-icon left >cancel</v-icon>
               Cancel
             </v-btn>
-            <v-btn flat color="primary" @click="save">
+            {{person.$save.isLoading}}
+            <v-btn color="primary"  
+              @click.native="person.$save()" 
+              :loading="person.$save.isLoading"
+              :disabled="person.$save.isLoading"
+            >
               <v-icon left >save</v-icon>
               Save 
             </v-btn>

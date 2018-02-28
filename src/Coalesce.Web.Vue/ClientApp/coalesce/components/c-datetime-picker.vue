@@ -77,9 +77,14 @@
 
     
     textInputChanged(val: string) {
-      var value = moment(val, this.dateFormat)
-      if (!value || !value.isValid()){
-        value = moment(this.value || undefined)
+      var value: moment.Moment | null;
+      if (!val || !val.trim()){
+        value = null
+      } else {
+        value = moment(val, this.dateFormat)
+        if (!value || !value.isValid()){
+          value = moment(this.value || undefined)
+        }
       }
       this.$emit('input', value)
     }
@@ -91,8 +96,8 @@
       if (!parts) throw `Time set by vuetify timepicker not in expected format: ${val}`
 
       value.set({
-      'hour': parseInt(parts[1]),
-      'minute': parseInt(parts[2]),
+        'hour': parseInt(parts[1]),
+        'minute': parseInt(parts[2]),
       });
       this.$emit('input', value)
     }
@@ -104,9 +109,9 @@
       if (!parts) throw `Date set by vuetify datepicker not in expected format: ${val}`
 
       value.set({
-      'year': parseInt(parts[1]),
-      'month': parseInt(parts[2]) - 1,
-      'date': parseInt(parts[3])
+        'year': parseInt(parts[1]),
+        'month': parseInt(parts[2]) - 1,
+        'date': parseInt(parts[3])
       });
       this.$emit('input', value)
     }

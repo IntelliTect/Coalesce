@@ -5,15 +5,19 @@
   "dependencies": {
     "axios": "^0.17.1",
     "babel-polyfill": "^6.26.0",
+    "luxon": "^0.5.3",
     "moment": "^2.20.1",
     "qs": "^6.5.1",
+    "underscore": "^1.8.3",
     "vue": "^2.5.13",
     "vue-axios": "^2.0.2",
     "vue-router": "^3.0.1",
     "vuetify": "1.0.3"
   },
   "devDependencies": {
+    "@types/luxon": "^0.2.6",
     "@types/qs": "^6.5.1",
+    "@types/underscore": "^1.8.7",
     "@types/webpack-env": "^1.13.0",
     "aspnet-webpack": "^2.0.3",
     "autoprefixer": "^7.2.5",
@@ -28,7 +32,7 @@
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.1",
     "ts-loader": "^3.3.1",
-    "typescript": "^2.8.0-dev.20180223",
+    "typescript": "^2.8.0-dev.20180227",
     "url-loader": "^0.6.2",
     "vue-class-component": "^6.1.2",
     "vue-loader": "^13.7.0",
@@ -36,7 +40,7 @@
     "vue-style-loader": "^3.1.1",
     "vue-template-compiler": "^2.5.13",
     "webpack": "^3.10.0",
-    "webpack-hot-middleware": "^2.21.0",
-    "webpack-bundle-analyzer": "^2.10.1"
+    "webpack-bundle-analyzer": "^2.10.1",
+    "webpack-hot-middleware": "^2.21.0"
   }
 }

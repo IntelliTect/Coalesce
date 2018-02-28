@@ -1,8 +1,8 @@
 
-import * as moment from 'moment';
+import { DateTime } from 'luxon';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
-import { ApiClient, IHaveMetadata, hydrateMetadata } from '../coalesce'
+import { ApiClient, IHaveMetadata, hydrateModel } from '../coalesce'
 import * as metadata from '../metadata.g';
 import * as models from '../models.g';
 
@@ -18,7 +18,6 @@ import { PersonViewModel } from '../viewmodels-sandbox'
 export default class extends Vue {
   metadata = metadata.Person
   person: PersonViewModel | null = null;
-
   isLoading: boolean = false;
   
   pagination = {
@@ -62,18 +61,15 @@ export default class extends Vue {
         this.pagination.rowsPerPage = listResult.pageSize;
         this.count = listResult.totalCount;
         
-        this.person = new PersonViewModel(list[0]);
-        this.person.$startAutoSave(this);
+        // this.person = new PersonViewModel(list[0]);
       })
-  }
-
-  save() {
-    if (this.person)
-      new ApiClient<models.Person>(metadata.Person).save(this.person)
   }
 
   mounted() {
     //this.getData();
+    this.person = new PersonViewModel();
+    this.person.$load(1);
+    this.person.$startAutoSave(this);
   }
 
   

@@ -87,8 +87,8 @@ module ViewModels {
                 callback();
             }
         };
-        
-        public setupValidation = (): void => {
+
+        public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
             ]);

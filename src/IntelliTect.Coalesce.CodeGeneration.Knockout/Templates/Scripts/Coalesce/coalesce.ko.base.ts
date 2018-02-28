@@ -484,7 +484,7 @@ module Coalesce {
         };
 
         /** Setup knockout validation on this ViewModel. This is done automatically unless disabled with setupValidationAutomatically(false) */
-        public abstract setupValidation: () => void;
+        public abstract setupValidation(): void;
 
         /** True if the object is loading. */
         public isLoading: KnockoutObservable<boolean> = ko.observable(false);
@@ -813,7 +813,7 @@ module Coalesce {
             Common base-class level initialization that depends on all constructors being ran
             (and therefore cannot be performed directly in the base constructor).
         */
-        protected baseInitialize = () => {
+        protected baseInitialize() {
 
             var dataSource = this.coalesceConfig.initialDataSource.peek();
             if (dataSource === null) {

@@ -240,8 +240,8 @@ module ViewModels {
                 callback();
             }
         };
-        
-        public setupValidation = (): void => {
+
+        public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
                 this.title.extend({ required: {params: true, message: "You must enter a title for the case."} }),
@@ -311,7 +311,6 @@ module ViewModels {
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);
-            self.devTeamAssigned.subscribe(self.autoSave);
             self.duration.subscribe(self.autoSave);
         
             self.products.subscribe<KnockoutArrayChange<Product>[]>(changes => {

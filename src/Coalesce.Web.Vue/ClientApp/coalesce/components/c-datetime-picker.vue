@@ -13,6 +13,7 @@
     :label="label"
     :value="displayedValue"
     @change="textInputChanged"
+    :error-messages="error"
     append-icon="date_range"
   ></v-text-field>
   <v-tabs ref="tabs" v-model="selectedTab" grow icons >
@@ -47,80 +48,4 @@
 </template>
 
 
-<script lang="ts">
-  import * as moment from 'moment';
-  import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-  // import CDisplay from './c-display';
-  import MetadataComponent from './c-metadata-component'
-  import { ModelProperty } from '../core';
-
-  @Component({
-  name: 'c-datetime-picker',
-  components: {
-    // CDisplay
-  }
-  })
-  export default class extends Vue {
-
-    @Prop({required: false})
-    public value?: moment.Moment | null ;
-
-    @Prop({type: String})
-    public label?: string;
-
-    @Prop({default: 'L LT', type: String}) 
-    public dateFormat?: string;
-
-    get displayedValue() {
-      return this.value && this.value.format(this.dateFormat) || ''
-    }
-
-    
-    textInputChanged(val: string) {
-      var value: moment.Moment | null;
-      if (!val || !val.trim()){
-        value = null
-      } else {
-        value = moment(val, this.dateFormat)
-        if (!value || !value.isValid()){
-          value = moment(this.value || undefined)
-        }
-      }
-      this.$emit('input', value)
-    }
-
-    timeChanged(val: string) {
-      var value = moment(this.value || undefined)
-
-      var parts = /(\d\d):(\d\d)/.exec(val);
-      if (!parts) throw `Time set by vuetify timepicker not in expected format: ${val}`
-
-      value.set({
-        'hour': parseInt(parts[1]),
-        'minute': parseInt(parts[2]),
-      });
-      this.$emit('input', value)
-    }
-
-    dateChanged(val: string) {
-      var value = moment(this.value || undefined)
-
-      var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
-      if (!parts) throw `Date set by vuetify datepicker not in expected format: ${val}`
-
-      value.set({
-        'year': parseInt(parts[1]),
-        'month': parseInt(parts[2]) - 1,
-        'date': parseInt(parts[3])
-      });
-      this.$emit('input', value)
-    }
-
-    menu = false
-    selectedTab: "date" | "time" | null = null; // = "date"
-
-    get datePart() { return this.value && this.value.format("YYYY-MM-DD") || null }
-    get timePart() { return this.value && this.value.format("HH:mm") || null }
-  }
-</script>
-
+<script lang="ts" src="./c-datetime-picker.ts"/>

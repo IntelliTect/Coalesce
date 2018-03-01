@@ -1,5 +1,4 @@
 
-import { DateTime } from 'luxon';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
 import { ApiClient, IHaveMetadata, convertToModel } from '../coalesce'
@@ -67,12 +66,10 @@ export default class extends Vue {
   }
 
   mounted() {
-    //this.getData();
+    
+
     this.person.$load(1)
-      .then(r => {
-        const newCase = this.person!.$addChild("casesAssigned") as models.Case
-        this.person.$startAutoSave(this)
-      })
+    this.person.$startAutoSave(this)
     
     
   }

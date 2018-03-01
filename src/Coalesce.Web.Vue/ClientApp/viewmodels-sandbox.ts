@@ -83,7 +83,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
      * A function for invoking the /delete endpoint, and a set of properties about the state of the last call.
      */
     public $delete = this.$apiClient.$caller("item",
-        c => () => c.delete((this as any)[this.$metadata.keyProp.name]))
+        c => () => c.delete(this.$primaryKey))
 
     // Internal autosave state - seal to prevent unnessecary reactivity
     private _autoSaveState = Object.seal<{
@@ -219,7 +219,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
     }
 }
 
-// TODO: should this really be typeof metadata.Person?
+
 export interface PersonViewModel extends models.Person {}
 export class PersonViewModel extends ViewModel<models.Person> {
     constructor(initialData?: models.Person) {

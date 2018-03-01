@@ -1,7 +1,11 @@
 
-import * as moment from 'moment';
-import { ClassType, IHaveMetadata, ModelType, Property, ExternalType, CollectableType, PropNames, resolvePropMeta } from "./metadata";
-import { Indexable } from './util';
+// Tedious imports for maximum tree shaking
+import * as toDate from 'date-fns/toDate'
+import * as isValid from 'date-fns/isValid'
+import * as format from 'date-fns/format'
+
+import { ClassType, IHaveMetadata, ModelType, Property, ExternalType, CollectableType, PropNames, resolvePropMeta } from "./metadata"
+import { Indexable } from './util'
 
 /**
  * Represents a model with metadata information.
@@ -34,15 +38,11 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
         } else {
             switch (propMeta.type) {
                 case "date": 
-                    // https://codepen.io/anon/pen/PQVNxQ
-                    // This is consistently 20x faster than letting moment parse our date.
-                    // Since we know all our incoming dates are going to be ISO 8601, this is safe.
-                    // Tested for parsing correctness on Firefox, Chrome, and IE 11.
-                    var momentInstance = moment(new Date(propVal));
-                    if (!momentInstance.isValid()) {
+                    var date = toDate(propVal);
+                    if (!isValid(date)) {
                         throw `Recieved unparsable date: ${propVal}`;
                     }
-                    hydrated[propName] = momentInstance;    
+                    hydrated[propName] = date;    
                     break;    
                 case "model":
                 case "object":
@@ -71,10 +71,12 @@ export function mapToDto<T extends Model<ClassType>>(object: T): any {
         var value = (object as Indexable<T>)[propName];
         switch (propMeta.type) {
             case "date":
-                if (moment.isMoment(value)) {
-                    value = value.toISOString(); // TODO: pass keepOffset property for DateTimeOffset, and not DateTime.
-                } else if (value) {
-                    value = value.toString();
+                if (isValid(value)) {
+                    // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+                    value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+                } else if (value != null) {
+                    console.warn(`Invalid date couldn't be mapped: ${value}`)
+                    value = null
                 }
             case "string":
             case "number":

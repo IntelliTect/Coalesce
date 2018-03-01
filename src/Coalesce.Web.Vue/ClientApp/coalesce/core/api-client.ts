@@ -326,7 +326,7 @@ abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultP
         private readonly invoker: TCall
     ) { 
         super();
-        const self = this;
+        
         // Create our invoker function that will ultimately be our instance object.
         const invokeFunc: TCall = function invokeFunc() {
             return invoke._invokeInternal.apply(invoke, arguments);
@@ -336,11 +336,11 @@ abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultP
         invoke.invoke = invoke;
         
         // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
-        for (const stateProp in self) {
-            const value = self[stateProp]
+        for (const stateProp in this) {
+            const value = this[stateProp]
             // Don't define sealed object properties (e.g. this._callbacks)
             if (value != null && typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(invoke, stateProp, self[stateProp], null, true)
+                Vue.util.defineReactive(invoke, stateProp, this[stateProp], null, true)
             }
         }
 

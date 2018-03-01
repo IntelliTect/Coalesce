@@ -78,7 +78,8 @@ module.exports = (env) => {
         },
         plugins: [
             // Exclude unneeded moment locales - these can be very large.
-            new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en|es|fr/),
+            // (commented because we're not using moment anymore)
+            // new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en|es|fr/),
             
             new webpack.DefinePlugin({
                 'process.env': {

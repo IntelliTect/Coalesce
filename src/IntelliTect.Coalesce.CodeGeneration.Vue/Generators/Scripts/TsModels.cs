@@ -16,8 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder();
             b.Line("import * as metadata from './metadata.g'");
-            b.Line("import * as moment from 'moment'");
-            b.Line("import { Model } from './coalesce/core/model'");
+            b.Line("import { Model, convertToModel } from './coalesce/core/model'");
          //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
 
@@ -35,18 +34,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             foreach (var model in Model.ClientClasses)
             {
+                // Allow for instantiation of an empty model.
+                // This deliberately converts and returns an empty object and not `this`.
+                // - We don't want anyone expecting that they can use `x instanceof MyModel`, since such behavior would be very inconsistent 
+                // (only instances created via new MyModel would work, which excludes all those created by the API client.)
+                // Typechecking of models should be done via their metadata.
+                b.Line($"export class {model.ViewModelClassName} {{ constructor () {{ return convertToModel({{}}, metadata.{model.ViewModelClassName}) }} }}");
+
                 using (b.Block($"export interface {model.ViewModelClassName} extends Model<typeof metadata.{model.ViewModelClassName}>"))
                 {
                     foreach (var prop in model.ClientProperties)
                     {
                         // TODO: this .Replace() to get rid of "ViewModels." is a hack. 
-                        // So is the enum handling.
+                        // So is the enum handling, and the moment replacement
                         // We need to create some sort of resolver class for resolving C# types to the names we should use in generated typescript.
                         string type = prop.Type.IsEnum
                             ? prop.Type.Name
                             : prop.Type.TsType
                                 .Replace("ViewModels.", "")
-                                ; //.Replace("moment.Moment", "Date");
+                                .Replace("moment.Moment", "Date");
 
                         b.Line($"{prop.JsVariable}: {type} | null");
                     }

@@ -18,7 +18,7 @@ import { PersonViewModel } from '../viewmodels-sandbox'
 })
 export default class extends Vue {
   metadata = metadata.Person
-  person: PersonViewModel | null = null;
+  person: PersonViewModel = new PersonViewModel();
   isLoading: boolean = false;
   
   pagination = {
@@ -68,12 +68,12 @@ export default class extends Vue {
 
   mounted() {
     //this.getData();
-    this.person = new PersonViewModel()
     this.person.$load(1)
-    this.person.$startAutoSave(this)
-    this.person.$display()
-    this.person.$add()
-    this.person.personId
+      .then(r => {
+        const newCase = this.person!.$addChild("casesAssigned") as models.Case
+        this.person.$startAutoSave(this)
+      })
+    
     
   }
 

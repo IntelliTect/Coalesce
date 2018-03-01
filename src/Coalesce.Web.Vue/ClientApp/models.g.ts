@@ -75,6 +75,7 @@ export interface Company extends Model<typeof metadata.Company> {
 export interface Product extends Model<typeof metadata.Product> {
   productId: number | null
   name: string | null
+  details: ProductDetails | null
 }
 
 export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
@@ -114,6 +115,18 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
 export interface DevTeam extends Model<typeof metadata.DevTeam> {
   devTeamId: number | null
   name: string | null
+}
+
+export interface ProductDetails extends Model<typeof metadata.ProductDetails> {
+  manufacturingAddress: StreetAddress | null
+  companyHqAddress: StreetAddress | null
+}
+
+export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
+  address: string | null
+  city: string | null
+  state: string | null
+  postalCode: string | null
 }
 
 export interface WeatherData extends Model<typeof metadata.WeatherData> {

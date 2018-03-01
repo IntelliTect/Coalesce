@@ -159,11 +159,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             string classMeta(ClassViewModel obj = null)
                             {
                                 obj = (obj ?? prop.Object);
-                                return $"(domain.types.{obj.ViewModelClassName} as {(obj.OnContext ? "ModelType" : "ExternalType")})";
+                                return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ExternalType")})";
                             }
 
                             //string classMeta = $"domain.models.{prop.Object.ViewModelClassName}";
-                            if (prop.Object.OnContext)
+                            if (prop.Object.IsDbMappedType)
                             {
                                 if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
                                 {
@@ -188,14 +188,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 if (prop.Type.IsPOCO)
                                 {
                                     // External type objects
-                                    b.StringProp("type", "collection");
+                                    b.StringProp("type", "object");
                                     b.StringProp("role", "value");
                                     b.Line($"get typeDef() {{ return {classMeta()} }},");
                                 }
                                 else if (prop.Type.IsCollection)
                                 {
                                     // External type collections
-                                    b.StringProp("type", "object");
+                                    b.StringProp("type", "collection");
                                     b.StringProp("role", "value");
                                     b.Line($"get typeDef() {{ return {classMeta()} }},");
                                 }

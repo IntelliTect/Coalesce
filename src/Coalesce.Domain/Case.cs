@@ -70,7 +70,7 @@ namespace Coalesce.Domain
         public int? DevTeamAssignedId { get; set; }
 
         [NotMapped]
-        [ForeignKey("DevTeamAssignedId")]
+        // [ForeignKey("DevTeamAssignedId")]
         public DevTeam DevTeamAssigned { get; set; }
 
         // EF does support TimeSpans. Some of our projects also do.

@@ -26,8 +26,7 @@ namespace IntelliTect.Coalesce.TypeUsage
                 {
                     var usage = new EntityTypeUsage(this, p.PureType.ClassViewModel, p.Name);
 
-                    // TODO: eliminate these.
-                    usage.ClassViewModel.OnContext = true;
+                    // TODO: can this be eliminated?
                     usage.ClassViewModel.HasDbSet = true;
 
                     return usage;

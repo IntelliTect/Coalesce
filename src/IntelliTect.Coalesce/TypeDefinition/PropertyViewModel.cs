@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public TypeViewModel PureType => Type.PureType;
 
-        public bool PureTypeOnContext => PureType.ClassViewModel?.OnContext ?? false;
+        public bool PureTypeOnContext => PureType.ClassViewModel?.IsDbMappedType ?? false;
 
         public string JsVariable => Name.ToCamelCase();
 
@@ -186,7 +186,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
-        public bool HasValidValues => IsManytoManyCollection || ((Object?.OnContext) ?? false && IsPOCO);
+        public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType) ?? false && IsPOCO);
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.
@@ -351,7 +351,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (!Parent.OnContext)
+                if (!Parent.IsDbMappedType && !Parent.IsDto)
                     return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;
@@ -375,21 +375,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (IsPOCO) return false;
-                if (!Parent.OnContext) return false;
-                
-                if (this.HasAttribute<ForeignKeyAttribute>())
-                {
+
+                // Types that aren't DB mapped don't have properties that can be considered keys to anything.
+                if (!Parent.IsDbMappedType) return false;
+
+                // If the foreign key has a navigation property that is on the context, this is a foreign key
+                if (IdPropertyObjectProperty?.PureTypeOnContext ?? false)
                     return true;
-                }
-                if (this.Name.EndsWith("Id") && !IsPrimaryKey && Parent.PropertyByName(Name.Substring(0, Name.Length - 2)) != null)
-                {
-                    return true;
-                }
-                if (Parent.Properties.Any(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)))
-                {
-                    // You can also put the attribute on the POCO property and refer to the key property. This detects that.
-                    return true;
-                }
 
                 return false;
             }
@@ -438,8 +430,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (!IsForeignKey) return null;
-
                 // Use the ForeignKey Attribute if it is there.
                 var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
                 if (value != null) return value;
@@ -449,7 +439,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (prop != null) return prop.Name;
 
                 // Else, by convention remove the Id at the end.
-                return Name.Substring(0, Name.Length - 2);
+                if (Name.EndsWith("Id")) return Name.Substring(0, Name.Length - 2);
+
+                return null;
             }
         }
 

@@ -404,7 +404,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string DisplayName => Type.DisplayName;
 
-        public bool OnContext { get; internal set; }
+        public bool IsDbMappedType => HasDbSet || (DtoBaseViewModel?.HasDbSet ?? false);
 
         /// <summary>
         /// Has a DbSet property in the Context.

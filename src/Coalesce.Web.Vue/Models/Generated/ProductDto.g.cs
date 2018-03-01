@@ -17,6 +17,7 @@ namespace Coalesce.Web.Vue.Models
 
         public int? ProductId { get; set; }
         public string Name { get; set; }
+        public Coalesce.Web.Vue.Models.ProductDetailsDtoGen Details { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -30,6 +31,9 @@ namespace Coalesce.Web.Vue.Models
 
             this.ProductId = obj.ProductId;
             this.Name = obj.Name;
+
+            this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsDtoGen>(context, tree?[nameof(this.Details)]);
+
         }
 
         /// <summary>

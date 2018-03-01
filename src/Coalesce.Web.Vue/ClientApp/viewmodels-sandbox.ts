@@ -1,12 +1,13 @@
 
 import * as metadata from './metadata.g'
 import * as models from './models.g'
-import * as api from './coalesce/core/api-client'
-import { mapToDto, ApiClient, ClassType, ModelType, ApiResult, ItemResult, ListResult, convertToModel, PropNames, Property, CollectionProperty, resolvePropMeta, PropertyOrName, isClassType } from './coalesce';
+import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './coalesce/core/model';
+import { Indexable } from './coalesce/core/util';
 import Vue from 'vue';
-import { Model, modelDisplay, propDisplay } from './coalesce/core/model';
 import { AxiosResponse, AxiosError } from 'axios';
 import * as _ from 'underscore';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, isClassType, PropNames } from './coalesce/core/metadata';
+import { ApiClient } from './coalesce/core/api-client';
 
 /*
 DESIGN NOTES
@@ -19,9 +20,13 @@ DESIGN NOTES
 */
 
 abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TModel["$metadata"]> {
-    abstract readonly $metadata: TModel["$metadata"]
-    public $data: TModel
+    /**
+     * Object which holds all of the data represented by this ViewModel.
+     */
+    // Will always be reactive - is definitely assigned in the ctor.
+    public $data: Indexable<TModel>
 
+    // Won't be reactive, and shouldn't be.
     private _pristineDto: any;
 
     /**
@@ -83,9 +88,8 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
     // Internal autosave state - seal to prevent unnessecary reactivity
     private _autoSaveState = Object.seal<{
         on: boolean,
-        watcher: (() => void) | null
-        debouncer: _.Cancelable | null
-    }>({ on: false, watcher: null, debouncer: null })
+        cleanup: Function | null
+    }>({ on: false, cleanup: null})
 
     /**
      * Starts auto-saving of the instance's data properties when changes occur. 
@@ -93,31 +97,50 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
      * navigation properties are not considered.
      * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
      * @param wait Time in milliseconds to debounce saves for
+     * @param predicate A function that will be called before saving that can return false to prevent a save.
      */
-    public $startAutoSave(vue: Vue, wait: number = 1000) {
+    public $startAutoSave(vue: Vue, wait: number = 1000, predicate?: (viewModel: this) => boolean) {
         this.$stopAutoSave()
 
         const enqueueSave = _.debounce(() => {
+            if (!this._autoSaveState.on) return;
             if (this.$save.isLoading) {
                 // Save already in progress. Enqueue another attempt.
-                enqueueSave();
+                enqueueSave()
             } else if (this.$isDirty) {
+
+                // Check if we should save.
+                if (predicate && !predicate(this)) {
+                    // If not, try again after the timer.
+                    enqueueSave()
+                    return 
+                }
+
                 // No saves in progress - go ahead and save now.
                 this.$save()
             }
         }, wait)
 
-        this._autoSaveState.debouncer = enqueueSave;
-        this._autoSaveState.watcher = vue.$watch(() => this.$isDirty, enqueueSave)
+        const watcher = vue.$watch(() => this.$isDirty, enqueueSave);
+
+        const destroyHook = () => this.$stopAutoSave()
+        vue.$on('hook:beforeDestroy', destroyHook)
+        this._autoSaveState.cleanup = () => {
+            watcher() // This destroys the watcher
+            enqueueSave.cancel()
+            // Cleanup the hook, in case we're not responding to beforeDestroy but instead to a direct call to $stopAutoSave.
+            // If we didn't do this, autosave could later get disabled when the original component is destroyed, 
+            // even though if was later attached to a different component that is still alive.
+            vue.$off('hook:beforeDestroy', destroyHook)
+        }
         this._autoSaveState.on = true;
     }
 
     /** Stops auto-saving if it is currently enabled. */
     public $stopAutoSave() {
         if (!this._autoSaveState.on) return;
+        this._autoSaveState.cleanup!()
         this._autoSaveState.on = false
-        this._autoSaveState.watcher!()
-        this._autoSaveState.debouncer!.cancel()
     }
 
     /**
@@ -130,7 +153,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
         return propDisplay(this, prop);
     }
 
-    public $addChild(prop: PropertyOrName<TModel["$metadata"], CollectionProperty>) {
+    public $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>) {
         const propMeta = resolvePropMeta<CollectionProperty>(this.$metadata, prop)
         var collection: Array<any> = this.$data[propMeta.name];
 
@@ -143,7 +166,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
             var newModel = convertToModel({}, typeDef);
             const foreignKey = propMeta.foreignKey
             if (foreignKey){
-                newModel[foreignKey.name] = this.$primaryKey
+                (newModel as Indexable<TModel>)[foreignKey.name] = this.$primaryKey
             }
             collection.push(newModel);
             return newModel;
@@ -153,10 +176,31 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
         }
     }
 
-    constructor($metadata: TModel["$metadata"], initialData?: TModel) {
+    constructor(public readonly $metadata: TModel["$metadata"], initialData?: TModel) {
+        type self = this;
+
+        this.$metadata = $metadata
         // Late-initialize the metadata of the api client, 
         // since it isn't actually available in the field initializer.
         this.$apiClient.$metadata = $metadata
+
+        // Define proxy getters/setters to the underlying $data object.
+        Object.defineProperties(this, Object.keys($metadata.props).reduce((descriptors, propName) => {
+            // Maybe making this a const avoids creating a closure? Not sure.
+            const propNameConst = propName
+
+            descriptors[propNameConst] = {
+                enumerable: true,
+                get: function(this: self) {
+                    return this.$data[propNameConst]
+                },
+                set: function(this: self, val: any) {
+                    this.$data[propNameConst] = val
+                }
+            }
+            return descriptors
+        }, {} as PropertyDescriptorMap))
+        
 
         if (initialData) {
             if (!initialData.$metadata) {
@@ -178,40 +222,6 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
 // TODO: should this really be typeof metadata.Person?
 export interface PersonViewModel extends models.Person {}
 export class PersonViewModel extends ViewModel<models.Person> {
-//export class PersonViewModel extends ViewModel<typeof metadata.Person, models.Person, PropNames<typeof metadata.Person>> implements models.Person {
-    readonly $metadata = metadata.Person
-
-    get personId() { return this.$data.personId }
-    set personId(val) { this.$data.personId = val }
-    get title() { return this.$data.title }
-    set title(val) { this.$data.title = val }
-    get firstName() { return this.$data.firstName }
-    set firstName(val) { this.$data.firstName = val }
-    get lastName() { return this.$data.lastName }
-    set lastName(val) { this.$data.lastName = val }
-    get birthDate() { return this.$data.birthDate }
-    set birthDate(val) { this.$data.birthDate = val }
-    get email() { return this.$data.email }
-    set email(val) { this.$data.email = val }
-    get gender() { return this.$data.gender }
-    set gender(val) { this.$data.gender = val }
-    get lastBath() { return this.$data.lastBath }
-    set lastBath(val) { this.$data.lastBath = val }
-    get nextUpgrade() { return this.$data.nextUpgrade }
-    set nextUpgrade(val) { this.$data.nextUpgrade = val }
-    get name() { return this.$data.name }
-    set name(val) { this.$data.name = val }
-    get companyId() { return this.$data.companyId }
-    set companyId(val) { this.$data.companyId = val }
-    get personStats() { return this.$data.personStats }
-    set personStats(val) { this.$data.personStats = val }
-    get casesAssigned() { return this.$data.casesAssigned }
-    set casesAssigned(val) { this.$data.casesAssigned = val }
-    get casesReported() { return this.$data.casesReported }
-    set casesReported(val) { this.$data.casesReported = val }
-    get company() { return this.$data.company }
-    set company(val) { this.$data.company = val }
-
     constructor(initialData?: models.Person) {
         super(metadata.Person, initialData)
     }

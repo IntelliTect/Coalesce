@@ -1,13 +1,13 @@
 
 import * as moment from 'moment';
 import { ClassType, IHaveMetadata, ModelType, Property, ExternalType, CollectableType, PropNames, resolvePropMeta } from "./metadata";
+import { Indexable } from './util';
 
 /**
  * Represents a model with metadata information.
  */
 export interface Model<TMeta extends ClassType> extends IHaveMetadata {
     readonly $metadata: TMeta;
-    [k: string]: any | null | undefined
 }
 
 /**
@@ -19,7 +19,7 @@ export interface Model<TMeta extends ClassType> extends IHaveMetadata {
 export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel {
     if (!object) return object;
 
-    const hydrated = Object.assign(object, { $metadata: metadata }) as TModel;
+    const hydrated = Object.assign(object, { $metadata: metadata }) as Indexable<TModel>;
     
     for (const propName in metadata.props) {
         const propMeta = metadata.props[propName];
@@ -68,7 +68,7 @@ export function mapToDto<T extends Model<ClassType>>(object: T): any {
     for (const propName in object.$metadata.props) {
         const propMeta = object.$metadata.props[propName];
 
-        var value = object[propName];
+        var value = (object as Indexable<T>)[propName];
         switch (propMeta.type) {
             case "date":
                 if (moment.isMoment(value)) {
@@ -150,7 +150,7 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(it
 export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(item: T, prop: Property | PropNames<TMeta>) {
     const propMeta = resolvePropMeta(item.$metadata, prop);
 
-    var value = item[propMeta.name];
+    var value = (item as Indexable<T>)[propMeta.name];
 
     switch (propMeta.type) {
         case "enum":

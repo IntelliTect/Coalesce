@@ -84,11 +84,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     {
                         var classViewModel = type.ClassViewModel;
 
-                        // TODO: this is a lie, and is also terrible.
-                        // Just trying to maintain the way that IClassDtos were identified before this overhaul.
-                        // This property is primarily used to determine if there is an API controller serving this data.
-                        classViewModel.OnContext = true;
-
                         // Force cache this since it has extra bits of info attached.
                         _customDtos.Add(Cache(classViewModel, force: true));
 

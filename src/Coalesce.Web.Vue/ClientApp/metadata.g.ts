@@ -117,7 +117,7 @@ export const Person = domain.types.Person = {
     personStats: {
       name: "personStats",
       displayName: "Person Stats",
-      type: "collection",
+      type: "object",
       role: "value",
       get typeDef() { return (domain.types.PersonStats as ExternalType) },
     },
@@ -238,12 +238,12 @@ export const Case = domain.types.Case = {
       name: "devTeamAssignedId",
       displayName: "Dev Team Assigned Id",
       type: "number",
-      role: "foreignKey",
+      role: "value",
     },
     devTeamAssigned: {
       name: "devTeamAssigned",
       displayName: "Dev Team Assigned",
-      type: "collection",
+      type: "object",
       role: "value",
       get typeDef() { return (domain.types.DevTeam as ExternalType) },
     },
@@ -348,6 +348,13 @@ export const Product = domain.types.Product = {
       displayName: "Name",
       type: "string",
       role: "value",
+    },
+    details: {
+      name: "details",
+      displayName: "Details",
+      type: "object",
+      role: "value",
+      get typeDef() { return (domain.types.ProductDetails as ExternalType) },
     },
   },
   methods: {},
@@ -483,14 +490,13 @@ export const PersonStats = domain.types.PersonStats = {
 export const CaseSummary = domain.types.CaseSummary = {
   name: "caseSummary",
   displayName: "Case Summary",
-  get displayProp() { return this.props.caseSummaryId }, 
   type: "object",
   props: {
     caseSummaryId: {
       name: "caseSummaryId",
       displayName: "Case Summary Id",
       type: "number",
-      role: "primaryKey",
+      role: "value",
     },
     openCases: {
       name: "openCases",
@@ -528,11 +534,65 @@ export const DevTeam = domain.types.DevTeam = {
       name: "devTeamId",
       displayName: "Dev Team Id",
       type: "number",
-      role: "primaryKey",
+      role: "value",
     },
     name: {
       name: "name",
       displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+}
+export const ProductDetails = domain.types.ProductDetails = {
+  name: "productDetails",
+  displayName: "Product Details",
+  get displayProp() { return this.props.manufacturingAddress }, 
+  type: "object",
+  props: {
+    manufacturingAddress: {
+      name: "manufacturingAddress",
+      displayName: "Manufacturing Address",
+      type: "object",
+      role: "value",
+      get typeDef() { return (domain.types.StreetAddress as ExternalType) },
+    },
+    companyHqAddress: {
+      name: "companyHqAddress",
+      displayName: "Company Hq Address",
+      type: "object",
+      role: "value",
+      get typeDef() { return (domain.types.StreetAddress as ExternalType) },
+    },
+  },
+}
+export const StreetAddress = domain.types.StreetAddress = {
+  name: "streetAddress",
+  displayName: "Street Address",
+  get displayProp() { return this.props.address }, 
+  type: "object",
+  props: {
+    address: {
+      name: "address",
+      displayName: "Address",
+      type: "string",
+      role: "value",
+    },
+    city: {
+      name: "city",
+      displayName: "City",
+      type: "string",
+      role: "value",
+    },
+    state: {
+      name: "state",
+      displayName: "State",
+      type: "string",
+      role: "value",
+    },
+    postalCode: {
+      name: "postalCode",
+      displayName: "Postal Code",
       type: "string",
       role: "value",
     },
@@ -558,7 +618,7 @@ export const WeatherData = domain.types.WeatherData = {
     location: {
       name: "location",
       displayName: "Location",
-      type: "collection",
+      type: "object",
       role: "value",
       get typeDef() { return (domain.types.Location as ExternalType) },
     },
@@ -607,6 +667,8 @@ interface AppDomain extends Domain {
     PersonStats: typeof PersonStats
     CaseSummary: typeof CaseSummary
     DevTeam: typeof DevTeam
+    ProductDetails: typeof ProductDetails
+    StreetAddress: typeof StreetAddress
     WeatherData: typeof WeatherData
     Location: typeof Location
   }

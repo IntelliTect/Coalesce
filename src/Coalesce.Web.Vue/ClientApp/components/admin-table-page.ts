@@ -2,11 +2,12 @@
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
 import { ApiClient, IHaveMetadata, convertToModel } from '../coalesce'
-import * as metadata from '../metadata.g';
 import { Person } from '../metadata.g';
+import * as metadata from '../metadata.g';
 import * as models from '../models.g';
 
-import { PersonViewModel } from '../viewmodels-sandbox'
+import { PersonViewModel, CaseViewModel } from '../viewmodels.g'
+import { Indexable } from '../coalesce/core/util';
 
 
 @Component({
@@ -67,10 +68,21 @@ export default class extends Vue {
 
   mounted() {
     
+    var case2: Indexable<{}> = {title: "blah"}
+    var person: Indexable<{}> = {}
+    case2.assignedTo = person;
+    person.casesAssigned = [case2];
+    
+    models.Case.from({title: "sdlfjlsdjf"})
 
     this.person.$load(1)
+      .then(r => {
+        this.person!.casesAssigned = [
+          models.Case.from(case2),
+          new CaseViewModel(),
+        ]
+      })
     this.person.$startAutoSave(this)
-    
     
   }
 

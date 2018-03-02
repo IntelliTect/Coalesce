@@ -53,12 +53,11 @@ export default class extends Vue {
                 value = toDate(val)
             }
             
-            // If that didn't work, fall back to the existing value, or Now if there was no existing value.
-            // (Defaulting to now at least gives a hint about the format)
+            // If that didn't work, don't change the underlying value. Instead, display an error.
             if (!value || !isValid(value)) {
                 
                 // TODO: i18n
-                this.error = ["Invalid Date. Try format like " + format(new Date(), this.dateFormat)]
+                this.error = ["Invalid Date. Try formatting like " + format(new Date(), this.dateFormat)]
                 value = null
             }
         }

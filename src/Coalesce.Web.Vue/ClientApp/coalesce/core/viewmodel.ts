@@ -1,13 +1,34 @@
 
-import * as metadata from './metadata.g'
-import * as models from './models.g'
-import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './coalesce/core/model';
-import { Indexable } from './coalesce/core/util';
 import Vue from 'vue';
 import { AxiosResponse, AxiosError } from 'axios';
-import * as _ from 'underscore';
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, isClassType, PropNames } from './coalesce/core/metadata';
-import { ApiClient } from './coalesce/core/api-client';
+import debounce from 'lodash-es/debounce';
+
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, isClassType, PropNames } from './metadata';
+import { ApiClient } from './api-client';
+import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
+import { Indexable } from './util';
+
+/**
+ * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
+ * @param ctor The class to add wrapper properties to
+ * @param metadata The metadata describing the properties to add.
+ */
+export function defineProps<T extends new() => ViewModel<any>>(ctor: T, metadata: ModelType)
+{
+  Object.defineProperties(ctor.prototype,     
+    Object.keys(metadata.props).reduce(function (descriptors, propName) {
+    descriptors[propName] = {
+        enumerable: true,
+        get: function(this: InstanceType<T>) {
+            return this.$data[propName]
+        },
+        set: function(this: InstanceType<T>, val: any) {
+            this.$data[propName] = val
+        }
+    }
+    return descriptors
+  }, {} as PropertyDescriptorMap))
+}
 
 /*
 DESIGN NOTES
@@ -17,9 +38,14 @@ DESIGN NOTES
         we end up with the type of implemented classes taking several pages of the intellisense tooltip.
         With this, we can still strongly type off of known information of TMeta (like PropNames<TModel["$metadata"]>),
         but without it cluttering up tooltips with basically the entire type structure of the metadata.
+    - ViewModels never instantiate other ViewModels on the users' behalf. ViewModels must always be instantiated explicitly.
+        This makes it much easier to reason about the behavior of a program
+        when Coalesce isn't creating ViewModel instances on the developers' behalf.
+        It prevents the existance of deeply nested, difficult-to-access (or even find at all) instances
+        that are difficult to configure. Ideally, all ViewModels exist on instances of components.
 */
 
-abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TModel["$metadata"]> {
+export abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TModel["$metadata"]> {
     /**
      * Object which holds all of the data represented by this ViewModel.
      */
@@ -102,7 +128,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
     public $startAutoSave(vue: Vue, wait: number = 1000, predicate?: (viewModel: this) => boolean) {
         this.$stopAutoSave()
 
-        const enqueueSave = _.debounce(() => {
+        const enqueueSave = debounce(() => {
             if (!this._autoSaveState.on) return;
             if (this.$save.isLoading) {
                 // Save already in progress. Enqueue another attempt.
@@ -126,6 +152,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
         const destroyHook = () => this.$stopAutoSave()
         vue.$on('hook:beforeDestroy', destroyHook)
         this._autoSaveState.cleanup = () => {
+            if (!this._autoSaveState.on) return;
             watcher() // This destroys the watcher
             enqueueSave.cancel()
             // Cleanup the hook, in case we're not responding to beforeDestroy but instead to a direct call to $stopAutoSave.
@@ -153,6 +180,12 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
         return propDisplay(this, prop);
     }
 
+    /**
+     * Creates a new instance of an item for the specified child collection, adds it to that collection, and returns the item.
+     * For class collections, this will be a valid implementation of the corresponding model interface.
+     * For non-class collections, this will be null.
+     * @param prop The name of the collection property, or the metadata representing it.
+     */
     public $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>) {
         const propMeta = resolvePropMeta<CollectionProperty>(this.$metadata, prop)
         var collection: Array<any> = this.$data[propMeta.name];
@@ -181,25 +214,22 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
 
         this.$metadata = $metadata
         // Late-initialize the metadata of the api client, 
-        // since it isn't actually available in the field initializer.
+        // since it isn't available in the field initializer.
         this.$apiClient.$metadata = $metadata
 
         // Define proxy getters/setters to the underlying $data object.
-        Object.defineProperties(this, Object.keys($metadata.props).reduce((descriptors, propName) => {
-            // Maybe making this a const avoids creating a closure? Not sure.
-            const propNameConst = propName
-
-            descriptors[propNameConst] = {
-                enumerable: true,
-                get: function(this: self) {
-                    return this.$data[propNameConst]
-                },
-                set: function(this: self, val: any) {
-                    this.$data[propNameConst] = val
-                }
-            }
-            return descriptors
-        }, {} as PropertyDescriptorMap))
+        // Object.defineProperties(this, Object.keys($metadata.props).reduce((descriptors, propName) => {
+        //     descriptors[propName] = {
+        //         enumerable: true,
+        //         get: function(this: self) {
+        //             return this.$data[propName]
+        //         },
+        //         set: function(this: self, val: any) {
+        //             this.$data[propName] = val
+        //         }
+        //     }
+        //     return descriptors
+        // }, {} as PropertyDescriptorMap))
         
 
         if (initialData) {
@@ -210,8 +240,7 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
             } else {
                 this.$data = initialData
             }
-        }
-        else {
+        } else {
             this.$data = convertToModel({}, $metadata);
         }
 
@@ -219,10 +248,3 @@ abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TMode
     }
 }
 
-
-export interface PersonViewModel extends models.Person {}
-export class PersonViewModel extends ViewModel<models.Person> {
-    constructor(initialData?: models.Person) {
-        super(metadata.Person, initialData)
-    }
-}

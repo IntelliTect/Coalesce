@@ -34,12 +34,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             foreach (var model in Model.ClientClasses)
             {
-                // Allow for instantiation of an empty model.
-                // This deliberately converts and returns an empty object and not `this`.
-                // - We don't want anyone expecting that they can use `x instanceof MyModel`, since such behavior would be very inconsistent 
-                // (only instances created via new MyModel would work, which excludes all those created by the API client.)
-                // Typechecking of models should be done via their metadata.
-                b.Line($"export class {model.ViewModelClassName} {{ constructor () {{ return convertToModel({{}}, metadata.{model.ViewModelClassName}) }} }}");
+                using (b.Block($"export namespace {model.ViewModelClassName}"))
+                {
+                    b.Line($"/** Mutates the input object and its descendents into a valid {model.ViewModelClassName} implementation. */");
+                    b.Line($"export function from(data?: Partial<{model.ViewModelClassName}>): {model.ViewModelClassName} {{ return convertToModel(data || {{}}, metadata.{model.ViewModelClassName}) }}");
+                }
 
                 using (b.Block($"export interface {model.ViewModelClassName} extends Model<typeof metadata.{model.ViewModelClassName}>"))
                 {

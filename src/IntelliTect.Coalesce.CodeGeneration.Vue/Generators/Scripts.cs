@@ -29,6 +29,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 .WithModel(Model)
                 .AppendOutputPath("models.g.ts");
 
+            yield return Generator<TsViewModels>()
+                .WithModel(Model)
+                .AppendOutputPath("viewmodels.g.ts");
+
             //var dynamicGenerators = GetDynamicGenerators().ToList();
             //foreach (var gen in dynamicGenerators)
             //{

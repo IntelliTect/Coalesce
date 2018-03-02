@@ -22,7 +22,10 @@ export enum Statuses {
   Cancelled = 4,
 }
 
-export class Person { constructor () { return convertToModel({}, metadata.Person) } }
+export namespace Person {
+  /** Mutates the input object and its descendents into a valid Person implementation. */
+  export function from(data?: Partial<Person>): Person { return convertToModel(data || {}, metadata.Person) }
+}
 export interface Person extends Model<typeof metadata.Person> {
   personId: number | null
   title: Titles | null
@@ -41,7 +44,10 @@ export interface Person extends Model<typeof metadata.Person> {
   company: Company | null
 }
 
-export class Case { constructor () { return convertToModel({}, metadata.Case) } }
+export namespace Case {
+  /** Mutates the input object and its descendents into a valid Case implementation. */
+  export function from(data?: Partial<Case>): Case { return convertToModel(data || {}, metadata.Case) }
+}
 export interface Case extends Model<typeof metadata.Case> {
   caseKey: number | null
   title: string | null
@@ -60,7 +66,10 @@ export interface Case extends Model<typeof metadata.Case> {
   duration: any | null
 }
 
-export class Company { constructor () { return convertToModel({}, metadata.Company) } }
+export namespace Company {
+  /** Mutates the input object and its descendents into a valid Company implementation. */
+  export function from(data?: Partial<Company>): Company { return convertToModel(data || {}, metadata.Company) }
+}
 export interface Company extends Model<typeof metadata.Company> {
   companyId: number | null
   name: string | null
@@ -74,14 +83,20 @@ export interface Company extends Model<typeof metadata.Company> {
   altName: string | null
 }
 
-export class Product { constructor () { return convertToModel({}, metadata.Product) } }
+export namespace Product {
+  /** Mutates the input object and its descendents into a valid Product implementation. */
+  export function from(data?: Partial<Product>): Product { return convertToModel(data || {}, metadata.Product) }
+}
 export interface Product extends Model<typeof metadata.Product> {
   productId: number | null
   name: string | null
   details: ProductDetails | null
 }
 
-export class CaseProduct { constructor () { return convertToModel({}, metadata.CaseProduct) } }
+export namespace CaseProduct {
+  /** Mutates the input object and its descendents into a valid CaseProduct implementation. */
+  export function from(data?: Partial<CaseProduct>): CaseProduct { return convertToModel(data || {}, metadata.CaseProduct) }
+}
 export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   caseProductId: number | null
   caseId: number | null
@@ -90,28 +105,40 @@ export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   product: Product | null
 }
 
-export class CaseDto { constructor () { return convertToModel({}, metadata.CaseDto) } }
+export namespace CaseDto {
+  /** Mutates the input object and its descendents into a valid CaseDto implementation. */
+  export function from(data?: Partial<CaseDto>): CaseDto { return convertToModel(data || {}, metadata.CaseDto) }
+}
 export interface CaseDto extends Model<typeof metadata.CaseDto> {
   caseId: number | null
   title: string | null
   assignedToName: string | null
 }
 
-export class PersonCriteria { constructor () { return convertToModel({}, metadata.PersonCriteria) } }
+export namespace PersonCriteria {
+  /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
+  export function from(data?: Partial<PersonCriteria>): PersonCriteria { return convertToModel(data || {}, metadata.PersonCriteria) }
+}
 export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   name: string | null
   birthdayMonth: number | null
   emailDomain: string | null
 }
 
-export class PersonStats { constructor () { return convertToModel({}, metadata.PersonStats) } }
+export namespace PersonStats {
+  /** Mutates the input object and its descendents into a valid PersonStats implementation. */
+  export function from(data?: Partial<PersonStats>): PersonStats { return convertToModel(data || {}, metadata.PersonStats) }
+}
 export interface PersonStats extends Model<typeof metadata.PersonStats> {
   height: number | null
   weight: number | null
   name: string | null
 }
 
-export class CaseSummary { constructor () { return convertToModel({}, metadata.CaseSummary) } }
+export namespace CaseSummary {
+  /** Mutates the input object and its descendents into a valid CaseSummary implementation. */
+  export function from(data?: Partial<CaseSummary>): CaseSummary { return convertToModel(data || {}, metadata.CaseSummary) }
+}
 export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseSummaryId: number | null
   openCases: number | null
@@ -120,19 +147,28 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   description: string | null
 }
 
-export class DevTeam { constructor () { return convertToModel({}, metadata.DevTeam) } }
+export namespace DevTeam {
+  /** Mutates the input object and its descendents into a valid DevTeam implementation. */
+  export function from(data?: Partial<DevTeam>): DevTeam { return convertToModel(data || {}, metadata.DevTeam) }
+}
 export interface DevTeam extends Model<typeof metadata.DevTeam> {
   devTeamId: number | null
   name: string | null
 }
 
-export class ProductDetails { constructor () { return convertToModel({}, metadata.ProductDetails) } }
+export namespace ProductDetails {
+  /** Mutates the input object and its descendents into a valid ProductDetails implementation. */
+  export function from(data?: Partial<ProductDetails>): ProductDetails { return convertToModel(data || {}, metadata.ProductDetails) }
+}
 export interface ProductDetails extends Model<typeof metadata.ProductDetails> {
   manufacturingAddress: StreetAddress | null
   companyHqAddress: StreetAddress | null
 }
 
-export class StreetAddress { constructor () { return convertToModel({}, metadata.StreetAddress) } }
+export namespace StreetAddress {
+  /** Mutates the input object and its descendents into a valid StreetAddress implementation. */
+  export function from(data?: Partial<StreetAddress>): StreetAddress { return convertToModel(data || {}, metadata.StreetAddress) }
+}
 export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   address: string | null
   city: string | null
@@ -140,14 +176,20 @@ export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   postalCode: string | null
 }
 
-export class WeatherData { constructor () { return convertToModel({}, metadata.WeatherData) } }
+export namespace WeatherData {
+  /** Mutates the input object and its descendents into a valid WeatherData implementation. */
+  export function from(data?: Partial<WeatherData>): WeatherData { return convertToModel(data || {}, metadata.WeatherData) }
+}
 export interface WeatherData extends Model<typeof metadata.WeatherData> {
   tempFahrenheit: number | null
   humidity: number | null
   location: Location | null
 }
 
-export class Location { constructor () { return convertToModel({}, metadata.Location) } }
+export namespace Location {
+  /** Mutates the input object and its descendents into a valid Location implementation. */
+  export function from(data?: Partial<Location>): Location { return convertToModel(data || {}, metadata.Location) }
+}
 export interface Location extends Model<typeof metadata.Location> {
   city: string | null
   state: string | null

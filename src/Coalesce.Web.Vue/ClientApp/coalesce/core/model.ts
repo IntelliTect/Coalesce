@@ -23,6 +23,11 @@ export interface Model<TMeta extends ClassType> extends IHaveMetadata {
 export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel {
     if (!object) return object;
 
+    // Assume that an object that already has $metadata is already valid. 
+    // This prevents this method from infinitely recursing when it encounters a circular graph.
+    // It may be worth changing this to use an ES6 symbol to mark this instead.
+    if ("$metadata" in object) return object as TModel;
+
     const hydrated = Object.assign(object, { $metadata: metadata }) as Indexable<TModel>;
     
     for (const propName in metadata.props) {
@@ -34,11 +39,12 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
             // Null is a valid type for all model properties (or at least generated models). Undefined is not.
             hydrated[propName] = null
         } else if (propVal === null) {
-            // Incoming value was explicit null. Nothing to be done.
+            // Incoming value was explicit null. Nothing to be done. Nulls are valid for all model properties.
         } else {
             switch (propMeta.type) {
                 case "date": 
-                    var date = toDate(propVal);
+                    // If value is already a date, keep the exact same object.
+                    var date = propVal instanceof Date ? propVal : toDate(propVal);
                     if (!isValid(date)) {
                         throw `Recieved unparsable date: ${propVal}`;
                     }

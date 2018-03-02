@@ -6,7 +6,7 @@ import CDisplay from './c-display';
 import MetadataComponent from './c-metadata-component'
 import { ModelProperty } from '../core';
 import { ApiClient } from '../index';
-import * as _ from 'underscore';
+import debounce from 'lodash-es/debounce';
 
 @Component({
   name: 'c-select',
@@ -39,7 +39,7 @@ export default class extends MetadataComponent {
   mounted() {
     // This needs to be late initialized so we have the correct "this" reference.
     
-    this.debouncedQuery = _.debounce(() => {
+    this.debouncedQuery = debounce(() => {
       this.loading = true;
       
       const propMeta = this.propMeta;

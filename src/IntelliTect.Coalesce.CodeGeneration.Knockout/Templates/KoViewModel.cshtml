@@ -211,7 +211,7 @@ module @moduleName {
                 @:} else {
                     @:this.@(prop.JsVariable)()!.loadFromDto(data.@prop.JsonName);
                 @:}
-                @if (prop.Object.OnContext) { 
+                @if (prop.Object.IsDbMappedType) { 
                 @:if (this.parent instanceof @(prop.Object.ViewModelClassName) && this.parent !== this.@(prop.JsVariable)() && this.parent.@(prop.Object.PrimaryKey.JsVariable)() == this.@(prop.JsVariable)()!.@(prop.Object.PrimaryKey.JsVariable)())
                 @:{
                     @:this.parent.loadFromDto(data.@prop.JsonName, undefined, false);

@@ -139,7 +139,7 @@ export class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $caller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>>(
         resultType: "item",
         invokerFactory: (client: this) => TCall
     ): ItemApiState<TCall, T> & TCall
@@ -148,12 +148,12 @@ export class ApiClient<T extends Model<ClassType>> {
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $caller<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>>(
         resultType: "list",
         invokerFactory: (client: this) => TCall
     ): ListApiState<TCall, T> & TCall
     
-    $caller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
         resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
         invokerFactory: (client: this) => TCall
     ): ApiState<TCall, T> & TCall
@@ -173,11 +173,17 @@ export class ApiClient<T extends Model<ClassType>> {
         return instance as any;
     }
 
-    private $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig) {
+    protected $options(
+        parameters?: ListParameters | FilterParameters | DataSourceParameters, 
+        config?: AxiosRequestConfig,
+        queryParams?: any
+    ) {
         // Merge standard Coalesce params with general configured params if there are any.
-        var mergedParams = config && config.params 
-            ? Object.assign({}, config && config.params, this.$objectify(parameters))
-            : this.$objectify(parameters)
+        var mergedParams: any = Object.assign({}, 
+            queryParams,
+            config && config.params ? config.params : null, 
+            this.$objectify(parameters)
+        )
 
         // Params come last to overwrite config.params with our merged params object.
         return Object.assign({}, 

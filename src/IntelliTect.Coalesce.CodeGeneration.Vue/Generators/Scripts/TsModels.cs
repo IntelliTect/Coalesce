@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
@@ -44,16 +45,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     foreach (var prop in model.ClientProperties)
                     {
-                        // TODO: this .Replace() to get rid of "ViewModels." is a hack. 
-                        // So is the enum handling, and the moment replacement
-                        // We need to create some sort of resolver class for resolving C# types to the names we should use in generated typescript.
-                        string type = prop.Type.IsEnum
-                            ? prop.Type.Name
-                            : prop.Type.TsType
-                                .Replace("ViewModels.", "")
-                                .Replace("moment.Moment", "Date");
-
-                        b.Line($"{prop.JsVariable}: {type} | null");
+                        var typeString = new VueType(prop.Type).TsTypePlain();
+                        b.Line($"{prop.JsVariable}: {typeString} | null");
                     }
                 }
                 b.Line();

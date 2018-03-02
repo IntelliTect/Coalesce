@@ -69,7 +69,13 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
     return object as TModel;
 }
 
-export function mapToDto<T extends Model<ClassType>>(object: T): any {
+export function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null {
+    if (object === null || object === undefined) return null;
+
+    if (!object.$metadata){
+        throw "Object has no $metadata property."
+    }
+    
     var dto: { [k: string]: any } = {};
     for (const propName in object.$metadata.props) {
         const propMeta = object.$metadata.props[propName];

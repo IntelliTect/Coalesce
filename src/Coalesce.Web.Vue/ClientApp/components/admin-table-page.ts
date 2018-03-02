@@ -68,21 +68,17 @@ export default class extends Vue {
 
   mounted() {
     
-    var case2: Indexable<{}> = {title: "blah"}
-    var person: Indexable<{}> = {}
-    case2.assignedTo = person;
-    person.casesAssigned = [case2];
-    
-    models.Case.from({title: "sdlfjlsdjf"})
 
     this.person.$load(1)
       .then(r => {
-        this.person!.casesAssigned = [
-          models.Case.from(case2),
-          new CaseViewModel(),
-        ]
+        this.person!.$apiClient.removePersonById(200)
+        this.person!.$apiClient.fullNameAndAge(1)
+        this.person!.$apiClient.personCount("Roberts")
+        this.person!.$apiClient.getUser()
+        this.person!.$apiClient.obfuscateEmail(1)
       })
-    this.person.$startAutoSave(this)
+    
+      //this.person.$startAutoSave(this)
     
   }
 

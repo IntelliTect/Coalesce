@@ -13,7 +13,7 @@ import { Indexable } from './util';
  * @param ctor The class to add wrapper properties to
  * @param metadata The metadata describing the properties to add.
  */
-export function defineProps<T extends new() => ViewModel<any>>(ctor: T, metadata: ModelType)
+export function defineProps<T extends new() => ViewModel<any, any>>(ctor: T, metadata: ModelType)
 {
   Object.defineProperties(ctor.prototype,     
     Object.keys(metadata.props).reduce(function (descriptors, propName) {
@@ -45,7 +45,10 @@ DESIGN NOTES
         that are difficult to configure. Ideally, all ViewModels exist on instances of components.
 */
 
-export abstract class ViewModel<TModel extends Model<ModelType>> implements Model<TModel["$metadata"]> {
+export abstract class ViewModel<
+    TModel extends Model<ModelType>,
+    TApi extends ApiClient<TModel>,
+> implements Model<TModel["$metadata"]> {
     /**
      * Object which holds all of the data represented by this ViewModel.
      */
@@ -69,15 +72,9 @@ export abstract class ViewModel<TModel extends Model<ModelType>> implements Mode
     public set $isDirty(val) { if (val) throw "Can't set $isDirty to true manually"; this._pristineDto = mapToDto(this.$data) }
 
     /**
-     * Instance of an API client for the model through which direct, stateless API requests may be made.
-     */
-    // Metadata will actually be undefined here. It will be late-initialized in the ctor.
-    public $apiClient: ApiClient<TModel> = new ApiClient<TModel>(this.$metadata)
-
-    /**
      * A function for invoking the /get endpoint, and a set of properties about the state of the last call.
      */
-    public $load = this.$apiClient.$caller("item",
+    public $load = this.$apiClient.$makeCaller("item",
         c => (id?: string | number) => c.get(id != null ? id : this.$primaryKey))
         // TODO: merge in the result, don't replace the existing one.
         .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
@@ -85,7 +82,7 @@ export abstract class ViewModel<TModel extends Model<ModelType>> implements Mode
     /**
      * A function for invoking the /save endpoint, and a set of properties about the state of the last call.
      */
-    public $save = this.$apiClient.$caller("item", 
+    public $save = this.$apiClient.$makeCaller("item", 
         c => () => {
             // Before we make the save call, set isDirty = false.
             // This lets us detect changes that happen to the model while our save request is pending.
@@ -108,7 +105,7 @@ export abstract class ViewModel<TModel extends Model<ModelType>> implements Mode
     /**
      * A function for invoking the /delete endpoint, and a set of properties about the state of the last call.
      */
-    public $delete = this.$apiClient.$caller("item",
+    public $delete = this.$apiClient.$makeCaller("item",
         c => () => c.delete(this.$primaryKey))
 
     // Internal autosave state - seal to prevent unnessecary reactivity
@@ -209,13 +206,22 @@ export abstract class ViewModel<TModel extends Model<ModelType>> implements Mode
         }
     }
 
-    constructor(public readonly $metadata: TModel["$metadata"], initialData?: TModel) {
+    // protected _lateInitialize<T>(initializer: (this: this) => T) {
+
+    // }
+
+    constructor(
+        // The following MUST be declared in the constructor so they will be available to property initializers.
+        public readonly $metadata: TModel["$metadata"], 
+        /**
+         * Instance of an API client for the model through which direct, stateless API requests may be made.
+         */
+        public readonly $apiClient: TApi,
+        initialData?: TModel
+    ) {
         type self = this;
 
         this.$metadata = $metadata
-        // Late-initialize the metadata of the api client, 
-        // since it isn't available in the field initializer.
-        this.$apiClient.$metadata = $metadata
 
         // Define proxy getters/setters to the underlying $data object.
         // Object.defineProperties(this, Object.keys($metadata.props).reduce((descriptors, propName) => {

@@ -95,6 +95,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public IEnumerable<ParameterViewModel> ClientParameters => Parameters.Where(f => !f.IsDI);
 
+        public bool IsModelInstanceMethod => !IsStatic && !Parent.IsService;
+
         /// <summary>
         /// Gets the CS parameters for this method call.
         /// </summary>
@@ -106,7 +108,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var outParameters = new List<string>();
 
                 // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
-                if (!IsStatic && !Parent.IsService)
+                if (IsModelInstanceMethod)
                 {
                     outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
                     outParameters.Add($"{Parent.PrimaryKey.PureType.FullyQualifiedName} id");
@@ -152,13 +154,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var result = "{ ";
-                if (!IsStatic && !Parent.IsService)
+                if (IsModelInstanceMethod)
                 {
                     result = result + "id: this.parent[this.parent.primaryKeyName]()";
                     if (Parameters.Any()) result = result + ", ";
                 }
 
-                result += string.Join(", ", ClientParameters.Select(f => $"{f.JsVariable}: {f.TsConversion(f.JsVariable)}"));
+                string TsConversion(ParameterViewModel param)
+                {
+                    string argument = param.JsVariable;
+                    if (param.Type.HasClassViewModel)
+                        return $"{argument} ? {argument}.saveToDto() : null";
+                    if (param.Type.IsDate)
+                        return $"{argument} ? {argument}.format() : null";
+                    return argument;
+                }
+
+                result += string.Join(", ", ClientParameters.Select(f => $"{f.JsVariable}: {TsConversion(f)}"));
                 result += " }";
                 return result;
 

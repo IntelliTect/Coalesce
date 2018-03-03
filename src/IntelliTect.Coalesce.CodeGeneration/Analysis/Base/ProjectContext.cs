@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base
         /// <summary>
         /// Full path of the project file.
         /// </summary>
-        public string ProjectFilePath { get; set; }
+        public string ProjectFilePath { get; }
 
         /// <summary>
         /// Full path to the project directory.
@@ -41,12 +41,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base
         /// <summary>
         /// Build configuration (Debug/Release) to use when building or analyzing projects.
         /// </summary>
-        public string Configuration { get; set; }
+        public string Configuration { get; }
 
         /// <summary>
         /// Framework to build against when building or analyzing projects.
         /// </summary>
-        public string Framework { get; set; }
+        public string Framework { get; }
 
         public virtual string RootNamespace { get; }
 

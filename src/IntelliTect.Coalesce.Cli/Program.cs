@@ -72,7 +72,7 @@ namespace IntelliTect.Coalesce.Cli
                 config = serializer.Deserialize<CoalesceConfiguration>(jsonReader);
             }
 
-            if (!Enum.TryParse(LogLevelOption, out LogLevel logLevel)) logLevel = LogLevel.Information;
+            if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
 
 
             var executor = new GenerationExecutor(config, logLevel);

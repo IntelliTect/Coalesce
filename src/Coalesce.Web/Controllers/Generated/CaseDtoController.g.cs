@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Knockout.Controllers;
+using IntelliTect.Coalesce.Knockout.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +8,7 @@ namespace Coalesce.Web.Controllers
     [Authorize]
     public partial class CaseDtoController : BaseViewController<Coalesce.Domain.CaseDto>
     {
+
         [Authorize]
         public ActionResult Cards()
         {

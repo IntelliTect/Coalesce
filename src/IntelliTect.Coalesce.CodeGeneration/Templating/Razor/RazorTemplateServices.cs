@@ -17,16 +17,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
             GenerationContext genContext,
             ITemplateResolver resolver,
             RazorTemplateCompiler compiler)
-            : base(genContext.CoalesceConfiguration, loggerFactory)
+            : base(genContext.CoalesceConfiguration, repository, genContext, loggerFactory)
         {
-            ReflectionRepository = repository;
-            GenerationContext = genContext;
             Resolver = resolver;
             Compiler = compiler;
         }
 
-        public ReflectionRepository ReflectionRepository { get; }
-        public GenerationContext GenerationContext { get; }
         public ITemplateResolver Resolver { get; }
         public RazorTemplateCompiler Compiler { get; }
     }

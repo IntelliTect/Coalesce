@@ -31,18 +31,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 var syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(output));
                 var root = syntaxTree.GetRoot();
 
-                // Abandoned idea for refactoring code with Roslyn to clean up fully qualified names.
-                // May revisit at some point if there's any interest.
-                // The point of it is to add using statements for names that are fully-qualified,
-                // and then remove that full qualification.
-                //var refactors = new[]
-                //{
-                //    new Refactorings.AddUsingStatements(GenerationContext.WebProject)
-                //};
-                //foreach (var refactor in refactors)
-                //{
-                //    root = await refactor.RefactorAsync(root as CompilationUnitSyntax);
-                //}
                 using (var workspace = new AdhocWorkspace())
                 {
                     var options = workspace.Options

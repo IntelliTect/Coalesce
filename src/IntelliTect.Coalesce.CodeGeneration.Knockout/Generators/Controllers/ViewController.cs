@@ -5,14 +5,89 @@ using System.Collections.Generic;
 using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
+using System.Threading.Tasks;
+using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class ViewController : RazorTemplateCSharpGenerator<ClassViewModel>
+    public class ViewController : KnockoutCsGenerator
     {
         public ViewController(RazorTemplateServices razorServices) : base(razorServices) { }
+        
+        public override void BuildOutput(CSharpCodeBuilder b)
+        {
+            string namespaceName = Namespace;
+            string viewLocation = "~/Views";
+            if (!string.IsNullOrWhiteSpace(AreaName))
+            {
+                namespaceName += "." + AreaName;
+                viewLocation = "~/Areas/" + AreaName + "/Views";
+            }
 
-        public override TemplateDescriptor Template =>
-            new TemplateDescriptor("Templates", "ViewController.cshtml");
+
+            b.Line("using IntelliTect.Coalesce.Knockout.Controllers;");
+            b.Line("using Microsoft.AspNetCore.Authorization;");
+            b.Line("using Microsoft.AspNetCore.Mvc;");
+            b.Line("using Microsoft.AspNetCore.Hosting;");
+
+            b.Line();
+            using (b.Block($"namespace {namespaceName}.Controllers"))
+            {
+                if (!string.IsNullOrWhiteSpace(AreaName))
+                {
+                    b.Line($"[Area(\"{AreaName}\")]");
+                }
+                b.Line($"{Model.SecurityInfo.ClassAnnotation}");
+
+                using (b.Block($"public partial class {Model.ViewControllerClassName} : BaseViewController<{Model.FullyQualifiedName}>"))
+                {
+                    b.Line($"{Model.SecurityInfo.ReadAnnotation}");
+                    using (b.Block("public ActionResult Cards()"))
+                    {
+                        b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.Name}/Cards.cshtml\");");
+                    }
+
+                    b.Line();
+                    b.Line($"{Model.SecurityInfo.ReadAnnotation}");
+                    using (b.Block("public ActionResult Table()"))
+                    {
+                        b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.Name}/Table.cshtml\");");
+                    }
+
+                    b.Line();
+                    if (Model.SecurityInfo.IsEditAllowed())
+                    {
+                        b.Line();
+                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        using (b.Block("public ActionResult TableEdit()"))
+                        {
+                            b.Line($"return IndexImplementation(true, @\"{viewLocation}/Generated/{Model.Name}/Table.cshtml\");");
+                        }
+
+                        b.Line();
+                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        using (b.Block("public ActionResult CreateEdit()"))
+                        {
+                            b.Line($"return CreateEditImplementation(@\"{viewLocation}/Generated/{Model.Name}/CreateEdit.cshtml\");");
+                        }
+
+                        b.Line();
+                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        using (b.Block("public ActionResult EditorHtml(bool simple = false)"))
+                        {
+                            b.Line("return EditorHtmlImplementation(simple);");
+                        }
+
+                        b.Line();
+                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        using (b.Block("public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)"))
+                        {
+                            b.Line("return DocsImplementation(hostingEnvironment);");
+                        }
+                    }
+                }
+            }
+        }
     }
 }

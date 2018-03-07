@@ -38,25 +38,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "";
         }
 
-        protected override IReadOnlyCollection<PropertyViewModel> RawProperties
+        protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent)
         {
-            get
-            {
-                var result = Symbol.GetMembers()
-                    .Where(s => s.Kind == SymbolKind.Property)
-                    .Cast<IPropertySymbol>()
-                    .Select((s, i) => new SymbolPropertyViewModel(this, s) { ClassFieldOrder = i })
-                    .Cast<PropertyViewModel>()
-                    .ToList();
+            var result = Symbol.GetMembers()
+                .Where(s => s.Kind == SymbolKind.Property)
+                .Cast<IPropertySymbol>()
+                .Select((s, i) => new SymbolPropertyViewModel(effectiveParent, this, s) { ClassFieldOrder = i })
+                .Cast<PropertyViewModel>()
+                .ToList();
 
-                // Add properties from the base class
-                if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
-                {
-                    var parentSymbol = new SymbolClassViewModel(Symbol.BaseType);
-                    result.AddRange(parentSymbol.RawProperties);
-                }
-                return result.AsReadOnly();
+            // Add properties from the base class
+            if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
+            {
+                var parentSymbol = new SymbolClassViewModel(Symbol.BaseType);
+                result.AddRange(parentSymbol.RawProperties(effectiveParent));
             }
+            return result.AsReadOnly();
         }
 
         protected override IReadOnlyCollection<MethodViewModel> RawMethods

@@ -21,9 +21,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => "";
 
-        protected override IReadOnlyCollection<PropertyViewModel> RawProperties => Info
+        protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent) => Info
             .GetProperties()
-            .Select((p, i) => new ReflectionPropertyViewModel(this, p){ ClassFieldOrder = i })
+            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, new ReflectionTypeViewModel(p.DeclaringType).ClassViewModel, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
             .ToList().AsReadOnly();
 

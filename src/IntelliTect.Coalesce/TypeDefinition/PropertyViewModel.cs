@@ -59,7 +59,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string JsonName => Name.ToCamelCase();
         
+        /// <summary>
+        /// The class that the property was declared on. 
+        /// For the class that is the context in which the property was requested,
+        /// use <see cref="EffectiveParent"/>
+        /// </summary>
         public ClassViewModel Parent { get; protected set; }
+        
+        /// <summary>
+        /// The class that is the context in which the property was requested.
+        /// Not nessecarily the class that the property is declared on. For that, use <see cref="Parent"/>
+        /// </summary>
+        public ClassViewModel EffectiveParent { get; protected set; }
 
         /// <summary>
         /// Gets the type name without any collection around it.
@@ -351,7 +362,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (!Parent.IsDbMappedType && !Parent.IsDto)
+                // EffectiveParent used here because primary keys may be declared on a base class (as they are with AspNetCore.Identity).
+                if (!EffectiveParent.IsDbMappedType && !Parent.IsDto)
                     return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;

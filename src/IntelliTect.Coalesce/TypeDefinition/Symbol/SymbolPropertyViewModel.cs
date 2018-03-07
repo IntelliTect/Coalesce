@@ -12,9 +12,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected IPropertySymbol Symbol;
 
-        public SymbolPropertyViewModel(ClassViewModel parent, IPropertySymbol symbol)
+        public SymbolPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, IPropertySymbol symbol)
         {
-            Parent = parent;
+            Parent = declaringParent;
+            EffectiveParent = effectiveParent;
             Symbol = symbol;
             Type = new SymbolTypeViewModel(Symbol.Type);
         }
@@ -38,6 +39,5 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsVirtual => Symbol.IsVirtual;
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
-
     }
 }

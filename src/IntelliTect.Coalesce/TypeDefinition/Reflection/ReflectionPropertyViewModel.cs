@@ -11,9 +11,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected PropertyInfo Info { get; }
 
-        public ReflectionPropertyViewModel(ClassViewModel parent, PropertyInfo propetyInfo)
+        public ReflectionPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, PropertyInfo propetyInfo)
         {
-            Parent = parent;
+            Parent = declaringParent;
+            EffectiveParent = effectiveParent;
             Info = propetyInfo;
             Type = new ReflectionTypeViewModel(Info.PropertyType);
         }

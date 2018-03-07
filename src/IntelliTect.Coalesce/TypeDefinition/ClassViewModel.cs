@@ -117,7 +117,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Member Info - Properties & Methods
 
-        protected abstract IReadOnlyCollection<PropertyViewModel> RawProperties { get; }
+        protected abstract IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent);
         protected abstract IReadOnlyCollection<MethodViewModel> RawMethods { get; }
         protected abstract IReadOnlyCollection<TypeViewModel> RawNestedTypes { get; }
 
@@ -136,7 +136,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 var properties = new List<PropertyViewModel>();
                 int count = 1;
-                foreach (var prop in RawProperties)
+                foreach (var prop in RawProperties(this))
                 {
                     if (properties.Any(f => f.Name == prop.Name))
                     {

@@ -14,7 +14,7 @@ import * as setMinutes from 'date-fns/setMinutes'
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
 // import CDisplay from './c-display';
 import MetadataComponent from './c-metadata-component'
-import { ModelProperty } from '../core';
+import { ModelProperty } from 'coalesce-vue/lib/metadata';
 
 @Component({
     name: 'c-datetime-picker',

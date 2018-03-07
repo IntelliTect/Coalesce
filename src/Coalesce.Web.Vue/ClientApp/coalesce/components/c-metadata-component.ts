@@ -1,6 +1,6 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-import { IHaveMetadata, Property } from '../core'
+import { IHaveMetadata, Property } from 'coalesce-vue/lib/metadata'
 
 export default abstract class extends Vue {
 

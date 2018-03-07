@@ -1,13 +1,12 @@
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
-import { ApiClient, IHaveMetadata, convertToModel } from '../coalesce'
+import { ApiClient, IHaveMetadata, convertToModel } from 'coalesce-vue'
 import { Person } from '../metadata.g';
 import * as metadata from '../metadata.g';
 import * as models from '../models.g';
 
 import { PersonViewModel, CaseViewModel } from '../viewmodels.g'
-import { Indexable } from '../coalesce/core/util';
 
 
 @Component({

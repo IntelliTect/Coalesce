@@ -4,8 +4,8 @@ import { Vue, Component, Watch } from 'vue-property-decorator';
 // import { VSelect } from 'vuetify/es5/components/VSelect';
 import CDisplay from './c-display';
 import MetadataComponent from './c-metadata-component'
-import { ModelProperty } from '../core';
-import { ApiClient } from '../index';
+import { ModelProperty } from 'coalesce-vue/lib/metadata';
+import { ApiClient } from 'coalesce-vue/lib/api-client';
 import debounce from 'lodash-es/debounce';
 
 @Component({

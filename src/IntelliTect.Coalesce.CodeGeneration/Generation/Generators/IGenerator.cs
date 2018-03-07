@@ -11,7 +11,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 {
     public interface IGenerator
     {
-        string OutputPath { get; set; }
+        string DefaultOutputPath { get; set; }
+
+        string EffectiveOutputPath { get; }
 
         bool IsDisabled { get; }
 

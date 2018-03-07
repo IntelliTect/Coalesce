@@ -27,6 +27,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
         public string TypescriptModulePrefix { get; set; } = null;
 
+        /// <summary>
+        /// Path relative to the .csproj of the web project where all output should be written.
+        /// </summary>
+        /// <remarks>TODO: needs documentation</remarks>
+        public string TargetDirectory { get; set; } = null;
     }
 
     public class ProjectConfiguration

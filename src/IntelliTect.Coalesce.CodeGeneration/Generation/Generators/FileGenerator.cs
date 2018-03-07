@@ -15,6 +15,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
     {
         protected FileGenerator(GeneratorServices services) : base(services) { }
 
+        public override string EffectiveOutputPath =>
+            string.IsNullOrWhiteSpace(TargetDirectory)
+            // No configured output - just use the normal output path.
+            ? DefaultOutputPath
+            // User has configured an output location - insert this at the end of the directory part of the path.
+            : Path.Combine(Path.GetDirectoryName(DefaultOutputPath), TargetDirectory, Path.GetFileName(DefaultOutputPath));
+
         public override async Task GenerateAsync()
         {
             if (IsDisabled)
@@ -31,21 +38,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             using (var contents = await GetOutputAsync())
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(EffectiveOutputPath));
 
-                if (!await FileUtilities.HasDifferencesAsync(contents, OutputPath))
+                if (!await FileUtilities.HasDifferencesAsync(contents, EffectiveOutputPath))
                 {
                     Logger?.LogTrace($"Skipped write of {this}, existing file wasn't different");
                     return;
                 }
 
-                var isRegen = File.Exists(OutputPath);
-                using (FileStream fileStream = new FileStream(OutputPath, FileMode.Create, FileAccess.Write))
+                var isRegen = File.Exists(EffectiveOutputPath);
+                using (FileStream fileStream = new FileStream(EffectiveOutputPath, FileMode.Create, FileAccess.Write))
                 {
                     contents.Seek(0, SeekOrigin.Begin);
                     await contents.CopyToAsync(fileStream);
 
-                    Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(OutputPath));
+                    Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(EffectiveOutputPath));
                     Logger?.LogInformation($"{(isRegen ? "Reg" : "G")}enerated: {Uri.UnescapeDataString(relPath.OriginalString)}");
                 };
             }

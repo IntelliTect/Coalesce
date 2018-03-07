@@ -69,7 +69,14 @@ namespace IntelliTect.Coalesce.Cli
             }
 
             // Must go AFTER we load in the config file, since if the config file was a relative path, changing this ruins that.
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(configFilePath));
+            var desiredDirectory = Path.GetDirectoryName(configFilePath);
+            if (!string.IsNullOrWhiteSpace(desiredDirectory))
+            {
+                // If we're already in the desired working directory, desiredDirectory will be String.Empty,
+                // and an exception would be thrown. So, we check before calling this.
+                Directory.SetCurrentDirectory(desiredDirectory);
+            }
+
             Console.WriteLine(
                 $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
 

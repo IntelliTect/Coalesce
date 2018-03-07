@@ -18,6 +18,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public List<ICleaner> Cleaners { get; protected set; } = new List<ICleaner>();
 
+        public override string EffectiveOutputPath =>
+            string.IsNullOrWhiteSpace(TargetDirectory)
+            // No configured output - just use the normal output path.
+            ? DefaultOutputPath
+            // User has configured an output location - insert this at the end of the path.
+            : Path.Combine(DefaultOutputPath, TargetDirectory);
+
         public CompositeGenerator(CompositeGeneratorServices services) : base(services)
         {
             this._services = services;
@@ -27,7 +34,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             where TGenerator : IGenerator
         {
             var generator = ActivatorUtilities.CreateInstance<TGenerator>(_services.ServiceProvider);
-            generator.OutputPath = OutputPath;
+            generator.DefaultOutputPath = EffectiveOutputPath;
             return generator;
         }
 
@@ -36,7 +43,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             var cleaner = ActivatorUtilities.CreateInstance<TCleaner>(_services.ServiceProvider);
             cleaner.Owner = this;
-            cleaner.TargetPath = OutputPath;
+            cleaner.TargetPath = EffectiveOutputPath;
             return cleaner;
         }
 
@@ -54,7 +61,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                     yield break;
                 }
 
-                Logger.LogDebug($"{prefix} {composite.GetType().FullName} => {composite.OutputPath}");
+                Logger.LogDebug($"{prefix} {composite.GetType().FullName} => {composite.EffectiveOutputPath}");
 
                 prefix = string.Concat(Enumerable.Repeat("  |", depth + 1));
 
@@ -63,7 +70,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                     if (generator.IsDisabled)
                     {
                         Logger.LogDebug($"{prefix} {generator.GetType().FullName} => DISABLED");
-                        yield break;
+                        continue;
                     }
                     else if (generator is ICompositeGenerator childComposite)
                     {
@@ -71,7 +78,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                     }
                     else
                     {
-                        Logger.LogDebug($"{prefix} {generator.GetType().FullName} => {generator.OutputPath}");
+                        Logger.LogDebug($"{prefix} {generator.GetType().FullName} => {generator.EffectiveOutputPath}");
                     }
 
                     yield return generator;
@@ -82,7 +89,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             var fileGenerators = allGenerators.OfType<IFileGenerator>().ToList();
             var compositeGenerators = allGenerators.OfType<ICompositeGenerator>().ToList();
-            var outputtedFiles = fileGenerators.Select(g => g.OutputPath).ToList();
+            var outputtedFiles = fileGenerators.Select(g => g.EffectiveOutputPath).ToList();
             var cleaners = compositeGenerators.SelectMany(g => g.GetCleaners()).ToList();
 
             await Task.WhenAll(fileGenerators
@@ -99,9 +106,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public override string ToString()
         {
-            if (OutputPath != null)
+            if (EffectiveOutputPath != null)
             {
-                return $"{this.GetType().Name} => {OutputPath}";
+                return $"{this.GetType().Name} => {EffectiveOutputPath}";
             }
 
             return this.GetType().Name;

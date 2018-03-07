@@ -26,11 +26,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             b.Line();
             b.Line($"/// <reference path=\"coalesce.dependencies.d.ts\" />");
 
-            foreach (var referencePath in Model.Select(m => m.OutputPath).OrderBy(p => p))
+            foreach (var referencePath in Model.Select(m => m.EffectiveOutputPath).OrderBy(p => p))
             {
                 // https://stackoverflow.com/a/1766773/2465631
                 Uri referencedFilePath = new Uri(referencePath);
-                Uri referenceFile = new Uri(this.OutputPath);
+                Uri referenceFile = new Uri(this.EffectiveOutputPath);
                 Uri diff = referenceFile.MakeRelativeUri(referencedFilePath);
                 string relPath = diff.OriginalString;
 

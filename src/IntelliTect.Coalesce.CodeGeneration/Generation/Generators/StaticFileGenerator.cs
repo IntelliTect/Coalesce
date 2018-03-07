@@ -30,13 +30,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             return Task.FromResult(Resolver.Resolve(Template).GetContents());
         }
 
-        public override bool ShouldGenerate() => NoOverwrite ? !File.Exists(OutputPath) : true;
+        public override bool ShouldGenerate() => NoOverwrite ? !File.Exists(EffectiveOutputPath) : true;
 
         public override string ToString()
         {
-            if (OutputPath != null)
+            if (EffectiveOutputPath != null)
             {
-                return $"{Template.ToString()} => {OutputPath}";
+                return $"{Template.ToString()} => {EffectiveOutputPath}";
             }
             return Template.ToString();
         }

@@ -50,9 +50,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public override string ToString()
         {
-            if (OutputPath != null)
+            if (EffectiveOutputPath != null)
             {
-                return $"{Template.ToString()} => {OutputPath}";
+                return $"{Template.ToString()} => {EffectiveOutputPath}";
             }
             return Template.ToString();
         }

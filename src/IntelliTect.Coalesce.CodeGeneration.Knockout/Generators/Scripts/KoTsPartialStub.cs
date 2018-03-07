@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         public override bool ShouldGenerate()
         {
-            return !File.Exists(OutputPath);
+            return !File.Exists(EffectiveOutputPath);
         }
 
         public override TemplateDescriptor Template =>

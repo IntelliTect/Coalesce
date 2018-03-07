@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -97,10 +98,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 return;
             }
 
+            string outputPath = genContext.WebProject.ProjectPath;
+            if (Config.Output.TargetDirectory != null)
+            {
+                outputPath = Path.Combine(outputPath, Config.Output.TargetDirectory);
+            }
+
             var generator = 
                 (ActivatorUtilities.CreateInstance(provider, rootGenerator) as IRootGenerator)
                 .WithModel(rr)
-                .WithOutputPath(genContext.WebProject.ProjectPath);
+                .WithOutputPath(outputPath);
 
             logger.LogInformation("Starting Generation");
 

@@ -27,9 +27,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public override string ToString()
         {
-            if (OutputPath != null)
+            if (EffectiveOutputPath != null)
             {
-                return $"{GetType().FullName} => {OutputPath}";
+                return $"{GetType().FullName} => {EffectiveOutputPath}";
             }
             return GetType().FullName;
         }

@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public static T WithOutputPath<T>(this T generator, string outputPath)
             where T : IGenerator
         {
-            generator.OutputPath = outputPath;
+            generator.DefaultOutputPath = outputPath;
             return generator;
         }
 
@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public static T AppendOutputPath<T>(this T generator, string outputPath)
             where T : IGenerator
         {
-            generator.OutputPath = Path.Combine(generator.OutputPath, outputPath);
+            generator.DefaultOutputPath = Path.Combine(generator.DefaultOutputPath, outputPath);
             return generator;
         }
 

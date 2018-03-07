@@ -23,7 +23,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public bool IsDisabled { get; private set; }
 
-        public virtual string OutputPath { get; set; }
+        /// <summary>
+        /// Output path that will be set in C# when instantiating generators.
+        /// For the ultimate destination of generated files, use <see cref="EffectiveOutputPath"/>
+        /// </summary>
+        public string DefaultOutputPath { get; set; }
+
+         // todo: document this. 
+        /// <summary>
+        /// Configues a path relative to the default output path for a generator for that generator's output to be placed in.
+        /// </summary>
+        [GeneratorConfig]
+        public string TargetDirectory { get; set; }
+
+        /// <summary>
+        /// The desired destination path of generated files, including any user configuration through <see cref="TargetDirectory"/>
+        /// </summary>
+        public abstract string EffectiveOutputPath { get; }
 
         public abstract Task GenerateAsync();
 

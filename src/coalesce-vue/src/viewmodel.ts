@@ -3,8 +3,8 @@ import Vue from 'vue';
 import { AxiosResponse, AxiosError } from 'axios';
 import debounce from 'lodash-es/debounce';
 
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, isClassType, PropNames } from './metadata';
-import { ApiClient } from './api-client';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, isClassType, PropNames, ExternalType } from './metadata';
+import { ApiClient, ItemResult, ItemApiState } from './api-client';
 import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
 import { Indexable } from './util';
 

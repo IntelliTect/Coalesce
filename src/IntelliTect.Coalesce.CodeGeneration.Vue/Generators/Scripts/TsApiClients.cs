@@ -18,8 +18,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             var b = new TypeScriptCodeBuilder();
             b.Line("import * as models from './models.g'");
             b.Line("import * as qs from 'qs'");
-            b.Line("import { mapToDto as $mapToDto } from './coalesce/core/model'");
-            b.Line("import { AxiosClient, ApiClient } from './coalesce/core/api-client'");
+            b.Line("import { mapToDto as $mapToDto } from 'coalesce-vue/lib/model'");
+            b.Line("import { AxiosClient, ApiClient } from 'coalesce-vue/lib/api-client'");
             b.Line("import { AxiosRequestConfig } from 'axios'");
             b.Line();
 

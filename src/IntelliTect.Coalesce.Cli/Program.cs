@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -59,9 +58,6 @@ namespace IntelliTect.Coalesce.Cli
 
 
             string configFilePath = LocateConfigFile(ConfigFile);
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(configFilePath));
-            Console.WriteLine(
-                $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
 
             CoalesceConfiguration config;
 
@@ -72,12 +68,37 @@ namespace IntelliTect.Coalesce.Cli
                 config = serializer.Deserialize<CoalesceConfiguration>(jsonReader);
             }
 
+            // Must go AFTER we load in the config file, since if the config file was a relative path, changing this ruins that.
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(configFilePath));
+            Console.WriteLine(
+                $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
+
             if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
 
+            // TODO: dynamic resolution of the specific generator.
+            // For now, we hard-reference all of them and then try and match one of them.
+            // This may ultimately be the best approach in the long run, since it lets us easily do partial matching as below:
+            var rootGeneratorName = config.RootGenerator ?? "Knockout";
+            var rootGenerators = new[]
+            {
+                typeof(CodeGeneration.Vue.Generators.VueSuite),
+                typeof(CodeGeneration.Knockout.Generators.KnockoutSuite),
+            };
+
+            Type rootGenerator =
+                   rootGenerators.FirstOrDefault(t => t.FullName == rootGeneratorName)
+                ?? rootGenerators.FirstOrDefault(t => t.Name == rootGeneratorName)
+                ?? rootGenerators.FirstOrDefault(t => t.FullName.Contains(rootGeneratorName));
+
+            if (rootGenerator == null)
+            {
+                Console.Error.WriteLine($"Couldn't find a root generator that matches {rootGeneratorName}");
+                Console.Error.WriteLine($"Valid root generators are: {string.Join(",", rootGenerators.Select(g => g.FullName))}");
+                return -1;
+            }
 
             var executor = new GenerationExecutor(config, logLevel);
-            // TODO: configure root generator.
-            await executor.GenerateAsync<CodeGeneration.Vue.Generators.VueSuite>();
+            await executor.GenerateAsync(rootGenerator);
 
             if (!Debugger.IsAttached) return 0;
             Console.WriteLine("Press Enter to quit");

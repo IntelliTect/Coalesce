@@ -1,7 +1,7 @@
 import * as metadata from './metadata.g'
 import * as models from './models.g'
 import * as apiClients from './api-clients.g'
-import { ViewModel, defineProps } from './coalesce/core/viewmodel'
+import { ViewModel, defineProps } from 'coalesce-vue/lib/viewmodel'
 
 export interface PersonViewModel extends models.Person {}
 export class PersonViewModel extends ViewModel<models.Person, apiClients.PersonApiClient> {

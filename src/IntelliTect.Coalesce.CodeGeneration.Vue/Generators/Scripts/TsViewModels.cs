@@ -15,10 +15,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         public override Task<string> BuildOutputAsync()
         {
             var b = new TypeScriptCodeBuilder();
+            // TODO: alias these imports with $ to prevent name conflicts
             b.Line("import * as metadata from './metadata.g'");
             b.Line("import * as models from './models.g'");
             b.Line("import * as apiClients from './api-clients.g'");
-            b.Line("import { ViewModel, defineProps } from './coalesce/core/viewmodel'");
+            b.Line("import { ViewModel, defineProps } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
             foreach (var model in Model.Entities)

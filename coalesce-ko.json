@@ -11,7 +11,7 @@
   },
 
 
-  //"rootGenerator": "IntelliTect.Coalesce.CodeGeneration.Knockout",
+  "rootGenerator": "Knockout",
 
   //"additionalRootGenerators": [
   //  {

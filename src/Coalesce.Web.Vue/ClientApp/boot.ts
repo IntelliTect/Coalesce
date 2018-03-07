@@ -10,9 +10,13 @@ Vue.use(Vuetify);
 
 import App from './components/app.vue';
 import Admin from './components/admin-table-page.vue'
+import { AxiosClient } from 'coalesce-vue'
 
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
+
+AxiosClient.defaults.baseURL = 'http://localhost:11202/api/'
+AxiosClient.defaults.withCredentials = true
 
 const routes = [
     { path: '/', component: Admin },

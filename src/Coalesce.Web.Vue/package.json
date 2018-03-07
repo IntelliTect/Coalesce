@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "babel-polyfill": "^6.26.0",
+    "coalesce-vue": "file:../coalesce-vue",
     "date-fns": "^2.0.0-alpha.7",
     "lodash-es": "^4.17.5",
     "luxon": "^0.5.3",
@@ -32,7 +33,7 @@
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.1",
     "ts-loader": "^3.3.1",
-    "typescript": "^2.8.0-dev.20180227",
+    "typescript": "^2.8.0-dev.20180302",
     "url-loader": "^0.6.2",
     "vue-class-component": "^6.1.2",
     "vue-loader": "^13.7.0",

@@ -3,6 +3,9 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const bundleOutputDir = './wwwroot/dist';
 
+const typescript = require('typescript');
+console.log("Typescript version: " + typescript.version)
+
 module.exports = (env) => {
     const isDevBuild = !(env && env.prod);
 

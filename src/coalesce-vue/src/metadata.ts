@@ -26,7 +26,7 @@ export interface Metadata {
 }
 
 
-interface CustomReferenceTypeBase extends Metadata {
+export interface CustomReferenceTypeBase extends Metadata {
     readonly props: { [propName in string]: Property } 
 
     // The property that holds the value that represents this model.
@@ -85,7 +85,7 @@ export type CustomType = ClassType | EnumType
 export type CollectableType = CustomType | SimpleType
 
 
-interface PropMetaBase extends Metadata {
+export interface PropMetaBase extends Metadata {
     readonly role: Role
 }
 export interface PrimitiveProperty extends PropMetaBase {

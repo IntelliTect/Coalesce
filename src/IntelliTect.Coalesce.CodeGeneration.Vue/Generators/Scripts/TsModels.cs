@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder();
             b.Line("import * as metadata from './metadata.g'");
-            b.Line("import { Model, convertToModel } from './coalesce/core/model'");
+            b.Line("import { Model, convertToModel } from 'coalesce-vue/lib/model'");
          //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
 

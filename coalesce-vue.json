@@ -1,0 +1,16 @@
+{
+  "webProject": {
+    "projectFile": "./src/Coalesce.Web.Vue/Coalesce.Web.Vue.csproj"
+  },
+  "dataProject": {
+    "projectFile": "./src/Coalesce.Domain/Coalesce.Domain.csproj"
+  },
+
+  "rootGenerator": "Vue",
+
+  "generatorConfig": {
+    "Views": {
+      "disabled": false
+    }
+  }
+}

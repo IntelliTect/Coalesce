@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder();
 
-            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from './coalesce/core/metadata' ");
+            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from 'coalesce-vue/lib/metadata' ");
             b.Line();
 
             // Assigning each property as a member of domain ensures we don't break type contracts.

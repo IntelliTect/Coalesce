@@ -1,4 +1,4 @@
-import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from './coalesce/core/metadata' 
+import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from 'coalesce-vue/lib/metadata' 
 
 const domain: Domain = { types: {}, enums: {} }
 export const Titles = domain.enums.Titles = {

@@ -1,0 +1,33 @@
+{
+  "name": "coalesce-vue",
+  "version": "2.0.0-alpha-0001",
+  "description": "Coalesce core scripts for Vue.js",
+
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+
+  "repository": "https://github.com/IntelliTect/Coalesce",
+  "author": "IntelliTect",
+  "license": "Apache-2.0",
+  "private": false,
+
+  "dependencies": {
+    "@types/lodash-es": "^4.17.0",
+    "@types/qs": "^6.5.1",
+
+    "axios": "^0.17.1",
+    "date-fns": "^2.0.0-alpha.7",
+    "lodash-es": "^4.17.5",
+    "qs": "^6.5.1",
+    "vue": "^2.5.13"
+  },
+
+  "devDependencies": {
+    "typescript": "^2.8.0-dev.20180302"
+  },
+
+  "scripts": {
+    "build": "tsc",
+    "prepack": "tsc"
+  }
+}

@@ -12,7 +12,7 @@ import { IHaveMetadata, ModelType, ClassType } from './metadata'
 import { Model, convertToModel, mapToDto } from './model'
 import { OwnProps } from './util'
 
-import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource } from 'axios'
+import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance } from 'axios'
 import * as qs from 'qs'
 import Vue from 'vue';
 
@@ -70,11 +70,8 @@ export type ListResultPromise<T> = Promise<AxiosResponse<ListResult<T>>>
 // Otherwise, typescript doesn't like us calling a function with a union return type. For some reason.
 export type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T>>
 
-// TODO: temp config for development
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export const AxiosClient = axios.create()
-AxiosClient.defaults.baseURL = 'http://localhost:11202/api/'
-AxiosClient.defaults.withCredentials = true
 
 export class ApiClient<T extends Model<ClassType>> {
     
@@ -227,7 +224,7 @@ export class ApiClient<T extends Model<ClassType>> {
     }
 }
 
-abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<T>, T extends Model<ClassType>> extends Function {
+export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<T>, T extends Model<ClassType>> extends Function {
 
     /** True if a request is currently pending. */
     isLoading: boolean = false

@@ -708,6 +708,20 @@ coa@~1.0.1:
   dependencies:
     q "^1.1.2"
 
+"coalesce-vue-vuetify@file:../coalesce-vue-vuetify":
+  version "2.0.0-alpha-0001"
+
+"coalesce-vue@file:../coalesce-vue":
+  version "2.0.0-alpha-0001"
+  dependencies:
+    "@types/lodash-es" "^4.17.0"
+    "@types/qs" "^6.5.1"
+    axios "^0.17.1"
+    date-fns "^2.0.0-alpha.7"
+    lodash-es "^4.17.5"
+    qs "^6.5.1"
+    vue "^2.5.13"
+
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
@@ -4521,9 +4535,9 @@ type-is@~1.6.15:
     media-typer "0.3.0"
     mime-types "~2.1.18"
 
-typescript@^2.8.0-dev.20180227:
-  version "2.8.0-dev.20180227"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.8.0-dev.20180227.tgz#8cecb57a101499bf024ebe4b1fa5a5873d68499f"
+typescript@^2.8.0-dev.20180302:
+  version "2.8.0-dev.20180302"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.8.0-dev.20180302.tgz#e40c3be7aeac0bfce3c695e3043cbb2c42f99fb9"
 
 uglify-js@^2.8.29:
   version "2.8.29"

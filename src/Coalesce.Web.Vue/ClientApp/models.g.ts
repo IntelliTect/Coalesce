@@ -1,5 +1,5 @@
 import * as metadata from './metadata.g'
-import { Model, convertToModel } from './coalesce/core/model'
+import { Model, convertToModel } from 'coalesce-vue/lib/model'
 
 export enum Titles {
   Mr = 0,

@@ -1,7 +1,7 @@
 import * as models from './models.g'
 import * as qs from 'qs'
-import { mapToDto as $mapToDto } from './coalesce/core/model'
-import { AxiosClient, ApiClient } from './coalesce/core/api-client'
+import { mapToDto as $mapToDto } from 'coalesce-vue/lib/model'
+import { AxiosClient, ApiClient } from 'coalesce-vue/lib/api-client'
 import { AxiosRequestConfig } from 'axios'
 
 export class PersonApiClient extends ApiClient<models.Person> {

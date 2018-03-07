@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}"
 EndProject
@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
+		coalesce-ko.json = coalesce-ko.json
+		coalesce-vue.json = coalesce-vue.json
 		coalesce.json = coalesce.json
 		Coalesce2.0Changes.md = Coalesce2.0Changes.md
 		src\Directory.Build.props = src\Directory.Build.props
@@ -36,9 +38,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{AC58582C-9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Web.Vue", "src\Coalesce.Web.Vue\Coalesce.Web.Vue.csproj", "{A76BAACB-8581-4A1F-ACEE-5E7CB4594F71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.CodeGeneration.Vue", "src\IntelliTect.Coalesce.CodeGeneration.Vue\IntelliTect.Coalesce.CodeGeneration.Vue.csproj", "{C2259B45-4507-43C3-BA19-D3F07BE1C010}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.CodeGeneration.Vue", "src\IntelliTect.Coalesce.CodeGeneration.Vue\IntelliTect.Coalesce.CodeGeneration.Vue.csproj", "{C2259B45-4507-43C3-BA19-D3F07BE1C010}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.CodeGeneration.Api", "src\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj", "{2F87C06D-22C5-453C-94DB-D78B1D8CAED6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.CodeGeneration.Api", "src\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj", "{2F87C06D-22C5-453C-94DB-D78B1D8CAED6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

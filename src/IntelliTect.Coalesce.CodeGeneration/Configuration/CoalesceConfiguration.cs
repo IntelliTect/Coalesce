@@ -12,6 +12,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
         public ProjectConfiguration WebProject { get; set; }
 
+        public string RootGenerator { get; set; }
+
         public OutputConfiguration Output { get; set; } = new OutputConfiguration();
 
         public Dictionary<string, JObject> GeneratorConfig { get; set; } = new Dictionary<string, JObject>();

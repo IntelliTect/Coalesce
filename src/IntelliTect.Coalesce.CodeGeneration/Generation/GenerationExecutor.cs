@@ -27,9 +27,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public CoalesceConfiguration Config { get; }
 
-        public async Task GenerateAsync<TGenerator>()
+        public Task GenerateAsync<TGenerator>()
             where TGenerator : IRootGenerator
         {
+            return GenerateAsync(typeof(TGenerator));
+        }
+        
+        public async Task GenerateAsync(Type rootGenerator)
+        {
+            if (rootGenerator == null)
+            {
+                throw new ArgumentNullException(nameof(rootGenerator));
+            }
+
+            if (!typeof(IRootGenerator).IsAssignableFrom(rootGenerator))
+            {
+                throw new ArgumentException("type is not an IRootGenerator");
+            }
+
             var services = new ServiceCollection();
             services.AddLogging(builder => builder
                 .SetMinimumLevel(logLevel)
@@ -60,7 +75,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             // Now that we have the web project, we should be able to precompile our templates while the data project analyzes.
             var precompileTask = Task.Run(() => provider.GetRequiredService<RazorTemplateCompiler>()
-                .PrecompileAssemblyTemplates(typeof(TGenerator).Assembly));
+                .PrecompileAssemblyTemplates(rootGenerator.Assembly));
 
             genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
 
@@ -82,7 +97,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 return;
             }
 
-            var generator = ActivatorUtilities.CreateInstance<TGenerator>(provider)
+            var generator = 
+                (ActivatorUtilities.CreateInstance(provider, rootGenerator) as IRootGenerator)
                 .WithModel(rr)
                 .WithOutputPath(genContext.WebProject.ProjectPath);
 

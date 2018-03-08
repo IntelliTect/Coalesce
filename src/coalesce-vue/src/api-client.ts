@@ -81,13 +81,17 @@ export type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export const AxiosClient = axios.create()
 
-export type ApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
+export type ItemApiReturnType<T extends (this: null, ...args: any[]) => ItemResultPromise<any>> 
     = ReturnType<T> extends void ? void
     : ReturnType<T> extends ItemResultPromise<infer R> ? R 
-    : ReturnType<T> extends ListResultPromise<infer S> ? S
     : any;
 
-    
+export type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResultPromise<any>> 
+    = ReturnType<T> extends ListResultPromise<infer S> ? S
+    : any;
+
+type AnyApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
+    = ReturnType<T> extends ApiResultPromise<infer S> ? S : any;
 
 export class ApiClient<T extends Model<ClassType>> {
     
@@ -155,7 +159,7 @@ export class ApiClient<T extends Model<ClassType>> {
     $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<any>>(
         resultType: "item",
         invokerFactory: (client: this) => TCall
-    ): ItemApiState<TCall, ApiReturnType<TCall>> & TCall
+    ): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
@@ -164,14 +168,14 @@ export class ApiClient<T extends Model<ClassType>> {
     $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(
         resultType: "list",
         invokerFactory: (client: this) => TCall
-    ): ListApiState<TCall, ApiReturnType<TCall>> & TCall
+    ): ListApiState<TCall, ListApiReturnType<TCall>> & TCall
     
     $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
         resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
         invokerFactory: (client: this) => TCall
-    ): ApiState<TCall, ApiReturnType<TCall>> & TCall
+    ): ApiState<TCall, AnyApiReturnType<TCall>> & TCall
     {
-        type TResult = ApiReturnType<TCall>;
+        type TResult = AnyApiReturnType<TCall>;
         
         var instance: ApiState<TCall, TResult>;
         switch (resultType){
@@ -282,11 +286,11 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         return this;
     }
 
-    abstract setResponseProps(data: ApiResult): void
+    protected abstract setResponseProps(data: ApiResult): void
 
-    invoke!: TCall
+    public invoke!: TCall
 
-    _invokeInternal() {
+    private _invokeInternal() {
         if (this.isLoading) {
             throw `Request is already pending for invoker ${this.invoker.toString()}`
         }
@@ -377,7 +381,7 @@ export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResu
     /** Principal data returned by the previous request. */
     result: TResult | null = null
 
-    setResponseProps(data: ItemResult<TResult>) {
+    protected setResponseProps(data: ItemResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
 
@@ -402,7 +406,7 @@ export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResu
     /** Principal data returned by the previous request. */
     result: TResult[] | null = null
 
-    setResponseProps(data: ListResult<TResult>) {
+    protected setResponseProps(data: ListResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
 

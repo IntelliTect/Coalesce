@@ -13,7 +13,7 @@ declare module "axios" {
 }
 import { ModelType, ClassType } from './metadata';
 import { Model } from './model';
-import { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelToken, AxiosInstance } from 'axios';
+import { AxiosPromise, AxiosResponse, AxiosRequestConfig, Canceler, CancelToken, AxiosInstance } from 'axios';
 export interface ApiResult {
     wasSuccessful: boolean;
     message?: string;
@@ -58,7 +58,8 @@ export declare type ListResultPromise<T> = Promise<AxiosResponse<ListResult<T>>>
 export declare type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T>>;
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export declare const AxiosClient: AxiosInstance;
-export declare type ApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> = ReturnType<T> extends void ? void : ReturnType<T> extends ItemResultPromise<infer R> ? R : ReturnType<T> extends ListResultPromise<infer S> ? S : any;
+export declare type ItemApiReturnType<T extends (this: null, ...args: any[]) => ItemResultPromise<any>> = ReturnType<T> extends void ? void : ReturnType<T> extends ItemResultPromise<infer R> ? R : any;
+export declare type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResultPromise<any>> = ReturnType<T> extends ListResultPromise<infer S> ? S : any;
 export declare class ApiClient<T extends Model<ClassType>> {
     $metadata: ModelType;
     constructor($metadata: ModelType);
@@ -74,13 +75,13 @@ export declare class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<any>>(resultType: "item", invokerFactory: (client: this) => TCall): ItemApiState<TCall, ApiReturnType<TCall>> & TCall;
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<any>>(resultType: "item", invokerFactory: (client: this) => TCall): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall;
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, ApiReturnType<TCall>> & TCall;
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, ListApiReturnType<TCall>> & TCall;
     protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): {
         cancelToken: CancelToken | null;
     } & AxiosRequestConfig & {
@@ -114,9 +115,9 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
      * @param onFulfilled A callback to be called when a request to this endpoint fails.
      */
     onRejected(callback: (state: this) => void): this;
-    abstract setResponseProps(data: ApiResult): void;
+    protected abstract setResponseProps(data: ApiResult): void;
     invoke: TCall;
-    _invokeInternal(): Promise<AxiosError | AxiosResponse<ItemResult<TResult>> | AxiosResponse<ListResult<TResult>>>;
+    private _invokeInternal();
     constructor(apiClient: ApiClient<any>, invoker: TCall);
 }
 export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
@@ -124,7 +125,7 @@ export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => 
     validationIssues: ValidationIssue[] | null;
     /** Principal data returned by the previous request. */
     result: TResult | null;
-    setResponseProps(data: ItemResult<TResult>): void;
+    protected setResponseProps(data: ItemResult<TResult>): void;
 }
 export declare class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
     /** Page number returned by the previous request. */
@@ -137,5 +138,5 @@ export declare class ListApiState<TCall extends (this: null, ...args: any[]) => 
     totalCount: number | null;
     /** Principal data returned by the previous request. */
     result: TResult[] | null;
-    setResponseProps(data: ListResult<TResult>): void;
+    protected setResponseProps(data: ListResult<TResult>): void;
 }

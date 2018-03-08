@@ -77,15 +77,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             var paramsObject = "{ " + string.Join(", ", paramsObjectProps) + " }";
 
                             string resultType = method.TransportTypeGenericParameter.IsVoid
-                                ? method.TransportType.ToString()
+                                ? $"{method.TransportType}<void>"
                                 : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
 
                             b.Line($"const $params = {paramsObject}");
                             b.Line("return AxiosClient");
                             using (b.Block())
                             {
+                                bool needsHydration = method.ResultType.PureType.HasClassViewModel;
+
                                 // Include the generic param on the request if the result doesn't need to be hydrated.
-                                string requestGenericParam = method.ResultType.PureType.IsPrimitive ? "" : $"<{resultType}>";
+                                // TODO: date return types need to be hydrated, but aren't here.
+                                // Once we start generating method metadata, we can make a generic client-side hydration function
+                                // that will accept the ApiResult object and the method's metadata and perform whatever actions are needed.
+                                string requestGenericParam = !needsHydration ? $"<{resultType}>" : "";
 
                                 b.Line($".{method.ApiActionHttpMethodName.ToLower()}{requestGenericParam}(");
                                 b.Indented($"`/${{this.$metadata.controllerRoute}}/{method.Name}`,");
@@ -103,7 +108,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 b.Line(")");
 
                                 // TODO: date return types aren't handled here.
-                                if (method.ResultType.PureType.HasClassViewModel)
+                                if (needsHydration)
                                 {
                                     b.Line($".then<AxiosResponse<{resultType}>>(r => this.$hydrate{method.TransportType}(r, $metadata.{method.ResultType.PureType.ClassViewModel.ViewModelClassName}))");
                                 }

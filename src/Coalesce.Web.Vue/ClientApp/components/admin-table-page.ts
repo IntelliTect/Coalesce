@@ -66,7 +66,7 @@ export default class extends Vue {
   }
 
   mounted() {
-    
+
     this.person.$load(1)
       .then(r => {
         this.person!.$apiClient.removePersonById(200)
@@ -75,7 +75,7 @@ export default class extends Vue {
         this.person!.$apiClient.getUser()
       })
 
-      var caller = this.person!.$apiClient.$makeCaller("item", c => () => c.changeFirstName(1, "s"));
+      var caller = this.person!.$apiClient.$makeCaller("item", c => () => c.changeSpacesToDashesInName(1));
       caller.result
     
       //this.person.$startAutoSave(this)

@@ -52,7 +52,7 @@ export declare type ListResultPromise<T> = Promise<AxiosResponse<ListResult<T>>>
 export declare type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T>>;
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export declare const AxiosClient: AxiosInstance;
-export declare type ApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> = ReturnType<T> extends ItemResultPromise<infer R> ? R : ReturnType<T> extends ListResultPromise<infer S> ? S : any;
+export declare type ApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> = ReturnType<T> extends void ? void : ReturnType<T> extends ItemResultPromise<infer R> ? R : ReturnType<T> extends ListResultPromise<infer S> ? S : any;
 export declare class ApiClient<T extends Model<ClassType>> {
     $metadata: ModelType;
     constructor($metadata: ModelType);

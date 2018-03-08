@@ -12,7 +12,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig) {
     const $params = { id: id, name: name }
     return AxiosClient
-      .post<ItemResult<$models.Person>>(
+      .post(
         `/${this.$metadata.controllerRoute}/Rename`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -23,7 +23,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public changeSpacesToDashesInName(id: number, $config?: AxiosRequestConfig) {
     const $params = { id: id }
     return AxiosClient
-      .post<ItemResult>(
+      .post<ItemResult<void>>(
         `/${this.$metadata.controllerRoute}/ChangeSpacesToDashesInName`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -33,7 +33,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public add(numberOne: number | null, numberTwo: number | null, $config?: AxiosRequestConfig) {
     const $params = { numberOne: numberOne, numberTwo: numberTwo }
     return AxiosClient
-      .post(
+      .post<ItemResult<number>>(
         `/${this.$metadata.controllerRoute}/Add`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -43,7 +43,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public getUser($config?: AxiosRequestConfig) {
     const $params = {  }
     return AxiosClient
-      .post(
+      .post<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/GetUser`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -53,7 +53,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public personCount(lastNameStartsWith: string | null, $config?: AxiosRequestConfig) {
     const $params = { lastNameStartsWith: lastNameStartsWith }
     return AxiosClient
-      .get(
+      .get<ItemResult<number>>(
         `/${this.$metadata.controllerRoute}/PersonCount`,
         this.$options(undefined, $config, $params)
       )
@@ -62,7 +62,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public fullNameAndAge(id: number, $config?: AxiosRequestConfig) {
     const $params = { id: id }
     return AxiosClient
-      .get(
+      .get<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/FullNameAndAge`,
         this.$options(undefined, $config, $params)
       )
@@ -71,7 +71,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public removePersonById(id: number | null, $config?: AxiosRequestConfig) {
     const $params = { id: id }
     return AxiosClient
-      .delete(
+      .delete<ItemResult<boolean>>(
         `/${this.$metadata.controllerRoute}/RemovePersonById`,
         this.$options(undefined, $config, $params)
       )
@@ -80,7 +80,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public obfuscateEmail(id: number, $config?: AxiosRequestConfig) {
     const $params = { id: id }
     return AxiosClient
-      .put(
+      .put<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/ObfuscateEmail`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -90,7 +90,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public changeFirstName(id: number, firstName: string | null, $config?: AxiosRequestConfig) {
     const $params = { id: id, firstName: firstName }
     return AxiosClient
-      .patch<ItemResult<$models.Person>>(
+      .patch(
         `/${this.$metadata.controllerRoute}/ChangeFirstName`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -101,7 +101,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public getUserPublic($config?: AxiosRequestConfig) {
     const $params = {  }
     return AxiosClient
-      .post(
+      .post<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/GetUserPublic`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -111,7 +111,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public namesStartingWith(characters: string | null, $config?: AxiosRequestConfig) {
     const $params = { characters: characters }
     return AxiosClient
-      .post(
+      .post<ItemResult<string[]>>(
         `/${this.$metadata.controllerRoute}/NamesStartingWith`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -121,7 +121,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   public searchPeople(criteria: $models.PersonCriteria | null, page: number | null, $config?: AxiosRequestConfig) {
     const $params = { criteria: $mapToDto(criteria), page: page }
     return AxiosClient
-      .post<ListResult<$models.Person>>(
+      .post(
         `/${this.$metadata.controllerRoute}/SearchPeople`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -137,7 +137,7 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   public getSomeCases($config?: AxiosRequestConfig) {
     const $params = {  }
     return AxiosClient
-      .post<ItemResult<$models.Case[]>>(
+      .post(
         `/${this.$metadata.controllerRoute}/GetSomeCases`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -148,7 +148,7 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   public getAllOpenCasesCount($config?: AxiosRequestConfig) {
     const $params = {  }
     return AxiosClient
-      .post(
+      .post<ItemResult<number>>(
         `/${this.$metadata.controllerRoute}/GetAllOpenCasesCount`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -158,7 +158,7 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   public randomizeDatesAndStatus($config?: AxiosRequestConfig) {
     const $params = {  }
     return AxiosClient
-      .post<ItemResult>(
+      .post<ItemResult<void>>(
         `/${this.$metadata.controllerRoute}/RandomizeDatesAndStatus`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -168,7 +168,7 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   public getCaseSummary($config?: AxiosRequestConfig) {
     const $params = {  }
     return AxiosClient
-      .post<ItemResult<$models.CaseSummary>>(
+      .post(
         `/${this.$metadata.controllerRoute}/GetCaseSummary`,
         qs.stringify($params),
         this.$options(undefined, $config)
@@ -184,7 +184,7 @@ export class CompanyApiClient extends ApiClient<$models.Company> {
   public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig) {
     const $params = { isDeleted: isDeleted }
     return AxiosClient
-      .post<ItemResult<$models.Company[]>>(
+      .post(
         `/${this.$metadata.controllerRoute}/GetCertainItems`,
         qs.stringify($params),
         this.$options(undefined, $config)

@@ -133,6 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsDate) return "moment.Moment";
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
+                if (IsVoid) return "void";
                 if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 return "any";

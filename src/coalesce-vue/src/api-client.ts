@@ -74,10 +74,9 @@ export type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T
 export const AxiosClient = axios.create()
 
 export type ApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
-    = ReturnType<T> extends ItemResultPromise<infer R> 
-    ? R 
-    : ReturnType<T> extends ListResultPromise<infer S> 
-    ? S
+    = ReturnType<T> extends void ? void
+    : ReturnType<T> extends ItemResultPromise<infer R> ? R 
+    : ReturnType<T> extends ListResultPromise<infer S> ? S
     : any;
 
     

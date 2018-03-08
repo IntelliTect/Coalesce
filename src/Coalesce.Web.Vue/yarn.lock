@@ -708,19 +708,9 @@ coa@~1.0.1:
   dependencies:
     q "^1.1.2"
 
-"coalesce-vue-vuetify@file:../coalesce-vue-vuetify":
-  version "2.0.0-alpha-0001"
-
-"coalesce-vue@file:../coalesce-vue":
-  version "2.0.0-alpha-0001"
-  dependencies:
-    "@types/lodash-es" "^4.17.0"
-    "@types/qs" "^6.5.1"
-    axios "^0.17.1"
-    date-fns "^2.0.0-alpha.7"
-    lodash-es "^4.17.5"
-    qs "^6.5.1"
-    vue "^2.5.13"
+"coalesce-vue@link:../coalesce-vue":
+  version "0.0.0"
+  uid ""
 
 code-point-at@^1.0.0:
   version "1.1.0"

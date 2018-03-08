@@ -1,11 +1,12 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-import { IHaveMetadata, Property } from 'coalesce-vue/lib/metadata'
+import { Property, ClassType } from 'coalesce-vue/lib/metadata'
+import { Model } from 'coalesce-vue';
 
 export default abstract class extends Vue {
 
   @Prop({required: true, type: Object})
-  public item?: IHaveMetadata;
+  public item?: Model<ClassType>;
 
   @Prop({required: false, type: [String, Object]})
   public prop?: string | Property;

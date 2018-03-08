@@ -73,6 +73,15 @@ export type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export const AxiosClient = axios.create()
 
+export type ApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
+    = ReturnType<T> extends ItemResultPromise<infer R> 
+    ? R 
+    : ReturnType<T> extends ListResultPromise<infer S> 
+    ? S
+    : any;
+
+    
+
 export class ApiClient<T extends Model<ClassType>> {
     
     constructor(public $metadata: ModelType) {
@@ -136,25 +145,27 @@ export class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult = T>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<any>>(
         resultType: "item",
         invokerFactory: (client: this) => TCall
-    ): ItemApiState<TCall, TResult> & TCall
+    ): ItemApiState<TCall, ApiReturnType<TCall>> & TCall
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult = T>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(
         resultType: "list",
         invokerFactory: (client: this) => TCall
-    ): ListApiState<TCall, TResult> & TCall
+    ): ListApiState<TCall, ApiReturnType<TCall>> & TCall
     
-    $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>, TResult = T>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
         resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
         invokerFactory: (client: this) => TCall
-    ): ApiState<TCall, TResult> & TCall
+    ): ApiState<TCall, ApiReturnType<TCall>> & TCall
     {
+        type TResult = ApiReturnType<TCall>;
+        
         var instance: ApiState<TCall, TResult>;
         switch (resultType){
             case "item": 

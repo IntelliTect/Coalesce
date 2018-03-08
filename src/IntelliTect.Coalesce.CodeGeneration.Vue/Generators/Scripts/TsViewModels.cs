@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     using (b.Block($"constructor(initialData?: models.{model.ViewModelClassName})"))
                     {
-                        b.Line($"super({metadataName}, new apiClients.{model.ViewModelClassName}ApiClient({metadataName}), initialData)");
+                        b.Line($"super({metadataName}, new apiClients.{model.ViewModelClassName}ApiClient(), initialData)");
                     }
                 }
                 b.Line($"defineProps({viewModelName}, metadata.{model.ViewModelClassName})");

@@ -1,7 +1,7 @@
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
-import { ApiClient, IHaveMetadata, convertToModel, ModelType } from 'coalesce-vue'
+import { ApiClient, convertToModel, ModelType } from 'coalesce-vue'
 import { Person } from '../metadata.g';
 import * as metadata from '../metadata.g';
 import * as models from '../models.g';
@@ -67,15 +67,16 @@ export default class extends Vue {
 
   mounted() {
     
-    
     this.person.$load(1)
       .then(r => {
         this.person!.$apiClient.removePersonById(200)
         this.person!.$apiClient.fullNameAndAge(1)
         this.person!.$apiClient.personCount("Roberts")
         this.person!.$apiClient.getUser()
-        this.person!.$apiClient.obfuscateEmail(1)
       })
+
+      var caller = this.person!.$apiClient.$makeCaller("item", c => () => c.changeFirstName(1, "s"));
+      caller.result
     
       //this.person.$startAutoSave(this)
     
@@ -83,6 +84,6 @@ export default class extends Vue {
 
   
 
-  items: IHaveMetadata[] = [];
+  items: models.Person[] = [];
 }
 

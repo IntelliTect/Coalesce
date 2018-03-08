@@ -15,8 +15,21 @@ using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
+    public enum MethodTransportType
+    {
+        ItemResult,
+        ListResult,
+    }
+
     public abstract class MethodViewModel : IAttributeProvider
     {
+        internal MethodViewModel(ClassViewModel parent)
+        {
+            Parent = parent;
+        }
+
+        public ClassViewModel Parent { get; }
+
         public abstract bool IsStatic { get; }
 
         public abstract string Comment { get; }
@@ -24,11 +37,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Name { get; }
 
         public abstract TypeViewModel ReturnType { get; }
-        
+
+        public abstract IEnumerable<ParameterViewModel> Parameters { get; }
+
+        /// <summary>
+        /// True if the method's return type is explicitly declared 
+        /// </summary>
         public bool ReturnsListResult => ReturnType.IsA(typeof(ListResult<>));
 
         /// <summary>
-        /// The return type of the method, discounting any <see cref="ItemResult{T}"/> wrapped around it.
+        /// The return type of the essential data returned by the method.
+        /// This discounts any <see cref="ItemResult"/> or <see cref="ListResult{T}"/> that may be wrapped around its return type.
+        /// For <see cref="ListResult{T}"/> returns, this will be <see cref="IList{T}"/>.
+        /// For <see cref="ItemResult{T}"/> returns, this will be T.
+        /// For any plain return type T, this will be T.
         /// </summary>
         public TypeViewModel ResultType =>
               ReturnsListResult
@@ -39,25 +61,37 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? new ReflectionTypeViewModel(typeof(void))
             : ReturnType;
 
-        public abstract IEnumerable<ParameterViewModel> Parameters { get; }
+        /// <summary>
+        /// The transport object that is returned by the API controller.
+        /// </summary>
+        public MethodTransportType TransportType => ReturnsListResult
+            ? MethodTransportType.ListResult
+            : MethodTransportType.ItemResult;
+
+        /// <summary>
+        /// The generic parameter to the <see cref="TransportType"/>. Can possibly be void.
+        /// </summary>
+        public TypeViewModel TransportTypeGenericParameter => ReturnsListResult
+            ? ResultType.PureType
+            : ResultType;
 
         /// <summary>
         /// Returns true if this method is marked as InternalUse. Not exposed through the API
         /// </summary>
         public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
-
-        public ClassViewModel Parent { get; }
-
-        internal MethodViewModel(ClassViewModel parent)
-        {
-            Parent = parent;
-        }
-
-        public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
-        public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
+        
         
         public HttpMethod ApiActionHttpMethod =>
             this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ?? HttpMethod.Post;
+        public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
+        public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
+
+        /// <summary>
+        /// Return type of the controller action for the method.
+        /// </summary>
+        public string ApiActionReturnTypeDeclaration => TransportTypeGenericParameter.IsVoid
+            ? TransportType.ToString()
+            : $"{TransportType}<{TransportTypeGenericParameter.DtoFullyQualifiedName}>";
 
 
         /// <summary>
@@ -66,29 +100,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public virtual MethodInfo MethodInfo => throw new InvalidOperationException("MethodInfo not available in the current context");
 
         public string JsVariable => Name.ToCamelCase();
-
-        /// <summary>
-        /// Return type of the controller action for the method.
-        /// </summary>
-        public string ReturnTypeNameForApi
-        {
-            get
-            {
-                var resultType = ResultType;
-
-                if (resultType.IsVoid)
-                {
-                    return nameof(ItemResult);
-                }
-
-                if (ReturnsListResult)
-                {
-                    return $"{nameof(ListResult<object>)}<{ReturnType.PureType.DtoFullyQualifiedName}>";
-                }
-
-                return $"{nameof(ItemResult)}<{resultType.DtoFullyQualifiedName}>";
-            }
-        }
 
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)

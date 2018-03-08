@@ -35,11 +35,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 // For any ApiResult return type, pass it to our ApiResult ctor to grab the WasSuccessful and Message props.
                 // For list results, this also copies paging information.
-                b.Line($"var result = new {method.ReturnTypeNameForApi}(methodResult);");
+                b.Line($"var result = new {method.ApiActionReturnTypeDeclaration}(methodResult);");
             }
             else
             {
-                b.Line($"var result = new {method.ReturnTypeNameForApi}();");
+                b.Line($"var result = new {method.ApiActionReturnTypeDeclaration}();");
             }
 
             if (resultType.IsVoid)

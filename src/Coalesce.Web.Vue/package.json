@@ -5,7 +5,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "babel-polyfill": "^6.26.0",
-    "coalesce-vue": "file:../coalesce-vue",
+    "coalesce-vue": "link:../coalesce-vue",
     "date-fns": "^2.0.0-alpha.7",
     "lodash-es": "^4.17.5",
     "luxon": "^0.5.3",

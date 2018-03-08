@@ -174,7 +174,7 @@ namespace @(namespaceName).Api
         // Methods from data class exposed through API Controller.
         @foreach (var method in model.ClientMethods)
         {
-            var returnType = method.ReturnTypeNameForApi;
+            var returnType = method.ApiActionReturnTypeDeclaration;
             if (!method.IsStatic) { returnType = $"async Task<{returnType}>"; }
         <text>
         /// <summary>
@@ -203,7 +203,7 @@ namespace @(namespaceName).Api
                 @:var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 @:if (!itemResult.WasSuccessful)
                 @:{
-                    @:return new @(method.ReturnTypeNameForApi)(itemResult);
+                    @:return new @(method.ApiActionReturnTypeDeclaration)(itemResult);
                 @:}
                 @:var item = itemResult.Object;
                 if (method.ReturnType.IsVoid)

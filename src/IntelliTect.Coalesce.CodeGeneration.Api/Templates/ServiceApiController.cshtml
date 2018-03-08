@@ -66,7 +66,7 @@ namespace @(namespaceName).Api
         /// </summary>
         [@(method.ApiActionHttpMethodAnnotation)("@(method.Name)")]
         @(method.SecurityInfo.ExecuteAnnotation)
-        @(model.ApiActionAccessModifier) virtual @method.ReturnTypeNameForApi @method.Name (@method.CsParameters)
+        @(model.ApiActionAccessModifier) virtual @method.ApiActionReturnTypeDeclaration @method.Name (@method.CsParameters)
         {
             @if (method.ResultType.HasClassViewModel ||
                 (method.ResultType.PureType.HasClassViewModel && method.ResultType.IsCollection))

@@ -15,11 +15,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
             this.type = type;
         }
 
-        public string TsTypePlain(string modelPrefix = null)
+        public string TsType(string modelPrefix = null)
         {
             // TODO: this .Replace() to get rid of "ViewModels." is a hack. 
             // So is the enum handling, and the moment replacement
             // We need to create some sort of resolver class for resolving C# types to the names we should use in generated typescript.
+
             // This class (VueType) was a start towards that, but it needs more work for sure.
 
 

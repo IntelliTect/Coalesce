@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             ClassViewModelData data, string methodName, string expectedReturn)
         {
             var method = data.ClassViewModel.MethodByName(methodName);
-            Assert.Equal(expectedReturn, method.ReturnTypeNameForApi);
+            Assert.Equal(expectedReturn, method.ApiActionReturnTypeDeclaration);
         }
     }
 }

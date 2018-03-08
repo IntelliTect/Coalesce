@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     foreach (var prop in model.ClientProperties)
                     {
-                        var typeString = new VueType(prop.Type).TsTypePlain();
+                        var typeString = new VueType(prop.Type).TsType();
                         b.Line($"{prop.JsVariable}: {typeString} | null");
                     }
                 }

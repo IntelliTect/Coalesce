@@ -11,9 +11,21 @@ module.exports = (env) => {
 
     return [{
         resolve: {
-            extensions: ['.ts', '.js', '.vue', '.json'],
+            // Extensions that can be imported without an extension in their "import ... from './path/to/file".
+            // .ts and .js are the only ones here to mirror what Typescript does.
+            extensions: ['.ts', '.js'],
+            
+            // Specify that all modules should be resolved from node_modules in the current directory.
+            // This allows our locally-linked copy of package "coalesce-vue" to resolve its dependencies correctly.
+            // If this wasn't here, we would end up with two copies of vue in our bundle because without this,
+            // the "import Vue from 'vue'" statements in "coalesce-vue" will resolve to "coalesce-vue"'s own node_modules,
+            // which is a different directory than our project's node_modules.
+            // This is an implementation of https://github.com/webpack/webpack/issues/966#issuecomment-91562352 (resolve.root) for webpack 3.0.0
+            modules: [path.join(__dirname, "node_modules")],
             alias: {
-                'vue$': 'vue/dist/vue.esm.js'
+                // If it is desired to use the full build of Vue (which allows for client-side template compilation),
+                // uncomment the following line: https://vuejs.org/v2/guide/installation.html
+                // 'vue$': 'vue/dist/vue.esm.js'
             }
         },
         entry: { 'main': './ClientApp/boot.ts' },

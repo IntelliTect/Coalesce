@@ -5,6 +5,12 @@ declare module "vue/types/vue" {
         };
     }
 }
+declare module "axios" {
+    interface AxiosInstance {
+        delete<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
+        head<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
+    }
+}
 import { ModelType, ClassType } from './metadata';
 import { Model } from './model';
 import { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelToken, AxiosInstance } from 'axios';

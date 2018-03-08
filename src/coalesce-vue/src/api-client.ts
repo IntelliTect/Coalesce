@@ -8,6 +8,14 @@ declare module "vue/types/vue" {
     }
 }
 
+// Works around https://github.com/axios/axios/issues/1365 (PR https://github.com/axios/axios/pull/1401)
+declare module "axios" {
+    export interface AxiosInstance {
+      delete<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
+      head<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
+    }
+  }
+
 import { ModelType, ClassType } from './metadata'
 import { Model, convertToModel, mapToDto } from './model'
 import { OwnProps } from './util'

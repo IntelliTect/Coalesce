@@ -67,23 +67,23 @@ export declare class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>>(resultType: "item", invokerFactory: (client: this) => TCall): ItemApiState<TCall, T> & TCall;
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult = T>(resultType: "item", invokerFactory: (client: this) => TCall): ItemApiState<TCall, TResult> & TCall;
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, T> & TCall;
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult = T>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, TResult> & TCall;
     protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): {
         cancelToken: CancelToken | null;
     } & AxiosRequestConfig & {
         params: any;
     };
     private $objectify(parameters?);
-    private $hydrateItemResult(value);
-    private $hydrateListResult(value);
+    protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType): AxiosResponse<ItemResult<TResult>>;
+    protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: ClassType): AxiosResponse<ListResult<TResult>>;
 }
-export declare abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<T>, T extends Model<ClassType>> extends Function {
+export declare abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {
     private readonly apiClient;
     private readonly invoker;
     /** True if a request is currently pending. */
@@ -109,17 +109,17 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
     onRejected(callback: (state: this) => void): this;
     abstract setResponseProps(data: ApiResult): void;
     invoke: TCall;
-    _invokeInternal(): Promise<AxiosError | AxiosResponse<ItemResult<T>> | AxiosResponse<ListResult<T>>>;
-    constructor(apiClient: ApiClient<T>, invoker: TCall);
+    _invokeInternal(): Promise<AxiosError | AxiosResponse<ItemResult<TResult>> | AxiosResponse<ListResult<TResult>>>;
+    constructor(apiClient: ApiClient<any>, invoker: TCall);
 }
-export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>, T extends Model<ClassType>> extends ApiState<TCall, T> {
+export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
     /** Validation issues returned by the previous request. */
     validationIssues: ValidationIssue[] | null;
     /** Principal data returned by the previous request. */
-    result: T | null;
-    setResponseProps(data: ItemResult<T>): void;
+    result: TResult | null;
+    setResponseProps(data: ItemResult<TResult>): void;
 }
-export declare class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>, T extends Model<ClassType>> extends ApiState<TCall, T> {
+export declare class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
     /** Page number returned by the previous request. */
     page: number | null;
     /** Page size returned by the previous request. */
@@ -129,6 +129,6 @@ export declare class ListApiState<TCall extends (this: null, ...args: any[]) => 
     /** Total Count returned by the previous request. */
     totalCount: number | null;
     /** Principal data returned by the previous request. */
-    result: T[] | null;
-    setResponseProps(data: ListResult<T>): void;
+    result: TResult[] | null;
+    setResponseProps(data: ListResult<TResult>): void;
 }

@@ -4,13 +4,13 @@ import * as toDate from 'date-fns/toDate'
 import * as isValid from 'date-fns/isValid'
 import * as format from 'date-fns/format'
 
-import { ClassType, IHaveMetadata, ModelType, Property, ExternalType, CollectableType, PropNames, resolvePropMeta } from "./metadata"
+import { ClassType, ModelType, Property, ExternalType, CollectableType, PropNames, resolvePropMeta } from "./metadata"
 import { Indexable } from './util'
 
 /**
  * Represents a model with metadata information.
  */
-export interface Model<TMeta extends ClassType> extends IHaveMetadata {
+export interface Model<TMeta extends ClassType> {
     readonly $metadata: TMeta;
 }
 
@@ -198,31 +198,3 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(ite
             return getDisplayForType(propMeta.type, value);
     }
 }
-
-
-// type HydratedModel<T extends Model> = {
-//     [P in keyof T]?: DeepTransport<T[P]>;
-// } & IHaveMetadata
-
-
-// e.g. 
-
-/*
-
-type DeepTransport<T> = 
-    T extends any[] ? DeepTransportArray<T[number]> :
-    T extends Date ? string :
-    T extends object ? DeepTransportObject<T> :
-    T;
-interface DeepTransportArray<T> extends Array<DeepTransport<T>> {}
-type DeepTransportObject<T> = { [P in keyof T]?: DeepTransport<T[P]>; };
-
-
-export type Transport<T> = DeepTransport<Pick<T, Exclude<keyof T, keyof IHaveMetadata>>>
-
-
-
-    type CaseTransport = Transport<Case>
-    var a: CaseTransport;
-
-*/

@@ -1,17 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 // Tedious imports for maximum tree shaking
-var toDate = require("date-fns/toDate");
-var isValid = require("date-fns/isValid");
-var format = require("date-fns/format");
-var metadata_1 = require("./metadata");
+import * as toDate from 'date-fns/toDate';
+import * as isValid from 'date-fns/isValid';
+import * as format from 'date-fns/format';
+import { resolvePropMeta } from "./metadata";
 /**
  * Transforms a given object with data properties into a valid implemenation of TModel.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
  * @param object The object with data properties that should be converted to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
-function convertToModel(object, metadata) {
+export function convertToModel(object, metadata) {
     if (!object)
         return object;
     // Assume that an object that already has $metadata is already valid. 
@@ -63,8 +61,7 @@ function convertToModel(object, metadata) {
     }
     return object;
 }
-exports.convertToModel = convertToModel;
-function mapToDto(object) {
+export function mapToDto(object) {
     if (object === null || object === undefined)
         return null;
     if (!object.$metadata) {
@@ -99,7 +96,6 @@ function mapToDto(object) {
     }
     return dto;
 }
-exports.mapToDto = mapToDto;
 /**
  * Given a non-collection value and its type's metadata,
  * return a string representation of the value suitable for display.
@@ -130,7 +126,7 @@ function getDisplayForType(type, value) {
  * Given a model instance, return a string representation of the instance suitable for display.
  * @param item The model instance to return a string representation of
  */
-function modelDisplay(item) {
+export function modelDisplay(item) {
     var modelMeta = item.$metadata;
     if (!modelMeta) {
         throw "Item passed to modelDisplay(item) is missing its $metadata property";
@@ -147,15 +143,14 @@ function modelDisplay(item) {
         }
     }
 }
-exports.modelDisplay = modelDisplay;
 /**
  * Given a model instance and a descriptor of a property on the instance,
  * return a string representation of the property suitable for display.
  * @param item An instance of the model that holds the property to be displayed
  * @param prop The property to be displayed - either the name of a property or a property metadata object.
  */
-function propDisplay(item, prop) {
-    var propMeta = metadata_1.resolvePropMeta(item.$metadata, prop);
+export function propDisplay(item, prop) {
+    var propMeta = resolvePropMeta(item.$metadata, prop);
     var value = item[propMeta.name];
     switch (propMeta.type) {
         case "enum":
@@ -190,27 +185,3 @@ function propDisplay(item, prop) {
             return getDisplayForType(propMeta.type, value);
     }
 }
-exports.propDisplay = propDisplay;
-// type HydratedModel<T extends Model> = {
-//     [P in keyof T]?: DeepTransport<T[P]>;
-// } & IHaveMetadata
-// e.g. 
-/*
-
-type DeepTransport<T> =
-    T extends any[] ? DeepTransportArray<T[number]> :
-    T extends Date ? string :
-    T extends object ? DeepTransportObject<T> :
-    T;
-interface DeepTransportArray<T> extends Array<DeepTransport<T>> {}
-type DeepTransportObject<T> = { [P in keyof T]?: DeepTransport<T[P]>; };
-
-
-export type Transport<T> = DeepTransport<Pick<T, Exclude<keyof T, keyof IHaveMetadata>>>
-
-
-
-    type CaseTransport = Transport<Case>
-    var a: CaseTransport;
-
-*/ 

@@ -8,7 +8,7 @@ declare module "vue/types/vue" {
     }
 }
 
-import { IHaveMetadata, ModelType, ClassType } from './metadata'
+import { ModelType, ClassType } from './metadata'
 import { Model, convertToModel, mapToDto } from './model'
 import { OwnProps } from './util'
 
@@ -91,7 +91,7 @@ export class ApiClient<T extends Model<ClassType>> {
                 `/${this.$metadata.controllerRoute}/get/${id}`, 
                 this.$options(parameters, config)
             )
-            .then<AxiosItemResult<T>>(this.$hydrateItemResult.bind(this))
+            .then<AxiosItemResult<T>>(r => this.$hydrateItemResult(r, this.$metadata))
     }
     
     public list(parameters?: ListParameters, config?: AxiosRequestConfig) {
@@ -100,7 +100,7 @@ export class ApiClient<T extends Model<ClassType>> {
                 `/${this.$metadata.controllerRoute}/list`, 
                 this.$options(parameters, config)
             )
-            .then<AxiosListResult<T>>(this.$hydrateListResult.bind(this))
+            .then<AxiosListResult<T>>(r => this.$hydrateListResult(r, this.$metadata))
     }
     
     public count(parameters?: FilterParameters, config?: AxiosRequestConfig) {
@@ -118,7 +118,7 @@ export class ApiClient<T extends Model<ClassType>> {
                 qs.stringify(mapToDto(item)),
                 this.$options(parameters, config)
             )
-            .then<AxiosItemResult<T>>(this.$hydrateItemResult.bind(this))
+            .then<AxiosItemResult<T>>(r => this.$hydrateItemResult(r, this.$metadata))
     }
     
     public delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
@@ -128,7 +128,7 @@ export class ApiClient<T extends Model<ClassType>> {
                 null,
                 this.$options(parameters, config)
             )
-            .then<AxiosItemResult<T>>(this.$hydrateItemResult.bind(this))
+            .then<AxiosItemResult<T>>(r => this.$hydrateItemResult(r, this.$metadata))
     }
 
     /**
@@ -136,33 +136,33 @@ export class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult = T>(
         resultType: "item",
         invokerFactory: (client: this) => TCall
-    ): ItemApiState<TCall, T> & TCall
+    ): ItemApiState<TCall, TResult> & TCall
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult = T>(
         resultType: "list",
         invokerFactory: (client: this) => TCall
-    ): ListApiState<TCall, T> & TCall
+    ): ListApiState<TCall, TResult> & TCall
     
-    $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
+    $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>, TResult = T>(
         resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
         invokerFactory: (client: this) => TCall
-    ): ApiState<TCall, T> & TCall
+    ): ApiState<TCall, TResult> & TCall
     {
-        var instance: ApiState<TCall, T>;
+        var instance: ApiState<TCall, TResult>;
         switch (resultType){
             case "item": 
-                instance = new ItemApiState<TCall, T>(this, invokerFactory(this));
+                instance = new ItemApiState<TCall, TResult>(this, invokerFactory(this));
                 break;
             // Typescript is unhappy with giving TCall to ListApiState. No idea why, since the item one is fine.
             case "list": 
-                instance = new ListApiState<any, T>(this, invokerFactory(this));
+                instance = new ListApiState<any, TResult>(this, invokerFactory(this));
                 break;
             default: throw `Unknown result type ${resultType}`
         }
@@ -205,26 +205,26 @@ export class ApiClient<T extends Model<ClassType>> {
         return paramsObject
     }
 
-    private $hydrateItemResult(value: AxiosItemResult<T>) {
+    protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType) {
         // This function is NOT PURE - we mutate the result object on the response.
         const object = value.data.object
         if (object) {
-            convertToModel(object, this.$metadata)
+            convertToModel(object, metadata)
         }
         return value
     }
 
-    private $hydrateListResult(value: AxiosListResult<T>) {
+    protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: ClassType) {
         // This function is NOT PURE - we mutate the result object on the response.
         const list = value.data.list
         if (Array.isArray(list)) {
-            list.forEach(item => convertToModel(item, this.$metadata))
+            list.forEach(item => convertToModel(item, metadata))
         }
         return value
     }
 }
 
-export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<T>, T extends Model<ClassType>> extends Function {
+export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {
 
     /** True if a request is currently pending. */
     isLoading: boolean = false
@@ -277,7 +277,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         this.isLoading = true
 
         // Inject a cancellation token into the request.
-        var promise: ApiResultPromise<T>
+        var promise: ApiResultPromise<TResult>
         try {
             const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
             this.cancel = token.cancel
@@ -307,7 +307,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
             }, (error: AxiosError) => {
                 this.cancel = null
                 this.wasSuccessful = false
-                const result = error.response as AxiosResponse<ListResult<T> | ItemResult<T>> | undefined
+                const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
                 if (result) {
                     const data = result.data
                     this.setResponseProps(data)
@@ -325,7 +325,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
     }
 
     constructor(
-        private readonly apiClient: ApiClient<T>,
+        private readonly apiClient: ApiClient<any>,
         private readonly invoker: TCall
     ) { 
         super();
@@ -352,14 +352,14 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
     }
 }
 
-export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<T>, T extends Model<ClassType>> extends ApiState<TCall, T> {
+export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
     /** Validation issues returned by the previous request. */
     validationIssues: ValidationIssue[] | null = null
 
     /** Principal data returned by the previous request. */
-    result: T | null = null
+    result: TResult | null = null
 
-    setResponseProps(data: ItemResult<T>) {
+    setResponseProps(data: ItemResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
 
@@ -371,7 +371,7 @@ export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResu
     }
 }
 
-export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<T>, T extends Model<ClassType>> extends ApiState<TCall, T> {
+export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
     /** Page number returned by the previous request. */
     page: number | null = null
     /** Page size returned by the previous request. */
@@ -382,9 +382,9 @@ export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResu
     totalCount: number | null = null
 
     /** Principal data returned by the previous request. */
-    result: T[] | null = null
+    result: TResult[] | null = null
 
-    setResponseProps(data: ListResult<T>) {
+    setResponseProps(data: ListResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
 

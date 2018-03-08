@@ -1,4 +1,3 @@
-"use strict";
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
         s = arguments[i];
@@ -7,8 +6,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-function getEnumMeta(values) {
+export function getEnumMeta(values) {
     return {
         valueLookup: __assign({}, values.reduce(function (obj, v) {
             return Object.assign(obj, (_a = {},
@@ -20,8 +18,7 @@ function getEnumMeta(values) {
         values: values
     };
 }
-exports.getEnumMeta = getEnumMeta;
-function resolvePropMeta(metadata, propOrString, slient) {
+export function resolvePropMeta(metadata, propOrString, slient) {
     if (slient === void 0) { slient = false; }
     var propMeta = typeof propOrString == "string" ? metadata.props[propOrString] : propOrString;
     if (!propMeta) {
@@ -36,8 +33,6 @@ function resolvePropMeta(metadata, propOrString, slient) {
     }
     return propMeta;
 }
-exports.resolvePropMeta = resolvePropMeta;
-function isClassType(prop) {
+export function isClassType(prop) {
     return typeof (prop) === "object" && (prop.type === "model" || prop.type === "object");
 }
-exports.isClassType = isClassType;

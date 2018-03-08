@@ -1,4 +1,3 @@
-"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -9,13 +8,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-Object.defineProperty(exports, "__esModule", { value: true });
-var model_1 = require("./model");
-var axios_1 = require("axios");
-var qs = require("qs");
-var vue_1 = require("vue");
+import { convertToModel, mapToDto } from './model';
+import axios from 'axios';
+import * as qs from 'qs';
+import Vue from 'vue';
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
-exports.AxiosClient = axios_1.default.create();
+export var AxiosClient = axios.create();
 var ApiClient = /** @class */ (function () {
     function ApiClient($metadata) {
         this.$metadata = $metadata;
@@ -24,28 +22,32 @@ var ApiClient = /** @class */ (function () {
     }
     // TODO: should the standard set of endpoints be prefixed with $ 
     ApiClient.prototype.get = function (id, parameters, config) {
-        return exports.AxiosClient
+        var _this = this;
+        return AxiosClient
             .get("/" + this.$metadata.controllerRoute + "/get/" + id, this.$options(parameters, config))
-            .then(this.$hydrateItemResult.bind(this));
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
     };
     ApiClient.prototype.list = function (parameters, config) {
-        return exports.AxiosClient
+        var _this = this;
+        return AxiosClient
             .get("/" + this.$metadata.controllerRoute + "/list", this.$options(parameters, config))
-            .then(this.$hydrateListResult.bind(this));
+            .then(function (r) { return _this.$hydrateListResult(r, _this.$metadata); });
     };
     ApiClient.prototype.count = function (parameters, config) {
-        return exports.AxiosClient
+        return AxiosClient
             .get("/" + this.$metadata.controllerRoute + "/count", this.$options(parameters, config));
     };
     ApiClient.prototype.save = function (item, parameters, config) {
-        return exports.AxiosClient
-            .post("/" + this.$metadata.controllerRoute + "/save", qs.stringify(model_1.mapToDto(item)), this.$options(parameters, config))
-            .then(this.$hydrateItemResult.bind(this));
+        var _this = this;
+        return AxiosClient
+            .post("/" + this.$metadata.controllerRoute + "/save", qs.stringify(mapToDto(item)), this.$options(parameters, config))
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
     };
     ApiClient.prototype.delete = function (id, parameters, config) {
-        return exports.AxiosClient
+        var _this = this;
+        return AxiosClient
             .post("/" + this.$metadata.controllerRoute + "/delete/" + id, null, this.$options(parameters, config))
-            .then(this.$hydrateItemResult.bind(this));
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
     };
     ApiClient.prototype.$makeCaller = function (resultType, // TODO: Eventually this should be replaced with a metadata object I think
     invokerFactory) {
@@ -81,26 +83,25 @@ var ApiClient = /** @class */ (function () {
         }
         return paramsObject;
     };
-    ApiClient.prototype.$hydrateItemResult = function (value) {
+    ApiClient.prototype.$hydrateItemResult = function (value, metadata) {
         // This function is NOT PURE - we mutate the result object on the response.
         var object = value.data.object;
         if (object) {
-            model_1.convertToModel(object, this.$metadata);
+            convertToModel(object, metadata);
         }
         return value;
     };
-    ApiClient.prototype.$hydrateListResult = function (value) {
-        var _this = this;
+    ApiClient.prototype.$hydrateListResult = function (value, metadata) {
         // This function is NOT PURE - we mutate the result object on the response.
         var list = value.data.list;
         if (Array.isArray(list)) {
-            list.forEach(function (item) { return model_1.convertToModel(item, _this.$metadata); });
+            list.forEach(function (item) { return convertToModel(item, metadata); });
         }
         return value;
     };
     return ApiClient;
 }());
-exports.ApiClient = ApiClient;
+export { ApiClient };
 var ApiState = /** @class */ (function (_super) {
     __extends(ApiState, _super);
     function ApiState(apiClient, invoker) {
@@ -132,7 +133,7 @@ var ApiState = /** @class */ (function (_super) {
             var value = _this[stateProp];
             // Don't define sealed object properties (e.g. this._callbacks)
             if (value != null && typeof value !== "object" || !Object.isSealed(value)) {
-                vue_1.default.util.defineReactive(invoke, stateProp, _this[stateProp], null, true);
+                Vue.util.defineReactive(invoke, stateProp, _this[stateProp], null, true);
             }
         }
         Object.setPrototypeOf(invoke, _newTarget.prototype);
@@ -165,7 +166,7 @@ var ApiState = /** @class */ (function (_super) {
         // Inject a cancellation token into the request.
         var promise;
         try {
-            var token = this.apiClient._nextCancelToken = axios_1.default.CancelToken.source();
+            var token = this.apiClient._nextCancelToken = axios.CancelToken.source();
             this.cancel = token.cancel;
             promise = this.invoker.apply(null, arguments);
         }
@@ -206,7 +207,7 @@ var ApiState = /** @class */ (function (_super) {
     };
     return ApiState;
 }(Function));
-exports.ApiState = ApiState;
+export { ApiState };
 var ItemApiState = /** @class */ (function (_super) {
     __extends(ItemApiState, _super);
     function ItemApiState() {
@@ -229,7 +230,7 @@ var ItemApiState = /** @class */ (function (_super) {
     };
     return ItemApiState;
 }(ApiState));
-exports.ItemApiState = ItemApiState;
+export { ItemApiState };
 var ListApiState = /** @class */ (function (_super) {
     __extends(ListApiState, _super);
     function ListApiState() {
@@ -258,4 +259,4 @@ var ListApiState = /** @class */ (function (_super) {
     };
     return ListApiState;
 }(ApiState));
-exports.ListApiState = ListApiState;
+export { ListApiState };

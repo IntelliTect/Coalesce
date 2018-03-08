@@ -1,14 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var debounce_1 = require("lodash-es/debounce");
-var metadata_1 = require("./metadata");
-var model_1 = require("./model");
+import debounce from 'lodash-es/debounce';
+import { resolvePropMeta, isClassType } from './metadata';
+import { modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
  * @param ctor The class to add wrapper properties to
  * @param metadata The metadata describing the properties to add.
  */
-function defineProps(ctor, metadata) {
+export function defineProps(ctor, metadata) {
     Object.defineProperties(ctor.prototype, Object.keys(metadata.props).reduce(function (descriptors, propName) {
         descriptors[propName] = {
             enumerable: true,
@@ -22,7 +20,6 @@ function defineProps(ctor, metadata) {
         return descriptors;
     }, {}));
 }
-exports.defineProps = defineProps;
 /*
 DESIGN NOTES
     - ViewModel deliberately has TModel as its only type parameter.
@@ -107,7 +104,7 @@ var ViewModel = /** @class */ (function () {
             }
         }
         else {
-            this.$data = model_1.convertToModel({}, $metadata);
+            this.$data = convertToModel({}, $metadata);
         }
         this.$isDirty = false;
     }
@@ -125,9 +122,9 @@ var ViewModel = /** @class */ (function () {
          * Returns true if the values of the savable data properties of this ViewModel
          * have changed since the last load, save, or the last time $isDirty was set to false.
          */
-        get: function () { return JSON.stringify(model_1.mapToDto(this.$data)) != JSON.stringify(this._pristineDto); },
+        get: function () { return JSON.stringify(mapToDto(this.$data)) != JSON.stringify(this._pristineDto); },
         set: function (val) { if (val)
-            throw "Can't set $isDirty to true manually"; this._pristineDto = model_1.mapToDto(this.$data); },
+            throw "Can't set $isDirty to true manually"; this._pristineDto = mapToDto(this.$data); },
         enumerable: true,
         configurable: true
     });
@@ -143,7 +140,7 @@ var ViewModel = /** @class */ (function () {
         var _this = this;
         if (wait === void 0) { wait = 1000; }
         this.$stopAutoSave();
-        var enqueueSave = debounce_1.default(function () {
+        var enqueueSave = debounce(function () {
             if (!_this._autoSaveState.on)
                 return;
             if (_this.$save.isLoading) {
@@ -190,8 +187,8 @@ var ViewModel = /** @class */ (function () {
      */
     ViewModel.prototype.$display = function (prop) {
         if (!prop)
-            return model_1.modelDisplay(this);
-        return model_1.propDisplay(this, prop);
+            return modelDisplay(this);
+        return propDisplay(this, prop);
     };
     /**
      * Creates a new instance of an item for the specified child collection, adds it to that collection, and returns the item.
@@ -200,14 +197,14 @@ var ViewModel = /** @class */ (function () {
      * @param prop The name of the collection property, or the metadata representing it.
      */
     ViewModel.prototype.$addChild = function (prop) {
-        var propMeta = metadata_1.resolvePropMeta(this.$metadata, prop);
+        var propMeta = resolvePropMeta(this.$metadata, prop);
         var collection = this.$data[propMeta.name];
         if (!Array.isArray(collection)) {
             collection = this.$data[propMeta.name] = [];
         }
         var typeDef = propMeta.typeDef;
-        if (metadata_1.isClassType(typeDef)) {
-            var newModel = model_1.convertToModel({}, typeDef);
+        if (isClassType(typeDef)) {
+            var newModel = convertToModel({}, typeDef);
             var foreignKey = propMeta.foreignKey;
             if (foreignKey) {
                 newModel[foreignKey.name] = this.$primaryKey;
@@ -222,4 +219,4 @@ var ViewModel = /** @class */ (function () {
     };
     return ViewModel;
 }());
-exports.ViewModel = ViewModel;
+export { ViewModel };

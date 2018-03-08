@@ -1,7 +1,7 @@
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
-import { ApiClient, IHaveMetadata, convertToModel } from 'coalesce-vue'
+import { ApiClient, IHaveMetadata, convertToModel, ModelType } from 'coalesce-vue'
 import { Person } from '../metadata.g';
 import * as metadata from '../metadata.g';
 import * as models from '../models.g';
@@ -67,7 +67,7 @@ export default class extends Vue {
 
   mounted() {
     
-
+    
     this.person.$load(1)
       .then(r => {
         this.person!.$apiClient.removePersonById(200)

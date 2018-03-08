@@ -1,8 +1,8 @@
-import { ClassType, IHaveMetadata, Property, PropNames } from "./metadata";
+import { ClassType, Property, PropNames } from "./metadata";
 /**
  * Represents a model with metadata information.
  */
-export interface Model<TMeta extends ClassType> extends IHaveMetadata {
+export interface Model<TMeta extends ClassType> {
     readonly $metadata: TMeta;
 }
 /**

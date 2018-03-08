@@ -5,9 +5,6 @@ export declare type ObjectType = "model" | "object";
 export declare type NonCollectionType = ValueType | ObjectType;
 export declare type TypeDiscriminator = NonCollectionType | "collection";
 export declare type Role = "value" | "primaryKey" | "foreignKey" | "referenceNavigation" | "collectionNavigation";
-export interface IHaveMetadata {
-    readonly $metadata: ClassType;
-}
 export interface Domain {
     types: {
         [modelName: string]: ClassType;

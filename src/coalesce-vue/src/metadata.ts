@@ -8,10 +8,6 @@ export type TypeDiscriminator = NonCollectionType | "collection"
 
 export type Role = "value" | "primaryKey" | "foreignKey" | "referenceNavigation" | "collectionNavigation"
 
-export interface IHaveMetadata {
-    readonly $metadata: ClassType
-}
-
 export interface Domain {
     // models: { [modelName: string]: ModelMetadata },
     // externalTypes: { [modelName: string]: ExternalTypeMetadata },

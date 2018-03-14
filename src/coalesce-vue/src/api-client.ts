@@ -20,7 +20,7 @@ import { ModelType, ClassType } from './metadata'
 import { Model, convertToModel, mapToDto } from './model'
 import { OwnProps } from './util'
 
-import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance } from 'axios'
+import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance, Cancel} from 'axios'
 import * as qs from 'qs'
 import Vue from 'vue';
 
@@ -156,7 +156,7 @@ export class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<any>>(
+    $makeCaller<TCall extends (this: any, ...args: any[]) => ItemResultPromise<any>>(
         resultType: "item",
         invokerFactory: (client: this) => TCall
     ): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall
@@ -246,6 +246,8 @@ export class ApiClient<T extends Model<ClassType>> {
     }
 }
 
+function NoOp() {}
+
 export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {
 
     /** True if a request is currently pending. */
@@ -260,7 +262,15 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
     /** 
      * Function that can be called to cancel a pending request.
     */
-    cancel: Canceler | null = null
+    cancel() {
+        if (this._cancelToken){
+            this._cancelToken.cancel();
+            this.isLoading = false;
+        }
+    }
+
+    // Undefined initially to prevent unneeded reactivity
+    private _cancelToken: CancelTokenSource | undefined;
 
     // Frozen to prevent unneeded reactivity.
     private _callbacks = Object.freeze<{
@@ -272,7 +282,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
      * Attach a callback to be invoked when the request to this endpoint succeeds.
      * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
      */
-    onFulfilled(callback: (state: this) => void): this {
+    onFulfilled(callback: (this: any, state: this) => void): this {
         this._callbacks.onFulfilled.push(callback)
         return this;
     }
@@ -281,7 +291,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
      * Attach a callback to be invoked when the request to this endpoint fails.
      * @param onFulfilled A callback to be called when a request to this endpoint fails.
      */
-    onRejected(callback: (state: this) => void): this {
+    onRejected(callback: (this: any, state: this) => void): this {
         this._callbacks.onFulfilled.push(callback)
         return this;
     }
@@ -290,7 +300,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
 
     public invoke!: TCall
 
-    private _invokeInternal() {
+    private _invokeInternal(thisArg: any, args: IArguments) {
         if (this.isLoading) {
             throw `Request is already pending for invoker ${this.invoker.toString()}`
         }
@@ -302,8 +312,8 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         var promise: ApiResultPromise<TResult>
         try {
             const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
-            this.cancel = token.cancel
-            promise = this.invoker.apply(null, arguments)
+            this._cancelToken = token
+            promise = this.invoker.apply(thisArg, args)
         } finally {
             (this.apiClient as any)._nextCancelToken = null
         }
@@ -311,10 +321,10 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         return promise
             .then(resp => {
                 const data = resp.data
-                this.cancel = null
+                delete this._cancelToken
                 this.setResponseProps(data)
 
-                this._callbacks.onFulfilled.forEach(cb => cb.apply(this, [this]))
+                this._callbacks.onFulfilled.forEach(cb => cb.apply(thisArg, [this]))
 
                 this.isLoading = false
 
@@ -326,8 +336,20 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
                 // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
                 // but changing the implementation would be a significant breaking change by then.
                 return resp
-            }, (error: AxiosError) => {
-                this.cancel = null
+            }, (thrown: AxiosError | Cancel) => {
+                if (axios.isCancel(thrown)) {
+                    // No handling of anything for cancellations.
+                    // A cancellation is deliberate and shouldn't be treated as an error state. Callbacks should not be called either - pretend the request never happened.
+                    // If a compelling case for invoking callbacks on cancel is found,
+                    // it should probably be implemented as a separate set of callbacks.
+                    // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
+                    // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
+                    return;
+                } else {
+                    var error = thrown as AxiosError;
+                }
+
+                delete this._cancelToken
                 this.wasSuccessful = false
                 const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
                 if (result) {
@@ -338,7 +360,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
                     this.message = error.message || "A network error occurred"
                 }
 
-                this._callbacks.onRejected.forEach(cb => cb.apply(this, [this]))
+                this._callbacks.onRejected.forEach(cb => cb.apply(thisArg, [this]))
 
                 this.isLoading = false
 
@@ -354,7 +376,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         
         // Create our invoker function that will ultimately be our instance object.
         const invokeFunc: TCall = function invokeFunc() {
-            return invoke._invokeInternal.apply(invoke, arguments);
+            return invoke._invokeInternal(this, arguments);
         } as TCall
         // Copy all properties from the class to the function.
         const invoke = Object.assign(invokeFunc, this);
@@ -364,7 +386,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         for (const stateProp in this) {
             const value = this[stateProp]
             // Don't define sealed object properties (e.g. this._callbacks)
-            if (value != null && typeof value !== "object" || !Object.isSealed(value)) {
+            if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
                 Vue.util.defineReactive(invoke, stateProp, this[stateProp], null, true)
             }
         }

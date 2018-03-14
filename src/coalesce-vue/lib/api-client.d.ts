@@ -13,7 +13,7 @@ declare module "axios" {
 }
 import { ModelType, ClassType } from './metadata';
 import { Model } from './model';
-import { AxiosPromise, AxiosResponse, AxiosRequestConfig, Canceler, CancelToken, AxiosInstance } from 'axios';
+import { AxiosPromise, AxiosResponse, AxiosRequestConfig, CancelToken, AxiosInstance } from 'axios';
 export interface ApiResult {
     wasSuccessful: boolean;
     message?: string;
@@ -75,7 +75,7 @@ export declare class ApiClient<T extends Model<ClassType>> {
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ItemResultPromise<any>>(resultType: "item", invokerFactory: (client: this) => TCall): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall;
+    $makeCaller<TCall extends (this: any, ...args: any[]) => ItemResultPromise<any>>(resultType: "item", invokerFactory: (client: this) => TCall): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall;
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
@@ -103,21 +103,22 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
     /**
      * Function that can be called to cancel a pending request.
     */
-    cancel: Canceler | null;
+    cancel(): void;
+    private _cancelToken;
     private _callbacks;
     /**
      * Attach a callback to be invoked when the request to this endpoint succeeds.
      * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
      */
-    onFulfilled(callback: (state: this) => void): this;
+    onFulfilled(callback: (this: any, state: this) => void): this;
     /**
      * Attach a callback to be invoked when the request to this endpoint fails.
      * @param onFulfilled A callback to be called when a request to this endpoint fails.
      */
-    onRejected(callback: (state: this) => void): this;
+    onRejected(callback: (this: any, state: this) => void): this;
     protected abstract setResponseProps(data: ApiResult): void;
     invoke: TCall;
-    private _invokeInternal();
+    private _invokeInternal(thisArg, args);
     constructor(apiClient: ApiClient<any>, invoker: TCall);
 }
 export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {

@@ -102,6 +102,7 @@ var ApiClient = /** @class */ (function () {
     return ApiClient;
 }());
 export { ApiClient };
+function NoOp() { }
 var ApiState = /** @class */ (function (_super) {
     __extends(ApiState, _super);
     function ApiState(apiClient, invoker) {
@@ -115,15 +116,11 @@ var ApiState = /** @class */ (function (_super) {
         _this.wasSuccessful = null;
         /** Error message returned by the previous request. */
         _this.message = null;
-        /**
-         * Function that can be called to cancel a pending request.
-        */
-        _this.cancel = null;
         // Frozen to prevent unneeded reactivity.
         _this._callbacks = Object.freeze({ onFulfilled: [], onRejected: [] });
         // Create our invoker function that will ultimately be our instance object.
         var invokeFunc = function invokeFunc() {
-            return invoke._invokeInternal.apply(invoke, arguments);
+            return invoke._invokeInternal(this, arguments);
         };
         // Copy all properties from the class to the function.
         var invoke = Object.assign(invokeFunc, _this);
@@ -132,13 +129,22 @@ var ApiState = /** @class */ (function (_super) {
         for (var stateProp in _this) {
             var value = _this[stateProp];
             // Don't define sealed object properties (e.g. this._callbacks)
-            if (value != null && typeof value !== "object" || !Object.isSealed(value)) {
+            if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
                 Vue.util.defineReactive(invoke, stateProp, _this[stateProp], null, true);
             }
         }
         Object.setPrototypeOf(invoke, _newTarget.prototype);
         return invoke;
     }
+    /**
+     * Function that can be called to cancel a pending request.
+    */
+    ApiState.prototype.cancel = function () {
+        if (this._cancelToken) {
+            this._cancelToken.cancel();
+            this.isLoading = false;
+        }
+    };
     /**
      * Attach a callback to be invoked when the request to this endpoint succeeds.
      * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
@@ -155,7 +161,7 @@ var ApiState = /** @class */ (function (_super) {
         this._callbacks.onFulfilled.push(callback);
         return this;
     };
-    ApiState.prototype._invokeInternal = function () {
+    ApiState.prototype._invokeInternal = function (thisArg, args) {
         var _this = this;
         if (this.isLoading) {
             throw "Request is already pending for invoker " + this.invoker.toString();
@@ -167,8 +173,8 @@ var ApiState = /** @class */ (function (_super) {
         var promise;
         try {
             var token = this.apiClient._nextCancelToken = axios.CancelToken.source();
-            this.cancel = token.cancel;
-            promise = this.invoker.apply(null, arguments);
+            this._cancelToken = token;
+            promise = this.invoker.apply(thisArg, args);
         }
         finally {
             this.apiClient._nextCancelToken = null;
@@ -176,9 +182,9 @@ var ApiState = /** @class */ (function (_super) {
         return promise
             .then(function (resp) {
             var data = resp.data;
-            _this.cancel = null;
+            delete _this._cancelToken;
             _this.setResponseProps(data);
-            _this._callbacks.onFulfilled.forEach(function (cb) { return cb.apply(_this, [_this]); });
+            _this._callbacks.onFulfilled.forEach(function (cb) { return cb.apply(thisArg, [_this]); });
             _this.isLoading = false;
             // We have to maintain the shape of the promise of the stateless invoke method.
             // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
@@ -188,8 +194,20 @@ var ApiState = /** @class */ (function (_super) {
             // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
             // but changing the implementation would be a significant breaking change by then.
             return resp;
-        }, function (error) {
-            _this.cancel = null;
+        }, function (thrown) {
+            if (axios.isCancel(thrown)) {
+                // No handling of anything for cancellations.
+                // A cancellation is deliberate and shouldn't be treated as an error state. Callbacks should not be called either - pretend the request never happened.
+                // If a compelling case for invoking callbacks on cancel is found,
+                // it should probably be implemented as a separate set of callbacks.
+                // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
+                // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
+                return;
+            }
+            else {
+                var error = thrown;
+            }
+            delete _this._cancelToken;
             _this.wasSuccessful = false;
             var result = error.response;
             if (result) {
@@ -200,7 +218,7 @@ var ApiState = /** @class */ (function (_super) {
                 // TODO: i18n
                 _this.message = error.message || "A network error occurred";
             }
-            _this._callbacks.onRejected.forEach(function (cb) { return cb.apply(_this, [_this]); });
+            _this._callbacks.onRejected.forEach(function (cb) { return cb.apply(thisArg, [_this]); });
             _this.isLoading = false;
             return error;
         });

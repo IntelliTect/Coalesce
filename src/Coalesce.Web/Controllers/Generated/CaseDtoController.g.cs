@@ -8,7 +8,6 @@ namespace Coalesce.Web.Controllers
     [Authorize]
     public partial class CaseDtoController : BaseViewController<Coalesce.Domain.CaseDto>
     {
-
         [Authorize]
         public ActionResult Cards()
         {

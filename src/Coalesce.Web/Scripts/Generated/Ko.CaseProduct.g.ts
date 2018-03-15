@@ -50,6 +50,7 @@ module ViewModels {
         
         /** 
             Load the ViewModel object from the DTO.
+            @param data: The incoming data object to load.
             @param force: Will override the check against isLoading that is done to prevent recursion. False is default.
             @param allowCollectionDeletes: Set true when entire collections are loaded. True is the default. 
             In some cases only a partial collection is returned, set to false to only add/update collections.

@@ -89,7 +89,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
-           if (method.ResultType.IsCollection || method.ResultType.IsArray)
+            if (method.ResultType.IsCollection || method.ResultType.IsArray)
             {
                 b.Line($"public result: {method.ResultType.TsKnockoutType()} = {method.ResultType.ObservableConstructorCall()};");
             }
@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             classBlock.Dispose();
         }
 
-        public string WriteMethod_SaveToDto(TypeScriptCodeBuilder b)
+        public void WriteMethod_SaveToDto(TypeScriptCodeBuilder b)
         {
             b.DocComment($"Saves this object into a data transfer object to send to the server.");
             using (b.Block($"public saveToDto = (): any =>"))
@@ -265,7 +265,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line();
                 b.Line($"return dto;");
             }
-            return b.ToString();
         }
     }
 

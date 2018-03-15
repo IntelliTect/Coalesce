@@ -13,9 +13,16 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 {
-    public abstract class KnockoutTsGenerator : KnockoutGenerator
+    public abstract class KnockoutTsGenerator : StringBuilderFileGenerator<ClassViewModel>
     {
-        public KnockoutTsGenerator(GeneratorServices services) : base(services) { }
+        public KnockoutTsGenerator(GeneratorServices services) : base(services) {
+            Services = services;
+        }
+
+        public GeneratorServices Services { get; }
+        public GenerationContext GenerationContext => Services.GenerationContext;
+        public string AreaName => GenerationContext.AreaName;
+        public string ModulePrefix => GenerationContext.TypescriptModulePrefix;
 
         protected bool ShouldWriteGeneratedBy { get; set; } = true;
 

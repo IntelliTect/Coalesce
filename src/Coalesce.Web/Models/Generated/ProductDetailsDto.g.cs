@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -46,6 +45,5 @@ namespace Coalesce.Web.Models
             if (OnUpdate(entity, context)) return;
 
         }
-
     }
 }

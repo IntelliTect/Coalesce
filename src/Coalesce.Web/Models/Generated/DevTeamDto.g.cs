@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -44,6 +43,5 @@ namespace Coalesce.Web.Models
             entity.DevTeamId = (DevTeamId ?? entity.DevTeamId);
             entity.Name = Name;
         }
-
     }
 }

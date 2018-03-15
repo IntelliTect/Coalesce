@@ -19,7 +19,7 @@ namespace CshtmlConvert
     {
         static void Main(string[] args)
         {
-            var di = new DirectoryInfo("D:/Work/Coalesce - 20/src/IntelliTect.Coalesce.CodeGeneration.Knockout/Templates");
+            var di = new DirectoryInfo("D:/Work/Coalesce - 20/src/IntelliTect.Coalesce.CodeGeneration.Api/Templates");
 
             Parallel.ForEach(di.GetFiles().Where(f => f.Extension == ".cshtml"), file =>
             {

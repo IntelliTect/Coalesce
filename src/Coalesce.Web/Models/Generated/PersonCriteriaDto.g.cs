@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -47,6 +46,5 @@ namespace Coalesce.Web.Models
             entity.BirthdayMonth = BirthdayMonth;
             entity.EmailDomain = EmailDomain;
         }
-
     }
 }

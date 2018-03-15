@@ -48,9 +48,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteDtoClass(CSharpCodeBuilder b, string namespaceName)
         {
-            using (b.Block($"public partial class {Model.Name}DtoGen : GeneratedDto<{Model.FullyQualifiedName}>"))
+            using (b.Block($"public partial class {Model.DtoName} : GeneratedDto<{Model.FullyQualifiedName}>"))
             {
-                b.Line($"public {Model.Name}DtoGen() {{ }}");
+                b.Line($"public {Model.DtoName}() {{ }}");
 
                 b.Line();
                 foreach (PropertyViewModel prop in Model.ClientProperties)

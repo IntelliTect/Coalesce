@@ -10,14 +10,50 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 {
-    public abstract class ApiController : RazorTemplateCSharpGenerator<ClassViewModel>
+    public abstract class ApiController : StringBuilderCSharpGenerator<ClassViewModel>
     {
         public ApiController(RazorTemplateServices razorServices) : base(razorServices) { }
-
-        public string MethodResultProcessBlock(MethodViewModel method, int indentLevel = 2)
+        
+        protected string WriteNamespaces(CSharpCodeBuilder b)
         {
-            var b = new CodeBuilder(initialLevel: indentLevel, indentSize: IndentationSize);
+            string namespaceName = Namespace;
+            if (!string.IsNullOrWhiteSpace(AreaName))
+            {
+                namespaceName += "." + AreaName;
+            }
+            var namespaces = new[]
+            {
+                "IntelliTect.Coalesce",
+                "IntelliTect.Coalesce.Api",
+                "IntelliTect.Coalesce.Api.Controllers",
+                "IntelliTect.Coalesce.Api.DataSources",
+                "IntelliTect.Coalesce.Mapping",
+                "IntelliTect.Coalesce.Mapping.IncludeTrees",
+                "IntelliTect.Coalesce.Models",
+                "IntelliTect.Coalesce.TypeDefinition",
+                "Microsoft.AspNetCore.Authorization",
+                "Microsoft.AspNetCore.Mvc",
+                "Microsoft.AspNetCore.Http",
+                "System",
+                "System.Linq",
+                "System.Collections.Generic",
+                "System.ComponentModel.DataAnnotations",
+                "System.Net",
+                "System.Threading.Tasks",
+                $"{namespaceName}.Models"
+            };
 
+            b.Line();
+            foreach (var ns in namespaces.Where(n => !string.IsNullOrEmpty(n)).OrderBy(n => n))
+            {
+                b.Line($"using {ns};");
+            }
+
+            return namespaceName;
+        }
+
+        public void WriteMethodResultProcessBlock(CSharpCodeBuilder b, MethodViewModel method, int indentLevel = 2)
+        {
             var resultVar = "methodResult";
             var resultProp = "Object";
             var resultType = method.ResultType;
@@ -92,8 +128,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
 
             b.Append("return result;");
-
-            return b.ToString();
         }
     }
 }

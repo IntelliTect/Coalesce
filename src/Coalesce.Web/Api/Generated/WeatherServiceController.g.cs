@@ -1,4 +1,4 @@
-﻿
+
 using Coalesce.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
@@ -30,7 +30,6 @@ namespace Coalesce.Web.Api
             Service = service;
         }
 
-
         /// <summary>
         /// Method: GetWeather
         /// </summary>
@@ -40,7 +39,6 @@ namespace Coalesce.Web.Api
         {
             IncludeTree includeTree = null;
             var methodResult = Service.GetWeather(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), new MappingContext(User)), dateTime);
-
             var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);

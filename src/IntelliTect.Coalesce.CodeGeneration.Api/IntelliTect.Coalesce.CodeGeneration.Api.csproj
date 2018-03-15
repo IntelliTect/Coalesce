@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Templates\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
   </ItemGroup>
 

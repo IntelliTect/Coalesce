@@ -8,7 +8,6 @@ namespace Coalesce.Web.Controllers
     [Authorize]
     public partial class CompanyController : BaseViewController<Coalesce.Domain.Company>
     {
-
         [Authorize]
         public ActionResult Cards()
         {

@@ -8,7 +8,6 @@ namespace Coalesce.Web.Controllers
     [Authorize]
     public partial class PersonController : BaseViewController<Coalesce.Domain.Person>
     {
-
         [AllowAnonymous]
         public ActionResult Cards()
         {

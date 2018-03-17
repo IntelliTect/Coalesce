@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
+using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -37,6 +38,7 @@ namespace IntelliTect.Coalesce.Cli
 
         private static Task<int> Main(string[] args)
         {
+            ApplicationTimer.Stopwatch.Start();
             return CommandLineApplication.ExecuteAsync<Program>(args);
         }
 
@@ -72,7 +74,7 @@ namespace IntelliTect.Coalesce.Cli
                 config = serializer.Deserialize<CoalesceConfiguration>(jsonReader);
             }
 
-            if (!Enum.TryParse(LogLevelOption, out LogLevel logLevel)) logLevel = LogLevel.Information;
+            if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
 
 
             var executor = new GenerationExecutor(config, logLevel);

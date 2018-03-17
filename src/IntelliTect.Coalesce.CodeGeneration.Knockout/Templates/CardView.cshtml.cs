@@ -40,13 +40,7 @@ namespace Razor
             b.Line("    }");
             b.Line("</style>");
             b.Line();
-            Write($"<div");
-            BeginWriteAttribute("class", " class=\"", 1005, "\"", 1054, 3);
-            WriteAttributeValue("", 1013, "card-view", 1013, 9, true);
-            WriteAttributeValue(" ", 1022, "obj-", 1023, 5, true);
-            WriteAttributeValue("", 1027, model.Name.ToCamelCase(), 1027, 27, false);
-            EndWriteAttribute();
-            b.Line(">");
+            b.Line($"<div class=\"card-view obj-{model.Name.ToCamelCase()}>");
             b.Line("    <div class=\"card-view-header\">");
             b.Line("        <div class=\"clearfix\">");
             b.Line("            <h1 style=\"display: inline-block\">");

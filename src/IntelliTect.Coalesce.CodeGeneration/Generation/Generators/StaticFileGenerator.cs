@@ -32,15 +32,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public override bool ShouldGenerate() => NoOverwrite ? !File.Exists(OutputPath) : true;
 
-        public override string ToString()
-        {
-            if (OutputPath != null)
-            {
-                return $"{Template.ToString()} => {OutputPath}";
-            }
-            return Template.ToString();
-        }
-
         #region Fluent
 
         public StaticFileGenerator WithTemplate(TemplateDescriptor template)

@@ -31,6 +31,7 @@ namespace Razor
             {
                 listViewModelsNamespace = Model.ModulePrefix + "." + listViewModelsNamespace;
             }
+
             b.Line("@using IntelliTect.Coalesce.Knockout.Helpers");
             b.Line("@{ ViewBag.Fluid = true; }");
             b.Line("<style>");
@@ -47,13 +48,7 @@ namespace Razor
             b.Line("        padding: 10px 15px;");
             b.Line("    }");
             b.Line("</style>");
-            Write($"<div");
-            BeginWriteAttribute("class", " class=\"", 1191, "\"", 1241, 3);
-            WriteAttributeValue("", 1199, "table-view", 1199, 10, true);
-            WriteAttributeValue(" ", 1209, "obj-", 1210, 5, true);
-            WriteAttributeValue("", 1214, model.Name.ToCamelCase(), 1214, 27, false);
-            EndWriteAttribute();
-            b.Line(">");
+            b.Line($"<div class=\"table-view obj-{model.Name.ToCamelCase()}>");
             b.Line("    <div class=\"table-view-header\">");
             b.Line("        <div class=\"clearfix\">");
             b.Line("            <h1 style=\"display: inline-block\">");
@@ -138,12 +133,7 @@ namespace Razor
             foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
             {
                 b.Line("                            ");
-                Write($"                            <td");
-                BeginWriteAttribute("class", " class=\"", 6312, "\"", 6341, 2);
-                WriteAttributeValue("", 6320, "prop-", 6320, 5, true);
-                WriteAttributeValue("", 6325, prop.JsonName, 6325, 16, false);
-                EndWriteAttribute();
-                b.Line($">{Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)}</td>");
+                b.Line($"                            <td class=\"prop-{prop.JsonName}\">{Display.PropertyHelper(prop, !prop.IsReadOnly, null, true)}</td>");
             }
             b.Line("                        }");
             b.Line("                        else");
@@ -151,12 +141,7 @@ namespace Razor
             foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
             {
                 b.Line("                            ");
-                Write($"                            <td");
-                BeginWriteAttribute("class", " class=\"", 6767, "\"", 6796, 2);
-                WriteAttributeValue("", 6775, "prop-", 6775, 5, true);
-                WriteAttributeValue("", 6780, prop.JsonName, 6780, 16, false);
-                EndWriteAttribute();
-                b.Line($">{Display.PropertyHelper(prop, false, null, true)}</td>");
+                b.Line($"                            <td class=\"prop-{prop.JsonName}\">{Display.PropertyHelper(prop, false, null, true)}</td>");
             }
             b.Line("                        }");
             b.Line("                    <td>");

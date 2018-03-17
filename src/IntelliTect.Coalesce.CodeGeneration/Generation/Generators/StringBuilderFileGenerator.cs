@@ -24,14 +24,5 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             return new MemoryStream(Encoding.UTF8.GetBytes(await BuildOutputAsync()));
         }
-
-        public override string ToString()
-        {
-            if (OutputPath != null)
-            {
-                return $"{GetType().FullName} => {OutputPath}";
-            }
-            return GetType().FullName;
-        }
     }
 }

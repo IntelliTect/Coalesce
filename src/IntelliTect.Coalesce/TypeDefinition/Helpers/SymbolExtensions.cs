@@ -13,6 +13,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         public static AttributeData GetAttribute<TAttribute>(this ISymbol symbol)
         {
+            var count = symbol.GetAttributes().Length;
             return symbol.GetAttributes().SingleOrDefault(a => a.AttributeClass.Name == typeof(TAttribute).Name);
         }
 

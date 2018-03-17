@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -23,13 +24,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
     {
         private ConcurrentDictionary<string, Type> _templateTypeCache = new ConcurrentDictionary<string, Type>();
         private ConcurrentDictionary<string, SemaphoreSlim> _templateCacheLocks = new ConcurrentDictionary<string, SemaphoreSlim>();
-
-        private readonly ProjectContext _projectContext;
+        
         private readonly ILogger<RazorTemplateCompiler> _logger;
 
-        public RazorTemplateCompiler(GenerationContext genContext, ILogger<RazorTemplateCompiler> logger)
+        public RazorTemplateCompiler(ILogger<RazorTemplateCompiler> logger)
         {
-            _projectContext = genContext.WebProject;
             _logger = logger;
         }
 
@@ -70,7 +69,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                     _logger.LogTrace($"Precompiling suspected template {resolved}");
                     try
                     {
-                        await GetTemplateInstance(resolved);
+                        await GetCachedTemplateType(resolved);
                         _logger.LogTrace($"Successfully precompiled {resolved}");
                     }
                     catch
@@ -103,10 +102,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
             await keyLock.WaitAsync();
             try
             {
-                return _templateTypeCache.GetOrAdd(key, path =>
-                {
-                    return GetTemplateType(template);
-                });
+                return _templateTypeCache.GetOrAdd(key, _ => GetTemplateType(template));
             }
             finally
             {
@@ -158,31 +154,47 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                 throw new TemplateProcessingException(generatorResults.Diagnostics.Select(e => e.ToString()), generatorResults.GeneratedCode);
             }
 
-            var type = Compile(generatorResults.GeneratedCode);
+            var type = Compile(template, generatorResults.GeneratedCode);
             
             _logger.LogTrace($"Compiled C# for {template} into in-memory assembly.");
 
             return type;
         }
 
-        private Type Compile(string content)
+
+        
+        private ICollection<MetadataReference> GetTemplateMetadataReferences(IResolvedTemplate template)
+        {
+            // Force load required assemblies into the current appdomain.
+            // These are dependent assemblies of Coalesce that aren't otherwise loaded until this point.
+            // Specific dependencies of specific generation suites and/or individual generators should be declared
+            // as explicit dependencies of their generator in order to get included as a reference.
+            new System.Security.Claims.ClaimsPrincipal();
+
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(asm => asm.GetName());
+
+            var templateAssemblies = template.TemplateDescriptor.ManifestResourceAssembly
+                .GetReferencedAssemblies()
+                .Select(name => Assembly.Load(name).GetName());
+
+            return loadedAssemblies
+                .Concat(templateAssemblies)
+                // Get only one reference for each assembly. There may be duplicates because we pulled from
+                // both our current AppDomain and the templateAssemblies's deps.
+                .GroupBy(name => name.FullName)
+                .Select(group => group.First())
+                .Select(name => new Uri(name.CodeBase).LocalPath)
+                .Select(path => MetadataReference.CreateFromFile(path))
+                .Cast<MetadataReference>()
+                .ToList();
+        }
+
+        private Type Compile(IResolvedTemplate template, string content)
         {
             var syntaxTrees = new[] { CSharpSyntaxTree.ParseText(content) };
 
-            var references = 
-                _projectContext.GetTemplateMetadataReferences()
-
-                // Add in references to any other currently loaded Coalesce assemblies.
-                // Primarily, this will be the assembly that actually hosts the generator,
-                // but this could also be any other assembly that IntelliTect.Coalesce.CodeGeneration needs but IntelliTect.Coalesce doesn't.
-
-                // This pevents Coalesce-based projects from needing to reference the code gen
-                // packages/projects/assemblies when using stock generators,
-                // which are always named IntelliTect.Coalesce.* and are the only generators Coalesce supports as of 10.26.2017 anyway.
-                .Concat(AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .Where(asm => !asm.IsDynamic && !string.IsNullOrEmpty(asm.Location) && asm.FullName.Contains("IntelliTect.Coalesce"))
-                    .Select(asm => MetadataReference.CreateFromFile(asm.Location)));
+            var references = GetTemplateMetadataReferences(template);
 
             var assemblyName = Path.GetRandomFileName();
 
@@ -190,17 +202,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Razor
                         options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
                         syntaxTrees: syntaxTrees,
                         references: references);
-
-            //var analyzers = System.Collections.Immutable.ImmutableArray.CreateBuilder<Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer>();
-            //Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis..))
-            //        .GetTypes()
-            //        .Where(x => typeof(DiagnosticAnalyzer).IsAssignableFrom(x))
-            //        .Select(Activator.CreateInstance)
-            //        .Cast<DiagnosticAnalyzer>()
-            //        .ToList()
-            //        .ForEach(x => analyzers.Add(x));
-
-
+            
             using (var assemblyStream = new MemoryStream())
             {
                 using (var pdbStream = new MemoryStream())

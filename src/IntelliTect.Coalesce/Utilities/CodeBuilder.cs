@@ -81,14 +81,14 @@ namespace IntelliTect.Coalesce.Utilities
         /// <summary>
         /// Write text to the current line. If currently on a new, blank line, the current indentation will be added.
         /// </summary>
-        public CodeBuilder Append(string line)
+        public CodeBuilder Append(string text)
         {
             if (onNewLine)
             {
                 sb.Append(indentChar, Level * indentSize);
                 onNewLine = false;
             }
-            sb.Append(line);
+            sb.Append(text);
             return this;
         }
 
@@ -101,25 +101,6 @@ namespace IntelliTect.Coalesce.Utilities
         {
             Level++;
             return new Indentation(this);
-        }
-
-        public IDisposable ElBlock(string elName, string attributes = null)
-        {
-            if (!onNewLine)
-            {
-                throw new InvalidOperationException("Cannot start a block on a line that isn't empty");
-            }
-
-            Append("<").Append(elName);
-            if (attributes != null)
-            {
-                Append(" ").Append(attributes);
-            }
-            Line(">");
-
-            Level++;
-
-            return new Indentation(this, $"</{elName}>");
         }
 
         /// <summary>

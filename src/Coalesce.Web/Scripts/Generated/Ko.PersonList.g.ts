@@ -6,15 +6,15 @@
 module ListViewModels {
     
     export namespace PersonDataSources {
-        export class WithoutCases extends Coalesce.DataSource<ViewModels.Person> {
-        }
-        export const Default = WithoutCases;
-        export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
-        }
         
         /** People whose last name starts with B or c */
         export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> {
         }
+        export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
+        }
+        export class WithoutCases extends Coalesce.DataSource<ViewModels.Person> {
+        }
+        export const Default = WithoutCases;
     }
     
     export class PersonList extends Coalesce.BaseListViewModel<ViewModels.Person> {

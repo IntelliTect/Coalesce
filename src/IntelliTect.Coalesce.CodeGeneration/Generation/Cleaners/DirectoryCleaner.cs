@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             return Task.Run(() =>
             {
-                logger.LogTrace($"{Owner}: Running cleaner {this}");
+                logger.LogTrace($"Cleaning {this}");
 
                 if (!Directory.Exists(TargetPath))
                 {

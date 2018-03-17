@@ -28,8 +28,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public IProjectContext MsBuildProjectContext { get; internal set; }
 
-        public override ICollection<MetadataReference> GetTemplateMetadataReferences() => GetMetadataReferences();
-
         public ICollection<MetadataReference> GetMetadataReferences()
         {
             var references = new List<MetadataReference>();

@@ -17,6 +17,7 @@ using Microsoft.DotNet.Cli.Utils;
 using System.Linq;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 {
@@ -73,7 +74,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 "buildMultiTargeting/IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild.targets"
             };
 
-            foreach (var file in files)
+            Parallel.ForEach(files, file =>
             {
                 using (var stream = thisAssembly.GetManifestResourceStream($"{baseResourceName}.{file.Replace("/", ".")}"))
                 {
@@ -83,7 +84,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                     Directory.CreateDirectory(Path.GetDirectoryName(filePath));
                     File.WriteAllBytes(filePath, targetBytes);
                 }
-            }
+            });
 
             return this;
         }
@@ -129,7 +130,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 
             var line = $"   {(projectPath)}";
             if (Framework != null) line += $" ({Framework})";
-            line += $": Evaluating & building dependencies";
             Logger?.LogInformation(line);
 
             var projectInfoFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

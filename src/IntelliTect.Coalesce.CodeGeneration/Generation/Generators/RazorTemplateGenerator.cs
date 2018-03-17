@@ -47,14 +47,5 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             return output;
         }
-
-        public override string ToString()
-        {
-            if (OutputPath != null)
-            {
-                return $"{Template.ToString()} => {OutputPath}";
-            }
-            return Template.ToString();
-        }
     }
 }

@@ -8,10 +8,8 @@ using System.IO;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
-
-#if NET462
-using Microsoft.CodeAnalysis.MSBuild;
-#endif
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
@@ -64,45 +62,36 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
         }
 
 
-        private class SymbolDiscoveryVisitor : SymbolVisitor<IEnumerable<INamedTypeSymbol>>
+        private class SymbolDiscoveryVisitor : SymbolVisitor
         {
-            public override IEnumerable<INamedTypeSymbol> VisitNamespace(INamespaceSymbol symbol)
+            public List<INamedTypeSymbol> Discovered { get; } = new List<INamedTypeSymbol>();
+
+            public override void VisitNamespace(INamespaceSymbol symbol)
             {
-                foreach (var childSymbol in symbol.GetMembers())
-                {
-                    //We must implement the visitor pattern ourselves and 
-                    //accept the child symbols in order to visit their children
-                    foreach (var result in childSymbol.Accept(this)) yield return result;
-                }
+                foreach (var member in symbol.GetMembers()) member.Accept(this);
             }
 
-            public override IEnumerable<INamedTypeSymbol> VisitNamedType(INamedTypeSymbol symbol)
+            public override void VisitNamedType(INamedTypeSymbol symbol)
             {
-                yield return symbol;
-
-                foreach (var childSymbol in symbol.GetTypeMembers())
-                {
-                    //Once againt we must accept the children to visit 
-                    //all of their children
-                    foreach (var result in childSymbol.Accept(this)) yield return result;
-                }
+                Discovered.Add(symbol);
+                foreach (var childSymbol in symbol.GetTypeMembers()) childSymbol.Accept(this);
             }
         }
 
-        private ICollection<INamedTypeSymbol> _allTypes;
-        public IEnumerable<INamedTypeSymbol> GetAllTypes()
+        private List<INamedTypeSymbol> _allTypes;
+        public List<INamedTypeSymbol> GetAllTypes()
         {
             if (_allTypes != null) return _allTypes;
-
+            
             var compilation = GetProjectCompilation();
             if (compilation == null)
             {
                 throw new ArgumentNullException(nameof(compilation));
             }
 
-            return _allTypes = compilation.Assembly.GlobalNamespace
-                .Accept(new SymbolDiscoveryVisitor())
-                .ToList();
+            var visitor = new SymbolDiscoveryVisitor();
+            compilation.Assembly.GlobalNamespace.Accept(visitor);
+            return _allTypes = visitor.Discovered;
         }
 
         /*
@@ -171,12 +160,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
         {
-#if !NET462
             var workspace = new RoslynWorkspace(project.MsBuildProjectContext, project.MsBuildProjectContext.Configuration);
-#endif
-#if NET462
-            var workspace = MSBuildWorkspace.Create();
-#endif
 
             workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
             {
@@ -194,10 +178,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                     }
                 }
             };
-
-#if NET462
-            var result = workspace.OpenProjectAsync(project.ProjectFilePath).Result;
-#endif
 
             return new RoslynTypeLocator(workspace, project);
         }

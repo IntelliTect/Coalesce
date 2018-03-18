@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// <summary>
         /// Calls <see cref="Line(string)"/> for each line.
         /// </summary>
-        public CodeBuilder Lines(IEnumerable<string> lines)
+        public CodeBuilder Lines(params string[] lines)
         {
             foreach (var line in lines) Line(line);
             return this;

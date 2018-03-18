@@ -519,29 +519,35 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             var b = new HtmlCodeBuilder();
             b.Line($"<!-- Modal for method: {method.Name} -->");
             var withBinding = includeWithBinding ? $"with: {method.JsVariable}" : null;
-            
-            using (b.TagBlock("div", new { @class="modal fade", id=elementId, tabindex=-1, role="dialog", data_bind=withBinding } ))
-            using (b.TagBlock("div", new { @class="modal-dialog" }))
-            using (b.TagBlock("div", new { @class="modal-content" }))
+
+            using (b
+                .TagBlock("div", new { @class = "modal fade", id = elementId, tabindex = -1, role = "dialog", data_bind = withBinding })
+                .TagBlock("div", "modal-dialog")
+                .TagBlock("div", "modal-content")
+            )
             {
-                using (b.TagBlock("div", new { @class="modal-header" }))
+                using (b.TagBlock("div", "modal-header"))
                 {
                     b.Line("<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
                     b.Line($"<h4 class='modal-title'>{method.Name.ToProperCase()}</h4>");
                 }
 
-                using (b.TagBlock("div", new { @class="modal-body form-horizontal", data_bind="with: args" }))
-                foreach (ParameterViewModel arg in method.ClientParameters)
-                using (b.TagBlock("div", new { @class="form-group" }))
+                using (b.TagBlock("div", "modal-body form-horizontal", "with: args" ))
                 {
-                    b.Line($"<label class='col-md-4 control-label'>{arg.Name.ToProperCase()}</label>");
-                    using (b.TagBlock("div", new { @class="col-md-8" }))
+                    foreach (ParameterViewModel arg in method.ClientParameters)
                     {
-                        b.Line($"<input type='text' class='form-control' data-bind='value: {arg.JsVariable}'>");
+                        using (b.TagBlock("div", "form-group"))
+                        {
+                            b.Line($"<label class='col-md-4 control-label'>{arg.Name.ToProperCase()}</label>");
+                            using (b.TagBlock("div", "col-md-8"))
+                            {
+                                b.Line($"<input type='text' class='form-control' data-bind='value: {arg.JsVariable}'>");
+                            }
+                        }
                     }
                 }
 
-                using (b.TagBlock("div", new { @class="modal-footer" }))
+                using (b.TagBlock("div", "modal-footer"))
                 {
                     b.Line("<button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>");
                     b.Line(@"<button type='button' class='btn btn-primary btn-ok'");

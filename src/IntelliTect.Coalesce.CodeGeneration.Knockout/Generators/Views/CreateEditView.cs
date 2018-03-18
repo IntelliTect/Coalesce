@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using IntelliTect.Coalesce.Knockout.Helpers;
@@ -16,10 +14,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class CreateEditView : KnockoutViewGenerator
     {
-        public CreateEditView(GeneratorServices services) : base(services)
-        {
-        }
-
+        public CreateEditView(GeneratorServices services) : base(services) { }
+        
         public override void BuildOutput(HtmlCodeBuilder b)
         {
             string viewModelsNamespace = "ViewModels";

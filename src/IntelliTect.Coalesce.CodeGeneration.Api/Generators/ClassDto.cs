@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
 
@@ -12,7 +10,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
     public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
     {
-        public ClassDto(RazorTemplateServices razorServices) : base(razorServices) { }
+        public ClassDto(GeneratorServices services) : base(services)
+        {
+        }
 
         public override void BuildOutput(CSharpCodeBuilder b)
         {

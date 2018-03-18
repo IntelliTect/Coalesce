@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
@@ -13,7 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KoExternalType : KnockoutViewModelGenerator
     {
-        public KoExternalType(RazorTemplateServices razorServices) : base(razorServices) { }
+        public KoExternalType(GeneratorServices services) : base(services) { }
         
         public override void BuildOutput(TypeScriptCodeBuilder b)
         {

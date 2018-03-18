@@ -1,9 +1,4 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
-using IntelliTect.Coalesce.CodeGeneration.Utilities;
-using IntelliTect.Coalesce.Knockout.TypeDefinition;
-using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System;

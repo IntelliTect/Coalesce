@@ -1,89 +1,94 @@
 @using IntelliTect.Coalesce.Knockout.Helpers
 
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card">
+    <div class="card-heading">
         <div class="btn-group pull-right">
-            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
-            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+            <button onclick="window.history.back()" class="btn btn-xs btn-default"><i class="fa fa-arrow-left"></i> Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i> Refresh</button>
         </div>
-        <h1 class="clearfix" style="display:inline-block;">Company</h1>
+        <h1 class="card-title clearfix" style="display:inline-block;">Company</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div class="form-horizontal">
-            <div class="form-group btn-warning" style="display: none;" data-bind="if: errorMessage(), visible: errorMessage()">
+            <div class="form-group btn-warning" style="display: none" data-bind="if: errorMessage(), visible: errorMessage()">
                 <label class="col-md-4 control-label">Error</label>
                 <div class="col-md-8">
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Name</label>
-<div class="col-md-8 prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Address1</label>
-<div class="col-md-8 prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Address2</label>
-<div class="col-md-8 prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">City</label>
-<div class="col-md-8 prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">State</label>
-<div class="col-md-8 prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Zip Code</label>
-<div class="col-md-8 prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Is Deleted</label>
-<div class="col-md-8 prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Employees</label>
-<div class="col-md-8 prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Alt Name</label>
-<div class="col-md-8 prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, false))</div>                </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Name</label>
+                <div class="col-md-8 prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Address1</label>
+                <div class="col-md-8 prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Address2</label>
+                <div class="col-md-8 prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">City</label>
+                <div class="col-md-8 prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">State</label>
+                <div class="col-md-8 prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Zip Code</label>
+                <div class="col-md-8 prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Is Deleted</label>
+                <div class="col-md-8 prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Employees</label>
+                <div class="col-md-8 prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Alt Name</label>
+                <div class="col-md-8 prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, false))</div>
+            </div>
         </div>
-    </div>
-    <div class="panel-body">
     </div>
 </div>
 
 
-    @section Scripts
-    {
-    <script>
-        var model = new ViewModels.Company();
-        model.includes = "Editor";
 
-        model.saveCallbacks.push(function(obj){
-            // If there is a new id, set the one for this page
-            if (!Coalesce.Utilities.GetUrlParameter('id')){
-                if (model.myId) {
-                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
-                    window.history.replaceState(null, window.document.title, newUrl);
-                }
+@section Scripts
+{
+<script>
+    var model = new ViewModels.Company();
+    model.includes = "Editor";
+    model.saveCallbacks.push(function(obj){
+        // If there is a new id, set the one for this page
+        if (!Coalesce.Utilities.GetUrlParameter('id')){
+            if (model.myId) {
+                var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
+                window.history.replaceState(null, window.document.title, newUrl);
             }
-        });
-
-        @if (ViewBag.Id != null)
-                {
-                    @:model.load('@ViewBag.Id');
-                }
-        @foreach (var kvp in ViewBag.ParentIds)
-                {
-                    @:model.@(((string)(@kvp.Key)))(@kvp.Value);
-                }
-
-        window.onbeforeunload = function(){
-            if (model.isDirty()) model.save();
         }
-
-        model.coalesceConfig.autoSaveEnabled(false);
-        model.loadChildren(function() {
-            ko.applyBindings(model);
-            model.coalesceConfig.autoSaveEnabled(true);
-        });
-    </script>
+    });
+    @if (ViewBag.Id != null)
+    {
+        @:model.load('@ViewBag.Id');
     }
+    @foreach (var kvp in ViewBag.ParentIds)
+    {
+        @:model.@(((string)(@kvp.Key)))(@kvp.Value);
+    }
+
+    window.onbeforeunload = function(){
+        if (model.isDirty()) model.save();
+    }
+    model.coalesceConfig.autoSaveEnabled(false);
+    model.loadChildren(function() {
+        ko.applyBindings(model);
+        model.coalesceConfig.autoSaveEnabled(true);
+    });
+</script>
+}

@@ -1,101 +1,108 @@
 @using IntelliTect.Coalesce.Knockout.Helpers
 
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card">
+    <div class="card-heading">
         <div class="btn-group pull-right">
-            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
-            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+            <button onclick="window.history.back()" class="btn btn-xs btn-default"><i class="fa fa-arrow-left"></i> Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i> Refresh</button>
         </div>
-        <h1 class="clearfix" style="display:inline-block;">Case</h1>
+        <h1 class="card-title clearfix" style="display:inline-block;">Case</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div class="form-horizontal">
-            <div class="form-group btn-warning" style="display: none;" data-bind="if: errorMessage(), visible: errorMessage()">
+            <div class="form-group btn-warning" style="display: none" data-bind="if: errorMessage(), visible: errorMessage()">
                 <label class="col-md-4 control-label">Error</label>
                 <div class="col-md-8">
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Title</label>
-<div class="col-md-8 prop-title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Description</label>
-<div class="col-md-8 prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Opened At</label>
-<div class="col-md-8 prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Assigned To</label>
-<div class="col-md-7 prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</div>                        <div class="col-md-1" data-bind="with: assignedTo">
-                            <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
-                        </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Title</label>
+                <div class="col-md-8 prop-title">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Title))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Description</label>
+                <div class="col-md-8 prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Opened At</label>
+                <div class="col-md-8 prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Assigned To</label>
+                <div class="col-md-7 prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</div>
+                <div class="col-md-1" data-bind="with: assignedTo">
+                    <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                 </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Reported By</label>
-<div class="col-md-7 prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</div>                        <div class="col-md-1" data-bind="with: reportedBy">
-                            <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
-                        </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Reported By</label>
+                <div class="col-md-7 prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</div>
+                <div class="col-md-1" data-bind="with: reportedBy">
+                    <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                 </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Attachment</label>
-<div class="col-md-8 prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Severity</label>
-<div class="col-md-8 prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Status</label>
-<div class="col-md-8 prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Case Products</label>
-<div class="col-md-8 prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Dev Team Assigned</label>
-<div class="col-md-8 prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))</div>                </div>
-                <div class="form-group">
-                    <label class="col-md-4 control-label">Duration</label>
-<div class="col-md-8 prop-duration">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Duration))</div>                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Attachment</label>
+                <div class="col-md-8 prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Severity</label>
+                <div class="col-md-8 prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Status</label>
+                <div class="col-md-8 prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Case Products</label>
+                <div class="col-md-8 prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Dev Team Assigned</label>
+                <div class="col-md-8 prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Duration</label>
+                <div class="col-md-8 prop-duration">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Duration))</div>
+            </div>
         </div>
-    </div>
-    <div class="panel-body">
     </div>
 </div>
 
 
-    @section Scripts
-    {
-    <script>
-        var model = new ViewModels.Case();
-        model.includes = "Editor";
 
-        model.saveCallbacks.push(function(obj){
-            // If there is a new id, set the one for this page
-            if (!Coalesce.Utilities.GetUrlParameter('id')){
-                if (model.myId) {
-                    var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
-                    window.history.replaceState(null, window.document.title, newUrl);
-                }
+@section Scripts
+{
+<script>
+    var model = new ViewModels.Case();
+    model.includes = "Editor";
+    model.saveCallbacks.push(function(obj){
+        // If there is a new id, set the one for this page
+        if (!Coalesce.Utilities.GetUrlParameter('id')){
+            if (model.myId) {
+                var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
+                window.history.replaceState(null, window.document.title, newUrl);
             }
-        });
-
-        @if (ViewBag.Id != null)
-                {
-                    @:model.load('@ViewBag.Id');
-                }
-        @foreach (var kvp in ViewBag.ParentIds)
-                {
-                    @:model.@(((string)(@kvp.Key)))(@kvp.Value);
-                }
-
-        window.onbeforeunload = function(){
-            if (model.isDirty()) model.save();
         }
-
-        model.coalesceConfig.autoSaveEnabled(false);
-        model.loadChildren(function() {
-            ko.applyBindings(model);
-            model.coalesceConfig.autoSaveEnabled(true);
-        });
-    </script>
+    });
+    @if (ViewBag.Id != null)
+    {
+        @:model.load('@ViewBag.Id');
     }
+    @foreach (var kvp in ViewBag.ParentIds)
+    {
+        @:model.@(((string)(@kvp.Key)))(@kvp.Value);
+    }
+
+    window.onbeforeunload = function(){
+        if (model.isDirty()) model.save();
+    }
+    model.coalesceConfig.autoSaveEnabled(false);
+    model.loadChildren(function() {
+        ko.applyBindings(model);
+        model.coalesceConfig.autoSaveEnabled(true);
+    });
+</script>
+}

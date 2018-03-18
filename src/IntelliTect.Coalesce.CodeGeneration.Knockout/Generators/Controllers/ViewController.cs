@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
@@ -13,7 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class ViewController : KnockoutCsGenerator
     {
-        public ViewController(RazorTemplateServices razorServices) : base(razorServices) { }
+        public ViewController(GeneratorServices services) : base(services) { }
         
         public override void BuildOutput(CSharpCodeBuilder b)
         {

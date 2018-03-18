@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
@@ -14,11 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
     public class KoViewModel : KnockoutViewModelGenerator
     {
-        public KoViewModel(RazorTemplateServices razorServices) : base(razorServices)
-        {
-            MethodsLoadParent = true;
-            ParentLoadHasIdParameter = true;
-        }
+        public KoViewModel(GeneratorServices services) : base(services) { }
 
         public override void BuildOutput(TypeScriptCodeBuilder b)
         {
@@ -155,7 +149,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line();
                 foreach (var method in Model.ClientMethods.Where(m => !m.IsStatic || m.ResultType.EqualsType(Model.Type)))
                 {
-                    WriteClientMethodDeclaration(b, method, Model.ViewModelGeneratedClassName);
+                    WriteClientMethodDeclaration(b, method, Model.ViewModelGeneratedClassName, true, true);
                 }
 
                 WriteMethod_LoadFromDto(b);

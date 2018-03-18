@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
@@ -13,7 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
     public class ServiceApiController : ApiController
     {
-        public ServiceApiController(RazorTemplateServices razorServices) : base(razorServices) { }
+        public ServiceApiController(GeneratorServices services) : base(services) { }
 
         public override void BuildOutput(CSharpCodeBuilder b)
         {

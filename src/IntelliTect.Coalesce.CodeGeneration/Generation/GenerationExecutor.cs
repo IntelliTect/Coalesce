@@ -1,7 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -39,9 +38,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             services.AddSingleton(Config);
             services.AddSingleton(ReflectionRepository.Global);
-            services.AddSingleton<RazorTemplateCompiler>();
             services.AddSingleton<ITemplateResolver, TemplateResolver>();
-            services.AddSingleton<RazorTemplateServices>();
             services.AddSingleton<GeneratorServices>();
             services.AddSingleton<CompositeGeneratorServices>();
             services.AddSingleton<GenerationContext>();
@@ -58,26 +55,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             logger.LogInformation("Loading Projects:");
 
-            var webProjectLoad = Task.Run(() =>
-            {
-                genContext.WebProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.WebProject);
-            });
-            var dataProjectLoad = Task.Run(() =>
-            {
-                genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
-            });
-
-            await webProjectLoad;
-
-            // Now that we have the web project, we should be able to precompile our templates while the types are discovered.
-            logger.LogDebug("Precompiling templates");
-            // This is just enqueued on the thread pool instead of a task because we don't care if it ever finishes.
-            // Just trying to get this started in advance while the types are discovered.
-            ThreadPool.QueueUserWorkItem(state => provider
-                .GetRequiredService<RazorTemplateCompiler>()
-                .PrecompileAssemblyTemplates(typeof(TGenerator).Assembly));
-
-            await dataProjectLoad;
+            await Task.WhenAll(
+                Task.Run(() =>
+                {
+                    genContext.WebProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.WebProject);
+                }),
+                Task.Run(() =>
+                {
+                    genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
+                })
+            );
 
             // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
             logger.LogInformation("Gathering Types");
@@ -109,9 +96,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             logger.LogInformation("Starting Generation");
 
             await generator.GenerateAsync();
-
-            // No reason to await this. We don't care about it - just needed some work on the background.
-            //await precompileTask;
 
             logger.LogInformation("Generation Complete");
 

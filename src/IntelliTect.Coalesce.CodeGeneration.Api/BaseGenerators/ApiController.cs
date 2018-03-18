@@ -1,5 +1,4 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Razor;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
@@ -12,8 +11,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 {
     public abstract class ApiController : StringBuilderCSharpGenerator<ClassViewModel>
     {
-        public ApiController(RazorTemplateServices razorServices) : base(razorServices) { }
-        
+        public ApiController(GeneratorServices services) : base(services)
+        {
+        }
+
         protected string WriteNamespaces(CSharpCodeBuilder b)
         {
             string namespaceName = Namespace;

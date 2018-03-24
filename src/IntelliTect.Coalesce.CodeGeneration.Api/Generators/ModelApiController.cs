@@ -29,23 +29,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             b.Line();
             using (b.Block($"namespace {namespaceName}.Api"))
             {
-                if (Model.ApiRouted)
-                {
-                    if (!string.IsNullOrWhiteSpace(AreaName))
-                    {
-                        b.Line($"[Route(\"{AreaName}/api/{Model.ApiRouteControllerPart}\")]");
-                    }
-                    else
-                    {
-                        b.Line($"[Route(\"api/{Model.ApiRouteControllerPart}\")]");
-                    }
-                }
+                WriteControllerRouteAttribute(b);
                 b.Line($"{securityInfo.ClassAnnotation}");
                 b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
+
                 b.Line($"public partial class {Model.ApiControllerClassName} ");
                 b.Line($"    : BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}, {DbContext.Type.FullyQualifiedName}>");
+
+
+                // b.Block() has no contents here because we put the base class on a separate line to avoid really long lines.
                 b.Line("{");
-                using (b.Block())
+                using (b.Indented())
                 {
                     WriteClassContents(b, securityInfo);
                 }
@@ -129,10 +123,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
             
             // ENDPOINT: /csvDownload
-            b.Line();
-            b.Line("/// <summary>");
-            b.Line($"/// Downloads CSV of {Model.DtoName}");
-            b.Line("/// </summary>");
+            b.DocComment($"Downloads CSV of {Model.DtoName}");
             b.Line("[HttpGet(\"csvDownload\")]");
             b.Line($"{securityInfo.ReadAnnotation}");
             b.Line($"{Model.ApiActionAccessModifier} virtual Task<FileResult> CsvDownload(");
@@ -141,10 +132,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             b.Indented($"=> CsvDownloadImplementation(parameters, dataSource);");
             
             // ENDPOINT: /csvText
-            b.Line();
-            b.Line("/// <summary>");
-            b.Line($"/// Returns CSV text of {Model.DtoName}");
-            b.Line("/// </summary>");
+            b.DocComment($"Returns CSV text of {Model.DtoName}");
             b.Line("[HttpGet(\"csvText\")]");
             b.Line($"{securityInfo.ReadAnnotation}");
             b.Line($"{Model.ApiActionAccessModifier} virtual Task<string> CsvText(");
@@ -155,10 +143,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
             {
                 // ENDPOINT: /csvUpload
-                b.Line();
-                b.Line("/// <summary>");
-                b.Line("/// Saves CSV data as an uploaded file");
-                b.Line("/// </summary>");
+                b.DocComment($"Saves CSV data as an uploaded file");
                 b.Line("[HttpPost(\"csvUpload\")]");
                 b.Line($"{securityInfo.SaveAnnotation}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<IEnumerable<ItemResult>> CsvUpload(");
@@ -169,10 +154,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"=> CsvUploadImplementation(file, dataSource, behaviors, hasHeader);");
 
                 // ENDPOINT: /csvSave
-                b.Line();
-                b.Line("/// <summary>");
-                b.Line("/// Saves CSV data as a posted string");
-                b.Line("/// </summary>");
+                b.DocComment($"Saves CSV data as a posted string");
                 b.Line("[HttpPost(\"csvSave\")]");
                 b.Line($"{securityInfo.SaveAnnotation}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<IEnumerable<ItemResult>> CsvSave(");
@@ -192,10 +174,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 {
                     returnType = $"async Task<{returnType}>";
                 }
-                b.Line();
-                b.Line("/// <summary>");
-                b.Line($"/// Method: {method.Name}");
-                b.Line("/// </summary>");
+
+                b.DocComment($"Method: {method.Name}");
                 b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
                 b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
                 using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.Name} ({method.CsParameters})"))
@@ -208,14 +188,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                     if (method.IsStatic)
                     {
-                        if (method.ReturnType.IsVoid)
-                        {
-                            b.Line($"{method.Parent.FullyQualifiedName}.{method.Name}({method.CsArguments});");
-                        }
-                        else
-                        {
-                            b.Line($"var methodResult = {method.Parent.FullyQualifiedName}.{method.Name}({method.CsArguments});");
-                        }
+                        WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
                     }
                     else
                     {
@@ -226,14 +199,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             b.Line($"return new {method.ReturnTypeNameForApi}(itemResult);");
                         }
                         b.Line("var item = itemResult.Object;");
-                        if (method.ReturnType.IsVoid)
-                        {
-                            b.Line($"item.{method.Name}({method.CsArguments});");
-                        }
-                        else
-                        {
-                            b.Line($"var methodResult = item.{method.Name}({method.CsArguments});");
-                        }
+                        WriteMethodInvocation(b, method, "item");
                         b.Line("await Db.SaveChangesAsync();");
                     }
 

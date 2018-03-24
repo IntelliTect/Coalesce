@@ -288,7 +288,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     {
                         b.Line();
                         b.Line($"self.{prop.ManyToManyCollectionName.ToCamelCase()}.subscribe<KnockoutArrayChange<{prop.ManyToManyCollectionProperty.Object.ViewModelClassName}>[]>(changes => {{");
-                        using (b.Block())
+                        using (b.Indented())
                         {
                             using (b.Block("for (var i in changes)"))
                             {
@@ -387,7 +387,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsPOCO && !p.Type.IsCollection))
                 {
                     b.Line($"if (!data.{prop.JsonName}) {{ ");
-                    using (b.Block())
+                    using (b.Indented())
                     {
                         if (prop.ObjectIdProperty != null)
                         {
@@ -401,7 +401,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         }
                     }
                     b.Line("} else {");
-                    using (b.Block())
+                    using (b.Indented())
                     {
                         b.Line($"if (!this.{prop.JsVariable}()){{");
                         b.Line($"    this.{prop.JsVariable}(new {prop.Object.ViewModelClassName}(data.{prop.JsonName}, this));");

@@ -21,17 +21,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             b.Line();
             using (b.Block($"namespace {namespaceName}.Api"))
             {
-                if (Model.ApiRouted)
-                {
-                    if (!string.IsNullOrWhiteSpace(AreaName))
-                    {
-                        b.Line($"[Route(\"{AreaName}/api/{Model.ApiRouteControllerPart}\")]");
-                    }
-                    else
-                    {
-                        b.Line($"[Route(\"api/{Model.ApiRouteControllerPart}\")]");
-                    }
-                }
+                WriteControllerRouteAttribute(b);
                 /* No controller-level security annotation is applied - all security for service controllers is on a per-action basis. */
                 b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
                 using (b.Block($"public partial class {Model.ApiControllerClassName} : Controller"))
@@ -41,20 +31,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
         }
 
+
+
         private void WriteClassContents(CSharpCodeBuilder b)
         {
             b.Line($"protected {Model.FullyQualifiedName} Service {{ get; }}");
+            b.Line();
             using (b.Block($"public {Model.ApiControllerClassName}({Model.FullyQualifiedName} service)"))
             {
                 b.Line("Service = service;");
             }
 
-            b.Line();
             foreach (var method in Model.ClientMethods)
             {
-                b.Line("/// <summary>");
-                b.Line($"/// Method: {method.Name}");
-                b.Line("/// </summary>");
+                b.DocComment($"Method: {method.Name}");
                 b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
                 b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
                 using (b.Block($"{Model.ApiActionAccessModifier} virtual {method.ReturnTypeNameForApi} {method.Name} ({method.CsParameters})"))
@@ -65,14 +55,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line("IncludeTree includeTree = null;");
                     }
 
-                    if (method.ReturnType.IsVoid)
-                    {
-                        b.Line($"Service.{method.Name}({method.CsArguments});");
-                    }
-                    else
-                    {
-                        b.Line($"var methodResult = Service.{method.Name}({method.CsArguments});");
-                    }
+                    WriteMethodInvocation(b, method, "Service");
 
                     WriteMethodResultProcessBlock(b, method);
                 }

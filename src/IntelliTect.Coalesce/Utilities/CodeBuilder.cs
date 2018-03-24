@@ -79,6 +79,17 @@ namespace IntelliTect.Coalesce.Utilities
         }
 
         /// <summary>
+        /// Increases indentation one level, returning an object that can be disposed to decrease indentation.
+        /// </summary>
+        /// <example>using (b.Indented()) { b.Line("line1"); b.Line("line2"); } </example>
+        /// <returns></returns>
+        public IDisposable Indented()
+        {
+            Level++;
+            return new Indentation(this);
+        }
+
+        /// <summary>
         /// Write text to the current line. If currently on a new, blank line, the current indentation will be added.
         /// </summary>
         public CodeBuilder Append(string text)
@@ -90,17 +101,6 @@ namespace IntelliTect.Coalesce.Utilities
             }
             sb.Append(text);
             return this;
-        }
-
-        /// <summary>
-        /// Increases indentation one level, returning an object that can be disposed to decrease indentation.
-        /// </summary>
-        /// <example>using (sb.Block) { block.Line("line1"); block.Line("line2"); } </example>
-        /// <returns></returns>
-        public IDisposable Block()
-        {
-            Level++;
-            return new Indentation(this);
         }
 
         /// <summary>

@@ -697,7 +697,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         sb.Append($" && (tree == null || tree[nameof({objectName}.{Name})] != null)");
                     }
                     sb.Line(") {");
-                    using (sb.Block())
+                    using (sb.Indented())
                     {
                         sb.Line($"{objectName}.{Name} = propVal{Name}");
 

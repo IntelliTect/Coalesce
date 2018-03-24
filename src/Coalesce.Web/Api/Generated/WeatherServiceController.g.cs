@@ -25,6 +25,7 @@ namespace Coalesce.Web.Api
     public partial class WeatherServiceController : Controller
     {
         protected Coalesce.Domain.Services.IWeatherService Service { get; }
+
         public WeatherServiceController(Coalesce.Domain.Services.IWeatherService service)
         {
             Service = service;

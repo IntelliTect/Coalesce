@@ -23,5 +23,20 @@ namespace IntelliTect.Coalesce.Utilities
 
             return new Indentation(this, "}");
         }
+
+        /// <summary>
+        /// Writes a blank line, followed by a C# xmldoc comment with the given summary.
+        /// </summary>
+        /// <param name="summary"></param>
+        /// <returns></returns>
+        public CSharpCodeBuilder DocComment(string summary)
+        {
+            Line();
+            Line("/// <summary>");
+            Line($"/// {summary}");
+            Line("/// </summary>");
+
+            return this;
+        }
     }
 }

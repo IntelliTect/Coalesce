@@ -58,10 +58,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     b.Line($"public {prop.Type.NullableTypeForDto(namespaceName)} {prop.Name} {{ get; set; }}");
                 }
 
-                b.Line();
-                b.Line("/// <summary>");
-                b.Line("/// Map from the domain object to the properties of the current DTO instance.");
-                b.Line("/// </summary>");
+                b.DocComment("Map from the domain object to the properties of the current DTO instance.");
                 using (b.Block($"public override void MapFrom({Model.FullyQualifiedName} obj, IMappingContext context, IncludeTree tree = null)"))
                 {
                     b.Line("if (obj == null) return;");
@@ -95,10 +92,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     }
                 }
 
-                b.Line();
-                b.Line("/// <summary>");
-                b.Line("/// Map from the current DTO instance to the domain object.");
-                b.Line("/// </summary>");
+                b.DocComment("Map from the current DTO instance to the domain object.");
                 using (b.Block($"public override void MapTo({Model.FullyQualifiedName} entity, IMappingContext context)"))
                 {
                     b.Line("var includes = context.Includes;");

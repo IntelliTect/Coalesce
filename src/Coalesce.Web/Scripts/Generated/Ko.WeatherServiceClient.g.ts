@@ -8,8 +8,10 @@ module Services {
         
         public readonly apiController: string = "/WeatherService";
         
+        /** Configuration for all instances of WeatherServiceClient. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig = new Coalesce.ServiceClientConfiguration<WeatherServiceClient>(Coalesce.GlobalConfiguration.serviceClient);
         
+        /** Configuration for this WeatherServiceClient instance. */
         public coalesceConfig: Coalesce.ServiceClientConfiguration<WeatherServiceClient>
             = new Coalesce.ServiceClientConfiguration<WeatherServiceClient>(WeatherServiceClient.coalesceConfig);
         

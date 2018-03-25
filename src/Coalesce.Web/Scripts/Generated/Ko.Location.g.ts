@@ -7,14 +7,13 @@ module ViewModels {
     
     /** External Type Location */
     export class Location {
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public city: KnockoutObservable<string | null> = ko.observable(null);
         public state: KnockoutObservable<string | null> = ko.observable(null);
         public zip: KnockoutObservable<string | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -29,7 +28,6 @@ module ViewModels {
             this.zip(data.zip);
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

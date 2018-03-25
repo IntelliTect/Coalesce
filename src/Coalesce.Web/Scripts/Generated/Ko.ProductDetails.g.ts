@@ -7,13 +7,12 @@ module ViewModels {
     
     /** External Type ProductDetails */
     export class ProductDetails {
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public manufacturingAddress: KnockoutObservable<ViewModels.StreetAddress | null> = ko.observable(null);
         public companyHqAddress: KnockoutObservable<ViewModels.StreetAddress | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -35,7 +34,6 @@ module ViewModels {
             }
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

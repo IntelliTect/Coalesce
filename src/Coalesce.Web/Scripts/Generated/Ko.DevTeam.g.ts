@@ -8,13 +8,12 @@ module ViewModels {
     /** External Type DevTeam */
     export class DevTeam {
         public myId: any = 0;
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public devTeamId: KnockoutObservable<number | null> = ko.observable(null);
         public name: KnockoutObservable<string | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -30,7 +29,6 @@ module ViewModels {
             this.name(data.name);
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

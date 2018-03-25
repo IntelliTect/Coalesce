@@ -7,14 +7,13 @@ module ViewModels {
     
     /** External Type PersonCriteria */
     export class PersonCriteria {
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public name: KnockoutObservable<string | null> = ko.observable(null);
         public birthdayMonth: KnockoutObservable<number | null> = ko.observable(null);
         public emailDomain: KnockoutObservable<string | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -29,7 +28,6 @@ module ViewModels {
             this.emailDomain(data.emailDomain);
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

@@ -42,10 +42,10 @@ module ListViewModels {
         /** The data source on the server to use when retrieving objects. Valid values are in this.dataSources. */
         public dataSource: Coalesce.DataSource<ViewModels.Case> = new this.dataSources.Default();
         
-        /** Configuration for all instances of this ListViewModel */
+        /** Configuration for all instances of CaseList. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(Coalesce.GlobalConfiguration.listViewModel);
         
-        /** Configuration for this ListViewModel instance. */
+        /** Configuration for this CaseList instance. */
         public coalesceConfig: Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>
             = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(CaseList.coalesceConfig);
         

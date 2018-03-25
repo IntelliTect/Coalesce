@@ -5,15 +5,7 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
-
-    <!-- Hide node_modules in the solution explorer -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);**\node_modules\**;node_modules\**</DefaultItemExcludes>
   </PropertyGroup>
-
-  <!-- Add capabilities that enable automatic npm integration in visual studio (for our typings references) -->
-  <ItemGroup>
-    <ProjectCapability Include="DotNetCoreWeb" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />

@@ -50,10 +50,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.DocComment("The data source on the server to use when retrieving objects. Valid values are in this.dataSources.");
                 b.Line($"public dataSource: Coalesce.DataSource<{ViewModelFullName}> = new this.dataSources.Default();");
 
-                b.DocComment("Configuration for all instances of this ListViewModel");
+                b.DocComment($"Configuration for all instances of {Model.ListViewModelClassName}. Can be overidden on each instance via instance.coalesceConfig.");
                 b.Line($"public static coalesceConfig = new Coalesce.ListViewModelConfiguration<{Model.ListViewModelClassName}, {ViewModelFullName}>(Coalesce.GlobalConfiguration.listViewModel);");
 
-                b.DocComment("Configuration for this ListViewModel instance.");
+                b.DocComment($"Configuration for this {Model.ListViewModelClassName} instance.");
                 b.Line($"public coalesceConfig: Coalesce.ListViewModelConfiguration<{Model.ListViewModelClassName}, {ViewModelFullName}>");
                 b.Indented($"= new Coalesce.ListViewModelConfiguration<{Model.ListViewModelClassName}, {ViewModelFullName}>({Model.ListViewModelClassName}.coalesceConfig);");
 
@@ -86,6 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     b.Line($"export class Default extends Coalesce.DataSource<{ViewModelFullName}> {{ }}");
                 }
+
                 foreach (var source in dataSources)
                 {
                     b.DocComment(source.Comment);

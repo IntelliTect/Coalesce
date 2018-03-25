@@ -7,15 +7,14 @@ module ViewModels {
     
     /** External Type StreetAddress */
     export class StreetAddress {
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public address: KnockoutObservable<string | null> = ko.observable(null);
         public city: KnockoutObservable<string | null> = ko.observable(null);
         public state: KnockoutObservable<string | null> = ko.observable(null);
         public postalCode: KnockoutObservable<string | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -31,7 +30,6 @@ module ViewModels {
             this.postalCode(data.postalCode);
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

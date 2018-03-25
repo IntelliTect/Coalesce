@@ -85,7 +85,7 @@ ko.bindingHandlers.select2Ajax = {
                         var results = (data.list as any[]).map(item => {
                             return {
                                 id: item[idField],
-                                text: item[textField],
+                                text: item[textField] && item[textField].toString(),
                                 _apiObject: item,
                             } as ResultItem;
                         });
@@ -311,7 +311,7 @@ ko.bindingHandlers.select2AjaxMultiple = {
                         var results = (data.list as any[]).map(item => {
                             return {
                                 id: item[idField],
-                                text: item[textField],
+                                text: item[textField] && item[textField].toString(),
                                 _apiObject: item,
                             } as ResultItem;
                         });

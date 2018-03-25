@@ -9,7 +9,7 @@ using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class ViewController : KnockoutCsGenerator
+    public class ViewController : StringBuilderCSharpGenerator<ClassViewModel>
     {
         public ViewController(GeneratorServices services) : base(services) { }
         

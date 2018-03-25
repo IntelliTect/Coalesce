@@ -314,10 +314,12 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Preconditions
             Assert.False(CrudContext.User.IsInRole(role));
+            Assert.True(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith);
             Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
 
-            // Two values - one that would match, one that shouldn't.
-            // Since searching on the prop isn't valid, no filtering happens, so both rows should be returned.
+            // Since searching by prop isn't valid for this specific property,
+            // the search will instead treat the entire input as the search term.
+            // Since this search term doesn't match the property's value, the results should be empty.
             Assert.Empty(query);
         }
     }

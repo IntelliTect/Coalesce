@@ -12,11 +12,11 @@ module ViewModels {
         public readonly apiController = "/Company";
         public readonly viewController = "/Company";
         
-        /** Behavioral configuration for all instances of Company. Can be overidden on each instance via instance.coalesceConfig. */
+        /** Configuration for all instances of Company. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Company>
             = new Coalesce.ViewModelConfiguration<Company>(Coalesce.GlobalConfiguration.viewModel);
         
-        /** Behavioral configuration for the current Company instance. */
+        /** Configuration for the current Company instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<this>
             = new Coalesce.ViewModelConfiguration<Company>(Company.coalesceConfig);
         

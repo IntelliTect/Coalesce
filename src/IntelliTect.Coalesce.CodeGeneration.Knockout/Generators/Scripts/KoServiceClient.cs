@@ -21,10 +21,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.Line();
                     b.Line($"public readonly apiController: string = \"/{Model.ApiRouteControllerPart}\";");
 
-                    b.Line();
+                    b.DocComment($"Configuration for all instances of {Model.ServiceClientClassName}. Can be overidden on each instance via instance.coalesceConfig.");
                     b.Line($"public static coalesceConfig = new Coalesce.ServiceClientConfiguration<{Model.ServiceClientClassName}>(Coalesce.GlobalConfiguration.serviceClient);");
 
-                    b.Line();
+                    b.DocComment($"Configuration for this {Model.ServiceClientClassName} instance.");
                     b.Line($"public coalesceConfig: Coalesce.ServiceClientConfiguration<{Model.ServiceClientClassName}>");
                     b.Indented($"= new Coalesce.ServiceClientConfiguration<{Model.ServiceClientClassName}>({Model.ServiceClientClassName}.coalesceConfig);");
 

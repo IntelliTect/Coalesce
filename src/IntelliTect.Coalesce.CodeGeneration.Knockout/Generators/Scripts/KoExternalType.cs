@@ -32,6 +32,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.Line("public myId: any = 0;");
                 }
 
+                b.Line("public parent: any;");
+                b.Line("public parentCollection: any;");
+
                 b.Line();
                 b.Line("// Observables");
                 foreach (PropertyViewModel prop in Model.ClientProperties)
@@ -43,13 +46,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     }
                 }
 
-                b.Line("public parent: any;");
-                b.Line("public parentCollection: any;");
-
-                b.Line();
                 WriteMethod_LoadFromDto(b);
 
-                b.Line();
                 WriteMethod_SaveToDto(b);
 
                 b.Line();

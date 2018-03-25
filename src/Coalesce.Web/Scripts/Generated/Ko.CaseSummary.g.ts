@@ -8,6 +8,8 @@ module ViewModels {
     /** External Type CaseSummary */
     export class CaseSummary {
         public myId: any = 0;
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public caseSummaryId: KnockoutObservable<number | null> = ko.observable(null);
@@ -15,9 +17,6 @@ module ViewModels {
         public caseCount: KnockoutObservable<number | null> = ko.observable(null);
         public closeCases: KnockoutObservable<number | null> = ko.observable(null);
         public description: KnockoutObservable<string | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -36,7 +35,6 @@ module ViewModels {
             this.description(data.description);
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

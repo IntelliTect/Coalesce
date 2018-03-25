@@ -12,11 +12,11 @@ module ViewModels {
         public readonly apiController = "/CaseDto";
         public readonly viewController = "/CaseDto";
         
-        /** Behavioral configuration for all instances of CaseDto. Can be overidden on each instance via instance.coalesceConfig. */
+        /** Configuration for all instances of CaseDto. Can be overidden on each instance via instance.coalesceConfig. */
         public static coalesceConfig: Coalesce.ViewModelConfiguration<CaseDto>
             = new Coalesce.ViewModelConfiguration<CaseDto>(Coalesce.GlobalConfiguration.viewModel);
         
-        /** Behavioral configuration for the current CaseDto instance. */
+        /** Configuration for the current CaseDto instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<this>
             = new Coalesce.ViewModelConfiguration<CaseDto>(CaseDto.coalesceConfig);
         

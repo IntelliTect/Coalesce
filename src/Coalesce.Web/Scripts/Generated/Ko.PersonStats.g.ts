@@ -7,14 +7,13 @@ module ViewModels {
     
     /** External Type PersonStats */
     export class PersonStats {
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public height: KnockoutObservable<number | null> = ko.observable(null);
         public weight: KnockoutObservable<number | null> = ko.observable(null);
         public name: KnockoutObservable<string | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -29,7 +28,6 @@ module ViewModels {
             this.name(data.name);
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

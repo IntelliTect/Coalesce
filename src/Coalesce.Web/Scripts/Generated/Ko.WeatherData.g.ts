@@ -7,14 +7,13 @@ module ViewModels {
     
     /** External Type WeatherData */
     export class WeatherData {
+        public parent: any;
+        public parentCollection: any;
         
         // Observables
         public tempFahrenheit: KnockoutObservable<number | null> = ko.observable(null);
         public humidity: KnockoutObservable<number | null> = ko.observable(null);
         public location: KnockoutObservable<ViewModels.Location | null> = ko.observable(null);
-        public parent: any;
-        public parentCollection: any;
-        
         
         /** 
             Load the object from the DTO.
@@ -33,7 +32,6 @@ module ViewModels {
             }
             
         };
-        
         
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {

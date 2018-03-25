@@ -36,11 +36,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line($"public readonly apiController = \"/{Model.ApiRouteControllerPart}\";");
                 b.Line($"public readonly viewController = \"/{Model.ControllerName}\";");
 
-                b.DocComment($"Behavioral configuration for all instances of {Model.ViewModelClassName}. Can be overidden on each instance via instance.coalesceConfig.");
+                b.DocComment($"Configuration for all instances of {Model.ViewModelClassName}. Can be overidden on each instance via instance.coalesceConfig.");
                 b.Line($"public static coalesceConfig: Coalesce.ViewModelConfiguration<{Model.ViewModelClassName}>");
                 b.Indented($"= new Coalesce.ViewModelConfiguration<{Model.ViewModelClassName}>(Coalesce.GlobalConfiguration.viewModel);");
 
-                b.DocComment($"Behavioral configuration for the current {Model.ViewModelClassName} instance.");
+                b.DocComment($"Configuration for the current {Model.ViewModelClassName} instance.");
                 b.Line("public coalesceConfig: Coalesce.ViewModelConfiguration<this>");
                 b.Indented($"= new Coalesce.ViewModelConfiguration<{Model.ViewModelGeneratedClassName}>({Model.ViewModelClassName}.coalesceConfig);");
 

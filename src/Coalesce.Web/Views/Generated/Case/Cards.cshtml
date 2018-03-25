@@ -91,6 +91,10 @@
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, false))
                     </dd>
+                    <dt>Dev Team Assigned Id</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssignedId, false))
+                    </dd>
                     <dt>Dev Team Assigned</dt>
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))
@@ -194,6 +198,8 @@
                     </td>
                     <td>
                         <dl class="dl-horizontal" data-bind="with: result">
+                            <dt>Case Summary Id</dt>
+                            <dd data-bind="text: caseSummaryId"></dd>
                             <dt>Open Cases</dt>
                             <dd data-bind="text: openCases"></dd>
                             <dt>Case Count</dt>

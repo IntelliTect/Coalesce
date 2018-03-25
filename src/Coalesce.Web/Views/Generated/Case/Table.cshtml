@@ -98,6 +98,10 @@
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Status', 'fa-caret-down': orderByDescending() == 'Status'}"></i>
                         </th>
                         <th>Case Products</th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('DevTeamAssignedId')}">
+                            Dev Team Assigned Id
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'DevTeamAssignedId', 'fa-caret-down': orderByDescending() == 'DevTeamAssignedId'}"></i>
+                        </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('DevTeamAssigned')}">
                             Dev Team Assigned
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'DevTeamAssigned', 'fa-caret-down': orderByDescending() == 'DevTeamAssigned'}"></i>
@@ -123,6 +127,7 @@
                             <td class="prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</td>
                             <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
                             <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
+                            <td class="prop-devTeamAssignedId">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.DevTeamAssignedId))</td>
                             <td class="prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, true))</td>
                             <td class="prop-duration">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Duration))</td>
                         }
@@ -137,6 +142,7 @@
                             <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, true))</td>
                             <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, true))</td>
                             <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>
+                            <td class="prop-devTeamAssignedId">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssignedId, true))</td>
                             <td class="prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, true))</td>
                             <td class="prop-duration">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Duration, true))</td>
                         }
@@ -235,6 +241,8 @@
                     </td>
                     <td>
                         <dl class="dl-horizontal" data-bind="with: result">
+                            <dt>Case Summary Id</dt>
+                            <dd data-bind="text: caseSummaryId"></dd>
                             <dt>Open Cases</dt>
                             <dd data-bind="text: openCases"></dd>
                             <dt>Case Count</dt>

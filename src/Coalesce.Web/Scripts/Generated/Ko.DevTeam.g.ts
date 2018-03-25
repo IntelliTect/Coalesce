@@ -7,7 +7,6 @@ module ViewModels {
     
     /** External Type DevTeam */
     export class DevTeam {
-        public myId: any = 0;
         public parent: any;
         public parentCollection: any;
         
@@ -21,8 +20,6 @@ module ViewModels {
         */
         public loadFromDto = (data: any) => {
             if (!data) return;
-            // Set the ID
-            this.myId = data.devTeamId;
             
             // Load the properties.
             this.devTeamId(data.devTeamId);
@@ -33,8 +30,8 @@ module ViewModels {
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
-            dto.devTeamId = this.devTeamId();
             
+            dto.devTeamId = this.devTeamId();
             dto.name = this.name();
             
             return dto;

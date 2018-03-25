@@ -1,4 +1,4 @@
-﻿
+
 using Coalesce.Web.Vue.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
@@ -31,7 +31,6 @@ namespace Coalesce.Web.Vue.Api
             GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.CaseProduct>();
         }
 
-
         [HttpGet("get/{id}")]
         [Authorize]
         public virtual Task<ItemResult<CaseProductDtoGen>> Get(
@@ -54,7 +53,6 @@ namespace Coalesce.Web.Vue.Api
             IDataSource<Coalesce.Domain.CaseProduct> dataSource)
             => CountImplementation(parameters, dataSource);
 
-
         [HttpPost("save")]
         [Authorize]
         public virtual Task<ItemResult<CaseProductDtoGen>> Save(
@@ -63,7 +61,6 @@ namespace Coalesce.Web.Vue.Api
             IDataSource<Coalesce.Domain.CaseProduct> dataSource,
             IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
-
 
         [HttpPost("delete/{id}")]
         [Authorize]
@@ -92,7 +89,6 @@ namespace Coalesce.Web.Vue.Api
             ListParameters parameters,
             IDataSource<Coalesce.Domain.CaseProduct> dataSource)
             => CsvTextImplementation(parameters, dataSource);
-
 
         /// <summary>
         /// Saves CSV data as an uploaded file

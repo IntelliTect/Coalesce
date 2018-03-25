@@ -208,16 +208,16 @@ module ViewModels {
             Removes spaces from the name and puts in dashes
         */
         public readonly changeSpacesToDashesInName = new PersonPartial.ChangeSpacesToDashesInName(this);
-        public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<PersonPartial, any> {
+        public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<PersonPartial, void> {
             public readonly name = 'ChangeSpacesToDashesInName';
             public readonly verb = 'POST';
             
             /** Calls server method (ChangeSpacesToDashesInName) with the given arguments */
-            public invoke = (callback?: (result: any) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: any) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();

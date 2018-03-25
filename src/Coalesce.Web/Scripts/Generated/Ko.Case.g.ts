@@ -146,9 +146,7 @@ module ViewModels {
                 }
             }
             if (!data.devTeamAssigned) { 
-                if (data.devTeamAssignedId != this.devTeamAssignedId()) {
-                    this.devTeamAssigned(null);
-                }
+                this.devTeamAssigned(null);
             } else {
                 if (!this.devTeamAssigned()){
                     this.devTeamAssigned(new DevTeam(data.devTeamAssigned, this));
@@ -200,9 +198,6 @@ module ViewModels {
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
-            if (!dto.devTeamAssignedId && this.devTeamAssigned()) {
-                dto.devTeamAssignedId = this.devTeamAssigned()!.devTeamId();
-            }
             dto.duration = this.duration();
             
             return dto;

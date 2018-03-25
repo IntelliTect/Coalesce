@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -77,6 +76,5 @@ namespace Coalesce.Web.Vue.Models
             entity.ZipCode = ZipCode;
             entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
         }
-
     }
 }

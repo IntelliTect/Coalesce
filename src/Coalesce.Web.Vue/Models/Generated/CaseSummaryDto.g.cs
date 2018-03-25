@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -53,6 +52,5 @@ namespace Coalesce.Web.Vue.Models
             entity.CloseCases = (CloseCases ?? entity.CloseCases);
             entity.Description = Description;
         }
-
     }
 }

@@ -103,16 +103,16 @@ module ListViewModels {
             Methods and properties for invoking server method RandomizeDatesAndStatus.
         */
         public readonly randomizeDatesAndStatus = new CaseList.RandomizeDatesAndStatus(this);
-        public static RandomizeDatesAndStatus = class RandomizeDatesAndStatus extends Coalesce.ClientMethod<CaseList, any> {
+        public static RandomizeDatesAndStatus = class RandomizeDatesAndStatus extends Coalesce.ClientMethod<CaseList, void> {
             public readonly name = 'RandomizeDatesAndStatus';
             public readonly verb = 'POST';
             
             /** Calls server method (RandomizeDatesAndStatus) with the given arguments */
-            public invoke = (callback?: (result: any) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: any) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();

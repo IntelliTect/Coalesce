@@ -60,6 +60,10 @@
                 <div class="col-md-8 prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Dev Team Assigned Id</label>
+                <div class="col-md-8 prop-devTeamAssignedId">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.DevTeamAssignedId))</div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Dev Team Assigned</label>
                 <div class="col-md-8 prop-devTeamAssigned">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))</div>
             </div>

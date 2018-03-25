@@ -7,7 +7,6 @@ module ViewModels {
     
     /** External Type CaseSummary */
     export class CaseSummary {
-        public myId: any = 0;
         public parent: any;
         public parentCollection: any;
         
@@ -24,8 +23,6 @@ module ViewModels {
         */
         public loadFromDto = (data: any) => {
             if (!data) return;
-            // Set the ID
-            this.myId = data.caseSummaryId;
             
             // Load the properties.
             this.caseSummaryId(data.caseSummaryId);
@@ -39,8 +36,8 @@ module ViewModels {
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
-            dto.caseSummaryId = this.caseSummaryId();
             
+            dto.caseSummaryId = this.caseSummaryId();
             dto.openCases = this.openCases();
             dto.caseCount = this.caseCount();
             dto.closeCases = this.closeCases();

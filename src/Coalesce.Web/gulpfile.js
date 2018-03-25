@@ -185,7 +185,7 @@ gulp.task('coalesce:build', ['coalesce:cleanbuild'], shell.task([
 // Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
 gulp.task('coalesce-ko', ['coalesce:build'], shell.task
     ([
-        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" ../coalesce-ko.json ` 
+        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" ../../coalesce-ko.json ` 
     //    `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --verbosity debug ` 
     ],
     { verbose: true }

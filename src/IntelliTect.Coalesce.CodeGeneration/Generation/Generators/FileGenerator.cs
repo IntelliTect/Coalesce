@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             if (IsDisabled)
             {
-                Logger?.LogDebug($"Skipped gen of {this}, {DisabledJsonPropertyName} was false");
+                Logger?.LogDebug($"Skipped gen of {this}, generator disabled");
                 return;
             }
 
@@ -35,9 +35,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 Logger?.LogDebug($"Skipped gen of {this}, {nameof(ShouldGenerate)} returned false");
                 return;
             }
-
+            
             using (var contents = await GetOutputAsync())
             {
+                Logger.LogTrace($"Got output for {this}");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(EffectiveOutputPath));
 
                 if (!await FileUtilities.HasDifferencesAsync(contents, EffectiveOutputPath))
@@ -68,5 +70,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public virtual bool ShouldGenerate() => true;
 
         public abstract Task<Stream> GetOutputAsync();
+
+        public override string ToString()
+        {
+            if (EffectiveOutputPath != null)
+            {
+                return $"{GetType().Name} => {EffectiveOutputPath}";
+            }
+            return GetType().Name;
+        }
     }
 }

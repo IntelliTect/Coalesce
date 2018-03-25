@@ -1,4 +1,5 @@
 @using IntelliTect.Coalesce.Knockout.Helpers
+
 @{ ViewBag.Fluid = true; }
 
 <style>
@@ -12,21 +13,19 @@
         <div class="clearfix">
             <h1 style="display: inline-block">
                 Case List
-                    <span style="font-size: .5em; padding-left: 20px;"><a href="~/Case/Docs">API Docs</a></span>
+                <span style="font-size: .5em; padding-left: 20px;"><a href="~/Case/Docs">API Docs</a></span>
             </h1>
-            <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
         </div>
-
         <div class="clearfix">
             <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
-                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled(), click: previousPage"></i>
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
                 Page
                 <input data-bind="value: page" style="width: 35px">
                 of
                 <span data-bind="text: pageCount"></span>
-                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled(), click: nextPage"></i>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
             </div>
-            <select data-bind="value:pageSize" class="form-control" style="width: 100px; display: inline-block">
+            <select class="form-control" style="width: 100px; display: inline-block;" data-bind="value: pageSize">
                 <option value="1">1</option>
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -35,202 +34,191 @@
                 <option value="500">500</option>
                 <option value="1000">1000</option>
             </select>
-
             <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
-
             <div class="btn-group pull-right">
-                        <a href="~/Case/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
-                    <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
-                    <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
-                        <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
+                <a href="~/Case/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
+                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                <a href="#" role="button" class="btn btn-sm btn-default " data-bind="attr:{href: downloadAllCsvUrl}"><i class="fa fa-download"></i> CSV</a>
+                <button role="button" class="btn btn-sm btn-default " data-bind="click: csvUploadUi"><i class="fa fa-upload"></i> CSV</button>
             </div>
         </div>
     </div>
+    
     <hr />
-
-
-    <div class="flex-card-container card-view-body" data-bind="foreach: items, visible: isLoaded" style="display: none">
-        <div class="flex-card ">
-                <div class="card-heading">
-                    <h3 class="card-title">
-                        <span data-bind="text: title"></span>
-                    </h3>
-                </div>
+    
+    <div class="flex-card-container card-view-body" style="display: none" data-bind="foreach: items, visible: isLoaded">
+        <div class="flex-card">
+            <div class="card-heading">
+                <h3 class="card-title">
+                    <span data-bind="text: title"></span>
+                </h3>
+            </div>
             <div class="card-body flex">
-
                 <dl>
-                        <dt>Title</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title, false))
-                        </dd>
-                        <dt>Description</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description, false))
-                        </dd>
-                        <dt>Opened At</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt, false))
-                        </dd>
-                        <dt>Assigned To</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo, false))
-                        </dd>
-                        <dt>Reported By</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, false))
-                        </dd>
-                        <dt>Attachment</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, false))
-                        </dd>
-                        <dt>Severity</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, false))
-                        </dd>
-                        <dt>Status</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, false))
-                        </dd>
-                        <dt>Case Products</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, false))
-                        </dd>
-                        <dt>Dev Team Assigned</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))
-                        </dd>
-                        <dt>Duration</dt>
-                        <dd>
-                            @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Duration, false))
-                        </dd>
-
+                    <dt>Title</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Title, false))
+                    </dd>
+                    <dt>Description</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Description, false))
+                    </dd>
+                    <dt>Opened At</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt, false))
+                    </dd>
+                    <dt>Assigned To</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo, false))
+                    </dd>
+                    <dt>Reported By</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, false))
+                    </dd>
+                    <dt>Attachment</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, false))
+                    </dd>
+                    <dt>Severity</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, false))
+                    </dd>
+                    <dt>Status</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, false))
+                    </dd>
+                    <dt>Case Products</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, false))
+                    </dd>
+                    <dt>Dev Team Assigned</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.DevTeamAssigned, false))
+                    </dd>
+                    <dt>Duration</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Duration, false))
+                    </dd>
                 </dl>
-
-
+                
                 <div style="margin-top: auto">
                     <!-- Editor buttons -->
                     <div class="pull-right" role="group">
-                                                    <a data-bind="attr:{ href: editUrl }" class="btn btn-sm btn-default">
-                                <i class="fa fa-pencil"></i>
-                            </a>
-                                                    <button data-bind="click: deleteItemWithConfirmation" class="btn btn-sm btn-danger">
-                                <i class="fa fa-remove"></i>
-                            </button>
-
+                        <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
+                            <i class="fa fa-remove"></i>
+                        </button>
                     </div>
                     <span class="form-control-static" data-bind="text: errorMessage"></span>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
-
-
-    <div class="card">
-        <div class="card-heading">
-            <h3 class="card-title">Actions</h3>
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Action</th>
-                        <th style="width: 50%;">Result</th>
-                        <th style="width: 20%;">Successful</th>
-                        <th style="width: 10%;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                        <tr data-bind="with: getSomeCases">
-                            <td>
-                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
-                                        Get Some Cases
-                                    </button>
-                            </td>
-                            <td>
-                                    <ul data-bind="foreach: result">
-                                        <li class="" data-bind="text: $data"></li>
-                                    </ul>
-                            </td>
-                            <td>
-                                <span data-bind="text: wasSuccessful"></span>
-                                <span data-bind="text: message"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
-                            </td>
-                        </tr>
-                        <tr data-bind="with: getAllOpenCasesCount">
-                            <td>
-                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
-                                        Get All Open Cases Count
-                                    </button>
-                            </td>
-                            <td>
-                                    <span data-bind="text: result"></span>
-                            </td>
-                            <td>
-                                <span data-bind="text: wasSuccessful"></span>
-                                <span data-bind="text: message"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
-                            </td>
-                        </tr>
-                        <tr data-bind="with: randomizeDatesAndStatus">
-                            <td>
-                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
-                                        Randomize Dates And Status
-                                    </button>
-                            </td>
-                            <td>
-                                    <span data-bind="text: result"></span>
-                            </td>
-                            <td>
-                                <span data-bind="text: wasSuccessful"></span>
-                                <span data-bind="text: message"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
-                            </td>
-                        </tr>
-                        <tr data-bind="with: getCaseSummary">
-                            <td>
-                                    <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
-                                        Get Case Summary
-                                    </button>
-                            </td>
-                            <td>
-                                    <dl class="dl-horizontal" data-bind="with: result">
-                                            <dt>Open Cases</dt>
-                                            <dd data-bind="text: openCases"></dd>
-                                            <dt>Case Count</dt>
-                                            <dd data-bind="text: caseCount"></dd>
-                                            <dt>Close Cases</dt>
-                                            <dd data-bind="text: closeCases"></dd>
-                                            <dt>Description</dt>
-                                            <dd data-bind="text: description"></dd>
-                                    </dl>
-                            </td>
-                            <td>
-                                <span data-bind="text: wasSuccessful"></span>
-                                <span data-bind="text: message"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
-                            </td>
-                        </tr>
-                </tbody>
-            </table>
-        </div>
+<div class="card">
+    <div class="card-heading">
+        <h3 class="card-title">Actions</h3>
     </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Action</th>
+                    <th style="width: 50%;">Result</th>
+                    <th style="width: 20%;">Successful</th>
+                    <th style="width: 10%;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-bind="with: getSomeCases">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Get Some Cases
+                        </button>
+                    </td>
+                    <td>
+                        <ul data-bind="foreach: result">
+                            <li data-bind="text: $data"></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: getAllOpenCasesCount">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Get All Open Cases Count
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: randomizeDatesAndStatus">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Randomize Dates And Status
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: getCaseSummary">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Get Case Summary
+                        </button>
+                    </td>
+                    <td>
+                        <dl class="dl-horizontal" data-bind="with: result">
+                            <dt>Open Cases</dt>
+                            <dd data-bind="text: openCases"></dd>
+                            <dt>Case Count</dt>
+                            <dd data-bind="text: caseCount"></dd>
+                            <dt>Close Cases</dt>
+                            <dd data-bind="text: closeCases"></dd>
+                            <dt>Description</dt>
+                            <dd data-bind="text: description"></dd>
+                        </dl>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-
-
-    @section Scripts
-    {
+@section Scripts
+{
 
     <script>
         @if (!ViewBag.Editable)
@@ -269,4 +257,4 @@
         caseList.load();
 
     </script>
-    }
+}

@@ -86,6 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             }
 
             var allGenerators = Flatten(this).ToList();
+            Logger.LogDebug("---");
 
             var fileGenerators = allGenerators.OfType<IFileGenerator>().ToList();
             var compositeGenerators = allGenerators.OfType<ICompositeGenerator>().ToList();
@@ -93,8 +94,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             var cleaners = compositeGenerators.SelectMany(g => g.GetCleaners()).ToList();
 
             await Task.WhenAll(fileGenerators
+                // Kick off generate tasks in parallel. 
+                // This is especially essential for any generators that complete synchronously
+                // (including all string builder generators)
                 .AsParallel()
-                .Select(g => g.GenerateAsync()));
+                .Select(g => g.GenerateAsync())
+
+                // Coerce all of our generators to a collection before awiting them all. If we don't do this, 
+                // then for some reason, the first few tasks are completing in sequence instead of in parallel.
+                .ToArray()
+            );
 
 
             Logger.LogDebug($"Running {cleaners.Count} cleaners");

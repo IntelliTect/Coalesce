@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Knockout.Controllers;
+using IntelliTect.Coalesce.Knockout.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;

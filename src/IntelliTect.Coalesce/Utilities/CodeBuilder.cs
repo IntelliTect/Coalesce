@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// <summary>
         /// Calls <see cref="Line(string)"/> for each line.
         /// </summary>
-        public CodeBuilder Lines(IEnumerable<string> lines)
+        public CodeBuilder Lines(params string[] lines)
         {
             foreach (var line in lines) Line(line);
             return this;
@@ -79,47 +79,28 @@ namespace IntelliTect.Coalesce.Utilities
         }
 
         /// <summary>
+        /// Increases indentation one level, returning an object that can be disposed to decrease indentation.
+        /// </summary>
+        /// <example>using (b.Indented()) { b.Line("line1"); b.Line("line2"); } </example>
+        /// <returns></returns>
+        public IDisposable Indented()
+        {
+            Level++;
+            return new Indentation(this);
+        }
+
+        /// <summary>
         /// Write text to the current line. If currently on a new, blank line, the current indentation will be added.
         /// </summary>
-        public CodeBuilder Append(string line)
+        public CodeBuilder Append(string text)
         {
             if (onNewLine)
             {
                 sb.Append(indentChar, Level * indentSize);
                 onNewLine = false;
             }
-            sb.Append(line);
+            sb.Append(text);
             return this;
-        }
-
-        /// <summary>
-        /// Increases indentation one level, returning an object that can be disposed to decrease indentation.
-        /// </summary>
-        /// <example>using (sb.Block) { block.Line("line1"); block.Line("line2"); } </example>
-        /// <returns></returns>
-        public IDisposable Block()
-        {
-            Level++;
-            return new Indentation(this);
-        }
-
-        public IDisposable ElBlock(string elName, string attributes = null)
-        {
-            if (!onNewLine)
-            {
-                throw new InvalidOperationException("Cannot start a block on a line that isn't empty");
-            }
-
-            Append("<").Append(elName);
-            if (attributes != null)
-            {
-                Append(" ").Append(attributes);
-            }
-            Line(">");
-
-            Level++;
-
-            return new Indentation(this, $"</{elName}>");
         }
 
         /// <summary>

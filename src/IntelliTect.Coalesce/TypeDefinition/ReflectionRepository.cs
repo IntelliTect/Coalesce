@@ -58,42 +58,45 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
         {
-            foreach (var type in types)
+            foreach (var type in types
+                // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
+                // Really not sure why, but lets parallelize to minimize that impact.
+                .AsParallel()
+                .Where(type => type.HasAttribute<CoalesceAttribute>())
+            )
             {
-                if (type.HasAttribute<CoalesceAttribute>())
+                if (type.IsA<DbContext>())
                 {
-                    if (type.IsA<DbContext>())
-                    {
-                        var context = new DbContextTypeUsage(type.ClassViewModel);
-                        _contexts.Add(context);
-                        _entities.UnionWith(context.Entities.Select(e => e.ClassViewModel));
+                    var context = new DbContextTypeUsage(type.ClassViewModel);
+                    _contexts.Add(context);
+                    _entities.UnionWith(context.Entities.Select(e => e.ClassViewModel));
 
-                        // Force cache these since they have extra bits of info attached now.
-                        // TODO: eliminate the need for this.
-                        foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
-                    }
-                    else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
-                    {
-                        // Handled by helper
-                    }
-                    else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
-                    {
-                        // Handled by helper
-                    }
-                    else if (type.IsA(typeof(IClassDto<>)))
-                    {
-                        var classViewModel = type.ClassViewModel;
+                    // Force cache these since they have extra bits of info attached now.
+                    // TODO: eliminate the need for this.
+                    foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
 
-                        // Force cache this since it has extra bits of info attached.
-                        _customDtos.Add(Cache(classViewModel, force: true));
+                }
+                else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
+                {
+                    // Handled by helper
+                }
+                else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
+                {
+                    // Handled by helper
+                }
+                else if (type.IsA(typeof(IClassDto<>)))
+                {
+                    var classViewModel = type.ClassViewModel;
 
-                        DiscoverNestedCrudStrategiesOn(classViewModel);
-                    }
-                    else if (type.ClassViewModel?.IsService ?? false)
-                    {
-                        var classViewModel = type.ClassViewModel;
-                        _services.Add(Cache(classViewModel));
-                    }
+                    // Force cache this since it has extra bits of info attached.
+                    _customDtos.Add(Cache(classViewModel, force: true));
+
+                    DiscoverNestedCrudStrategiesOn(classViewModel);
+                }
+                else if (type.ClassViewModel?.IsService ?? false)
+                {
+                    var classViewModel = type.ClassViewModel;
+                    _services.Add(Cache(classViewModel));
                 }
             }
 

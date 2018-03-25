@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             return Task.Run(() =>
             {
-                logger.LogTrace($"{Owner}: Running cleaner {this}");
+                logger.LogTrace($"Cleaning {this}");
                 if (File.Exists(TargetPath))
                 {
                     logger.LogWarning($"Deleting {TargetPath} because it was explicitly flagged for removal.");

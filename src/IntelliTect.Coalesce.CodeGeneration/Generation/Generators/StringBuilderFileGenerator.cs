@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public abstract Task<string> BuildOutputAsync();
 
-        public override async Task<Stream> GetOutputAsync()
+        public sealed override async Task<Stream> GetOutputAsync()
         {
             return new MemoryStream(Encoding.UTF8.GetBytes(await BuildOutputAsync()));
         }

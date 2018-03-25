@@ -1,14 +1,12 @@
-/// <reference path="../viewmodels.generated.d.ts" />
 
-
+/// <reference path="../coalesce.dependencies.d.ts" />
 
 module ViewModels {
-	export class Person extends PersonPartial {
-
+    export class Person extends PersonPartial {
+        
         constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.PersonList) {
             super(newItem, parent);
-
-            // Not really doing anything with this - just making sure it works.
+            
         }
     }
 }

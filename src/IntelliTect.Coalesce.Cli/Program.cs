@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -36,6 +37,7 @@ namespace IntelliTect.Coalesce.Cli
 
         private static Task<int> Main(string[] args)
         {
+            ApplicationTimer.Stopwatch.Start();
             return CommandLineApplication.ExecuteAsync<Program>(args);
         }
 

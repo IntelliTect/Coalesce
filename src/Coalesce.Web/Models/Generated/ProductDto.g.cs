@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -48,6 +47,5 @@ namespace Coalesce.Web.Models
             entity.ProductId = (ProductId ?? entity.ProductId);
             entity.Name = Name;
         }
-
     }
 }

@@ -2,7 +2,7 @@
 
 | CHANGE | RESOLUTION
 | ------ |----------|
-| NPM Packages: Upgraded to `gulp-typescript` 3.0 and `typescript` 2.3. Breaking changes may be found at http://dev.ivogabe.com/gulp-typescript-3/. | Add/update references to `"gulp-typescript": "^3.1.6"` and `"typescript": "~2.3.2"` in your package.json. Newer versions are fine, too. Update your `gulpfile.js` according to the breaking changes at http://dev.ivogabe.com/gulp-typescript-3/.
+| NPM Packages: Upgraded to `gulp-typescript` 3.0 and `typescript` 2.7+. Breaking changes may be found at http://dev.ivogabe.com/gulp-typescript-3/. | Add/update references to `"gulp-typescript": "^3.1.6"` and `"typescript": "~2.3.2"` in your package.json. Newer versions are fine, too. Update your `gulpfile.js` according to the breaking changes at http://dev.ivogabe.com/gulp-typescript-3/.
 | TypeScript Global variable `baseUrl` is gone. | Replaced by `Coalesce.GlobalConfiguration.baseApiUrl` and `baseViewUrl`.
 | TypeScript global variable `saveTimeoutInMs` is gone. | Replaced by `Coalesce.GlobalConfiguration.saveTimeoutMs`, and the corresponding configuration in class-level and instance-level `CoalesceConfiguration<>` objects.
 | Various knockout bindings that would interpret a `saveImmediately` supplementary binding no longer do so. | The `saveImmediately` standalone binding still exists, but will only function if the currently scoped binding object is a Coalesce `BaseViewModel`. This is because the binding must access the model's `coalesceConfig` to set the save timeout, since `saveTimeoutInMs` is no longer a global.
@@ -35,7 +35,7 @@
 | `isSelectedToggle()` is now named `toggleIsSelected`. | Simple find-and-replace.
 | `originalData: KnockoutObservable<any>` has been removed. | Create a `[TypeScriptPartial]`, create this field, and populate it in your constructor with the value of the first constructor parameter of the stub that will be provided upon regeneration.
 | `public init()` has been removed from `BaseViewModel`. | Create a `[TypeScriptPartial]` and add desired behavior into the constructor of the stub that will be provided upon regeneration.
-| `BaseViewModel.autoSaveEnabled` is deprecated. | Use `BaseViewModel.coalesceConfig.autoSaveEnabled` observable instead.
+| `BaseViewModel.isSavingAutomatically` is deprecated. | Use `BaseViewModel.coalesceConfig.autoSaveEnabled` observable instead.
 | `BaseViewModel.showBusyWhenSaving` is deprecated. | Use `BaseViewModel.coalesceConfig.showBusyWhenSaving` observable instead.
 | `BaseViewModel.showFailureAlerts` is deprecated. | Use `BaseViewModel.coalesceConfig.showFailureAlerts` observable instead.
 | `BaseViewModel.validationIssues` has been removed. | Use `BaseViewModel.message` to get errors that occurred while saving a model. No other methods other than `save` were populating this collection, and it was only being populated with exception messages - not validation issues.

@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         public override Task<string> BuildOutputAsync()
         {
-            var b = new TypeScriptCodeBuilder();
+            var b = new TypeScriptCodeBuilder(indentSize: 2);
             b.Line("import * as metadata from './metadata.g'");
             b.Line("import { Model, convertToModel } from 'coalesce-vue/lib/model'");
          //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");

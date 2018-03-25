@@ -1,4 +1,3 @@
-﻿
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -50,6 +49,5 @@ namespace Coalesce.Web.Models
             entity.State = State;
             entity.PostalCode = PostalCode;
         }
-
     }
 }

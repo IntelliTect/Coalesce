@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         public override Task<string> BuildOutputAsync()
         {
-            var b = new TypeScriptCodeBuilder();
+            var b = new TypeScriptCodeBuilder(indentSize: 2);
             b.Lines(new [] {
                 "import * as $metadata from './metadata.g'",
                 "import * as $models from './models.g'",
@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                             b.Line($"const $params = {paramsObject}");
                             b.Line("return AxiosClient");
-                            using (b.Block())
+                            using (b.Indented())
                             {
                                 bool needsHydration = method.ResultType.PureType.HasClassViewModel;
 

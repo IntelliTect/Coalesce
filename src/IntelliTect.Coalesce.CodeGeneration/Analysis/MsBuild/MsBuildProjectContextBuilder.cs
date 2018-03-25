@@ -134,7 +134,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 
             var line = $"   {(projectPath)}";
             if (Framework != null) line += $" ({Framework})";
-            line += $": Evaluating & building dependencies";
             Logger?.LogInformation(line);
 
             var projectInfoFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

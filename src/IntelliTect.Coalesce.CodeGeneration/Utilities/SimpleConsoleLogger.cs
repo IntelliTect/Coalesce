@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,9 +17,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
             return new SimpleConsoleLogger(categoryName);
         }
 
+
         public class SimpleConsoleLogger : ILogger
         {
+
             private readonly string _categoryName;
+            private static object sync = new object();
+
+            private static Dictionary<LogLevel, ConsoleColor> colorLevelMap = new Dictionary<LogLevel, ConsoleColor>
+            {
+                { LogLevel.Trace, ConsoleColor.DarkGray },
+                { LogLevel.Debug, ConsoleColor.Gray },
+                { LogLevel.Information, ConsoleColor.DarkGreen },
+                { LogLevel.Warning, ConsoleColor.Yellow },
+                { LogLevel.Error, ConsoleColor.Red },
+                { LogLevel.Critical, ConsoleColor.Red },
+            };
 
             public SimpleConsoleLogger(string categoryName)
             {
@@ -33,7 +47,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
                 }
 
                 var levelString = logLevel == LogLevel.Information ? "Info" : logLevel.ToString();
-                Console.WriteLine($"{levelString}: {formatter(state, exception)}");
+
+                lock (sync)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("[");
+                    Console.ForegroundColor = colorLevelMap[logLevel];
+                    Console.Write(levelString.ToLower()[0]);
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write(":");
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.Write($"{ApplicationTimer.Stopwatch.ElapsedMilliseconds / 1000d:0.000}");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("] ");
+                    Console.ResetColor();
+                    Console.WriteLine(formatter(state, exception));
+                    Console.Out.Flush();
+                }
             }
 
             public bool IsEnabled(LogLevel logLevel)

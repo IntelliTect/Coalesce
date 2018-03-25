@@ -213,7 +213,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
             .DataSources
             .Where(d => d.DeclaredFor.Equals(this))
-            .Select(d => d.StrategyClass);
+            .Select(d => d.StrategyClass)
+            .OrderBy(d => d.Name);
 
 
         /// <summary>

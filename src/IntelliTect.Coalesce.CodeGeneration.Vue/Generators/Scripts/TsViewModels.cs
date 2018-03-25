@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         public override Task<string> BuildOutputAsync()
         {
-            var b = new TypeScriptCodeBuilder();
+            var b = new TypeScriptCodeBuilder(indentSize: 2);
             // TODO: alias these imports with $ to prevent name conflicts
             b.Line("import * as metadata from './metadata.g'");
             b.Line("import * as models from './models.g'");

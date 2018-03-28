@@ -23,7 +23,7 @@
   },
 
   "devDependencies": {
-    "typescript": "^2.8.0-dev.20180302"
+    "typescript": "2.8.1"
   },
 
   "scripts": {

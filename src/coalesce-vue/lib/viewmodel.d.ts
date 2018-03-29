@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { AxiosResponse } from 'axios';
-import { ModelType, CollectionProperty, PropertyOrName, PropNames, ExternalType } from './metadata';
+import { ModelType, CollectionProperty, PropertyOrName, PropNames } from './metadata';
 import { ApiClient, ItemResult, ItemApiState } from './api-client';
 import { Model } from './model';
 import { Indexable } from './util';
@@ -66,7 +66,7 @@ export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi ex
      * For non-class collections, this will be null.
      * @param prop The name of the collection property, or the metadata representing it.
      */
-    $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>): Model<ExternalType | ModelType> | null;
+    $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>): Model<ModelType> | null;
     constructor($metadata: TModel["$metadata"], 
         /**
          * Instance of an API client for the model through which direct, stateless API requests may be made.

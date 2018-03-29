@@ -86,7 +86,8 @@ export const Person = domain.types.Person = {
       type: "collection",
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as PrimitiveProperty },
-      get typeDef() { return (domain.types.Case as ModelType) },
+      collectedType: "model",
+      get collectedTypeDef() { return (domain.types.Case as ModelType) },
     },
     casesReported: {
       name: "casesReported",
@@ -94,7 +95,8 @@ export const Person = domain.types.Person = {
       type: "collection",
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as PrimitiveProperty },
-      get typeDef() { return (domain.types.Case as ModelType) },
+      collectedType: "model",
+      get collectedTypeDef() { return (domain.types.Case as ModelType) },
     },
     birthDate: {
       name: "birthDate",
@@ -232,7 +234,8 @@ export const Case = domain.types.Case = {
       type: "collection",
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as PrimitiveProperty },
-      get typeDef() { return (domain.types.CaseProduct as ModelType) },
+      collectedType: "model",
+      get collectedTypeDef() { return (domain.types.CaseProduct as ModelType) },
     },
     devTeamAssignedId: {
       name: "devTeamAssignedId",
@@ -318,7 +321,8 @@ export const Company = domain.types.Company = {
       type: "collection",
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Person as ModelType).props.companyId as PrimitiveProperty },
-      get typeDef() { return (domain.types.Person as ModelType) },
+      collectedType: "model",
+      get collectedTypeDef() { return (domain.types.Person as ModelType) },
     },
     altName: {
       name: "altName",

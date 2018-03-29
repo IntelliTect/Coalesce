@@ -1,3 +1,7 @@
+/* -----------------------------
+   ---------- GENERAL ----------
+   -----------------------------
+*/
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
         s = arguments[i];
@@ -6,6 +10,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
+/** Utility function for creating the required properties of `EnumType<>` from an array of `EnumValue`  */
 export function getEnumMeta(values) {
     return {
         valueLookup: __assign({}, values.reduce(function (obj, v) {
@@ -34,5 +39,7 @@ export function resolvePropMeta(metadata, propOrString, slient) {
     return propMeta;
 }
 export function isClassType(prop) {
-    return typeof (prop) === "object" && (prop.type === "model" || prop.type === "object");
+    if (prop == "object" || prop == "model")
+        return true;
+    return prop !== null && typeof (prop) === "object" && (prop.type === "model" || prop.type === "object");
 }

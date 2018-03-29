@@ -43,6 +43,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                 }
             }
+
+            foreach (var model in Model.Services)
+            {
+                yield return Generator<ServiceApiController>()
+                    .WithModel(model)
+                    .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
+            }
         }
     }
 }

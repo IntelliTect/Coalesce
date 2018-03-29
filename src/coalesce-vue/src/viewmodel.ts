@@ -190,10 +190,9 @@ export abstract class ViewModel<
         if (!Array.isArray(collection)) {
             collection = this.$data[propMeta.name] = [];
         }
-        const typeDef = propMeta.typeDef;
-        
-        if (isClassType(typeDef)) {
-            var newModel = convertToModel({}, typeDef);
+
+        if (propMeta.collectedType == "model") {
+            var newModel = convertToModel({}, propMeta.collectedTypeDef);
             const foreignKey = propMeta.foreignKey
             if (foreignKey){
                 (newModel as Indexable<TModel>)[foreignKey.name] = this.$primaryKey

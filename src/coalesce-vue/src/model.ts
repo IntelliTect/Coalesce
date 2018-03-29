@@ -4,7 +4,7 @@ import * as toDate from 'date-fns/toDate'
 import * as isValid from 'date-fns/isValid'
 import * as format from 'date-fns/format'
 
-import { ClassType, ModelType, Property, ExternalType, CollectableType, PropNames, resolvePropMeta } from "./metadata"
+import { ClassType, ModelType, Property, ExternalType, PropNames, resolvePropMeta, isClassType, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator } from "./metadata"
 import { Indexable } from './util'
 
 /**
@@ -55,12 +55,8 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
                     convertToModel(propVal, propMeta.typeDef)
                     break;
                 case "collection":
-                    const typeDef = propMeta.typeDef;
-                    if (Array.isArray(propVal) 
-                        && typeof(typeDef) == 'object' 
-                        && (typeDef.type == "model" || typeDef.type == "object"))
-                    {
-                        propVal.forEach((item: any) => convertToModel(item, typeDef));
+                    if (Array.isArray(propVal) && (propMeta.collectedType == "model" || propMeta.collectedType == "object")) {
+                        propVal.forEach((item: any) => convertToModel(item, propMeta.collectedTypeDef));
                     }
                     break;
             }
@@ -108,28 +104,37 @@ export function mapToDto<T extends Model<ClassType>>(object: T | null | undefine
 }
 
 /**
- * Given a non-collection value and its type's metadata, 
+ * Given a value and its custom type's metadata, 
  * return a string representation of the value suitable for display.
  */
-// Intentionally not exported - this is a helper for the other display functions.
-function getDisplayForType(type: CollectableType, value: any): string | null {
+// NOTE: Intentionally not exported - this is a helper for the other display functions.
+function getDisplayForType(typeDef: CustomType, value: any): string | null {
     if (value == null) return value;
 
-    switch (type) {
-        case "date":
-        case "number":
-        case "boolean":
-        case "string":
-            return value.toLocaleString()
-    }
-    switch (type.type) {
+    switch (typeDef.type) {
         case "enum":
-            const enumData = type.valueLookup[value];
+            const enumData = typeDef.valueLookup[value];
             if (!enumData) return null;
             return enumData.displayName;
         case "model":
         case "object":
             return modelDisplay(value);
+    }
+}
+
+/**
+ * Given a value and its simple type kind, 
+ * return a string representation of the value suitable for display.
+ */
+function getDisplayForValue(type: SimpleTypeDiscriminator, value: any): string | null {
+    if (value == null) return value;
+
+    switch (type) {
+        case "date": // TODO: handle date better than this?
+        case "number":
+        case "boolean":
+        case "string":
+            return value.toLocaleString()
     }
 }
 
@@ -184,10 +189,13 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(ite
             if (value.length == 0) return "";
             // TODO: a prop that controls this number would also be good.
             if (value.length <= 5) {
-                let collectedType = propMeta.typeDef
+                const collectedType = propMeta.collectedType
                 return (value)
                     .map<string>(childItem => {
-                        var display = getDisplayForType(collectedType, childItem);
+                        // if (propMeta.collectedTypeDef)
+                        var display = 'collectedTypeDef' in propMeta
+                            ? getDisplayForType(propMeta.collectedTypeDef, childItem)
+                            : getDisplayForValue(propMeta.collectedType, childItem)
                         if (display === null) display = '???' // TODO: what should this be for un-displayable members of a collection?
                         return display;
                     })
@@ -195,6 +203,6 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(ite
             }
             return value.length.toLocaleString();
         default:
-            return getDisplayForType(propMeta.type, value);
+            return getDisplayForValue(propMeta.type, value);
     }
 }

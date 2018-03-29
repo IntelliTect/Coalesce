@@ -45,11 +45,8 @@ export function convertToModel(object, metadata) {
                     convertToModel(propVal, propMeta.typeDef);
                     break;
                 case "collection":
-                    var typeDef_1 = propMeta.typeDef;
-                    if (Array.isArray(propVal)
-                        && typeof (typeDef_1) == 'object'
-                        && (typeDef_1.type == "model" || typeDef_1.type == "object")) {
-                        propVal.forEach(function (item) { return convertToModel(item, typeDef_1); });
+                    if (Array.isArray(propVal) && (propMeta.collectedType == "model" || propMeta.collectedType == "object")) {
+                        propVal.forEach(function (item) { return convertToModel(item, propMeta.collectedTypeDef); });
                     }
                     break;
             }
@@ -97,29 +94,37 @@ export function mapToDto(object) {
     return dto;
 }
 /**
- * Given a non-collection value and its type's metadata,
+ * Given a value and its custom type's metadata,
  * return a string representation of the value suitable for display.
  */
-// Intentionally not exported - this is a helper for the other display functions.
-function getDisplayForType(type, value) {
+// NOTE: Intentionally not exported - this is a helper for the other display functions.
+function getDisplayForType(typeDef, value) {
     if (value == null)
         return value;
-    switch (type) {
-        case "date":
-        case "number":
-        case "boolean":
-        case "string":
-            return value.toLocaleString();
-    }
-    switch (type.type) {
+    switch (typeDef.type) {
         case "enum":
-            var enumData = type.valueLookup[value];
+            var enumData = typeDef.valueLookup[value];
             if (!enumData)
                 return null;
             return enumData.displayName;
         case "model":
         case "object":
             return modelDisplay(value);
+    }
+}
+/**
+ * Given a value and its simple type kind,
+ * return a string representation of the value suitable for display.
+ */
+function getDisplayForValue(type, value) {
+    if (value == null)
+        return value;
+    switch (type) {
+        case "date": // TODO: handle date better than this?
+        case "number":
+        case "boolean":
+        case "string":
+            return value.toLocaleString();
     }
 }
 /**
@@ -170,10 +175,13 @@ export function propDisplay(item, prop) {
                 return "";
             // TODO: a prop that controls this number would also be good.
             if (value.length <= 5) {
-                var collectedType_1 = propMeta.typeDef;
+                var collectedType = propMeta.collectedType;
                 return (value)
                     .map(function (childItem) {
-                    var display = getDisplayForType(collectedType_1, childItem);
+                    // if (propMeta.collectedTypeDef)
+                    var display = 'collectedTypeDef' in propMeta
+                        ? getDisplayForType(propMeta.collectedTypeDef, childItem)
+                        : getDisplayForValue(propMeta.collectedType, childItem);
                     if (display === null)
                         display = '???'; // TODO: what should this be for un-displayable members of a collection?
                     return display;
@@ -182,6 +190,6 @@ export function propDisplay(item, prop) {
             }
             return value.length.toLocaleString();
         default:
-            return getDisplayForType(propMeta.type, value);
+            return getDisplayForValue(propMeta.type, value);
     }
 }

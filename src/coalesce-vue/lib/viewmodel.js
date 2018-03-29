@@ -1,5 +1,5 @@
 import debounce from 'lodash-es/debounce';
-import { resolvePropMeta, isClassType } from './metadata';
+import { resolvePropMeta } from './metadata';
 import { modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
@@ -51,6 +51,7 @@ var ViewModel = /** @class */ (function () {
          * A function for invoking the /get endpoint, and a set of properties about the state of the last call.
          */
         this.$load = this.$apiClient.$makeCaller("item", function (c) { return function (id) { return c.get(id != null ? id : _this.$primaryKey); }; })
+            // TODO: merge in the result, don't replace the existing one.
             .onFulfilled(function () { _this.$data = _this.$load.result || _this.$data; _this.$isDirty = false; });
         /**
          * A function for invoking the /save endpoint, and a set of properties about the state of the last call.
@@ -202,9 +203,8 @@ var ViewModel = /** @class */ (function () {
         if (!Array.isArray(collection)) {
             collection = this.$data[propMeta.name] = [];
         }
-        var typeDef = propMeta.typeDef;
-        if (isClassType(typeDef)) {
-            var newModel = convertToModel({}, typeDef);
+        if (propMeta.collectedType == "model") {
+            var newModel = convertToModel({}, propMeta.collectedTypeDef);
             var foreignKey = propMeta.foreignKey;
             if (foreignKey) {
                 newModel[foreignKey.name] = this.$primaryKey;

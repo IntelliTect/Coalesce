@@ -24,64 +24,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("const domain: Domain = { types: {}, enums: {} }");
 
 
-            void WriteCommon(ClassViewModel model)
-            {
-                b.StringProp("name", model.Name.ToCamelCase());
-                b.StringProp("displayName", model.DisplayName);
-                if (model.ListTextProperty != null)
-                {
-                    // This might not be defined for external types, because sometimes it just doesn't make sense. We'll accommodate on the client.
-                    b.Line($"get displayProp() {{ return this.props.{model.ListTextProperty.JsVariable} }}, ");
-                }
-            }
 
             foreach (var model in Model.ClientEnums)
             {
-                using (b.Block($"export const {model.Name} = domain.enums.{model.Name} ="))
-                {
-                    b.StringProp("name", model.Name.ToCamelCase());
-                    b.StringProp("displayName", model.DisplayName);
-                    b.StringProp("type", "enum");
-
-                    // TODO: This type here is a bit of a hack. Eventually we should emit a real typescript enum somewhere.
-                    string enumShape = string.Join("|", model.EnumValues.Select(ev => $"\"{ev.Value}\""));
-                    b.Line($"...getEnumMeta<{enumShape}>([");
-                    foreach (var value in model.EnumValues)
-                    {
-                        // TODO: allow for localization of displayName
-                        b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value}' }},");
-                    }
-                    b.Line("]),");
-                }
+                WriteEnumMetadata(b, model);
             }
 
             foreach (var model in Model.ApiBackedClasses)
-            { 
-                //using (b.Block($"export const {model.ViewModelClassName} = domain.models.{model.ViewModelClassName} ="))
-                using (b.Block($"export const {model.ViewModelClassName} = domain.types.{model.ViewModelClassName} ="))
-                {
-                    WriteCommon(model);
-                    b.StringProp("type", "model");
-                    b.StringProp("controllerRoute", model.ApiRouteControllerPart);
-                    b.Line($"get keyProp() {{ return this.props.{model.PrimaryKey.JsVariable} }}, ");
-
-                    WriteProps(model, b);
-
-                    // TODO: methods
-                    b.Line("methods: {},");
-                }
+            {
+                WriteApiBackedTypeMetadata(b, model);
             }
 
             foreach (var model in Model.ExternalTypes)
             {
-                //using (b.Block($"export const {model.ViewModelClassName} = domain.externalTypes.{model.ViewModelClassName} ="))
-                using (b.Block($"export const {model.ViewModelClassName} = domain.types.{model.ViewModelClassName} ="))
-                {
-                    WriteCommon(model);
-                    b.StringProp("type", "object");
-
-                    WriteProps(model, b);
-                }
+                WriteExternalTypeMetadata(b, model);
             }
 
             // Create an enhanced Domain definition for deep intellisense.
@@ -111,7 +67,75 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             return Task.FromResult(b.ToString());
         }
 
-        private string GetValueTypeString(TypeViewModel type)
+        void WriteCommonClassMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            b.StringProp("name", model.Name.ToCamelCase());
+            b.StringProp("displayName", model.DisplayName);
+            if (model.ListTextProperty != null)
+            {
+                // This might not be defined for external types, because sometimes it just doesn't make sense. We'll accommodate on the client.
+                b.Line($"get displayProp() {{ return this.props.{model.ListTextProperty.JsVariable} }}, ");
+            }
+        }
+
+        private void WriteExternalTypeMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            using (b.Block($"export const {model.ViewModelClassName} = domain.types.{model.ViewModelClassName} ="))
+            {
+                WriteCommonClassMetadata(b, model);
+                b.StringProp("type", "object");
+
+                WriteClassPropertyMetadata(b, model);
+            }
+        }
+
+        private void WriteApiBackedTypeMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            using (b.Block($"export const {model.ViewModelClassName} = domain.types.{model.ViewModelClassName} ="))
+            {
+                WriteCommonClassMetadata(b, model);
+                b.StringProp("type", "model");
+                b.StringProp("controllerRoute", model.ApiRouteControllerPart);
+                b.Line($"get keyProp() {{ return this.props.{model.PrimaryKey.JsVariable} }}, ");
+
+                WriteClassPropertyMetadata(b, model);
+
+                // TODO: methods
+                WriteClassMethodMetadata(b);
+            }
+        }
+
+        private static void WriteClassMethodMetadata(TypeScriptCodeBuilder b)
+        {
+            b.Line("methods: {},");
+        }
+
+        private static void WriteEnumMetadata(TypeScriptCodeBuilder b, TypeViewModel model)
+        {
+            using (b.Block($"export const {model.Name} = domain.enums.{model.Name} ="))
+            {
+                b.StringProp("name", model.Name.ToCamelCase());
+                b.StringProp("displayName", model.DisplayName);
+                b.StringProp("type", "enum");
+
+                string enumShape = string.Join("|", model.EnumValues.Select(ev => $"\"{ev.Value}\""));
+                b.Line($"...getEnumMeta<{enumShape}>([");
+                foreach (var value in model.EnumValues)
+                {
+                    // TODO: allow for localization of displayName
+                    b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value}' }},");
+                }
+                b.Line("]),");
+            }
+        }
+
+        /// <summary>
+        /// For a given type, if that type is a primitive type,
+        /// return the string type discriminator
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>"number", "boolean", "string", "enum", or "date"</returns>
+        private string GetPrimitiveTypeDiscriminator(TypeViewModel type)
         {
             if (type.IsNumber
                 || type.IsBool
@@ -124,7 +148,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             return null;
         }
 
-        private void WriteProps(ClassViewModel model, TypeScriptCodeBuilder b)
+        private void WriteClassPropertyMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
         {
             using (b.Block("props:", ','))
             {
@@ -134,7 +158,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     {
                         b.StringProp("name", prop.JsVariable);
                         b.StringProp("displayName", prop.DisplayName);
-                        var valueTypeString = GetValueTypeString(prop.Type);
+                        var valueTypeString = GetPrimitiveTypeDiscriminator(prop.Type);
                         if (valueTypeString != null)
                         {
                             b.StringProp("type", valueTypeString);
@@ -168,6 +192,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
                                 {
                                     // Reference navigations
+                                    // TS Type: "ModelProperty"
                                     b.StringProp("type", "model");
                                     b.StringProp("role", "referenceNavigation");
                                     b.Line($"get foreignKey() {{ return {classMeta(model)}.props.{prop.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
@@ -177,10 +202,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
                                 {
                                     // Collection navigations
+                                    // TS Type: "ModelCollectionProperty"
                                     b.StringProp("type", "collection");
                                     b.StringProp("role", "collectionNavigation");
                                     b.Line($"get foreignKey() {{ return {classMeta()}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
-                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
+
+                                    b.StringProp("collectedType", "model");
+                                    b.Line($"get collectedTypeDef() {{ return {classMeta()} }},");
                                 }
                             }
                             else
@@ -188,6 +216,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 if (prop.Type.IsPOCO)
                                 {
                                     // External type objects
+                                    // TS Type: "ObjectProperty"
                                     b.StringProp("type", "object");
                                     b.StringProp("role", "value");
                                     b.Line($"get typeDef() {{ return {classMeta()} }},");
@@ -195,18 +224,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 else if (prop.Type.IsCollection)
                                 {
                                     // External type collections
+                                    // TS Type: "CustomCollectionProperty"
                                     b.StringProp("type", "collection");
                                     b.StringProp("role", "value");
-                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
+                                    b.StringProp("collectedType", "object");
+                                    b.Line($"get collectedTypeDef() {{ return {classMeta()} }},");
                                 }
                             }
                         }
                         else if (prop.Type.IsCollection)
                         {
                             // Primitive collections
+                            // TS Type: "SimpleCollectionProperty" or "CustomCollectionProperty" (enum collection)
                             b.StringProp("type", "collection");
                             b.StringProp("role", "value");
-                            b.StringProp("model", GetValueTypeString(prop.PureType));
+                            b.StringProp("collectedType", GetPrimitiveTypeDiscriminator(prop.PureType));
+                            if (prop.PureType.IsEnum)
+                            {
+                                b.Line($"get collectedTypeDef() {{ return domain.enums.{prop.Type.Name} }},");
+                            }
                         }
                         else
                         {

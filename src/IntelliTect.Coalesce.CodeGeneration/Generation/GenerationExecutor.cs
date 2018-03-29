@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+﻿using IntelliTect.Coalesce.CodeGeneration.Analysis;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
@@ -70,17 +71,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             var genContext = provider.GetRequiredService<GenerationContext>();
 
             logger.LogInformation("Loading Projects:");
-
-            await Task.WhenAll(
-                Task.Run(() =>
-                {
-                    genContext.WebProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.WebProject);
-                }),
-                Task.Run(() =>
-                {
-                    genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
-                })
-            );
+            await LoadProjects(provider, logger, genContext);
 
             // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
             logger.LogInformation("Gathering Types");
@@ -111,7 +102,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 outputPath = Path.Combine(outputPath, Config.Output.TargetDirectory);
             }
 
-            var generator = 
+            var generator =
                 (ActivatorUtilities.CreateInstance(provider, rootGenerator) as IRootGenerator)
                 .WithModel(rr)
                 .WithOutputPath(outputPath);
@@ -122,6 +113,60 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             logger.LogInformation("Generation Complete");
 
+        }
+
+        private async Task LoadProjects(ServiceProvider provider, ILogger<GenerationExecutor> logger, GenerationContext genContext)
+        {
+            const int maxProjectLoadRetries = 3;
+            const int projectLoadRetryDelayMs = 2000;
+            for (int retry = 1; retry <= maxProjectLoadRetries; retry++)
+            {
+                try
+                {
+                    await Task.WhenAll(
+                        Task.Run(() =>
+                        {
+                            genContext.WebProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.WebProject);
+                        }),
+                        Task.Run(() =>
+                        {
+                            genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
+                        })
+                    );
+
+                    // If we got here, it worked. Stop looping.
+                    break;
+                }
+                catch (ProjectAnalysisException ex)
+                {
+                    // If we reached max retries, bail.
+                    if (retry == maxProjectLoadRetries) throw;
+
+                    // Dumbly check what the error looks like, attempt retries on errors that are possibly recoverable.
+                    // Usually, these are because some other run of msbuild is doing bad things to files that we need.
+                    // Related: There are way to many phrasings of "file not there" used by MSBuild.
+                    string lastLine = ex.LastOutputLine.ToLowerInvariant();
+                    if (lastLine.Contains("not copy the file")
+                     || lastLine.Contains("not found")
+                     || lastLine.Contains("could not find")
+                     || lastLine.Contains("could not be found")
+                     || lastLine.Contains("msb3491")
+                     || lastLine.Contains("being used by another process")
+                    )
+                    {
+                        // Error message looks like something that might go away if we try again. Lets try again in a second.
+
+                        logger.LogWarning(ex, $"Error analyzing projects. Attempting retry {retry} of {maxProjectLoadRetries} in {projectLoadRetryDelayMs}ms");
+                        await Task.Delay(projectLoadRetryDelayMs);
+                    }
+                    else
+                    {
+                        // Doesn't look like anything to me. Just bail.
+                        throw;
+                    }
+
+                }
+            }
         }
     }
 }

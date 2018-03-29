@@ -97,7 +97,7 @@ namespace IntelliTect.Coalesce.Cli
             Type rootGenerator =
                    rootGenerators.FirstOrDefault(t => t.FullName == rootGeneratorName)
                 ?? rootGenerators.FirstOrDefault(t => t.Name == rootGeneratorName)
-                ?? rootGenerators.FirstOrDefault(t => t.FullName.Contains(rootGeneratorName));
+                ?? rootGenerators.SingleOrDefault(t => t.FullName.Contains(rootGeneratorName));
 
             if (rootGenerator == null)
             {

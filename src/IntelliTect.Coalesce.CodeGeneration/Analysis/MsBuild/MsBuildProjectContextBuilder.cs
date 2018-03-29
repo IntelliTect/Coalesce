@@ -96,6 +96,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             var projectPath = _context.ProjectFilePath;
 
             Logger?.LogInformation($"   {(projectPath)}: Restoring packages");
+            string lastOutputLine = null;
             var result = Command.CreateDotNet(
                 "restore",
                 new string[]
@@ -104,13 +105,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                     "--verbosity", "quiet",
                     $"/p:nowarn=NU1603"
                 })
-                .OnOutputLine(l => Logger.LogInformation(l))
-                .OnErrorLine(l => Logger.LogError(l))
+                .OnOutputLine(l => { lastOutputLine = l; Logger.LogInformation(l); })
+                .OnErrorLine(l => { lastOutputLine = l; Logger.LogError(l); })
                 .Execute();
             if (result.ExitCode != 0)
             {
-                throw new Exception(
-                    $"{result.StartInfo.FileName} {result.StartInfo.Arguments} exited with code {result.ExitCode}");
+                throw new ProjectAnalysisException(
+                    $"{result.StartInfo.FileName} {result.StartInfo.Arguments} exited with code {result.ExitCode}",
+                    lastOutputLine);
             }
 
             return this;
@@ -150,15 +152,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             };
             if (Framework != null) args.Add($"/p:TargetFramework={Framework}");
 
+            string lastOutputLine = null;
             var result = Command.CreateDotNet("msbuild", args)
-                .OnOutputLine(l => Logger.LogInformation(l))
-                .OnErrorLine(l => Logger.LogError(l))
+                .OnOutputLine(l => { lastOutputLine = l; Logger.LogInformation(l); })
+                .OnErrorLine(l => { lastOutputLine = l; Logger.LogError(l); })
                 .Execute();
 
             if (result.ExitCode != 0)
             {
-                throw new Exception(
-                    $"Evaluating & building dependencies exited with code {result.ExitCode}");
+                throw new ProjectAnalysisException(
+                    $"Evaluating & building dependencies exited with code {result.ExitCode}",
+                    lastOutputLine);
             }
             try
             {
@@ -170,7 +174,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to read the project information.", ex);
+                throw new ApplicationException("Failed to read the project information output from msbuild.", ex);
             }
             finally
             {

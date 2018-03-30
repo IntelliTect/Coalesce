@@ -36,12 +36,12 @@ export type ValueTypeDiscriminator = SimpleTypeDiscriminator | "enum"
 
 
 /** Type discriminator of object-based types. */
-export type ObjectTypeDiscriminator = "model" | "object"
+export type ClassTypeDiscriminator = "model" | "object"
 /** Type discriminator of custom types that have their own metadata representation. */
-export type CustomTypeDiscriminator = ObjectTypeDiscriminator | "enum"
+export type CustomTypeDiscriminator = ClassTypeDiscriminator | "enum"
 
 /** Type discriminator of all non-collection types */
-export type NonCollectionTypeDiscriminator = ValueTypeDiscriminator | ObjectTypeDiscriminator
+export type NonCollectionTypeDiscriminator = ValueTypeDiscriminator | ClassTypeDiscriminator
 
 /** Union of all valid type discriminators. */
 export type TypeDiscriminator = NonCollectionTypeDiscriminator | "collection"
@@ -57,11 +57,11 @@ export type TypeDiscriminator = NonCollectionTypeDiscriminator | "collection"
 /** Base properties found on all pieces of metadata. */
 export interface Metadata {
 
-    /** The camel-cased, machine-readable name of the property or type. */
+    /** The camel-cased, machine-readable name of the value or type. */
     readonly name: string
 
     // TODO: i18n? How does it fit into this property? Do we take a dependency on an i18n framework and compute it in a getter?
-    /** The human-readable name of the property or type */
+    /** The human-readable name of the value or type */
     displayName: string
 }
 
@@ -80,7 +80,7 @@ export interface CustomReferenceTypeBase extends Metadata {
 }
 
 /** Represents a type that is not part of a relational model. */
-export interface ExternalType extends CustomReferenceTypeBase {
+export interface ObjectType extends CustomReferenceTypeBase {
     readonly type: "object"
 }
 
@@ -148,17 +148,10 @@ export interface EnumType<K extends string = string> extends Metadata {
 }
 
 /** Union of all metadata descriptions of object-based types. */
-export type ClassType = ExternalType | ModelType 
+export type ClassType = ObjectType | ModelType 
 
 /** Union of all metadata descriptions of custom types, including enums. */
 export type CustomType = ClassType | EnumType
-
-/** 
- * All valid types that can be contained within a collection.
- * This union includes both type discriminator strings and metadata objects.
- */
-export type CollectableType = CustomType | SimpleTypeDiscriminator
-
 
 
 
@@ -167,49 +160,82 @@ export type CollectableType = CustomType | SimpleTypeDiscriminator
    -----------------------------
 */
 
+/** A special value that represents void. 
+ * Not be included in the standard unions of all `Value` kinds,
+ * since its usage only applies to method returns - it should instead 
+ * only be included in unions where its usage is applicable.
+ * Also note that its `type` propety is not part of `TypeDiscriminator`.
+ */
 export interface VoidValue extends Metadata {
     readonly role: "value"
     readonly type: "void"
 }
+
+/**
+ * Base interface for all normal value metadata representations.
+ * For our purposes, a value is defined as the usage of a type.
+ * This includes properties, method parameters, method returns, 
+ * items in a collection, and more.
+ */
 export interface ValueMeta<TType extends TypeDiscriminator> extends Metadata {
     /** 
-     * Role that the value or property plays in a relational model. 
-     * Some values may be nonapplicable in some contexts, like method parameters. 
+     * Role that the value or property plays in a relational model.
+     * Some values may be nonapplicable in some contexts, like method parameters.
      */
     readonly role: ValueRole
     readonly type: TType
 }
+
+/**
+ * Base interface for values whose type has a custom definition in the metadata.
+ */
 export interface ValueMetaWithTypeDef<TType extends TypeDiscriminator, TTypeDef extends Metadata> extends ValueMeta<TType> {
     /** Full description of the type represented by this value. */
     readonly typeDef: TTypeDef
 }
-export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> { }
-export interface DateValue extends ValueMeta<"date"> { }
-export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { }
-export interface ObjectValue extends ValueMetaWithTypeDef<"object", ExternalType> { }
-export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> { }
+/** Represents the usage of a primitive value (string, number, or bool) */
+export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> { 
+    role: "value" | "foreignKey" | "primaryKey"
+}
+/** Represents the usage of a date */
+export interface DateValue extends ValueMeta<"date"> { 
+    role: "value"
+}
+/** Represents the usage of an enum */
+export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 
+    role: "value"
+}
+/** Represents the usage of an 'external type', i.e. an object that is not part of a relational model */
+export interface ObjectValue extends ValueMetaWithTypeDef<"object", ObjectType> { 
+    role: "value"
+}
+/** Represents the usage of an object that is part of a relational model */
+export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> { 
+    role: "value" | "referenceNavigation"
+}
 
+/** Represents the usage of a collection of values */
 export interface CollectionValue extends ValueMeta<"collection"> {
+    role: "value" | "collectionNavigation"
     readonly itemType: NonCollectionValue
 }
-export interface ModelCollectionValue extends CollectionValue {
-    readonly itemType: ModelValue
-}
 
+/** Union of all representations of the usage of types with explicit type metadata */
 export type CustomTypeValue = 
   EnumValue
 | ObjectValue
 | ModelValue
 
+/** Union of all representations of the usage of non-collection types */
 export type NonCollectionValue = 
   PrimitiveValue
 | DateValue
 | CustomTypeValue
 
+/** Union of all representations of the usage of a type */
 export type Value = 
   NonCollectionValue
 | CollectionValue
-| ModelCollectionValue
 
 
 
@@ -217,34 +243,67 @@ export type Value =
    ----- PROPERTY METADATA -----
    -----------------------------
 */
-export interface PrimitiveProperty extends PrimitiveValue { }
+
+/** Represents a primitive property */
+export interface PrimitiveProperty extends PrimitiveValue { 
+    readonly role: "value"
+}
+
+export interface PrimaryKeyProperty extends PrimitiveValue { 
+    readonly role: "primaryKey" 
+}
+
+/** Represents a property that serves as a foreign key */
 export interface ForeignKeyProperty extends PrimitiveValue {
     readonly role: "foreignKey"
-    readonly principalKey: PrimitiveProperty
+    readonly type: "string" | "number"
+    readonly principalKey: PrimaryKeyProperty
     readonly principalType: ModelType
+    readonly navigationProp?: ModelProperty
 }
+/** Represents a date property */
 export interface DateProperty extends DateValue { }
+/** Represents an enum property */
 export interface EnumProperty extends EnumValue { }
+/** Represents an object property */
 export interface ObjectProperty extends ObjectValue { }
+/** 
+ * Represents an object property that represents the foreign end of 
+ * a 1-to-1 or 1-to-many relationship in a relational model.
+ */
 export interface ModelProperty extends ModelValue {
     readonly role: "referenceNavigation"
-    readonly foreignKey: PrimitiveProperty
-    readonly principalKey: PrimitiveProperty
+    readonly foreignKey: ForeignKeyProperty
+    readonly principalKey: PrimaryKeyProperty
 }
+/** 
+ * Represents a collection property that simple contains values that do not
+ * have any special meaning in a relational model.
+ */
 export interface BasicCollectionProperty extends CollectionValue { 
     readonly role: "value"
 }
-export interface ModelCollectionProperty extends ModelCollectionValue {
+/** 
+ * Represents a collection property that represents 
+ * the foreign objects in a many-to-1 relationship in a relational model.
+ */
+export interface ModelCollectionNavigationProperty extends CollectionValue {
     readonly role: "collectionNavigation"
-    readonly foreignKey: PrimitiveProperty
+    /**
+     * Reference to the property on the type contained in this collection that relates
+     * to the primary key of the model that owns the collection property.
+     */
+    readonly foreignKey: ForeignKeyProperty
+    readonly itemType: ModelValue
 }
 
 export type CollectionProperty = 
   BasicCollectionProperty
-| ModelCollectionProperty
+| ModelCollectionNavigationProperty
 
 export type Property = 
   PrimitiveProperty
+| PrimaryKeyProperty
 | ForeignKeyProperty
 | DateProperty
 | EnumProperty
@@ -295,11 +354,4 @@ export function resolvePropMeta<TProp extends Property>(metadata: ClassType, pro
         throw `Property ${propMeta.name} does not belong to object of type ${metadata.name}`
     }
     return propMeta
-}
-
-
-
-export function isClassType(prop: TypeDiscriminator | CollectableType | null | undefined): prop is ClassType {
-    if (prop == "object" || prop == "model") return true;
-    return prop !== null && typeof(prop) === "object" && (prop.type === "model" || prop.type === "object")
 }

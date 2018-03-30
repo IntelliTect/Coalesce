@@ -38,8 +38,3 @@ export function resolvePropMeta(metadata, propOrString, slient) {
     }
     return propMeta;
 }
-export function isClassType(prop) {
-    if (prop == "object" || prop == "model")
-        return true;
-    return prop !== null && typeof (prop) === "object" && (prop.type === "model" || prop.type === "object");
-}

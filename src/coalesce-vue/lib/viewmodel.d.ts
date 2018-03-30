@@ -11,10 +11,9 @@ import { Indexable } from './util';
  */
 export declare function defineProps<T extends new () => ViewModel<any, any>>(ctor: T, metadata: ModelType): void;
 export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi extends ApiClient<TModel>> implements Model<TModel["$metadata"]> {
+    /** The metadata representing the type of data that this ViewModel handles. */
     readonly $metadata: TModel["$metadata"];
-    /**
-     * Instance of an API client for the model through which direct, stateless API requests may be made.
-     */
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     readonly $apiClient: TApi;
     /**
      * Object which holds all of the data represented by this ViewModel.
@@ -67,9 +66,9 @@ export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi ex
      * @param prop The name of the collection property, or the metadata representing it.
      */
     $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>): Model<ModelType> | null;
-    constructor($metadata: TModel["$metadata"], 
-        /**
-         * Instance of an API client for the model through which direct, stateless API requests may be made.
-         */
+    constructor(
+        /** The metadata representing the type of data that this ViewModel handles. */
+        $metadata: TModel["$metadata"], 
+        /** Instance of an API client for the model through which direct, stateless API requests may be made. */
         $apiClient: TApi, initialData?: TModel);
 }

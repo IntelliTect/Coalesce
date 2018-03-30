@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
 
-            b.Line("import { Domain, getEnumMeta, ModelType, ExternalType, PrimitiveProperty } from 'coalesce-vue/lib/metadata' ");
+            b.Line("import { Domain, getEnumMeta, ModelType, ObjectType, PrimitiveProperty, ModelProperty, ForeignKeyProperty, PrimaryKeyProperty } from 'coalesce-vue/lib/metadata' ");
             b.Line();
 
             // Assigning each property as a member of domain ensures we don't break type contracts.
@@ -26,17 +26,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
 
 
-            foreach (var model in Model.ClientEnums)
+            foreach (var model in Model.ClientEnums.OrderBy(e => e.Name))
             {
                 WriteEnumMetadata(b, model);
             }
 
-            foreach (var model in Model.ApiBackedClasses)
+            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.Name))
             {
                 WriteApiBackedTypeMetadata(b, model);
             }
 
-            foreach (var model in Model.ExternalTypes)
+            foreach (var model in Model.ExternalTypes.OrderBy(e => e.Name))
             {
                 WriteExternalTypeMetadata(b, model);
             }
@@ -47,14 +47,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 using (b.Block("enums:"))
                 {
-                    foreach (var model in Model.ClientEnums)
+                    foreach (var model in Model.ClientEnums.OrderBy(e => e.Name))
                     {
                         b.Line($"{model.Name}: typeof {model.Name}");
                     }
                 }
                 using (b.Block("types:"))
                 {
-                    foreach (var model in Model.ClientClasses)
+                    foreach (var model in Model.ClientClasses.OrderBy(e => e.Name))
                     {
                         b.Line($"{model.ViewModelClassName}: typeof {model.ViewModelClassName}");
                     }
@@ -159,7 +159,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             // We need to qualify with "domain." instead of the exported const
             // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
 
-            return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ExternalType")})";
+            return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ObjectType")})";
         }
 
         private void WriteClassPropertyMetadata(TypeScriptCodeBuilder b, ClassViewModel model, PropertyViewModel prop)
@@ -177,15 +177,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             // Reference navigations
                             // TS Type: "ModelProperty"
                             b.StringProp("role", "referenceNavigation");
-                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
-                            b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimitiveProperty }},");
+                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
+                            b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
                         }
                         else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
                         {
                             // Collection navigations
                             // TS Type: "ModelCollectionProperty"
                             b.StringProp("role", "collectionNavigation");
-                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
+                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
                         }
                     }
                     else
@@ -210,8 +210,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     {
                         var principalProp = prop.IdPropertyObjectProperty;
                         b.StringProp("role", "foreignKey");
-                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(principalProp.Object)}.props.{principalProp.Object.PrimaryKey.JsVariable} as PrimitiveProperty }},");
+                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(principalProp.Object)}.props.{principalProp.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
                         b.Line($"get principalType() {{ return {GetClassMetadataRef(principalProp.Object)} }},");
+                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{prop.IdPropertyObjectProperty.JsVariable} as ModelProperty }},");
                     }
                     else
                     {

@@ -69,147 +69,13 @@ export function convertToModel(object, metadata) {
     }
     return object;
 }
-export function mapToDto(object) {
-    if (object === null || object === undefined)
-        return null;
-    if (!object.$metadata) {
-        throw "Object has no $metadata property.";
-    }
-    var dto = {};
-    for (var propName in object.$metadata.props) {
-        var propMeta = object.$metadata.props[propName];
-        var value = object[propName];
-        switch (propMeta.type) {
-            case "date":
-                if (isValid(value)) {
-                    // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-                    value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ');
-                }
-                else if (value != null) {
-                    console.warn("Invalid date couldn't be mapped: " + value);
-                    value = null;
-                }
-            case "string":
-            case "number":
-            case "boolean":
-            case "enum":
-                value = value || null;
-                break;
-            default:
-                value = undefined;
-        }
-        if (value !== undefined) {
-            dto[propName] = value;
-        }
-    }
-    return dto;
-}
-// export function mapValueToDtoValue(value: any, valueMeta: Value, maxObjectDepth: number = 0, depth: number = 0) {
-//     switch (valueMeta.type) {
-//         case "model":
-//         case "object":
-//             if (depth < maxObjectDepth){
-//                 value = mapObjectToDto(value, valueMeta.typeDef.props)
-//             }
-//             break;
-//         case "collection":
-//             if (depth < maxObjectDepth){
-//                 if (!value) {
-//                     value = [];
-//                 }
-//                 if (!Array.isArray(value)){
-//                     throw `Value for collection ${valueMeta.name} was not an array`
-//                 }
-//                 const collectedType = valueMeta.collectedType
-//                 return value
-//                     .map(childItem => {
-//                         // if (propMeta.collectedTypeDef)
-//                         var child = 'collectedTypeDef' in valueMeta
-//                             ? mapValueToDtoValue(childItem, valueMeta.collectedTypeDef, maxObjectDepth, depth)
-//                             : mapValueToDtoValue(childItem, valueMeta.collectedType, maxObjectDepth, depth)
-//                         return child;
-//                     })
-//             }
-//             break;
-//         case "date":
-//             if (isValid(value)) {
-//                 // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-//                 value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
-//             } else if (value != null) {
-//                 console.warn(`Invalid date couldn't be mapped: ${value}`)
-//                 value = null
-//             }
-//         case "string":
-//         case "number":
-//         case "boolean":
-//         case "enum":
-//             value = value || null;    
-//             break;
-//         default:
-//             value = undefined;
-//     }
-// }
-// export function mapObjectToDto(object: any, valuesMetadata: { [valueName: string]: Value }, maxObjectDepth: number = 0, depth: number = 0) {
-//     var dto: { [k: string]: any } = {};
-//     for (const valueName in valuesMetadata) {
-//         const valueMeta = valuesMetadata[valueName];
-//         var value = object[valueName];
-//         switch (valueMeta.type) {
-//             case "model":
-//             case "object":
-//                 if (depth < maxObjectDepth){
-//                     value = mapObjectToDto(object, valueMeta.typeDef.props)
-//                 }
-//                 break;
-//             case "collection":
-//                 if (depth < maxObjectDepth){
-//                     if (!value) {
-//                         value = [];
-//                     }
-//                     if (!Array.isArray(value)){
-//                         throw `Value for collection ${valueMeta.name} was not an array`
-//                     }
-//                     const collectedType = valueMeta.collectedType
-//                     return value
-//                         .map(childItem => {
-//                             // if (propMeta.collectedTypeDef)
-//                             var child = 'collectedTypeDef' in valueMeta
-//                                 ? getDisplayForType(valueMeta.collectedTypeDef, childItem)
-//                                 : getDisplayForValue(valueMeta.collectedType, childItem)
-//                             return child;
-//                         })
-//                 }
-//                 break;
-//             case "date":
-//                 if (isValid(value)) {
-//                     // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-//                     value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
-//                 } else if (value != null) {
-//                     console.warn(`Invalid date couldn't be mapped: ${value}`)
-//                     value = null
-//                 }
-//             case "string":
-//             case "number":
-//             case "boolean":
-//             case "enum":
-//                 value = value || null;    
-//                 break;
-//             default:
-//                 value = undefined;
-//         }
-//         if (value !== undefined) {
-//             dto[valueName] = value;
-//         }
-//     }
-//     return dto;
-// }
 var Visitor = /** @class */ (function () {
     function Visitor() {
     }
     Visitor.prototype.visitValue = function (value, meta) {
         switch (meta.type) {
             case "model": return this.visitModelValue(value, meta);
-            case "object": return this.visitExternalTypeValue(value, meta);
+            case "object": return this.visitObjectValue(value, meta);
             case "collection": return this.visitCollection(value, meta);
             case "enum": return this.visitEnumValue(value, meta);
             case "date": return this.visitDateValue(value, meta);
@@ -226,7 +92,7 @@ var Visitor = /** @class */ (function () {
         }
         return output;
     };
-    Visitor.prototype.visitExternalTypeValue = function (value, meta) {
+    Visitor.prototype.visitObjectValue = function (value, meta) {
         return this.visitObject(value, meta.typeDef);
     };
     Visitor.prototype.visitModelValue = function (value, meta) {
@@ -240,17 +106,99 @@ var Visitor = /** @class */ (function () {
             throw "Value for collection " + meta.name + " was not an array";
         return value.map(function (element, index) { return _this.visitValue(element, meta.itemType); });
     };
-    Visitor.prototype.visitEnumValue = function (value, meta) {
+    Visitor.prototype.visitPrimitiveValue = function (value, meta) {
         return value;
     };
     Visitor.prototype.visitDateValue = function (value, meta) {
         return value;
     };
-    Visitor.prototype.visitPrimitiveValue = function (value, meta) {
+    Visitor.prototype.visitEnumValue = function (value, meta) {
         return value;
     };
     return Visitor;
 }());
+var MapToDtoVisitor = /** @class */ (function (_super) {
+    __extends(MapToDtoVisitor, _super);
+    function MapToDtoVisitor(maxObjectDepth) {
+        if (maxObjectDepth === void 0) { maxObjectDepth = 1; }
+        var _this = _super.call(this) || this;
+        _this.maxObjectDepth = maxObjectDepth;
+        _this.depth = 0;
+        return _this;
+    }
+    MapToDtoVisitor.prototype.visitObject = function (value, meta) {
+        // If we've exceded max depth, return undefined to prevent the 
+        // creation of an entry in the parent object for this object.
+        if (this.depth >= this.maxObjectDepth)
+            return undefined;
+        this.depth++;
+        var props = meta.props;
+        var output = {};
+        for (var propName in props) {
+            var propMeta = props[propName];
+            if (propName in value) {
+                var newValue = this.visitValue(value[propName], propMeta);
+                if (newValue !== undefined) {
+                    // Only store values that aren't undefined.
+                    // We don't any properties with undefined as their value - we shouldn't define these in the first place.
+                    output[propName] = newValue;
+                }
+            }
+            // This prop is a foreign key, and it has no value.
+            // Lets check and see if the corresponding referenceNavigation prop has an object in it.
+            // If it does, try and use that object's primary key as the value of our FK.
+            if (output[propName] == null && propMeta.role == "foreignKey" && propMeta.navigationProp) {
+                var objectValue = value[propMeta.navigationProp.name];
+                if (objectValue) {
+                    var objectValuePkValue = objectValue[propMeta.navigationProp.typeDef.keyProp.name];
+                    if (objectValuePkValue != null) {
+                        output[propName] = objectValuePkValue;
+                    }
+                }
+                propMeta.principalType.keyProp.name;
+            }
+        }
+        this.depth--;
+        return output;
+    };
+    MapToDtoVisitor.prototype.visitCollection = function (value, meta) {
+        // If we've exceded max depth, return undefined to prevent the 
+        // creation of an entry in the parent object for this collection.
+        if (this.depth >= this.maxObjectDepth)
+            return undefined;
+        this.depth++;
+        var ret = _super.prototype.visitCollection.call(this, value, meta);
+        this.depth--;
+        return ret;
+    };
+    MapToDtoVisitor.prototype.visitDateValue = function (value, meta) {
+        if (isValid(value)) {
+            // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+            value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ');
+        }
+        else if (value != null) {
+            console.warn("Invalid date couldn't be mapped: " + value);
+            value = null;
+        }
+        return value;
+    };
+    return MapToDtoVisitor;
+}(Visitor));
+export function mapToDto(object) {
+    if (object === null || object === undefined)
+        return null;
+    if (!object.$metadata) {
+        throw "Object has no $metadata property.";
+    }
+    var dto = new MapToDtoVisitor(1).visitObject(object, object.$metadata);
+    return dto;
+}
+export function mapValueToDto(value, meta) {
+    if (value === null || value === undefined)
+        return value;
+    return new MapToDtoVisitor(1).visitValue(value, meta);
+}
+/** Visitor that maps its input to a string representation of its value, suitable for display. */
 var GetDisplayVisitor = /** @class */ (function (_super) {
     __extends(GetDisplayVisitor, _super);
     function GetDisplayVisitor() {
@@ -314,40 +262,8 @@ var GetDisplayVisitor = /** @class */ (function (_super) {
     };
     return GetDisplayVisitor;
 }(Visitor));
-/**
- * Given a value and its custom type's metadata,
- * return a string representation of the value suitable for display.
- */
-// NOTE: Intentionally not exported - this is a helper for the other display functions.
-function getDisplayForType(typeDef, value) {
-    if (value == null)
-        return value;
-    switch (typeDef.type) {
-        case "enum":
-            var enumData = typeDef.valueLookup[value];
-            if (!enumData)
-                return null;
-            return enumData.displayName;
-        case "model":
-        case "object":
-            return modelDisplay(value);
-    }
-}
-/**
- * Given a value and its simple type kind,
- * return a string representation of the value suitable for display.
- */
-function getDisplayForValue(type, value) {
-    if (value == null)
-        return value;
-    switch (type) {
-        case "date": // TODO: handle date better than this?
-        case "number":
-        case "boolean":
-        case "string":
-            return value.toLocaleString();
-    }
-}
+/** Singleton instance of `GetDisplayVisitor`, since the visitor is stateless. */
+var displayVisitor = new GetDisplayVisitor();
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
  * @param item The model instance to return a string representation of
@@ -357,7 +273,7 @@ export function modelDisplay(item) {
     if (!modelMeta) {
         throw "Item passed to modelDisplay(item) is missing its $metadata property";
     }
-    return new GetDisplayVisitor().visitObject(item, item.$metadata);
+    return displayVisitor.visitObject(item, item.$metadata);
 }
 /**
  * Given a model instance and a descriptor of a property on the instance,
@@ -368,5 +284,5 @@ export function modelDisplay(item) {
 export function propDisplay(item, prop) {
     var propMeta = resolvePropMeta(item.$metadata, prop);
     var value = item[propMeta.name];
-    return new GetDisplayVisitor().visitValue(value, propMeta);
+    return displayVisitor.visitValue(value, propMeta);
 }

@@ -1,4 +1,4 @@
-import { ClassType, Property, PropNames } from "./metadata";
+import { ClassType, Property, PropNames, Value } from "./metadata";
 /**
  * Represents a model with metadata information.
  */
@@ -15,6 +15,7 @@ export declare function convertToModel<TMeta extends ClassType, TModel extends M
     [k: string]: any;
 }, metadata: TMeta): TModel;
 export declare function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null;
+export declare function mapValueToDto(value: any, meta: Value): any | null;
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
  * @param item The model instance to return a string representation of

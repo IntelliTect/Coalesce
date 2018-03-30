@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 "import * as qs from 'qs'",
                 "import * as $isValid from 'date-fns/isValid'",
                 "import * as $format from 'date-fns/format'",
-                "import { mapToDto as $mapToDto } from 'coalesce-vue/lib/model'",
+                "import { mapValueToDto as $mapValue } from 'coalesce-vue/lib/model'",
                 "import { AxiosClient, ApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'",
                 "import { AxiosResponse, AxiosRequestConfig } from 'axios'",
             });
@@ -49,38 +49,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                         using (b.Block($"public {method.JsVariable}({signature})"))
                         {
-                            string ConvertArugment(ParameterViewModel param)
-                            {
-                                string argument = param.JsVariable;
-                                if (param.Type.HasClassViewModel)
-                                {
-                                    return $"$mapToDto({argument})";
-                                }
-
-                                if (param.Type.IsDate)
-                                {
-                                    string format = "YYYY-MM-DDTHH:mm:ss.SSS";
-                                    if (param.Type.IsDateTimeOffset) format += "Z";
-                                    
-                                    return $"{argument} instanceof Date && $isValid({argument}) ? $format({argument}, '{format}') : null";
-                                }
-                                return argument;
-                            }
-
-                            var paramsObjectProps = method.ClientParameters
-                                .Select(f => $"{f.JsVariable}: {ConvertArugment(f)}");
-
-                            if (method.IsModelInstanceMethod)
-                            {
-                                paramsObjectProps = new[] { "id: id" }.Concat(paramsObjectProps);
-                            }
-                            var paramsObject = "{ " + string.Join(", ", paramsObjectProps) + " }";
-
                             string resultType = method.TransportTypeGenericParameter.IsVoid
                                 ? $"{method.TransportType}<void>"
                                 : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
 
-                            b.Line($"const $params = {paramsObject}");
+                            if (method.ClientParameters.Any())
+                            {
+                                b.Line($"const $paramsMeta = this.$metadata.methods.{method.JsVariable}.params");
+                            }
+                            using (b.Block("const $params ="))
+                            {
+                                if (method.IsModelInstanceMethod)
+                                {
+                                    b.Line($"id,");
+                                }
+                                foreach (var param in method.ClientParameters)
+                                {
+                                    b.Line($"{param.JsVariable}: $mapValue({param.JsVariable}, $paramsMeta.{param.JsVariable}),");
+                                }
+                            }
                             b.Line("return AxiosClient");
                             using (b.Indented())
                             {

@@ -3,7 +3,7 @@ import Vue from 'vue';
 import { AxiosResponse, AxiosError } from 'axios';
 import debounce from 'lodash-es/debounce';
 
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, isClassType, PropNames, ExternalType } from './metadata';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, ObjectType } from './metadata';
 import { ApiClient, ItemResult, ItemApiState } from './api-client';
 import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
 import { Indexable } from './util';
@@ -37,7 +37,7 @@ DESIGN NOTES
         This makes the intellisense in IDEs quite nice. If TMeta is a type param,
         we end up with the type of implemented classes taking several pages of the intellisense tooltip.
         With this, we can still strongly type off of known information of TMeta (like PropNames<TModel["$metadata"]>),
-        but without it cluttering up tooltips with basically the entire type structure of the metadata.
+        but without cluttering up tooltips with the entire type structure of the metadata.
     - ViewModels never instantiate other ViewModels on the users' behalf. ViewModels must always be instantiated explicitly.
         This makes it much easier to reason about the behavior of a program
         when Coalesce isn't creating ViewModel instances on the developers' behalf.
@@ -200,6 +200,7 @@ export abstract class ViewModel<
             collection.push(newModel);
             return newModel;
         } else {
+            // TODO: handle non-navigation collections (value collections of models/objects)
             collection.push(null);
             return null;
         }
@@ -215,7 +216,7 @@ export abstract class ViewModel<
 
         initialData?: TModel
     ) {
-        
+
         if (initialData) {
             if (!initialData.$metadata) {
                 throw `Initial data must have a $metadata property.`

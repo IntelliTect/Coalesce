@@ -27,7 +27,7 @@ DESIGN NOTES
         This makes the intellisense in IDEs quite nice. If TMeta is a type param,
         we end up with the type of implemented classes taking several pages of the intellisense tooltip.
         With this, we can still strongly type off of known information of TMeta (like PropNames<TModel["$metadata"]>),
-        but without it cluttering up tooltips with basically the entire type structure of the metadata.
+        but without cluttering up tooltips with the entire type structure of the metadata.
     - ViewModels never instantiate other ViewModels on the users' behalf. ViewModels must always be instantiated explicitly.
         This makes it much easier to reason about the behavior of a program
         when Coalesce isn't creating ViewModel instances on the developers' behalf.
@@ -35,14 +35,11 @@ DESIGN NOTES
         that are difficult to configure. Ideally, all ViewModels exist on instances of components.
 */
 var ViewModel = /** @class */ (function () {
-    // protected _lateInitialize<T>(initializer: (this: this) => T) {
-    // }
     function ViewModel(
-    // The following MUST be declared in the constructor so they will be available to property initializers.
+    // The following MUST be declared in the constructor so its value will be available to property initializers.
+    /** The metadata representing the type of data that this ViewModel handles. */
     $metadata, 
-    /**
-     * Instance of an API client for the model through which direct, stateless API requests may be made.
-     */
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     $apiClient, initialData) {
         var _this = this;
         this.$metadata = $metadata;
@@ -79,20 +76,6 @@ var ViewModel = /** @class */ (function () {
         this.$delete = this.$apiClient.$makeCaller("item", function (c) { return function () { return c.delete(_this.$primaryKey); }; });
         // Internal autosave state - seal to prevent unnessecary reactivity
         this._autoSaveState = Object.seal({ on: false, cleanup: null });
-        this.$metadata = $metadata;
-        // Define proxy getters/setters to the underlying $data object.
-        // Object.defineProperties(this, Object.keys($metadata.props).reduce((descriptors, propName) => {
-        //     descriptors[propName] = {
-        //         enumerable: true,
-        //         get: function(this: self) {
-        //             return this.$data[propName]
-        //         },
-        //         set: function(this: self, val: any) {
-        //             this.$data[propName] = val
-        //         }
-        //     }
-        //     return descriptors
-        // }, {} as PropertyDescriptorMap))
         if (initialData) {
             if (!initialData.$metadata) {
                 throw "Initial data must have a $metadata property.";
@@ -213,6 +196,7 @@ var ViewModel = /** @class */ (function () {
             return newModel;
         }
         else {
+            // TODO: handle non-navigation collections (value collections of models/objects)
             collection.push(null);
             return null;
         }

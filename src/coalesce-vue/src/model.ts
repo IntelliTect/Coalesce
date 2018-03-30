@@ -4,7 +4,7 @@ import * as toDate from 'date-fns/toDate'
 import * as isValid from 'date-fns/isValid'
 import * as format from 'date-fns/format'
 
-import { ClassType, ModelType, Property, ExternalType, PropNames, resolvePropMeta, isClassType, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator, Value, EnumType, CollectionValue, ModelValue, ObjectValue, EnumValue, PrimitiveValue, DateValue, CustomTypeValue, ValueMeta } from "./metadata"
+import { ClassType, ModelType, Property, ObjectType, PropNames, resolvePropMeta, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator, Value, EnumType, ModelValue, ObjectValue, EnumValue, PrimitiveValue, DateValue, CustomTypeValue, ValueMeta, CollectionValue, PrimitiveProperty, ForeignKeyProperty } from "./metadata"
 import { Indexable } from './util'
 
 /**
@@ -66,151 +66,6 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
     return object as TModel;
 }
 
-export function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null {
-    if (object === null || object === undefined) return null;
-
-    if (!object.$metadata){
-        throw "Object has no $metadata property."
-    }
-    
-    var dto: { [k: string]: any } = {};
-    for (const propName in object.$metadata.props) {
-        const propMeta = object.$metadata.props[propName];
-
-        var value = (object as Indexable<T>)[propName];
-        switch (propMeta.type) {
-            case "date":
-                if (isValid(value)) {
-                    // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-                    value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
-                } else if (value != null) {
-                    console.warn(`Invalid date couldn't be mapped: ${value}`)
-                    value = null
-                }
-            case "string":
-            case "number":
-            case "boolean":
-            case "enum":
-                value = value || null;    
-                break;
-            default:
-                value = undefined;
-        }
-
-        if (value !== undefined) {
-            dto[propName] = value;
-        }
-    }
-    return dto;
-}
-
-// export function mapValueToDtoValue(value: any, valueMeta: Value, maxObjectDepth: number = 0, depth: number = 0) {
-//     switch (valueMeta.type) {
-//         case "model":
-//         case "object":
-//             if (depth < maxObjectDepth){
-//                 value = mapObjectToDto(value, valueMeta.typeDef.props)
-//             }
-//             break;
-//         case "collection":
-//             if (depth < maxObjectDepth){
-//                 if (!value) {
-//                     value = [];
-//                 }
-//                 if (!Array.isArray(value)){
-//                     throw `Value for collection ${valueMeta.name} was not an array`
-//                 }
-    
-//                 const collectedType = valueMeta.collectedType
-//                 return value
-//                     .map(childItem => {
-//                         // if (propMeta.collectedTypeDef)
-//                         var child = 'collectedTypeDef' in valueMeta
-//                             ? mapValueToDtoValue(childItem, valueMeta.collectedTypeDef, maxObjectDepth, depth)
-//                             : mapValueToDtoValue(childItem, valueMeta.collectedType, maxObjectDepth, depth)
-                            
-//                         return child;
-//                     })
-//             }
-//             break;
-//         case "date":
-//             if (isValid(value)) {
-//                 // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-//                 value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
-//             } else if (value != null) {
-//                 console.warn(`Invalid date couldn't be mapped: ${value}`)
-//                 value = null
-//             }
-//         case "string":
-//         case "number":
-//         case "boolean":
-//         case "enum":
-//             value = value || null;    
-//             break;
-//         default:
-//             value = undefined;
-//     }
-// }
-
-// export function mapObjectToDto(object: any, valuesMetadata: { [valueName: string]: Value }, maxObjectDepth: number = 0, depth: number = 0) {
-    
-//     var dto: { [k: string]: any } = {};
-//     for (const valueName in valuesMetadata) {
-//         const valueMeta = valuesMetadata[valueName];
-
-//         var value = object[valueName];
-//         switch (valueMeta.type) {
-//             case "model":
-//             case "object":
-//                 if (depth < maxObjectDepth){
-//                     value = mapObjectToDto(object, valueMeta.typeDef.props)
-//                 }
-//                 break;
-//             case "collection":
-//                 if (depth < maxObjectDepth){
-//                     if (!value) {
-//                         value = [];
-//                     }
-//                     if (!Array.isArray(value)){
-//                         throw `Value for collection ${valueMeta.name} was not an array`
-//                     }
-        
-//                     const collectedType = valueMeta.collectedType
-//                     return value
-//                         .map(childItem => {
-//                             // if (propMeta.collectedTypeDef)
-//                             var child = 'collectedTypeDef' in valueMeta
-//                                 ? getDisplayForType(valueMeta.collectedTypeDef, childItem)
-//                                 : getDisplayForValue(valueMeta.collectedType, childItem)
-                                
-//                             return child;
-//                         })
-//                 }
-//                 break;
-//             case "date":
-//                 if (isValid(value)) {
-//                     // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-//                     value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
-//                 } else if (value != null) {
-//                     console.warn(`Invalid date couldn't be mapped: ${value}`)
-//                     value = null
-//                 }
-//             case "string":
-//             case "number":
-//             case "boolean":
-//             case "enum":
-//                 value = value || null;    
-//                 break;
-//             default:
-//                 value = undefined;
-//         }
-
-//         if (value !== undefined) {
-//             dto[valueName] = value;
-//         }
-//     }
-//     return dto;
-// }
 
 
 class Visitor<TValue = any, TArray = any[], TObject = any> {
@@ -218,7 +73,7 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
     public visitValue(value: any, meta: Value): TValue | TArray | TObject {
         switch (meta.type) {
             case "model": return this.visitModelValue(value, meta);
-            case "object": return this.visitExternalTypeValue(value, meta);
+            case "object": return this.visitObjectValue(value, meta);
             case "collection": return this.visitCollection(value, meta);
             case "enum": return this.visitEnumValue(value, meta);
             case "date": return this.visitDateValue(value, meta);
@@ -230,14 +85,14 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
         const props = meta.props;
         const output: any = {}
         for (const propName in props) {
-            if (propName in value){
+            if (propName in value) {
                 output[propName] = this.visitValue(value[propName], props[propName]);
             }
         }
         return output;
     }
 
-    public visitExternalTypeValue(value: any, meta: ObjectValue): TObject {
+    public visitObjectValue(value: any, meta: ObjectValue): TObject {
         return this.visitObject(value, meta.typeDef);
     }
 
@@ -252,7 +107,7 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
         return value.map((element, index) => this.visitValue(element, meta.itemType)) as any;
     }
 
-    public visitEnumValue(value: any, meta: EnumValue): TValue {
+    public visitPrimitiveValue(value: any, meta: PrimitiveValue): TValue {
         return value;
     }
 
@@ -260,11 +115,102 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
         return value;
     }
 
-    public visitPrimitiveValue(value: any, meta: PrimitiveValue): TValue {
+    public visitEnumValue(value: any, meta: EnumValue): TValue {
         return value;
     }
 }
 
+
+
+
+class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | undefined> {
+    private depth: number = 0;
+
+    public visitObject(value: any, meta: ClassType) {
+        // If we've exceded max depth, return undefined to prevent the 
+        // creation of an entry in the parent object for this object.
+        if (this.depth >= this.maxObjectDepth) return undefined;
+        this.depth++;
+
+        const props = meta.props;
+        const output: any = {}
+        for (const propName in props) {
+            const propMeta = props[propName];
+            if (propName in value) {
+                const newValue = this.visitValue(value[propName], propMeta);
+                if (newValue !== undefined) {
+                    // Only store values that aren't undefined.
+                    // We don't any properties with undefined as their value - we shouldn't define these in the first place.
+                    output[propName] = newValue;
+                }
+            }
+
+            // This prop is a foreign key, and it has no value.
+            // Lets check and see if the corresponding referenceNavigation prop has an object in it.
+            // If it does, try and use that object's primary key as the value of our FK.
+            if (output[propName] == null && propMeta.role == "foreignKey" && propMeta.navigationProp) {
+                const objectValue = value[propMeta.navigationProp.name];
+                if (objectValue) {
+                    const objectValuePkValue = objectValue[propMeta.navigationProp.typeDef.keyProp.name];
+                    if (objectValuePkValue != null) {
+                        output[propName] = objectValuePkValue
+                    }
+                }
+                propMeta.principalType.keyProp.name
+            }
+        }
+
+        this.depth--;
+
+        return output;
+    }
+
+    public visitCollection(value: any[], meta: CollectionValue) {
+        // If we've exceded max depth, return undefined to prevent the 
+        // creation of an entry in the parent object for this collection.
+        if (this.depth >= this.maxObjectDepth) return undefined;
+        this.depth++;
+        const ret = super.visitCollection(value, meta);
+        this.depth--;
+        return ret;
+    }
+
+    public visitDateValue(value: any, meta: DateValue) {
+        if (isValid(value)) {
+            // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+            value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+        } else if (value != null) {
+            console.warn(`Invalid date couldn't be mapped: ${value}`)
+            value = null
+        }
+        return value;
+    }
+
+    constructor(private maxObjectDepth: number = 1) {
+        super();
+    }
+}
+
+export function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null {
+    if (object === null || object === undefined) return null;
+
+    if (!object.$metadata){
+        throw "Object has no $metadata property."
+    }
+    
+    var dto = new MapToDtoVisitor(1).visitObject(object, object.$metadata);
+
+    return dto;
+}
+
+export function mapValueToDto(value: any, meta: Value): any | null {
+    if (value === null || value === undefined) return value;
+    return new MapToDtoVisitor(1).visitValue(value, meta);
+}
+
+
+
+/** Visitor that maps its input to a string representation of its value, suitable for display. */
 class GetDisplayVisitor extends Visitor<string | null, string | null, string | null> {
     public visitObject(value: any, meta: ClassType): string | null {
         if (value == null) return value;
@@ -318,41 +264,8 @@ class GetDisplayVisitor extends Visitor<string | null, string | null, string | n
     }
 }
 
-/**
- * Given a value and its custom type's metadata, 
- * return a string representation of the value suitable for display.
- */
-// NOTE: Intentionally not exported - this is a helper for the other display functions.
-function getDisplayForType(typeDef: CustomType, value: any): string | null {
-    if (value == null) return value;
-
-    switch (typeDef.type) {
-        case "enum":
-            const enumData = typeDef.valueLookup[value];
-            if (!enumData) return null;
-            return enumData.displayName;
-        case "model":
-        case "object":
-            return modelDisplay(value);
-    }
-}
-
-/**
- * Given a value and its simple type kind, 
- * return a string representation of the value suitable for display.
- */
-function getDisplayForValue(type: SimpleTypeDiscriminator, value: any): string | null {
-    if (value == null) return value;
-
-    switch (type) {
-        case "date": // TODO: handle date better than this?
-        case "number":
-        case "boolean":
-        case "string":
-            return value.toLocaleString()
-    }
-}
-
+/** Singleton instance of `GetDisplayVisitor`, since the visitor is stateless. */
+const displayVisitor = new GetDisplayVisitor();
 
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
@@ -364,7 +277,7 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(it
         throw `Item passed to modelDisplay(item) is missing its $metadata property`
     }
 
-    return new GetDisplayVisitor().visitObject(item, item.$metadata);
+    return displayVisitor.visitObject(item, item.$metadata);
 }
 
 /**
@@ -377,5 +290,5 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(ite
     const propMeta = resolvePropMeta(item.$metadata, prop);
 
     var value = (item as Indexable<T>)[propMeta.name];
-    return new GetDisplayVisitor().visitValue(value, propMeta);
+    return displayVisitor.visitValue(value, propMeta);
 }

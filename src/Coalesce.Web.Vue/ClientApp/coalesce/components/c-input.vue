@@ -57,14 +57,14 @@
         </v-toolbar>
         <v-card-text>
           <v-list >
-            <v-list-tile avatar v-for="child in item[propMeta.name]" :key="child[propMeta.typeDef.keyProp.name]">
+            <v-list-tile avatar v-for="child in item[propMeta.name]" :key="child[propMeta.itemType.typeDef.keyProp.name]">
               <v-list-tile-content>
                 <v-list-tile-title>
                   <c-display :item="child"></c-display>
                 </v-list-tile-title>
                 <v-list-tile-sub-title>
-                  {{propMeta.typeDef.keyProp.displayName}}:
-                  {{child[propMeta.typeDef.keyProp.name]}}
+                  {{propMeta.itemType.typeDef.keyProp.displayName}}:
+                  <c-display :item="child" :prop="propMeta.itemType.typeDef.keyProp"></c-display>
                 </v-list-tile-sub-title>
               </v-list-tile-content>
             </v-list-tile>

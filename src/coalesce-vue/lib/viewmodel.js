@@ -203,8 +203,8 @@ var ViewModel = /** @class */ (function () {
         if (!Array.isArray(collection)) {
             collection = this.$data[propMeta.name] = [];
         }
-        if (propMeta.collectedType == "model") {
-            var newModel = convertToModel({}, propMeta.collectedTypeDef);
+        if (propMeta.role == "collectionNavigation") {
+            var newModel = convertToModel({}, propMeta.itemType.typeDef);
             var foreignKey = propMeta.foreignKey;
             if (foreignKey) {
                 newModel[foreignKey.name] = this.$primaryKey;

@@ -191,8 +191,8 @@ export abstract class ViewModel<
             collection = this.$data[propMeta.name] = [];
         }
 
-        if (propMeta.collectedType == "model") {
-            var newModel = convertToModel({}, propMeta.collectedTypeDef);
+        if (propMeta.role == "collectionNavigation") {
+            var newModel = convertToModel({}, propMeta.itemType.typeDef);
             const foreignKey = propMeta.foreignKey
             if (foreignKey){
                 (newModel as Indexable<TModel>)[foreignKey.name] = this.$primaryKey
@@ -205,38 +205,17 @@ export abstract class ViewModel<
         }
     }
 
-    // protected _lateInitialize<T>(initializer: (this: this) => T) {
-
-    // }
-
     constructor(
-        // The following MUST be declared in the constructor so they will be available to property initializers.
+        // The following MUST be declared in the constructor so its value will be available to property initializers.
+
+        /** The metadata representing the type of data that this ViewModel handles. */
         public readonly $metadata: TModel["$metadata"], 
-        /**
-         * Instance of an API client for the model through which direct, stateless API requests may be made.
-         */
+        /** Instance of an API client for the model through which direct, stateless API requests may be made. */
         public readonly $apiClient: TApi,
+
         initialData?: TModel
     ) {
-        type self = this;
-
-        this.$metadata = $metadata
-
-        // Define proxy getters/setters to the underlying $data object.
-        // Object.defineProperties(this, Object.keys($metadata.props).reduce((descriptors, propName) => {
-        //     descriptors[propName] = {
-        //         enumerable: true,
-        //         get: function(this: self) {
-        //             return this.$data[propName]
-        //         },
-        //         set: function(this: self, val: any) {
-        //             this.$data[propName] = val
-        //         }
-        //     }
-        //     return descriptors
-        // }, {} as PropertyDescriptorMap))
         
-
         if (initialData) {
             if (!initialData.$metadata) {
                 throw `Initial data must have a $metadata property.`

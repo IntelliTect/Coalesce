@@ -5,13 +5,16 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public abstract class ParameterViewModel : IAttributeProvider
+    public abstract class ParameterViewModel : IAttributeProvider, IValueViewModel
     {
         public ParameterViewModel(MethodViewModel parent)
         {
@@ -23,6 +26,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Name { get; }
 
         public TypeViewModel Type { get; protected set; }
+
+        /// <summary>
+        /// Gets the type name without any collection around it.
+        /// </summary>
+        public TypeViewModel PureType => Type.PureType;
+
+        /// <summary>
+        /// Returns the DisplayName Attribute or 
+        /// puts a space before every upper class letter aside from the first one.
+        /// </summary>
+        public string DisplayName =>
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
         /// <summary>
         /// True if this is a parameter to the method on the model that is not represented in the controller action signature.

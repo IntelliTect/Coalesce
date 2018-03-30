@@ -15,7 +15,7 @@ using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public abstract class PropertyViewModel : IAttributeProvider
+    public abstract class PropertyViewModel : IAttributeProvider, IValueViewModel
     {
         /// <summary>
         /// Returns whether or not the property may be exposed to the client.

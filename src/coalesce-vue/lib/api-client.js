@@ -64,6 +64,14 @@ var ApiClient = /** @class */ (function () {
         }
         return instance;
     };
+    ApiClient.prototype.$formatParams = function (method, params) {
+        var formatted = {};
+        for (var paramName in params) {
+            var paramMeta = method.params[paramName];
+            var paramValue = params[paramName];
+            // mapToDto
+        }
+    };
     ApiClient.prototype.$options = function (parameters, config, queryParams) {
         // Merge standard Coalesce params with general configured params if there are any.
         var mergedParams = Object.assign({}, queryParams, config && config.params ? config.params : null, this.$objectify(parameters));
@@ -102,7 +110,6 @@ var ApiClient = /** @class */ (function () {
     return ApiClient;
 }());
 export { ApiClient };
-function NoOp() { }
 var ApiState = /** @class */ (function (_super) {
     __extends(ApiState, _super);
     function ApiState(apiClient, invoker) {

@@ -82,7 +82,7 @@ namespace Coalesce.Web
 
 
             app.UseCors(b => b
-                .WithOrigins("http://localhost:28421", "http://localhost:64122")
+                .WithOrigins("http://localhost:28421", "http://localhost:28419", "http://localhost:64122")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()

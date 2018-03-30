@@ -11,7 +11,7 @@ declare module "axios" {
         head<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
     }
 }
-import { ModelType, ClassType } from './metadata';
+import { ModelType, ClassType, Method } from './metadata';
 import { Model } from './model';
 import { AxiosPromise, AxiosResponse, AxiosRequestConfig, CancelToken, AxiosInstance } from 'axios';
 export interface ApiResult {
@@ -82,6 +82,7 @@ export declare class ApiClient<T extends Model<ClassType>> {
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
     $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, ListApiReturnType<TCall>> & TCall;
+    protected $formatParams(method: Method, params: any): void;
     protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): {
         cancelToken: CancelToken | null;
     } & AxiosRequestConfig & {

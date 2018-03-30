@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -85,7 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 WriteCommonClassMetadata(b, model);
                 b.StringProp("type", "object");
 
-                WriteClassPropertyMetadata(b, model);
+                WriteClassPropertiesMetadata(b, model);
             }
         }
 
@@ -98,16 +99,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.StringProp("controllerRoute", model.ApiRouteControllerPart);
                 b.Line($"get keyProp() {{ return this.props.{model.PrimaryKey.JsVariable} }}, ");
 
-                WriteClassPropertyMetadata(b, model);
+                WriteClassPropertiesMetadata(b, model);
 
-                // TODO: methods
-                WriteClassMethodMetadata(b);
+                WriteClassMethodMetadata(b, model);
             }
-        }
-
-        private static void WriteClassMethodMetadata(TypeScriptCodeBuilder b)
-        {
-            b.Line("methods: {},");
         }
 
         private static void WriteEnumMetadata(TypeScriptCodeBuilder b, TypeViewModel model)
@@ -148,114 +143,209 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             return null;
         }
 
-        private void WriteClassPropertyMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        private void WriteClassPropertiesMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
         {
             using (b.Block("props:", ','))
             {
                 foreach (var prop in model.ClientProperties)
                 {
-                    using (b.Block($"{prop.JsVariable}:", ','))
+                    WriteClassPropertyMetadata(b, model, prop);
+                }
+            }
+        }
+
+        string GetClassMetadataRef(ClassViewModel obj = null)
+        {
+            // We need to qualify with "domain." instead of the exported const
+            // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
+
+            return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ExternalType")})";
+        }
+
+        private void WriteClassPropertyMetadata(TypeScriptCodeBuilder b, ClassViewModel model, PropertyViewModel prop)
+        {
+            using (b.Block($"{prop.JsVariable}:", ','))
+            {
+                WriteValueCommonMetadata(b, prop);
+
+                if (prop.Object != null)
+                {
+                    if (prop.Object.IsDbMappedType)
                     {
-                        b.StringProp("name", prop.JsVariable);
-                        b.StringProp("displayName", prop.DisplayName);
-                        var valueTypeString = GetPrimitiveTypeDiscriminator(prop.Type);
-                        if (valueTypeString != null)
+                        if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
                         {
-                            b.StringProp("type", valueTypeString);
-
-                            if (prop.Type.IsEnum)
-                            {
-                                b.Line($"get typeDef() {{ return domain.enums.{prop.Type.Name} }},");
-                            }
+                            // Reference navigations
+                            // TS Type: "ModelProperty"
+                            b.StringProp("role", "referenceNavigation");
+                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
+                            b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimitiveProperty }},");
                         }
-                        else if (prop.Type.TsTypePlain == "any")
+                        else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
                         {
-                            // We assume any unknown props are strings.
-                            b.StringProp("type", "string");
+                            // Collection navigations
+                            // TS Type: "ModelCollectionProperty"
+                            b.StringProp("role", "collectionNavigation");
+                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
                         }
-                                
-                        
-                        if (prop.Object != null)
-                        {
-                            // Note in this section: Some getters need to qualify with "domain." instead of the exported const
-                            // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
-
-                            string classMeta(ClassViewModel obj = null)
-                            {
-                                obj = (obj ?? prop.Object);
-                                return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ExternalType")})";
-                            }
-
-                            //string classMeta = $"domain.models.{prop.Object.ViewModelClassName}";
-                            if (prop.Object.IsDbMappedType)
-                            {
-                                if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
-                                {
-                                    // Reference navigations
-                                    // TS Type: "ModelProperty"
-                                    b.StringProp("type", "model");
-                                    b.StringProp("role", "referenceNavigation");
-                                    b.Line($"get foreignKey() {{ return {classMeta(model)}.props.{prop.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
-                                    b.Line($"get principalKey() {{ return {classMeta()}.props.{prop.Object.PrimaryKey.JsVariable} as PrimitiveProperty }},");
-                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
-                                }
-                                else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
-                                {
-                                    // Collection navigations
-                                    // TS Type: "ModelCollectionProperty"
-                                    b.StringProp("type", "collection");
-                                    b.StringProp("role", "collectionNavigation");
-                                    b.Line($"get foreignKey() {{ return {classMeta()}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as PrimitiveProperty }},");
-
-                                    b.StringProp("collectedType", "model");
-                                    b.Line($"get collectedTypeDef() {{ return {classMeta()} }},");
-                                }
-                            }
-                            else
-                            {
-                                if (prop.Type.IsPOCO)
-                                {
-                                    // External type objects
-                                    // TS Type: "ObjectProperty"
-                                    b.StringProp("type", "object");
-                                    b.StringProp("role", "value");
-                                    b.Line($"get typeDef() {{ return {classMeta()} }},");
-                                }
-                                else if (prop.Type.IsCollection)
-                                {
-                                    // External type collections
-                                    // TS Type: "CustomCollectionProperty"
-                                    b.StringProp("type", "collection");
-                                    b.StringProp("role", "value");
-                                    b.StringProp("collectedType", "object");
-                                    b.Line($"get collectedTypeDef() {{ return {classMeta()} }},");
-                                }
-                            }
-                        }
-                        else if (prop.Type.IsCollection)
-                        {
-                            // Primitive collections
-                            // TS Type: "SimpleCollectionProperty" or "CustomCollectionProperty" (enum collection)
-                            b.StringProp("type", "collection");
-                            b.StringProp("role", "value");
-                            b.StringProp("collectedType", GetPrimitiveTypeDiscriminator(prop.PureType));
-                            if (prop.PureType.IsEnum)
-                            {
-                                b.Line($"get collectedTypeDef() {{ return domain.enums.{prop.Type.Name} }},");
-                            }
-                        }
-                        else
-                        {
-                            // All non-object/collection properties:
-                            if (prop.IsPrimaryKey)
-                                b.StringProp("role", "primaryKey");
-                            else if (prop.IsForeignKey && prop.IdPropertyObjectProperty.PureTypeOnContext)
-                                b.StringProp("role", "foreignKey");
-                            else
-                                b.StringProp("role", "value");
-                        }
-
                     }
+                    else
+                    {
+                        // External types, and collections of such
+                        b.StringProp("role", "value");
+                    }
+                }
+                else if (prop.Type.IsCollection)
+                {
+                    // Primitive collections
+                    b.StringProp("role", "value");
+                }
+                else
+                {
+                    // All non-object/collection properties:
+                    if (prop.IsPrimaryKey)
+                    {
+                        b.StringProp("role", "primaryKey");
+                    }
+                    else if (prop.IsForeignKey && prop.IdPropertyObjectProperty.PureTypeOnContext)
+                    {
+                        var principalProp = prop.IdPropertyObjectProperty;
+                        b.StringProp("role", "foreignKey");
+                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(principalProp.Object)}.props.{principalProp.Object.PrimaryKey.JsVariable} as PrimitiveProperty }},");
+                        b.Line($"get principalType() {{ return {GetClassMetadataRef(principalProp.Object)} }},");
+                    }
+                    else
+                    {
+                        b.StringProp("role", "value");
+                    }
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Write the metadata for all methods of a class
+        /// </summary>
+        private void WriteClassMethodMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            using (b.Block("methods:", ','))
+            {
+                foreach (var method in model.ClientMethods)
+                {
+                    WriteClassMethodMetadata(b, model, method);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Write the metadata for an entire method
+        /// </summary>
+        private void WriteClassMethodMetadata(TypeScriptCodeBuilder b, ClassViewModel model, MethodViewModel method)
+        {
+            using (b.Block($"{method.JsVariable}:", ','))
+            {
+
+                b.StringProp("name", method.JsVariable);
+                b.StringProp("displayName", method.DisplayName);
+
+                using (b.Block("params:", ','))
+                {
+                    foreach (var param in method.ClientParameters)
+                    {
+                        WriteMethodParameterMetadata(b, method, param);
+                    }
+                }
+
+                using (b.Block("return:", ','))
+                {
+                    b.StringProp("name", "$return");
+                    b.StringProp("displayName", "Result"); // TODO: i18n
+                    b.StringProp("role", "value");
+                    WriteTypeCommonMetadata(b, method.ResultType);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Write the metadata for a specific parameter to a specific method
+        /// </summary>
+        private void WriteMethodParameterMetadata(TypeScriptCodeBuilder b, MethodViewModel method, ParameterViewModel parameter)
+        {
+            using (b.Block($"{parameter.JsVariable}:", ','))
+            {
+                WriteValueCommonMetadata(b, parameter);
+                b.StringProp("role", "value");
+            }
+        }
+
+
+        /// <summary>
+        /// Write metadata common to all value representations, like properties and method parameters.
+        /// </summary>
+        private void WriteValueCommonMetadata(TypeScriptCodeBuilder b, IValueViewModel value)
+        {
+            b.StringProp("name", value.JsVariable);
+            b.StringProp("displayName", value.DisplayName);
+
+            WriteTypeCommonMetadata(b, value.Type);
+        }
+
+        /// <summary>
+        /// Write metadata common to all type representations, 
+        /// like properties, method parameters, method returns, etc.
+        /// </summary>
+        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type)
+        {
+            void WriteTypeDiscriminator(string propName, TypeViewModel t)
+            {
+                var kind = t.TsTypeKind;
+                switch (kind)
+                {
+                    case TypeDiscriminator.Unknown:
+                        // We assume any unknown props are strings.
+                        b.Line("// Type not supported natively by Coalesce - falling back to string.");
+                        b.StringProp(propName, "string");
+                        break;
+
+                    default:
+                        b.StringProp(propName, kind.ToString().ToLowerInvariant());
+                        break;
+                }
+            }
+
+            void WriteTypeDef(string propName, TypeViewModel t)
+            {
+                var kind = t.TsTypeKind;
+                switch (kind)
+                {
+                    case TypeDiscriminator.Enum:
+                        b.Line($"get {propName}() {{ return domain.enums.{t.Name} }},");
+                        break;
+
+                    case TypeDiscriminator.Model:
+                    case TypeDiscriminator.Object:
+                        b.Line($"get {propName}() {{ return {GetClassMetadataRef(t.ClassViewModel)} }},");
+                        break;
+                }
+            }
+
+
+            WriteTypeDiscriminator("type", type);
+            WriteTypeDef("typeDef", type);
+
+            // For collections, write the references to the underlying type.
+            if (type.TsTypeKind == TypeDiscriminator.Collection)
+            {
+                if (type.PureType.TsTypeKind == TypeDiscriminator.Collection)
+                {
+                    throw new InvalidOperationException("Collections of collections aren't supported by Coalesce as exposed types");
+                }
+
+                using (b.Block($"itemType:", ','))
+                {
+                    b.StringProp("name", "$collectionItem");
+                    b.StringProp("displayName", "");
+                    b.StringProp("role", "value");
+                    WriteTypeCommonMetadata(b, type.PureType);
                 }
             }
         }

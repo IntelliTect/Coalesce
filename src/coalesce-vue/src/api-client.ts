@@ -16,7 +16,7 @@ declare module "axios" {
     }
   }
 
-import { ModelType, ClassType } from './metadata'
+import { ModelType, ClassType, Method } from './metadata'
 import { Model, convertToModel, mapToDto } from './model'
 import { OwnProps } from './util'
 
@@ -192,6 +192,19 @@ export class ApiClient<T extends Model<ClassType>> {
         return instance as any;
     }
 
+    protected $formatParams(
+        method: Method,
+        params: any
+    ) {
+        const formatted = {};
+        for (var paramName in params){
+            const paramMeta = method.params[paramName];
+            const paramValue = params[paramName];
+
+            // mapToDto
+        }
+    }
+
     protected $options(
         parameters?: ListParameters | FilterParameters | DataSourceParameters, 
         config?: AxiosRequestConfig,
@@ -245,8 +258,6 @@ export class ApiClient<T extends Model<ClassType>> {
         return value
     }
 }
-
-function NoOp() {}
 
 export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {
 

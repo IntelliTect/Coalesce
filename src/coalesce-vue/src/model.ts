@@ -4,7 +4,7 @@ import * as toDate from 'date-fns/toDate'
 import * as isValid from 'date-fns/isValid'
 import * as format from 'date-fns/format'
 
-import { ClassType, ModelType, Property, ExternalType, PropNames, resolvePropMeta, isClassType, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator } from "./metadata"
+import { ClassType, ModelType, Property, ExternalType, PropNames, resolvePropMeta, isClassType, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator, Value, EnumType, CollectionValue, ModelValue, ObjectValue, EnumValue, PrimitiveValue, DateValue, CustomTypeValue, ValueMeta } from "./metadata"
 import { Indexable } from './util'
 
 /**
@@ -49,14 +49,15 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
                         throw `Recieved unparsable date: ${propVal}`;
                     }
                     hydrated[propName] = date;    
-                    break;    
+                    break;
                 case "model":
                 case "object":
                     convertToModel(propVal, propMeta.typeDef)
                     break;
                 case "collection":
-                    if (Array.isArray(propVal) && (propMeta.collectedType == "model" || propMeta.collectedType == "object")) {
-                        propVal.forEach((item: any) => convertToModel(item, propMeta.collectedTypeDef));
+                    const itemType = propMeta.itemType;
+                    if (Array.isArray(propVal) && (itemType.type == "model" || itemType.type == "object")) {
+                        propVal.forEach((item: any) => convertToModel(item, itemType.typeDef));
                     }
                     break;
             }
@@ -101,6 +102,220 @@ export function mapToDto<T extends Model<ClassType>>(object: T | null | undefine
         }
     }
     return dto;
+}
+
+// export function mapValueToDtoValue(value: any, valueMeta: Value, maxObjectDepth: number = 0, depth: number = 0) {
+//     switch (valueMeta.type) {
+//         case "model":
+//         case "object":
+//             if (depth < maxObjectDepth){
+//                 value = mapObjectToDto(value, valueMeta.typeDef.props)
+//             }
+//             break;
+//         case "collection":
+//             if (depth < maxObjectDepth){
+//                 if (!value) {
+//                     value = [];
+//                 }
+//                 if (!Array.isArray(value)){
+//                     throw `Value for collection ${valueMeta.name} was not an array`
+//                 }
+    
+//                 const collectedType = valueMeta.collectedType
+//                 return value
+//                     .map(childItem => {
+//                         // if (propMeta.collectedTypeDef)
+//                         var child = 'collectedTypeDef' in valueMeta
+//                             ? mapValueToDtoValue(childItem, valueMeta.collectedTypeDef, maxObjectDepth, depth)
+//                             : mapValueToDtoValue(childItem, valueMeta.collectedType, maxObjectDepth, depth)
+                            
+//                         return child;
+//                     })
+//             }
+//             break;
+//         case "date":
+//             if (isValid(value)) {
+//                 // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+//                 value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+//             } else if (value != null) {
+//                 console.warn(`Invalid date couldn't be mapped: ${value}`)
+//                 value = null
+//             }
+//         case "string":
+//         case "number":
+//         case "boolean":
+//         case "enum":
+//             value = value || null;    
+//             break;
+//         default:
+//             value = undefined;
+//     }
+// }
+
+// export function mapObjectToDto(object: any, valuesMetadata: { [valueName: string]: Value }, maxObjectDepth: number = 0, depth: number = 0) {
+    
+//     var dto: { [k: string]: any } = {};
+//     for (const valueName in valuesMetadata) {
+//         const valueMeta = valuesMetadata[valueName];
+
+//         var value = object[valueName];
+//         switch (valueMeta.type) {
+//             case "model":
+//             case "object":
+//                 if (depth < maxObjectDepth){
+//                     value = mapObjectToDto(object, valueMeta.typeDef.props)
+//                 }
+//                 break;
+//             case "collection":
+//                 if (depth < maxObjectDepth){
+//                     if (!value) {
+//                         value = [];
+//                     }
+//                     if (!Array.isArray(value)){
+//                         throw `Value for collection ${valueMeta.name} was not an array`
+//                     }
+        
+//                     const collectedType = valueMeta.collectedType
+//                     return value
+//                         .map(childItem => {
+//                             // if (propMeta.collectedTypeDef)
+//                             var child = 'collectedTypeDef' in valueMeta
+//                                 ? getDisplayForType(valueMeta.collectedTypeDef, childItem)
+//                                 : getDisplayForValue(valueMeta.collectedType, childItem)
+                                
+//                             return child;
+//                         })
+//                 }
+//                 break;
+//             case "date":
+//                 if (isValid(value)) {
+//                     // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+//                     value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+//                 } else if (value != null) {
+//                     console.warn(`Invalid date couldn't be mapped: ${value}`)
+//                     value = null
+//                 }
+//             case "string":
+//             case "number":
+//             case "boolean":
+//             case "enum":
+//                 value = value || null;    
+//                 break;
+//             default:
+//                 value = undefined;
+//         }
+
+//         if (value !== undefined) {
+//             dto[valueName] = value;
+//         }
+//     }
+//     return dto;
+// }
+
+
+class Visitor<TValue = any, TArray = any[], TObject = any> {
+
+    public visitValue(value: any, meta: Value): TValue | TArray | TObject {
+        switch (meta.type) {
+            case "model": return this.visitModelValue(value, meta);
+            case "object": return this.visitExternalTypeValue(value, meta);
+            case "collection": return this.visitCollection(value, meta);
+            case "enum": return this.visitEnumValue(value, meta);
+            case "date": return this.visitDateValue(value, meta);
+            default: return this.visitPrimitiveValue(value, meta);
+        }
+    }
+    
+    public visitObject(value: any, meta: ClassType): TObject {
+        const props = meta.props;
+        const output: any = {}
+        for (const propName in props) {
+            if (propName in value){
+                output[propName] = this.visitValue(value[propName], props[propName]);
+            }
+        }
+        return output;
+    }
+
+    public visitExternalTypeValue(value: any, meta: ObjectValue): TObject {
+        return this.visitObject(value, meta.typeDef);
+    }
+
+    public visitModelValue(value: any, meta: ModelValue): TObject {
+        return this.visitObject(value, meta.typeDef);
+    }
+
+    public visitCollection(value: any[], meta: CollectionValue): TArray {
+        if (value == null) return value;
+        if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
+
+        return value.map((element, index) => this.visitValue(element, meta.itemType)) as any;
+    }
+
+    public visitEnumValue(value: any, meta: EnumValue): TValue {
+        return value;
+    }
+
+    public visitDateValue(value: any, meta: DateValue): TValue {
+        return value;
+    }
+
+    public visitPrimitiveValue(value: any, meta: PrimitiveValue): TValue {
+        return value;
+    }
+}
+
+class GetDisplayVisitor extends Visitor<string | null, string | null, string | null> {
+    public visitObject(value: any, meta: ClassType): string | null {
+        if (value == null) return value;
+
+        if (meta.displayProp) {
+            return this.visitValue(value[meta.displayProp.name], meta.displayProp);
+        } else {
+            // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
+            try {
+                return JSON.stringify(value, function (k, v) { return k ? "" + v : v; });
+            } catch {
+                return value.toLocaleString();
+            }
+        }
+    }
+
+    public visitCollection(value: any[], meta: CollectionValue): string | null {
+        if (!value) return null;
+        if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
+
+        // Is this what we want? I think so - its the cleanest option.
+        // Perhaps an prop that controls this would be best.
+        if (value.length == 0) return "";
+        // TODO: a prop that controls this number would also be good.
+        if (value.length <= 5) {
+            return (value)
+                .map<string>(childItem => 
+                    this.visitValue(childItem, meta.itemType) 
+                    || '???' // TODO: what should this be for un-displayable members of a collection?
+                )
+                .join(", ")
+        }
+        return value.length.toLocaleString();
+    }
+
+    public visitEnumValue(value: any, meta: EnumValue): string | null {
+        if (value == null) return value;
+        const enumData = meta.typeDef.valueLookup[value];
+        if (!enumData) return '';
+        return enumData.displayName;
+    }
+
+    public visitDateValue(value: any, meta: DateValue): string | null {
+        if (value == null) return value;
+        return value.toLocaleString();
+    }
+
+    public visitPrimitiveValue(value: any, meta?: PrimitiveValue): string | null {
+        if (value == null) return value;
+        return value.toLocaleString();
+    }
 }
 
 /**
@@ -148,16 +363,8 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(it
     if (!modelMeta) {
         throw `Item passed to modelDisplay(item) is missing its $metadata property`
     }
-    if (modelMeta.displayProp)
-        return propDisplay(item, modelMeta.displayProp);
-    else {
-        // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
-        try {
-            return JSON.stringify(item, function (k, v) { return k ? "" + v : v; });
-        } catch {
-            return item.toLocaleString();
-        }
-    }
+
+    return new GetDisplayVisitor().visitObject(item, item.$metadata);
 }
 
 /**
@@ -170,39 +377,5 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(ite
     const propMeta = resolvePropMeta(item.$metadata, prop);
 
     var value = (item as Indexable<T>)[propMeta.name];
-
-    switch (propMeta.type) {
-        case "enum":
-        case "model":
-        case "object":
-            return getDisplayForType(propMeta.typeDef, value);
-        case "collection":
-            if (!value) {
-                value = [];
-            }
-            if (!Array.isArray(value)){
-                throw `Value for collection ${propMeta.name} was not an array`
-            }
-
-            // Is this what we want? I think so - its the cleanest option.
-            // Perhaps an prop that controls this would be best.
-            if (value.length == 0) return "";
-            // TODO: a prop that controls this number would also be good.
-            if (value.length <= 5) {
-                const collectedType = propMeta.collectedType
-                return (value)
-                    .map<string>(childItem => {
-                        // if (propMeta.collectedTypeDef)
-                        var display = 'collectedTypeDef' in propMeta
-                            ? getDisplayForType(propMeta.collectedTypeDef, childItem)
-                            : getDisplayForValue(propMeta.collectedType, childItem)
-                        if (display === null) display = '???' // TODO: what should this be for un-displayable members of a collection?
-                        return display;
-                    })
-                    .join(", ")
-            }
-            return value.length.toLocaleString();
-        default:
-            return getDisplayForValue(propMeta.type, value);
-    }
+    return new GetDisplayVisitor().visitValue(value, propMeta);
 }

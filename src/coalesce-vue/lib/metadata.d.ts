@@ -9,7 +9,7 @@ export interface Domain {
         [modelName: string]: EnumType;
     };
 }
-/** Type discriminator of types that are natively represented in javascript, i.e. they are valid results of the typeof operator. */
+/** Type discriminator of non-object types that are natively represented in javascript, i.e. they are valid results of the typeof operator. */
 export declare type NativeTypeDiscriminator = "string" | "number" | "boolean";
 /**
  * Type discriminator of types that do not have a `CustomType` representation in the metadata.
@@ -28,8 +28,6 @@ export declare type NonCollectionTypeDiscriminator = ValueTypeDiscriminator | Ob
 export declare type TypeDiscriminator = NonCollectionTypeDiscriminator | "collection";
 /** Base properties found on all pieces of metadata. */
 export interface Metadata {
-    /** The kind of type represented by the property or type. */
-    readonly type: TypeDiscriminator;
     /** The camel-cased, machine-readable name of the property or type. */
     readonly name: string;
     /** The human-readable name of the property or type */
@@ -69,31 +67,31 @@ export interface ModelType extends CustomReferenceTypeBase {
     readonly controllerRoute: string;
 }
 /** Represents a value of an enum */
-export interface EnumValue {
+export interface EnumMember {
     readonly strValue: string;
     readonly displayName: string;
     readonly value: number;
 }
 /** A dictionary with both string and numeric keys for looking up `EnumValue` objects by their string or numeric value. */
-export declare type EnumValues<K extends string> = {
-    [strValue in K]: EnumValue;
+export declare type EnumMembers<K extends string> = {
+    [strValue in K]: EnumMember;
 } & {
-    [n: number]: EnumValue | undefined;
+    [n: number]: EnumMember | undefined;
 };
 /** Utility function for creating the required properties of `EnumType<>` from an array of `EnumValue`  */
-export declare function getEnumMeta<K extends string>(values: EnumValue[]): {
-    readonly valueLookup: EnumValues<K>;
-    readonly values: EnumValue[];
+export declare function getEnumMeta<K extends string>(values: EnumMember[]): {
+    readonly valueLookup: EnumMembers<K>;
+    readonly values: EnumMember[];
 };
 /** Metadata representation of an enum type */
 export interface EnumType<K extends string = string> extends Metadata {
     readonly type: "enum";
     /** A lookup object with both string and numeric keys for obtaining metadata about a particular enum value. */
-    readonly valueLookup: EnumValues<K>;
+    readonly valueLookup: EnumMembers<K>;
     /**
      * The collection of all declared values of this enumeration.
      */
-    readonly values: EnumValue[];
+    readonly values: EnumMember[];
 }
 /** Union of all metadata descriptions of object-based types. */
 export declare type ClassType = ExternalType | ModelType;
@@ -104,53 +102,75 @@ export declare type CustomType = ClassType | EnumType;
  * This union includes both type discriminator strings and metadata objects.
  */
 export declare type CollectableType = CustomType | SimpleTypeDiscriminator;
-export interface PropMetaBase extends Metadata {
+export interface VoidValue extends Metadata {
+    readonly role: "value";
+    readonly type: "void";
+}
+export interface ValueMeta<TType extends TypeDiscriminator> extends Metadata {
+    /**
+     * Role that the value or property plays in a relational model.
+     * Some values may be nonapplicable in some contexts, like method parameters.
+     */
     readonly role: ValueRole;
+    readonly type: TType;
 }
-export interface PrimitiveProperty extends PropMetaBase {
-    readonly type: NativeTypeDiscriminator;
+export interface ValueMetaWithTypeDef<TType extends TypeDiscriminator, TTypeDef extends Metadata> extends ValueMeta<TType> {
+    /** Full description of the type represented by this value. */
+    readonly typeDef: TTypeDef;
 }
-export interface DateProperty extends PropMetaBase {
-    readonly type: "date";
+export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> {
 }
-export interface EnumProperty extends PropMetaBase {
-    readonly type: "enum";
-    readonly typeDef: EnumType;
+export interface DateValue extends ValueMeta<"date"> {
 }
-export interface ObjectProperty extends PropMetaBase {
-    readonly type: "object";
-    readonly typeDef: ExternalType;
+export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> {
 }
-export interface ModelProperty extends PropMetaBase {
-    readonly type: "model";
-    readonly typeDef: ModelType;
+export interface ObjectValue extends ValueMetaWithTypeDef<"object", ExternalType> {
+}
+export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> {
+}
+export interface CollectionValue extends ValueMeta<"collection"> {
+    readonly itemType: NonCollectionValue;
+}
+export interface ModelCollectionValue extends CollectionValue {
+    readonly itemType: ModelValue;
+}
+export declare type CustomTypeValue = EnumValue | ObjectValue | ModelValue;
+export declare type NonCollectionValue = PrimitiveValue | DateValue | CustomTypeValue;
+export declare type Value = NonCollectionValue | CollectionValue | ModelCollectionValue;
+export interface PrimitiveProperty extends PrimitiveValue {
+}
+export interface ForeignKeyProperty extends PrimitiveValue {
+    readonly role: "foreignKey";
+    readonly principalKey: PrimitiveProperty;
+    readonly principalType: ModelType;
+}
+export interface DateProperty extends DateValue {
+}
+export interface EnumProperty extends EnumValue {
+}
+export interface ObjectProperty extends ObjectValue {
+}
+export interface ModelProperty extends ModelValue {
+    readonly role: "referenceNavigation";
     readonly foreignKey: PrimitiveProperty;
     readonly principalKey: PrimitiveProperty;
 }
-export interface SimpleCollectionProperty extends PropMetaBase {
-    readonly type: "collection";
-    readonly collectedType: SimpleTypeDiscriminator;
+export interface BasicCollectionProperty extends CollectionValue {
+    readonly role: "value";
 }
-export interface EnumCollectionProperty extends PropMetaBase {
-    readonly type: "collection";
-    readonly collectedType: "enum";
-    readonly collectedTypeDef: EnumType;
-}
-export interface ExternalTypeCollectionProperty extends PropMetaBase {
-    readonly type: "collection";
-    readonly collectedType: "object";
-    readonly collectedTypeDef: ExternalType;
-}
-export interface ModelCollectionProperty extends PropMetaBase {
-    readonly type: "collection";
-    readonly collectedType: "model";
-    readonly collectedTypeDef: ModelType;
+export interface ModelCollectionProperty extends ModelCollectionValue {
+    readonly role: "collectionNavigation";
     readonly foreignKey: PrimitiveProperty;
 }
-export declare type CollectionProperty = SimpleCollectionProperty | EnumCollectionProperty | ExternalTypeCollectionProperty | ModelCollectionProperty;
-export declare type Property = PrimitiveProperty | DateProperty | EnumProperty | ObjectProperty | ModelProperty | CollectionProperty;
+export declare type CollectionProperty = BasicCollectionProperty | ModelCollectionProperty;
+export declare type Property = PrimitiveProperty | ForeignKeyProperty | DateProperty | EnumProperty | ObjectProperty | ModelProperty | CollectionProperty;
 export interface Method extends Metadata {
-    readonly params: Property[];
+    /** The return type of the method. */
+    readonly return: Value | VoidValue;
+    /** The parameters of the method */
+    readonly params: {
+        [paramName in string]: Value;
+    };
 }
 export declare type PropNames<TMeta extends ClassType, Kind extends Property = Property> = {
     [K in keyof TMeta["props"]]: TMeta["props"][K] extends Kind ? K : never;

@@ -1,3 +1,13 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 // Tedious imports for maximum tree shaking
 import * as toDate from 'date-fns/toDate';
 import * as isValid from 'date-fns/isValid';
@@ -45,8 +55,9 @@ export function convertToModel(object, metadata) {
                     convertToModel(propVal, propMeta.typeDef);
                     break;
                 case "collection":
-                    if (Array.isArray(propVal) && (propMeta.collectedType == "model" || propMeta.collectedType == "object")) {
-                        propVal.forEach(function (item) { return convertToModel(item, propMeta.collectedTypeDef); });
+                    var itemType_1 = propMeta.itemType;
+                    if (Array.isArray(propVal) && (itemType_1.type == "model" || itemType_1.type == "object")) {
+                        propVal.forEach(function (item) { return convertToModel(item, itemType_1.typeDef); });
                     }
                     break;
             }
@@ -93,6 +104,216 @@ export function mapToDto(object) {
     }
     return dto;
 }
+// export function mapValueToDtoValue(value: any, valueMeta: Value, maxObjectDepth: number = 0, depth: number = 0) {
+//     switch (valueMeta.type) {
+//         case "model":
+//         case "object":
+//             if (depth < maxObjectDepth){
+//                 value = mapObjectToDto(value, valueMeta.typeDef.props)
+//             }
+//             break;
+//         case "collection":
+//             if (depth < maxObjectDepth){
+//                 if (!value) {
+//                     value = [];
+//                 }
+//                 if (!Array.isArray(value)){
+//                     throw `Value for collection ${valueMeta.name} was not an array`
+//                 }
+//                 const collectedType = valueMeta.collectedType
+//                 return value
+//                     .map(childItem => {
+//                         // if (propMeta.collectedTypeDef)
+//                         var child = 'collectedTypeDef' in valueMeta
+//                             ? mapValueToDtoValue(childItem, valueMeta.collectedTypeDef, maxObjectDepth, depth)
+//                             : mapValueToDtoValue(childItem, valueMeta.collectedType, maxObjectDepth, depth)
+//                         return child;
+//                     })
+//             }
+//             break;
+//         case "date":
+//             if (isValid(value)) {
+//                 // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+//                 value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+//             } else if (value != null) {
+//                 console.warn(`Invalid date couldn't be mapped: ${value}`)
+//                 value = null
+//             }
+//         case "string":
+//         case "number":
+//         case "boolean":
+//         case "enum":
+//             value = value || null;    
+//             break;
+//         default:
+//             value = undefined;
+//     }
+// }
+// export function mapObjectToDto(object: any, valuesMetadata: { [valueName: string]: Value }, maxObjectDepth: number = 0, depth: number = 0) {
+//     var dto: { [k: string]: any } = {};
+//     for (const valueName in valuesMetadata) {
+//         const valueMeta = valuesMetadata[valueName];
+//         var value = object[valueName];
+//         switch (valueMeta.type) {
+//             case "model":
+//             case "object":
+//                 if (depth < maxObjectDepth){
+//                     value = mapObjectToDto(object, valueMeta.typeDef.props)
+//                 }
+//                 break;
+//             case "collection":
+//                 if (depth < maxObjectDepth){
+//                     if (!value) {
+//                         value = [];
+//                     }
+//                     if (!Array.isArray(value)){
+//                         throw `Value for collection ${valueMeta.name} was not an array`
+//                     }
+//                     const collectedType = valueMeta.collectedType
+//                     return value
+//                         .map(childItem => {
+//                             // if (propMeta.collectedTypeDef)
+//                             var child = 'collectedTypeDef' in valueMeta
+//                                 ? getDisplayForType(valueMeta.collectedTypeDef, childItem)
+//                                 : getDisplayForValue(valueMeta.collectedType, childItem)
+//                             return child;
+//                         })
+//                 }
+//                 break;
+//             case "date":
+//                 if (isValid(value)) {
+//                     // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+//                     value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+//                 } else if (value != null) {
+//                     console.warn(`Invalid date couldn't be mapped: ${value}`)
+//                     value = null
+//                 }
+//             case "string":
+//             case "number":
+//             case "boolean":
+//             case "enum":
+//                 value = value || null;    
+//                 break;
+//             default:
+//                 value = undefined;
+//         }
+//         if (value !== undefined) {
+//             dto[valueName] = value;
+//         }
+//     }
+//     return dto;
+// }
+var Visitor = /** @class */ (function () {
+    function Visitor() {
+    }
+    Visitor.prototype.visitValue = function (value, meta) {
+        switch (meta.type) {
+            case "model": return this.visitModelValue(value, meta);
+            case "object": return this.visitExternalTypeValue(value, meta);
+            case "collection": return this.visitCollection(value, meta);
+            case "enum": return this.visitEnumValue(value, meta);
+            case "date": return this.visitDateValue(value, meta);
+            default: return this.visitPrimitiveValue(value, meta);
+        }
+    };
+    Visitor.prototype.visitObject = function (value, meta) {
+        var props = meta.props;
+        var output = {};
+        for (var propName in props) {
+            if (propName in value) {
+                output[propName] = this.visitValue(value[propName], props[propName]);
+            }
+        }
+        return output;
+    };
+    Visitor.prototype.visitExternalTypeValue = function (value, meta) {
+        return this.visitObject(value, meta.typeDef);
+    };
+    Visitor.prototype.visitModelValue = function (value, meta) {
+        return this.visitObject(value, meta.typeDef);
+    };
+    Visitor.prototype.visitCollection = function (value, meta) {
+        var _this = this;
+        if (value == null)
+            return value;
+        if (!Array.isArray(value))
+            throw "Value for collection " + meta.name + " was not an array";
+        return value.map(function (element, index) { return _this.visitValue(element, meta.itemType); });
+    };
+    Visitor.prototype.visitEnumValue = function (value, meta) {
+        return value;
+    };
+    Visitor.prototype.visitDateValue = function (value, meta) {
+        return value;
+    };
+    Visitor.prototype.visitPrimitiveValue = function (value, meta) {
+        return value;
+    };
+    return Visitor;
+}());
+var GetDisplayVisitor = /** @class */ (function (_super) {
+    __extends(GetDisplayVisitor, _super);
+    function GetDisplayVisitor() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    GetDisplayVisitor.prototype.visitObject = function (value, meta) {
+        if (value == null)
+            return value;
+        if (meta.displayProp) {
+            return this.visitValue(value[meta.displayProp.name], meta.displayProp);
+        }
+        else {
+            // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
+            try {
+                return JSON.stringify(value, function (k, v) { return k ? "" + v : v; });
+            }
+            catch (_a) {
+                return value.toLocaleString();
+            }
+        }
+    };
+    GetDisplayVisitor.prototype.visitCollection = function (value, meta) {
+        var _this = this;
+        if (!value)
+            return null;
+        if (!Array.isArray(value))
+            throw "Value for collection " + meta.name + " was not an array";
+        // Is this what we want? I think so - its the cleanest option.
+        // Perhaps an prop that controls this would be best.
+        if (value.length == 0)
+            return "";
+        // TODO: a prop that controls this number would also be good.
+        if (value.length <= 5) {
+            return (value)
+                .map(function (childItem) {
+                return _this.visitValue(childItem, meta.itemType)
+                    || '???';
+            } // TODO: what should this be for un-displayable members of a collection?
+            )
+                .join(", ");
+        }
+        return value.length.toLocaleString();
+    };
+    GetDisplayVisitor.prototype.visitEnumValue = function (value, meta) {
+        if (value == null)
+            return value;
+        var enumData = meta.typeDef.valueLookup[value];
+        if (!enumData)
+            return '';
+        return enumData.displayName;
+    };
+    GetDisplayVisitor.prototype.visitDateValue = function (value, meta) {
+        if (value == null)
+            return value;
+        return value.toLocaleString();
+    };
+    GetDisplayVisitor.prototype.visitPrimitiveValue = function (value, meta) {
+        if (value == null)
+            return value;
+        return value.toLocaleString();
+    };
+    return GetDisplayVisitor;
+}(Visitor));
 /**
  * Given a value and its custom type's metadata,
  * return a string representation of the value suitable for display.
@@ -136,17 +357,7 @@ export function modelDisplay(item) {
     if (!modelMeta) {
         throw "Item passed to modelDisplay(item) is missing its $metadata property";
     }
-    if (modelMeta.displayProp)
-        return propDisplay(item, modelMeta.displayProp);
-    else {
-        // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
-        try {
-            return JSON.stringify(item, function (k, v) { return k ? "" + v : v; });
-        }
-        catch (_a) {
-            return item.toLocaleString();
-        }
-    }
+    return new GetDisplayVisitor().visitObject(item, item.$metadata);
 }
 /**
  * Given a model instance and a descriptor of a property on the instance,
@@ -157,39 +368,5 @@ export function modelDisplay(item) {
 export function propDisplay(item, prop) {
     var propMeta = resolvePropMeta(item.$metadata, prop);
     var value = item[propMeta.name];
-    switch (propMeta.type) {
-        case "enum":
-        case "model":
-        case "object":
-            return getDisplayForType(propMeta.typeDef, value);
-        case "collection":
-            if (!value) {
-                value = [];
-            }
-            if (!Array.isArray(value)) {
-                throw "Value for collection " + propMeta.name + " was not an array";
-            }
-            // Is this what we want? I think so - its the cleanest option.
-            // Perhaps an prop that controls this would be best.
-            if (value.length == 0)
-                return "";
-            // TODO: a prop that controls this number would also be good.
-            if (value.length <= 5) {
-                var collectedType = propMeta.collectedType;
-                return (value)
-                    .map(function (childItem) {
-                    // if (propMeta.collectedTypeDef)
-                    var display = 'collectedTypeDef' in propMeta
-                        ? getDisplayForType(propMeta.collectedTypeDef, childItem)
-                        : getDisplayForValue(propMeta.collectedType, childItem);
-                    if (display === null)
-                        display = '???'; // TODO: what should this be for un-displayable members of a collection?
-                    return display;
-                })
-                    .join(", ");
-            }
-            return value.length.toLocaleString();
-        default:
-            return getDisplayForValue(propMeta.type, value);
-    }
+    return new GetDisplayVisitor().visitValue(value, propMeta);
 }

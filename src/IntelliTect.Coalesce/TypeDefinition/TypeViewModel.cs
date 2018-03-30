@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
+
     public abstract class TypeViewModel : IAttributeProvider
     {
         public abstract string Name { get; }
@@ -55,6 +56,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
         public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
+
+
+        /// <summary>
+        /// Get a value indicating what kind of type this <see cref="TypeViewModel"/> will be represented by on the client.
+        /// </summary>
+        public TypeDiscriminator TsTypeKind =>
+            IsString ? TypeDiscriminator.String :
+            IsByteArray ? TypeDiscriminator.String :
+            IsNumber ? TypeDiscriminator.Number :
+            IsBool ? TypeDiscriminator.Boolean :
+            IsDate ? TypeDiscriminator.Date :
+            IsEnum ? TypeDiscriminator.Enum :
+            IsVoid ? TypeDiscriminator.Void :
+            IsCollection ? TypeDiscriminator.Collection :
+            HasClassViewModel ? (
+                ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object
+            ) : TypeDiscriminator.Unknown;
 
         public string CsDefaultValue
         {

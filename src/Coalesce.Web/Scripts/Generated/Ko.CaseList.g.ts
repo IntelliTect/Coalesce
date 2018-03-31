@@ -141,7 +141,7 @@ module ListViewModels {
                 if (!this.result()) {
                     this.result(new ViewModels.CaseSummary(data.object));
                 } else {
-                    this.result().loadFromDto(data);
+                    this.result().loadFromDto(data.object);
                 }
                 if (reload) {
                     var result = this.result();

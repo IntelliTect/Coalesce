@@ -54,7 +54,7 @@ module Services {
                 if (!this.result()) {
                     this.result(new ViewModels.WeatherData(data.object));
                 } else {
-                    this.result().loadFromDto(data);
+                    this.result().loadFromDto(data.object);
                 }
                 if (typeof(callback) == 'function')
                     callback(this.result());

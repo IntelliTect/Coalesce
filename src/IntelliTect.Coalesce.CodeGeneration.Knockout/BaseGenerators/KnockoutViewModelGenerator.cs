@@ -166,7 +166,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("if (!this.result()) {");
                     b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.Name}({incomingMainData}));");
                     b.Line("} else {");
-                    b.Indented($"this.result().loadFromDto(data);");
+                    b.Indented($"this.result().loadFromDto({incomingMainData});");
                     b.Line("}");
                 }
                 else

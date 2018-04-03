@@ -22,7 +22,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 "import * as qs from 'qs'",
                 "import * as $isValid from 'date-fns/isValid'",
                 "import * as $format from 'date-fns/format'",
-                "import { mapValueToDto as $mapValue } from 'coalesce-vue/lib/model'",
                 "import { AxiosClient, ApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'",
                 "import { AxiosResponse, AxiosRequestConfig } from 'axios'",
             });
@@ -53,11 +52,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 ? $"{method.TransportType}<void>"
                                 : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
 
-                            if (method.ClientParameters.Any())
-                            {
-                                b.Line($"const $paramsMeta = this.$metadata.methods.{method.JsVariable}.params");
-                            }
-                            using (b.Block("const $params ="))
+                            using (b.Block($"const $params = this.$mapParams(this.$metadata.methods.{method.JsVariable},", ')'))
                             {
                                 if (method.IsModelInstanceMethod)
                                 {
@@ -65,7 +60,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 }
                                 foreach (var param in method.ClientParameters)
                                 {
-                                    b.Line($"{param.JsVariable}: $mapValue({param.JsVariable}, $paramsMeta.{param.JsVariable}),");
+                                    b.Line($"{param.JsVariable},");
                                 }
                             }
                             b.Line("return AxiosClient");

@@ -88,7 +88,7 @@ export interface ObjectType extends CustomReferenceTypeBase {
 export interface ModelType extends CustomReferenceTypeBase {
     readonly type: "model"
 
-    /** The methods of the represented entity */
+    /** The methods of the entity that are invokable via API endpoints. */
     readonly methods: { [methodName in string]: Method }
 
     // NOTE: This is declared on CustomReferenceTypeBase as optional - we re-define it here as non-optional
@@ -171,6 +171,19 @@ export interface VoidValue extends Metadata {
     readonly type: "void"
 }
 
+/** Narrowing intersection interface for the 'itemType' value on collection values that represents the type contained within the collection.  */
+export interface CollectionItemValue {
+    name: "$collectionItem"
+
+    // While this is currently always emptystring, not sure that we want to restrict this in the typings.
+    // displayName: "" // Yep, always emptystring
+}
+
+/** Narrowing intersection interface for the 'return' value on methods.  */
+export interface MethodReturnValue {
+    name: "$return"
+}
+
 /**
  * Base interface for all normal value metadata representations.
  * For our purposes, a value is defined as the usage of a type.
@@ -217,7 +230,7 @@ export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> {
 /** Represents the usage of a collection of values */
 export interface CollectionValue extends ValueMeta<"collection"> {
     role: "value" | "collectionNavigation"
-    readonly itemType: NonCollectionValue
+    readonly itemType: NonCollectionValue & CollectionItemValue
 }
 
 /** Union of all representations of the usage of types with explicit type metadata */
@@ -251,6 +264,7 @@ export interface PrimitiveProperty extends PrimitiveValue {
 
 export interface PrimaryKeyProperty extends PrimitiveValue { 
     readonly role: "primaryKey" 
+    readonly type: "string" | "number"
 }
 
 /** Represents a property that serves as a foreign key */
@@ -294,7 +308,7 @@ export interface ModelCollectionNavigationProperty extends CollectionValue {
      * to the primary key of the model that owns the collection property.
      */
     readonly foreignKey: ForeignKeyProperty
-    readonly itemType: ModelValue
+    readonly itemType: ModelValue & CollectionItemValue
 }
 
 export type CollectionProperty = 

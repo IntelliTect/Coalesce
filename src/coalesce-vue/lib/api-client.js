@@ -8,7 +8,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { convertToModel, mapToDto } from './model';
+import { convertToModel, mapToDto, mapValueToDto } from './model';
 import axios from 'axios';
 import * as qs from 'qs';
 import Vue from 'vue';
@@ -64,13 +64,19 @@ var ApiClient = /** @class */ (function () {
         }
         return instance;
     };
-    ApiClient.prototype.$formatParams = function (method, params) {
+    /**
+     * Maps the given method parameters to values suitable for transport.
+     * @param method The method whose parameters need mapping
+     * @param params The values of the parameter to map
+     */
+    ApiClient.prototype.$mapParams = function (method, params) {
         var formatted = {};
         for (var paramName in params) {
             var paramMeta = method.params[paramName];
             var paramValue = params[paramName];
-            // mapToDto
+            formatted[paramName] = mapValueToDto(params[paramName], paramMeta);
         }
+        return formatted;
     };
     ApiClient.prototype.$options = function (parameters, config, queryParams) {
         // Merge standard Coalesce params with general configured params if there are any.

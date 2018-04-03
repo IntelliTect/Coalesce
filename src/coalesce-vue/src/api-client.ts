@@ -17,7 +17,7 @@ declare module "axios" {
   }
 
 import { ModelType, ClassType, Method } from './metadata'
-import { Model, convertToModel, mapToDto } from './model'
+import { Model, convertToModel, mapToDto, mapValueToDto } from './model'
 import { OwnProps } from './util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance, Cancel} from 'axios'
@@ -192,17 +192,22 @@ export class ApiClient<T extends Model<ClassType>> {
         return instance as any;
     }
 
-    protected $formatParams(
+    /**
+     * Maps the given method parameters to values suitable for transport.
+     * @param method The method whose parameters need mapping
+     * @param params The values of the parameter to map
+     */
+    protected $mapParams(
         method: Method,
-        params: any
+        params: { [paramName: string]: any }
     ) {
-        const formatted = {};
-        for (var paramName in params){
+        const formatted: { [paramName: string]: any } = {};
+        for (var paramName in params) {
             const paramMeta = method.params[paramName];
             const paramValue = params[paramName];
-
-            // mapToDto
+            formatted[paramName] = mapValueToDto(params[paramName], paramMeta)
         }
+        return formatted;
     }
 
     protected $options(

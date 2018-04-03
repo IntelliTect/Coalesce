@@ -82,7 +82,16 @@ export declare class ApiClient<T extends Model<ClassType>> {
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
     $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, ListApiReturnType<TCall>> & TCall;
-    protected $formatParams(method: Method, params: any): void;
+    /**
+     * Maps the given method parameters to values suitable for transport.
+     * @param method The method whose parameters need mapping
+     * @param params The values of the parameter to map
+     */
+    protected $mapParams(method: Method, params: {
+        [paramName: string]: any;
+    }): {
+        [paramName: string]: any;
+    };
     protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): {
         cancelToken: CancelToken | null;
     } & AxiosRequestConfig & {

@@ -3,18 +3,16 @@ import * as $models from './models.g'
 import * as qs from 'qs'
 import * as $isValid from 'date-fns/isValid'
 import * as $format from 'date-fns/format'
-import { mapValueToDto as $mapValue } from 'coalesce-vue/lib/model'
 import { AxiosClient, ApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
 
 export class PersonApiClient extends ApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.rename.params
-    const $params = {
+    const $params = this.$mapParams(this.$metadata.methods.rename, {
       id,
-      name: $mapValue(name, $paramsMeta.name),
-    }
+      name,
+    })
     return AxiosClient
       .post(
         `/${this.$metadata.controllerRoute}/Rename`,
@@ -25,10 +23,9 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public changeSpacesToDashesInName(id: number, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.changeSpacesToDashesInName.params
-    const $params = {
+    const $params = this.$mapParams(this.$metadata.methods.changeSpacesToDashesInName, {
       id,
-    }
+    })
     return AxiosClient
       .post<ItemResult<void>>(
         `/${this.$metadata.controllerRoute}/ChangeSpacesToDashesInName`,
@@ -38,11 +35,10 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public add(numberOne: number | null, numberTwo: number | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.add.params
-    const $params = {
-      numberOne: $mapValue(numberOne, $paramsMeta.numberOne),
-      numberTwo: $mapValue(numberTwo, $paramsMeta.numberTwo),
-    }
+    const $params = this.$mapParams(this.$metadata.methods.add, {
+      numberOne,
+      numberTwo,
+    })
     return AxiosClient
       .post<ItemResult<number>>(
         `/${this.$metadata.controllerRoute}/Add`,
@@ -52,9 +48,8 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public getUser($config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.getUser.params
-    const $params = {
-    }
+    const $params = this.$mapParams(this.$metadata.methods.getUser, {
+    })
     return AxiosClient
       .post<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/GetUser`,
@@ -64,10 +59,9 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public personCount(lastNameStartsWith: string | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.personCount.params
-    const $params = {
-      lastNameStartsWith: $mapValue(lastNameStartsWith, $paramsMeta.lastNameStartsWith),
-    }
+    const $params = this.$mapParams(this.$metadata.methods.personCount, {
+      lastNameStartsWith,
+    })
     return AxiosClient
       .get<ItemResult<number>>(
         `/${this.$metadata.controllerRoute}/PersonCount`,
@@ -76,10 +70,9 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public fullNameAndAge(id: number, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.fullNameAndAge.params
-    const $params = {
+    const $params = this.$mapParams(this.$metadata.methods.fullNameAndAge, {
       id,
-    }
+    })
     return AxiosClient
       .get<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/FullNameAndAge`,
@@ -88,10 +81,9 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public removePersonById(id: number | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.removePersonById.params
-    const $params = {
-      id: $mapValue(id, $paramsMeta.id),
-    }
+    const $params = this.$mapParams(this.$metadata.methods.removePersonById, {
+      id,
+    })
     return AxiosClient
       .delete<ItemResult<boolean>>(
         `/${this.$metadata.controllerRoute}/RemovePersonById`,
@@ -100,10 +92,9 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public obfuscateEmail(id: number, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.obfuscateEmail.params
-    const $params = {
+    const $params = this.$mapParams(this.$metadata.methods.obfuscateEmail, {
       id,
-    }
+    })
     return AxiosClient
       .put<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/ObfuscateEmail`,
@@ -113,11 +104,10 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public changeFirstName(id: number, firstName: string | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.changeFirstName.params
-    const $params = {
+    const $params = this.$mapParams(this.$metadata.methods.changeFirstName, {
       id,
-      firstName: $mapValue(firstName, $paramsMeta.firstName),
-    }
+      firstName,
+    })
     return AxiosClient
       .patch(
         `/${this.$metadata.controllerRoute}/ChangeFirstName`,
@@ -128,9 +118,8 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public getUserPublic($config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.getUserPublic.params
-    const $params = {
-    }
+    const $params = this.$mapParams(this.$metadata.methods.getUserPublic, {
+    })
     return AxiosClient
       .post<ItemResult<string>>(
         `/${this.$metadata.controllerRoute}/GetUserPublic`,
@@ -140,10 +129,9 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public namesStartingWith(characters: string | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.namesStartingWith.params
-    const $params = {
-      characters: $mapValue(characters, $paramsMeta.characters),
-    }
+    const $params = this.$mapParams(this.$metadata.methods.namesStartingWith, {
+      characters,
+    })
     return AxiosClient
       .post<ItemResult<string[]>>(
         `/${this.$metadata.controllerRoute}/NamesStartingWith`,
@@ -153,11 +141,10 @@ export class PersonApiClient extends ApiClient<$models.Person> {
   }
   
   public searchPeople(criteria: $models.PersonCriteria | null, page: number | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.searchPeople.params
-    const $params = {
-      criteria: $mapValue(criteria, $paramsMeta.criteria),
-      page: $mapValue(page, $paramsMeta.page),
-    }
+    const $params = this.$mapParams(this.$metadata.methods.searchPeople, {
+      criteria,
+      page,
+    })
     return AxiosClient
       .post(
         `/${this.$metadata.controllerRoute}/SearchPeople`,
@@ -173,9 +160,8 @@ export class PersonApiClient extends ApiClient<$models.Person> {
 export class CaseApiClient extends ApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
   public getSomeCases($config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.getSomeCases.params
-    const $params = {
-    }
+    const $params = this.$mapParams(this.$metadata.methods.getSomeCases, {
+    })
     return AxiosClient
       .post(
         `/${this.$metadata.controllerRoute}/GetSomeCases`,
@@ -186,9 +172,8 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   }
   
   public getAllOpenCasesCount($config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.getAllOpenCasesCount.params
-    const $params = {
-    }
+    const $params = this.$mapParams(this.$metadata.methods.getAllOpenCasesCount, {
+    })
     return AxiosClient
       .post<ItemResult<number>>(
         `/${this.$metadata.controllerRoute}/GetAllOpenCasesCount`,
@@ -198,9 +183,8 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   }
   
   public randomizeDatesAndStatus($config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.randomizeDatesAndStatus.params
-    const $params = {
-    }
+    const $params = this.$mapParams(this.$metadata.methods.randomizeDatesAndStatus, {
+    })
     return AxiosClient
       .post<ItemResult<void>>(
         `/${this.$metadata.controllerRoute}/RandomizeDatesAndStatus`,
@@ -210,9 +194,8 @@ export class CaseApiClient extends ApiClient<$models.Case> {
   }
   
   public getCaseSummary($config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.getCaseSummary.params
-    const $params = {
-    }
+    const $params = this.$mapParams(this.$metadata.methods.getCaseSummary, {
+    })
     return AxiosClient
       .post(
         `/${this.$metadata.controllerRoute}/GetCaseSummary`,
@@ -228,10 +211,9 @@ export class CaseApiClient extends ApiClient<$models.Case> {
 export class CompanyApiClient extends ApiClient<$models.Company> {
   constructor() { super($metadata.Company) }
   public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig) {
-    const $paramsMeta = this.$metadata.methods.getCertainItems.params
-    const $params = {
-      isDeleted: $mapValue(isDeleted, $paramsMeta.isDeleted),
-    }
+    const $params = this.$mapParams(this.$metadata.methods.getCertainItems, {
+      isDeleted,
+    })
     return AxiosClient
       .post(
         `/${this.$metadata.controllerRoute}/GetCertainItems`,

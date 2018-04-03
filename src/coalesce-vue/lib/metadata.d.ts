@@ -165,6 +165,7 @@ export interface PrimitiveProperty extends PrimitiveValue {
 }
 export interface PrimaryKeyProperty extends PrimitiveValue {
     readonly role: "primaryKey";
+    readonly type: "string" | "number";
 }
 /** Represents a property that serves as a foreign key */
 export interface ForeignKeyProperty extends PrimitiveValue {

@@ -195,7 +195,7 @@ module ViewModels {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
-                    this.result().loadFromDto(data);
+                    this.result().loadFromDto(data.object);
                 }
                 this.parent.loadFromDto(data.object, true)
                 if (typeof(callback) == 'function') {
@@ -310,7 +310,7 @@ module ViewModels {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
-                    this.result().loadFromDto(data);
+                    this.result().loadFromDto(data.object);
                 }
                 this.parent.loadFromDto(data.object, true)
                 if (typeof(callback) == 'function') {

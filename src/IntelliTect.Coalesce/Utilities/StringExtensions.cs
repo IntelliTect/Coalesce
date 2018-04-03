@@ -30,12 +30,40 @@ namespace IntelliTect.Coalesce.Utilities
             return result;
         }
 
-        // Convert the string to camel case.
-        public static string ToCamelCase(this string theString)
+        /// <summary>
+        ///     Convert the string to camel case.
+        /// </summary>
+        /// <remarks>
+        ///     This is largely taken from JSON.NET's camelCase converter, 
+        ///     with some modifications to remove cases we don't need to handle 
+        ///     (e.g. whitespace in the middle of identifiers)
+        /// </remarks>
+        public static string ToCamelCase(this string s)
         {
-            if (theString == null) return null;
-            if (theString.Length <= 2) return theString.ToLower();
-            else return theString.Substring(0, 1).ToLower() + theString.Substring(1);
+            if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
+            {
+                return s;
+            }
+
+            char[] chars = s.ToCharArray();
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (i == 1 && !char.IsUpper(chars[i]))
+                {
+                    break;
+                }
+
+                bool hasNext = (i + 1 < chars.Length);
+                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+                {
+                    break;
+                }
+
+                chars[i] = char.ToLowerInvariant(chars[i]);
+            }
+
+            return new string(chars);
         }
 
         // Capitalize the first character and add a space before

@@ -101,6 +101,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         }
                         else if (prop.Object.PropertyByName(Model.PrimaryKey.JsVariable) != null)
                         {
+                            // TODO: why do we do this? Causes weird behavior simply because key names line up.
+                            // If all primary keys are just named "Id", this will copy the PK of the parent to the PK of the child,
+                            // which doesn't make sense.
                             b.Line($"newItem.{Model.PrimaryKey.JsVariable}(this.{Model.PrimaryKey.JsVariable}());");
                         }
                         b.Line($"this.{prop.JsVariable}.push(newItem);");
@@ -111,7 +114,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.Line($"public {prop.JsVariable}List: (loadImmediate?: boolean) => {ListViewModelModuleName}.{prop.Object.ListViewModelClassName};");
                 }
                 b.Line();
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsCollection && f.PureTypeOnContext))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsCollection && f.PureTypeOnContext && !f.HasNotMapped))
                 {
                     b.DocComment($"Url for a table view of all members of collection {prop.Name} for the current object.");
                     b.Line($"public {prop.ListEditorUrlName}: KnockoutComputed<string> = ko.computed(");
@@ -230,7 +233,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
                     b.Line();
                     b.Line();
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => 
+                        f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext && !f.HasNotMapped))
                     {
                         b.Line($"// List Object model for {prop.Name}. Allows for loading subsets of data.");
                         var childListVar = $"_{prop.JsVariable}List";

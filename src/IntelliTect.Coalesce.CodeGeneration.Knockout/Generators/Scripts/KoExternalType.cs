@@ -85,8 +85,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     // DB-mapped viewmodels can't have an external type as a parent.
                     // There's no strong reason for this restriction other than that 
                     // the code just doesn't support it at the moment.
-                    // If this prop's type is DB-mapped, pass a parent of null.
-                    var parentVar = prop.PureTypeOnContext ? "null" : "this";
+                    var parentVar = prop.PureTypeOnContext ? "undefined" : "this";
 
                     if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
                     {

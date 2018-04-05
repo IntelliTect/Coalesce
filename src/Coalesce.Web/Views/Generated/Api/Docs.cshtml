@@ -182,7 +182,7 @@
                             @method.CsParameters
                         </td>
                         <td>
-                            @method.JsArguments()
+                            @(string.Join(", ", method.ClientParameters.Select(f => f.JsVariable)))
                         </td>
                         <td>@method.SecurityInfo.ToString()</td>
                     </tr>

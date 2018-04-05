@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             using (b.Block($"module {ViewModelModuleName}"))
             {
-                b.DocComment($"External Type {Model.Name}");
+                b.DocComment($"External Type {Model.ViewModelClassName}");
                 WriteViewModelClass(b);
             }
         }
@@ -86,13 +86,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     {
                         b.Line($"if (data.{prop.JsonName} != null) {{");
                         b.Line("// Merge the incoming array");
-                        if (prop.Type.PureType.ClassViewModel.PrimaryKey != null)
+                        if (prop.Object.PrimaryKey != null)
                         {
-                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, \'{prop.Type.PureType.ClassViewModel.PrimaryKey.JsVariable}\', ViewModels.{prop.Type.PureType.ClassViewModel.Name}, self, true);");
+                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, \'{prop.Object.PrimaryKey.JsVariable}\', ViewModels.{prop.Object.ViewModelClassName}, self, true);");
                         }
                         else
                         {
-                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, null, ViewModels.{prop.Type.PureType.ClassViewModel.Name}, this, true);");
+                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, null, ViewModels.{prop.Object.ViewModelClassName}, this, true);");
                         }
                         b.Line("}");
                     }

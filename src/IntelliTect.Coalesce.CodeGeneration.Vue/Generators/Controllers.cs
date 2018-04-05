@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         yield return Generator<ModelApiController>()
                             .WithModel(model)
                             .WithDbContext(context.ClassViewModel)
-                            .AppendOutputPath($"Api/Generated/{model.Name}Controller.g.cs");
+                            .AppendOutputPath($"Api/Generated/{model.ClientTypeName}Controller.g.cs");
                     }
                 }
             }

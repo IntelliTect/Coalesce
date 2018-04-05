@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     .TagBlock("h1", style: "display: inline-block")
                 )
                 {
-                    b.Line($"{Model.Name.ToProperCase()} List");
+                    b.Line($"{Model.DisplayName} List");
                     b.Line($"<span style=\"font-size: .5em; padding-left: 20px;\"><a href=\"~/{Model.ControllerName}/Docs\">API Docs</a></span>");
                 }
 

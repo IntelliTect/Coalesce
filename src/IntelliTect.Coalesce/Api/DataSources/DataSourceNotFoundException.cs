@@ -18,6 +18,6 @@ namespace IntelliTect.Coalesce.Api.DataSources
             this.dataSourceName = dataSourceName;
         }
 
-        public override string Message => $"A DataSource named {dataSourceName} declared for {declaredFor.Name} that serves type {servedType.Name} could not be found";
+        public override string Message => $"A DataSource named {dataSourceName} declared for {declaredFor} that serves type {servedType} could not be found";
     }
 }

@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -9,6 +10,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
     public abstract class TypeViewModel : IAttributeProvider
     {
         public abstract string Name { get; }
+
+        /// <summary>
+        /// Returns the name of the type to be used by the client.
+        /// </summary>
+        public string ClientTypeName => 
+            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ??
+            Name;
 
         public abstract string FullyQualifiedName { get; }
 
@@ -49,14 +57,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Convenient accessor for the represented System.Type when in reflection-based contexts.
         /// </summary>
         public virtual Type TypeInfo => throw new InvalidOperationException("TypeInfo not available in the current context");
-        
 
         /// <summary>
-        /// Returns the DisplayName Attribute or 
-        /// puts a space before every upper class letter aside from the first one.
+        /// Returns a human-readable string that represents the name of this type to the client.
         /// </summary>
-        public string DisplayName => Regex.Replace(Name, "[A-Z]", " $0").Trim();
-
+        public string DisplayName => ClientTypeName.ToProperCase();
 
         /// <summary>
         /// Get a value indicating what kind of type this <see cref="TypeViewModel"/> will be represented by on the client.

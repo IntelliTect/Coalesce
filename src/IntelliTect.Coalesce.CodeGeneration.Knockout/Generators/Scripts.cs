@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<KoViewModel>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.g.ts");
+                    .AppendOutputPath($"Generated/Ko.{model.ViewModelClassName}{Partial(model)}.g.ts");
                 yield return Generator<KoListViewModel>()
                     .WithModel(model)
                     .AppendOutputPath($"Generated/Ko.{model.ListViewModelClassName}.g.ts");
@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<KoExternalType>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/Ko.{model.Name}{Partial(model)}.g.ts");
+                    .AppendOutputPath($"Generated/Ko.{model.ViewModelClassName}{Partial(model)}.g.ts");
             }
 
             foreach (var model in Model.Services)
@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<KoTsPartialStub>()
                     .WithModel(model)
-                    .AppendOutputPath($"Partials/Ko.{model.Name}.partial.ts");
+                    .AppendOutputPath($"Partials/Ko.{model.ViewModelClassName}.partial.ts");
             }
         }
     }

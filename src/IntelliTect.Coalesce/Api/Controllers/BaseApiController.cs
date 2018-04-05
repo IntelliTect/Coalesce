@@ -62,12 +62,12 @@ namespace IntelliTect.Coalesce.Api.Controllers
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return Task.FromResult<ItemResult<TDto>>($"Creation of {GeneratedForClassViewModel.Name} items not allowed.");
+                return Task.FromResult<ItemResult<TDto>>($"Creation of {GeneratedForClassViewModel.DisplayName} items not allowed.");
             }
             if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return Task.FromResult<ItemResult<TDto>>($"Editing of {GeneratedForClassViewModel.Name} items not allowed.");
+                return Task.FromResult<ItemResult<TDto>>($"Editing of {GeneratedForClassViewModel.DisplayName} items not allowed.");
             }
 
             return behaviors.SaveAsync(dto, dataSource, parameters);
@@ -81,7 +81,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected async Task<FileResult> CsvDownloadImplementation(ListParameters parameters, IDataSource<T> dataSource)
         {
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(await CsvTextImplementation(parameters, dataSource));
-            return File(bytes, "application/x-msdownload", this.EntityClassViewModel.Name + ".csv");
+            return File(bytes, "application/x-msdownload", this.EntityClassViewModel.ClientTypeName + ".csv");
         }
 
         protected async Task<string> CsvTextImplementation(ListParameters parameters, IDataSource<T> dataSource)

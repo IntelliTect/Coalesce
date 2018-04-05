@@ -1,6 +1,6 @@
 import { Domain, getEnumMeta, ModelType, ObjectType, PrimitiveProperty, ModelProperty, ForeignKeyProperty, PrimaryKeyProperty } from 'coalesce-vue/lib/metadata' 
 
-const domain: Domain = { types: {}, enums: {} }
+const domain: Domain = { enums: {}, types: {}, services: {} }
 export const Genders = domain.enums.Genders = {
   name: "genders",
   displayName: "Genders",
@@ -383,7 +383,7 @@ export const Company = domain.types.Company = {
       params: {
         isDeleted: {
           name: "isDeleted",
-          displayName: "is Deleted",
+          displayName: "Is Deleted",
           type: "boolean",
           role: "value",
         },
@@ -535,7 +535,7 @@ export const Person = domain.types.Person = {
       params: {
         name: {
           name: "name",
-          displayName: "name",
+          displayName: "Name",
           type: "string",
           role: "value",
         },
@@ -566,13 +566,13 @@ export const Person = domain.types.Person = {
       params: {
         numberOne: {
           name: "numberOne",
-          displayName: "number One",
+          displayName: "Number One",
           type: "number",
           role: "value",
         },
         numberTwo: {
           name: "numberTwo",
-          displayName: "number Two",
+          displayName: "Number Two",
           type: "number",
           role: "value",
         },
@@ -602,7 +602,7 @@ export const Person = domain.types.Person = {
       params: {
         lastNameStartsWith: {
           name: "lastNameStartsWith",
-          displayName: "last Name Starts With",
+          displayName: "Last Name Starts With",
           type: "string",
           role: "value",
         },
@@ -632,7 +632,7 @@ export const Person = domain.types.Person = {
       params: {
         id: {
           name: "id",
-          displayName: "id",
+          displayName: "Id",
           type: "number",
           role: "value",
         },
@@ -662,7 +662,7 @@ export const Person = domain.types.Person = {
       params: {
         firstName: {
           name: "firstName",
-          displayName: "first Name",
+          displayName: "First Name",
           type: "string",
           role: "value",
         },
@@ -693,7 +693,7 @@ export const Person = domain.types.Person = {
       params: {
         characters: {
           name: "characters",
-          displayName: "characters",
+          displayName: "Characters",
           type: "string",
           role: "value",
         },
@@ -717,14 +717,14 @@ export const Person = domain.types.Person = {
       params: {
         criteria: {
           name: "criteria",
-          displayName: "criteria",
+          displayName: "Criteria",
           type: "object",
           get typeDef() { return (domain.types.PersonCriteria as ObjectType) },
           role: "value",
         },
         page: {
           name: "page",
-          displayName: "page",
+          displayName: "Page",
           type: "number",
           role: "value",
         },
@@ -990,6 +990,40 @@ export const WeatherData = domain.types.WeatherData = {
     },
   },
 }
+export const WeatherService = domain.services.WeatherService = {
+  name: "weatherService",
+  displayName: "Weather Service",
+  type: "service",
+  controllerRoute: "WeatherService",
+  methods: {
+    getWeather: {
+      name: "getWeather",
+      displayName: "Get Weather",
+      params: {
+        location: {
+          name: "location",
+          displayName: "Location",
+          type: "object",
+          get typeDef() { return (domain.types.Location as ObjectType) },
+          role: "value",
+        },
+        dateTime: {
+          name: "dateTime",
+          displayName: "Date Time",
+          type: "date",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.WeatherData as ObjectType) },
+      },
+    },
+  },
+}
 
 interface AppDomain extends Domain {
   enums: {
@@ -1012,6 +1046,9 @@ interface AppDomain extends Domain {
     ProductDetails: typeof ProductDetails
     StreetAddress: typeof StreetAddress
     WeatherData: typeof WeatherData
+  }
+  services: {
+    WeatherService: typeof WeatherService
   }
 }
 

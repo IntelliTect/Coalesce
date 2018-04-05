@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static System.StringComparison;
 
 namespace IntelliTect.Coalesce.Api.DataSources
 {
@@ -31,24 +32,17 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
         protected Type GetDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor, string dataSourceName)
         {
-            var dataSources = declaredFor.ClientDataSources(reflectionRepository);
+            if (string.IsNullOrEmpty(dataSourceName) || dataSourceName.Equals(DefaultSourceName, InvariantCultureIgnoreCase))
+            {
+                return GetDefaultDataSourceType(servedType, declaredFor);
+            }
 
-            var dataSourceClassViewModel = dataSources.FirstOrDefault(t => t.Name == dataSourceName);
-            if (dataSourceClassViewModel == null)
-            {
-                if (dataSourceName == "" || dataSourceName == DefaultSourceName || dataSourceName == null)
-                {
-                    return GetDefaultDataSourceType(servedType, declaredFor);
-                }
-                else
-                {
-                    throw new DataSourceNotFoundException(servedType, declaredFor, dataSourceName);
-                }
-            }
-            else
-            {
-                return dataSourceClassViewModel.Type.TypeInfo;
-            }
+            var dataSourceClassViewModel = declaredFor
+                .ClientDataSources(reflectionRepository)
+                .FirstOrDefault(t => t.ClientTypeName.Equals(dataSourceName, InvariantCultureIgnoreCase))
+                ?? throw new DataSourceNotFoundException(servedType, declaredFor, dataSourceName);
+
+            return dataSourceClassViewModel.Type.TypeInfo;
         }
 
         public IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string dataSourceName)

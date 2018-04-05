@@ -11,7 +11,7 @@ declare module "axios" {
         head<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
     }
 }
-import { ModelType, ClassType, Method } from './metadata';
+import { ModelType, ClassType, Method, Service, ApiRoutedType } from './metadata';
 import { Model } from './model';
 import { AxiosPromise, AxiosResponse, AxiosRequestConfig, CancelToken, AxiosInstance } from 'axios';
 export interface ApiResult {
@@ -60,16 +60,11 @@ export declare type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosList
 export declare const AxiosClient: AxiosInstance;
 export declare type ItemApiReturnType<T extends (this: null, ...args: any[]) => ItemResultPromise<any>> = ReturnType<T> extends void ? void : ReturnType<T> extends ItemResultPromise<infer R> ? R : any;
 export declare type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResultPromise<any>> = ReturnType<T> extends ListResultPromise<infer S> ? S : any;
-export declare class ApiClient<T extends Model<ClassType>> {
-    $metadata: ModelType;
-    constructor($metadata: ModelType);
-    /** Injects a cancellation token into the next request. */
+export declare class ApiClient<T extends ApiRoutedType> {
+    $metadata: T;
+    constructor($metadata: T);
+    /** Cancellation token to inject into the next request. */
     private _nextCancelToken;
-    get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<T>>>;
-    list(parameters?: ListParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ListResult<T>>>;
-    count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<AxiosResponse<ItemResult<number>>>;
-    save(item: T, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<T>>>;
-    delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<T>>>;
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
@@ -100,6 +95,15 @@ export declare class ApiClient<T extends Model<ClassType>> {
     private $objectify(parameters?);
     protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType): AxiosResponse<ItemResult<TResult>>;
     protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: ClassType): AxiosResponse<ListResult<TResult>>;
+}
+export declare class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>> extends ApiClient<TMeta> {
+    get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
+    list(parameters?: ListParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ListResult<TModel>>>;
+    count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<AxiosResponse<ItemResult<number>>>;
+    save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
+    delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
+}
+export declare abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<TMeta> {
 }
 export declare abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {
     private readonly apiClient;

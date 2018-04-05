@@ -40,7 +40,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 );
             }
             
-            using (b.TagBlock("div", $"table-view obj-{Model.Name.ToCamelCase()}"))
+            using (b.TagBlock("div", $"table-view obj-{Model.ClientTypeName.ToCamelCase()}"))
             {
                 WriteAdminTableControls(b, "table", additionalButtons: () =>
                 {

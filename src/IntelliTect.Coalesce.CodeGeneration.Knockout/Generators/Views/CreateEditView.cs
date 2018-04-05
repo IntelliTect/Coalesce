@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         b.Line("<button onclick=\"window.history.back()\" class=\"btn btn-xs btn-default\"><i class=\"fa fa-arrow-left\"></i> Back</button>");
                         b.Line("<button data-bind=\"click:function() { load(); }\" class=\"btn btn-xs btn-default\"><i class=\"fa fa-refresh\"></i> Refresh</button>");
                     }
-                    b.Line($"<h1 class=\"card-title clearfix\" style=\"display:inline-block;\">{Model.Name.ToProperCase()}</h1>");
+                    b.Line($"<h1 class=\"card-title clearfix\" style=\"display:inline-block;\">{Model.DisplayName}</h1>");
                     b.Line("<span class=\"label label-info\" data-bind=\"fadeVisible: isLoading()\">Loading...</span>");
                 }
 

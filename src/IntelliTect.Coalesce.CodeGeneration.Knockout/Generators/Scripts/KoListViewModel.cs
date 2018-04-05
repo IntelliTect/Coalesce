@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
+using IntelliTect.Coalesce.Api.DataSources;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
@@ -31,7 +32,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             using (b.Block($"export class {Model.ListViewModelClassName} extends Coalesce.BaseListViewModel<{ViewModelFullName}>"))
             {
-                b.Line($"public readonly modelName: string = \"{Model.Name}\";");
+                b.Line($"public readonly modelName: string = \"{Model.ClientTypeName}\";");
                 b.Line($"public readonly apiController: string = \"/{Model.ApiRouteControllerPart}\";");
                 b.Line($"public modelKeyName: string = \"{Model.PrimaryKey.JsVariable}\";");
                 b.Line($"public itemClass: new () => {ViewModelFullName} = {ViewModelFullName};");
@@ -45,10 +46,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line("} | null = null;");
 
                 b.DocComment("The namespace containing all possible values of this.dataSource.");
-                b.Line($"public dataSources: typeof {Model.Name}DataSources = {Model.Name}DataSources;");
+                b.Line($"public dataSources: typeof {Model.ClientTypeName}DataSources = {Model.ClientTypeName}DataSources;");
 
                 b.DocComment("The data source on the server to use when retrieving objects. Valid values are in this.dataSources.");
-                b.Line($"public dataSource: Coalesce.DataSource<{ViewModelFullName}> = new this.dataSources.Default();");
+                b.Line($"public dataSource: Coalesce.DataSource<{ViewModelFullName}> = new this.dataSources.{DataSourceFactory.DefaultSourceName}();");
 
                 b.DocComment($"Configuration for all instances of {Model.ListViewModelClassName}. Can be overidden on each instance via instance.coalesceConfig.");
                 b.Line($"public static coalesceConfig = new Coalesce.ListViewModelConfiguration<{Model.ListViewModelClassName}, {ViewModelFullName}>(Coalesce.GlobalConfiguration.listViewModel);");
@@ -80,17 +81,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             var dataSources = Model.ClientDataSources(Services.ReflectionRepository).ToList();
             var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
 
-            using (b.Block($"export namespace {Model.Name}DataSources"))
+            using (b.Block($"export namespace {Model.ClientTypeName}DataSources"))
             {
                 if (defaultSource == null)
                 {
-                    b.Line($"export class Default extends Coalesce.DataSource<{ViewModelFullName}> {{ }}");
+                    b.Line($"export class {DataSourceFactory.DefaultSourceName} extends Coalesce.DataSource<{ViewModelFullName}> {{ }}");
                 }
 
                 foreach (var source in dataSources)
                 {
                     b.DocComment(source.Comment);
-                    using (b.Block($"export class {source.Name} extends Coalesce.DataSource<{ViewModelFullName}>"))
+                    using (b.Block($"export class {source.ClientTypeName} extends Coalesce.DataSource<{ViewModelFullName}>"))
                     {
                         if (source.DataSourceParameters.Any())
                         {
@@ -118,9 +119,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                             }
                         }
                     }
-                    if (source == defaultSource)
+
+                    // Case-sensitive comparison intended here. We always need a data source cased EXACTLY as "Default".
+                    if (source == defaultSource && !source.ClientTypeName.Equals(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCulture))
                     {
-                        b.Line($"export const Default = {source.Name};");
+                        b.Line($"export const {DataSourceFactory.DefaultSourceName} = {source.ClientTypeName};");
                     }
                 }
             }

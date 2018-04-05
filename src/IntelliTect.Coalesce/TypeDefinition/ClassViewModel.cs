@@ -29,7 +29,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public string FullyQualifiedName => Type.FullyQualifiedName;
 
-        public string ControllerName => IsService ? ServiceName : Name;
+        /// <summary>
+        /// Returns the name of the type to be used by the client, or in other cases
+        /// where the type name should be overridable using the [Coalesce] attribute.
+        /// This includes places where there could be name conflicts that should be resolvable
+        /// by allowing the developer to override the type name for generation.
+        /// </summary>
+        public string ClientTypeName =>
+            // Check for an override first
+            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ?? 
+            // If no override, check for an interface service, and trim the conventional 'I' if found.
+            (IsService && Type.IsInterface && Name[0] == 'I' && char.IsUpper(Name[1]) ? Name.Substring(1) : null) ??
+            // Nothing special - just use the name.
+            Name;
+
+        public string ControllerName => ClientTypeName;
 
         public string ApiControllerClassName
         {
@@ -38,10 +52,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var overrideName = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerName);
                 if (!string.IsNullOrWhiteSpace(overrideName)) return overrideName;
 
-                var suffix = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerSuffix);
-                if (!string.IsNullOrWhiteSpace(suffix)) return $"{ControllerName}Controller{suffix}";
-
-                return $"{ControllerName}Controller";
+                var suffix = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerSuffix) ?? "";
+                return $"{ControllerName}Controller{suffix}";
             }
         }
 
@@ -73,7 +85,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Name of the ViewModelClass
         /// </summary>
-        public string ViewModelClassName => Name;
+        public string ViewModelClassName => ClientTypeName;
 
         public string ViewModelGeneratedClassName
         {
@@ -95,15 +107,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Name of the List ViewModelClass
         /// </summary>
-        public string ListViewModelClassName => Name + "List";
+        public string ListViewModelClassName => ClientTypeName + "List";
 
 
 
         public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
 
-        public string ServiceName => Type.IsInterface && Name.StartsWith("I") ? Name.Substring(1) : Name;
-
-        public string ServiceClientClassName => ServiceName + "Client";
+        public string ServiceClientClassName => ClientTypeName + "Client";
 
 
 
@@ -214,7 +224,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .DataSources
             .Where(d => d.DeclaredFor.Equals(this))
             .Select(d => d.StrategyClass)
-            .OrderBy(d => d.Name);
+            .OrderBy(d => d.ClientTypeName);
 
 
         /// <summary>
@@ -333,19 +343,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public IEnumerable<SearchableProperty> SearchProperties(string rootModelName = null, int depth = 0, int maxDepth = 2)
+        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel rootModel = null, int depth = 0, int maxDepth = 2)
         {
             // Only go down three levels.
             if (depth == 3) yield break;
 
-            var searchProperties = Properties.Where(f => f.IsSearchable(rootModelName)).ToList();
+            var searchProperties = Properties.Where(f => f.IsSearchable(rootModel)).ToList();
             if (searchProperties.Any())
             {
                 // Process these items to make sure we have things we can search on.
                 foreach (var property in searchProperties)
                 {
                     // Get all the child items
-                    foreach (var searchProperty in property.SearchProperties(rootModelName, depth, maxDepth))
+                    foreach (var searchProperty in property.SearchProperties(rootModel, depth, maxDepth))
                     {
                         yield return searchProperty;
                     }
@@ -400,10 +410,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateApi) ?? true;
 
         /// <summary>
-        /// Returns the DisplayName Attribute or 
-        /// puts a space before every upper class letter aside from the first one.
+        /// Returns a human-readable string that represents the name of this type to the client.
         /// </summary>
-        public string DisplayName => Type.DisplayName;
+        public string DisplayName => ClientTypeName.ToProperCase();
 
         public bool IsDbMappedType => HasDbSet || (DtoBaseViewModel?.HasDbSet ?? false);
 

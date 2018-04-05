@@ -27,15 +27,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             {
                 yield return Generator<TableView>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/{model.Name}/Table.cshtml");
+                    .AppendOutputPath($"Generated/{model.ClientTypeName}/Table.cshtml");
 
                 yield return Generator<CardView>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/{model.Name}/Cards.cshtml");
+                    .AppendOutputPath($"Generated/{model.ClientTypeName}/Cards.cshtml");
 
                 yield return Generator<CreateEditView>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/{model.Name}/CreateEdit.cshtml");
+                    .AppendOutputPath($"Generated/{model.ClientTypeName}/CreateEdit.cshtml");
             }
         }
     }

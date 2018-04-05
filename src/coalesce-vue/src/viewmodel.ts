@@ -4,7 +4,7 @@ import { AxiosResponse, AxiosError } from 'axios';
 import debounce from 'lodash-es/debounce';
 
 import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, ObjectType } from './metadata';
-import { ApiClient, ItemResult, ItemApiState } from './api-client';
+import { ApiClient, ItemResult, ItemApiState, ModelApiClient } from './api-client';
 import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
 import { Indexable } from './util';
 
@@ -47,7 +47,7 @@ DESIGN NOTES
 
 export abstract class ViewModel<
     TModel extends Model<ModelType>,
-    TApi extends ApiClient<TModel>,
+    TApi extends ModelApiClient<TModel["$metadata"], TModel>,
 > implements Model<TModel["$metadata"]> {
     /**
      * Object which holds all of the data represented by this ViewModel.

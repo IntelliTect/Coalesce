@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             using (b.Block($"export class {Model.ViewModelGeneratedClassName} extends Coalesce.BaseViewModel"))
             {
-                b.Line($"public readonly modelName = \"{Model.Name}\";");
+                b.Line($"public readonly modelName = \"{Model.ClientTypeName}\";");
                 b.Line($"public readonly primaryKeyName: keyof this = \"{Model.PrimaryKey.JsVariable}\";");
                 b.Line($"public readonly modelDisplayName = \"{Model.DisplayName}\";");
                 b.Line($"public readonly apiController = \"/{Model.ApiRouteControllerPart}\";");
@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Indented($"= new Coalesce.ViewModelConfiguration<{Model.ViewModelGeneratedClassName}>({Model.ViewModelClassName}.coalesceConfig);");
 
                 b.DocComment("The namespace containing all possible values of this.dataSource.");
-                b.Line($"public dataSources: typeof ListViewModels.{Model.Name}DataSources = ListViewModels.{Model.Name}DataSources;");
+                b.Line($"public dataSources: typeof ListViewModels.{Model.ClientTypeName}DataSources = ListViewModels.{Model.ClientTypeName}DataSources;");
 
                 b.Line();
                 b.Line();
@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
                 {
                     b.DocComment($"Add object to {prop.JsVariable}");
-                    using (b.Block($"public addTo{prop.Name} = (autoSave?: boolean | null): {prop.PureType.ClassViewModel.Name} =>", ';'))
+                    using (b.Block($"public addTo{prop.Name} = (autoSave?: boolean | null): {prop.Object.ViewModelClassName} =>", ';'))
                     {
                         b.Line($"var newItem = new {prop.Object.ViewModelClassName}();");
                         b.Line($"if (typeof(autoSave) == 'boolean'){{");
@@ -117,7 +117,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.Line($"public {prop.ListEditorUrlName}: KnockoutComputed<string> = ko.computed(");
                     if (prop.ListEditorUrl == null)
                     {
-                        b.Indented($"() => \"Inverse property not set on {Model.Name} for property {prop.Name}\",");
+                        b.Indented($"() => \"Inverse property not set on {Model.ClientTypeName} for property {prop.Name}\",");
                     }
                     else
                     {
@@ -266,7 +266,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
                     b.Line();
                     b.Line();
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.PureType.ClassViewModel.HasDbSet))
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.Object.IsDbMappedType))
                     {
                         b.Line($"this.show{prop.Name}Editor = function(callback: any) {{");
                         b.Line($"    if (!self.{prop.JsVariable}()) {{");

@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             }
 
             b.Line();
-            using (b.TagBlock("div", $"card-view obj-{Model.Name.ToCamelCase()}"))
+            using (b.TagBlock("div", $"card-view obj-{Model.ClientTypeName.ToCamelCase()}"))
             {
                 WriteAdminTableControls(b, "card");
                 

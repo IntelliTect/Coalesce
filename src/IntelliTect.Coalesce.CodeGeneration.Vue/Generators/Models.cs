@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 yield return Generator<ClassDto>()
                     .WithModel(model)
-                    .AppendOutputPath($"Generated/{model.Name}Dto.g.cs");
+                    .AppendOutputPath($"Generated/{model.ClientTypeName}Dto.g.cs");
                 
             }
         }

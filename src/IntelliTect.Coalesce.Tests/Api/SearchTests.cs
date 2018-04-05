@@ -57,7 +57,7 @@ namespace IntelliTect.Coalesce.Tests
 
             var searchClauses = classViewModel
                 .PropertyByName(nameof(ComplexModel.DateTimeOffset))
-                .SearchProperties(classViewModel.Name)
+                .SearchProperties(classViewModel)
                 .SelectMany(p => p.GetLinqDynamicSearchStatements(
                     new ClaimsPrincipal(),
                     TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(utcOffset), "test", "test"),
@@ -111,7 +111,7 @@ namespace IntelliTect.Coalesce.Tests
 
             var searchClauses = classViewModel
                 .PropertyByName(nameof(ComplexModel.DateTime))
-                .SearchProperties(classViewModel.Name)
+                .SearchProperties(classViewModel)
                 .SelectMany(p => p.GetLinqDynamicSearchStatements(
                     new ClaimsPrincipal(),
                     // DateTime fields should be timezone agnostic. We pick a random timezone to fuzz this test a bit.

@@ -367,7 +367,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string result = string.Format($@"
                     <select class=""form-control"" placeholder=""{placeholder}""
                         data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, " +
-                        $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.Name}/{endpointName}'"">
+                        $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.ApiRouteControllerPart}/{endpointName}'"">
                         <option></option>
                     </select >");
 
@@ -483,7 +483,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             if (string.IsNullOrWhiteSpace(propertyModel.ManyToManyCollectionName))
             {
-                throw new ArgumentException($"Property {propertyModel.Parent.Name}.{propertyModel.Name} is not marked as [ManyToMany], or has no name specified for the attribute.");
+                throw new ArgumentException($"Property {propertyModel.Name} is not marked as [ManyToMany], or has no name specified for the attribute.");
             }
 
             string result = string.Format(@"
@@ -491,9 +491,12 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     idField: '{3}', textField: '{4}', url: '/api/{5}/list?includes=none', pageSize: '{7}',""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
-                prefix, propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
+                prefix, 
+                propertyModel.ManyToManyCollectionName.ToCamelCase(), 
+                propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
                 propertyModel.ManyToManyCollectionProperty.Object.PrimaryKey.Name,
-                propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name, propertyModel.ManyToManyCollectionProperty.Object.Name,
+                propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name, 
+                propertyModel.ManyToManyCollectionProperty.Object.ApiRouteControllerPart,
                 (string.IsNullOrWhiteSpace(areaName) ? "" : $"{areaName}."),
                 pageSize
                 );

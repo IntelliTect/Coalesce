@@ -1,12 +1,13 @@
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { CDisplay, CInput } from '../coalesce/components';
-import { ApiClient, convertToModel, ModelType } from 'coalesce-vue'
+import { ApiClient, convertToModel, ModelType, ModelApiClient } from 'coalesce-vue'
 import { Person } from '../metadata.g';
 import * as metadata from '../metadata.g';
 import * as models from '../models.g';
 
 import { PersonViewModel, CaseViewModel } from '../viewmodels.g'
+import { PersonApiClient } from '../api-clients.g';
 
 
 @Component({
@@ -42,7 +43,7 @@ export default class extends Vue {
   getData() {
     this.isLoading = true;
 
-    new ApiClient<models.Person>(metadata.Person)
+    new PersonApiClient()
       .list({
         page: this.pagination.page,
         pageSize: this.pagination.rowsPerPage,

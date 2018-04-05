@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             // Assigning each property as a member of domain ensures we don't break type contracts.
             // Exporting each model individually offers easier usage in imports.
-            b.Line("const domain: Domain = { types: {}, enums: {} }");
+            b.Line("const domain: Domain = { enums: {}, types: {}, services: {} }");
 
 
 
@@ -31,14 +31,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 WriteEnumMetadata(b, model);
             }
 
-            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.Name))
+            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
             {
                 WriteApiBackedTypeMetadata(b, model);
             }
 
-            foreach (var model in Model.ExternalTypes.OrderBy(e => e.Name))
+            foreach (var model in Model.ExternalTypes.OrderBy(e => e.ClientTypeName))
             {
                 WriteExternalTypeMetadata(b, model);
+            }
+
+            foreach (var model in Model.Services.OrderBy(e => e.ClientTypeName))
+            {
+                WriteServiceMetadata(b, model);
             }
 
             // Create an enhanced Domain definition for deep intellisense.
@@ -54,9 +59,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
                 using (b.Block("types:"))
                 {
-                    foreach (var model in Model.ClientClasses.OrderBy(e => e.Name))
+                    foreach (var model in Model.ClientClasses.OrderBy(e => e.ClientTypeName))
                     {
-                        b.Line($"{model.ViewModelClassName}: typeof {model.ViewModelClassName}");
+                        b.Line($"{model.ClientTypeName}: typeof {model.ClientTypeName}");
+                    }
+                }
+                using (b.Block("services:"))
+                {
+                    foreach (var model in Model.Services.OrderBy(e => e.ClientTypeName))
+                    {
+                        b.Line($"{model.ClientTypeName}: typeof {model.ClientTypeName}");
                     }
                 }
             }
@@ -68,9 +80,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             return Task.FromResult(b.ToString());
         }
 
-        void WriteCommonClassMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        private void WriteCommonClassMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
         {
-            b.StringProp("name", model.Name.ToCamelCase());
+            b.StringProp("name", model.ClientTypeName.ToCamelCase());
             b.StringProp("displayName", model.DisplayName);
             if (model.ListTextProperty != null)
             {
@@ -105,7 +117,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        private static void WriteEnumMetadata(TypeScriptCodeBuilder b, TypeViewModel model)
+        private void WriteEnumMetadata(TypeScriptCodeBuilder b, TypeViewModel model)
         {
             using (b.Block($"export const {model.Name} = domain.enums.{model.Name} ="))
             {
@@ -121,6 +133,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value}' }},");
                 }
                 b.Line("]),");
+            }
+        }
+
+        private void WriteServiceMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            using (b.Block($"export const {model.ClientTypeName} = domain.services.{model.ClientTypeName} ="))
+            {
+                b.StringProp("name", model.ClientTypeName.ToCamelCase());
+                b.StringProp("displayName", model.DisplayName);
+
+                b.StringProp("type", "service");
+                b.StringProp("controllerRoute", model.ApiRouteControllerPart);
+
+                WriteClassMethodMetadata(b, model);
             }
         }
 

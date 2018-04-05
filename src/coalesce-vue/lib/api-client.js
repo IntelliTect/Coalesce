@@ -17,38 +17,9 @@ export var AxiosClient = axios.create();
 var ApiClient = /** @class */ (function () {
     function ApiClient($metadata) {
         this.$metadata = $metadata;
-        /** Injects a cancellation token into the next request. */
+        /** Cancellation token to inject into the next request. */
         this._nextCancelToken = null;
     }
-    // TODO: should the standard set of endpoints be prefixed with $ 
-    ApiClient.prototype.get = function (id, parameters, config) {
-        var _this = this;
-        return AxiosClient
-            .get("/" + this.$metadata.controllerRoute + "/get/" + id, this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
-    };
-    ApiClient.prototype.list = function (parameters, config) {
-        var _this = this;
-        return AxiosClient
-            .get("/" + this.$metadata.controllerRoute + "/list", this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateListResult(r, _this.$metadata); });
-    };
-    ApiClient.prototype.count = function (parameters, config) {
-        return AxiosClient
-            .get("/" + this.$metadata.controllerRoute + "/count", this.$options(parameters, config));
-    };
-    ApiClient.prototype.save = function (item, parameters, config) {
-        var _this = this;
-        return AxiosClient
-            .post("/" + this.$metadata.controllerRoute + "/save", qs.stringify(mapToDto(item)), this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
-    };
-    ApiClient.prototype.delete = function (id, parameters, config) {
-        var _this = this;
-        return AxiosClient
-            .post("/" + this.$metadata.controllerRoute + "/delete/" + id, null, this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
-    };
     ApiClient.prototype.$makeCaller = function (resultType, // TODO: Eventually this should be replaced with a metadata object I think
     invokerFactory) {
         var instance;
@@ -116,6 +87,51 @@ var ApiClient = /** @class */ (function () {
     return ApiClient;
 }());
 export { ApiClient };
+var ModelApiClient = /** @class */ (function (_super) {
+    __extends(ModelApiClient, _super);
+    function ModelApiClient() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    // TODO: should the standard set of endpoints be prefixed with '$'?
+    ModelApiClient.prototype.get = function (id, parameters, config) {
+        var _this = this;
+        return AxiosClient
+            .get("/" + this.$metadata.controllerRoute + "/get/" + id, this.$options(parameters, config))
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
+    };
+    ModelApiClient.prototype.list = function (parameters, config) {
+        var _this = this;
+        return AxiosClient
+            .get("/" + this.$metadata.controllerRoute + "/list", this.$options(parameters, config))
+            .then(function (r) { return _this.$hydrateListResult(r, _this.$metadata); });
+    };
+    ModelApiClient.prototype.count = function (parameters, config) {
+        return AxiosClient
+            .get("/" + this.$metadata.controllerRoute + "/count", this.$options(parameters, config));
+    };
+    ModelApiClient.prototype.save = function (item, parameters, config) {
+        var _this = this;
+        return AxiosClient
+            .post("/" + this.$metadata.controllerRoute + "/save", qs.stringify(mapToDto(item)), this.$options(parameters, config))
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
+    };
+    ModelApiClient.prototype.delete = function (id, parameters, config) {
+        var _this = this;
+        return AxiosClient
+            .post("/" + this.$metadata.controllerRoute + "/delete/" + id, null, this.$options(parameters, config))
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
+    };
+    return ModelApiClient;
+}(ApiClient));
+export { ModelApiClient };
+var ServiceApiClient = /** @class */ (function (_super) {
+    __extends(ServiceApiClient, _super);
+    function ServiceApiClient() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return ServiceApiClient;
+}(ApiClient));
+export { ServiceApiClient };
 var ApiState = /** @class */ (function (_super) {
     __extends(ApiState, _super);
     function ApiState(apiClient, invoker) {

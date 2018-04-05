@@ -184,7 +184,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             string setter;
             if (property.Type.IsCollection)
             {
-                if (property.PureType.HasClassViewModel)
+                if (property.Object != null)
                 {
                     // Only check the includes tree for things that are in the database.
                     // Otherwise, this would break IncludesExternal.
@@ -193,7 +193,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     // Set this as a variable once and then use it below. This prevents multiple-evaluation of computed getter-only properties.
                     sb.Line($"var propVal{name} = obj.{name};");
                     sb.Append($"if (propVal{name} != null");
-                    if (property.PureType.ClassViewModel.HasDbSet)
+                    if (property.Object.HasDbSet)
                     {
                         sb.Append($" && (tree == null || tree[nameof({objectName}.{name})] != null)");
                     }
@@ -202,7 +202,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         sb.Line($"{objectName}.{name} = propVal{name}");
 
-                        var defaultOrderBy = property.PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
+                        var defaultOrderBy = property.Object.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
                         if (defaultOrderBy != null)
                         {
                             sb.Indented($".AsQueryable().OrderBy(\"{defaultOrderBy}\").AsEnumerable<{property.PureType.FullyQualifiedName}>()");
@@ -211,7 +211,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.PureType.Name}DtoGen>(context, tree?[nameof({objectName}.{name})])).ToList();");
                     }
 
-                    if (property.PureType.ClassViewModel.HasDbSet)
+                    if (property.Object.HasDbSet)
                     {
                         // If we know for sure that we're loading these things (becuse the IncludeTree said so),
                         // but EF didn't load any, then add a blank collection so the client will delete any that already exist.

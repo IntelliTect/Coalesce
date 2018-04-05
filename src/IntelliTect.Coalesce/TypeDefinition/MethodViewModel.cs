@@ -136,59 +136,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
-        /// Gets the js arguments passed to this method call.
-        /// </summary>
-        public string JsArguments(string obj = "", bool callback = false)
-        {
-            string result;
-            if (obj != "")
-            {
-                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.JsVariable}()"));
-            }
-            else
-            {
-                result = string.Join(", ", ClientParameters.Select(f => obj + f.JsVariable));
-            }
-            if (callback)
-            {
-                if (!string.IsNullOrEmpty(result))
-                {
-                    result = result + ", ";
-                }
-                result = result + "callback";
-            }
-            return result;
-        }
-
-        public string JsPostObject
-        {
-            get
-            {
-                var result = "{ ";
-                if (IsModelInstanceMethod)
-                {
-                    result = result + "id: this.parent[this.parent.primaryKeyName]()";
-                    if (Parameters.Any()) result = result + ", ";
-                }
-
-                string TsConversion(ParameterViewModel param)
-                {
-                    string argument = param.JsVariable;
-                    if (param.Type.HasClassViewModel)
-                        return $"{argument} ? {argument}.saveToDto() : null";
-                    if (param.Type.IsDate)
-                        return $"{argument} ? {argument}.format() : null";
-                    return argument;
-                }
-
-                result += string.Join(", ", ClientParameters.Select(f => $"{f.JsVariable}: {TsConversion(f)}"));
-                result += " }";
-                return result;
-
-            }
-        }
-
-        /// <summary>
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
@@ -226,7 +173,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var type = this.GetAttributeValue<LoadFromDataSourceAttribute>(a => a.DataSourceType);
                 if (type == null) return Api.DataSources.DataSourceFactory.DefaultSourceName;
-                return type.Name;
+                return type.ClientTypeName;
             }
         }
 

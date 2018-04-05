@@ -43,14 +43,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.Line($"{Model.SecurityInfo.ReadAnnotation}");
                     using (b.Block("public ActionResult Cards()"))
                     {
-                        b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.Name}/Cards.cshtml\");");
+                        b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.ClientTypeName}/Cards.cshtml\");");
                     }
 
                     b.Line();
                     b.Line($"{Model.SecurityInfo.ReadAnnotation}");
                     using (b.Block("public ActionResult Table()"))
                     {
-                        b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.Name}/Table.cshtml\");");
+                        b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.ClientTypeName}/Table.cshtml\");");
                     }
 
                     b.Line();
@@ -60,14 +60,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         b.Line($"{Model.SecurityInfo.EditAnnotation}");
                         using (b.Block("public ActionResult TableEdit()"))
                         {
-                            b.Line($"return IndexImplementation(true, @\"{viewLocation}/Generated/{Model.Name}/Table.cshtml\");");
+                            b.Line($"return IndexImplementation(true, @\"{viewLocation}/Generated/{Model.ClientTypeName}/Table.cshtml\");");
                         }
 
                         b.Line();
                         b.Line($"{Model.SecurityInfo.EditAnnotation}");
                         using (b.Block("public ActionResult CreateEdit()"))
                         {
-                            b.Line($"return CreateEditImplementation(@\"{viewLocation}/Generated/{Model.Name}/CreateEdit.cshtml\");");
+                            b.Line($"return CreateEditImplementation(@\"{viewLocation}/Generated/{Model.ClientTypeName}/CreateEdit.cshtml\");");
                         }
 
                         b.Line();

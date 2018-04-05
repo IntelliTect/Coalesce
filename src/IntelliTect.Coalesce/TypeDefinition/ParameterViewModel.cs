@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Regex.Replace(Name, "[A-Z]", " $0").Trim();
+            Name.ToProperCase();
 
         /// <summary>
         /// True if this is a parameter to the method on the model that is not represented in the controller action signature.
@@ -128,24 +128,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-
-
-        /// <summary>
-        /// Additional conversion to serialize to send to server. For example a moment(Date) adds .toDate()
-        /// </summary>
-        public string TsConversion(string argument)
-        {
-            if (Type.HasClassViewModel)
-            {
-                return $"{argument} ? {argument}.saveToDto() : null";
-            }
-            if (Type.IsDate)
-            {
-                return $"{argument} ? {argument}.format() : null";
-            }
-            return argument;
-        }
+        public override string ToString() => Name;
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;

@@ -139,7 +139,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Property on the other side of the many-to-many relationship.
         /// </summary>
         public PropertyViewModel ManyToManyCollectionProperty =>
-            Object.Properties.FirstOrDefault(prop => prop.IsPOCO && prop.Object.Name != Parent.Name);
+            Object.Properties.FirstOrDefault(prop => prop.IsPOCO && !prop.Object.Equals(Parent));
 
         /// <summary>
         /// True if the property is read only.
@@ -270,10 +270,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.
         /// </summary>
-        public bool IsSearchable(string rootModelName)
+        public bool IsSearchable(ClassViewModel rootModel)
         {
             if (!HasAttribute<SearchAttribute>()) return false;
 
+            var rootModelName = rootModel?.Name;
             if (rootModelName == null) return true;
 
             var whitelist = this.GetAttributeValue<SearchAttribute>(a => a.RootWhitelist);
@@ -315,9 +316,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the fields to search for this object. This could be just the field itself 
         /// or a number of child fields if this is an object or collection.
         /// </summary>
-        public IEnumerable<SearchableProperty> SearchProperties(string rootModelName, int depth = 0, int maxDepth = 2, bool force = false)
+        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel rootModel, int depth = 0, int maxDepth = 2, bool force = false)
         {
-            if (!force && !IsSearchable(rootModelName)) yield break;
+            if (!force && !IsSearchable(rootModel)) yield break;
 
             if (this.PureType.HasClassViewModel)
             {
@@ -325,7 +326,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (depth < maxDepth)
                 {
                     // Remove this item and add the child's search items with a prepended property name
-                    var childProperties = this.Type.PureType.ClassViewModel.SearchProperties(rootModelName, depth + 1, maxDepth);
+                    var childProperties = this.Type.PureType.ClassViewModel.SearchProperties(rootModel, depth + 1, maxDepth);
 
                     if (this.Type.IsCollection)
                     {
@@ -534,7 +535,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool HasInverseProperty => HasAttribute<InversePropertyAttribute>();
 
         /// <summary>
-        /// For a collection, this is the reference to this object from the contained object.
+        /// If this property is a collection navigation property (the "many"), 
+        /// returns the reference navigation property on the collected type that represents the 
+        /// "one" end of the one-to-many relationship.
         /// </summary>
         public PropertyViewModel InverseProperty
         {

@@ -3,10 +3,10 @@ import * as $models from './models.g'
 import * as qs from 'qs'
 import * as $isValid from 'date-fns/isValid'
 import * as $format from 'date-fns/format'
-import { AxiosClient, ApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
+import { AxiosClient, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
 
-export class PersonApiClient extends ApiClient<$models.Person> {
+export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig) {
     const $params = this.$mapParams(this.$metadata.methods.rename, {
@@ -157,7 +157,7 @@ export class PersonApiClient extends ApiClient<$models.Person> {
 }
 
 
-export class CaseApiClient extends ApiClient<$models.Case> {
+export class CaseApiClient extends ModelApiClient<typeof $metadata.Case, $models.Case> {
   constructor() { super($metadata.Case) }
   public getSomeCases($config?: AxiosRequestConfig) {
     const $params = this.$mapParams(this.$metadata.methods.getSomeCases, {
@@ -208,7 +208,7 @@ export class CaseApiClient extends ApiClient<$models.Case> {
 }
 
 
-export class CompanyApiClient extends ApiClient<$models.Company> {
+export class CompanyApiClient extends ModelApiClient<typeof $metadata.Company, $models.Company> {
   constructor() { super($metadata.Company) }
   public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig) {
     const $params = this.$mapParams(this.$metadata.methods.getCertainItems, {
@@ -226,13 +226,32 @@ export class CompanyApiClient extends ApiClient<$models.Company> {
 }
 
 
-export class ProductApiClient extends ApiClient<$models.Product> {
+export class ProductApiClient extends ModelApiClient<typeof $metadata.Product, $models.Product> {
   constructor() { super($metadata.Product) }
 }
 
 
-export class CaseProductApiClient extends ApiClient<$models.CaseProduct> {
+export class CaseProductApiClient extends ModelApiClient<typeof $metadata.CaseProduct, $models.CaseProduct> {
   constructor() { super($metadata.CaseProduct) }
+}
+
+
+export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.WeatherService> {
+  constructor() { super($metadata.WeatherService) }
+  public getWeather(location: $models.Location | null, dateTime: Date | null, $config?: AxiosRequestConfig) {
+    const $params = this.$mapParams(this.$metadata.methods.getWeather, {
+      location,
+      dateTime,
+    })
+    return AxiosClient
+      .post(
+        `/${this.$metadata.controllerRoute}/GetWeather`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<$models.WeatherData>>>(r => this.$hydrateItemResult(r, $metadata.WeatherData))
+  }
+  
 }
 
 

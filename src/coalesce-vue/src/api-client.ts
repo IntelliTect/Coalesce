@@ -16,7 +16,7 @@ declare module "axios" {
     }
   }
 
-import { ModelType, ClassType, Method } from './metadata'
+import { ModelType, ClassType, Method, Service, ApiRoutedType } from './metadata'
 import { Model, convertToModel, mapToDto, mapValueToDto } from './model'
 import { OwnProps } from './util'
 
@@ -93,63 +93,13 @@ export type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResu
 type AnyApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
     = ReturnType<T> extends ApiResultPromise<infer S> ? S : any;
 
-export class ApiClient<T extends Model<ClassType>> {
-    
-    constructor(public $metadata: ModelType) {
-        
+export class ApiClient<T extends ApiRoutedType> {
+
+    constructor(public $metadata: T) {
     }
 
-    /** Injects a cancellation token into the next request. */
+    /** Cancellation token to inject into the next request. */
     private _nextCancelToken: CancelTokenSource | null = null
-
-
-    // TODO: should the standard set of endpoints be prefixed with $ 
-
-    public get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
-        return AxiosClient
-            .get(
-                `/${this.$metadata.controllerRoute}/get/${id}`, 
-                this.$options(parameters, config)
-            )
-            .then<AxiosItemResult<T>>(r => this.$hydrateItemResult(r, this.$metadata))
-    }
-    
-    public list(parameters?: ListParameters, config?: AxiosRequestConfig) {
-        return AxiosClient
-            .get(
-                `/${this.$metadata.controllerRoute}/list`, 
-                this.$options(parameters, config)
-            )
-            .then<AxiosListResult<T>>(r => this.$hydrateListResult(r, this.$metadata))
-    }
-    
-    public count(parameters?: FilterParameters, config?: AxiosRequestConfig) {
-        return AxiosClient
-            .get<AxiosItemResult<number>>(
-                `/${this.$metadata.controllerRoute}/count`, 
-                this.$options(parameters, config)
-            )
-    }
-    
-    public save(item: T, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
-        return AxiosClient
-            .post(
-                `/${this.$metadata.controllerRoute}/save`,
-                qs.stringify(mapToDto(item)),
-                this.$options(parameters, config)
-            )
-            .then<AxiosItemResult<T>>(r => this.$hydrateItemResult(r, this.$metadata))
-    }
-    
-    public delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
-        return AxiosClient
-            .post(
-                `/${this.$metadata.controllerRoute}/delete/${id}`,
-                null,
-                this.$options(parameters, config)
-            )
-            .then<AxiosItemResult<T>>(r => this.$hydrateItemResult(r, this.$metadata))
-    }
 
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -160,6 +110,7 @@ export class ApiClient<T extends Model<ClassType>> {
         resultType: "item",
         invokerFactory: (client: this) => TCall
     ): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall
+
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
@@ -262,6 +213,61 @@ export class ApiClient<T extends Model<ClassType>> {
         }
         return value
     }
+}
+
+export class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>> extends ApiClient<TMeta> {
+
+    // TODO: should the standard set of endpoints be prefixed with '$'?
+
+    public get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
+        return AxiosClient
+            .get(
+                `/${this.$metadata.controllerRoute}/get/${id}`, 
+                this.$options(parameters, config)
+            )
+            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$metadata))
+    }
+    
+    public list(parameters?: ListParameters, config?: AxiosRequestConfig) {
+        return AxiosClient
+            .get(
+                `/${this.$metadata.controllerRoute}/list`, 
+                this.$options(parameters, config)
+            )
+            .then<AxiosListResult<TModel>>(r => this.$hydrateListResult(r, this.$metadata))
+    }
+    
+    public count(parameters?: FilterParameters, config?: AxiosRequestConfig) {
+        return AxiosClient
+            .get<AxiosItemResult<number>>(
+                `/${this.$metadata.controllerRoute}/count`, 
+                this.$options(parameters, config)
+            )
+    }
+    
+    public save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
+        return AxiosClient
+            .post(
+                `/${this.$metadata.controllerRoute}/save`,
+                qs.stringify(mapToDto(item)),
+                this.$options(parameters, config)
+            )
+            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$metadata))
+    }
+    
+    public delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
+        return AxiosClient
+            .post(
+                `/${this.$metadata.controllerRoute}/delete/${id}`,
+                null,
+                this.$options(parameters, config)
+            )
+            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$metadata))
+    }
+}
+
+export abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<TMeta> {
+    
 }
 
 export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {

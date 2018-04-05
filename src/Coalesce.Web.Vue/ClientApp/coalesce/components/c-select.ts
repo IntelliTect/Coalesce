@@ -5,7 +5,7 @@ import { Vue, Component, Watch } from 'vue-property-decorator';
 import CDisplay from './c-display';
 import MetadataComponent from './c-metadata-component'
 import { ModelProperty } from 'coalesce-vue/lib/metadata';
-import { ApiClient } from 'coalesce-vue/lib/api-client';
+import { ApiClient, ModelApiClient } from 'coalesce-vue/lib/api-client';
 import debounce from 'lodash-es/debounce';
 
 @Component({
@@ -46,7 +46,7 @@ export default class extends MetadataComponent {
       if (propMeta.type != "model") 
         throw `Property ${propMeta.name} must be a model property to use c-select.`
 
-      new ApiClient(propMeta.typeDef)
+      new ModelApiClient(propMeta.typeDef)
         .list({pageSize: 500, search: this.search || undefined})
         .then(resp => {
           this.items = resp.data.list || [];

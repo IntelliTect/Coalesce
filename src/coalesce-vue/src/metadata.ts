@@ -14,6 +14,7 @@ export interface Domain {
     // externalTypes: { [modelName: string]: ExternalTypeMetadata },
     types: { [modelName: string]: ClassType }
     enums: { [modelName: string]: EnumType },
+    services: { [modelName: string]: Service },
 }
 
 
@@ -67,6 +68,7 @@ export interface Metadata {
 
 /** Common properties for custom object types. */
 export interface CustomReferenceTypeBase extends Metadata {
+    readonly type: ClassTypeDiscriminator
 
     /** The properties of a the represented type */
     readonly props: { [propName in string]: Property } 
@@ -79,29 +81,31 @@ export interface CustomReferenceTypeBase extends Metadata {
     readonly displayProp?: Property
 }
 
+export interface ApiRoutedType {
+    /** 
+     * The URI path segment that identifies this type in API endpoints.
+     * This value contains no leading/trailing slashes.
+     */
+    readonly controllerRoute: string;
+
+    /** The methods of the type that are invokable via API endpoints. */
+    readonly methods: { [methodName in string]: Method }
+}
+
 /** Represents a type that is not part of a relational model. */
 export interface ObjectType extends CustomReferenceTypeBase {
     readonly type: "object"
 }
 
 /** Represents a type that is part of a relational model and can be identified by a single, unique key. */
-export interface ModelType extends CustomReferenceTypeBase {
+export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
     readonly type: "model"
-
-    /** The methods of the entity that are invokable via API endpoints. */
-    readonly methods: { [methodName in string]: Method }
 
     // NOTE: This is declared on CustomReferenceTypeBase as optional - we re-define it here as non-optional
     readonly displayProp: Property
 
     /** The primary key property of the entity */
     readonly keyProp: Property
-
-    /** 
-     * The URI path segment that identifies this model in API endpoints.
-     * This value contains no leading/trailing slashes.
-     */
-    readonly controllerRoute: string;
 }
 
 /** Represents a value of an enum */
@@ -152,6 +156,19 @@ export type ClassType = ObjectType | ModelType
 
 /** Union of all metadata descriptions of custom types, including enums. */
 export type CustomType = ClassType | EnumType
+
+export interface DataSource extends Metadata {
+    readonly type: "dataSource"
+    
+    /** The parameters of the data source */
+    readonly params: { [paramName in string]: PrimitiveValue | DateValue | EnumValue }
+    // NOTE: this union is the currently supported set of data source parameters.
+    // When we support more types in the future (e.g. objects), adjust accordingly. 
+}
+
+export interface Service extends Metadata, ApiRoutedType {
+    readonly type: "service"
+}
 
 
 

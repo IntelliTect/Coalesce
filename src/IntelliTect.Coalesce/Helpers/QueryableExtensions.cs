@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce
         public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query) where T : class
         {
             var model = ReflectionRepository.Global.GetClassViewModel<T>();
-            foreach (var prop in model.ClientProperties.Where(f => !f.IsStatic && f.PureType.HasClassViewModel && f.PureType.ClassViewModel.HasDbSet && !f.HasNotMapped))
+            foreach (var prop in model.ClientProperties.Where(f => !f.IsStatic && f.Object != null && f.Object.HasDbSet && !f.HasNotMapped))
             {
                 if (prop.IsManytoManyCollection)
                 {

@@ -8,6 +8,9 @@ export interface Domain {
     enums: {
         [modelName: string]: EnumType;
     };
+    services: {
+        [modelName: string]: Service;
+    };
 }
 /** Type discriminator of non-object types that are natively represented in javascript, i.e. they are valid results of the typeof operator. */
 export declare type NativeTypeDiscriminator = "string" | "number" | "boolean";
@@ -35,6 +38,7 @@ export interface Metadata {
 }
 /** Common properties for custom object types. */
 export interface CustomReferenceTypeBase extends Metadata {
+    readonly type: ClassTypeDiscriminator;
     /** The properties of a the represented type */
     readonly props: {
         [propName in string]: Property;
@@ -46,25 +50,27 @@ export interface CustomReferenceTypeBase extends Metadata {
     */
     readonly displayProp?: Property;
 }
+export interface ApiRoutedType {
+    /**
+     * The URI path segment that identifies this type in API endpoints.
+     * This value contains no leading/trailing slashes.
+     */
+    readonly controllerRoute: string;
+    /** The methods of the type that are invokable via API endpoints. */
+    readonly methods: {
+        [methodName in string]: Method;
+    };
+}
 /** Represents a type that is not part of a relational model. */
 export interface ObjectType extends CustomReferenceTypeBase {
     readonly type: "object";
 }
 /** Represents a type that is part of a relational model and can be identified by a single, unique key. */
-export interface ModelType extends CustomReferenceTypeBase {
+export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
     readonly type: "model";
-    /** The methods of the represented entity */
-    readonly methods: {
-        [methodName in string]: Method;
-    };
     readonly displayProp: Property;
     /** The primary key property of the entity */
     readonly keyProp: Property;
-    /**
-     * The URI path segment that identifies this model in API endpoints.
-     * This value contains no leading/trailing slashes.
-     */
-    readonly controllerRoute: string;
 }
 /** Represents a value of an enum */
 export interface EnumMember {
@@ -97,6 +103,16 @@ export interface EnumType<K extends string = string> extends Metadata {
 export declare type ClassType = ObjectType | ModelType;
 /** Union of all metadata descriptions of custom types, including enums. */
 export declare type CustomType = ClassType | EnumType;
+export interface DataSource extends Metadata {
+    readonly type: "dataSource";
+    /** The parameters of the data source */
+    readonly params: {
+        [paramName in string]: PrimitiveValue | DateValue | EnumValue;
+    };
+}
+export interface Service extends Metadata, ApiRoutedType {
+    readonly type: "service";
+}
 /** A special value that represents void.
  * Not be included in the standard unions of all `Value` kinds,
  * since its usage only applies to method returns - it should instead
@@ -106,6 +122,14 @@ export declare type CustomType = ClassType | EnumType;
 export interface VoidValue extends Metadata {
     readonly role: "value";
     readonly type: "void";
+}
+/** Narrowing intersection interface for the 'itemType' value on collection values that represents the type contained within the collection.  */
+export interface CollectionItemValue {
+    name: "$collectionItem";
+}
+/** Narrowing intersection interface for the 'return' value on methods.  */
+export interface MethodReturnValue {
+    name: "$return";
 }
 /**
  * Base interface for all normal value metadata representations.
@@ -151,7 +175,7 @@ export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> {
 /** Represents the usage of a collection of values */
 export interface CollectionValue extends ValueMeta<"collection"> {
     role: "value" | "collectionNavigation";
-    readonly itemType: NonCollectionValue;
+    readonly itemType: NonCollectionValue & CollectionItemValue;
 }
 /** Union of all representations of the usage of types with explicit type metadata */
 export declare type CustomTypeValue = EnumValue | ObjectValue | ModelValue;
@@ -211,7 +235,7 @@ export interface ModelCollectionNavigationProperty extends CollectionValue {
      * to the primary key of the model that owns the collection property.
      */
     readonly foreignKey: ForeignKeyProperty;
-    readonly itemType: ModelValue;
+    readonly itemType: ModelValue & CollectionItemValue;
 }
 export declare type CollectionProperty = BasicCollectionProperty | ModelCollectionNavigationProperty;
 export declare type Property = PrimitiveProperty | PrimaryKeyProperty | ForeignKeyProperty | DateProperty | EnumProperty | ObjectProperty | ModelProperty | CollectionProperty;

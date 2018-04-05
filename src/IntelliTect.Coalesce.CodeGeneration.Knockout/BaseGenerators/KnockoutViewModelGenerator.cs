@@ -30,7 +30,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
         public string ViewModelFullName => $"{ViewModelModuleName}.{Model.ViewModelClassName}";
 
         /// <summary>
-        /// 
+        /// Writes the class for invoking the given client method,
+        /// as well as the property for the default instance of this class.
         /// </summary>
         /// <param name="b"></param>
         /// <param name="method"></param>
@@ -63,13 +64,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
 
-            // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
-            string methodClass = returnIsListResult
+            string methodBaseClass = returnIsListResult
                 ? "ClientListMethod"
                 : "ClientMethod";
 
+            // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
             var classBlock = b.Block(
-                $"public static {method.Name} = class {method.Name} extends Coalesce.{methodClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
+                $"public static {method.Name} = class {method.Name} extends Coalesce.{methodBaseClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
 
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
@@ -79,7 +80,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 b.Line($"public result: {method.ResultType.TsKnockoutType()} = {method.ResultType.ObservableConstructorCall()};");
             }
 
+            // ----------------------
             // Standard invoke method - all CS method parameters as TS method parameters.
+            // ----------------------
             b.Line();
             b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
 
@@ -90,33 +93,91 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             using (b.Block($"public invoke = ({parameters}): JQueryPromise<any> =>", ';'))
             {
-                b.Line($"return this.invokeWithData({method.JsPostObject}, callback{reloadArg});");
+                string jsPostObject = "{ ";
+                if (method.IsModelInstanceMethod)
+                {
+                    jsPostObject = jsPostObject + "id: this.parent[this.parent.primaryKeyName]()";
+                    if (method.Parameters.Any()) jsPostObject = jsPostObject + ", ";
+                }
+
+                string TsConversion(ParameterViewModel param)
+                {
+                    string argument = param.JsVariable;
+                    if (param.Type.HasClassViewModel)
+                        return $"{argument} ? {argument}.saveToDto() : null";
+                    if (param.Type.IsDate)
+                        return $"{argument} ? {argument}.format() : null";
+                    return argument;
+                }
+
+                jsPostObject += string.Join(", ", method.ClientParameters.Select(f => $"{f.JsVariable}: {TsConversion(f)}"));
+                jsPostObject += " }";
+
+                b.Line($"return this.invokeWithData({jsPostObject}, callback{reloadArg});");
             }
 
 
-            // Args class, default instance, invokeWithArgs method.
+            // ----------------------
+            // Members for methods with parameters only.
             if (method.ClientParameters.Any())
             {
                 b.Line();
 
+
+                // ----------------------
+                // Args class, and default instance
                 b.Line($"/** Object that can be easily bound to fields to allow data entry for the method's parameters */");
                 b.Line($"public args = new {method.Name}.Args(); ");
 
                 using (b.Block("public static Args = class Args", ';'))
+                {
                     foreach (var arg in method.ClientParameters)
                     {
                         b.Line($@"public {arg.JsVariable}: {arg.Type.TsKnockoutType(true)} = {arg.Type.ObservableConstructorCall()};");
                     }
+                }
 
+                
+
+                // Gets the js arguments to pass to a call to this.invoke(...)
+                string JsArguments(string obj = "")
+                {
+                    string result;
+                    if (obj != "")
+                    {
+                        result = string.Join(", ", method.ClientParameters.Select(f => $"{obj}.{f.JsVariable}()"));
+                    }
+                    else
+                    {
+                        result = string.Join(", ", method.ClientParameters.Select(f => obj + f.JsVariable));
+                    }
+
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        result = result + ", ";
+                    }
+                    result = result + "callback";
+
+                    return result;
+                }
+
+
+                // ----------------------
+                // invokeWithArgs method
+                // ----------------------
                 b.Line();
                 b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
                 // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it.
                 // Thankfully, we can implicitly type using the default.
                 using (b.Block($"public invokeWithArgs = (args = this.args, {callbackAndReloadParam}): JQueryPromise<any> =>"))
                 {
-                    b.Line($"return this.invoke({method.JsArguments("args", true)}{reloadArg});");
+                    b.Line($"return this.invoke({JsArguments("args")}{reloadArg});");
                 }
 
+
+                // ----------------------
+                // invokeWithPrompts method
+                // ----------------------
                 b.Line();
                 b.Line("/** Invokes the method after displaying a browser-native prompt for each argument. */");
                 using (b.Block($"public invokeWithPrompts = ({callbackAndReloadParam}): JQueryPromise<any> | undefined =>", ';'))
@@ -136,11 +197,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     {
                         b.Line($"var {param.Name}: null = null;");
                     }
-                    b.Line($"return this.invoke({method.JsArguments("", true)}{reloadArg});");
+                    b.Line($"return this.invoke({JsArguments("")}{reloadArg});");
                 }
             }
 
+
+
+            // ----------------------
             // Method response handler - highly dependent on what the response type actually is.
+            // ----------------------
             b.Line();
             using (b.Block($"protected loadResponse = (data: Coalesce.{(returnIsListResult ? "List" : "Item")}Result, {callbackAndReloadParam}) =>", ';'))
             {
@@ -157,14 +222,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                         ? $"'{method.ResultType.PureType.ClassViewModel.PrimaryKey.JsVariable}'"
                         : "null";
                     
-                     b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, {incomingMainData}, {keyNameArg}, ViewModels.{method.ResultType.PureType.ClassViewModel.Name}, this, true);");
+                     b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.result, {incomingMainData}, {keyNameArg}, ViewModels.{method.ResultType.PureType.ClassViewModel.ClientTypeName}, this, true);");
                 }
                 else if (method.ResultType.HasClassViewModel)
                 {
                     // Single view model return type.
 
                     b.Line("if (!this.result()) {");
-                    b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.Name}({incomingMainData}));");
+                    b.Indented($"this.result(new ViewModels.{method.ResultType.PureType.ClassViewModel.ClientTypeName}({incomingMainData}));");
                     b.Line("} else {");
                     b.Indented($"this.result().loadFromDto({incomingMainData});");
                     b.Line("}");
@@ -206,6 +271,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("}");
                 }
             }
+
 
             // End of the method class declaration.
             classBlock.Dispose();

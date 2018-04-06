@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
             b.Line("import * as metadata from './metadata.g'");
-            b.Line("import { Model, convertToModel } from 'coalesce-vue/lib/model'");
+            b.Line("import { Model, DataSource, convertToModel } from 'coalesce-vue/lib/model'");
          //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
 
@@ -30,6 +30,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.Line($"{value.Value} = {value.Key},");
                     }
                 }
+
+                b.Line();
                 b.Line();
             }
 
@@ -37,18 +39,46 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 using (b.Block($"export namespace {model.ViewModelClassName}"))
                 {
-                    b.Line($"/** Mutates the input object and its descendents into a valid {model.ViewModelClassName} implementation. */");
+                    b.DocComment($"Mutates the input object and its descendents into a valid {model.ViewModelClassName} implementation.");
                     b.Line($"export function from(data?: Partial<{model.ViewModelClassName}>): {model.ViewModelClassName} {{ return convertToModel(data || {{}}, metadata.{model.ViewModelClassName}) }}");
+
+                    b.Line();
+                    using (b.Block("export namespace DataSources"))
+                    {
+                        foreach (var source in model.ClientDataSources(Model))
+                        {
+                            b.DocComment(source.Comment, true);
+                            var sourceMeta = $"metadata.{model.ViewModelClassName}.dataSources.{source.ClientTypeName.ToCamelCase()}";
+
+                            using (b.Block($"export interface {source.ClientTypeName} extends DataSource<typeof {sourceMeta}>"))
+                            {
+                                foreach (var param in source.DataSourceParameters)
+                                {
+                                    b.DocComment(param.Comment);
+                                    var typeString = new VueType(param.Type).TsType();
+                                    b.Line($"{param.JsVariable}: {typeString} | null");
+                                }
+                            }
+                            using (b.Block($"export namespace {source.ClientTypeName}"))
+                            {
+                                b.DocComment($"Mutates the input object and its descendents into a valid {source.ViewModelClassName} implementation.");
+                                b.Line($"export function from(data?: Partial<{source.ViewModelClassName}>): {source.ViewModelClassName} {{ return convertToModel(data || {{}}, {sourceMeta}) }}");
+                            }
+                        }
+                    }
                 }
 
                 using (b.Block($"export interface {model.ViewModelClassName} extends Model<typeof metadata.{model.ViewModelClassName}>"))
                 {
                     foreach (var prop in model.ClientProperties)
                     {
+                        b.DocComment(prop.Comment);
                         var typeString = new VueType(prop.Type).TsType();
                         b.Line($"{prop.JsVariable}: {typeString} | null");
                     }
                 }
+
+                b.Line();
                 b.Line();
             }
 

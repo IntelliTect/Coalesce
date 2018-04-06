@@ -8,8 +8,8 @@ export interface Model<TMeta extends ClassType> {
 /**
  * Represents a data source with metadata information and parameter values.
  */
-export interface DataSource {
-    readonly $metadata: DataSourceType;
+export interface DataSource<TMeta extends DataSourceType> {
+    readonly $metadata: TMeta;
     [paramName: string]: any;
 }
 /**
@@ -19,6 +19,9 @@ export interface DataSource {
  * @param metadata The metadata describing the TModel that is desired
  */
 export declare function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {
+    [k: string]: any;
+}, metadata: TMeta): TModel;
+export declare function convertToModel<TMeta extends DataSourceType, TModel extends DataSource<TMeta>>(object: {
     [k: string]: any;
 }, metadata: TMeta): TModel;
 export declare function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null;

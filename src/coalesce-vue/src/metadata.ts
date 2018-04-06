@@ -114,6 +114,7 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 
 export interface DataSourceType extends Metadata {
     readonly type: "dataSource"
+    readonly isDefault?: true;
     
     /** The parameters of the data source */
     readonly params: { [paramName in string]: PrimitiveValue | DateValue | EnumValue }

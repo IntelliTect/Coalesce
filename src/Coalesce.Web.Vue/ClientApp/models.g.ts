@@ -1,5 +1,5 @@
 import * as metadata from './metadata.g'
-import { Model, convertToModel, DataSource } from 'coalesce-vue/lib/model'
+import { Model, DataSource, convertToModel } from 'coalesce-vue/lib/model'
 
 export enum Titles {
   Mr = 0,
@@ -8,11 +8,13 @@ export enum Titles {
   Miss = 4,
 }
 
+
 export enum Genders {
   NonSpecified = 0,
   Male = 1,
   Female = 2,
 }
+
 
 export enum Statuses {
   Open = 0,
@@ -22,39 +24,101 @@ export enum Statuses {
   Cancelled = 4,
 }
 
+
 export namespace Person {
+  
   /** Mutates the input object and its descendents into a valid Person implementation. */
   export function from(data?: Partial<Person>): Person { return convertToModel(data || {}, metadata.Person) }
-
+  
   export namespace DataSources {
-    export class Default implements DataSource {
-      $metadata = metadata.Person.dataSources.default
+    
+    /** People whose last name starts with B or c */
+    export interface BOrCPeople extends DataSource<typeof metadata.Person.dataSources.bOrCPeople> {
+    }
+    export namespace BOrCPeople {
+      
+      /** Mutates the input object and its descendents into a valid BOrCPeople implementation. */
+      export function from(data?: Partial<BOrCPeople>): BOrCPeople { return convertToModel(data || {}, metadata.Person.dataSources.bOrCPeople) }
+    }
+    
+    export interface NamesStartingWithAWithCases extends DataSource<typeof metadata.Person.dataSources.namesStartingWithAWithCases> {
+    }
+    export namespace NamesStartingWithAWithCases {
+      
+      /** Mutates the input object and its descendents into a valid NamesStartingWithAWithCases implementation. */
+      export function from(data?: Partial<NamesStartingWithAWithCases>): NamesStartingWithAWithCases { return convertToModel(data || {}, metadata.Person.dataSources.namesStartingWithAWithCases) }
+    }
+    
+    export interface WithoutCases extends DataSource<typeof metadata.Person.dataSources.withoutCases> {
+    }
+    export namespace WithoutCases {
+      
+      /** Mutates the input object and its descendents into a valid WithoutCases implementation. */
+      export function from(data?: Partial<WithoutCases>): WithoutCases { return convertToModel(data || {}, metadata.Person.dataSources.withoutCases) }
     }
   }
 }
 export interface Person extends Model<typeof metadata.Person> {
+  
+  /** ID for the person object. */
   personId: number | null
+  
+  /** Title of the person, Mr. Mrs, etc. */
   title: Titles | null
+  
+  /** First name of the person. */
   firstName: string | null
+  
+  /** Last name of the person */
   lastName: string | null
+  
+  /** Email address of the person */
   email: string | null
+  
+  /** Genetic Gender of the person. */
   gender: Genders | null
+  
+  /** List of cases assigned to the person */
   casesAssigned: Case[] | null
+  
+  /** List of cases reported by the person. */
   casesReported: Case[] | null
   birthDate: Date | null
   lastBath: Date | null
   nextUpgrade: Date | null
   personStats: PersonStats | null
+  
+  /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
   name: string | null
+  
+  /** Company ID this person is employed by */
   companyId: number | null
+  
+  /** Company loaded from the Company ID */
   company: Company | null
 }
 
+
 export namespace Case {
+  
   /** Mutates the input object and its descendents into a valid Case implementation. */
   export function from(data?: Partial<Case>): Case { return convertToModel(data || {}, metadata.Case) }
+  
+  export namespace DataSources {
+    
+    export interface AllOpenCases extends DataSource<typeof metadata.Case.dataSources.allOpenCases> {
+      minDate: Date | null
+    }
+    export namespace AllOpenCases {
+      
+      /** Mutates the input object and its descendents into a valid AllOpenCases implementation. */
+      export function from(data?: Partial<AllOpenCases>): AllOpenCases { return convertToModel(data || {}, metadata.Case.dataSources.allOpenCases) }
+    }
+  }
 }
 export interface Case extends Model<typeof metadata.Case> {
+  
+  /** The Primary key for the Case object */
   caseKey: number | null
   title: string | null
   description: string | null
@@ -72,9 +136,22 @@ export interface Case extends Model<typeof metadata.Case> {
   duration: any | null
 }
 
+
 export namespace Company {
+  
   /** Mutates the input object and its descendents into a valid Company implementation. */
   export function from(data?: Partial<Company>): Company { return convertToModel(data || {}, metadata.Company) }
+  
+  export namespace DataSources {
+    
+    export interface DefaultSource extends DataSource<typeof metadata.Company.dataSources.defaultSource> {
+    }
+    export namespace DefaultSource {
+      
+      /** Mutates the input object and its descendents into a valid DefaultSource implementation. */
+      export function from(data?: Partial<DefaultSource>): DefaultSource { return convertToModel(data || {}, metadata.Company.dataSources.defaultSource) }
+    }
+  }
 }
 export interface Company extends Model<typeof metadata.Company> {
   companyId: number | null
@@ -89,9 +166,14 @@ export interface Company extends Model<typeof metadata.Company> {
   altName: string | null
 }
 
+
 export namespace Product {
+  
   /** Mutates the input object and its descendents into a valid Product implementation. */
   export function from(data?: Partial<Product>): Product { return convertToModel(data || {}, metadata.Product) }
+  
+  export namespace DataSources {
+  }
 }
 export interface Product extends Model<typeof metadata.Product> {
   productId: number | null
@@ -99,9 +181,14 @@ export interface Product extends Model<typeof metadata.Product> {
   details: ProductDetails | null
 }
 
+
 export namespace CaseProduct {
+  
   /** Mutates the input object and its descendents into a valid CaseProduct implementation. */
   export function from(data?: Partial<CaseProduct>): CaseProduct { return convertToModel(data || {}, metadata.CaseProduct) }
+  
+  export namespace DataSources {
+  }
 }
 export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   caseProductId: number | null
@@ -111,9 +198,22 @@ export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   product: Product | null
 }
 
+
 export namespace CaseDto {
+  
   /** Mutates the input object and its descendents into a valid CaseDto implementation. */
   export function from(data?: Partial<CaseDto>): CaseDto { return convertToModel(data || {}, metadata.CaseDto) }
+  
+  export namespace DataSources {
+    
+    export interface CaseDtoSource extends DataSource<typeof metadata.CaseDto.dataSources.caseDtoSource> {
+    }
+    export namespace CaseDtoSource {
+      
+      /** Mutates the input object and its descendents into a valid CaseDtoSource implementation. */
+      export function from(data?: Partial<CaseDtoSource>): CaseDtoSource { return convertToModel(data || {}, metadata.CaseDto.dataSources.caseDtoSource) }
+    }
+  }
 }
 export interface CaseDto extends Model<typeof metadata.CaseDto> {
   caseId: number | null
@@ -121,9 +221,14 @@ export interface CaseDto extends Model<typeof metadata.CaseDto> {
   assignedToName: string | null
 }
 
+
 export namespace PersonCriteria {
+  
   /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
   export function from(data?: Partial<PersonCriteria>): PersonCriteria { return convertToModel(data || {}, metadata.PersonCriteria) }
+  
+  export namespace DataSources {
+  }
 }
 export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   name: string | null
@@ -131,9 +236,14 @@ export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   emailDomain: string | null
 }
 
+
 export namespace PersonStats {
+  
   /** Mutates the input object and its descendents into a valid PersonStats implementation. */
   export function from(data?: Partial<PersonStats>): PersonStats { return convertToModel(data || {}, metadata.PersonStats) }
+  
+  export namespace DataSources {
+  }
 }
 export interface PersonStats extends Model<typeof metadata.PersonStats> {
   height: number | null
@@ -141,9 +251,14 @@ export interface PersonStats extends Model<typeof metadata.PersonStats> {
   name: string | null
 }
 
+
 export namespace CaseSummary {
+  
   /** Mutates the input object and its descendents into a valid CaseSummary implementation. */
   export function from(data?: Partial<CaseSummary>): CaseSummary { return convertToModel(data || {}, metadata.CaseSummary) }
+  
+  export namespace DataSources {
+  }
 }
 export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseSummaryId: number | null
@@ -153,27 +268,42 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   description: string | null
 }
 
+
 export namespace DevTeam {
+  
   /** Mutates the input object and its descendents into a valid DevTeam implementation. */
   export function from(data?: Partial<DevTeam>): DevTeam { return convertToModel(data || {}, metadata.DevTeam) }
+  
+  export namespace DataSources {
+  }
 }
 export interface DevTeam extends Model<typeof metadata.DevTeam> {
   devTeamId: number | null
   name: string | null
 }
 
+
 export namespace ProductDetails {
+  
   /** Mutates the input object and its descendents into a valid ProductDetails implementation. */
   export function from(data?: Partial<ProductDetails>): ProductDetails { return convertToModel(data || {}, metadata.ProductDetails) }
+  
+  export namespace DataSources {
+  }
 }
 export interface ProductDetails extends Model<typeof metadata.ProductDetails> {
   manufacturingAddress: StreetAddress | null
   companyHqAddress: StreetAddress | null
 }
 
+
 export namespace StreetAddress {
+  
   /** Mutates the input object and its descendents into a valid StreetAddress implementation. */
   export function from(data?: Partial<StreetAddress>): StreetAddress { return convertToModel(data || {}, metadata.StreetAddress) }
+  
+  export namespace DataSources {
+  }
 }
 export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   address: string | null
@@ -182,9 +312,14 @@ export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   postalCode: string | null
 }
 
+
 export namespace WeatherData {
+  
   /** Mutates the input object and its descendents into a valid WeatherData implementation. */
   export function from(data?: Partial<WeatherData>): WeatherData { return convertToModel(data || {}, metadata.WeatherData) }
+  
+  export namespace DataSources {
+  }
 }
 export interface WeatherData extends Model<typeof metadata.WeatherData> {
   tempFahrenheit: number | null
@@ -192,13 +327,19 @@ export interface WeatherData extends Model<typeof metadata.WeatherData> {
   location: Location | null
 }
 
+
 export namespace Location {
+  
   /** Mutates the input object and its descendents into a valid Location implementation. */
   export function from(data?: Partial<Location>): Location { return convertToModel(data || {}, metadata.Location) }
+  
+  export namespace DataSources {
+  }
 }
 export interface Location extends Model<typeof metadata.Location> {
   city: string | null
   state: string | null
   zip: string | null
 }
+
 

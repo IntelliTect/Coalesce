@@ -13,12 +13,6 @@ import * as toDate from 'date-fns/toDate';
 import * as isValid from 'date-fns/isValid';
 import * as format from 'date-fns/format';
 import { resolvePropMeta } from "./metadata";
-/**
- * Transforms a given object with data properties into a valid implemenation of TModel.
- * This function mutates its input and all descendent properties of its input - it does not map to a new object.
- * @param object The object with data properties that should be converted to a TModel
- * @param metadata The metadata describing the TModel that is desired
- */
 export function convertToModel(object, metadata) {
     if (!object)
         return object;
@@ -28,8 +22,11 @@ export function convertToModel(object, metadata) {
     if ("$metadata" in object)
         return object;
     var hydrated = Object.assign(object, { $metadata: metadata });
+    var props = metadata.type == "dataSource"
+        ? metadata.params
+        : metadata.props;
     var _loop_1 = function (propName) {
-        var propMeta = metadata.props[propName];
+        var propMeta = props[propName];
         var propVal = hydrated[propName];
         if (!(propName in hydrated) || propVal === undefined) {
             // All propertes that are not defined need to be declared
@@ -64,7 +61,7 @@ export function convertToModel(object, metadata) {
         }
     };
     var date;
-    for (var propName in metadata.props) {
+    for (var propName in props) {
         _loop_1(propName);
     }
     return object;

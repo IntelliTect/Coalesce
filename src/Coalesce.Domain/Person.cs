@@ -320,9 +320,9 @@ namespace Coalesce.Domain
     /// People whose last name starts with B or c
     /// </summary>
     [Coalesce]
-    public class BorCPeople : StandardDataSource<Person, AppDbContext>
+    public class BOrCPeople : StandardDataSource<Person, AppDbContext>
     {
-        public BorCPeople(CrudContext<AppDbContext> context) : base(context) { }
+        public BOrCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
             Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));

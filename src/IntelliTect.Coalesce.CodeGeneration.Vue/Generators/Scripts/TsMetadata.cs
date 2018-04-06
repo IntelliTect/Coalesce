@@ -319,8 +319,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     WriteDataSourceMetadata(b, model, source);
                 }
 
+                // Not sure we need to explicitly declare the default source.
+                // We can just use the absense of a data source to represent the default.
+                /*
                 var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
-
                 if (defaultSource != null)
                 {
                     var name = defaultSource.ClientTypeName.ToCamelCase();
@@ -336,6 +338,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.Line("params: {}");
                     }
                 }
+                */
             }
         }
 
@@ -344,11 +347,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// </summary>
         private void WriteDataSourceMetadata(TypeScriptCodeBuilder b, ClassViewModel model, ClassViewModel source)
         {
+            // TODO: Should we be camel-casing the names of data sources in the metadata?
+            // TODO: OR, should we be not camel casing the members we place on the domain[key: string] objects?
             using (b.Block($"{source.ClientTypeName.ToCamelCase()}:", ','))
             {
                 b.StringProp("type", "dataSource");
 
                 WriteCommonClassMetadata(b, source);
+
+                if (source.IsDefaultDataSource)
+                {
+                    b.Line("isDefault: true,");
+                }
 
                 using (b.Block("params:", ','))
                 {

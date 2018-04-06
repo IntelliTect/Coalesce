@@ -46,9 +46,13 @@ namespace IntelliTect.Coalesce.Utilities
             return this;
         }
         
-        public TypeScriptCodeBuilder DocComment(string comment)
+        public TypeScriptCodeBuilder DocComment(string comment, bool alwaysAddBlankLine = false)
         {
-            if (string.IsNullOrWhiteSpace(comment)) return this;
+            if (string.IsNullOrWhiteSpace(comment))
+            {
+                if (alwaysAddBlankLine) Line();
+                return this;
+            }
 
             // Always put a blank line before a doc comment.
             Line().Append("/** ").Append(comment).Append(" */").Line();

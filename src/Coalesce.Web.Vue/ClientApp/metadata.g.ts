@@ -228,12 +228,6 @@ export const Case = domain.types.Case = {
         },
       },
     },
-    default: {
-      type: "dataSource",
-      name: "default",
-      displayName: "Default",
-      params: {}
-    },
   },
 }
 export const CaseDto = domain.types.CaseDto = {
@@ -272,12 +266,6 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Case Dto Source",
       params: {
       },
-    },
-    default: {
-      type: "dataSource",
-      name: "default",
-      displayName: "Default",
-      params: {}
     },
   },
 }
@@ -335,12 +323,6 @@ export const CaseProduct = domain.types.CaseProduct = {
   methods: {
   },
   dataSources: {
-    default: {
-      type: "dataSource",
-      name: "default",
-      displayName: "Default",
-      params: {}
-    },
   },
 }
 export const Company = domain.types.Company = {
@@ -454,12 +436,6 @@ export const Company = domain.types.Company = {
       displayName: "Default Source",
       params: {
       },
-    },
-    default: {
-      type: "dataSource",
-      name: "default",
-      displayName: "Default",
-      params: {}
     },
   },
 }
@@ -804,10 +780,10 @@ export const Person = domain.types.Person = {
     },
   },
   dataSources: {
-    borCPeople: {
+    bOrCPeople: {
       type: "dataSource",
-      name: "borCPeople",
-      displayName: "Bor C People",
+      name: "bOrCPeople",
+      displayName: "B Or C People",
       params: {
       },
     },
@@ -822,10 +798,10 @@ export const Person = domain.types.Person = {
       type: "dataSource",
       name: "withoutCases",
       displayName: "Without Cases",
+      isDefault: true,
       params: {
       },
     },
-    get default() { return this.withoutCases },
   },
 }
 export const Product = domain.types.Product = {
@@ -859,12 +835,6 @@ export const Product = domain.types.Product = {
   methods: {
   },
   dataSources: {
-    default: {
-      type: "dataSource",
-      name: "default",
-      displayName: "Default",
-      params: {}
-    },
   },
 }
 export const CaseSummary = domain.types.CaseSummary = {

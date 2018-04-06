@@ -17,8 +17,8 @@ export interface Model<TMeta extends ClassType> {
 /**
  * Represents a data source with metadata information and parameter values.
  */
-export interface DataSource {
-    readonly $metadata: DataSourceType;
+export interface DataSource<TMeta extends DataSourceType> {
+    readonly $metadata: TMeta;
     [paramName: string]: any;
 }
 
@@ -28,18 +28,24 @@ export interface DataSource {
  * @param object The object with data properties that should be converted to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
-export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel {
+export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel
+export function convertToModel<TMeta extends DataSourceType, TModel extends DataSource<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel
+export function convertToModel(object: {[k: string]: any}, metadata: ClassType | DataSourceType): Indexable<{}> {
     if (!object) return object;
 
     // Assume that an object that already has $metadata is already valid. 
     // This prevents this method from infinitely recursing when it encounters a circular graph.
     // It may be worth changing this to use an ES6 symbol to mark this instead.
-    if ("$metadata" in object) return object as TModel;
+    if ("$metadata" in object) return object;
 
-    const hydrated = Object.assign(object, { $metadata: metadata }) as Indexable<TModel>;
+    const hydrated = Object.assign(object, { $metadata: metadata });
     
-    for (const propName in metadata.props) {
-        const propMeta = metadata.props[propName];
+    const props = metadata.type == "dataSource"
+        ? metadata.params
+        : metadata.props;
+
+    for (const propName in props) {
+        const propMeta = props[propName];
         const propVal = hydrated[propName];
         if (!(propName in hydrated) || propVal === undefined) {
             // All propertes that are not defined need to be declared
@@ -71,7 +77,7 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
             }
         }
     }
-    return object as TModel;
+    return object;
 }
 
 

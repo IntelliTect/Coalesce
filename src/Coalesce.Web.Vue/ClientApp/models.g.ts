@@ -226,9 +226,6 @@ export namespace PersonCriteria {
   
   /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
   export function from(data?: Partial<PersonCriteria>): PersonCriteria { return convertToModel(data || {}, metadata.PersonCriteria) }
-  
-  export namespace DataSources {
-  }
 }
 export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   name: string | null
@@ -241,9 +238,6 @@ export namespace PersonStats {
   
   /** Mutates the input object and its descendents into a valid PersonStats implementation. */
   export function from(data?: Partial<PersonStats>): PersonStats { return convertToModel(data || {}, metadata.PersonStats) }
-  
-  export namespace DataSources {
-  }
 }
 export interface PersonStats extends Model<typeof metadata.PersonStats> {
   height: number | null
@@ -256,9 +250,6 @@ export namespace CaseSummary {
   
   /** Mutates the input object and its descendents into a valid CaseSummary implementation. */
   export function from(data?: Partial<CaseSummary>): CaseSummary { return convertToModel(data || {}, metadata.CaseSummary) }
-  
-  export namespace DataSources {
-  }
 }
 export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseSummaryId: number | null
@@ -273,9 +264,6 @@ export namespace DevTeam {
   
   /** Mutates the input object and its descendents into a valid DevTeam implementation. */
   export function from(data?: Partial<DevTeam>): DevTeam { return convertToModel(data || {}, metadata.DevTeam) }
-  
-  export namespace DataSources {
-  }
 }
 export interface DevTeam extends Model<typeof metadata.DevTeam> {
   devTeamId: number | null
@@ -287,9 +275,6 @@ export namespace ProductDetails {
   
   /** Mutates the input object and its descendents into a valid ProductDetails implementation. */
   export function from(data?: Partial<ProductDetails>): ProductDetails { return convertToModel(data || {}, metadata.ProductDetails) }
-  
-  export namespace DataSources {
-  }
 }
 export interface ProductDetails extends Model<typeof metadata.ProductDetails> {
   manufacturingAddress: StreetAddress | null
@@ -301,9 +286,6 @@ export namespace StreetAddress {
   
   /** Mutates the input object and its descendents into a valid StreetAddress implementation. */
   export function from(data?: Partial<StreetAddress>): StreetAddress { return convertToModel(data || {}, metadata.StreetAddress) }
-  
-  export namespace DataSources {
-  }
 }
 export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   address: string | null
@@ -317,9 +299,6 @@ export namespace WeatherData {
   
   /** Mutates the input object and its descendents into a valid WeatherData implementation. */
   export function from(data?: Partial<WeatherData>): WeatherData { return convertToModel(data || {}, metadata.WeatherData) }
-  
-  export namespace DataSources {
-  }
 }
 export interface WeatherData extends Model<typeof metadata.WeatherData> {
   tempFahrenheit: number | null
@@ -332,9 +311,6 @@ export namespace Location {
   
   /** Mutates the input object and its descendents into a valid Location implementation. */
   export function from(data?: Partial<Location>): Location { return convertToModel(data || {}, metadata.Location) }
-  
-  export namespace DataSources {
-  }
 }
 export interface Location extends Model<typeof metadata.Location> {
   city: string | null

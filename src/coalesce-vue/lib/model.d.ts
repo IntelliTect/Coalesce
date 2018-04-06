@@ -1,9 +1,16 @@
-import { ClassType, Property, PropNames, Value } from "./metadata";
+import { ClassType, Property, PropNames, Value, DataSourceType } from "./metadata";
 /**
  * Represents a model with metadata information.
  */
 export interface Model<TMeta extends ClassType> {
     readonly $metadata: TMeta;
+}
+/**
+ * Represents a data source with metadata information and parameter values.
+ */
+export interface DataSource {
+    readonly $metadata: DataSourceType;
+    [paramName: string]: any;
 }
 /**
  * Transforms a given object with data properties into a valid implemenation of TModel.

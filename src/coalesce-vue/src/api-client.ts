@@ -17,7 +17,7 @@ declare module "axios" {
   }
 
 import { ModelType, ClassType, Method, Service, ApiRoutedType } from './metadata'
-import { Model, convertToModel, mapToDto, mapValueToDto } from './model'
+import { Model, convertToModel, mapToDto, mapValueToDto, DataSource } from './model'
 import { OwnProps } from './util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance, Cancel} from 'axios'
@@ -55,7 +55,7 @@ export interface ListResult<T = any> extends ApiResult {
 
 export interface DataSourceParameters {
     includes?: string
-    dataSource?: never //Idatasource
+    dataSource?: DataSource
 }
 export interface FilterParameters extends DataSourceParameters {
     search?: string
@@ -170,7 +170,7 @@ export class ApiClient<T extends ApiRoutedType> {
         var mergedParams: any = Object.assign({}, 
             queryParams,
             config && config.params ? config.params : null, 
-            this.$objectify(parameters)
+            this.$serializeParams(parameters)
         )
 
         // Params come last to overwrite config.params with our merged params object.
@@ -181,19 +181,55 @@ export class ApiClient<T extends ApiRoutedType> {
         )
     }
 
-    private $objectify(parameters?: ListParameters | FilterParameters | DataSourceParameters) {
+    private $serializeParams(parameters?: ListParameters | FilterParameters | DataSourceParameters) {
         if (!parameters) return null
 
-        // This implementation is fairly naive - it will map out ANYTHING that comes in.
-        // We may want to move to only mapping known good parameters instead.
-        var paramsObject = Object.assign({}, parameters)
+        // Assume the widest type, which is ListParameters.
+        var wideParams = parameters as Partial<ListParameters>;
 
-        // Remove complex properties and replace them with their transport-mapped key-value-pairs.
-        // This is probably only dataSource
-        if (paramsObject.dataSource) {
-            throw ("data source not supported yet")
+        // The list of 'simple' params where we just pass along the exact value.
+        var simpleParams = [
+            'includes', 'search', 'page', 'pageSize', 'orderBy', 'orderByDescending'
+        ] as Array<keyof typeof wideParams>;
+        
+        // Map all the simple params to `paramsObject`
+        var paramsObject = simpleParams.reduce((obj, key) => {
+            if (key in wideParams) obj[key] = wideParams[key];
+            return obj;
+        }, {} as any);
+
+        // Map the 'filter' object, ensuring all values are strings.
+        const filter = wideParams.filter;
+        if (typeof filter == 'object') {
+            paramsObject.filter = Object.keys(filter).reduce((obj, key) => {
+                if (filter[key] !== undefined) {
+                    obj[key] = new String(filter[key]);
+                }
+                return obj;
+            }, {} as any);
         }
-        return paramsObject
+
+        if (Array.isArray(wideParams.fields)) {
+            paramsObject.fields = wideParams.fields.join(',')
+        }
+
+        // Map the data source and its params
+        if (wideParams.dataSource) {
+            // Add the data source name
+            paramsObject["dataSource"] = wideParams.dataSource.$metadata.name;
+            var paramsMeta = wideParams.dataSource.$metadata.params;
+
+            // Add the data source parameters.
+            // Note that we use "dataSource.{paramName}", not a nested object. 
+            // This is what the model binder expects.
+            for (var paramName in paramsMeta) {
+                const paramMeta = paramsMeta[paramName];
+                if (paramName in wideParams.dataSource) {
+                    const paramValue = wideParams.dataSource[paramName];
+                    paramsObject["dataSource." + paramMeta.name] = mapValueToDto(paramValue, paramMeta)
+                }
+            }
+        }
     }
 
     protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType) {

@@ -106,6 +106,23 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 
     /** The primary key property of the entity */
     readonly keyProp: Property
+
+    /** The data sources that can be used to query the API for objects of this type. */
+    readonly dataSources: { [sourceName in string]: DataSourceType }
+}
+
+
+export interface DataSourceType extends Metadata {
+    readonly type: "dataSource"
+    
+    /** The parameters of the data source */
+    readonly params: { [paramName in string]: PrimitiveValue | DateValue | EnumValue }
+    // NOTE: this union is the currently supported set of data source parameters.
+    // When we support more types in the future (e.g. objects), adjust accordingly. 
+}
+
+export interface Service extends Metadata, ApiRoutedType {
+    readonly type: "service"
 }
 
 /** Represents a value of an enum */
@@ -156,19 +173,6 @@ export type ClassType = ObjectType | ModelType
 
 /** Union of all metadata descriptions of custom types, including enums. */
 export type CustomType = ClassType | EnumType
-
-export interface DataSource extends Metadata {
-    readonly type: "dataSource"
-    
-    /** The parameters of the data source */
-    readonly params: { [paramName in string]: PrimitiveValue | DateValue | EnumValue }
-    // NOTE: this union is the currently supported set of data source parameters.
-    // When we support more types in the future (e.g. objects), adjust accordingly. 
-}
-
-export interface Service extends Metadata, ApiRoutedType {
-    readonly type: "service"
-}
 
 
 

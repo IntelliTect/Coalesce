@@ -12,7 +12,7 @@ declare module "axios" {
     }
 }
 import { ModelType, ClassType, Method, Service, ApiRoutedType } from './metadata';
-import { Model } from './model';
+import { Model, DataSource } from './model';
 import { AxiosPromise, AxiosResponse, AxiosRequestConfig, CancelToken, AxiosInstance } from 'axios';
 export interface ApiResult {
     wasSuccessful: boolean;
@@ -35,7 +35,7 @@ export interface ListResult<T = any> extends ApiResult {
 }
 export interface DataSourceParameters {
     includes?: string;
-    dataSource?: never;
+    dataSource?: DataSource;
 }
 export interface FilterParameters extends DataSourceParameters {
     search?: string;
@@ -92,7 +92,7 @@ export declare class ApiClient<T extends ApiRoutedType> {
     } & AxiosRequestConfig & {
         params: any;
     };
-    private $objectify(parameters?);
+    private $serializeParams(parameters?);
     protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType): AxiosResponse<ItemResult<TResult>>;
     protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: ClassType): AxiosResponse<ListResult<TResult>>;
 }

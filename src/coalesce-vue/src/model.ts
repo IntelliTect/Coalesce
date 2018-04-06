@@ -4,7 +4,7 @@ import * as toDate from 'date-fns/toDate'
 import * as isValid from 'date-fns/isValid'
 import * as format from 'date-fns/format'
 
-import { ClassType, ModelType, Property, ObjectType, PropNames, resolvePropMeta, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator, Value, EnumType, ModelValue, ObjectValue, EnumValue, PrimitiveValue, DateValue, CustomTypeValue, ValueMeta, CollectionValue, PrimitiveProperty, ForeignKeyProperty } from "./metadata"
+import { ClassType, ModelType, Property, ObjectType, PropNames, resolvePropMeta, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator, Value, EnumType, ModelValue, ObjectValue, EnumValue, PrimitiveValue, DateValue, CustomTypeValue, ValueMeta, CollectionValue, PrimitiveProperty, ForeignKeyProperty, DataSourceType } from "./metadata"
 import { Indexable } from './util'
 
 /**
@@ -12,6 +12,14 @@ import { Indexable } from './util'
  */
 export interface Model<TMeta extends ClassType> {
     readonly $metadata: TMeta;
+}
+
+/**
+ * Represents a data source with metadata information and parameter values.
+ */
+export interface DataSource {
+    readonly $metadata: DataSourceType;
+    [paramName: string]: any;
 }
 
 /**

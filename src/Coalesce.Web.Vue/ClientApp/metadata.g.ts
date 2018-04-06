@@ -214,6 +214,27 @@ export const Case = domain.types.Case = {
       },
     },
   },
+  dataSources: {
+    allOpenCases: {
+      type: "dataSource",
+      name: "allOpenCases",
+      displayName: "All Open Cases",
+      params: {
+        minDate: {
+          name: "minDate",
+          displayName: "Min Date",
+          type: "date",
+          role: "value",
+        },
+      },
+    },
+    default: {
+      type: "dataSource",
+      name: "default",
+      displayName: "Default",
+      params: {}
+    },
+  },
 }
 export const CaseDto = domain.types.CaseDto = {
   name: "caseDto",
@@ -243,6 +264,21 @@ export const CaseDto = domain.types.CaseDto = {
     },
   },
   methods: {
+  },
+  dataSources: {
+    caseDtoSource: {
+      type: "dataSource",
+      name: "caseDtoSource",
+      displayName: "Case Dto Source",
+      params: {
+      },
+    },
+    default: {
+      type: "dataSource",
+      name: "default",
+      displayName: "Default",
+      params: {}
+    },
   },
 }
 export const CaseProduct = domain.types.CaseProduct = {
@@ -297,6 +333,14 @@ export const CaseProduct = domain.types.CaseProduct = {
     },
   },
   methods: {
+  },
+  dataSources: {
+    default: {
+      type: "dataSource",
+      name: "default",
+      displayName: "Default",
+      params: {}
+    },
   },
 }
 export const Company = domain.types.Company = {
@@ -401,6 +445,21 @@ export const Company = domain.types.Company = {
           get typeDef() { return (domain.types.Company as ModelType) },
         },
       },
+    },
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "defaultSource",
+      displayName: "Default Source",
+      params: {
+      },
+    },
+    default: {
+      type: "dataSource",
+      name: "default",
+      displayName: "Default",
+      params: {}
     },
   },
 }
@@ -744,6 +803,30 @@ export const Person = domain.types.Person = {
       },
     },
   },
+  dataSources: {
+    borCPeople: {
+      type: "dataSource",
+      name: "borCPeople",
+      displayName: "Bor C People",
+      params: {
+      },
+    },
+    namesStartingWithAWithCases: {
+      type: "dataSource",
+      name: "namesStartingWithAWithCases",
+      displayName: "Names Starting With A With Cases",
+      params: {
+      },
+    },
+    withoutCases: {
+      type: "dataSource",
+      name: "withoutCases",
+      displayName: "Without Cases",
+      params: {
+      },
+    },
+    get default() { return this.withoutCases },
+  },
 }
 export const Product = domain.types.Product = {
   name: "product",
@@ -774,6 +857,14 @@ export const Product = domain.types.Product = {
     },
   },
   methods: {
+  },
+  dataSources: {
+    default: {
+      type: "dataSource",
+      name: "default",
+      displayName: "Default",
+      params: {}
+    },
   },
 }
 export const CaseSummary = domain.types.CaseSummary = {

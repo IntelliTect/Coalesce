@@ -71,6 +71,20 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
     readonly displayProp: Property;
     /** The primary key property of the entity */
     readonly keyProp: Property;
+    /** The data sources that can be used to query the API for objects of this type. */
+    readonly dataSources: {
+        [sourceName in string]: DataSourceType;
+    };
+}
+export interface DataSourceType extends Metadata {
+    readonly type: "dataSource";
+    /** The parameters of the data source */
+    readonly params: {
+        [paramName in string]: PrimitiveValue | DateValue | EnumValue;
+    };
+}
+export interface Service extends Metadata, ApiRoutedType {
+    readonly type: "service";
 }
 /** Represents a value of an enum */
 export interface EnumMember {
@@ -103,16 +117,6 @@ export interface EnumType<K extends string = string> extends Metadata {
 export declare type ClassType = ObjectType | ModelType;
 /** Union of all metadata descriptions of custom types, including enums. */
 export declare type CustomType = ClassType | EnumType;
-export interface DataSource extends Metadata {
-    readonly type: "dataSource";
-    /** The parameters of the data source */
-    readonly params: {
-        [paramName in string]: PrimitiveValue | DateValue | EnumValue;
-    };
-}
-export interface Service extends Metadata, ApiRoutedType {
-    readonly type: "service";
-}
 /** A special value that represents void.
  * Not be included in the standard unions of all `Value` kinds,
  * since its usage only applies to method returns - it should instead

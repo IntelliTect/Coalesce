@@ -1,5 +1,5 @@
 import * as metadata from './metadata.g'
-import { Model, convertToModel } from 'coalesce-vue/lib/model'
+import { Model, convertToModel, DataSource } from 'coalesce-vue/lib/model'
 
 export enum Titles {
   Mr = 0,
@@ -25,6 +25,12 @@ export enum Statuses {
 export namespace Person {
   /** Mutates the input object and its descendents into a valid Person implementation. */
   export function from(data?: Partial<Person>): Person { return convertToModel(data || {}, metadata.Person) }
+
+  export namespace DataSources {
+    export class Default implements DataSource {
+      $metadata = metadata.Person.dataSources.default
+    }
+  }
 }
 export interface Person extends Model<typeof metadata.Person> {
   personId: number | null

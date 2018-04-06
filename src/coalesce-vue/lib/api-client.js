@@ -51,22 +51,54 @@ var ApiClient = /** @class */ (function () {
     };
     ApiClient.prototype.$options = function (parameters, config, queryParams) {
         // Merge standard Coalesce params with general configured params if there are any.
-        var mergedParams = Object.assign({}, queryParams, config && config.params ? config.params : null, this.$objectify(parameters));
+        var mergedParams = Object.assign({}, queryParams, config && config.params ? config.params : null, this.$serializeParams(parameters));
         // Params come last to overwrite config.params with our merged params object.
         return Object.assign({}, { cancelToken: this._nextCancelToken && this._nextCancelToken.token }, config, { params: mergedParams });
     };
-    ApiClient.prototype.$objectify = function (parameters) {
+    ApiClient.prototype.$serializeParams = function (parameters) {
         if (!parameters)
             return null;
-        // This implementation is fairly naive - it will map out ANYTHING that comes in.
-        // We may want to move to only mapping known good parameters instead.
-        var paramsObject = Object.assign({}, parameters);
-        // Remove complex properties and replace them with their transport-mapped key-value-pairs.
-        // This is probably only dataSource
-        if (paramsObject.dataSource) {
-            throw ("data source not supported yet");
+        // Assume the widest type, which is ListParameters.
+        var wideParams = parameters;
+        // The list of 'simple' params where we just pass along the exact value.
+        var simpleParams = [
+            'includes', 'search', 'page', 'pageSize', 'orderBy', 'orderByDescending'
+        ];
+        // Map all the simple params to `paramsObject`
+        var paramsObject = simpleParams.reduce(function (obj, key) {
+            if (key in wideParams)
+                obj[key] = wideParams[key];
+            return obj;
+        }, {});
+        // Map the 'filter' object, ensuring all values are strings.
+        var filter = wideParams.filter;
+        if (typeof filter == 'object') {
+            paramsObject.filter = Object.keys(filter).reduce(function (obj, key) {
+                if (filter[key] !== undefined) {
+                    obj[key] = new String(filter[key]);
+                }
+                return obj;
+            }, {});
         }
-        return paramsObject;
+        if (Array.isArray(wideParams.fields)) {
+            paramsObject.fields = wideParams.fields.join(',');
+        }
+        // Map the data source and its params
+        if (wideParams.dataSource) {
+            // Add the data source name
+            paramsObject["dataSource"] = wideParams.dataSource.$metadata.name;
+            var paramsMeta = wideParams.dataSource.$metadata.params;
+            // Add the data source parameters.
+            // Note that we use "dataSource.{paramName}", not a nested object. 
+            // This is what the model binder expects.
+            for (var paramName in paramsMeta) {
+                var paramMeta = paramsMeta[paramName];
+                if (paramName in wideParams.dataSource) {
+                    var paramValue = wideParams.dataSource[paramName];
+                    paramsObject["dataSource." + paramMeta.name] = mapValueToDto(paramValue, paramMeta);
+                }
+            }
+        }
     };
     ApiClient.prototype.$hydrateItemResult = function (value, metadata) {
         // This function is NOT PURE - we mutate the result object on the response.

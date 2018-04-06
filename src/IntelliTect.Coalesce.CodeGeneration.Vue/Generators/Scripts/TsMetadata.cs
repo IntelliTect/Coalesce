@@ -114,6 +114,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 WriteClassPropertiesMetadata(b, model);
 
                 WriteClassMethodMetadata(b, model);
+
+                WriteDataSourcesMetadata(b, model);
             }
         }
 
@@ -180,7 +182,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        string GetClassMetadataRef(ClassViewModel obj = null)
+        private static string GetClassMetadataRef(ClassViewModel obj = null)
         {
             // We need to qualify with "domain." instead of the exported const
             // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
@@ -304,6 +306,59 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
+        /// <summary>
+        /// Write the metadata for all data sources of a class
+        /// </summary>
+        private void WriteDataSourcesMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            using (b.Block("dataSources:", ','))
+            {
+                var dataSources = model.ClientDataSources(this.Model);
+                foreach (var source in dataSources)
+                {
+                    WriteDataSourceMetadata(b, model, source);
+                }
+
+                var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
+
+                if (defaultSource != null)
+                {
+                    var name = defaultSource.ClientTypeName.ToCamelCase();
+                    b.Line($"get default() {{ return this.{name} }},");
+                }
+                else
+                {
+                    using (b.Block($"default:", ','))
+                    {
+                        b.StringProp("type", "dataSource");
+                        b.StringProp("name", "default");
+                        b.StringProp("displayName", "Default");
+                        b.Line("params: {}");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Write the metadata for all data sources of a class
+        /// </summary>
+        private void WriteDataSourceMetadata(TypeScriptCodeBuilder b, ClassViewModel model, ClassViewModel source)
+        {
+            using (b.Block($"{source.ClientTypeName.ToCamelCase()}:", ','))
+            {
+                b.StringProp("type", "dataSource");
+
+                WriteCommonClassMetadata(b, source);
+
+                using (b.Block("params:", ','))
+                {
+                    foreach (var prop in source.DataSourceParameters)
+                    {
+                        WriteClassPropertyMetadata(b, model, prop);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Write metadata common to all value representations, like properties and method parameters.

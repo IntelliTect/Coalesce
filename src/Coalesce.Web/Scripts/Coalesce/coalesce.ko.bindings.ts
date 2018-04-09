@@ -460,6 +460,7 @@ ko.bindingHandlers.select2AjaxText = {
         var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         var allowClear = allBindings.get('allowClear') || true
         var placeholder = $(element).attr('placeholder') || "select";
+        var resultField = allBindings.has("resultField") ? allBindings.get("resultField") : null;
 
         var myParams: any;
 
@@ -515,6 +516,14 @@ ko.bindingHandlers.select2AjaxText = {
                         }
 
                         for (let item of items) {
+                            if (typeof item === "object" && resultField) {
+                                item = item[resultField];
+                            }
+                            
+                            if (item === undefined || item === null) {
+                                continue;
+                            }
+
                             if (item == myParams.term) {
                                 perfectMatch = true;
                                 result.push({ id: item, text: item, selected: true });

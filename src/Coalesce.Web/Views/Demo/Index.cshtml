@@ -146,8 +146,11 @@
                         <dd data-bind="with: assignedTo"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></dd>
                     </dl>
 
+
                     @* Some tests for dropdowns. *@
-                    @*<select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
+                    @*
+                    @(Knockout.SelectFor<Case>(c => c.Description))
+                    <select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
 
                     </select>
                     

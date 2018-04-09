@@ -345,7 +345,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         #region StringSelect
 
         public static HtmlString SelectFor<T>(Expression<Func<T, string>> propertySelector,
-            string endpointName,
+            string endpointName = null,
             string placeholder = "")
         {
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
@@ -354,7 +354,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, string>> propertySelector,
-            string endpointActionName,
+            string endpointActionName = null,
             int? labelCols = null, int? inputCols = null, string label = null, string placeholder = "")
         {
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
@@ -362,11 +362,18 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 .AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
-        public static HtmlString SelectString(PropertyViewModel propertyModel, string endpointName, string placeholder = "")
+        public static HtmlString SelectString(PropertyViewModel propertyModel, string endpointName = null, string placeholder = "")
         {
+            string resultField = "";
+            if (endpointName == null)
+            {
+                endpointName = $"List?fields={propertyModel.JsonName}";
+                resultField = $"resultField: '{propertyModel.JsonName}',";
+            }
+
             string result = string.Format($@"
                     <select class=""form-control"" placeholder=""{placeholder}""
-                        data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, " +
+                        data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, {resultField}" +
                         $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.Name}/{endpointName}'"">
                         <option></option>
                     </select >");

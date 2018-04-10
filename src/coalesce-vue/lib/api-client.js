@@ -8,7 +8,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { convertToModel, mapToDto, mapValueToDto } from './model';
+import { mapToDto, mapValueToDto, convertValueToModel } from './model';
 import axios from 'axios';
 import * as qs from 'qs';
 import Vue from 'vue';
@@ -49,6 +49,12 @@ var ApiClient = /** @class */ (function () {
         }
         return formatted;
     };
+    /**
+     * Combines the input into a single `AxiosRequestConfig` object.
+     * @param parameters The Coalesce parameters for the standard API endpoints.
+     * @param config A full `AxiosRequestConfig` to merge in.
+     * @param queryParams An object with an additional querystring parameters.
+     */
     ApiClient.prototype.$options = function (parameters, config, queryParams) {
         // Merge standard Coalesce params with general configured params if there are any.
         var mergedParams = Object.assign({}, queryParams, config && config.params ? config.params : null, this.$serializeParams(parameters));
@@ -84,36 +90,35 @@ var ApiClient = /** @class */ (function () {
             paramsObject.fields = wideParams.fields.join(',');
         }
         // Map the data source and its params
-        if (wideParams.dataSource) {
+        var dataSource = wideParams.dataSource;
+        if (dataSource) {
             // Add the data source name
-            paramsObject["dataSource"] = wideParams.dataSource.$metadata.name;
-            var paramsMeta = wideParams.dataSource.$metadata.params;
+            paramsObject["dataSource"] = dataSource.$metadata.name;
+            var paramsMeta = dataSource.$metadata.params;
             // Add the data source parameters.
             // Note that we use "dataSource.{paramName}", not a nested object. 
             // This is what the model binder expects.
             for (var paramName in paramsMeta) {
                 var paramMeta = paramsMeta[paramName];
-                if (paramName in wideParams.dataSource) {
-                    var paramValue = wideParams.dataSource[paramName];
+                if (paramName in dataSource) {
+                    var paramValue = dataSource[paramName];
                     paramsObject["dataSource." + paramMeta.name] = mapValueToDto(paramValue, paramMeta);
                 }
             }
         }
+        return paramsObject;
     };
     ApiClient.prototype.$hydrateItemResult = function (value, metadata) {
-        // This function is NOT PURE - we mutate the result object on the response.
-        var object = value.data.object;
-        if (object) {
-            convertToModel(object, metadata);
+        // Do nothing for void returns - there will be no object.
+        if (metadata.type !== "void") {
+            // This function is NOT PURE - we mutate the result object on the response.
+            value.data.object = convertValueToModel(value.data.object, metadata);
         }
         return value;
     };
     ApiClient.prototype.$hydrateListResult = function (value, metadata) {
         // This function is NOT PURE - we mutate the result object on the response.
-        var list = value.data.list;
-        if (Array.isArray(list)) {
-            list.forEach(function (item) { return convertToModel(item, metadata); });
-        }
+        value.data.list = convertValueToModel(value.data.list, metadata);
         return value;
     };
     return ApiClient;
@@ -122,20 +127,33 @@ export { ApiClient };
 var ModelApiClient = /** @class */ (function (_super) {
     __extends(ModelApiClient, _super);
     function ModelApiClient() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        // TODO: should the standard set of endpoints be prefixed with '$'?
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.$itemValueMeta = {
+            name: "object", displayName: "",
+            type: "model",
+            role: "value",
+            typeDef: _this.$metadata,
+        };
+        _this.$collectionValueMeta = {
+            name: "list", displayName: "",
+            type: "collection",
+            role: "value",
+            itemType: _this.$itemValueMeta,
+        };
+        return _this;
     }
-    // TODO: should the standard set of endpoints be prefixed with '$'?
     ModelApiClient.prototype.get = function (id, parameters, config) {
         var _this = this;
         return AxiosClient
             .get("/" + this.$metadata.controllerRoute + "/get/" + id, this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$itemValueMeta); });
     };
     ModelApiClient.prototype.list = function (parameters, config) {
         var _this = this;
         return AxiosClient
             .get("/" + this.$metadata.controllerRoute + "/list", this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateListResult(r, _this.$metadata); });
+            .then(function (r) { return _this.$hydrateListResult(r, _this.$collectionValueMeta); });
     };
     ModelApiClient.prototype.count = function (parameters, config) {
         return AxiosClient
@@ -145,13 +163,13 @@ var ModelApiClient = /** @class */ (function (_super) {
         var _this = this;
         return AxiosClient
             .post("/" + this.$metadata.controllerRoute + "/save", qs.stringify(mapToDto(item)), this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$itemValueMeta); });
     };
     ModelApiClient.prototype.delete = function (id, parameters, config) {
         var _this = this;
         return AxiosClient
             .post("/" + this.$metadata.controllerRoute + "/delete/" + id, null, this.$options(parameters, config))
-            .then(function (r) { return _this.$hydrateItemResult(r, _this.$metadata); });
+            .then(function (r) { return _this.$hydrateItemResult(r, _this.$itemValueMeta); });
     };
     return ModelApiClient;
 }(ApiClient));

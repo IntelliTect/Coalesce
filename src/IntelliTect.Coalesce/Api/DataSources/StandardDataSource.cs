@@ -235,7 +235,7 @@ namespace IntelliTect.Coalesce
 
         /// <summary>
         /// Applies a filter to the query based on the search term recieved from the client.
-        /// This search term is found in ListParameters.Search.
+        /// This search term is found in parameters.Search.
         /// This is called by ApplyListFiltering when constructing a list result.
         /// </summary>
         /// <param name="query">The query to filter.</param>

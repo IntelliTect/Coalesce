@@ -193,13 +193,14 @@ export interface VoidValue extends Metadata {
     readonly type: "void"
 }
 
-/** Narrowing intersection interface for the 'itemType' value on collection values that represents the type contained within the collection.  */
-export interface CollectionItemValue {
-    name: "$collectionItem"
+// /** Narrowing intersection interface for the 'itemType' value on collection values that represents the type contained within the collection.  */
+// export interface CollectionItemValue {
+//     // While this is currently always this string, no real reason to restrict it.
+//     // name: "$collectionItem"
 
-    // While this is currently always emptystring, not sure that we want to restrict this in the typings.
-    // displayName: "" // Yep, always emptystring
-}
+//     // While this is currently always emptystring, not sure that we want to restrict this in the typings.
+//     // displayName: "" // Yep, always emptystring
+// }
 
 /** Narrowing intersection interface for the 'return' value on methods.  */
 export interface MethodReturnValue {
@@ -252,7 +253,7 @@ export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> {
 /** Represents the usage of a collection of values */
 export interface CollectionValue extends ValueMeta<"collection"> {
     role: "value" | "collectionNavigation"
-    readonly itemType: NonCollectionValue & CollectionItemValue
+    readonly itemType: NonCollectionValue // & CollectionItemValue
 }
 
 /** Union of all representations of the usage of types with explicit type metadata */
@@ -330,7 +331,7 @@ export interface ModelCollectionNavigationProperty extends CollectionValue {
      * to the primary key of the model that owns the collection property.
      */
     readonly foreignKey: ForeignKeyProperty
-    readonly itemType: ModelValue & CollectionItemValue
+    readonly itemType: ModelValue // & CollectionItemValue
 }
 
 export type CollectionProperty = 

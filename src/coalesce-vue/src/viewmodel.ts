@@ -47,7 +47,7 @@ DESIGN NOTES
 
 export abstract class ViewModel<
     TModel extends Model<ModelType>,
-    TApi extends ModelApiClient<TModel["$metadata"], TModel>,
+    TApi extends ModelApiClient<TModel>,
 > implements Model<TModel["$metadata"]> {
     /**
      * Object which holds all of the data represented by this ViewModel.

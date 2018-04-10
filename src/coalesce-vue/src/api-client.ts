@@ -16,9 +16,9 @@ declare module "axios" {
     }
   }
 
-import { ModelType, ClassType, Method, Service, ApiRoutedType } from './metadata'
-import { Model, convertToModel, mapToDto, mapValueToDto, DataSource } from './model'
-import { OwnProps } from './util'
+import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue } from './metadata'
+import { Model, convertToModel, mapToDto, mapValueToDto, DataSource, convertValueToModel } from './model'
+import { OwnProps, Indexable } from './util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance, Cancel} from 'axios'
 import * as qs from 'qs'
@@ -55,7 +55,7 @@ export interface ListResult<T = any> extends ApiResult {
 
 export interface DataSourceParameters {
     includes?: string
-    dataSource?: DataSource
+    dataSource?: DataSource<DataSourceType>
 }
 export interface FilterParameters extends DataSourceParameters {
     search?: string
@@ -161,11 +161,17 @@ export class ApiClient<T extends ApiRoutedType> {
         return formatted;
     }
 
+    /**
+     * Combines the input into a single `AxiosRequestConfig` object.
+     * @param parameters The Coalesce parameters for the standard API endpoints.
+     * @param config A full `AxiosRequestConfig` to merge in.
+     * @param queryParams An object with an additional querystring parameters.
+     */
     protected $options(
         parameters?: ListParameters | FilterParameters | DataSourceParameters, 
         config?: AxiosRequestConfig,
         queryParams?: any
-    ) {
+    ): AxiosRequestConfig {
         // Merge standard Coalesce params with general configured params if there are any.
         var mergedParams: any = Object.assign({}, 
             queryParams,
@@ -214,44 +220,44 @@ export class ApiClient<T extends ApiRoutedType> {
         }
 
         // Map the data source and its params
-        if (wideParams.dataSource) {
+        const dataSource = wideParams.dataSource as Indexable<typeof wideParams.dataSource>
+        if (dataSource) {
             // Add the data source name
-            paramsObject["dataSource"] = wideParams.dataSource.$metadata.name;
-            var paramsMeta = wideParams.dataSource.$metadata.params;
+            paramsObject["dataSource"] = dataSource.$metadata.name;
+            var paramsMeta = dataSource.$metadata.params;
 
             // Add the data source parameters.
             // Note that we use "dataSource.{paramName}", not a nested object. 
             // This is what the model binder expects.
             for (var paramName in paramsMeta) {
                 const paramMeta = paramsMeta[paramName];
-                if (paramName in wideParams.dataSource) {
-                    const paramValue = wideParams.dataSource[paramName];
+                if (paramName in dataSource) {
+                    const paramValue = dataSource[paramName];
                     paramsObject["dataSource." + paramMeta.name] = mapValueToDto(paramValue, paramMeta)
                 }
             }
         }
+
+        return paramsObject;
     }
 
-    protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType) {
-        // This function is NOT PURE - we mutate the result object on the response.
-        const object = value.data.object
-        if (object) {
-            convertToModel(object, metadata)
+    protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: Value | VoidValue) {
+        // Do nothing for void returns - there will be no object.
+        if (metadata.type !== "void") {
+            // This function is NOT PURE - we mutate the result object on the response.
+            value.data.object = convertValueToModel(value.data.object, metadata)
         }
-        return value
+        return value;
     }
 
-    protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: ClassType) {
+    protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: CollectionValue) {
         // This function is NOT PURE - we mutate the result object on the response.
-        const list = value.data.list
-        if (Array.isArray(list)) {
-            list.forEach(item => convertToModel(item, metadata))
-        }
-        return value
+        value.data.list = convertValueToModel(value.data.list, metadata)
+        return value;
     }
 }
 
-export class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>> extends ApiClient<TMeta> {
+export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<TModel["$metadata"]> {
 
     // TODO: should the standard set of endpoints be prefixed with '$'?
 
@@ -261,7 +267,7 @@ export class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>
                 `/${this.$metadata.controllerRoute}/get/${id}`, 
                 this.$options(parameters, config)
             )
-            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$metadata))
+            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$itemValueMeta))
     }
     
     public list(parameters?: ListParameters, config?: AxiosRequestConfig) {
@@ -270,7 +276,7 @@ export class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>
                 `/${this.$metadata.controllerRoute}/list`, 
                 this.$options(parameters, config)
             )
-            .then<AxiosListResult<TModel>>(r => this.$hydrateListResult(r, this.$metadata))
+            .then<AxiosListResult<TModel>>(r => this.$hydrateListResult(r, this.$collectionValueMeta))
     }
     
     public count(parameters?: FilterParameters, config?: AxiosRequestConfig) {
@@ -288,7 +294,7 @@ export class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>
                 qs.stringify(mapToDto(item)),
                 this.$options(parameters, config)
             )
-            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$metadata))
+            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$itemValueMeta))
     }
     
     public delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
@@ -298,7 +304,21 @@ export class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>
                 null,
                 this.$options(parameters, config)
             )
-            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$metadata))
+            .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$itemValueMeta))
+    }
+    
+    private $itemValueMeta: ModelValue = {
+        name: "object", displayName: "",
+        type: "model",
+        role: "value",
+        typeDef: this.$metadata,
+    }
+
+    private $collectionValueMeta: CollectionValue = {
+        name: "list", displayName: "",
+        type: "collection",
+        role: "value",
+        itemType: this.$itemValueMeta,
     }
 }
 

@@ -19,65 +19,6 @@ export interface Model<TMeta extends ClassType> {
  */
 export interface DataSource<TMeta extends DataSourceType> {
     readonly $metadata: TMeta;
-    [paramName: string]: any;
-}
-
-/**
- * Transforms a given object with data properties into a valid implemenation of TModel.
- * This function mutates its input and all descendent properties of its input - it does not map to a new object.
- * @param object The object with data properties that should be converted to a TModel
- * @param metadata The metadata describing the TModel that is desired
- */
-export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel
-export function convertToModel<TMeta extends DataSourceType, TModel extends DataSource<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel
-export function convertToModel(object: {[k: string]: any}, metadata: ClassType | DataSourceType): Indexable<{}> {
-    if (!object) return object;
-
-    // Assume that an object that already has $metadata is already valid. 
-    // This prevents this method from infinitely recursing when it encounters a circular graph.
-    // It may be worth changing this to use an ES6 symbol to mark this instead.
-    if ("$metadata" in object) return object;
-
-    const hydrated = Object.assign(object, { $metadata: metadata });
-    
-    const props = metadata.type == "dataSource"
-        ? metadata.params
-        : metadata.props;
-
-    for (const propName in props) {
-        const propMeta = props[propName];
-        const propVal = hydrated[propName];
-        if (!(propName in hydrated) || propVal === undefined) {
-            // All propertes that are not defined need to be declared
-            // so that Vue's reactivity system can discover them.
-            // Null is a valid type for all model properties (or at least generated models). Undefined is not.
-            hydrated[propName] = null
-        } else if (propVal === null) {
-            // Incoming value was explicit null. Nothing to be done. Nulls are valid for all model properties.
-        } else {
-            switch (propMeta.type) {
-                case "date": 
-                    // If value is already a date, keep the exact same object.
-                    var date = propVal instanceof Date ? propVal : toDate(propVal);
-                    if (!isValid(date)) {
-                        throw `Recieved unparsable date: ${propVal}`;
-                    }
-                    hydrated[propName] = date;    
-                    break;
-                case "model":
-                case "object":
-                    convertToModel(propVal, propMeta.typeDef)
-                    break;
-                case "collection":
-                    const itemType = propMeta.itemType;
-                    if (Array.isArray(propVal) && (itemType.type == "model" || itemType.type == "object")) {
-                        propVal.forEach((item: any) => convertToModel(item, itemType.typeDef));
-                    }
-                    break;
-            }
-        }
-    }
-    return object;
 }
 
 
@@ -96,6 +37,7 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
     }
     
     public visitObject(value: any, meta: ClassType): TObject {
+        if (value == null) return value;
         const props = meta.props;
         const output: any = {}
         for (const propName in props) {
@@ -132,6 +74,135 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
     public visitEnumValue(value: any, meta: EnumValue): TValue {
         return value;
     }
+}
+
+class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
+
+    private objects = new Map<object, object>();
+
+    public visitValue(value: any, meta: Value): any {
+        if (value === undefined) return null;
+        return super.visitValue(value, meta);
+    }
+
+    public visitObject(value: any, meta: ClassType) {
+        if (!value) return null;
+        if (typeof value !== "object") throw `Value for object ${meta.name} was not an object`;
+
+        // Prevent infinite recursion on circular object graphs.
+        if (this.objects.has(value)) return this.objects.get(value);
+
+        const props = meta.props;
+
+        let target: any;
+        if (this.mode == "convert") {
+            
+            // If there already is metadata but it doesn't match,
+            // this is bad - someone passed mismatched parameters.
+            if ("$metadata" in value && value.$metadata !== meta) {
+                throw `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`   
+            };
+
+            target = value;
+        } else if (this.mode == "map") {
+            target = {};
+        } else {
+            throw `Unhandled mode ${this.mode}`
+        }
+
+        this.objects.set(value, target);
+        target.$metadata = meta;
+
+        for (const propName in props) {
+            const propVal = value[propName];
+            if (!(propName in value) || propVal === undefined) {
+                // All propertes that are not defined need to be declared
+                // so that Vue's reactivity system can discover them.
+                // Null is a valid type for all model properties (or at least generated models). Undefined is not.
+                target[propName] = null
+            } else {
+                target[propName] = this.visitValue(value[propName], props[propName]);
+            }
+
+        }
+
+        return target;
+    }
+
+    public visitCollection(value: any[], meta: CollectionValue) {
+        if (!value) return null;
+        if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
+
+        if (this.mode == "convert") {
+            for (let i = 0; i < value.length; i++) {
+                value[i] = this.visitValue(value[i], meta.itemType);
+            }
+            return value;
+        } else if (this.mode == "map") {
+            return value.map((element, index) => this.visitValue(element, meta.itemType));
+        } else {
+            throw `Unhandled mode ${this.mode}`
+        }
+    }
+
+    public visitDateValue(value: any, meta: DateValue) {
+        if (!value) return null;
+        
+        if (value instanceof Date) {
+            if (this.mode == "convert") {
+                // Preserve object ref when converting.
+                return value;
+            } else if (this.mode == "map") {
+                // Get a new object ref when mapping
+                return new Date(value);
+            }
+        } else {
+            var date = toDate(value);
+            if (!isValid(date)) {
+                console.warn(`Recieved unparsable date: ${value}`);
+            }
+            return date;
+        }
+    }
+
+    constructor(private mode: "map" | "convert") {
+        super();
+    }
+}
+
+
+/**
+ * Transforms a given object with data properties into a valid implemenation of TModel.
+ * This function mutates its input and all descendent properties of its input - it does not map to a new object.
+ * @param object The object with data properties that should be converted to a TModel
+ * @param metadata The metadata describing the TModel that is desired
+ */
+export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(value: {[k: string]: any}, metadata: TMeta): TModel {
+    if (value == null) return value;
+    return new ModelConversionVisitor("convert").visitObject(value, metadata);
+}
+
+/**
+ * Transforms a raw value into a valid implemenation of a model value.
+ * This function mutates its input and all descendent properties of its input - it does not map to a new object.
+ * @param object The value that should be converted
+ * @param metadata The metadata describing the value
+ */
+export function convertValueToModel(value: any, metadata: Value): any | null {
+    if (value == null) return value;
+    return new ModelConversionVisitor("convert").visitValue(value, metadata);
+}
+
+/**
+ * Maps the given object with data properties into a valid implemenation of TModel.
+ * This function returns a new copy of its input and all descendent properties of its input - it does not preserve original objects.
+ * @param object The object with data properties that should be mapped to a TModel
+ * @param metadata The metadata describing the TModel that is desired
+ */
+export function mapToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel {
+    if (!object) return object;
+
+    return new ModelConversionVisitor("map").visitObject(object, metadata);
 }
 
 
@@ -217,9 +288,9 @@ export function mapToDto<T extends Model<ClassType>>(object: T | null | undefine
     return dto;
 }
 
-export function mapValueToDto(value: any, meta: Value): any | null {
+export function mapValueToDto(value: any, metadata: Value): any | null {
     if (value === null || value === undefined) return value;
-    return new MapToDtoVisitor(1).visitValue(value, meta);
+    return new MapToDtoVisitor(1).visitValue(value, metadata);
 }
 
 

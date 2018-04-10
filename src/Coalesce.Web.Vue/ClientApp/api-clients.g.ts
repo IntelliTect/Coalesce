@@ -6,10 +6,11 @@ import * as $format from 'date-fns/format'
 import { AxiosClient, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
 
-export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $models.Person> {
+export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.rename, {
+    const $method = this.$metadata.methods.rename
+    const $params = this.$mapParams($method, {
       id,
       name,
     })
@@ -19,11 +20,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ItemResult<$models.Person>>>(r => this.$hydrateItemResult(r, $metadata.Person))
+      .then<AxiosResponse<ItemResult<$models.Person>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public changeSpacesToDashesInName(id: number, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.changeSpacesToDashesInName, {
+    const $method = this.$metadata.methods.changeSpacesToDashesInName
+    const $params = this.$mapParams($method, {
       id,
     })
     return AxiosClient
@@ -32,10 +34,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<void>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public add(numberOne: number | null, numberTwo: number | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.add, {
+    const $method = this.$metadata.methods.add
+    const $params = this.$mapParams($method, {
       numberOne,
       numberTwo,
     })
@@ -45,10 +49,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<number>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public getUser($config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getUser, {
+    const $method = this.$metadata.methods.getUser
+    const $params = this.$mapParams($method, {
     })
     return AxiosClient
       .post<ItemResult<string>>(
@@ -56,10 +62,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<string>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public personCount(lastNameStartsWith: string | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.personCount, {
+    const $method = this.$metadata.methods.personCount
+    const $params = this.$mapParams($method, {
       lastNameStartsWith,
     })
     return AxiosClient
@@ -67,10 +75,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         `/${this.$metadata.controllerRoute}/PersonCount`,
         this.$options(undefined, $config, $params)
       )
+      .then<AxiosResponse<ItemResult<number>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public fullNameAndAge(id: number, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.fullNameAndAge, {
+    const $method = this.$metadata.methods.fullNameAndAge
+    const $params = this.$mapParams($method, {
       id,
     })
     return AxiosClient
@@ -78,10 +88,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         `/${this.$metadata.controllerRoute}/FullNameAndAge`,
         this.$options(undefined, $config, $params)
       )
+      .then<AxiosResponse<ItemResult<string>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public removePersonById(id: number | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.removePersonById, {
+    const $method = this.$metadata.methods.removePersonById
+    const $params = this.$mapParams($method, {
       id,
     })
     return AxiosClient
@@ -89,10 +101,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         `/${this.$metadata.controllerRoute}/RemovePersonById`,
         this.$options(undefined, $config, $params)
       )
+      .then<AxiosResponse<ItemResult<boolean>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public obfuscateEmail(id: number, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.obfuscateEmail, {
+    const $method = this.$metadata.methods.obfuscateEmail
+    const $params = this.$mapParams($method, {
       id,
     })
     return AxiosClient
@@ -101,10 +115,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<string>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public changeFirstName(id: number, firstName: string | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.changeFirstName, {
+    const $method = this.$metadata.methods.changeFirstName
+    const $params = this.$mapParams($method, {
       id,
       firstName,
     })
@@ -114,11 +130,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ItemResult<$models.Person>>>(r => this.$hydrateItemResult(r, $metadata.Person))
+      .then<AxiosResponse<ItemResult<$models.Person>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public getUserPublic($config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getUserPublic, {
+    const $method = this.$metadata.methods.getUserPublic
+    const $params = this.$mapParams($method, {
     })
     return AxiosClient
       .post<ItemResult<string>>(
@@ -126,10 +143,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<string>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public namesStartingWith(characters: string | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.namesStartingWith, {
+    const $method = this.$metadata.methods.namesStartingWith
+    const $params = this.$mapParams($method, {
       characters,
     })
     return AxiosClient
@@ -138,10 +157,12 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<string[]>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public searchPeople(criteria: $models.PersonCriteria | null, page: number | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.searchPeople, {
+    const $method = this.$metadata.methods.searchPeople
+    const $params = this.$mapParams($method, {
       criteria,
       page,
     })
@@ -151,16 +172,17 @@ export class PersonApiClient extends ModelApiClient<typeof $metadata.Person, $mo
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ListResult<$models.Person>>>(r => this.$hydrateListResult(r, $metadata.Person))
+      .then<AxiosResponse<ListResult<$models.Person>>>(r => this.$hydrateListResult(r, $method.return))
   }
   
 }
 
 
-export class CaseApiClient extends ModelApiClient<typeof $metadata.Case, $models.Case> {
+export class CaseApiClient extends ModelApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
   public getSomeCases($config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getSomeCases, {
+    const $method = this.$metadata.methods.getSomeCases
+    const $params = this.$mapParams($method, {
     })
     return AxiosClient
       .post(
@@ -168,11 +190,12 @@ export class CaseApiClient extends ModelApiClient<typeof $metadata.Case, $models
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ItemResult<$models.Case[]>>>(r => this.$hydrateItemResult(r, $metadata.Case))
+      .then<AxiosResponse<ItemResult<$models.Case[]>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public getAllOpenCasesCount($config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getAllOpenCasesCount, {
+    const $method = this.$metadata.methods.getAllOpenCasesCount
+    const $params = this.$mapParams($method, {
     })
     return AxiosClient
       .post<ItemResult<number>>(
@@ -180,10 +203,12 @@ export class CaseApiClient extends ModelApiClient<typeof $metadata.Case, $models
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<number>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public randomizeDatesAndStatus($config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.randomizeDatesAndStatus, {
+    const $method = this.$metadata.methods.randomizeDatesAndStatus
+    const $params = this.$mapParams($method, {
     })
     return AxiosClient
       .post<ItemResult<void>>(
@@ -191,10 +216,12 @@ export class CaseApiClient extends ModelApiClient<typeof $metadata.Case, $models
         qs.stringify($params),
         this.$options(undefined, $config)
       )
+      .then<AxiosResponse<ItemResult<void>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
   public getCaseSummary($config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getCaseSummary, {
+    const $method = this.$metadata.methods.getCaseSummary
+    const $params = this.$mapParams($method, {
     })
     return AxiosClient
       .post(
@@ -202,16 +229,17 @@ export class CaseApiClient extends ModelApiClient<typeof $metadata.Case, $models
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ItemResult<$models.CaseSummary>>>(r => this.$hydrateItemResult(r, $metadata.CaseSummary))
+      .then<AxiosResponse<ItemResult<$models.CaseSummary>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
 }
 
 
-export class CompanyApiClient extends ModelApiClient<typeof $metadata.Company, $models.Company> {
+export class CompanyApiClient extends ModelApiClient<$models.Company> {
   constructor() { super($metadata.Company) }
   public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getCertainItems, {
+    const $method = this.$metadata.methods.getCertainItems
+    const $params = this.$mapParams($method, {
       isDeleted,
     })
     return AxiosClient
@@ -220,18 +248,18 @@ export class CompanyApiClient extends ModelApiClient<typeof $metadata.Company, $
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ItemResult<$models.Company[]>>>(r => this.$hydrateItemResult(r, $metadata.Company))
+      .then<AxiosResponse<ItemResult<$models.Company[]>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
 }
 
 
-export class ProductApiClient extends ModelApiClient<typeof $metadata.Product, $models.Product> {
+export class ProductApiClient extends ModelApiClient<$models.Product> {
   constructor() { super($metadata.Product) }
 }
 
 
-export class CaseProductApiClient extends ModelApiClient<typeof $metadata.CaseProduct, $models.CaseProduct> {
+export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
   constructor() { super($metadata.CaseProduct) }
 }
 
@@ -239,7 +267,8 @@ export class CaseProductApiClient extends ModelApiClient<typeof $metadata.CasePr
 export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.WeatherService> {
   constructor() { super($metadata.WeatherService) }
   public getWeather(location: $models.Location | null, dateTime: Date | null, $config?: AxiosRequestConfig) {
-    const $params = this.$mapParams(this.$metadata.methods.getWeather, {
+    const $method = this.$metadata.methods.getWeather
+    const $params = this.$mapParams($method, {
       location,
       dateTime,
     })
@@ -249,7 +278,7 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
         qs.stringify($params),
         this.$options(undefined, $config)
       )
-      .then<AxiosResponse<ItemResult<$models.WeatherData>>>(r => this.$hydrateItemResult(r, $metadata.WeatherData))
+      .then<AxiosResponse<ItemResult<$models.WeatherData>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
 }

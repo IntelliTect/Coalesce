@@ -11,9 +11,9 @@ declare module "axios" {
         head<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
     }
 }
-import { ModelType, ClassType, Method, Service, ApiRoutedType } from './metadata';
+import { ModelType, Method, Service, ApiRoutedType, DataSourceType, Value, CollectionValue, VoidValue } from './metadata';
 import { Model, DataSource } from './model';
-import { AxiosPromise, AxiosResponse, AxiosRequestConfig, CancelToken, AxiosInstance } from 'axios';
+import { AxiosPromise, AxiosResponse, AxiosRequestConfig, AxiosInstance } from 'axios';
 export interface ApiResult {
     wasSuccessful: boolean;
     message?: string;
@@ -35,7 +35,7 @@ export interface ListResult<T = any> extends ApiResult {
 }
 export interface DataSourceParameters {
     includes?: string;
-    dataSource?: DataSource;
+    dataSource?: DataSource<DataSourceType>;
 }
 export interface FilterParameters extends DataSourceParameters {
     search?: string;
@@ -87,21 +87,25 @@ export declare class ApiClient<T extends ApiRoutedType> {
     }): {
         [paramName: string]: any;
     };
-    protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): {
-        cancelToken: CancelToken | null;
-    } & AxiosRequestConfig & {
-        params: any;
-    };
+    /**
+     * Combines the input into a single `AxiosRequestConfig` object.
+     * @param parameters The Coalesce parameters for the standard API endpoints.
+     * @param config A full `AxiosRequestConfig` to merge in.
+     * @param queryParams An object with an additional querystring parameters.
+     */
+    protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): AxiosRequestConfig;
     private $serializeParams(parameters?);
-    protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: ClassType): AxiosResponse<ItemResult<TResult>>;
-    protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: ClassType): AxiosResponse<ListResult<TResult>>;
+    protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: Value | VoidValue): AxiosResponse<ItemResult<TResult>>;
+    protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: CollectionValue): AxiosResponse<ListResult<TResult>>;
 }
-export declare class ModelApiClient<TMeta extends ModelType, TModel extends Model<TMeta>> extends ApiClient<TMeta> {
+export declare class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<TModel["$metadata"]> {
     get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
     list(parameters?: ListParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ListResult<TModel>>>;
     count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<AxiosResponse<ItemResult<number>>>;
     save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
     delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
+    private $itemValueMeta;
+    private $collectionValueMeta;
 }
 export declare abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<TMeta> {
 }

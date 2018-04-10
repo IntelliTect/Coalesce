@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             foreach (var model in Model.Entities)
             {
-                WriteApiClientClass(b, model, $"ModelApiClient<typeof $metadata.{model.ClientTypeName}, $models.{model.ClientTypeName}>");
+                WriteApiClientClass(b, model, $"ModelApiClient<$models.{model.ClientTypeName}>");
 
                 // Lines between classes
                 b.Line();
@@ -81,7 +81,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     ? $"{method.TransportType}<void>"
                     : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
 
-                using (b.Block($"const $params = this.$mapParams(this.$metadata.methods.{method.JsVariable},", ')'))
+                b.Line($"const $method = this.$metadata.methods.{method.JsVariable}");
+                using (b.Block($"const $params = this.$mapParams($method,", ')'))
                 {
                     if (method.IsModelInstanceMethod)
                     {
@@ -121,9 +122,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     // TODO: date return types aren't handled here.
                     // Need to finish writing the dto-to-model converter in model.ts,
                     // then bring that in here and use it.
-                    if (needsHydration)
+                    //if (needsHydration)
                     {
-                        b.Line($".then<AxiosResponse<{resultType}>>(r => this.$hydrate{method.TransportType}(r, $metadata.{method.ResultType.PureType.ClassViewModel.ViewModelClassName}))");
+                        b.Line($".then<AxiosResponse<{resultType}>>(r => this.$hydrate{method.TransportType}(r, $method.return))");
                     }
                 }
             }

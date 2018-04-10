@@ -10,7 +10,7 @@ import { Indexable } from './util';
  * @param metadata The metadata describing the properties to add.
  */
 export declare function defineProps<T extends new () => ViewModel<any, any>>(ctor: T, metadata: ModelType): void;
-export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi extends ModelApiClient<TModel["$metadata"], TModel>> implements Model<TModel["$metadata"]> {
+export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi extends ModelApiClient<TModel>> implements Model<TModel["$metadata"]> {
     /** The metadata representing the type of data that this ViewModel handles. */
     readonly $metadata: TModel["$metadata"];
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */

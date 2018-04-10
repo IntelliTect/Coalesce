@@ -568,6 +568,12 @@ export const Person = domain.types.Person = {
       name: "rename",
       displayName: "Rename",
       params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
         name: {
           name: "name",
           displayName: "Name",
@@ -587,6 +593,12 @@ export const Person = domain.types.Person = {
       name: "changeSpacesToDashesInName",
       displayName: "Change Spaces To Dashes In Name",
       params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
       },
       return: {
         name: "$return",
@@ -653,6 +665,12 @@ export const Person = domain.types.Person = {
       name: "fullNameAndAge",
       displayName: "Full Name And Age",
       params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
       },
       return: {
         name: "$return",
@@ -683,6 +701,12 @@ export const Person = domain.types.Person = {
       name: "obfuscateEmail",
       displayName: "Obfuscate Email",
       params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
       },
       return: {
         name: "$return",
@@ -695,6 +719,12 @@ export const Person = domain.types.Person = {
       name: "changeFirstName",
       displayName: "Change First Name",
       params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
         firstName: {
           name: "firstName",
           displayName: "First Name",

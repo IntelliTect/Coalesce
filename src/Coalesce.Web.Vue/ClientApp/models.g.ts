@@ -1,5 +1,5 @@
 import * as metadata from './metadata.g'
-import { Model, DataSource, convertToModel } from 'coalesce-vue/lib/model'
+import { Model, DataSource, convertToModel, mapToModel } from 'coalesce-vue/lib/model'
 
 export enum Titles {
   Mr = 0,
@@ -25,39 +25,6 @@ export enum Statuses {
 }
 
 
-export namespace Person {
-  
-  /** Mutates the input object and its descendents into a valid Person implementation. */
-  export function from(data?: Partial<Person>): Person { return convertToModel(data || {}, metadata.Person) }
-  
-  export namespace DataSources {
-    
-    /** People whose last name starts with B or c */
-    export interface BOrCPeople extends DataSource<typeof metadata.Person.dataSources.bOrCPeople> {
-    }
-    export namespace BOrCPeople {
-      
-      /** Mutates the input object and its descendents into a valid BOrCPeople implementation. */
-      export function from(data?: Partial<BOrCPeople>): BOrCPeople { return convertToModel(data || {}, metadata.Person.dataSources.bOrCPeople) }
-    }
-    
-    export interface NamesStartingWithAWithCases extends DataSource<typeof metadata.Person.dataSources.namesStartingWithAWithCases> {
-    }
-    export namespace NamesStartingWithAWithCases {
-      
-      /** Mutates the input object and its descendents into a valid NamesStartingWithAWithCases implementation. */
-      export function from(data?: Partial<NamesStartingWithAWithCases>): NamesStartingWithAWithCases { return convertToModel(data || {}, metadata.Person.dataSources.namesStartingWithAWithCases) }
-    }
-    
-    export interface WithoutCases extends DataSource<typeof metadata.Person.dataSources.withoutCases> {
-    }
-    export namespace WithoutCases {
-      
-      /** Mutates the input object and its descendents into a valid WithoutCases implementation. */
-      export function from(data?: Partial<WithoutCases>): WithoutCases { return convertToModel(data || {}, metadata.Person.dataSources.withoutCases) }
-    }
-  }
-}
 export interface Person extends Model<typeof metadata.Person> {
   
   /** ID for the person object. */
@@ -97,25 +64,42 @@ export interface Person extends Model<typeof metadata.Person> {
   /** Company loaded from the Company ID */
   company: Company | null
 }
-
-
-export namespace Case {
+export class Person {
   
-  /** Mutates the input object and its descendents into a valid Case implementation. */
-  export function from(data?: Partial<Case>): Case { return convertToModel(data || {}, metadata.Case) }
+  /** Mutates the input object and its descendents into a valid Person implementation. */
+  static convert(data?: Partial<Person>): Person {
+    return convertToModel(data || {}, metadata.Person) 
+  }
   
+  /** Maps the input object and its descendents to a new, valid Person implementation. */
+  static map(data?: Partial<Person>): Person {
+    return mapToModel(data || {}, metadata.Person) 
+  }
+  
+  /** Instantiate a new Person, optionally basing it on the given data. */
+  constructor(data?: Partial<Person> | {[k: string]: any}) {
+      Object.assign(this, Person.map(data || {}));
+  }
+}
+export namespace Person {
   export namespace DataSources {
     
-    export interface AllOpenCases extends DataSource<typeof metadata.Case.dataSources.allOpenCases> {
-      minDate: Date | null
+    /** People whose last name starts with B or c */
+    export class BOrCPeople implements DataSource<typeof metadata.Person.dataSources.bOrCPeople> {
+      readonly $metadata = metadata.Person.dataSources.bOrCPeople
     }
-    export namespace AllOpenCases {
-      
-      /** Mutates the input object and its descendents into a valid AllOpenCases implementation. */
-      export function from(data?: Partial<AllOpenCases>): AllOpenCases { return convertToModel(data || {}, metadata.Case.dataSources.allOpenCases) }
+    
+    export class NamesStartingWithAWithCases implements DataSource<typeof metadata.Person.dataSources.namesStartingWithAWithCases> {
+      readonly $metadata = metadata.Person.dataSources.namesStartingWithAWithCases
+    }
+    
+    export class WithoutCases implements DataSource<typeof metadata.Person.dataSources.withoutCases> {
+      readonly $metadata = metadata.Person.dataSources.withoutCases
     }
   }
 }
+
+
 export interface Case extends Model<typeof metadata.Case> {
   
   /** The Primary key for the Case object */
@@ -135,24 +119,34 @@ export interface Case extends Model<typeof metadata.Case> {
   devTeamAssigned: DevTeam | null
   duration: any | null
 }
-
-
-export namespace Company {
+export class Case {
   
-  /** Mutates the input object and its descendents into a valid Company implementation. */
-  export function from(data?: Partial<Company>): Company { return convertToModel(data || {}, metadata.Company) }
+  /** Mutates the input object and its descendents into a valid Case implementation. */
+  static convert(data?: Partial<Case>): Case {
+    return convertToModel(data || {}, metadata.Case) 
+  }
   
+  /** Maps the input object and its descendents to a new, valid Case implementation. */
+  static map(data?: Partial<Case>): Case {
+    return mapToModel(data || {}, metadata.Case) 
+  }
+  
+  /** Instantiate a new Case, optionally basing it on the given data. */
+  constructor(data?: Partial<Case> | {[k: string]: any}) {
+      Object.assign(this, Case.map(data || {}));
+  }
+}
+export namespace Case {
   export namespace DataSources {
     
-    export interface DefaultSource extends DataSource<typeof metadata.Company.dataSources.defaultSource> {
-    }
-    export namespace DefaultSource {
-      
-      /** Mutates the input object and its descendents into a valid DefaultSource implementation. */
-      export function from(data?: Partial<DefaultSource>): DefaultSource { return convertToModel(data || {}, metadata.Company.dataSources.defaultSource) }
+    export class AllOpenCases implements DataSource<typeof metadata.Case.dataSources.allOpenCases> {
+      readonly $metadata = metadata.Case.dataSources.allOpenCases
+      minDate: Date | null = null
     }
   }
 }
+
+
 export interface Company extends Model<typeof metadata.Company> {
   companyId: number | null
   name: string | null
@@ -165,31 +159,57 @@ export interface Company extends Model<typeof metadata.Company> {
   employees: Person[] | null
   altName: string | null
 }
-
-
-export namespace Product {
+export class Company {
   
-  /** Mutates the input object and its descendents into a valid Product implementation. */
-  export function from(data?: Partial<Product>): Product { return convertToModel(data || {}, metadata.Product) }
+  /** Mutates the input object and its descendents into a valid Company implementation. */
+  static convert(data?: Partial<Company>): Company {
+    return convertToModel(data || {}, metadata.Company) 
+  }
   
-  export namespace DataSources {
+  /** Maps the input object and its descendents to a new, valid Company implementation. */
+  static map(data?: Partial<Company>): Company {
+    return mapToModel(data || {}, metadata.Company) 
+  }
+  
+  /** Instantiate a new Company, optionally basing it on the given data. */
+  constructor(data?: Partial<Company> | {[k: string]: any}) {
+      Object.assign(this, Company.map(data || {}));
   }
 }
+export namespace Company {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.Company.dataSources.defaultSource> {
+      readonly $metadata = metadata.Company.dataSources.defaultSource
+    }
+  }
+}
+
+
 export interface Product extends Model<typeof metadata.Product> {
   productId: number | null
   name: string | null
   details: ProductDetails | null
 }
-
-
-export namespace CaseProduct {
+export class Product {
   
-  /** Mutates the input object and its descendents into a valid CaseProduct implementation. */
-  export function from(data?: Partial<CaseProduct>): CaseProduct { return convertToModel(data || {}, metadata.CaseProduct) }
+  /** Mutates the input object and its descendents into a valid Product implementation. */
+  static convert(data?: Partial<Product>): Product {
+    return convertToModel(data || {}, metadata.Product) 
+  }
   
-  export namespace DataSources {
+  /** Maps the input object and its descendents to a new, valid Product implementation. */
+  static map(data?: Partial<Product>): Product {
+    return mapToModel(data || {}, metadata.Product) 
+  }
+  
+  /** Instantiate a new Product, optionally basing it on the given data. */
+  constructor(data?: Partial<Product> | {[k: string]: any}) {
+      Object.assign(this, Product.map(data || {}));
   }
 }
+
+
 export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   caseProductId: number | null
   caseId: number | null
@@ -197,60 +217,105 @@ export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   productId: number | null
   product: Product | null
 }
-
-
-export namespace CaseDto {
+export class CaseProduct {
   
-  /** Mutates the input object and its descendents into a valid CaseDto implementation. */
-  export function from(data?: Partial<CaseDto>): CaseDto { return convertToModel(data || {}, metadata.CaseDto) }
+  /** Mutates the input object and its descendents into a valid CaseProduct implementation. */
+  static convert(data?: Partial<CaseProduct>): CaseProduct {
+    return convertToModel(data || {}, metadata.CaseProduct) 
+  }
   
-  export namespace DataSources {
-    
-    export interface CaseDtoSource extends DataSource<typeof metadata.CaseDto.dataSources.caseDtoSource> {
-    }
-    export namespace CaseDtoSource {
-      
-      /** Mutates the input object and its descendents into a valid CaseDtoSource implementation. */
-      export function from(data?: Partial<CaseDtoSource>): CaseDtoSource { return convertToModel(data || {}, metadata.CaseDto.dataSources.caseDtoSource) }
-    }
+  /** Maps the input object and its descendents to a new, valid CaseProduct implementation. */
+  static map(data?: Partial<CaseProduct>): CaseProduct {
+    return mapToModel(data || {}, metadata.CaseProduct) 
+  }
+  
+  /** Instantiate a new CaseProduct, optionally basing it on the given data. */
+  constructor(data?: Partial<CaseProduct> | {[k: string]: any}) {
+      Object.assign(this, CaseProduct.map(data || {}));
   }
 }
+
+
 export interface CaseDto extends Model<typeof metadata.CaseDto> {
   caseId: number | null
   title: string | null
   assignedToName: string | null
 }
-
-
-export namespace PersonCriteria {
+export class CaseDto {
   
-  /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
-  export function from(data?: Partial<PersonCriteria>): PersonCriteria { return convertToModel(data || {}, metadata.PersonCriteria) }
+  /** Mutates the input object and its descendents into a valid CaseDto implementation. */
+  static convert(data?: Partial<CaseDto>): CaseDto {
+    return convertToModel(data || {}, metadata.CaseDto) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid CaseDto implementation. */
+  static map(data?: Partial<CaseDto>): CaseDto {
+    return mapToModel(data || {}, metadata.CaseDto) 
+  }
+  
+  /** Instantiate a new CaseDto, optionally basing it on the given data. */
+  constructor(data?: Partial<CaseDto> | {[k: string]: any}) {
+      Object.assign(this, CaseDto.map(data || {}));
+  }
 }
+export namespace CaseDto {
+  export namespace DataSources {
+    
+    export class CaseDtoSource implements DataSource<typeof metadata.CaseDto.dataSources.caseDtoSource> {
+      readonly $metadata = metadata.CaseDto.dataSources.caseDtoSource
+    }
+  }
+}
+
+
 export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   name: string | null
   birthdayMonth: number | null
   emailDomain: string | null
 }
-
-
-export namespace PersonStats {
+export class PersonCriteria {
   
-  /** Mutates the input object and its descendents into a valid PersonStats implementation. */
-  export function from(data?: Partial<PersonStats>): PersonStats { return convertToModel(data || {}, metadata.PersonStats) }
+  /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
+  static convert(data?: Partial<PersonCriteria>): PersonCriteria {
+    return convertToModel(data || {}, metadata.PersonCriteria) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid PersonCriteria implementation. */
+  static map(data?: Partial<PersonCriteria>): PersonCriteria {
+    return mapToModel(data || {}, metadata.PersonCriteria) 
+  }
+  
+  /** Instantiate a new PersonCriteria, optionally basing it on the given data. */
+  constructor(data?: Partial<PersonCriteria> | {[k: string]: any}) {
+      Object.assign(this, PersonCriteria.map(data || {}));
+  }
 }
+
+
 export interface PersonStats extends Model<typeof metadata.PersonStats> {
   height: number | null
   weight: number | null
   name: string | null
 }
-
-
-export namespace CaseSummary {
+export class PersonStats {
   
-  /** Mutates the input object and its descendents into a valid CaseSummary implementation. */
-  export function from(data?: Partial<CaseSummary>): CaseSummary { return convertToModel(data || {}, metadata.CaseSummary) }
+  /** Mutates the input object and its descendents into a valid PersonStats implementation. */
+  static convert(data?: Partial<PersonStats>): PersonStats {
+    return convertToModel(data || {}, metadata.PersonStats) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid PersonStats implementation. */
+  static map(data?: Partial<PersonStats>): PersonStats {
+    return mapToModel(data || {}, metadata.PersonStats) 
+  }
+  
+  /** Instantiate a new PersonStats, optionally basing it on the given data. */
+  constructor(data?: Partial<PersonStats> | {[k: string]: any}) {
+      Object.assign(this, PersonStats.map(data || {}));
+  }
 }
+
+
 export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseSummaryId: number | null
   openCases: number | null
@@ -258,64 +323,141 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   closeCases: number | null
   description: string | null
 }
-
-
-export namespace DevTeam {
+export class CaseSummary {
   
-  /** Mutates the input object and its descendents into a valid DevTeam implementation. */
-  export function from(data?: Partial<DevTeam>): DevTeam { return convertToModel(data || {}, metadata.DevTeam) }
+  /** Mutates the input object and its descendents into a valid CaseSummary implementation. */
+  static convert(data?: Partial<CaseSummary>): CaseSummary {
+    return convertToModel(data || {}, metadata.CaseSummary) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid CaseSummary implementation. */
+  static map(data?: Partial<CaseSummary>): CaseSummary {
+    return mapToModel(data || {}, metadata.CaseSummary) 
+  }
+  
+  /** Instantiate a new CaseSummary, optionally basing it on the given data. */
+  constructor(data?: Partial<CaseSummary> | {[k: string]: any}) {
+      Object.assign(this, CaseSummary.map(data || {}));
+  }
 }
+
+
 export interface DevTeam extends Model<typeof metadata.DevTeam> {
   devTeamId: number | null
   name: string | null
 }
-
-
-export namespace ProductDetails {
+export class DevTeam {
   
-  /** Mutates the input object and its descendents into a valid ProductDetails implementation. */
-  export function from(data?: Partial<ProductDetails>): ProductDetails { return convertToModel(data || {}, metadata.ProductDetails) }
+  /** Mutates the input object and its descendents into a valid DevTeam implementation. */
+  static convert(data?: Partial<DevTeam>): DevTeam {
+    return convertToModel(data || {}, metadata.DevTeam) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid DevTeam implementation. */
+  static map(data?: Partial<DevTeam>): DevTeam {
+    return mapToModel(data || {}, metadata.DevTeam) 
+  }
+  
+  /** Instantiate a new DevTeam, optionally basing it on the given data. */
+  constructor(data?: Partial<DevTeam> | {[k: string]: any}) {
+      Object.assign(this, DevTeam.map(data || {}));
+  }
 }
+
+
 export interface ProductDetails extends Model<typeof metadata.ProductDetails> {
   manufacturingAddress: StreetAddress | null
   companyHqAddress: StreetAddress | null
 }
-
-
-export namespace StreetAddress {
+export class ProductDetails {
   
-  /** Mutates the input object and its descendents into a valid StreetAddress implementation. */
-  export function from(data?: Partial<StreetAddress>): StreetAddress { return convertToModel(data || {}, metadata.StreetAddress) }
+  /** Mutates the input object and its descendents into a valid ProductDetails implementation. */
+  static convert(data?: Partial<ProductDetails>): ProductDetails {
+    return convertToModel(data || {}, metadata.ProductDetails) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid ProductDetails implementation. */
+  static map(data?: Partial<ProductDetails>): ProductDetails {
+    return mapToModel(data || {}, metadata.ProductDetails) 
+  }
+  
+  /** Instantiate a new ProductDetails, optionally basing it on the given data. */
+  constructor(data?: Partial<ProductDetails> | {[k: string]: any}) {
+      Object.assign(this, ProductDetails.map(data || {}));
+  }
 }
+
+
 export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   address: string | null
   city: string | null
   state: string | null
   postalCode: string | null
 }
-
-
-export namespace WeatherData {
+export class StreetAddress {
   
-  /** Mutates the input object and its descendents into a valid WeatherData implementation. */
-  export function from(data?: Partial<WeatherData>): WeatherData { return convertToModel(data || {}, metadata.WeatherData) }
+  /** Mutates the input object and its descendents into a valid StreetAddress implementation. */
+  static convert(data?: Partial<StreetAddress>): StreetAddress {
+    return convertToModel(data || {}, metadata.StreetAddress) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid StreetAddress implementation. */
+  static map(data?: Partial<StreetAddress>): StreetAddress {
+    return mapToModel(data || {}, metadata.StreetAddress) 
+  }
+  
+  /** Instantiate a new StreetAddress, optionally basing it on the given data. */
+  constructor(data?: Partial<StreetAddress> | {[k: string]: any}) {
+      Object.assign(this, StreetAddress.map(data || {}));
+  }
 }
+
+
 export interface WeatherData extends Model<typeof metadata.WeatherData> {
   tempFahrenheit: number | null
   humidity: number | null
   location: Location | null
 }
-
-
-export namespace Location {
+export class WeatherData {
   
-  /** Mutates the input object and its descendents into a valid Location implementation. */
-  export function from(data?: Partial<Location>): Location { return convertToModel(data || {}, metadata.Location) }
+  /** Mutates the input object and its descendents into a valid WeatherData implementation. */
+  static convert(data?: Partial<WeatherData>): WeatherData {
+    return convertToModel(data || {}, metadata.WeatherData) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid WeatherData implementation. */
+  static map(data?: Partial<WeatherData>): WeatherData {
+    return mapToModel(data || {}, metadata.WeatherData) 
+  }
+  
+  /** Instantiate a new WeatherData, optionally basing it on the given data. */
+  constructor(data?: Partial<WeatherData> | {[k: string]: any}) {
+      Object.assign(this, WeatherData.map(data || {}));
+  }
 }
+
+
 export interface Location extends Model<typeof metadata.Location> {
   city: string | null
   state: string | null
   zip: string | null
+}
+export class Location {
+  
+  /** Mutates the input object and its descendents into a valid Location implementation. */
+  static convert(data?: Partial<Location>): Location {
+    return convertToModel(data || {}, metadata.Location) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Location implementation. */
+  static map(data?: Partial<Location>): Location {
+    return mapToModel(data || {}, metadata.Location) 
+  }
+  
+  /** Instantiate a new Location, optionally basing it on the given data. */
+  constructor(data?: Partial<Location> | {[k: string]: any}) {
+      Object.assign(this, Location.map(data || {}));
+  }
 }
 
 

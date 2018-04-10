@@ -128,10 +128,6 @@ export interface VoidValue extends Metadata {
     readonly role: "value";
     readonly type: "void";
 }
-/** Narrowing intersection interface for the 'itemType' value on collection values that represents the type contained within the collection.  */
-export interface CollectionItemValue {
-    name: "$collectionItem";
-}
 /** Narrowing intersection interface for the 'return' value on methods.  */
 export interface MethodReturnValue {
     name: "$return";
@@ -180,7 +176,7 @@ export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> {
 /** Represents the usage of a collection of values */
 export interface CollectionValue extends ValueMeta<"collection"> {
     role: "value" | "collectionNavigation";
-    readonly itemType: NonCollectionValue & CollectionItemValue;
+    readonly itemType: NonCollectionValue;
 }
 /** Union of all representations of the usage of types with explicit type metadata */
 export declare type CustomTypeValue = EnumValue | ObjectValue | ModelValue;
@@ -240,7 +236,7 @@ export interface ModelCollectionNavigationProperty extends CollectionValue {
      * to the primary key of the model that owns the collection property.
      */
     readonly foreignKey: ForeignKeyProperty;
-    readonly itemType: ModelValue & CollectionItemValue;
+    readonly itemType: ModelValue;
 }
 export declare type CollectionProperty = BasicCollectionProperty | ModelCollectionNavigationProperty;
 export declare type Property = PrimitiveProperty | PrimaryKeyProperty | ForeignKeyProperty | DateProperty | EnumProperty | ObjectProperty | ModelProperty | CollectionProperty;

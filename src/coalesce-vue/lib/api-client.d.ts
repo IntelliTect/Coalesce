@@ -101,7 +101,7 @@ export declare class ApiClient<T extends ApiRoutedType> {
 export declare class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<TModel["$metadata"]> {
     get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
     list(parameters?: ListParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ListResult<TModel>>>;
-    count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<AxiosResponse<ItemResult<number>>>;
+    count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>>;
     save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
     delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
     private $itemValueMeta;

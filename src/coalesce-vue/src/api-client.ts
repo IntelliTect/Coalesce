@@ -281,7 +281,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
     
     public count(parameters?: FilterParameters, config?: AxiosRequestConfig) {
         return AxiosClient
-            .get<AxiosItemResult<number>>(
+            .get<ItemResult<number>>(
                 `/${this.$metadata.controllerRoute}/count`, 
                 this.$options(parameters, config)
             )

@@ -1,4 +1,9 @@
-﻿body {
+﻿@import './node_modules/components-font-awesome/scss/variables';
+@import './node_modules/components-font-awesome/scss/core';
+@import './node_modules/components-font-awesome/scss/icons';
+@import './node_modules/components-font-awesome/scss/fixed-width';
+
+body {
     padding-bottom: 20px;
     background-color: #F8F8F8 !important;
 }

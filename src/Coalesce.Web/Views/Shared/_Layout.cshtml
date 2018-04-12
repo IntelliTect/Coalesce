@@ -13,6 +13,7 @@
     <link href="~/css/site.css" rel="stylesheet" />
     <link href="~/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" />
     <link href="~/lib/select2/css/select2.css" rel="stylesheet" />
+    <link href="~/lib/select2-bootstrap/select2-bootstrap.css" rel="stylesheet" />
     <link href="~/lib/font-awesome/css/font-awesome.css" rel="stylesheet" />
 
     @*<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>*@
@@ -77,26 +78,6 @@
     </div>
 </header>
 
-@*<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a asp-controller="Home" asp-action="Index" asp-route-area="" class="navbar-brand">@applicationName</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-                <li><a asp-controller="Demo" asp-action="Index">Demo</a></li>
-                <li><a asp-controller="Home" asp-action="Generated">Generated Views</a></li>
-                <li><a asp-controller="Docs" asp-action="Index">Documentation</a></li>
-            </ul>
-        </div>
-    </div>
-</div>*@
 <div class="container@(fluid) body-content">
     @RenderBody()
 </div>
@@ -136,10 +117,10 @@
         </nav>
     </div>
 </footer>
-
+    
 <script src="~/lib/jquery/jquery.js"></script>
-<script src="~/lib/bootstrap/js/bootstrap.js"></script>
-<script src="~/lib/knockout/knockout.js"></script>
+<script src="~/lib/bootstrap/javascripts/bootstrap.js"></script>
+<script src="~/lib/knockout/knockout-latest.js"></script>
 <script src="~/lib/knockout-validation/knockout.validation.js"></script>
 <script src="~/lib/moment/moment.js"></script>
 <script src="~/lib/select2/js/select2.js"></script>
@@ -147,17 +128,36 @@
 <script src="~/js/app.js" asp-append-version="true"></script>
 <!-- Google Analytics -->
 <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-178624-5', 'auto');
-  ga('send', 'pageview');
+    ga('create', 'UA-178624-5', 'auto');
+    ga('send', 'pageview');
 
 </script>
 
-<script>var baseUrl = '@Url.Content( "~/" )';</script>
+<script>
+    
+    var baseUrl = '@Url.Content( "~/" )';
+
+    // Setup datetimepicker to use Font Awesome icons
+    $.fn.datetimepicker.defaults.icons = {
+        time: 'fa fa-clock-o',
+        date: 'fa fa-calendar',
+        up: 'fa fa-chevron-up',
+        down: 'fa fa-chevron-down',
+        previous: 'fa fa-chevron-left',
+        next: 'fa fa-chevron-right',
+        today: 'fa fa-dot-circle-o',
+        clear: 'fa fa-trash',
+        close: 'fa fa-times'
+    };
+
+    Coalesce.GlobalConfiguration.app.select2Theme("bootstrap");
+
+</script>
 @RenderSection( "Scripts", required : false )
 </body>
 </html>

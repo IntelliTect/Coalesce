@@ -1,24 +1,35 @@
 {
   "version": "1.0.0",
-  "name": "CoalesceDemo",
+  "name": "coalesce.demo",
   "private": true,
+  "dependencies": {
+    "bootstrap-sass": "3.3.7",
+    "components-font-awesome": "4.7.0",
+    "eonasdan-bootstrap-datetimepicker": "4.17.47",
+    "jquery": "3.3.1",
+    "knockout": "3.4.2",
+    "knockout.validation": "2.0.3",
+    "moment": "^2.20.1",
+    "select2": "4.0.5",
+    "select2-bootstrap-theme": "0.1.0-beta.10"
+  },
   "devDependencies": {
-    "@types/bootstrap": "3.3.36",
+    "@types/bootstrap": "3.3.39",
     "@types/bootstrap.v3.datetimepicker": "4.17.46",
-    "@types/jquery": "2.0.48",
+    "@types/jquery": "3.3.1",
     "@types/knockout": "3.4.47",
     "@types/knockout.validation": "0.0.36",
     "@types/select2": "4.0.41",
     "@types/moment": "2.11.29",
-    "gulp": "^3.9.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "^2.6.0",
-    "gulp-flatten": "^0.3.1",
-    "gulp-sass": "^3.1.0",
-    "gulp-typescript": "^3.1.6",
-    "typescript": "^2.7.1",
     "del": "3.0.0",
-    "gulp-shell": "^0.6.5",
-    "gulp-util": "3.0.7"
+    "gulp": "^3.9.1",
+    "gulp-flatten": "^0.3.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-shell": "^0.5.2",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-typescript": "^3.1.6",
+    "gulp-util": "3.0.7",
+    "typescript": "~2.3.2"
   }
 }

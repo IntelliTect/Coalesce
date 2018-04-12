@@ -50,12 +50,17 @@ namespace Coalesce.Domain
 
                 if (!context.Products.Any())
                 {
-                    context.Products.Add(new Product { Name = "Office" });
-                    context.Products.Add(new Product { Name = "Word" });
-                    context.Products.Add(new Product { Name = "Excel" });
-                    context.Products.Add(new Product { Name = "Visual Studio" });
-                    context.Products.Add(new Product { Name = "Visual Studio 2013" });
-                    context.Products.Add(new Product { Name = "Visual Studio 2015" });
+
+
+                    GenFu.GenFu.Configure<ProductDetails>()
+                        .Fill(pd => pd.CompanyHqAddress, GenFu.GenFu.New<StreetAddress>)
+                        .Fill(pd => pd.ManufacturingAddress, GenFu.GenFu.New<StreetAddress>());
+                    context.Products.Add(new Product { Name = "Office", Details = GenFu.GenFu.New<ProductDetails>() });
+                    context.Products.Add(new Product { Name = "Word", Details = GenFu.GenFu.New<ProductDetails>() });
+                    context.Products.Add(new Product { Name = "Excel", Details = GenFu.GenFu.New<ProductDetails>() });
+                    context.Products.Add(new Product { Name = "Visual Studio", Details = GenFu.GenFu.New<ProductDetails>() });
+                    context.Products.Add(new Product { Name = "Visual Studio 2013", Details = GenFu.GenFu.New<ProductDetails>() });
+                    context.Products.Add(new Product { Name = "Visual Studio 2015", Details = GenFu.GenFu.New<ProductDetails>() });
 
                     context.SaveChanges();
                 }

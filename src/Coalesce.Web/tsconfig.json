@@ -2,9 +2,6 @@
   "compileOnSave": false,
   "compilerOptions": {
     "strict": true,
-    "strictFunctionTypes": false,
-    "strictPropertyInitialization": false,
-    "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,
     "module": "system",

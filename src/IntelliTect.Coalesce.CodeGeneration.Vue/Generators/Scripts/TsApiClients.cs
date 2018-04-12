@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             });
             b.Line();
 
-            foreach (var model in Model.Entities)
+            foreach (var model in Model.Entities.OrderBy(e => e.ClientTypeName))
             {
                 WriteApiClientClass(b, model, $"ModelApiClient<$models.{model.ClientTypeName}>");
 
@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
 
 
-            foreach (var model in Model.Services)
+            foreach (var model in Model.Services.OrderBy(e => e.ClientTypeName))
             {
                 WriteApiClientClass(b, model, $"ServiceApiClient<typeof $metadata.{model.ClientTypeName}>");
 

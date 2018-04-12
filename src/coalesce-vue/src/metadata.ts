@@ -296,7 +296,7 @@ export interface ForeignKeyProperty extends PrimitiveValue {
     readonly type: "string" | "number"
     readonly principalKey: PrimaryKeyProperty
     readonly principalType: ModelType
-    readonly navigationProp?: ModelProperty
+    readonly navigationProp?: ModelReferenceNavigationProperty
 }
 /** Represents a date property */
 export interface DateProperty extends DateValue { }
@@ -305,10 +305,17 @@ export interface EnumProperty extends EnumValue { }
 /** Represents an object property */
 export interface ObjectProperty extends ObjectValue { }
 /** 
+ * Represents a model property that simply exists as a value,
+ * not as a relational navigation property.
+ */
+export interface ModelValueProperty extends ModelValue {
+    readonly role: "value"
+}
+/** 
  * Represents an object property that represents the foreign end of 
  * a 1-to-1 or 1-to-many relationship in a relational model.
  */
-export interface ModelProperty extends ModelValue {
+export interface ModelReferenceNavigationProperty extends ModelValue {
     readonly role: "referenceNavigation"
     readonly foreignKey: ForeignKeyProperty
     readonly principalKey: PrimaryKeyProperty
@@ -345,7 +352,8 @@ export type Property =
 | DateProperty
 | EnumProperty
 | ObjectProperty
-| ModelProperty
+| ModelValueProperty
+| ModelReferenceNavigationProperty
 | CollectionProperty
 
 

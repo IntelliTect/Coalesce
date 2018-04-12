@@ -17,7 +17,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
 
-            b.Line("import { Domain, getEnumMeta, ModelType, ObjectType, PrimitiveProperty, ModelProperty, ForeignKeyProperty, PrimaryKeyProperty } from 'coalesce-vue/lib/metadata' ");
+            using (b.Block("import", " from 'coalesce-vue/lib/metadata'"))
+            {
+                b.Line("Domain, getEnumMeta, ModelType, ObjectType,");
+                b.Line("PrimitiveProperty, ModelReferenceNavigationProperty, ForeignKeyProperty, PrimaryKeyProperty");
+            }
+            b.Line();
             b.Line();
 
             // Assigning each property as a member of domain ensures we don't break type contracts.
@@ -200,31 +205,53 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     if (prop.Object.IsDbMappedType)
                     {
-                        if (prop.Type.IsPOCO && prop.ObjectIdProperty != null)
+                        if (prop.Type.IsCollection)
                         {
-                            // Reference navigations
-                            // TS Type: "ModelProperty"
-                            b.StringProp("role", "referenceNavigation");
-                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
-                            b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+                            if (prop.Object.PrimaryKey != null)
+                            {
+                                // Collection navigations
+                                // TS Type: "ModelCollectionNavigationProperty"
+                                b.StringProp("role", "collectionNavigation");
+                                b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
+                            }
+                            else
+                            {
+                                // Not sure if this case is even possible (Object is DB mapped, but has no PK), but whatever.
+                                // TS Type: "BasicCollectionProperty"
+                                b.StringProp("role", "value");
+                            }
                         }
-                        else if (prop.Type.IsCollection && prop.Object.PrimaryKey != null)
+                        else
                         {
-                            // Collection navigations
-                            // TS Type: "ModelCollectionProperty"
-                            b.StringProp("role", "collectionNavigation");
-                            b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
+                            if (prop.ObjectIdProperty != null)
+                            {
+                                // Reference navigations
+                                // TS Type: "ModelReferenceNavigationProperty"
+                                b.StringProp("role", "referenceNavigation");
+                                b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
+                                b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+                            }
+                            else
+                            {
+                                // Unexceptional property holding a DB mapped type.
+                                // We have no foreign key, so its not considered a navigation property.
+                                // TS Type: "ModelValueProperty"
+                                b.StringProp("role", "value");
+
+                            }
                         }
                     }
                     else
                     {
                         // External types, and collections of such
+                        // TS Type: "ObjectProperty" or "BasicCollectionProperty" (probably)
                         b.StringProp("role", "value");
                     }
                 }
                 else if (prop.Type.IsCollection)
                 {
                     // Primitive collections
+                    // TS Type: "BasicCollectionProperty"
                     b.StringProp("role", "value");
                 }
                 else
@@ -232,18 +259,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     // All non-object/collection properties:
                     if (prop.IsPrimaryKey)
                     {
+                        // TS Type: "PrimaryKeyProperty"
                         b.StringProp("role", "primaryKey");
                     }
                     else if (prop.IsForeignKey && prop.IdPropertyObjectProperty.PureTypeOnContext)
                     {
+                        // TS Type: "ForeignKeyProperty"
                         var principalProp = prop.IdPropertyObjectProperty;
                         b.StringProp("role", "foreignKey");
                         b.Line($"get principalKey() {{ return {GetClassMetadataRef(principalProp.Object)}.props.{principalProp.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
                         b.Line($"get principalType() {{ return {GetClassMetadataRef(principalProp.Object)} }},");
-                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{prop.IdPropertyObjectProperty.JsVariable} as ModelProperty }},");
+                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{prop.IdPropertyObjectProperty.JsVariable} as ModelReferenceNavigationProperty }},");
                     }
                     else
                     {
+                        // TS Type: "PrimitiveProperty", "DateProperty", "EnumProperty"
                         b.StringProp("role", "value");
                     }
                 }

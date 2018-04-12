@@ -307,19 +307,21 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
             .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$itemValueMeta))
     }
     
-    private $itemValueMeta: ModelValue = {
+    /** Value metadata for handling ItemResult returns from the standard API endpoints. */
+    private $itemValueMeta = Object.freeze(<ModelValue>{
         name: "object", displayName: "",
         type: "model",
         role: "value",
         typeDef: this.$metadata,
-    }
+    })
 
-    private $collectionValueMeta: CollectionValue = {
+    /** Value metadata for handling ListResult returns from the standard API endpoints. */
+    private $collectionValueMeta = Object.freeze(<CollectionValue>{
         name: "list", displayName: "",
         type: "collection",
         role: "value",
         itemType: this.$itemValueMeta,
-    }
+    })
 }
 
 export abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<TMeta> {

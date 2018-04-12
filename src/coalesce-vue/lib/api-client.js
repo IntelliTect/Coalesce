@@ -129,18 +129,20 @@ var ModelApiClient = /** @class */ (function (_super) {
     function ModelApiClient() {
         // TODO: should the standard set of endpoints be prefixed with '$'?
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.$itemValueMeta = {
+        /** Value metadata for handling ItemResult returns from the standard API endpoints. */
+        _this.$itemValueMeta = Object.freeze({
             name: "object", displayName: "",
             type: "model",
             role: "value",
             typeDef: _this.$metadata,
-        };
-        _this.$collectionValueMeta = {
+        });
+        /** Value metadata for handling ListResult returns from the standard API endpoints. */
+        _this.$collectionValueMeta = Object.freeze({
             name: "list", displayName: "",
             type: "collection",
             role: "value",
             itemType: _this.$itemValueMeta,
-        };
+        });
         return _this;
     }
     ModelApiClient.prototype.get = function (id, parameters, config) {

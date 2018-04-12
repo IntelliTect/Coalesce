@@ -104,7 +104,9 @@ export declare class ModelApiClient<TModel extends Model<ModelType>> extends Api
     count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>>;
     save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
     delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
+    /** Value metadata for handling ItemResult returns from the standard API endpoints. */
     private $itemValueMeta;
+    /** Value metadata for handling ListResult returns from the standard API endpoints. */
     private $collectionValueMeta;
 }
 export declare abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<TMeta> {

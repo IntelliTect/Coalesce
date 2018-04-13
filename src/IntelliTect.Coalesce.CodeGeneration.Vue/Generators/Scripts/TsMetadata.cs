@@ -207,7 +207,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     {
                         if (prop.Type.IsCollection)
                         {
-                            if (prop.Object.PrimaryKey != null)
+                            if (prop.Object.PrimaryKey != null && prop.InverseProperty != null)
                             {
                                 // Collection navigations
                                 // TS Type: "ModelCollectionNavigationProperty"
@@ -216,7 +216,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             }
                             else
                             {
-                                // Not sure if this case is even possible (Object is DB mapped, but has no PK), but whatever.
+                                // Value collection of models that have no relational context.
                                 // TS Type: "BasicCollectionProperty"
                                 b.StringProp("role", "value");
                             }

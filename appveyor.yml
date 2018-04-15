@@ -6,7 +6,7 @@ branches:
 image: Visual Studio 2017
 configuration: Debug
 environment:
-  nodejs_version: "Current"
+  nodejs_version: "9"
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
   - '%LocalAppData%\Yarn\cache'
@@ -16,7 +16,7 @@ before_build:
   - cmd: dotnet restore
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
   - cmd: cd ./src/coalesce-vue && yarn && yarn build
-  - cmd: yarn add gulp-cli webpack-cli --global
+  - cmd: yarn global add gulp-cli webpack-cli
   # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
   # I don't want to add gulp to Coalesce.Web.Vue
   - cmd: cd ./src/Coalesce.Web && gulp coalesce-ko

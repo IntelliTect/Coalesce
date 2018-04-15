@@ -260,12 +260,12 @@ ko.bindingHandlers.select2Ajax = {
 // Multi-select Select2 binding that uses an AJAX call for the list of valid values.
 ko.bindingHandlers.select2AjaxMultiple = {
     init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var url = allBindings.get('url');
-        var itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
+        const url = allBindings.get('url');
+        const itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
 
         // 'idFieldName' was the old name, kept for backwards compat. 'idField' is the new name.
-        var idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
-        var textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textField'));
+        const idField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('idFieldName') || allBindings.get('idField'));
+        const textField = Coalesce.Utilities.lowerFirstLetter(allBindings.get('textFieldName') || allBindings.get('textField'));
 
         if (!url) throw "select2AjaxMultiple requires additional binding 'url'";
         if (!itemViewModel) throw "select2AjaxMultiple requires additional binding 'itemViewModel'."
@@ -273,14 +273,13 @@ ko.bindingHandlers.select2AjaxMultiple = {
         if (!idField) throw "select2AjaxMultiple requires additional binding 'idField'";
         if (!textField) throw "select2AjaxMultiple requires additional binding 'textField'";
 
-        var selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
-        var format = allBindings.has("format") ? allBindings.get("format") : '{0}';
-        var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
-        var allowClear = allBindings.get('allowClear') || true
-        var placeholder = $(element).attr('placeholder') || "select";
-        var updating = false;
-        var pageSize = allBindings.get('pageSize') || 25;
+        const selectionFormat = allBindings.has("selectionFormat") ? allBindings.get("selectionFormat") : '{0}';
+        const format = allBindings.has("format") ? allBindings.get("format") : '{0}';
+        const selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
+        const openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false;
+        const allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
+        const placeholder = $(element).attr('placeholder') || "select";
+        const pageSize = allBindings.get('pageSize') || 25;
 
         interface ResultItem {
             id: any,
@@ -455,11 +454,12 @@ ko.bindingHandlers.select2AjaxMultiple = {
 // Select2 binding for a string value to show a list of other values
 ko.bindingHandlers.select2AjaxText = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var url = allBindings.get('url');
-        var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
-        var allowClear = allBindings.get('allowClear') || true
-        var placeholder = $(element).attr('placeholder') || "select";
+        const url = allBindings.get('url');
+        const selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
+        const openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
+        const allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
+        const placeholder = $(element).attr('placeholder') || "select";
+        const resultField = allBindings.has("resultField") ? allBindings.get("resultField") : null;
 
         var myParams: any;
 
@@ -515,6 +515,14 @@ ko.bindingHandlers.select2AjaxText = {
                         }
 
                         for (let item of items) {
+                            if (typeof item === "object" && resultField) {
+                                item = item[resultField];
+                            }
+                            
+                            if (item === undefined || item === null) {
+                                continue;
+                            }
+
                             if (item == myParams.term) {
                                 perfectMatch = true;
                                 result.push({ id: item, text: item, selected: true });

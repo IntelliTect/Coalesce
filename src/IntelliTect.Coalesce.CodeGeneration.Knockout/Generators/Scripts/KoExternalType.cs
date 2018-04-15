@@ -82,17 +82,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line("// Load the properties.");
                 foreach (PropertyViewModel prop in Model.ClientProperties)
                 {
+                    // DB-mapped viewmodels can't have an external type as a parent.
+                    // There's no strong reason for this restriction other than that 
+                    // the code just doesn't support it at the moment.
+                    var parentVar = prop.PureTypeOnContext ? "undefined" : "this";
+
                     if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
                     {
                         b.Line($"if (data.{prop.JsonName} != null) {{");
                         b.Line("// Merge the incoming array");
                         if (prop.Object.PrimaryKey != null)
                         {
-                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, \'{prop.Object.PrimaryKey.JsVariable}\', ViewModels.{prop.Object.ViewModelClassName}, self, true);");
+                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, \'{prop.Object.PrimaryKey.JsVariable}\', ViewModels.{prop.Object.ViewModelClassName}, {parentVar}, true);");
                         }
                         else
                         {
-                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, null, ViewModels.{prop.Object.ViewModelClassName}, this, true);");
+                            b.Indented($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, null, ViewModels.{prop.Object.ViewModelClassName}, {parentVar}, true);");
                         }
                         b.Line("}");
                     }
@@ -105,8 +110,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     }
                     else if (prop.IsPOCO)
                     {
+
                         b.Line($"if (!this.{prop.JsVariable}()){{");
-                        b.Indented($"this.{prop.JsVariable}(new {prop.Object.ViewModelClassName}(data.{prop.JsonName}, this));");
+                        b.Indented($"this.{prop.JsVariable}(new {prop.Object.ViewModelClassName}(data.{prop.JsonName}, {parentVar}));");
                         b.Line("} else {");
                         b.Indented($"this.{prop.JsVariable}()!.loadFromDto(data.{prop.JsonName});");
                         b.Line("}");

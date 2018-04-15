@@ -135,9 +135,16 @@ select2AjaxText
 
             - A raw :ts:`string[]`
             - An object that conforms to :ts:`{ list: string[] }`
-            - An object that conforms to  :ts:`{ object: string[] }`
+            - An object that conforms to :ts:`{ object: string[] }`
+            - An object that conforms to :ts:`{ list: { [prop: string]: string } }` where the value given to ``resultField`` is a valid property of the returned objects.
+            - An object that conforms to :ts:`{ object: { [prop: string]: string } }` where the value given to ``resultField`` is a valid property of the returned objects.
 
         The url will also be passed a ``search`` parameter and a ``page`` parameter appended to the query string. The chosen endpoint is responsible for implementing this functionality. Page size is expected to be some fixed value. Implementer should anticipate that the requested page may be out of range.
+
+        The cases listed above that accept arrays of objects (as opposed to arrays of strings) require that the ``resultField`` binding is also used. These are designed for obtaining string values from objects obtained from the standard ``list`` endpoint.
+
+    resultField
+        If provided, specifies a field on the objects returned from the API to pull the string values from. See examples in ``url`` above.
 
     selectOnClose
         Directly maps to select2 option ``selectOnClose``

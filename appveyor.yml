@@ -2,7 +2,7 @@ version: 2.0.0-alpha-{build}
 branches:
   only:
   - master
-  - 2.0
+  - dev
 image: Visual Studio 2017
 configuration: Debug
 cache: 

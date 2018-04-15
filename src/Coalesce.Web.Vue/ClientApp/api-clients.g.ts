@@ -6,6 +6,87 @@ import * as $format from 'date-fns/format'
 import { AxiosClient, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
 
+export class CaseApiClient extends ModelApiClient<$models.Case> {
+  constructor() { super($metadata.Case) }
+  public getSomeCases($config?: AxiosRequestConfig) {
+    const $method = this.$metadata.methods.getSomeCases
+    const $params = this.$mapParams($method, {
+    })
+    return AxiosClient
+      .post(
+        `/${this.$metadata.controllerRoute}/GetSomeCases`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<$models.Case[]>>>(r => this.$hydrateItemResult(r, $method.return))
+  }
+  
+  public getAllOpenCasesCount($config?: AxiosRequestConfig) {
+    const $method = this.$metadata.methods.getAllOpenCasesCount
+    const $params = this.$mapParams($method, {
+    })
+    return AxiosClient
+      .post<ItemResult<number>>(
+        `/${this.$metadata.controllerRoute}/GetAllOpenCasesCount`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<number>>>(r => this.$hydrateItemResult(r, $method.return))
+  }
+  
+  public randomizeDatesAndStatus($config?: AxiosRequestConfig) {
+    const $method = this.$metadata.methods.randomizeDatesAndStatus
+    const $params = this.$mapParams($method, {
+    })
+    return AxiosClient
+      .post<ItemResult<void>>(
+        `/${this.$metadata.controllerRoute}/RandomizeDatesAndStatus`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<void>>>(r => this.$hydrateItemResult(r, $method.return))
+  }
+  
+  public getCaseSummary($config?: AxiosRequestConfig) {
+    const $method = this.$metadata.methods.getCaseSummary
+    const $params = this.$mapParams($method, {
+    })
+    return AxiosClient
+      .post(
+        `/${this.$metadata.controllerRoute}/GetCaseSummary`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<$models.CaseSummary>>>(r => this.$hydrateItemResult(r, $method.return))
+  }
+  
+}
+
+
+export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
+  constructor() { super($metadata.CaseProduct) }
+}
+
+
+export class CompanyApiClient extends ModelApiClient<$models.Company> {
+  constructor() { super($metadata.Company) }
+  public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig) {
+    const $method = this.$metadata.methods.getCertainItems
+    const $params = this.$mapParams($method, {
+      isDeleted,
+    })
+    return AxiosClient
+      .post(
+        `/${this.$metadata.controllerRoute}/GetCertainItems`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<$models.Company[]>>>(r => this.$hydrateItemResult(r, $method.return))
+  }
+  
+}
+
+
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig) {
@@ -178,89 +259,8 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
 }
 
 
-export class CaseApiClient extends ModelApiClient<$models.Case> {
-  constructor() { super($metadata.Case) }
-  public getSomeCases($config?: AxiosRequestConfig) {
-    const $method = this.$metadata.methods.getSomeCases
-    const $params = this.$mapParams($method, {
-    })
-    return AxiosClient
-      .post(
-        `/${this.$metadata.controllerRoute}/GetSomeCases`,
-        qs.stringify($params),
-        this.$options(undefined, $config)
-      )
-      .then<AxiosResponse<ItemResult<$models.Case[]>>>(r => this.$hydrateItemResult(r, $method.return))
-  }
-  
-  public getAllOpenCasesCount($config?: AxiosRequestConfig) {
-    const $method = this.$metadata.methods.getAllOpenCasesCount
-    const $params = this.$mapParams($method, {
-    })
-    return AxiosClient
-      .post<ItemResult<number>>(
-        `/${this.$metadata.controllerRoute}/GetAllOpenCasesCount`,
-        qs.stringify($params),
-        this.$options(undefined, $config)
-      )
-      .then<AxiosResponse<ItemResult<number>>>(r => this.$hydrateItemResult(r, $method.return))
-  }
-  
-  public randomizeDatesAndStatus($config?: AxiosRequestConfig) {
-    const $method = this.$metadata.methods.randomizeDatesAndStatus
-    const $params = this.$mapParams($method, {
-    })
-    return AxiosClient
-      .post<ItemResult<void>>(
-        `/${this.$metadata.controllerRoute}/RandomizeDatesAndStatus`,
-        qs.stringify($params),
-        this.$options(undefined, $config)
-      )
-      .then<AxiosResponse<ItemResult<void>>>(r => this.$hydrateItemResult(r, $method.return))
-  }
-  
-  public getCaseSummary($config?: AxiosRequestConfig) {
-    const $method = this.$metadata.methods.getCaseSummary
-    const $params = this.$mapParams($method, {
-    })
-    return AxiosClient
-      .post(
-        `/${this.$metadata.controllerRoute}/GetCaseSummary`,
-        qs.stringify($params),
-        this.$options(undefined, $config)
-      )
-      .then<AxiosResponse<ItemResult<$models.CaseSummary>>>(r => this.$hydrateItemResult(r, $method.return))
-  }
-  
-}
-
-
-export class CompanyApiClient extends ModelApiClient<$models.Company> {
-  constructor() { super($metadata.Company) }
-  public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig) {
-    const $method = this.$metadata.methods.getCertainItems
-    const $params = this.$mapParams($method, {
-      isDeleted,
-    })
-    return AxiosClient
-      .post(
-        `/${this.$metadata.controllerRoute}/GetCertainItems`,
-        qs.stringify($params),
-        this.$options(undefined, $config)
-      )
-      .then<AxiosResponse<ItemResult<$models.Company[]>>>(r => this.$hydrateItemResult(r, $method.return))
-  }
-  
-}
-
-
 export class ProductApiClient extends ModelApiClient<$models.Product> {
   constructor() { super($metadata.Product) }
-}
-
-
-export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
-  constructor() { super($metadata.CaseProduct) }
 }
 
 

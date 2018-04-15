@@ -8,7 +8,7 @@ module ListViewModels {
     export namespace PersonDataSources {
         
         /** People whose last name starts with B or c */
-        export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> {
+        export class BOrCPeople extends Coalesce.DataSource<ViewModels.Person> {
         }
         export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
         }

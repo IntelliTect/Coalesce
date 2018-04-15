@@ -1,4 +1,8 @@
-import { Domain, getEnumMeta, ModelType, ObjectType, PrimitiveProperty, ModelProperty, ForeignKeyProperty, PrimaryKeyProperty } from 'coalesce-vue/lib/metadata' 
+import {
+  Domain, getEnumMeta, ModelType, ObjectType,
+  PrimitiveProperty, ModelReferenceNavigationProperty, ForeignKeyProperty, PrimaryKeyProperty
+} from 'coalesce-vue/lib/metadata'
+
 
 const domain: Domain = { enums: {}, types: {}, services: {} }
 export const Genders = domain.enums.Genders = {
@@ -73,7 +77,7 @@ export const Case = domain.types.Case = {
       role: "foreignKey",
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
-      get navigationProp() { return (domain.types.Case as ModelType).props.assignedTo as ModelProperty },
+      get navigationProp() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
     },
     assignedTo: {
       name: "assignedTo",
@@ -91,7 +95,7 @@ export const Case = domain.types.Case = {
       role: "foreignKey",
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
-      get navigationProp() { return (domain.types.Case as ModelType).props.reportedBy as ModelProperty },
+      get navigationProp() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
     },
     reportedBy: {
       name: "reportedBy",
@@ -290,7 +294,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       role: "foreignKey",
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
       get principalType() { return (domain.types.Case as ModelType) },
-      get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelProperty },
+      get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
     },
     case: {
       name: "case",
@@ -308,7 +312,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       role: "foreignKey",
       get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Product as ModelType) },
-      get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelProperty },
+      get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
     },
     product: {
       name: "product",
@@ -551,7 +555,7 @@ export const Person = domain.types.Person = {
       role: "foreignKey",
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Company as ModelType) },
-      get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelProperty },
+      get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
     },
     company: {
       name: "company",

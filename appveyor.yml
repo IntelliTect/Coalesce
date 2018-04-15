@@ -13,6 +13,12 @@ nuget:
 before_build:
   - cmd: dotnet restore
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
+  - cmd: cd ./src/coalesce-vue && yarn && yarn build
+  - cmd: yarn add gulp-cli webpack-cli --global
+  # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
+  # I don't want to add gulp to Coalesce.Web.Vue
+  - cmd: cd ./src/Coalesce.Web && gulp coalesce-ko
+  - cmd: cd ./src/Coalesce.Web && gulp coalesce-vue
 # Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
 # cd ..\Coalesce.Domain
 # dotnet ef database update --framework netcoreapp2.0

@@ -14,6 +14,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
+            // TODO: Something other than "ClientApp" as the default?
             yield return Generator<Scripts>()
                 .WithModel(Model)
                 .AppendOutputPath("ClientApp");

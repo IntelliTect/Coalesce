@@ -15,7 +15,7 @@ import { AxiosClient } from 'coalesce-vue'
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 
-AxiosClient.defaults.baseURL = 'http://localhost:11202/api/'
+AxiosClient.defaults.baseURL = '/api'
 AxiosClient.defaults.withCredentials = true
 
 const routes = [

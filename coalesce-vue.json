@@ -6,11 +6,5 @@
     "projectFile": "./src/Coalesce.Domain/Coalesce.Domain.csproj"
   },
 
-  "rootGenerator": "Vue",
-
-  "generatorConfig": {
-    "Views": {
-      "disabled": false
-    }
-  }
+  "rootGenerator": "Vue"
 }

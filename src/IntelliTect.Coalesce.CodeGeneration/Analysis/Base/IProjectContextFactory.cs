@@ -8,6 +8,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base
 {
     public interface IProjectContextFactory
     {
-        ProjectContext CreateContext(ProjectConfiguration projectConfig);
+        ProjectContext CreateContext(ProjectConfiguration projectConfig, bool restore = false);
     }
 }

@@ -96,7 +96,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             var projectPath = _context.ProjectFilePath;
 
             Logger?.LogInformation($"   {(projectPath)}: Restoring packages");
-            string lastOutputLine = null;
+            var outputLines = new List<string>();
             var result = Command.CreateDotNet(
                 "restore",
                 new string[]
@@ -105,14 +105,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                     "--verbosity", "quiet",
                     $"/p:nowarn=NU1603"
                 })
-                .OnOutputLine(l => { lastOutputLine = l; Logger.LogInformation(l); })
-                .OnErrorLine(l => { lastOutputLine = l; Logger.LogError(l); })
+                .OnOutputLine(l => { outputLines.Add(l); Logger.LogDebug(l); })
+                .OnErrorLine(l => { outputLines.Add(l); Logger.LogError(l); })
                 .Execute();
             if (result.ExitCode != 0)
             {
                 throw new ProjectAnalysisException(
                     $"{result.StartInfo.FileName} {result.StartInfo.Arguments} exited with code {result.ExitCode}",
-                    lastOutputLine);
+                    outputLines);
             }
 
             return this;
@@ -152,17 +152,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             };
             if (Framework != null) args.Add($"/p:TargetFramework={Framework}");
 
-            string lastOutputLine = null;
+            var outputLines = new List<string>();
             var result = Command.CreateDotNet("msbuild", args)
-                .OnOutputLine(l => { lastOutputLine = l; Logger.LogInformation(l); })
-                .OnErrorLine(l => { lastOutputLine = l; Logger.LogError(l); })
+                .OnOutputLine(l => { outputLines.Add(l); Logger.LogDebug(l); })
+                .OnErrorLine(l => { outputLines.Add(l); Logger.LogError(l); })
                 .Execute();
 
             if (result.ExitCode != 0)
             {
                 throw new ProjectAnalysisException(
                     $"Evaluating & building dependencies exited with code {result.ExitCode}",
-                    lastOutputLine);
+                    outputLines);
             }
             try
             {

@@ -11,11 +11,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis
         {
         }
 
-        public ProjectAnalysisException(string message, string lastOutputLine) : base(message)
+        public ProjectAnalysisException(string message, ICollection<string> outputLines) : base(message)
         {
-            LastOutputLine = lastOutputLine ?? "";
+            OutputLines = outputLines;
         }
 
-        public string LastOutputLine { get; }
+        public ICollection<string> OutputLines { get; }
     }
 }

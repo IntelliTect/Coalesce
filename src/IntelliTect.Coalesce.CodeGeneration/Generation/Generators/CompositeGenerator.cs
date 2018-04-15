@@ -95,8 +95,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             await Task.WhenAll(fileGenerators
                 // Kick off generate tasks in parallel. 
-                // This is especially essential for any generators that complete synchronously
-                // (including all string builder generators)
                 .AsParallel()
                 .Select(g => g.GenerateAsync())
 

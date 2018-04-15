@@ -117,55 +117,109 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         private async Task LoadProjects(ServiceProvider provider, ILogger<GenerationExecutor> logger, GenerationContext genContext)
         {
-            const int maxProjectLoadRetries = 3;
-            const int projectLoadRetryDelayMs = 2000;
-            for (int retry = 1; retry <= maxProjectLoadRetries; retry++)
+            const int maxProjectLoadRetries = 10;
+            const int projectLoadRetryDelayMs = 1000;
+
+            await Task.WhenAll(
+                Task.Run(async () =>
+                {
+                    genContext.WebProject = await TryLoadProject(Config.WebProject);
+                }),
+                Task.Run(async () =>
+                {
+                    genContext.DataProject = await TryLoadProject(Config.DataProject);
+                })
+            );
+
+            async Task<ProjectContext> TryLoadProject(ProjectConfiguration config)
             {
-                try
+                bool restorePackages = false;
+                for (int retry = 1; retry <= maxProjectLoadRetries; retry++)
                 {
-                    await Task.WhenAll(
-                        Task.Run(() =>
-                        {
-                            genContext.WebProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.WebProject);
-                        }),
-                        Task.Run(() =>
-                        {
-                            genContext.DataProject = provider.GetRequiredService<IProjectContextFactory>().CreateContext(Config.DataProject);
-                        })
-                    );
-
-                    // If we got here, it worked. Stop looping.
-                    break;
-                }
-                catch (ProjectAnalysisException ex)
-                {
-                    // If we reached max retries, bail.
-                    if (retry == maxProjectLoadRetries) throw;
-
-                    // Dumbly check what the error looks like, attempt retries on errors that are possibly recoverable.
-                    // Usually, these are because some other run of msbuild is doing bad things to files that we need.
-                    // Related: There are way to many phrasings of "file not there" used by MSBuild.
-                    string lastLine = ex.LastOutputLine.ToLowerInvariant();
-                    if (lastLine.Contains("not copy the file")
-                     || lastLine.Contains("not found")
-                     || lastLine.Contains("could not find")
-                     || lastLine.Contains("could not be found")
-                     || lastLine.Contains("msb3491")
-                     || lastLine.Contains("being used by another process")
-                    )
+                    try
                     {
-                        // Error message looks like something that might go away if we try again. Lets try again in a second.
-
-                        logger.LogWarning(ex, $"Error analyzing projects. Attempting retry {retry} of {maxProjectLoadRetries} in {projectLoadRetryDelayMs}ms");
-                        await Task.Delay(projectLoadRetryDelayMs);
+                        return provider.GetRequiredService<IProjectContextFactory>().CreateContext(config, restorePackages);
                     }
-                    else
+                    catch (ProjectAnalysisException ex)
                     {
-                        // Doesn't look like anything to me. Just bail.
-                        throw;
-                    }
+                        bool shouldRetry = false;
+                        restorePackages = false;
 
+                        void LogAllOutputAsError()
+                        {
+                            foreach (var line in ex.OutputLines)
+                            {
+                                logger.LogError(line);
+                            }
+                        }
+
+                        // If we reached max retries, bail.
+                        if (retry == maxProjectLoadRetries)
+                        {
+                            LogAllOutputAsError();
+                            throw;
+                        }
+
+                        bool TestLinesForRetry(params string[] lineSubstrings)
+                        {
+                            var triggers = ex.OutputLines
+                                .Where(l => lineSubstrings.Any(sub => l.ToLowerInvariant().Contains(sub.ToLowerInvariant().Trim())))
+                                .ToList();
+
+                            if (triggers.Any())
+                            {
+                                foreach (var line in triggers)
+                                {
+                                    // Just log as debug - if all our retries ultimately fail,
+                                    // all the output will get logged as errors anyway.
+                                    logger.LogDebug(line);
+                                }
+                                return true;
+                            }
+
+                            return false;
+                        }
+
+                        // Dumbly check what the error looks like, attempt retries on errors that are possibly recoverable.
+                        // Usually, these are because some other run of msbuild is doing bad things to files that we need.
+                        // Related: There are way to many phrasings of "file not there" used by MSBuild.
+
+                        // First, check for errors that can probably be fixed with a package restore.
+                        if (TestLinesForRetry(
+                            "run a nuget package restore",
+                            "The type or namespace name 'System' could not be found in the global namespace"
+                        )) {
+                            shouldRetry = true;
+                            restorePackages = true;
+                        }
+                        else if (TestLinesForRetry(
+                             "not copy the file",
+                             "not found",
+                             "could not find",
+                             "could not be found",
+                             "msb3491",
+                             "being used by another process"
+                        )) {
+                            shouldRetry = true;
+                        }
+
+                        if (shouldRetry)
+                        {
+                            // Error message looks like something that might go away if we try again. Lets try again in a second.
+                            await Task.Delay(projectLoadRetryDelayMs);
+                            logger.LogWarning(ex, $"Error analyzing {config.ProjectFile}, probably due to file contention. Attempting retry {retry} of {maxProjectLoadRetries}. (use '--verbosity debug' to see errors)");
+                        }
+                        else
+                        {
+                            // Doesn't look like anything to me. Log all output and bail.
+                            LogAllOutputAsError();
+                            throw;
+                        }
+                    }
                 }
+
+                // Not possible to reach, but need to satisfy the compiler.
+                return null;
             }
         }
     }

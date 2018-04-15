@@ -18,14 +18,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public ILogger Logger { get; }
 
-        public ProjectContext CreateContext(ProjectConfiguration projectConfig)
+        public ProjectContext CreateContext(ProjectConfiguration projectConfig, bool restore = false)
         {
             var context = new RoslynProjectContext(projectConfig);
 
-            context.MsBuildProjectContext =
-                new MsBuildProjectContextBuilder(Logger, context)
-                //.RestoreProjectPackages()
-                .BuildProjectContext();
+            var builder = new MsBuildProjectContextBuilder(Logger, context);
+            if (restore)
+            {
+                builder = builder.RestoreProjectPackages();
+            }
+
+            context.MsBuildProjectContext = builder.BuildProjectContext();
 
             return context;
         }

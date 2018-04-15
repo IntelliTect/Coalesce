@@ -12,7 +12,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
 {
     public class ReflectionProjectContextFactory : IProjectContextFactory
     {
-        public ProjectContext CreateContext(ProjectConfiguration projectConfig)
+        public ProjectContext CreateContext(ProjectConfiguration projectConfig, bool restore = false)
         {
             var context = new ReflectionProjectContext(projectConfig);
             context.AssemblyFileInfo = ResolveAssembly(projectConfig);

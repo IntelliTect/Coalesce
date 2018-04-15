@@ -35,26 +35,47 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 Logger?.LogDebug($"Skipped gen of {this}, {nameof(ShouldGenerate)} returned false");
                 return;
             }
-            
-            using (var contents = await GetOutputAsync())
+
+            // Start reading the existing output file while we generate the contents.
+            string outputFile = EffectiveOutputPath;
+            var outputExistingContents = Task.Run(async () =>
+            {
+                // Throw the creation of the directory on this thread too for max parallelization.
+                Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+                if (File.Exists(outputFile))
+                {
+                    using (var stream = File.OpenRead(outputFile))
+                    {
+                        var length = (int)stream.Length; // I hope your existng files aren't > 2GB.
+                        var bytes = new byte[length];
+                        await stream.ReadAsync(bytes, 0, length);
+                        return bytes;
+                    }
+                }
+                else
+                {
+                    return new byte[0];
+                }
+            });
+
+            using (var contents = await GetOutputAsync().ConfigureAwait(false))
             {
                 Logger.LogTrace($"Got output for {this}");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(EffectiveOutputPath));
-
-                if (!await FileUtilities.HasDifferencesAsync(contents, EffectiveOutputPath))
+                if (!FileUtilities.HasDifferences(contents, await outputExistingContents))
                 {
                     Logger?.LogTrace($"Skipped write of {this}, existing file wasn't different");
                     return;
                 }
 
-                var isRegen = File.Exists(EffectiveOutputPath);
-                using (FileStream fileStream = new FileStream(EffectiveOutputPath, FileMode.Create, FileAccess.Write))
+                var isRegen = File.Exists(outputFile);
+                using (FileStream fileStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
                 {
                     contents.Seek(0, SeekOrigin.Begin);
-                    await contents.CopyToAsync(fileStream);
+                    await contents.CopyToAsync(fileStream).ConfigureAwait(false);
+                    await fileStream.FlushAsync();
 
-                    Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(EffectiveOutputPath));
+                    Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(outputFile));
                     Logger?.LogInformation($"{(isRegen ? "Reg" : "G")}enerated: {Uri.UnescapeDataString(relPath.OriginalString)}");
                 };
             }

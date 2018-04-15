@@ -117,6 +117,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
         /// <summary>
+        /// True if the type is supported by Coalesce as a key type.
+        /// </summary>
+        public bool IsValidKeyType => IsString || IsIntegral;
+
+        /// <summary>
         /// Best approximation of a TypeScript type definition for the type.
         /// </summary>
         public string TsType

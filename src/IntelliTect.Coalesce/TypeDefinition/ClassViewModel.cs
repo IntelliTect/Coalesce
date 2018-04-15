@@ -234,6 +234,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public PropertyViewModel PropertyByName(string key)
         {
+            if (string.IsNullOrEmpty(key)) return null;
             return Properties.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
         }
 

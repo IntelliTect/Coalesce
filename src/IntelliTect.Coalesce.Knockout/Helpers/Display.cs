@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using System.Linq;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.Knockout.Helpers
 {
@@ -19,14 +20,14 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                var result = $@"<a data-bind = 'attr: {{href: {prop.ListEditorUrlName}}}, text: {prop.JsVariableForBinding()}().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                var result = $@"<a data-bind = 'attr: {{href: {prop.ListEditorUrlName()}}}, text: {prop.JsVariableForBinding()}().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 return new HtmlString(result);
             }
             else if (editable && prop.IsClientWritable && !prop.IsInternalUse)
             {
                 if (prop.Type.IsDate)
                 {
-                    return Knockout.DateTime(prop.JsVariableForBinding(), prop.DateFormat);
+                    return Knockout.DateTime(prop.JsVariableForBinding(), prop.IsDateOnly ? "M/D/YYYY" : "M/D/YYYY h:mm a");
                 }
                 else if (prop.Type.IsEnum)
                 {
@@ -93,7 +94,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 if (prop.PureTypeOnContext)
                 {
-                    return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                    return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName() + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 }
 
                 return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: " + prop.JsVariableForBinding() + @"().length + "" Items""' ></div>";
@@ -112,7 +113,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                         {
                             if (!string.IsNullOrWhiteSpace(areaName))
                             {
-                                return $"@(Knockout.SelectForManyToMany<{prop.Parent.FullyQualifiedName}>(p => p.{prop.Name}, areaName: \"StokesTest\"))";
+                                return $"@(Knockout.SelectForManyToMany<{prop.Parent.FullyQualifiedName}>(p => p.{prop.Name}, areaName: \"{areaName.EscapeStringLiteralForCSharp()}\"))";
                             }
                             else
                             {

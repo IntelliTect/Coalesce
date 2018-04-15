@@ -12,21 +12,25 @@ using Microsoft.CodeAnalysis;
 using System.Text;
 using IntelliTect.Coalesce.Helpers.Search;
 using System.Linq.Expressions;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class PropertyViewModel : IAttributeProvider, IValueViewModel
     {
+        private const string ConventionalIdSuffix = "Id";
+
         /// <summary>
-        /// Returns whether or not the property may be exposed to the client.
+        /// Name of the property
         /// </summary>
-        public bool IsClientProperty => !IsInternalUse && HasGetter;
+        public abstract string Name { get; }
 
         public TypeViewModel Type { get; protected set; }
 
         public abstract string Comment { get; }
 
         public abstract bool HasGetter { get; }
+
         public abstract bool HasSetter { get; }
 
         public abstract bool IsVirtual { get; }
@@ -39,26 +43,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public virtual PropertyInfo PropertyInfo => throw new InvalidOperationException("PropertyInfo not available in the current context");
 
         /// <summary>
-        /// Returns true if this property has the InternalUse Attribute 
-        /// </summary>
-        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
-
-        /// <summary>
         /// Order rank of the field in the model.
         /// </summary>
         public int ClassFieldOrder { get; internal set; }
 
-
-        /// <summary>
-        /// Name of the property
-        /// </summary>
-        public abstract string Name { get; }
-
-        /// <summary>
-        /// Name of the property sent by Json over the wire. Camel Cased Name
-        /// </summary>
-        public string JsonName => Name.ToCamelCase();
-        
         /// <summary>
         /// The class that the property was declared on. 
         /// For the class that is the context in which the property was requested,
@@ -71,6 +59,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Not nessecarily the class that the property is declared on. For that, use <see cref="Parent"/>
         /// </summary>
         public ClassViewModel EffectiveParent { get; protected set; }
+
+        /// <summary>
+        /// Name of the property sent by Json over the wire. Camel Cased Name
+        /// </summary>
+        public string JsonName => Name.ToCamelCase();
+
+        /// <summary>
+        /// Returns true if this property has the InternalUse Attribute 
+        /// </summary>
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
+
+        /// <summary>
+        /// Returns whether or not the property may be exposed to the client.
+        /// </summary>
+        public bool IsClientProperty => !IsInternalUse && HasGetter;
 
         /// <summary>
         /// Gets the type name without any collection around it.
@@ -113,22 +116,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsManytoManyCollection => Type.IsCollection && HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
-        /// True if this property has the ClientValidation Attribute
-        /// </summary>
-        public bool HasClientValidation => HasAttribute<ClientValidationAttribute>();
-
-        /// <summary>
         /// True if the client should save data when there is a ClientValidation error. False is default.
         /// </summary>
-        public bool ClientValidationAllowSave
-        {
-            get
-            {
-                if (!HasClientValidation) return false;
-                var allowSave = this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.AllowSave);
-                return allowSave.HasValue && allowSave.Value;
-            }
-        }
+        public bool ClientValidationAllowSave =>
+            this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.AllowSave) ?? false;
 
         /// <summary>
         /// Returns the name of the collection to map as a direct many-to-many collection
@@ -183,8 +174,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string DateFormat => IsDateOnly ? "M/D/YYYY" : "M/D/YYYY h:mm a";
-
         /// <summary>
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
@@ -197,7 +186,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
-        public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType) ?? false && IsPOCO);
+        public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.
@@ -368,9 +357,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;
-                else if (string.Equals(Name, "Id", StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(Name, ConventionalIdSuffix, StringComparison.InvariantCultureIgnoreCase))
                     return true;
-                else if (string.Equals(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(Name, Parent.Name + ConventionalIdSuffix, StringComparison.InvariantCultureIgnoreCase))
                     return true;
                 else if (Parent.IsDto && Parent.BaseViewModel != null && string.Equals(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase))
                     return true;
@@ -380,99 +369,80 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns true if this property is a foreign key.
+        /// Returns true if this property is a foreign key. Guarantees that <see cref="ReferenceNavigationProperty"/> is not null.
         /// </summary>
-        public bool IsForeignKey
-        {
-            // TODO: should this be the same as IsPrimaryKey
-            get
-            {
-                if (IsPOCO) return false;
-
-                // Types that aren't DB mapped don't have properties that can be considered keys to anything.
-                if (!Parent.IsDbMappedType) return false;
-
-                // If the foreign key has a navigation property that is on the context, this is a foreign key
-                if (IdPropertyObjectProperty?.PureTypeOnContext ?? false)
-                    return true;
-
-                return false;
-            }
-        }
-
+        public bool IsForeignKey => ReferenceNavigationProperty != null;
 
 
         /// <summary>
-        /// If this is an object, returns the name of the property that holds the ID. 
+        /// If this is a reference navigation property, returns the property that holds the foreign key. 
         /// </summary>
-        public string ObjectIdPropertyName
+        public PropertyViewModel ForeignKeyProperty
         {
             get
             {
-                // Use the foreign key attribute
-                var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
-                if (value != null) return value;
-                // See if this is a one-to-one using the parent's key
-                // Look up the other object and check the key
-                var vm = PureType.ClassViewModel;
-                if (vm != null)
+                // ForeignKeyProperty only has meaning on reference navigation props.
+                // If this prop isn't a POCO, that definitely isn't true.
+                if (!Type.IsPOCO) return null;
+
+                // Types/props that aren't DB mapped don't have properties that have relational meaning.
+                if (!IsDbMapped || !Parent.IsDbMappedType) return null;
+
+                var name =
+                    // Use the foreign key attribute
+                    this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
+
+                    // Use the ForeignKey Attribute on the key property if it is there.
+                    ?? Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+
+                    // See if this is a one-to-one using the parent's key
+                    // Look up the other object and check the key
+                    ?? (Object?.IsOneToOne ?? false ? Parent.PrimaryKey.Name : null)
+
+                    // Look for a property that follows convention.
+                    ?? Name + ConventionalIdSuffix;
+
+                var prop = Parent.PropertyByName(name);
+                if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)
                 {
-                    if (vm.IsOneToOne)
-                    {
-                        return Parent.PrimaryKey.Name;
-                    }
+                    return null;
                 }
-                // Look on the Object for the key in case of a commonly keyed one-to-one
-                return PureType.Name + "Id";
-            }
-        }
 
-
-        /// <summary>
-        /// If this is an object, returns the property that holds the ID. 
-        /// </summary>
-        public PropertyViewModel ObjectIdProperty => Parent.PropertyByName(ObjectIdPropertyName);
-
-
-        public string IdFieldCollection => PureType + (IsManytoManyCollection ? "Ids" : "Id");
-
-        /// <summary>
-        /// Gets the name of the property that this ID property points to.
-        /// </summary>
-        private string IdPropertyObjectPropertyName
-        {
-            get
-            {
-                // Use the ForeignKey Attribute if it is there.
-                var value = this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name);
-                if (value != null) return value;
-
-                // Use the ForeignKey Attribute on the object property if it is there.
-                var prop = Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name));
-                if (prop != null) return prop.Name;
-
-                // Else, by convention remove the Id at the end.
-                if (Name.EndsWith("Id")) return Name.Substring(0, Name.Length - 2);
-
-                return null;
+                return prop;
             }
         }
 
         /// <summary>
         /// Gets the property that is the object reference for this ID property.
         /// </summary>
-        public PropertyViewModel IdPropertyObjectProperty
+        public PropertyViewModel ReferenceNavigationProperty
         {
             get
             {
-                if (string.IsNullOrEmpty(IdPropertyObjectPropertyName))
+                // ReferenceNavigationProperty only has meaning on foreign key props.
+                // Eliminate out anything that can't be a key right away.
+                if (!Type.IsValidKeyType) return null;
+
+                // Types/props that aren't DB mapped don't have properties that have relational meaning.
+                if (!IsDbMapped || !Parent.IsDbMappedType) return null;
+
+                var name =
+                    // Use the ForeignKey Attribute if it is there.
+                    this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
+
+                    // Use the ForeignKey Attribute on the object property if it is there.
+                    ?? Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+
+                    // Else, by convention remove the Id at the end.
+                    ?? (Name.EndsWith(ConventionalIdSuffix) ? Name.Substring(0, Name.Length - ConventionalIdSuffix.Length) : null);
+
+                var prop = Parent.PropertyByName(name);
+                if (prop == null || !prop.IsPOCO || !prop.IsDbMapped)
                 {
                     return null;
                 }
-                else
-                {
-                    return Parent.PropertyByName(IdPropertyObjectPropertyName);
-                }
+
+                return prop;
             }
         }
 
@@ -513,27 +483,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        /// <summary>
-        /// Returns the URL for the List Editor with the ???Id= query string.
-        /// Ex: Adult/table?filter.adultId=
-        /// </summary>
-        public string ListEditorUrl
-        {
-            get
-            {
-                if (InverseIdProperty == null) { return null; }
-                return string.Format("{0}/Table?filter.{1}=", Object.ControllerName, InverseIdProperty.JsonName);
-            }
-        }
-
-        /// <summary>
-        /// Returns the core URL for the List Editor.
-        /// </summary>
-        public string ListEditorUrlName => string.Format("{0}ListUrl", JsVariable);
-
-        public bool HasInverseProperty => HasAttribute<InversePropertyAttribute>();
-
         /// <summary>
         /// If this property is a collection navigation property (the "many"), 
         /// returns the reference navigation property on the collected type that represents the 
@@ -558,7 +507,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// For a many to many collection this is the ID reference to this object from the contained object.
+        /// For a collection navigation property, this is the ID reference to this object from the contained object.
         /// </summary>
         public PropertyViewModel InverseIdProperty
         {
@@ -567,7 +516,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var inverseProperty = InverseProperty;
                 if (inverseProperty != null)
                 {
-                    return inverseProperty.ObjectIdProperty;
+                    return inverseProperty.ForeignKeyProperty;
                 }
                 return null;
             }
@@ -575,11 +524,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string ToString() => $"{Name} : {Type.FullyQualifiedName}";
 
-        public string SecurityToString()
-        {
-
-            return $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
-        }
+        public string SecurityToString() => $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
 
         public string SecurityEditToString()
         {
@@ -623,23 +568,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        /// <summary>
-        /// Object is not in the database, but hyndrated via other means.
-        /// </summary>
-        public bool IsExternal => IsPOCO && ObjectIdProperty != null && HasNotMapped;
-
-
         /// <summary>
         /// Has the NotMapped attribute.
         /// </summary>
         public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
+
+        public bool IsDbMapped => !HasNotMapped && (Object?.IsDbMappedType ?? true);
 
         /// <summary>
         /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 
         /// </summary>
         public bool IsUrlFilterParameter => 
             IsClientProperty && !HasNotMapped && (Type.IsPrimitive || Type.IsDate);
+
 
         /// <summary>
         /// Returns a list of content views from the Includes attribute
@@ -660,6 +601,40 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Split(',')
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s));
+
+        /// <summary>
+        /// Returns the role the property plays in a relational model.
+        /// </summary>
+        public PropertyRole Role
+        {
+            get
+            {
+
+                if (IsPrimaryKey)
+                {
+                    return PropertyRole.PrimaryKey;
+                }
+                else if (IsForeignKey)
+                {
+                    return PropertyRole.ForeignKey;
+                }
+
+                var obj = Object;
+                if (obj != null && obj.IsDbMappedType)
+                {
+                    if (Type.IsCollection && obj.PrimaryKey != null && InverseProperty != null)
+                    {
+                        return PropertyRole.CollectionNavigation;
+                    }
+                    else if (ForeignKeyProperty != null)
+                    {
+                        return PropertyRole.ReferenceNavigation;
+                    }
+                }
+
+                return PropertyRole.Value;
+            }
+        }
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;

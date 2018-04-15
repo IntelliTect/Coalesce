@@ -398,7 +398,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             if (propertyModel != null)
             {
-                return SelectObject(propertyModel, placeholder, prefix, propertyModel.ObjectIdProperty == null ? !propertyModel.IsRequired : !propertyModel.ObjectIdProperty.IsRequired);
+                return SelectObject(propertyModel, placeholder, prefix, propertyModel.ForeignKeyProperty == null ? !propertyModel.IsRequired : !propertyModel.ForeignKeyProperty.IsRequired);
             }
             return HtmlString.Empty;
         }
@@ -464,7 +464,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                             <option>{5}</option>
                     </select >
                     ",
-                /*0*/ propertyModel.ObjectIdProperty.JsVariable,
+                /*0*/ propertyModel.ForeignKeyProperty.JsVariable,
                 /*1*/ propertyModel.PureType.ClassViewModel.ApiControllerClassName.Replace("Controller", ""),
                 /*2*/ propertyModel.Object.PrimaryKey.Name,
                 /*3*/ propertyModel.Object.ListTextProperty.Name,

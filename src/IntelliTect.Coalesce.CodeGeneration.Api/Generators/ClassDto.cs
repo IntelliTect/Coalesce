@@ -236,7 +236,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             {
                 // Only check the includes tree for things that are in the database.
                 // Otherwise, this would break IncludesExternal.
-                string treeCheck = property.Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{name})] != null)" : "";
+                string treeCheck = property.Type.ClassViewModel.HasDbSet 
+                    ? $"if (tree == null || tree[nameof({objectName}.{name})] != null)" 
+                    : "";
+
                 setter = $@"{treeCheck}
                 {objectName}.{name} = obj.{name}.MapToDto<{property.Type.FullyQualifiedName}, {property.Type.ClassViewModel.DtoName}>(context, tree?[nameof({objectName}.{name})]);
 ";

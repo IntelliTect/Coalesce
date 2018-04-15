@@ -25,6 +25,21 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
 
 
 
+        /// <summary>
+        /// Returns the URL for the List Editor with the ???Id= query string.
+        /// Ex: Adult/table?filter.adultId=
+        /// </summary>
+        public static string ListEditorUrl(this PropertyViewModel prop)
+        {
+            if (prop.InverseIdProperty == null) { return null; }
+            return string.Format("{0}/Table?filter.{1}=", prop.Object.ControllerName, prop.InverseIdProperty.JsonName);
+        }
+
+        /// <summary>
+        /// Returns the core URL for the List Editor.
+        /// </summary>
+        public static string ListEditorUrlName(this PropertyViewModel prop) => string.Format("{0}ListUrl", prop.JsVariable);
+
 
         /// <summary>
         /// Gets the Knockout JS text for the validation.
@@ -63,7 +78,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
 
             if (isRequired.HasValue && isRequired.Value)
             {
-                validations.Add($"required: {KoValidationOptions("true", errorMessage ?? $"{(prop.IdPropertyObjectProperty ?? prop).DisplayName} is required.")}");
+                validations.Add($"required: {KoValidationOptions("true", errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.")}");
             }
             else if (prop.IsRequired)
             {
@@ -74,7 +89,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
                 }
                 if (string.IsNullOrWhiteSpace(message))
                 {
-                    var name = (prop.IdPropertyObjectProperty ?? prop).DisplayName;
+                    var name = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
                     message = $"{name} is required.";
                 }
 

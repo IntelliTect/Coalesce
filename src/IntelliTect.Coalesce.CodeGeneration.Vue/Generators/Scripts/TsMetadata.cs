@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Linq;
@@ -201,83 +202,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 WriteValueCommonMetadata(b, prop);
 
-                if (prop.Object != null)
+                switch (prop.Role)
                 {
-                    if (prop.Object.IsDbMappedType)
-                    {
-                        if (prop.Type.IsCollection)
-                        {
-                            if (prop.Object.PrimaryKey != null && prop.InverseProperty != null)
-                            {
-                                // Collection navigations
-                                // TS Type: "ModelCollectionNavigationProperty"
-                                b.StringProp("role", "collectionNavigation");
-                                b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
-                            }
-                            else
-                            {
-                                // Value collection of models that have no relational context.
-                                // TS Type: "BasicCollectionProperty"
-                                b.StringProp("role", "value");
-                            }
-                        }
-                        else
-                        {
-                            if (prop.ObjectIdProperty != null)
-                            {
-                                // Reference navigations
-                                // TS Type: "ModelReferenceNavigationProperty"
-                                b.StringProp("role", "referenceNavigation");
-                                b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ObjectIdProperty.JsVariable} as ForeignKeyProperty }},");
-                                b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
-                            }
-                            else
-                            {
-                                // Unexceptional property holding a DB mapped type.
-                                // We have no foreign key, so its not considered a navigation property.
-                                // TS Type: "ModelValueProperty"
-                                b.StringProp("role", "value");
-
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // External types, and collections of such
-                        // TS Type: "ObjectProperty" or "BasicCollectionProperty" (probably)
-                        b.StringProp("role", "value");
-                    }
-                }
-                else if (prop.Type.IsCollection)
-                {
-                    // Primitive collections
-                    // TS Type: "BasicCollectionProperty"
-                    b.StringProp("role", "value");
-                }
-                else
-                {
-                    // All non-object/collection properties:
-                    if (prop.IsPrimaryKey)
-                    {
+                    case PropertyRole.PrimaryKey:
                         // TS Type: "PrimaryKeyProperty"
                         b.StringProp("role", "primaryKey");
-                    }
-                    else if (prop.IsForeignKey && prop.IdPropertyObjectProperty.PureTypeOnContext)
-                    {
-                        // TS Type: "ForeignKeyProperty"
-                        var principalProp = prop.IdPropertyObjectProperty;
-                        b.StringProp("role", "foreignKey");
-                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(principalProp.Object)}.props.{principalProp.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
-                        b.Line($"get principalType() {{ return {GetClassMetadataRef(principalProp.Object)} }},");
-                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{prop.IdPropertyObjectProperty.JsVariable} as ModelReferenceNavigationProperty }},");
-                    }
-                    else
-                    {
-                        // TS Type: "PrimitiveProperty", "DateProperty", "EnumProperty"
-                        b.StringProp("role", "value");
-                    }
-                }
+                        break;
 
+                    case PropertyRole.ForeignKey:
+                        // TS Type: "ForeignKeyProperty"
+                        var navProp = prop.ReferenceNavigationProperty;
+                        b.StringProp("role", "foreignKey");
+                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(navProp.Object)}.props.{navProp.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+                        b.Line($"get principalType() {{ return {GetClassMetadataRef(navProp.Object)} }},");
+                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{navProp.JsVariable} as ModelReferenceNavigationProperty }},");
+                        break;
+
+                    case PropertyRole.ReferenceNavigation:
+                        // TS Type: "ModelReferenceNavigationProperty"
+                        b.StringProp("role", "referenceNavigation");
+                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+                        break;
+
+                    case PropertyRole.CollectionNavigation:
+                        // TS Type: "ModelCollectionNavigationProperty"
+                        b.StringProp("role", "collectionNavigation");
+                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                        break;
+
+                    default:
+                        b.StringProp("role", "value");
+                        break;
+                }
             }
         }
 

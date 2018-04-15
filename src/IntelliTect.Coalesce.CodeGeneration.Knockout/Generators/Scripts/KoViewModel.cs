@@ -7,6 +7,7 @@ using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using System.Linq;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
@@ -83,7 +84,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
 
                 b.Line();
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.CollectionNavigation && !f.IsManytoManyCollection))
                 {
                     b.DocComment($"Add object to {prop.JsVariable}");
                     using (b.Block($"public addTo{prop.Name} = (autoSave?: boolean | null): {prop.Object.ViewModelClassName} =>", ';'))
@@ -95,7 +96,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         b.Line($"newItem.parent = this;");
                         b.Line($"newItem.parentCollection = this.{prop.JsVariable};");
                         b.Line($"newItem.isExpanded(true);");
-                        if (prop.HasInverseProperty)
+                        if (prop.InverseIdProperty != null)
                         {
                             b.Line($"newItem.{prop.InverseIdProperty.JsVariable}(this.{Model.PrimaryKey.JsVariable}());");
                         }
@@ -113,25 +114,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.DocComment($"ListViewModel for {prop.Name}. Allows for loading subsets of data.");
                     b.Line($"public {prop.JsVariable}List: (loadImmediate?: boolean) => {ListViewModelModuleName}.{prop.Object.ListViewModelClassName};");
                 }
+
                 b.Line();
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsCollection && f.PureTypeOnContext && !f.HasNotMapped))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.CollectionNavigation))
                 {
                     b.DocComment($"Url for a table view of all members of collection {prop.Name} for the current object.");
-                    b.Line($"public {prop.ListEditorUrlName}: KnockoutComputed<string> = ko.computed(");
-                    if (prop.ListEditorUrl == null)
+                    b.Line($"public {prop.ListEditorUrlName()}: KnockoutComputed<string> = ko.computed(");
+                    if (prop.ListEditorUrl() == null)
                     {
                         b.Indented($"() => \"Inverse property not set on {Model.ClientTypeName} for property {prop.Name}\",");
                     }
                     else
                     {
-                        b.Indented($"() => this.coalesceConfig.baseViewUrl() + '/{prop.ListEditorUrl}' + this.{Model.PrimaryKey.JsVariable}(),");
+                        b.Indented($"() => this.coalesceConfig.baseViewUrl() + '/{prop.ListEditorUrl()}' + this.{Model.PrimaryKey.JsVariable}(),");
                     }
                     b.Indented("null, { deferEvaluation: true }");
                     b.Line(");");
                 }
 
                 b.Line();
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.PureTypeOnContext))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.ReferenceNavigation))
                 {
                     b.DocComment($"Pops up a stock editor for object {prop.JsVariable}");
                     b.Line($"public show{prop.Name}Editor: (callback?: any) => void;");
@@ -167,14 +169,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 using (b.Block("public loadChildren = (callback?: () => void): void =>", ';'))
                 {
                     b.Line("var loadingCount = 0;");
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && !f.IsReadOnly && !f.HasNotMapped && f.Object.HasDbSet))
+                    // AES 4/14/18 - unsure of the reason for the !IsReadOnly check here. Perhaps just redundant?
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.ReferenceNavigation && !f.IsReadOnly))
                     {
                         b.Line($"// See if this.{prop.JsVariable} needs to be loaded.");
-                        using (b.Block($"if (this.{prop.JsVariable}() == null && this.{prop.ObjectIdProperty.JsVariable}() != null)"))
+                        using (b.Block($"if (this.{prop.JsVariable}() == null && this.{prop.ForeignKeyProperty.JsVariable}() != null)"))
                         {
                             b.Line( "loadingCount++;");
                             b.Line($"var {prop.JsVariable}Obj = new {prop.Object.ViewModelClassName}();");
-                            b.Line($"{prop.JsVariable}Obj.load(this.{prop.ObjectIdProperty.JsVariable}(), () => {{");
+                            b.Line($"{prop.JsVariable}Obj.load(this.{prop.ForeignKeyProperty.JsVariable}(), () => {{");
                             b.Indented( "loadingCount--;");
                             b.Indented($"this.{prop.JsVariable}({prop.JsVariable}Obj);");
                             b.Indented( "if (loadingCount == 0 && typeof(callback) == \"function\") { callback(); }");
@@ -233,8 +236,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
                     b.Line();
                     b.Line();
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => 
-                        f.Type.IsCollection && !f.IsManytoManyCollection && f.PureTypeOnContext && !f.HasNotMapped))
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.CollectionNavigation && !f.IsManytoManyCollection))
                     {
                         b.Line($"// List Object model for {prop.Name}. Allows for loading subsets of data.");
                         var childListVar = $"_{prop.JsVariable}List";
@@ -270,20 +272,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
                     b.Line();
                     b.Line();
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsPOCO && !f.Type.IsCollection && f.Object.IsDbMappedType))
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.ReferenceNavigation))
                     {
-                        b.Line($"this.show{prop.Name}Editor = function(callback: any) {{");
-                        b.Line($"    if (!self.{prop.JsVariable}()) {{");
-                        b.Line($"        self.{prop.JsVariable}(new {prop.Object.ViewModelClassName}());");
-                        b.Line("    }");
-                        b.Line($"    self.{prop.JsVariable}()!.showEditor(callback)");
-                        b.Line("};");
+                        using (b.Block($"this.show{prop.Name}Editor = function(callback: any)", ';'))
+                        {
+                            b.Line($"if (!self.{prop.JsVariable}()) {{");
+                            b.Indented($"self.{prop.JsVariable}(new {prop.Object.ViewModelClassName}());");
+                            b.Line("}");
+                            b.Line($"self.{prop.JsVariable}()!.showEditor(callback)");
+                        }
                     }
 
                     // Register autosave subscriptions on all autosavable properties.
                     // Must be done after everything else in the ctor.
                     b.Line();
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsClientWritable && !p.IsManytoManyCollection && !p.Type.IsCollection))
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsClientWritable && !p.Type.IsCollection))
                     {
                         b.Line($"self.{prop.JsVariable}.subscribe(self.autoSave);");
                     }
@@ -301,8 +304,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                 b.Indented( "change.status, ");
                                 b.Indented($"this.{prop.JsVariable}, ");
                                 b.Indented($"{prop.Object.ViewModelClassName}, ");
-                                b.Indented($"'{prop.Object.ClientProperties.First(f => f.Type.EqualsType(Model.Type)).ObjectIdProperty.JsVariable}',");
-                                b.Indented($"'{prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable}',");
+                                b.Indented($"'{prop.Object.ClientProperties.First(f => f.Type.EqualsType(Model.Type)).ForeignKeyProperty.JsVariable}',");
+                                b.Indented($"'{prop.ManyToManyCollectionProperty.ForeignKeyProperty.JsVariable}',");
                                 b.Indented($"change.value.{prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable}()");
                                 b.Line( ");");
                             }
@@ -372,7 +375,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                     b.Indented($"objs.push(item.{prop.ManyToManyCollectionProperty.JsonName});");
                                     b.Line($"}}");
                                 }
-                                b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.ManyToManyCollectionName.ToCamelCase()}, objs, '{prop.ManyToManyCollectionProperty.ObjectIdProperty.JsVariable}', {prop.ManyToManyCollectionProperty.Object.ViewModelClassName}, this, allowCollectionDeletes);");
+                                b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.ManyToManyCollectionName.ToCamelCase()}, objs, '{prop.ManyToManyCollectionProperty.ForeignKeyProperty.JsVariable}', {prop.ManyToManyCollectionProperty.Object.ViewModelClassName}, this, allowCollectionDeletes);");
                             }
                         }
                         else if (prop.PureType.IsPrimitive)
@@ -388,15 +391,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
                 // Objects are loaded first so that they are available when the IDs get loaded.
                 // This handles the issue with populating select lists with correct data because we now have the object.
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsPOCO && !p.Type.IsCollection))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsPOCO))
                 {
                     b.Line($"if (!data.{prop.JsonName}) {{ ");
                     using (b.Indented())
                     {
-                        if (prop.ObjectIdProperty != null)
+                        if (prop.ForeignKeyProperty != null)
                         {
-                            b.Line($"if (data.{prop.ObjectIdProperty.JsonName} != this.{prop.ObjectIdProperty.JsVariable}()) {{");
-                            b.Line($"    this.{prop.JsVariable}(null);");
+                            // Prop is a reference navigation prop. The incoming foreign key doesn't match our existing foreign key, so clear out the property. 
+                            // If the incoming key and existing key DOES match, we assume that the data just wasn't loaded, but is still valid, so we do nothing.
+                            b.Line($"if (data.{prop.ForeignKeyProperty.JsonName} != this.{prop.ForeignKeyProperty.JsVariable}()) {{");
+                            b.Indented($"this.{prop.JsVariable}(null);");
                             b.Line("}");
                         }
                         else
@@ -408,38 +413,40 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     using (b.Indented())
                     {
                         b.Line($"if (!this.{prop.JsVariable}()){{");
-                        b.Line($"    this.{prop.JsVariable}(new {prop.Object.ViewModelClassName}(data.{prop.JsonName}, this));");
+                        b.Indented($"this.{prop.JsVariable}(new {prop.Object.ViewModelClassName}(data.{prop.JsonName}, this));");
                         b.Line("} else {");
-                        b.Line($"    this.{prop.JsVariable}()!.loadFromDto(data.{prop.JsonName});");
+                        b.Indented($"this.{prop.JsVariable}()!.loadFromDto(data.{prop.JsonName});");
                         b.Line("}");
                         if (prop.Object.IsDbMappedType)
                         {
                             b.Line($"if (this.parent instanceof {prop.Object.ViewModelClassName} && this.parent !== this.{prop.JsVariable}() && this.parent.{prop.Object.PrimaryKey.JsVariable}() == this.{prop.JsVariable}()!.{prop.Object.PrimaryKey.JsVariable}())");
                             b.Line("{");
-                            b.Line($"    this.parent.loadFromDto(data.{prop.JsonName}, undefined, false);");
+                            b.Indented($"this.parent.loadFromDto(data.{prop.JsonName}, undefined, false);");
                             b.Line("}");
                         }
                     }
                     b.Line("}");
                 }
+
                 b.Line();
                 b.Line("// The rest of the objects are loaded now.");
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => !p.HasValidValues && !p.Type.IsCollection))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.Object == null && !p.IsPrimaryKey))
                 {
                     if (prop.Type.IsDate)
                     {   // Using valueOf/getTime here is a 20x performance increase over moment.isSame(). moment(new Date(...)) is also a 10x perf increase.
                         b.Line($"if (data.{prop.JsonName} == null) this.{prop.JsVariable}(null);");
                         b.Line($"else if (this.{prop.JsVariable}() == null || this.{prop.JsVariable}()!.valueOf() != new Date(data.{prop.JsonName}).getTime()){{");
-                        b.Line($"    this.{prop.JsVariable}(moment(new Date(data.{prop.JsonName})));");
+                        b.Indented($"this.{prop.JsVariable}(moment(new Date(data.{prop.JsonName})));");
                         b.Line("}");
                     }
-                    else if (!prop.IsPOCO && !prop.IsPrimaryKey)
+                    else
                     {
                         b.Line($"this.{prop.JsVariable}(data.{prop.JsonName});");
                     }
                 }
+
                 b.Line("if (this.coalesceConfig.onLoadFromDto()){");
-                b.Line("    this.coalesceConfig.onLoadFromDto()(this as any);");
+                b.Indented("this.coalesceConfig.onLoadFromDto()(this as any);");
                 b.Line("}");
                 b.Line("this.isLoading(false);");
                 b.Line("this.isDirty(false);");

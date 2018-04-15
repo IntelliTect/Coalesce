@@ -48,20 +48,15 @@ namespace IntelliTect.Coalesce.Validation
                             if (!prop.IsReadOnly && !prop.HasNotMapped && prop.Object.HasDbSet)
                             {
                                 // Validate navigation properties
-
-                                assert.IsNotNull(prop.ObjectIdPropertyName, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
-                                if (!prop.Object.IsOneToOne)
-                                {
-                                    assert.IsNotNull(prop.ObjectIdProperty, "Has no ID Property - Add a ForeignKey attribute to the object");
-                                }
+                                assert.IsNotNull(prop.ForeignKeyProperty, "No ID Property found for related object. Related object needs a foreign key that matches by name or is marked with the [ForeignKey] attribute.");
                                 assert.IsNotNull(prop.Object.PrimaryKey, "No Primary key for related object. Ensure the target object has a [Key] attributed property.");
                             }
                         }
-                        if (prop.IsId && !prop.IsPrimaryKey)
+                        if (prop.IsForeignKey)
                         {
-                            assert.IsNotNull(prop.IdPropertyObjectProperty, "Object property not found.");
-                            assert.IsNotNull(prop.IdPropertyObjectProperty.Object, "Object property related object not found.");
-                            assert.IsNotNull(prop.IdPropertyObjectProperty.Object.PrimaryKey, "Object Property Object primary key is missing.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty, "Object property not found.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object, "Object property related object not found.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object.PrimaryKey, "No primary key on type of this ID's Navigation Property.");
                         }
                         if (prop.Type.IsCollection)
                         {

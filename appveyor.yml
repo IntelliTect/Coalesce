@@ -7,11 +7,13 @@ image: Visual Studio 2017
 configuration: Debug
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
+  - '%LocalAppData%\Yarn'
 nuget:
   disable_publish_on_pr: true
 before_build:
   - cmd: >-
       dotnet restore
+      yarn --cwd ./src/Coalesce.Web.Vue
 # Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
 # cd ..\Coalesce.Domain
 # dotnet ef database update --framework netcoreapp2.0

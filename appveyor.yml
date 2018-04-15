@@ -6,13 +6,15 @@ branches:
 image: Visual Studio 2017
 configuration: Debug
 environment:
-  nodejs_version: "9"
+  matrix:
+    - nodejs_version: "9"
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
   - '%LocalAppData%\Yarn\cache'
 nuget:
   disable_publish_on_pr: true
 before_build:
+  - cmd: node --version && npm --version
   - cmd: dotnet restore
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn

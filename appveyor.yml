@@ -14,6 +14,7 @@ nuget:
   disable_publish_on_pr: true
 before_build:
   - cmd: dotnet restore
+  - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
   - cmd: cd ./src/coalesce-vue && yarn && yarn build
   - cmd: yarn global add gulp-cli

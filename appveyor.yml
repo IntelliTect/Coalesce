@@ -5,9 +5,11 @@ branches:
   - dev
 image: Visual Studio 2017
 configuration: Debug
+environment:
+  nodejs_version: "Current"
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
-  - '%LocalAppData%\Yarn'
+  - '%LocalAppData%\Yarn\cache'
 nuget:
   disable_publish_on_pr: true
 before_build:

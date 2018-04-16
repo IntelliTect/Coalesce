@@ -213,7 +213,6 @@
 
 @section Scripts
 {
-
     <script>
         @if (!ViewBag.Editable)
         {
@@ -226,7 +225,7 @@
         {
             @:companyList.queryString = "@(ViewBag.Query)";
         }
-
+        
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
@@ -235,20 +234,19 @@
         })
         companyList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
-            
+        
             $.each(urlVariables, function(){
                 var param = companyList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
-
+        
         companyList.isSavingAutomatically = false;
         ko.applyBindings(companyList);
         companyList.isSavingAutomatically = true;
-
+        
         companyList.includes = "CompanyListGen";
         companyList.load();
-
     </script>
 }

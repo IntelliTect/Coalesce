@@ -85,7 +85,6 @@
 
 @section Scripts
 {
-
     <script>
         @if (!ViewBag.Editable)
         {
@@ -98,7 +97,7 @@
         {
             @:caseDtoList.queryString = "@(ViewBag.Query)";
         }
-
+        
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
@@ -107,20 +106,19 @@
         })
         caseDtoList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
-            
+        
             $.each(urlVariables, function(){
                 var param = caseDtoList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
-
+        
         caseDtoList.isSavingAutomatically = false;
         ko.applyBindings(caseDtoList);
         caseDtoList.isSavingAutomatically = true;
-
+        
         caseDtoList.includes = "CaseDtoListGen";
         caseDtoList.load();
-
     </script>
 }

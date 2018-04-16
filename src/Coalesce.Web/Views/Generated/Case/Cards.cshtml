@@ -225,7 +225,6 @@
 
 @section Scripts
 {
-
     <script>
         @if (!ViewBag.Editable)
         {
@@ -238,7 +237,7 @@
         {
             @:caseList.queryString = "@(ViewBag.Query)";
         }
-
+        
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
@@ -247,20 +246,19 @@
         })
         caseList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
-            
+        
             $.each(urlVariables, function(){
                 var param = caseList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
-
+        
         caseList.isSavingAutomatically = false;
         ko.applyBindings(caseList);
         caseList.isSavingAutomatically = true;
-
+        
         caseList.includes = "CaseListGen";
         caseList.load();
-
     </script>
 }

@@ -455,7 +455,6 @@
 
 @section Scripts
 {
-
     <script>
         @if (!ViewBag.Editable)
         {
@@ -468,7 +467,7 @@
         {
             @:personList.queryString = "@(ViewBag.Query)";
         }
-
+        
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
@@ -477,20 +476,19 @@
         })
         personList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
-            
+        
             $.each(urlVariables, function(){
                 var param = personList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
-
+        
         personList.isSavingAutomatically = false;
         ko.applyBindings(personList);
         personList.isSavingAutomatically = true;
-
+        
         personList.includes = "PersonListGen";
         personList.load();
-
     </script>
 }

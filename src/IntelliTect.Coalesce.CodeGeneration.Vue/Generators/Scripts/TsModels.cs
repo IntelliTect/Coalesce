@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
          //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
 
-            foreach (var model in Model.ClientEnums)
+            foreach (var model in Model.ClientEnums.OrderBy(e => e.Name))
             {
                 using (b.Block($"export enum {model.Name}"))
                 {
@@ -35,7 +35,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line();
             }
 
-            foreach (var model in Model.ClientClasses)
+            foreach (var model in Model.ClientClasses
+                .OrderByDescending(c => c.IsDbMappedType) // Entity types first
+                .ThenBy(e => e.ClientTypeName))
             {
                 var name = model.ViewModelClassName;
 

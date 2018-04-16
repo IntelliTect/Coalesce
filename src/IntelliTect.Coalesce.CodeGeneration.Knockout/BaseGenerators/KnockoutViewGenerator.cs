@@ -220,44 +220,51 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
         {
             b.Line("@section Scripts");
             b.Line("{");
-            b.Line($@"
-    <script>
-        @if (!ViewBag.Editable)
-        {{
-            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
-        }}
-        var {Model.ListViewModelObjectName} = new ListViewModels.{Model.ListViewModelClassName}();
-        
-        // Set up parent info based on the URL.
-        @if (ViewBag.Query != null)
-        {{
-            @:{Model.ListViewModelObjectName}.queryString = ""@(ViewBag.Query)"";
-        }}
+            using (b.Indented())
+            {
+                using (b.TagBlock("script"))
+                {
+                    b.Line($"@if (!ViewBag.Editable)");
+                    b.Line($"{{");
+                    b.Line($"    @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);");
+                    b.Line($"}}");
+                    b.Line($"var {Model.ListViewModelObjectName} = new ListViewModels.{Model.ListViewModelClassName}();");
 
-        // Save and restore values from the URL:
-        var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
-        $.each(urlVariables, function(){{
-            var param = Coalesce.Utilities.GetUrlParameter(this);
-            if (param) {{{Model.ListViewModelObjectName}[this](param);}}
-        }})
-        { Model.ListViewModelObjectName}.isLoading.subscribe(function(){{
-            var newUrl = window.location.href;
-            
-            $.each(urlVariables, function(){{
-                var param = {Model.ListViewModelObjectName}[this]();
-                newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
-            }})
-            history.replaceState(null, document.title, newUrl);
-        }});
+                    b.Line();
+                    b.Line($"// Set up parent info based on the URL.");
+                    b.Line($"@if (ViewBag.Query != null)");
+                    b.Line($"{{");
+                    b.Line($"    @:{Model.ListViewModelObjectName}.queryString = \"@(ViewBag.Query)\";");
+                    b.Line($"}}");
 
-        { Model.ListViewModelObjectName}.isSavingAutomatically = false;
-        ko.applyBindings({Model.ListViewModelObjectName});
-        {Model.ListViewModelObjectName}.isSavingAutomatically = true;
+                    b.Line();
+                    b.Line($"// Save and restore values from the URL:");
+                    b.Line($"var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];");
+                    b.Line($"$.each(urlVariables, function(){{");
+                    b.Line($"    var param = Coalesce.Utilities.GetUrlParameter(this);");
+                    b.Line($"    if (param) {{{Model.ListViewModelObjectName}[this](param);}}");
+                    b.Line($"}})");
+                    b.Line($"{Model.ListViewModelObjectName}.isLoading.subscribe(function(){{");
+                    b.Line($"    var newUrl = window.location.href;");
 
-        {Model.ListViewModelObjectName}.includes = ""{Model.ListViewModelClassName}Gen"";
-        { Model.ListViewModelObjectName}.load();
+                    b.Line();
+                    b.Line($"    $.each(urlVariables, function(){{");
+                    b.Line($"        var param = {Model.ListViewModelObjectName}[this]();");
+                    b.Line($"        newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);");
+                    b.Line($"    }})");
+                    b.Line($"    history.replaceState(null, document.title, newUrl);");
+                    b.Line($"}});");
 
-    </script>");
+                    b.Line();
+                    b.Line($"{Model.ListViewModelObjectName}.isSavingAutomatically = false;");
+                    b.Line($"ko.applyBindings({Model.ListViewModelObjectName});");
+                    b.Line($"{Model.ListViewModelObjectName}.isSavingAutomatically = true;");
+
+                    b.Line();
+                    b.Line($"{Model.ListViewModelObjectName}.includes = \"{Model.ListViewModelClassName}Gen\";");
+                    b.Line($"{Model.ListViewModelObjectName}.load();");
+                }
+            }
 
             b.Line("}");
         }

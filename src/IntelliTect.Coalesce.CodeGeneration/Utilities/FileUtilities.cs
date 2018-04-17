@@ -15,6 +15,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
         public static async Task<bool> HasDifferencesAsync(Stream sourceStream, string origContents)
         {
             if (string.IsNullOrEmpty(origContents)) return true;
+            origContents = origContents.Replace("\r\n", "\n");
 
             var newContents = Task.Run(async () =>
             {

@@ -588,10 +588,10 @@ ko.bindingHandlers.select2AjaxText = {
 // Simple Select2 binding used with an options list that is in HTML 
 ko.bindingHandlers.select2 = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-        var selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
-        var openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
-        var allowClear = allBindings.get('allowClear') || true
-        var placeholder = $(element).attr('placeholder') || "select";
+        const selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
+        const openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
+        const allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
+        const placeholder = $(element).attr('placeholder') || "select";
 
         // Create the Select2
         $(element)

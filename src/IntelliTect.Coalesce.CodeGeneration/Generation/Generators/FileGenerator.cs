@@ -56,7 +56,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             {
                 Logger.LogTrace($"Got output for {this}");
 
-                if ((await FileUtilities.HasDifferencesAsync(contents, await outputExistingContents)))
+                if (!(await FileUtilities.HasDifferencesAsync(contents, await outputExistingContents)))
                 {
                     Logger?.LogTrace($"Skipped write of {this}, existing file wasn't different");
                     return;

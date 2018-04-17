@@ -487,6 +487,11 @@ export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResu
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
 
+        if ("validationIssues" in data) {
+            this.validationIssues = data.validationIssues || null;
+        } else {
+            this.validationIssues = null;
+        }
         if ("object" in data) {
             this.result = data.object || null
         } else {
@@ -511,6 +516,11 @@ export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResu
     protected setResponseProps(data: ListResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
+        
+        this.page = data.page
+        this.pageSize = data.pageSize
+        this.pageCount = data.pageCount
+        this.totalCount = data.totalCount
 
         if ("list" in data) {
             this.result = data.list || []

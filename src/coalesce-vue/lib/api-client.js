@@ -320,6 +320,12 @@ var ItemApiState = /** @class */ (function (_super) {
     ItemApiState.prototype.setResponseProps = function (data) {
         this.wasSuccessful = data.wasSuccessful;
         this.message = data.message || null;
+        if ("validationIssues" in data) {
+            this.validationIssues = data.validationIssues || null;
+        }
+        else {
+            this.validationIssues = null;
+        }
         if ("object" in data) {
             this.result = data.object || null;
         }
@@ -349,6 +355,10 @@ var ListApiState = /** @class */ (function (_super) {
     ListApiState.prototype.setResponseProps = function (data) {
         this.wasSuccessful = data.wasSuccessful;
         this.message = data.message || null;
+        this.page = data.page;
+        this.pageSize = data.pageSize;
+        this.pageCount = data.pageCount;
+        this.totalCount = data.totalCount;
         if ("list" in data) {
             this.result = data.list || [];
         }

@@ -87,7 +87,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     // the code just doesn't support it at the moment.
                     var parentVar = prop.PureTypeOnContext ? "undefined" : "this";
 
-                    if (prop.Type.IsCollection && prop.Type.ClassViewModel != null)
+                    if (prop.Type.IsCollection && prop.Object != null)
                     {
                         b.Line($"if (data.{prop.JsonName} != null) {{");
                         b.Line("// Merge the incoming array");

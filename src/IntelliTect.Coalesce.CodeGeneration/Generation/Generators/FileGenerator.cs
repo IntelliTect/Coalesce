@@ -38,23 +38,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             // Start reading the existing output file while we generate the contents.
             string outputFile = EffectiveOutputPath;
-            var outputExistingContents = Task.Run(async () =>
+            var outputExistingContents = Task.Run(() =>
             {
                 // Throw the creation of the directory on this thread too for max parallelization.
                 Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
                 if (File.Exists(outputFile))
                 {
-                    using (var stream = File.OpenRead(outputFile))
-                    {
-                        var length = (int)stream.Length; // I hope your existng files aren't > 2GB.
-                        var bytes = new byte[length];
-                        await stream.ReadAsync(bytes, 0, length);
-                        return bytes;
-                    }
+                    return File.ReadAllText(outputFile);
                 }
                 else
                 {
-                    return new byte[0];
+                    return String.Empty;
                 }
             });
 
@@ -62,7 +56,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             {
                 Logger.LogTrace($"Got output for {this}");
 
-                if (!FileUtilities.HasDifferences(contents, await outputExistingContents))
+                if ((await FileUtilities.HasDifferencesAsync(contents, await outputExistingContents)))
                 {
                     Logger?.LogTrace($"Skipped write of {this}, existing file wasn't different");
                     return;

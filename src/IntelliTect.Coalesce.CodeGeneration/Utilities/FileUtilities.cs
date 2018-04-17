@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Utilities
@@ -11,34 +10,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
         /// Compares a stream to the target file ignoring line endings.
         /// </summary>
         /// <param name="sourceStream">Stream to compare with the file.</param>
-        /// <param name="originalContents">Contents of existing file to compare against.</param>
+        /// <param name="filename">File to compare with the stream.</param>
         /// <returns></returns>
-        public static bool HasDifferences(Stream sourceStream, byte[] originalContents)
+        public static async Task<bool> HasDifferencesAsync(Stream sourceStream, string origContents)
         {
-            var sourceLength = (int)sourceStream.Length;
-            if (sourceLength != originalContents.Length)
-            {
-                return true;
-            }
+            if (string.IsNullOrEmpty(origContents)) return true;
 
-            byte[] sourceContents;
-            if (sourceStream is MemoryStream ms)
+            var newContents = Task.Run(async () =>
             {
-                sourceContents = ms.ToArray();
-            }
-            else
-            {
-                sourceContents = new byte[sourceLength];
                 sourceStream.Seek(0, SeekOrigin.Begin);
-                sourceStream.Read(sourceContents, 0, sourceLength);
+                string sourceString = await new StreamReader(sourceStream).ReadToEndAsync();
                 sourceStream.Seek(0, SeekOrigin.Begin);
-            }
-
-            for (int i = 0; i < sourceLength; i++)
-            {
-                if (sourceContents[i] != originalContents[i]) return true;
-            }
-            return false;
+                return sourceString.Replace("\r\n", "\n");
+            });
+            return !string.Equals(origContents, await newContents, StringComparison.InvariantCulture);
         }
 
         public static bool HasDifferences(string fileName1, string fileName2)

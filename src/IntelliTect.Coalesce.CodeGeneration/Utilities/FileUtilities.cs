@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
         /// Compares a stream to the target file ignoring line endings.
         /// </summary>
         /// <param name="sourceStream">Stream to compare with the file.</param>
-        /// <param name="filename">File to compare with the stream.</param>
+        /// <param name="origContents">File contents to compare with the stream.</param>
         /// <returns></returns>
         public static async Task<bool> HasDifferencesAsync(Stream sourceStream, string origContents)
         {

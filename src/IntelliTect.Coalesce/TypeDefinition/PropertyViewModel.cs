@@ -386,23 +386,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!Type.IsPOCO) return null;
 
                 // Types/props that aren't DB mapped don't have properties that have relational meaning.
-                if (!IsDbMapped || !Parent.IsDbMappedType) return null;
+                // EffectiveParent used here to correctly handle properties on base classes -
+                // we need to know that the class that is ultimately used is DB mapped.
+                if (!IsDbMapped || !EffectiveParent.IsDbMappedType) return null;
 
                 var name =
                     // Use the foreign key attribute
                     this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
 
                     // Use the ForeignKey Attribute on the key property if it is there.
-                    ?? Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+                    ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
 
                     // See if this is a one-to-one using the parent's key
                     // Look up the other object and check the key
-                    ?? (Object?.IsOneToOne ?? false ? Parent.PrimaryKey.Name : null)
+                    ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey.Name : null)
 
                     // Look for a property that follows convention.
                     ?? Name + ConventionalIdSuffix;
 
-                var prop = Parent.PropertyByName(name);
+                var prop = EffectiveParent.PropertyByName(name);
                 if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)
                 {
                     return null;
@@ -424,19 +426,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!Type.IsValidKeyType) return null;
 
                 // Types/props that aren't DB mapped don't have properties that have relational meaning.
-                if (!IsDbMapped || !Parent.IsDbMappedType) return null;
+                // EffectiveParent used here to correctly handle properties on base classes -
+                // we need to know that the class that is ultimately used is DB mapped.
+                if (!IsDbMapped || !EffectiveParent.IsDbMappedType) return null;
 
                 var name =
                     // Use the ForeignKey Attribute if it is there.
                     this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
 
                     // Use the ForeignKey Attribute on the object property if it is there.
-                    ?? Parent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+                    ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
 
                     // Else, by convention remove the Id at the end.
                     ?? (Name.EndsWith(ConventionalIdSuffix) ? Name.Substring(0, Name.Length - ConventionalIdSuffix.Length) : null);
 
-                var prop = Parent.PropertyByName(name);
+                var prop = EffectiveParent.PropertyByName(name);
                 if (prop == null || !prop.IsPOCO || !prop.IsDbMapped)
                 {
                     return null;

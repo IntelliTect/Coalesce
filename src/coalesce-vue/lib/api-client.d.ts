@@ -76,7 +76,7 @@ export declare class ApiClient<T extends ApiRoutedType> {
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, ListApiReturnType<TCall>> & TCall;
+    $makeCaller<TCall extends (this: any, ...args: any[]) => ListResultPromise<any>>(resultType: "list", invokerFactory: (client: this) => TCall): ListApiState<TCall, ListApiReturnType<TCall>> & TCall;
     /**
      * Maps the given method parameters to values suitable for transport.
      * @param method The method whose parameters need mapping

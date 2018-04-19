@@ -116,12 +116,12 @@ export class ApiClient<T extends ApiRoutedType> {
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: null, ...args: any[]) => ListResultPromise<any>>(
+    $makeCaller<TCall extends (this: any, ...args: any[]) => ListResultPromise<any>>(
         resultType: "list",
         invokerFactory: (client: this) => TCall
     ): ListApiState<TCall, ListApiReturnType<TCall>> & TCall
     
-    $makeCaller<TCall extends (this: null, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
+    $makeCaller<TCall extends (this: any, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
         resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
         invokerFactory: (client: this) => TCall
     ): ApiState<TCall, AnyApiReturnType<TCall>> & TCall
@@ -516,7 +516,7 @@ export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResu
     protected setResponseProps(data: ListResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
         this.message = data.message || null
-        
+
         this.page = data.page
         this.pageSize = data.pageSize
         this.pageCount = data.pageCount

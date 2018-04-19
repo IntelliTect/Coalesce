@@ -206,14 +206,6 @@ var ApiState = /** @class */ (function (_super) {
         // Copy all properties from the class to the function.
         var invoke = Object.assign(invokeFunc, _this);
         invoke.invoke = invoke;
-        // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
-        for (var stateProp in _this) {
-            var value = _this[stateProp];
-            // Don't define sealed object properties (e.g. this._callbacks)
-            if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(invoke, stateProp, _this[stateProp], null, true);
-            }
-        }
         Object.setPrototypeOf(invoke, _newTarget.prototype);
         return invoke;
     }
@@ -304,17 +296,28 @@ var ApiState = /** @class */ (function (_super) {
             return error;
         });
     };
+    ApiState.prototype._makeReactive = function () {
+        // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
+        for (var stateProp in this) {
+            var value = this[stateProp];
+            // Don't define sealed object properties (e.g. this._callbacks)
+            if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
+                Vue.util.defineReactive(this, stateProp, this[stateProp], null, true);
+            }
+        }
+    };
     return ApiState;
 }(Function));
 export { ApiState };
 var ItemApiState = /** @class */ (function (_super) {
     __extends(ItemApiState, _super);
-    function ItemApiState() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
+    function ItemApiState(apiClient, invoker) {
+        var _this = _super.call(this, apiClient, invoker) || this;
         /** Validation issues returned by the previous request. */
         _this.validationIssues = null;
         /** Principal data returned by the previous request. */
         _this.result = null;
+        _this._makeReactive();
         return _this;
     }
     ItemApiState.prototype.setResponseProps = function (data) {
@@ -338,8 +341,8 @@ var ItemApiState = /** @class */ (function (_super) {
 export { ItemApiState };
 var ListApiState = /** @class */ (function (_super) {
     __extends(ListApiState, _super);
-    function ListApiState() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
+    function ListApiState(apiClient, invoker) {
+        var _this = _super.call(this, apiClient, invoker) || this;
         /** Page number returned by the previous request. */
         _this.page = null;
         /** Page size returned by the previous request. */
@@ -350,6 +353,7 @@ var ListApiState = /** @class */ (function (_super) {
         _this.totalCount = null;
         /** Principal data returned by the previous request. */
         _this.result = null;
+        _this._makeReactive();
         return _this;
     }
     ListApiState.prototype.setResponseProps = function (data) {

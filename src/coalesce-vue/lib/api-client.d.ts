@@ -139,6 +139,7 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
     protected abstract setResponseProps(data: ApiResult): void;
     invoke: TCall;
     private _invokeInternal(thisArg, args);
+    protected _makeReactive(): void;
     constructor(apiClient: ApiClient<any>, invoker: TCall);
 }
 export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
@@ -146,6 +147,7 @@ export declare class ItemApiState<TCall extends (this: null, ...args: any[]) => 
     validationIssues: ValidationIssue[] | null;
     /** Principal data returned by the previous request. */
     result: TResult | null;
+    constructor(apiClient: ApiClient<any>, invoker: TCall);
     protected setResponseProps(data: ItemResult<TResult>): void;
 }
 export declare class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
@@ -159,5 +161,6 @@ export declare class ListApiState<TCall extends (this: null, ...args: any[]) => 
     totalCount: number | null;
     /** Principal data returned by the previous request. */
     result: TResult[] | null;
+    constructor(apiClient: ApiClient<any>, invoker: TCall);
     protected setResponseProps(data: ListResult<TResult>): void;
 }

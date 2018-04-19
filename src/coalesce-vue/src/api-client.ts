@@ -448,6 +448,17 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
             })
     }
 
+    protected _makeReactive() {
+        // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
+        for (const stateProp in this) {
+            const value = this[stateProp]
+            // Don't define sealed object properties (e.g. this._callbacks)
+            if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
+                Vue.util.defineReactive(this, stateProp, this[stateProp], null, true)
+            }
+        }
+    }
+
     constructor(
         private readonly apiClient: ApiClient<any>,
         private readonly invoker: TCall
@@ -461,15 +472,6 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         // Copy all properties from the class to the function.
         const invoke = Object.assign(invokeFunc, this);
         invoke.invoke = invoke;
-        
-        // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
-        for (const stateProp in this) {
-            const value = this[stateProp]
-            // Don't define sealed object properties (e.g. this._callbacks)
-            if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(invoke, stateProp, this[stateProp], null, true)
-            }
-        }
 
         Object.setPrototypeOf(invoke, new.target.prototype);
         return invoke
@@ -482,6 +484,14 @@ export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResu
 
     /** Principal data returned by the previous request. */
     result: TResult | null = null
+
+    constructor(
+        apiClient: ApiClient<any>,
+        invoker: TCall) 
+    {
+        super(apiClient, invoker);
+        this._makeReactive();
+    }
 
     protected setResponseProps(data: ItemResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful
@@ -512,6 +522,14 @@ export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResu
 
     /** Principal data returned by the previous request. */
     result: TResult[] | null = null
+
+    constructor(
+        apiClient: ApiClient<any>,
+        invoker: TCall) 
+    {
+        super(apiClient, invoker);
+        this._makeReactive();
+    }
 
     protected setResponseProps(data: ListResult<TResult>) {
         this.wasSuccessful = data.wasSuccessful

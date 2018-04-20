@@ -93,6 +93,8 @@ export type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResu
 type AnyApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
     = ReturnType<T> extends ApiResultPromise<infer S> ? S : any;
 
+export type ApiCallerConcurrency = "cancel" | "disallow" | "allow"
+
 export class ApiClient<T extends ApiRoutedType> {
 
     constructor(public $metadata: T) {
@@ -207,12 +209,11 @@ export class ApiClient<T extends ApiRoutedType> {
         // Map the 'filter' object, ensuring all values are strings.
         const filter = wideParams.filter;
         if (typeof filter == 'object') {
-            paramsObject.filter = Object.keys(filter).reduce((obj, key) => {
+            for (var key in filter) {
                 if (filter[key] !== undefined) {
-                    obj[key] = new String(filter[key]);
+                    paramsObject["filter." + key] = filter[key];
                 }
-                return obj;
-            }, {} as any);
+            }
         }
 
         if (Array.isArray(wideParams.fields)) {
@@ -339,14 +340,31 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
     /** Error message returned by the previous request. */
     message: string | null = null
 
+    private _concurrencyMode: ApiCallerConcurrency = "disallow"
+
     /** 
      * Function that can be called to cancel a pending request.
     */
     cancel() {
-        if (this._cancelToken){
+        if (this._cancelToken) {
             this._cancelToken.cancel();
             this.isLoading = false;
         }
+    }
+
+    /**
+     * Set the concurrency mode for this API caller. Default is "disallow".
+     * @param mode Behavior for when a request is made while there is already an outstanding request.
+     * 
+     * "cancel" - cancel the outstanding request first. 
+     * 
+     * "disallow" - throw an error. 
+     * 
+     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     */
+    setConcurrency(mode: ApiCallerConcurrency) {
+        this._concurrencyMode = mode;
+        return this;
     }
 
     // Undefined initially to prevent unneeded reactivity
@@ -382,7 +400,11 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
 
     private _invokeInternal(thisArg: any, args: IArguments) {
         if (this.isLoading) {
-            throw `Request is already pending for invoker ${this.invoker.toString()}`
+            if (this._concurrencyMode === "disallow") {
+                throw `Request is already pending for invoker ${this.invoker.toString()}`
+            } else if (this._concurrencyMode === "cancel") {
+                this.cancel()
+            }
         }
         this.wasSuccessful = null
         this.message = null

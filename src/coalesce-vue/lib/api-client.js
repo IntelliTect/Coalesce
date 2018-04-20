@@ -79,12 +79,11 @@ var ApiClient = /** @class */ (function () {
         // Map the 'filter' object, ensuring all values are strings.
         var filter = wideParams.filter;
         if (typeof filter == 'object') {
-            paramsObject.filter = Object.keys(filter).reduce(function (obj, key) {
+            for (var key in filter) {
                 if (filter[key] !== undefined) {
-                    obj[key] = new String(filter[key]);
+                    paramsObject["filter." + key] = filter[key];
                 }
-                return obj;
-            }, {});
+            }
         }
         if (Array.isArray(wideParams.fields)) {
             paramsObject.fields = wideParams.fields.join(',');
@@ -197,6 +196,7 @@ var ApiState = /** @class */ (function (_super) {
         _this.wasSuccessful = null;
         /** Error message returned by the previous request. */
         _this.message = null;
+        _this._concurrencyMode = "disallow";
         // Frozen to prevent unneeded reactivity.
         _this._callbacks = Object.freeze({ onFulfilled: [], onRejected: [] });
         // Create our invoker function that will ultimately be our instance object.
@@ -219,6 +219,20 @@ var ApiState = /** @class */ (function (_super) {
         }
     };
     /**
+     * Set the concurrency mode for this API caller. Default is "disallow".
+     * @param mode Behavior for when a request is made while there is already an outstanding request.
+     *
+     * "cancel" - cancel the outstanding request first.
+     *
+     * "disallow" - throw an error.
+     *
+     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     */
+    ApiState.prototype.setConcurrency = function (mode) {
+        this._concurrencyMode = mode;
+        return this;
+    };
+    /**
      * Attach a callback to be invoked when the request to this endpoint succeeds.
      * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
      */
@@ -237,7 +251,12 @@ var ApiState = /** @class */ (function (_super) {
     ApiState.prototype._invokeInternal = function (thisArg, args) {
         var _this = this;
         if (this.isLoading) {
-            throw "Request is already pending for invoker " + this.invoker.toString();
+            if (this._concurrencyMode === "disallow") {
+                throw "Request is already pending for invoker " + this.invoker.toString();
+            }
+            else if (this._concurrencyMode === "cancel") {
+                this.cancel();
+            }
         }
         this.wasSuccessful = null;
         this.message = null;

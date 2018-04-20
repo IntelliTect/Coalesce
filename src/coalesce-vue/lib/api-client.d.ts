@@ -60,6 +60,7 @@ export declare type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosList
 export declare const AxiosClient: AxiosInstance;
 export declare type ItemApiReturnType<T extends (this: null, ...args: any[]) => ItemResultPromise<any>> = ReturnType<T> extends void ? void : ReturnType<T> extends ItemResultPromise<infer R> ? R : any;
 export declare type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResultPromise<any>> = ReturnType<T> extends ListResultPromise<infer S> ? S : any;
+export declare type ApiCallerConcurrency = "cancel" | "disallow" | "allow";
 export declare class ApiClient<T extends ApiRoutedType> {
     $metadata: T;
     constructor($metadata: T);
@@ -120,10 +121,22 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
     wasSuccessful: boolean | null;
     /** Error message returned by the previous request. */
     message: string | null;
+    private _concurrencyMode;
     /**
      * Function that can be called to cancel a pending request.
     */
     cancel(): void;
+    /**
+     * Set the concurrency mode for this API caller. Default is "disallow".
+     * @param mode Behavior for when a request is made while there is already an outstanding request.
+     *
+     * "cancel" - cancel the outstanding request first.
+     *
+     * "disallow" - throw an error.
+     *
+     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     */
+    setConcurrency(mode: ApiCallerConcurrency): this;
     private _cancelToken;
     private _callbacks;
     /**

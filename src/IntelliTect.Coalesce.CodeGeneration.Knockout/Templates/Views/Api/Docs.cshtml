@@ -66,7 +66,6 @@
                     <th class="text-center">Required</th>
                     <th class="text-center">Read Only</th>
                     <th class="text-center">Has Valid Values</th>
-                    <th class="text-center">Client Validation</th>
                     <th>Security</th>
                 </tr>
                 @foreach (var prop in vm.ClientProperties)
@@ -119,16 +118,6 @@
                             else
                             {
                             <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            @if (prop.HasClientValidation)
-                            {
-                                <span class="glyphicon glyphicon-ok" style="color:green;"></span>
-                            }
-                            else
-                            {
-                                <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
                             }
                         </td>
                         <td>@prop.SecurityInfo.ToString()</td>

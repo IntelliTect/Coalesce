@@ -406,8 +406,11 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
                 this.cancel()
             }
         }
-        this.wasSuccessful = null
-        this.message = null
+
+
+        // Change no state except `isLoading` until after the promise is resolved.
+        // this.wasSuccessful = null
+        // this.message = null
         this.isLoading = true
 
         // Inject a cancellation token into the request.

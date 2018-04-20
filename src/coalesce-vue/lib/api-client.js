@@ -245,7 +245,7 @@ var ApiState = /** @class */ (function (_super) {
      * @param onFulfilled A callback to be called when a request to this endpoint fails.
      */
     ApiState.prototype.onRejected = function (callback) {
-        this._callbacks.onFulfilled.push(callback);
+        this._callbacks.onRejected.push(callback);
         return this;
     };
     ApiState.prototype._invokeInternal = function (thisArg, args) {
@@ -302,13 +302,14 @@ var ApiState = /** @class */ (function (_super) {
             delete _this._cancelToken;
             _this.wasSuccessful = false;
             var result = error.response;
-            if (result) {
-                var data = result.data;
-                _this.setResponseProps(data);
+            if (result && typeof result.data === "object") {
+                _this.setResponseProps(result.data);
             }
             else {
-                // TODO: i18n
-                _this.message = error.message || "A network error occurred";
+                _this.message =
+                    typeof error.message === "string" ? error.message :
+                        typeof error === "string" ? error :
+                            "A network error occurred"; // TODO: i18n
             }
             _this._callbacks.onRejected.forEach(function (cb) { return cb.apply(thisArg, [_this]); });
             _this.isLoading = false;

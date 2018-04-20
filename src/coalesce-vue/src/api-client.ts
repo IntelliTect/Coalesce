@@ -390,7 +390,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
      * @param onFulfilled A callback to be called when a request to this endpoint fails.
      */
     onRejected(callback: (this: any, state: this) => void): this {
-        this._callbacks.onFulfilled.push(callback)
+        this._callbacks.onRejected.push(callback)
         return this;
     }
 
@@ -454,12 +454,13 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
                 delete this._cancelToken
                 this.wasSuccessful = false
                 const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
-                if (result) {
-                    const data = result.data
-                    this.setResponseProps(data)
+                if (result && typeof result.data === "object") {
+                    this.setResponseProps(result.data)
                 } else {
-                    // TODO: i18n
-                    this.message = error.message || "A network error occurred"
+                    this.message = 
+                        typeof error.message === "string" ? error.message : 
+                        typeof error === "string" ? error :
+                        "A network error occurred" // TODO: i18n
                 }
 
                 this._callbacks.onRejected.forEach(cb => cb.apply(thisArg, [this]))

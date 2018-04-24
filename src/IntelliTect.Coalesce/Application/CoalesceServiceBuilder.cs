@@ -28,7 +28,8 @@ namespace IntelliTect.Coalesce
             Services.AddScoped(sp => new CrudContext<TContext>(
                 sp.GetRequiredService<TContext>(),
                 sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext.User,
-                sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local
+                sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local,
+                sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext.RequestAborted
             ));
 
             return this;

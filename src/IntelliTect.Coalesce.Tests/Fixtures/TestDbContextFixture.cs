@@ -1,24 +1,27 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+using System.Threading;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.Tests.Fixtures
 {
-    public class TestDbContextTests
+    public class TestDbContextTests : TestDbContextTests<TestDbContext>
+    {
+
+    }
+
+    public class TestDbContextTests<TContext> where TContext :  DbContext, new()
     {
         public TestDbContextTests()
         {
-            Db = new TestDbContext();
-            CrudContext = new CrudContext<TestDbContext>(Db, new System.Security.Claims.ClaimsPrincipal())
+            Db = new TContext();
+            CrudContext = new CrudContext<TContext>(Db, new System.Security.Claims.ClaimsPrincipal(), CancellationToken.None)
             {
                 ReflectionRepository = ReflectionRepositoryFactory.Reflection
             };
         }
 
-        public TestDbContext Db { get; }
-        public CrudContext<TestDbContext> CrudContext { get; private set; }
+        public TContext Db { get; }
+        public CrudContext<TContext> CrudContext { get; set; }
     }
 }

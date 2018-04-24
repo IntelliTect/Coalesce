@@ -151,7 +151,7 @@ namespace IntelliTect.Coalesce
                 throw new InvalidOperationException("Recieved null from result of BeforeSave. Expected an ItemResult.");
             if (!beforeSave.WasSuccessful) return new ItemResult<TDto>(beforeSave);
 
-            await Db.SaveChangesAsync();
+            await Db.SaveChangesAsync(Context.CancellationToken);
 
             // Pull the object to get any changes.
             var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
@@ -341,7 +341,7 @@ namespace IntelliTect.Coalesce
         public virtual Task ExecuteDeleteAsync(T item)
         {
             GetDbSet().Remove(item);
-            return Db.SaveChangesAsync();
+            return Db.SaveChangesAsync(Context.CancellationToken);
         }
 
         /// <summary>

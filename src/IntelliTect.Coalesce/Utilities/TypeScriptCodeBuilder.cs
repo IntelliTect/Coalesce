@@ -58,6 +58,7 @@ namespace IntelliTect.Coalesce.Utilities
             Line().Append("/** ").Append(comment).Append(" */").Line();
             return this;
         }
+
         public TypeScriptCodeBuilder DocComment(string[] comment)
         {
             // Always put a blank line before a doc comment.

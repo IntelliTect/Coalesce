@@ -49,6 +49,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
         }
 
         private Assembly _assembly;
+
         private Assembly GetAssembly()
         {
             var asmFile = _projectContext.AssemblyFileInfo;

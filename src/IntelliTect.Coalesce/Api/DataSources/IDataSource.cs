@@ -10,10 +10,12 @@ namespace IntelliTect.Coalesce
         where T : class, new()
     {
         Task<(ItemResult<T> Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters);
+
         Task<ItemResult<TDto>> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
             where TDto : IClassDto<T>, new();
 
         Task<(ListResult<T> List, IncludeTree IncludeTree)> GetListAsync(IListParameters parameters);
+
         Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
             where TDto : IClassDto<T>, new();
 

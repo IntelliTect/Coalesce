@@ -32,10 +32,12 @@ namespace IntelliTect.Coalesce.Validation
         {
             return IsTrue(obj1 != obj2, message, isWarning);
         }
+
         public bool IsNotNull(object obj, string message, bool isWarning = false)
         {
             return IsTrue(obj != null, message, isWarning);
         }
+
         public bool IsNull(object obj, string message, bool isWarning = false)
         {
             return IsTrue(obj == null, message, isWarning);

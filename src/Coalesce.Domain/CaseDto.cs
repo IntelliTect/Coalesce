@@ -16,7 +16,9 @@ namespace Coalesce.Domain
     {
         [Key]
         public int CaseId { get; set; }
+
         public string Title { get; set; }
+
         [ReadOnly(true)]
         public string AssignedToName { get; set; }
 

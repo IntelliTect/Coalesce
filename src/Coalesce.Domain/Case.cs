@@ -21,11 +21,15 @@ namespace Coalesce.Domain
         public enum Statuses
         {
             Open,
+
             [Display(Name = "In Progress")]
             InProgress,
+
             Resolved,
+
             [Display(Name = "Closed, No Solution")]
             ClosedNoSolution,
+
             Cancelled
         }
 
@@ -47,11 +51,13 @@ namespace Coalesce.Domain
         public DateTimeOffset OpenedAt { get; set; }
 
         public int? AssignedToId { get; set; }
+
         [ForeignKey("AssignedToId")]
         [DtoExcludes("PersonListGen")]
         public Person AssignedTo { get; set; }
 
         public int? ReportedById { get; set; }
+
         [ForeignKey("ReportedById")]
         [DtoExcludes("PersonListGen")]
         [Display(Name = "Reported By")]

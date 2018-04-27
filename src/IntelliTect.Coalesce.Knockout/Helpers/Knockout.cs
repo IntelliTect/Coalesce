@@ -141,6 +141,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding(), format, preserve, stepping);
         }
+
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
@@ -154,6 +155,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding(), format, preserve, stepping);
         }
+
         public static HtmlString InputFor<T>(Expression<Func<T, DateTime?>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
@@ -334,6 +336,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return BooleanSelect(propertyModel.JsVariableForBinding(), trueText, falseText);
         }
+
         public static HtmlString BooleanValueFor<T>(Expression<Func<T, bool?>> propertySelector, string trueText = "Yes", string falseText = "No")
         {
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
@@ -486,6 +489,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             }
             return HtmlString.Empty;
         }
+
         public static HtmlString SelectForManyToMany(PropertyViewModel propertyModel, string placeholder = "", string prefix = "", string areaName = "", int pageSize = 25)
         {
             if (string.IsNullOrWhiteSpace(propertyModel.ManyToManyCollectionName))
@@ -620,6 +624,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             return new HtmlString(result);
         }
+
         public static HtmlString ModifiedOnFromNow(double size = 1, string format = "M/D/YY")
         {
             string result = string.Format(@"
@@ -630,6 +635,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             return new HtmlString(result);
         }
+
         public static HtmlString ModifiedOn(double size = 1, string format = "M/D/YY")
         {
             string result = string.Format(@"

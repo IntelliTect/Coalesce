@@ -19,14 +19,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class ClassViewModel : IAttributeProvider
     {
-        
         protected IReadOnlyCollection<PropertyViewModel> _Properties;
         protected IReadOnlyCollection<MethodViewModel> _Methods;
 
         public abstract string Name { get; }
         public abstract string Comment { get; }
         public TypeViewModel Type { get; protected set; }
-        
+
         public string FullyQualifiedName => Type.FullyQualifiedName;
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string ClientTypeName =>
             // Check for an override first
-            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ?? 
+            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ??
             // If no override, check for an interface service, and trim the conventional 'I' if found.
             (IsService && Type.IsInterface && Name[0] == 'I' && char.IsUpper(Name[1]) ? Name.Substring(1) : null) ??
             // Nothing special - just use the name.
@@ -109,21 +108,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string ListViewModelClassName => ClientTypeName + "List";
 
-
-
         public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
 
         public string ServiceClientClassName => ClientTypeName + "Client";
-
-
 
         /// <summary>
         /// Name of an instance of the List ViewModelClass
         /// </summary>
         public string ListViewModelObjectName => ListViewModelClassName.ToCamelCase();
-
-
-
 
         #region Member Info - Properties & Methods
 
@@ -176,18 +168,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Properties on the class that are permitted to be exposed to the client.
         /// </summary>
         public IEnumerable<PropertyViewModel> ClientProperties => Properties.Where(p => p.IsClientProperty);
-        
+
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
-            // TODO: how  are we determining which properties to inject into a datasource?
-            // This is using [CoalesceAttribute] - should this be something else?
-            .Where(p => !p.IsInternalUse && p.HasSetter && p.HasAttribute<CoalesceAttribute>())
-             // These are the only supported types, for now
-            .Where(p => p.Type.IsPrimitive || p.Type.IsDate);
+            .Where(p =>
+                !p.IsInternalUse && p.HasSetter && p.HasAttribute<CoalesceAttribute>()
+                // These are the only supported types, for now
+                && (p.Type.IsPrimitive || p.Type.IsDate)
+            );
 
         /// <summary>
         /// List of method names that should not be exposed to the client.
         /// </summary>
-        private string[] excludedMethodNames = new[] {
+        private readonly string[] excludedMethodNames = new[] {
             nameof(object.ToString),
             nameof(object.Equals),
             nameof(object.GetHashCode),
@@ -202,30 +194,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <remarks>
         /// This collection is internal to prevent accidental exposing of methods that should not be exposed.
         /// </remarks>
-        internal IReadOnlyCollection<MethodViewModel> Methods
-        {
-            get
-            {
-                if (_Methods != null) return _Methods;
+        internal IReadOnlyCollection<MethodViewModel> Methods =>
+            _Methods ?? (_Methods = RawMethods
+                .Where(m => !excludedMethodNames.Contains(m.Name))
+                .Where(m => !IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo)))
+                .ToList().AsReadOnly());
 
-                return _Methods = RawMethods
-                    .Where(m => !excludedMethodNames.Contains(m.Name))
-                    .Where(m => !IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo)))
-                    .ToList().AsReadOnly();
-            }
-        }
+        public IEnumerable<MethodViewModel> ClientMethods =>
+            Methods.Where(m => m.IsClientMethod);
 
-        public IEnumerable<MethodViewModel> ClientMethods => Methods.Where(m => m.IsClientMethod);
-
-        internal IEnumerable<TypeViewModel> ClientNestedTypes => RawNestedTypes
-            .Where(t => !t.IsInternalUse);
+        internal IEnumerable<TypeViewModel> ClientNestedTypes =>
+            RawNestedTypes.Where(t => !t.IsInternalUse);
 
         public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
             .DataSources
             .Where(d => d.DeclaredFor.Equals(this))
             .Select(d => d.StrategyClass)
             .OrderBy(d => d.ClientTypeName);
-
 
         /// <summary>
         /// Returns a property matching the name if it exists.
@@ -250,9 +235,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public MethodViewModel MethodByName(string name, bool? isStatic = null)
         {
-            return ClientMethods.FirstOrDefault(f => 
+            return ClientMethods.FirstOrDefault(f =>
                 string.Equals(f.Name, name, StringComparison.InvariantCultureIgnoreCase)
-                && isStatic == null || f.IsStatic == isStatic);
+                && (isStatic == null || f.IsStatic == isStatic));
         }
 
         /// <summary>
@@ -269,30 +254,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #endregion
 
-
         #region Searching/Sorting
 
         public string DefaultOrderByClause(string prependText = "")
         {
             var defaultOrderBy = DefaultOrderBy.ToList();
-            if (defaultOrderBy.Any())
-            {
-                var orderByClauseList = new List<string>();
-                foreach (var orderInfo in defaultOrderBy)
-                {
-                    if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
-                    {
-                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
-                    }
-                    else
-                    {
-                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
-                    }
-                }
-                return string.Join(",", orderByClauseList);
-            }
-            return null;
 
+            if (defaultOrderBy.Count == 0) return null;
+
+            var orderByClauseList = new List<string>();
+            foreach (var orderInfo in defaultOrderBy)
+            {
+                if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
+                {
+                    orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
+                }
+                else
+                {
+                    orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
+                }
+            }
+
+            return string.Join(",", orderByClauseList);
         }
 
         /// <summary>
@@ -311,11 +294,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         result.Add(orderInfo);
                     }
                 }
+
                 // Nothing found, order by ListText and then ID.
-                if (!result.Any())
+                if (result.Count == 0)
                 {
                     var nameProp = PropertyByName("Name");
-                    if (nameProp != null && !nameProp.HasNotMapped && nameProp.IsClientProperty)
+                    if (nameProp?.HasNotMapped == false && nameProp.IsClientProperty)
                     {
                         result.Add(new OrderByInformation()
                         {
@@ -350,7 +334,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (depth == 3) yield break;
 
             var searchProperties = Properties.Where(f => f.IsSearchable(rootModel)).ToList();
-            if (searchProperties.Any())
+            if (searchProperties.Count > 0)
             {
                 // Process these items to make sure we have things we can search on.
                 foreach (var property in searchProperties)
@@ -364,24 +348,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 yield break;
             }
 
-            foreach (var prop in new[]
+            yield return new[]
             {
                 PropertyByName("Name"),
                 Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
                 PrimaryKey
-            })
-            {
-                if (prop != null && !prop.HasNotMapped && prop.IsClientProperty)
-                {
-                    yield return new SearchableValueProperty(prop);
-                    yield break;
-                }
             }
+            .Where(p => p.IsClientProperty && p?.HasNotMapped == false)
+            .Select(p => new SearchableValueProperty(p))
+            .FirstOrDefault();
         }
 
         #endregion
-
-
 
         /// <summary>
         /// Returns the property ID field.
@@ -395,7 +373,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClientProperties.FirstOrDefault(f => f.IsListText) ??
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
-
 
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
@@ -423,6 +400,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool HasDbSet { get; internal set; }
 
         private ClassSecurityInfo _securityInfo;
+
         public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
             this.GetSecurityPermission<ReadAttribute>(),
             this.GetSecurityPermission<EditAttribute>(),
@@ -452,9 +430,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string ToString() => FullyQualifiedName;
 
-        public override bool Equals(object obj) => 
-            Object.ReferenceEquals(this, obj) 
-            || obj is ClassViewModel that && this.Type.Equals(that.Type);
+        public override bool Equals(object obj) =>
+            Object.ReferenceEquals(this, obj)
+            || (obj is ClassViewModel that && this.Type.Equals(that.Type));
 
         public override int GetHashCode() => this.Type.GetHashCode();
     }

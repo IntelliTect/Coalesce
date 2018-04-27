@@ -34,6 +34,7 @@ namespace IntelliTect.Coalesce.Helpers
         public bool HasRoles => RoleList.Any();
 
         private IReadOnlyList<string> _roleList = null;
+
         public IReadOnlyList<string> RoleList
         {
             get

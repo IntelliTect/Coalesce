@@ -15,19 +15,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
     public class RoslynTypeLocator : TypeLocator
     {
-        private Workspace _projectWorkspace;
-        private RoslynProjectContext _projectContext;
+        private readonly Workspace _projectWorkspace;
+        private readonly RoslynProjectContext _projectContext;
 
         private Compilation _compilation;
 
         public RoslynTypeLocator(Workspace projectWorkspace, RoslynProjectContext projectContext)
         {
-            if (projectWorkspace == null)
-            {
-                throw new ArgumentNullException(nameof(projectWorkspace));
-            }
-
-            _projectWorkspace = projectWorkspace;
+            _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
             _projectContext = projectContext;
         }
 
@@ -79,6 +74,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
         }
 
         private List<INamedTypeSymbol> _allTypes;
+
         public List<INamedTypeSymbol> GetAllTypes()
         {
             if (_allTypes != null) return _allTypes;
@@ -211,7 +207,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                     string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
             }
 
-            return new SymbolTypeViewModel(candidateModelTypes.First());
+            return new SymbolTypeViewModel(candidateModelTypes[0]);
         }
 
         public override IEnumerable<TypeViewModel> FindDerivedTypes(string typeName, bool throwWhenNotFound = true)
@@ -232,7 +228,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 {
                     return true;
                 }
-                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+
+                if (x is null || y is null)
                 {
                     return false;
                 }
@@ -254,11 +251,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
             public int GetHashCode(ITypeSymbol obj)
             {
-                if (Object.ReferenceEquals(obj, null))
+                if (obj is null)
                 {
                     return 0;
                 }
-                var hashName = obj.Name == null ? 0 : obj.Name.GetHashCode();
+                var hashName = obj.Name?.GetHashCode() ?? 0;
                 var hashNamespace = obj.ContainingNamespace?.Name == null ? 0 : obj.ContainingNamespace.Name.GetHashCode();
                 var hashAssembly = obj.ContainingAssembly?.Name == null ? 0 : obj.ContainingAssembly.Name.GetHashCode();
 

@@ -60,6 +60,7 @@ namespace Coalesce.Web.Controllers
         {
             return View();
         }
+
         public IActionResult Dtos()
         {
             return View();
@@ -69,14 +70,17 @@ namespace Coalesce.Web.Controllers
         {
             return View();
         }
+
         public IActionResult Enhancements()
         {
             return View();
         }
+
         public IActionResult NightlyBuilds()
         {
             return View();
         }
+
         public IActionResult BestPractices()
         {
             return View();

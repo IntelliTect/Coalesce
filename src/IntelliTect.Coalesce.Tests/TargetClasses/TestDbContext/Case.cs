@@ -20,11 +20,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public enum Statuses
         {
             Open,
+
             [Display(Name = "In Progress")]
             InProgress,
+
             Resolved,
+
             [Display(Name = "Closed, No Solution")]
             ClosedNoSolution,
+
             Cancelled
         }
         
@@ -42,10 +46,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DateTimeOffset OpenedAt { get; set; }
 
         public int? AssignedToId { get; set; }
+
         [ForeignKey("AssignedToId")]
         public Person AssignedTo { get; set; }
 
         public int? ReportedById { get; set; }
+
         [ForeignKey("ReportedById")]
         [Display(Name = "Reported By")]
         public Person ReportedBy { get; set; }

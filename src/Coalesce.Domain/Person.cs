@@ -35,6 +35,7 @@ namespace Coalesce.Domain
         {
             //Address = new Address();
         }
+
         /// <summary>
         /// ID for the person object.
         /// </summary>
@@ -88,8 +89,10 @@ namespace Coalesce.Domain
 
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTime? BirthDate { get; set; }
+
         [Hidden]
         public DateTime? LastBath { get; set; }
+
         [Hidden]
         public DateTimeOffset? NextUpgrade { get; set; }
 
@@ -112,6 +115,7 @@ namespace Coalesce.Domain
         /// </summary>
         [ClientValidation(IsRequired = true, AllowSave = false)]
         public int CompanyId { get; set; }
+
         /// <summary>
         /// Company loaded from the Company ID
         /// </summary>
@@ -162,8 +166,7 @@ namespace Coalesce.Domain
         [Coalesce,Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
-            if (user != null && user.Identity != null) return user.Identity.Name;
-            return "Unknown";
+            return user?.Identity?.Name ?? "Unknown";
         }
 
         [Coalesce]
@@ -227,8 +230,7 @@ namespace Coalesce.Domain
         [Coalesce]
         public static string GetUserPublic(ClaimsPrincipal user)
         {
-            if (user != null && user.Identity != null) return user.Identity.Name;
-            return "Unknown";
+            return user?.Identity?.Name ?? "Unknown";
         }
 
         /// <summary>
@@ -280,7 +282,7 @@ namespace Coalesce.Domain
         {
             public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
 
-            public override ItemResult BeforeSave(SaveKind kind, Person originalItem, Person item)
+            public override ItemResult BeforeSave(SaveKind kind, Person oldItem, Person item)
             {
                 if (kind == SaveKind.Update && item.FirstName != null && item.FirstName.Length < 2)
                 {

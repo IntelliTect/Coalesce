@@ -122,6 +122,7 @@ namespace IntelliTect.Coalesce.Utilities
             }
             
             private bool disposed = false; // To detect redundant calls
+
             public void Dispose()
             {
                 if (disposed) return;

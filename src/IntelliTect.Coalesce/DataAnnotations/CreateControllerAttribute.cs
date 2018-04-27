@@ -13,6 +13,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     {
         public bool WillCreateView { get; set; }
         public bool WillCreateApi { get; set; }
+
         public CreateControllerAttribute(bool willCreateView = true, bool willCreateApi = true)
         {
             WillCreateView = willCreateView;

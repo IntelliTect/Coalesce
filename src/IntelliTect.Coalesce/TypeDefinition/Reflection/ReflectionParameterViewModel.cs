@@ -32,6 +32,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             return Info.GetAttributeValue<TAttribute>(valueName);
         }
+
         public override bool HasAttribute<TAttribute>()
         {
             return Info.HasAttribute<TAttribute>();

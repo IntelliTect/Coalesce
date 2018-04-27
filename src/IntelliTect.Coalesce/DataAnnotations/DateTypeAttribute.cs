@@ -16,6 +16,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             DateTime = 0,
             DateOnly = 1,
         }
+
         public DateTypes DateType { get; set; }
 
         public DateTypeAttribute(DateTypes dateType = DateTypes.DateTime)

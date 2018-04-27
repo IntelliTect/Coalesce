@@ -148,6 +148,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             new object[] { false, "2017-08-02T12:34:56", new DateTime(2017, 08, 2, 12, 34, 57) },
             new object[] { false, "can't parse", new DateTime(2017, 08, 2, 12, 34, 57) },
         };
+
         [Theory]
         [MemberData(nameof(Filter_MatchesDateTimesData))]
         public void ApplyListPropertyFilter_WhenPropIsDateTime_FiltersProp(
@@ -180,6 +181,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             new object[] { false, "2017-08-02T12:34:56", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
             new object[] { false, "can't parse", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
         };
+
         [Theory]
         [MemberData(nameof(Filter_MatchesDateTimeOffsetsData))]
         public void ApplyListPropertyFilter_WhenPropIsDateTimeOffset_FiltersProp(

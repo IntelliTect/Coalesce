@@ -19,15 +19,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         public static readonly ReflectionRepository Global = new ReflectionRepository();
 
-        private object _lock = new object();
+        private readonly HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
+        private readonly HashSet<ClassViewModel> _entities = new HashSet<ClassViewModel>();
+        private readonly HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
+        private readonly HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
+        private readonly HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
+        private readonly HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
+        private readonly HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
 
-        private HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
-        private HashSet<ClassViewModel> _entities = new HashSet<ClassViewModel>();
-        private HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
-        private HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
-        private HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
-        private HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
-        private HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
+        private readonly ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
+            = new ConcurrentDictionary<object, ClassViewModel>();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
         public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
@@ -48,9 +49,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
             .Union(ClientClasses);
-
-        private ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
-            = new ConcurrentDictionary<object, ClassViewModel>();
 
         public ReflectionRepository()
         {
@@ -144,7 +142,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private object GetCacheKey(ClassViewModel classViewModel) => 
             (classViewModel.Type as ReflectionTypeViewModel)?.Info as object
             ?? (classViewModel.Type as SymbolTypeViewModel)?.Symbol as object
-            ?? throw new NotImplementedException("Unknown subtype of TypeViewModel");
+            ?? throw new NotSupportedException("Unknown subtype of TypeViewModel");
 
 
         /// <summary>
@@ -202,6 +200,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
             }
         }
+
         private bool AddCrudStrategy(
             Type iface,
             TypeViewModel strategyType,

@@ -83,6 +83,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public HttpMethod ApiActionHttpMethod =>
             this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ?? HttpMethod.Post;
+
         public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
         public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
 

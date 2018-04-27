@@ -12,6 +12,7 @@ namespace Coalesce.Domain
     public class GenFuBaseValueGenerator:BaseValueGenerator
     {
         private static int? _randomSeed = null;
+
         /// <summary>
         /// Random number seed. Null if not set and using Environment.TickCount.
         /// Every time this is set, a new Random object will be created.

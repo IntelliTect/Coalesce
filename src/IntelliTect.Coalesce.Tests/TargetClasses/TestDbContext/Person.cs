@@ -35,6 +35,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         {
             //Address = new Address();
         }
+
         /// <summary>
         /// ID for the person object.
         /// </summary>
@@ -101,6 +102,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// </summary>
         [ClientValidation(IsRequired = true, AllowSave = false)]
         public int CompanyId { get; set; }
+
         /// <summary>
         /// Company loaded from the Company ID
         /// </summary>

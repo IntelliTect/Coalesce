@@ -1,0 +1,371 @@
+﻿@model IntelliTect.Coalesce.TypeDefinition.ClassViewModel
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Knockout.Models
+@using IntelliTect.Coalesce.Utilities
+@{
+    ClassViewModel vm = Model;
+    TypeScriptDocumentation objDoc = ViewBag.ObjDoc;
+    TypeScriptDocumentation listDoc = ViewBag.ListDoc;
+}
+
+
+<div class="panel panel-default ">
+    <div class="panel-heading">
+        <h2>Docs for @vm.Name</h2>
+    </div>
+    <div class="panel-body">
+        <div>
+            This is an automatically generated server and client side stack based on an underlying Entity Framework (EF)
+            class (POCO).
+        </div>
+        <div>
+            The full implementation contains three layers.
+            <ol>
+                <li>
+                    An API which provides underlying access to the data and provides support for
+                    getting lists, getting single items, creating, and updating.
+                </li>
+                <li>An automatically generated view model (VM) for Knockout. Other client side VMs can also be supported.</li>
+                <li>A user interface that allows for simple editing of information in both a grid and a traditional form. This uses the underlying Knockout view model.</li>
+            </ol>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>Security</h3>
+            </div>
+            <table class="table">
+                <tr>
+                    <th style="width: 150px;">Create</th>
+                    <td>@vm.SecurityInfo.Create.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Read</th>
+                    <td>@vm.SecurityInfo.Read.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Edit</th>
+                    <td>@vm.SecurityInfo.Edit.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Delete</th>
+                    <td>@vm.SecurityInfo.Delete.ToString()</td>
+                </tr>
+            </table>
+        </div>
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@vm.Name Properties</h3>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th class="text-center">Required</th>
+                    <th class="text-center">Read Only</th>
+                    <th class="text-center">Has Valid Values</th>
+                    <th>Security</th>
+                </tr>
+                @foreach (var prop in vm.ClientProperties)
+                {
+                    <tr>
+                        <th>@prop.Name</th>
+                        <td>
+                            @if (prop.IsPOCO)
+                            {
+                                <a href="/@prop.Name/docs">@prop.Name</a>
+                            }
+                            else if (prop.Type.IsCollection)
+                            {
+                                <a href="/@prop.PureType.Name/docs">List of @prop.PureType.Name</a>
+                            }
+                            else if (prop.Type.IsEnum)
+                            {
+                                <span>@prop.PureType.Name (Enum)</span>
+                            }
+                            else
+                            {
+                                <span>@prop.PureType.Name</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.IsRequired)
+                            {
+                                <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.IsReadOnly)
+                            {
+                                <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (prop.HasValidValues || prop.Type.IsEnum)
+                            {
+                            <span class="glyphicon glyphicon-ok" style="color:green;"></span>
+                            }
+                            else
+                            {
+                            <span class="glyphicon glyphicon-minus" style="color:gray;"></span>
+                            }
+                        </td>
+                        <td>@prop.SecurityInfo.ToString()</td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@vm.Name Search Properties</h3>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Property</th>
+                    <th>Split on Spaces</th>
+                    <th>Search Type</th>
+                </tr>
+                @foreach (var prop in vm.SearchProperties())
+                {
+                    <tr>
+                        <th>@prop.Property</th>
+                        <td>@prop.Property.SearchIsSplitOnSpaces</td>
+                        <td>@prop.Property.SearchMethod.ToString().ToProperCase()</td>
+                    </tr>
+                }
+
+            </table>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@vm.Name Methods</h3>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>C# Parameters</th>
+                    <th>TypeScript Parameters</th>
+                    <th>Security</th>
+                </tr>
+                @foreach (var method in vm.ClientMethods)
+                {
+                    <tr>
+                        <th>@method.Name</th>
+                        <td>
+                            @method.ResultType.FullyQualifiedName
+                        </td>
+                        <td>
+                            @method.CsParameters
+                        </td>
+                        <td>
+                            @(string.Join(", ", method.ClientParameters.Select(f => f.JsVariable)))
+                        </td>
+                        <td>@method.SecurityInfo.ToString()</td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@vm.Name Alternate List Data Sources</h3>
+                <div>These can be accessed via the list view model's dataSource via an enumeration.</div>
+            </div>
+            <ul class="list-group">
+                @foreach (var source in vm.ClientDataSources(ReflectionRepository.Global))
+                {
+                    <li class="list-group-item">
+                        @source.Name
+                    </li>
+                }
+            </ul>
+        </div>
+
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@vm.ApiRouteControllerPart</h3>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>List</th>
+                    <td>
+                        <p>Provides a list of generated DTOs, or if specified your custom DTO.</p>
+                        <dl>
+                            <dt>Page</dt>
+                            <dd>Page number to retrieve</dd>
+
+                            <dt>PageSize</dt>
+                            <dd>Number of items per page</dd>
+
+                            <dt>Search</dt>
+                            <dd>
+                                Text to search for in predefined fields. By convention the Name field is searched if it exists.
+                                Fields can be specified with the [Search] attribute. If none of this is true, nothing is searched.
+                            </dd>
+
+                            <dt>OrberBy</dt>
+                            <dd>Field by which to order the list. If not specified the ID field will be used.</dd>
+
+                            <dt>OrderByDescending</dt>
+                            <dd>Field to order by with descending order.</dd>
+
+                            <dt>Includes</dt>
+                            <dd>The name of the list of child items to include by default, all immediate children are included. Specify 'none' to get no children. Note: this only works if lazy loading is turned off.</dd>
+
+                            <dt>List of filter.[field]=[value]</dt>
+                            <dd>
+                                A query parameter with the format filter.[field]=[value] will automatically create a filter.
+                            </dd>
+
+                            <dt>List of fields</dt>
+                            <dd>
+                                Any other string will be treated as a requested field name. If none are specified,
+                                all fields will be returned, otherwise only specified fields will be returned in a dynamic object.
+                            </dd>
+                        </dl>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Get/id</th>
+                    <td>
+                        <p>Get an item by id</p>
+                </tr>
+                <tr>
+                    <th>Save</th>
+                    <td>
+                        <p>Saves an item based on the DTO passed in.</p>
+                        <p>
+                            If the Id is non zero an update is attempted.
+                            If the Id is zero a new item is created. Validation is performed and passed back in the resultant object.
+                            The the save was successful a WasSuccessful flag is set to true. The saved object is passed back
+                            in the Object property. A message can be passed back in the Message Property.
+                        </p>
+                </tr>
+                <tr>
+                    <th>Count</th>
+                    <td>
+                        <p>Gives a count of items based on a where clause.</p>
+                        <p>
+                            <dl>
+                                <dt>Search</dt>
+                                <dd>
+                                    Text to search for in predefined fields. By convention the Name field is searched if it exists.
+                                    Fields can be specified with the [Search] attribute. If none of this is true, nothing is searched.
+                                </dd>
+                                <dt>Filter</dt>
+                                <dd>Free form SQL filter with the syntax [field][operator][value]. eg. name='test', price>10</dd>
+                            </dl>
+                        </p>
+                </tr>
+                <tr>
+                    <th>Delete</th>
+                    <td>
+                        <p>Deletes the ID.</p>
+                        <p>
+                            <dl>
+                                <dt>id</dt>
+                                <dd>ID to delete</dd>
+                            </dl>
+                        </p>
+                </tr>
+            </table>
+
+        </div>
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>View Model for @vm.Name</h3>
+                <h4>TypeScript Class: @(objDoc.Namespace).@(objDoc.Name)</h4>
+                <h5>TypeScript File: @(objDoc.TsFilename)</h5>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Observable</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var f in objDoc.Functions.OrderBy(f => f.Name))
+                    {
+                        <tr>
+                            <td>@f.Name</td>
+                            <td>@f.Observable</td>
+                            <td>@f.Type</td>
+                            <td>@f.Comment</td>
+                        </tr>
+                    }
+                    @foreach (var f in ((TypeScriptDocumentation)(ViewBag.BaseObjDoc)).Functions.OrderBy(f => f.Name))
+                    {
+                        <tr>
+                            <td>@f.Name</td>
+                            <td>@f.Observable</td>
+                            <td>@f.Type</td>
+                            <td>@f.Comment</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>View Model for @vm.ListViewModelClassName</h3>
+                <h4>TypeScript Class: @(listDoc.Namespace).@(listDoc.Name)</h4>
+                <h5>TypeScript File: @(listDoc.TsFilename)</h5>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Observable</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var f in listDoc.Functions.OrderBy(f => f.Name))
+                    {
+                        <tr>
+                            <td>@f.Name</td>
+                            <td>@f.Observable</td>
+                            <td>@f.Type</td>
+                            <td>@f.Comment</td>
+                        </tr>
+                    }
+                    @foreach (var f in ((TypeScriptDocumentation)(ViewBag.BaseListDoc)).Functions.OrderBy(f => f.Name))
+                    {
+                        <tr>
+                            <td>@f.Name</td>
+                            <td>@f.Observable</td>
+                            <td>@f.Type</td>
+                            <td>@f.Comment</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

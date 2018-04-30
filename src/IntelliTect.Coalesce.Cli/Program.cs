@@ -1,79 +1,159 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Common;
-using IntelliTect.Coalesce.CodeGeneration.Scripts;
-using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.ProjectModel;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Utilities;
+using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+
+// ReSharper disable UnassignedGetOnlyAutoProperty
 
 namespace IntelliTect.Coalesce.Cli
 {
+    [HelpOption]
     public class Program
     {
-        public static void Main(string[] args)
+        [Option(CommandOptionType.NoValue,
+            Description = "Wait for a debugger to be attached before starting generation", LongName = "debug",
+            ShortName = "d")]
+        public bool Debug { get; }
+
+        [Argument(0, "config", Description =
+            "Path to a coalesce.json configuration file that will drive generation.  If not specified, it will search in current folder.")]
+        public string ConfigFile { get; }
+
+        [Option(CommandOptionType.SingleValue, ShortName = "v", LongName = "verbosity",
+            Description = "Output verbosity. Options are Trace, Debug, Information, Warning, Error, Critical, None.")]
+        // TODO: Change this type to be the Enum once Nate McMaster ships v2.2.0 of his library.
+        public string LogLevelOption { get; }
+
+        private static Task<int> Main(string[] args)
         {
-            var app = new CommandLineApplication(false)
+            ApplicationTimer.Stopwatch.Start();
+            return CommandLineApplication.ExecuteAsync<Program>(args);
+        }
+
+        private async Task<int> OnExecuteAsync(CommandLineApplication app)
+        {
+#if DEBUG
+            if (Debug) WaitForDebugger();
+#endif
+
+            // Get the target framework (e.g. ".NETCoreApp,Version=v2.0") that Coalesce was compiled against.
+            // I added this originally for debugging, but its kinda nice to show regardless.
+            var attr = Assembly.GetEntryAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
+
+            // This reflects the version of the nuget package.
+            string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+
+            Console.WriteLine($"Starting Coalesce {version}, running under {attr.FrameworkName}");
+            Console.WriteLine("https://github.com/IntelliTect/Coalesce");
+            Console.WriteLine();
+
+
+            string configFilePath = LocateConfigFile(ConfigFile);
+
+            CoalesceConfiguration config;
+
+            using (var reader = new StreamReader(configFilePath))
+            using (var jsonReader = new JsonTextReader(reader))
             {
-                Name = "Coalesce"
+                var serializer = new JsonSerializer();
+                config = serializer.Deserialize<CoalesceConfiguration>(jsonReader);
+            }
+
+            // Must go AFTER we load in the config file, since if the config file was a relative path, changing this ruins that.
+            var desiredDirectory = Path.GetDirectoryName(configFilePath);
+            if (!string.IsNullOrWhiteSpace(desiredDirectory))
+            {
+                // If we're already in the desired working directory, desiredDirectory will be String.Empty,
+                // and an exception would be thrown. So, we check before calling this.
+                Directory.SetCurrentDirectory(desiredDirectory);
+            }
+
+            Console.WriteLine(
+                $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
+
+            if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
+
+            // TODO: dynamic resolution of the specific generator.
+            // For now, we hard-reference all of them and then try and match one of them.
+            // This may ultimately be the best approach in the long run, since it lets us easily do partial matching as below:
+            var rootGeneratorName = config.RootGenerator ?? "Knockout";
+            var rootGenerators = new[]
+            {
+                typeof(CodeGeneration.Vue.Generators.VueSuite),
+                typeof(CodeGeneration.Knockout.Generators.KnockoutSuite),
             };
 
-            app.HelpOption("-h|--help");
-            var dataContextClass = app.Option("-dc|--dataContext", "Data Context containing the classes to scaffold", CommandOptionType.SingleValue);
-            var force = app.Option("-f|--force", "Use this option to overwrite existing files", CommandOptionType.SingleValue);
-            var relativeFolderPath = app.Option("-outDir|--relativeFolderPath", "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the project folder", CommandOptionType.SingleValue);
-            var onlyGenerateFiles = app.Option("-filesOnly|--onlyGenerateFiles", "Will only generate the file output and will not restore any of the packages", CommandOptionType.SingleValue);
-            var validateOnly = app.Option("-vo|--validateOnly", "Validates the model but does not generate the models", CommandOptionType.SingleValue);
-            var area = app.Option("-a|--area", "The area where the generated/scaffolded code should be placed", CommandOptionType.SingleValue);
-            var module = app.Option("-m|--module", "The prefix to apply to the module name of the generated typescript files", CommandOptionType.SingleValue);
-            var webProject = app.Option("-wp|--webproject", "Relative path to the web project; if empty will search up from current folder for first project.json", CommandOptionType.SingleValue);
-            var dataProject = app.Option("-dp|--dataproject", "Relative path to the data project", CommandOptionType.SingleValue);
-            var targetNamespace = app.Option("-ns|--namespace", "Target Namespace for the generated code", CommandOptionType.SingleValue);
+            Type rootGenerator =
+                   rootGenerators.FirstOrDefault(t => t.FullName == rootGeneratorName)
+                ?? rootGenerators.FirstOrDefault(t => t.Name == rootGeneratorName)
+                ?? rootGenerators.SingleOrDefault(t => t.FullName.Contains(rootGeneratorName));
 
-            app.OnExecute(async () =>
+            if (rootGenerator == null)
             {
-                var model = new CommandLineGeneratorModel
-                {
-                    DataContextClass = dataContextClass.Value() ?? "",
-                    Force = force.Value() != null && force.Value().ToLower() == "true",
-                    RelativeFolderPath = relativeFolderPath.Value() ?? "",
-                    OnlyGenerateFiles = onlyGenerateFiles.Value() != null && onlyGenerateFiles.Value().ToLower() == "true",
-                    ValidateOnly = validateOnly.Value() != null && validateOnly.Value().ToLower() == "true",
-                    AreaLocation = area.Value() ?? "",
-                    TypescriptModulePrefix = module.Value() ?? "",
-                    TargetNamespace = targetNamespace.Value() ?? ""
-                };
-
-                // Find the web project
-                ProjectContext webContext = DependencyProvider.ProjectContext(webProject.Value());
-                if (webContext == null) throw new ArgumentException("Web project or target namespace was not found.");
-
-                // Find the data project
-                ProjectContext dataContext = DependencyProvider.ProjectContext(dataProject.Value());
-                if (dataContext == null) throw new ArgumentException("Data project was not found.");
-
-                Console.WriteLine("");
-
-                CommandLineGenerator generator = new CommandLineGenerator(webContext, dataContext);
-
-                await generator.GenerateCode(model);
-
-                return 0;
-            });
-
-            try
-            {
-                app.Execute(args);
+                Console.Error.WriteLine($"Couldn't find a root generator that matches {rootGeneratorName}");
+                Console.Error.WriteLine($"Valid root generators are: {string.Join(",", rootGenerators.Select(g => g.FullName))}");
+                return -1;
             }
-            catch (Exception ex)
+
+            var executor = new GenerationExecutor(config, logLevel);
+            await executor.GenerateAsync(rootGenerator);
+
+            if (!Debugger.IsAttached) return 0;
+            Console.WriteLine("Press Enter to quit");
+            Console.Read();
+
+            return 0;
+        }
+
+
+        private static void WaitForDebugger()
+        {
+            Console.WriteLine($"Attach a debugger to processID: {Process.GetCurrentProcess().Id}. Waiting...");
+            var waitStep = 10;
+            for (var i = 60; i > 0; i -= waitStep)
             {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-                if (ex.InnerException != null)
+                if (Debugger.IsAttached)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
-                    Console.WriteLine(ex.InnerException.StackTrace);
+                    Console.WriteLine("Debugger attached.");
+                    break;
                 }
+
+                Console.WriteLine($"Waiting {i}...");
+                Thread.Sleep(1000 * waitStep);
             }
+        }
+
+        private static string LocateConfigFile(string explicitLocation)
+        {
+            if (!string.IsNullOrWhiteSpace(explicitLocation))
+            {
+                if (!File.Exists(explicitLocation))
+                    throw new FileNotFoundException("Couldn't find Coalesce configuration file",
+                        Path.GetFullPath(explicitLocation));
+                return explicitLocation;
+            }
+
+            var curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            const string configFileName = "coalesce.json";
+            while (curDirectory != null)
+            {
+                List<FileInfo> matchingFiles = curDirectory.EnumerateFiles(configFileName).ToList();
+                if (matchingFiles.Any()) return matchingFiles.First().FullName;
+                curDirectory = curDirectory.Parent;
+            }
+
+            throw new FileNotFoundException("Couldn't locate a coalesce.json configuration file");
         }
     }
 }

@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Validation
     /// <summary>
     /// Evaluates various conditions and keeps a list of what succeeded and failed.
     /// </summary>
-    public class ValidationHelper: List<ValidationResult>
+    internal class ValidationHelper: List<ValidationResult>
     {
         public string Area { get; set; } = "";
 
@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.Validation
             {
                 result = false;
             }
-            this.Add(new ValidationResult() { WasSuccessful = result, isWarning = isWarning, Area = Area, Message = message });
+            this.Add(new ValidationResult() { WasSuccessful = result, IsWarning = isWarning, Area = Area, Message = message });
 
             return result;
         }
@@ -32,16 +32,18 @@ namespace IntelliTect.Coalesce.Validation
         {
             return IsTrue(obj1 != obj2, message, isWarning);
         }
+
         public bool IsNotNull(object obj, string message, bool isWarning = false)
         {
             return IsTrue(obj != null, message, isWarning);
         }
+
         public bool IsNull(object obj, string message, bool isWarning = false)
         {
             return IsTrue(obj == null, message, isWarning);
         }
 
-        public bool isFalse(bool expression, string message, bool isWarning = false)
+        public bool IsFalse(bool expression, string message, bool isWarning = false)
         {
             return IsTrue(!expression, message, isWarning);
         }

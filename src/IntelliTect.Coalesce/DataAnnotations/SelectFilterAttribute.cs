@@ -33,6 +33,6 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// 
         /// If this is set, LocalPropertyName will be ignored.
         /// </summary>
-        public ValueType StaticPropertyValue { get; set; }
+        public string StaticPropertyValue { get; set; }
     }
 }

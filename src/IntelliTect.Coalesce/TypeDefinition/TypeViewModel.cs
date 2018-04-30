@@ -1,32 +1,83 @@
-﻿using IntelliTect.Coalesce.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class TypeViewModel
+
+    public abstract class TypeViewModel : IAttributeProvider
     {
-        internal TypeWrapper Wrapper { get; }
+        public abstract string Name { get; }
 
-        internal TypeViewModel(TypeWrapper wrapper)
-        {
-            Wrapper = wrapper;
-        }
+        /// <summary>
+        /// Returns the name of the type to be used by the client.
+        /// </summary>
+        public string ClientTypeName => 
+            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ??
+            Name;
 
-        public string Name
-        {
-            get
-            {
-                if (Wrapper.IsArray) return "Array";
-                return Wrapper.Name;
-            }
-        }
+        public abstract string FullyQualifiedName { get; }
+
+        public abstract string FullNamespace { get; }
+
+        public abstract bool IsGeneric { get; }
+
+        public abstract bool IsCollection { get; }
+
+        public abstract bool IsArray { get; }
+
+        public abstract bool IsNullable { get; }
+
+        public abstract bool IsNullableType { get; }
+
+        public abstract bool IsClass { get; }
+
+        public abstract bool IsInterface { get; }
+
+        /// <summary>
+        /// Returns true if this TypeViewModel represents void.
+        /// </summary>
+        public abstract bool IsVoid { get; }
+
+        public abstract Dictionary<int, string> EnumValues { get; }
+        public abstract bool IsEnum { get; }
+
+        public abstract TypeViewModel FirstTypeArgument { get; }
+
+        public abstract TypeViewModel ArrayType { get; }
+
+        public abstract bool IsA(Type type);
+        public abstract TypeViewModel[] GenericArgumentsFor(Type type);
+
+        public bool IsA<T>() => IsA(typeof(T));
+
+        /// <summary>
+        /// Convenient accessor for the represented System.Type when in reflection-based contexts.
+        /// </summary>
+        public virtual Type TypeInfo => throw new InvalidOperationException("TypeInfo not available in the current context");
+
+        /// <summary>
+        /// Returns a human-readable string that represents the name of this type to the client.
+        /// </summary>
+        public string DisplayName => ClientTypeName.ToProperCase();
+
+        /// <summary>
+        /// Get a value indicating what kind of type this <see cref="TypeViewModel"/> will be represented by on the client.
+        /// </summary>
+        public TypeDiscriminator TsTypeKind =>
+            IsString ? TypeDiscriminator.String :
+            IsByteArray ? TypeDiscriminator.String :
+            IsNumber ? TypeDiscriminator.Number :
+            IsBool ? TypeDiscriminator.Boolean :
+            IsDate ? TypeDiscriminator.Date :
+            IsEnum ? TypeDiscriminator.Enum :
+            IsVoid ? TypeDiscriminator.Void :
+            IsCollection ? TypeDiscriminator.Collection :
+            HasClassViewModel ? (
+                ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object
+            ) : TypeDiscriminator.Unknown;
 
         public string CsDefaultValue
         {
@@ -39,7 +90,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsDateTime) { return "DateTime.MinValue"; }
                 if (IsDateTimeOffset) { return "DateTimeOffset.MinValue"; }
                 if (IsBool) { return "false"; }
-                return "null";
+                return $"default({FullyQualifiedName})";
             }
         }
 
@@ -47,94 +98,50 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsString) { return ""; }
-                if (IsPOCO) { return "(object)"; }
-                if (IsEnum) { return "Convert.ToInt32"; }
-                if (IsNumber) { return "Convert.To" + Name; }
-                if (IsDateTime) { return "DateTime.Parse"; }
-                if (IsDateTimeOffset) { return "DateTimeOffset.Parse"; }
-                if (IsBool) { return "Convert.ToBoolean"; }
+                if (IsString) return "";
+                if (IsPOCO) return "(object)";
+                if (IsEnum) return "Convert.ToInt32";
+                if (IsNumber) return "Convert.To" + Name;
+                if (IsDateTime) return "DateTime.Parse";
+                if (IsDateTimeOffset) return "DateTimeOffset.Parse";
+                if (IsBool) return "Convert.ToBoolean";
                 return "(object)";
             }
         }
 
         /// <summary>
-        /// Returns true if this type inherits from T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool IsA<T>()
-        {
-            return Wrapper.IsA<T>();
-        }
-
-        public string FullName => $"{Wrapper.Namespace}.{Name}";
-
-        public string FullNamespace => Wrapper.FullNamespace;
-
-        public string NameWithTypeParams => Wrapper.NameWithTypeParams;
-
-        public string FullyQualifiedNameWithTypeParams => Wrapper.FullyQualifiedNameWithTypeParams;
-
-        /// <summary>
-        /// Returns true if the property is an array.
-        /// </summary>
-        public bool IsArray => Wrapper.IsArray;
-
-        /// <summary>
-        /// Returns true if the property is a collection.
-        /// </summary>
-        public bool IsCollection => Wrapper.IsCollection;
-
-        /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool => Wrapper.IsBool;
+        public bool IsBool => NullableUnderlyingType.Name == nameof(Boolean);
+
+        public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
         /// <summary>
-        /// Returns true if the property is nullable.
+        /// True if the type is supported by Coalesce as a key type.
         /// </summary>
-        public bool IsNullable => Wrapper.IsNullable;
+        public bool IsValidKeyType => IsString || IsIntegral;
 
         /// <summary>
-        /// Returns true if the property returns void.
-        /// </summary>
-        public bool IsVoid => Name == "Void";
-
-        public bool IsPrimitive => Wrapper.IsPrimitive;
-
-        /// <summary>
-        /// Returns the first generic argument for a generic type.
-        /// </summary>
-        public TypeViewModel FirstTypeArgument => new TypeViewModel(Wrapper.FirstTypeArgument);
-
-        /// <summary>
-        /// Type used in knockout for the observable.
+        /// Best approximation of a TypeScript type definition for the type.
         /// </summary>
         public string TsType
         {
             get
             {
-                if (Wrapper.IsTimeZoneInfo) return "any";
-                if (IsBool) return "boolean";
-                if (IsDate) return "moment.Moment";
+                if (IsByteArray) return "string";
                 if (IsCollection && IsNumber) return "number[]";
-                if (IsCollection) return PureType + "[]";
-                if (IsPOCO) return $"ViewModels.{PureType.Name}";
-                if (IsClass) return PureType.Name;
-                if (IsEnum) return "number";
-                if (IsNumber) return "number";
-                return "any";
+                if (IsCollection) return PureType.TsTypePlain + "[]";
+                return TsTypePlain;
             }
         }
 
         /// <summary>
-        /// Type used in knockout for the observable.
+        /// Exrepssion that will convert from a string to the data's actual type.
         /// </summary>
         public string TsConvertFromString(string expression)
         {
             if (IsBool) return $"({expression}.toUpperCase() == 'TRUE')";
-            if (IsEnum) return $"parseInt({expression})";
+            if (IsEnum || IsIntegral) return $"parseInt({expression})";
             if (IsNumber) return $"parseFloat({expression})";
             if (IsDate) return $"moment({expression})";
             return expression;
@@ -142,248 +149,183 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
-        /// Type used in knockout for the observable.
+        /// Best approximation of a TypeScript type definition for the type, not accounting for arrays.
+        /// Collection types will be typed as "any". Use TsType to get correct collection types.
         /// </summary>
         public string TsTypePlain
         {
             get
             {
-                if (this.Name == nameof(TimeZoneInfo)) return "any";
+                if (IsString) return "string";
                 if (IsBool) return "boolean";
                 if (IsDate) return "moment.Moment";
-                if (IsPOCO) return $"ViewModels.{PureType.Name}";
-                if (IsClass) return PureType.Name;
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
+                if (IsVoid) return "void";
+                if (IsPOCO) return $"ViewModels.{PureType.Name}";
+                if (IsClass) return PureType.Name;
                 return "any";
             }
         }
 
-        /// <summary>
-        /// Type used in knockout for the observable.
-        /// </summary>
-        public string JsKnockoutType
-        {
-            get
-            {
-                if (IsByteArray) return "ko.observable(null)";
-                if (IsCollection || IsArray) return "ko.observableArray([])";
-                if (IsComplexType) return "ko.observable(null)";
-                else if (IsDate)
-                {
-                    if (IsNullable) return "ko.observable(null)";
-                    else return "ko.observable(moment())";
-                }
-                else return "ko.observable(null)";
-            }
-        }
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
-        /// <summary>
-        /// Type used in knockout for the observable with ViewModels.
-        /// </summary>
-        public string TsKnockoutType
-        {
-            get
-            {
-                if (IsByteArray) return "KnockoutObservable<string>";
-                if ((IsArray || IsCollection) && (PureType.IsNumber)) return "KnockoutObservableArray<number>";
-                if ((IsArray || IsCollection) && (PureType.IsString)) return "KnockoutObservableArray<string>";
-                if (Wrapper.IsTimeZoneInfo) return "KnockoutObservable<any>";
-                else if (IsCollection && HasClassViewModel) return "KnockoutObservableArray<ViewModels." + ClassViewModel.ViewModelClassName + ">";
-                else if (IsCollection || IsArray) return "KnockoutObservableArray<any>";
-                else if (IsString) return "KnockoutObservable<string>";
-                else if (IsPOCO && HasClassViewModel) return "KnockoutObservable<ViewModels." + ClassViewModel.ViewModelClassName + ">";
-                else return "KnockoutObservable<" + TsType + ">";
-            }
-        }
+        public bool HasClassViewModel => !IsPrimitive && IsPOCO;
 
-        public bool HasClassViewModel
-        {
-            get
-            {
-                return ClassViewModel != null;
-            }
-        }
+        public abstract ClassViewModel ClassViewModel { get; }
 
-        public ClassViewModel ClassViewModel
-        {
-            get
-            {
-                if (PureType.IsPOCO) return PureType.Wrapper.ClassViewModel;
-                return null;
-            }
-        }
-
-
-
-
-        /// <summary>
-        /// Returns true if this is a complex type.
-        /// </summary>
-        public bool IsComplexType
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ComplexTypeAttribute>();
-            }
-        }
 
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
-        public bool IsDate { get { return Wrapper.IsDate; } }
+        public bool IsDate => IsDateTime || IsDateTimeOffset;
+
+
 
         /// <summary>
         /// True if the property is a string.
         /// </summary>
-        public bool IsString { get { return Wrapper.IsString; } }
+        public bool IsString => Name == "String";
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
         /// </summary>
-        public bool IsDateTime { get { return Wrapper.IsDateTime; } }
+        public bool IsDateTime => NullableUnderlyingType.Name == "DateTime";
 
         /// <summary>
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
-        public bool IsDateTimeOffset { get { return Wrapper.IsDateTimeOffset; } }
+        public bool IsDateTimeOffset => NullableUnderlyingType.Name == "DateTimeOffset";
 
         /// <summary>
-        /// Returns true if class is a Byte
+        /// Returns true if class is a Byte[]
         /// </summary>
-        public bool IsByteArray
+        public bool IsByteArray => PureType.Name == nameof(Byte) && IsArray;
+        
+        /// <summary>
+        /// Returns true if the type is any integral type, except <see cref="char"/>
+        /// </summary>
+        public bool IsIntegral
         {
-            get
+            get 
             {
-                return PureType.Name == "Byte" && IsArray;
+                switch (NullableUnderlyingType.Name)
+                {
+                    case nameof(SByte):
+                    case nameof(Byte):
+                    case nameof(Int16):
+                    case nameof(UInt16):
+                    case nameof(Int32):
+                    case nameof(UInt32):
+                    case nameof(Int64):
+                    case nameof(UInt64):
+                        return true;
+                    default:
+                        return false;
+                }
             }
         }
 
         /// <summary>
-        /// Returns true if the class is an enum.
+        /// Returns true if the class is a number.
         /// </summary>
         public bool IsNumber
         {
             get
             {
-                switch (PureType.Name)
+                if (IsIntegral) return true;
+
+                switch (NullableUnderlyingType.Name)
                 {
-                    case nameof(Byte):
-                    case nameof(Int32):
                     case nameof(Single):
                     case nameof(Double):
                     case nameof(Decimal):
                         return true;
+                    default:
+                        return false;
                 }
-                return false;
             }
         }
 
         /// <summary>
-        /// Gets the type name without any collection around it.
+        /// If this represents a nullable type, returns the underlying type that is nullable.
+        /// Otherwise, returns the current instance.
+        /// </summary>
+        public TypeViewModel NullableUnderlyingType => (IsNullable && IsA(typeof(Nullable<>))) ? FirstTypeArgument : this;
+
+        /// <summary>
+        /// Gets the type name without any collection or nullable around it.
         /// </summary>
         public TypeViewModel PureType
         {
             get
             {
-                return new TypeViewModel(Wrapper.PureType);
-            }
-        }
-
-        /// <summary>
-        /// Returns true if the property type is a class.
-        /// </summary>
-        public bool IsClass { get { return Wrapper.IsClass; } }
-
-        /// <summary>
-        /// Returns true if the property is class outside the system NameSpace, but is not a string, array, or filedownload
-        /// </summary>
-        public bool IsPOCO
-        {
-            get
-            {
-                return
-                    !IsArray && !IsCollection &&
-                    !FullName.StartsWith("System") && 
-                    Wrapper.IsClass;
-                // && IsFileDownload;
-            }
-        }
-
-        public bool IsGeneric { get { return Wrapper.IsGeneric; } }
-
-
-        public bool IsEnum { get { return Wrapper.IsEnum; } }
-
-        public string TsDeclaration
-        {
-            get
-            {
-                return $"{Name}: {TsType}";
-            }
-        }
-        public string TsDeclarationPlain(string parameterName)
-        {
-            return $"{parameterName}: {TsTypePlain}";
-        }
-
-        public string CsDeclaration(string parameterName)
-        {
-            return $"{NameWithTypeParams} {parameterName.ToCamelCase()}";
-        }
-
-
-
-        /// <summary>
-        /// Returns all the possible enumeration values.
-        /// </summary>
-        public Dictionary<int, string> EnumValues { get { return Wrapper.EnumValues; } }
-
-        // This doesn't work correctly, but we will probably need it at some point.
-        //public string FullType { get
-        //    {
-        //        if (IsGeneric) return $"{Wrapper.Namespace}.{Name}<{FirstTypeArgument}>";
-        //        if (IsArray) return $"{Name}[]";
-        //        return $"{Wrapper.Namespace}.{Name}";
-        //    }
-        //}
-
-        public string NullableTypeForDto
-        {
-            get
-            {
-                var model = ReflectionRepository.GetClassViewModel(Wrapper.PureType.Name);
-                if (model != null)
+                if (IsArray)
                 {
-                    string typeName = "";
-
-                    if (Wrapper.IsNullable || Wrapper.IsArray || Wrapper.IsCollection)
-                        typeName = Wrapper.NameWithTypeParams;
-                    else
-                        typeName = Wrapper.Name + "?";
-
-                    typeName = (new Regex($"({model.Name}(?!(DtoGen)))")).Replace(typeName, $"{model.Name}DtoGen");
-
-                    return typeName;
+                    return ArrayType;
                 }
+                if (IsGeneric && (IsCollection || IsNullable)) { return FirstTypeArgument; }
+                return this;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the property is class outside the System namespace, and is not a string or array
+        /// </summary>
+        public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass;
+
+        public string TsDeclaration => $"{Name}: {TsType}";
+
+        public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
+        
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+
+        public string DtoFullyQualifiedName => IsCollection
+            // We assume ICollection for all collections. If this doesn't work in a particular context,
+            // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
+            ? $"ICollection<{PureType.DtoFullyQualifiedName}>" 
+            : (HasClassViewModel ? ClassViewModel.DtoName : FullyQualifiedName);
+
+        public string NullableTypeForDto(string dtoNamespace)
+        {
+            var model = this.PureType.ClassViewModel;
+            if (model != null)
+            {
+                string typeName = "";
+
+                if (IsNullable || IsArray || IsCollection)
+                    typeName = FullyQualifiedName;
                 else
-                {
-                    if (Wrapper.IsNullable || Wrapper.IsArray)
-                        return Wrapper.FullyQualifiedNameWithTypeParams;
-                    else
-                        return Wrapper.Name + "?";
-                }
+                    typeName = Name + "?";
 
+                var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
+                typeName = regex.Replace(typeName, $@"{model.Name}DtoGen$2");
+                typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+
+                return typeName;
             }
-        }
-
-        public string ExplicitConversionType
-        {
-            get
+            else
             {
-                if (Wrapper.IsNullable || Wrapper.IsArray) return "";
-                else return $"({Wrapper.Name})";
+                if (IsNullable || IsArray)
+                    return FullyQualifiedName;
+                else
+                    return FullyQualifiedName + "?";
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TypeViewModel that)) return false;
+
+            return this.FullyQualifiedName == that.FullyQualifiedName;
+        }
+
+        public override int GetHashCode() => this.FullyQualifiedName.GetHashCode();
+
+        // TODO: maybe retire this in favor of plain .Equals? Make sure that ReflectionTypeViewModel.FullyQualifiedName is correct, first.
+        public abstract bool EqualsType(TypeViewModel b);
+
+        public override string ToString() => FullyQualifiedName;
     }
 }

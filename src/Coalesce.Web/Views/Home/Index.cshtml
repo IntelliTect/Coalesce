@@ -33,10 +33,10 @@
                 <br />
                 <br />
                 <ul style="list-style: disc; font-size: 24px; font-weight: lighter">
-                    <li>ASP.NET Core 1.0</li>
-                    <li>MVC Core 1.0</li>
-                    <li>EF Core 1.0</li>
-                    <li>TypeScript</li>
+                    <li>ASP.NET Core @(AppDomain.CurrentDomain.GetAssemblies().First(a => a.FullName.StartsWith("Microsoft.AspNetCore.Server.Kestrel")).GetName().Version.ToString(3))</li>
+                    <li>EF Core @(AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Microsoft.EntityFrameworkCore").GetName().Version.ToString(3))</li>
+                    <li>Knockout 2.3+</li>
+                    <li>TypeScript 3.4+</li>
                 </ul>
                 <br />
 
@@ -120,7 +120,7 @@
                         Autosave
                     </p>
                     <small>
-                        Automatic saving of your models is trivial to enable - just one call to <pre style="display: inline; padding: 1px">model.autoSave(true)</pre>.
+                        Automatic saving of your models is turned on out-of-the-box, and is trivial to disable when not desired.
                     </small>
                 </div>
                 <div class="item ">
@@ -155,7 +155,7 @@
                         Security: Built In
                     </p>
                     <small>
-                        Coalesce integrates with both Active Directory and ASP.NET Core Identity 3, allowing for property-level control using model attributes.
+                        Coalesce integrates with any identity provider for ASP.NET Core (including Windows Auth), allowing for property-level control using model attributes.
                     </small>
                 </div>
                 <div class="clearfix visible-md visible-sm"></div>

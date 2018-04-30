@@ -1,0 +1,69 @@
+﻿@using IntelliTect.Coalesce.DataAnnotations
+@using IntelliTect.Coalesce.Knockout.Helpers
+@using System.Linq
+@using IntelliTect.Coalesce.TypeDefinition
+@using IntelliTect.Coalesce.Utilities
+
+@{ ClassViewModel model = Model;}
+<div class="form-horizontal">
+    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.IsReadable(User)).OrderBy(f => f.EditorOrder))
+    {
+        if (ViewBag.SimpleEditorOnly == null || ViewBag.SimpleEditorOnly == false ||
+                        (prop.IsManytoManyCollection == prop.Type.IsCollection))
+        {
+            <div class="form-group">
+                <label class="col-md-4 control-label">@prop.DisplayName</label>
+                <div class="col-md-8">
+                    @Display.Property(prop, prop.SecurityInfo.IsEditable(User))
+                    @*@Editors.DisplayOrEdit(prop, true, false)*@
+                </div>
+            </div>
+        }
+    }
+
+    @if (model.ClientMethods.Any(f=>f.SecurityInfo.IsExecuteAllowed(User) && !f.IsStatic))
+    {
+    <div class="row">
+        <div class="col-lg-offset-2 col-lg-10">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Actions</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2">Action</label>
+                        <label class="col-md-4">Result</label>
+                        <label class="col-md-2">Was Successful</label>
+                        <label class="col-md-2">Loading</label>
+                        <label class="col-md-2 bold">Notes</label>
+                    </div>
+                    @foreach (MethodViewModel method in model.ClientMethods.Where(f => f.SecurityInfo.IsExecuteAllowed(User) && !f.IsStatic))
+                        {
+                        <div class="form-group form-horizontal" data-bind="with: @(method.JsVariable)">
+                            <div class="col-md-2">
+                                @Display.MethodHelper(method)
+                            </div>
+                            <div class="col-md-4 control-label">
+                                <span class="" data-bind="text: result"></span>
+                            </div>
+                            <div class="col-md-2 control-label">
+                                <span class="" data-bind="text: wasSuccessful"></span>
+                                <span class="" data-bind="visible: wasSuccessful, text: message"></span>
+                            </div>
+                            <div class="col-md-2 control-label">
+                                <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                            </div>
+                            <div class="col-md-2 align-right control-label" style="font-size:.7em;">
+                                Modifies @(model.Name)
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    }
+
+</div>

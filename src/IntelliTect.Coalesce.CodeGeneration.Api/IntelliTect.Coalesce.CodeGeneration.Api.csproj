@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Shared API code generation for IntelliTect.Coalesce</Description>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
+  </ItemGroup>
+
+</Project>

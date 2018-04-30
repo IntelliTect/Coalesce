@@ -1,38 +1,66 @@
-﻿using IntelliTect.Coalesce.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
+using IntelliTect.Coalesce;
+using Microsoft.EntityFrameworkCore;
+using IntelliTect.Coalesce.Models;
 
 namespace Coalesce.Domain
 {
-    public class CaseDto: IClassDto<Case, CaseDto>
+    [Coalesce]
+    public class CaseDto : IClassDto<Case>
     {
         [Key]
         public int CaseId { get; set; }
+
         public string Title { get; set; }
+
         [ReadOnly(true)]
         public string AssignedToName { get; set; }
 
-        public void Update(Case obj, ClaimsPrincipal user, string includes)
+        public void MapTo(Case obj, IMappingContext context)
         {
             obj.Title = Title;
         }
 
-        public CaseDto CreateInstance(Case obj, ClaimsPrincipal user = null, string includes = null, Dictionary<object, object> objects = null, IncludeTree tree = null)
+        public void MapFrom(Case obj, IMappingContext context = null, IncludeTree tree = null)
         {
-            var dto = new CaseDto();
-            dto.CaseId = obj.CaseKey;
-            dto.Title = obj.Title;
+            CaseId = obj.CaseKey;
+            Title = obj.Title;
             if (obj.AssignedTo != null)
             {
-                dto.AssignedToName = obj.AssignedTo.Name;
+                AssignedToName = obj.AssignedTo.Name;
             }
-            return dto;
+        }
+    }
+
+    [Coalesce, DeclaredFor(typeof(CaseDto))]
+    public class CaseDtoSource : StandardDataSource<Case, AppDbContext>
+    {
+        public CaseDtoSource(CrudContext<AppDbContext> context) : base(context)
+        {
+        }
+
+        public override IQueryable<Case> GetQuery(IDataSourceParameters parameters)
+        {
+            return Db.Cases.Include(c => c.AssignedTo);
+        }
+    }
+
+    [Coalesce, DeclaredFor(typeof(CaseDto))]
+    public class CaseDtoBehaviors : StandardBehaviors<Case, AppDbContext>
+    {
+        public CaseDtoBehaviors(CrudContext<AppDbContext> context) : base(context)
+        {
+        }
+
+        public override ItemResult BeforeSave(SaveKind kind, Case oldItem, Case item)
+        {
+            return true;
         }
     }
 }

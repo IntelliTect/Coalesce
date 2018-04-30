@@ -73,7 +73,7 @@ namespace Coalesce.Web.Tests
             // Get a list of properties on anonmymous models that have read restrictions
             var models = Model.Models
                             .Where(m => m.SecurityInfo.AllowAnonymousAny)
-                            .SelectMany(m => m.Properties
+                            .SelectMany(m => m.ClientProperties
                                                 .Where(p => !p.SecurityInfo.IsReadable(User))
                                                 .Select(p => new { Model = m, Property = p }))
                             .ToList();
@@ -89,7 +89,7 @@ namespace Coalesce.Web.Tests
             // Get a list of properties on anonmymous models that have edit restrictions
             var models = Model.Models
                             .Where(m => m.SecurityInfo.Edit.AllowAnonymous)
-                            .SelectMany(m => m.Properties
+                            .SelectMany(m => m.ClientProperties
                                                 .Where(p => !p.SecurityInfo.IsEditable(User) && p.SecurityInfo.IsReadable(User))
                                                 .Select(p => new { Model = m, Property = p }))
                             .ToList();
@@ -140,7 +140,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("devTeamAssignedId", "")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Case");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Case");
 
             return await ApiPost(model, "Save", formData);
         }
@@ -163,7 +163,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("companyId", "1")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Person");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Person");
 
             return await ApiPost(model, "Save", formData);
         }
@@ -176,7 +176,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("name", "Test Product")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Product");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Product");
 
             return await ApiPost(model, "Save", formData);
         }
@@ -194,7 +194,7 @@ namespace Coalesce.Web.Tests
                 new KeyValuePair<string, string>("zipCode", "")
             });
 
-            var model = ReflectionRepository.Models.Single(m => m.Name == "Company");
+            var model = ReflectionRepository.Global.Models.Single(m => m.Name == "Company");
 
             return await ApiPost(model, "Save", formData);
         }

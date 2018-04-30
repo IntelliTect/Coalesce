@@ -1,30 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.1.0</VersionPrefix>
-    <TargetFramework>net46</TargetFramework>
+    <Description>.NET Core command-line tooling for IntelliTect.Coalesce code generation</Description>
+
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <AssemblyName>IntelliTect.Coalesce.Cli</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>IntelliTect.Coalesce.Cli</PackageId>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+
+    <AssemblyName>dotnet-coalesce</AssemblyName>
+    <PackageId>IntelliTect.Coalesce.Tools</PackageId>
+    <PackageType>DotnetCliTool</PackageType>
+    <!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
-    <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Knockout\IntelliTect.Coalesce.CodeGeneration.Knockout.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Vue\IntelliTect.Coalesce.CodeGeneration.Vue.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
-    <PackageReference Include="Microsoft.DotNet.InternalAbstractions" Version="1.0.500-preview2-1-003177" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
-    <PackageReference Include="System.Net.Http" Version="4.3.2" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.1.1" />
   </ItemGroup>
 </Project>

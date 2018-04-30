@@ -1,0 +1,77 @@
+﻿<!--
+ Copyright (c) .NET Foundation. All rights reserved.
+ Licensed under the Apache License, Version 2.0.
+ Modified by IntelliTect from https://github.com/aspnet/Scaffolding/blob/dev/src/VS.Web.CG.Msbuild/Target/build/Microsoft.VisualStudio.Web.CodeGeneration.Tools.targets
+ 
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!--
+**********************************************************************************
+Target: EvaluateProjectInfoForCodeGeneration
+
+Outputs the Project Information needed for CodeGeneration to a file.
+
+**********************************************************************************
+-->
+
+  <PropertyGroup>
+    <EvaluateProjectInfoForCodeGenerationDependsOn>
+      $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      ResolveReferences;
+      ResolvePackageDependenciesDesignTime;
+    </EvaluateProjectInfoForCodeGenerationDependsOn>
+  </PropertyGroup>
+
+  <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
+    
+    <!--
+      We're building JSON symbol-by-symbol using MSBuild. This is so much fun!
+      I'm so sorry. I lied. It isn't fun. We're trying to re-create the behavior of ProjectContextWriter from aspnet/scaffolding.
+      It seems that there are major issues with assembly depencencies when trying to use our own version of this task to get this data,
+      so instead we're trying to dump it all out using only WriteLinesToFile instead of a custom task like ProjectContextWriter.
+      We're trying to make it look like JSON instead of coming up with our own arbitrary file structure.
+      
+      %22 is the escape for double quotes.
+    -->
+
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="{" Overwrite="true"/>
+    
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="DependenciesDesignTime: ["/>
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(_DependenciesDesignTime->'{Path: %22%(Identity)%22, Name: %22%(Name)%22, Type: %22%(Type)%22, Target: %22%(Target)%22, Version: %22%(Version)%22, Resolved:%22%(Resolved)%22, Dependencies:%22%(Dependencies)%22 }, ')" />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
+    
+    
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="CompilationItems: ["/>
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(Compile->' %22%(Identity)%22, '->Replace('\', '/'))" />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
+    
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="ResolvedReferences: ["/>
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(ReferencePath->' %22%(Identity)%22, '->Replace('\', '/'))" />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
+    
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="ProjectReferences: ["/>
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(ProjectReference->' %22%(Identity)%22, '->Replace('\', '/'))" />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
+
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="EmbeddedItems: ["/>
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(EmbeddedItems->' %22%(Identity)%22, '->Replace('\', '/'))" />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
+
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="ProjectName: %22$(ProjectName)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="ProjectFullPath: %22$(MSBuildProjectFullPath.Replace('\', '/'))%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="AssemblyFullPath: %22$(TargetPath.Replace('\', '/'))%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="OutputType: %22$(OutputType)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="Platform: %22$(Platform)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="TargetFramework: '$(TargetFramework)',"/>
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="Configuration: %22$(Configuration)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="RootNamespace: %22$(RootNamespace)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="TargetDirectory: %22$(TargetDir.Replace('\', '/'))%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="DepsFile: %22$(ProjectDepsFileName)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="RuntimeConfig: %22$(ProjectRuntimeConfigFileName)%22," />
+
+
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="}"/>
+    
+  </Target>
+</Project>

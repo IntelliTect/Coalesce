@@ -6,91 +6,258 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Utilities;
+using System.Collections.Concurrent;
+using IntelliTect.Coalesce.TypeUsage;
+using IntelliTect.Coalesce.Api;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public static class ReflectionRepository
+    public class ReflectionRepository
     {
-        private static Dictionary<string, ClassViewModel> _models = new Dictionary<string, ClassViewModel>();
-        private static object _lock = new object();
-        private static string _contextNamespace;
+        public static readonly ReflectionRepository Global = new ReflectionRepository();
 
+        private readonly HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
+        private readonly HashSet<ClassViewModel> _entities = new HashSet<ClassViewModel>();
+        private readonly HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
+        private readonly HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
+        private readonly HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
+        private readonly HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
+        private readonly HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
 
-        public static ClassViewModel GetClassViewModel(TypeViewModel classType, string controllerName = null,
-            string apiName = null, bool hasDbSet = false, string area = "")
+        private readonly ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
+            = new ConcurrentDictionary<object, ClassViewModel>();
+
+        public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
+        public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
+        public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_behaviors);
+        public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_dataSources);
+        public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new ReadOnlyHashSet<ClassViewModel>(_externalTypes);
+        public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
+        public ReadOnlyHashSet<ClassViewModel> Services => new ReadOnlyHashSet<ClassViewModel>(_services);
+
+        public IEnumerable<ClassViewModel> ApiBackedClasses => Entities.Union(CustomDtos);
+
+        public IEnumerable<ClassViewModel> ClientClasses => ApiBackedClasses.Union(ExternalTypes);
+
+        public IEnumerable<TypeViewModel> ClientEnums => this.ClientClasses
+            .SelectMany(c => c.ClientProperties.Select(p => p.Type).Where(t => t.IsEnum))
+            .Distinct();
+
+        public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
+            DbContexts.Select(t => t.ClassViewModel)
+            .Union(ClientClasses);
+
+        public ReflectionRepository()
         {
-            if (classType.Wrapper is ReflectionTypeWrapper)
+        }
+
+        internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
+        {
+            foreach (var type in types
+                // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
+                // Really not sure why, but lets parallelize to minimize that impact.
+                .AsParallel()
+                .Where(type => type.HasAttribute<CoalesceAttribute>())
+            )
             {
-                return GetClassViewModel(classType.Wrapper.Info, controllerName, apiName, hasDbSet, area);
+                if (type.IsA<DbContext>())
+                {
+                    var context = new DbContextTypeUsage(type.ClassViewModel);
+                    _contexts.Add(context);
+                    _entities.UnionWith(context.Entities.Select(e => e.ClassViewModel));
+
+                    // Force cache these since they have extra bits of info attached now.
+                    // TODO: eliminate the need for this.
+                    foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
+
+                }
+                else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
+                {
+                    // Handled by helper
+                }
+                else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
+                {
+                    // Handled by helper
+                }
+                else if (type.IsA(typeof(IClassDto<>)))
+                {
+                    var classViewModel = type.ClassViewModel;
+
+                    // Force cache this since it has extra bits of info attached.
+                    _customDtos.Add(Cache(classViewModel, force: true));
+
+                    DiscoverNestedCrudStrategiesOn(classViewModel);
+                }
+                else if (type.ClassViewModel?.IsService ?? false)
+                {
+                    var classViewModel = type.ClassViewModel;
+                    _services.Add(Cache(classViewModel));
+                }
             }
+
+            foreach (var entity in Entities)
+            {
+                DiscoverExternalMethodTypesOn(entity);
+                DiscoverExternalPropertyTypesOn(entity);
+                DiscoverNestedCrudStrategiesOn(entity);
+            }
+            foreach (var service in Services)
+            {
+                DiscoverExternalMethodTypesOn(service);
+            }
+        }
+
+        /// <summary>
+        /// Adds types from the assembly that defines the given type parameter.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        internal void AddAssembly<T>() =>
+            DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(t)));
+
+        /// <summary>
+        /// Cache the given model so it can be reused when an instance representing its underlying type is requested.
+        /// </summary>
+        /// <param name="classViewModel">The ClassViewModel to cache.</param>
+        /// <param name="force">
+        /// True to override any existing object for the underlying type. 
+        /// False to preserve any existing object.
+        /// </param>
+        /// <returns>The ClassViewModel that was passed in, for convenience.</returns>
+        private ClassViewModel Cache(ClassViewModel classViewModel, bool force = false)
+        {
+            object key = GetCacheKey(classViewModel);
+
+            if (force)
+                _allClassViewModels[key] = classViewModel;
             else
-            {
-                return GetClassViewModel((INamedTypeSymbol)classType.Wrapper.Symbol, controllerName, apiName, hasDbSet, area);
-            }
+                _allClassViewModels.GetOrAdd(key, classViewModel);
+
+            return classViewModel;
         }
 
-        public static ClassViewModel GetClassViewModel(Type classType, string controllerName = null,
-            string apiName = null, bool hasDbSet = false, string area = "")
+        private object GetCacheKey(ClassViewModel classViewModel) => 
+            (classViewModel.Type as ReflectionTypeViewModel)?.Info as object
+            ?? (classViewModel.Type as SymbolTypeViewModel)?.Symbol as object
+            ?? throw new NotSupportedException("Unknown subtype of TypeViewModel");
+
+
+        /// <summary>
+        /// Attempt to add the given ClassViewModel as an ExternalType if it isn't already known.
+        /// If its a newly discovered type, recurse into that type's properties as well.
+        /// </summary>
+        /// <param name="externalType"></param>
+        private void ConditionallyAddAndDiscoverExternalPropertyTypesOn(ClassViewModel externalType)
         {
-            // Set defaults
-            if (controllerName == null) controllerName = classType.Name;
-            if (apiName == null) apiName = classType.Name;
-
-            if (!IsValidViewModelClass(apiName)) return null;
-
-            // Get a unique key
-            //TODO: The apiName probably don't need to be specified here, can cause problems where it isn't available.
-            string key = GetKey(classType);
-            // Create it if is doesn't exist.
-            // TODO: This could be better multi-threading code
-            lock (_models)
+            // Don't dig in if:
+            //  - This is a known entity type (its not external)
+            //  - This is a known custom DTO type (again, not external)
+            //  - This is already a known external type (don't infinitely recurse).
+            if (
+                !Entities.Contains(externalType)
+                && !CustomDtos.Contains(externalType)
+                && !ExternalTypes.Contains(externalType)
+                )
             {
-                if (!_models.ContainsKey(key))
+                if (_externalTypes.Add(Cache(externalType)))
                 {
-                    _models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
+                    DiscoverExternalPropertyTypesOn(externalType);
                 }
             }
-            // Return the class requested.
-            return _models[key];
         }
 
-        public static ClassViewModel GetClassViewModel(INamedTypeSymbol classType, string controllerName = null,
-            string apiName = null, bool hasDbSet = false, string area = "")
+        private void DiscoverExternalPropertyTypesOn(ClassViewModel model)
         {
-            // Set defaults
-            if (controllerName == null) controllerName = classType.Name;
-            if (apiName == null) apiName = classType.Name;
-
-            if (!IsValidViewModelClass(apiName)) return null;
-
-            // Get a unique key
-            string key = GetKey(classType);
-            // Create it if is doesn't exist.
-            // TODO: This could be better multi-threading code
-            lock (_models)
+            foreach (var type in model
+                .ClientProperties
+                .Select(p => p.PureType)
+                .Where(t => t.HasClassViewModel))
             {
-                if (!_models.ContainsKey(key))
+                ConditionallyAddAndDiscoverExternalPropertyTypesOn(type.ClassViewModel);
+            }
+        }
+
+        private void DiscoverExternalMethodTypesOn(ClassViewModel model)
+        {
+            foreach (var method in model.ClientMethods)
+            {
+                var returnType = method.ResultType.PureType;
+                if (returnType.HasClassViewModel)
                 {
-                    _models.Add(key, new ClassViewModel(classType, controllerName, apiName, hasDbSet));
+                    // Return type looks like an external type.
+                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(returnType.ClassViewModel);
+                }
+
+                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.Type.HasClassViewModel))
+                {
+                    // Parameter looks like an external type.
+                    // TODO: this doesn't actually give us anything,
+                    // because the generated typescript doesn't know how to call methods that have non-primitive properties.
+                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.Type.ClassViewModel);
                 }
             }
-            // Return the class requested.
-            return _models[key];
         }
 
-
-
-        public static ClassViewModel GetClassViewModel(string className)
+        private bool AddCrudStrategy(
+            Type iface,
+            TypeViewModel strategyType,
+            HashSet<CrudStrategyTypeUsage> set,
+            ClassViewModel declaredFor = null
+        )
         {
-            return _models.FirstOrDefault(f => f.Value.Name == className).Value;
+            if (!strategyType.IsA(iface)) return false;
+
+            var servedType = strategyType.GenericArgumentsFor(iface).Single();
+            if (!servedType.HasClassViewModel)
+            {
+                throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
+            }
+            var servedClass = Cache(servedType.ClassViewModel);
+
+            // See if we were expecting that the strategy be declared for a particular type
+            // by virtue of its nesting. If this type has been overridden to something else by an attribute, then that's wrong.
+            var explicitlyDeclaredFor = strategyType.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)?.ClassViewModel;
+            if (explicitlyDeclaredFor != null && declaredFor != null && !explicitlyDeclaredFor.Equals(declaredFor))
+            {
+                throw new InvalidOperationException(
+                    $"Expected that {strategyType} is declared for {declaredFor}, but it was explicitly declared for {explicitlyDeclaredFor} instead.");
+            }
+
+            // Any explicit declaration is OK. Use that,
+            // or the passed in value if no explicit value is given via attribute,
+            // or just the type that is served if neither are present.
+            declaredFor = explicitlyDeclaredFor ?? declaredFor ?? servedClass;
+
+            if (declaredFor.IsDto && !servedClass.Equals(declaredFor.DtoBaseViewModel))
+            {
+                throw new InvalidOperationException($"{strategyType} is not a valid {iface} for {declaredFor} - " +
+                    $"{strategyType} must satisfy {iface} with type parameter <{declaredFor.DtoBaseViewModel}>.");
+            }
+
+            set.Add(new CrudStrategyTypeUsage(Cache(strategyType.ClassViewModel), servedClass, declaredFor));
+            return true;
         }
-        public static ClassViewModel GetClassViewModel<T>()
+
+        private void DiscoverNestedCrudStrategiesOn(ClassViewModel model)
         {
-            return GetClassViewModel(typeof(T));
+            foreach (var nestedType in model.ClientNestedTypes)
+            {
+                AddCrudStrategy(typeof(IDataSource<>), nestedType, _dataSources, model);
+                AddCrudStrategy(typeof(IBehaviors<>), nestedType, _behaviors, model);
+            }
         }
+
+        public ClassViewModel GetClassViewModel(Type classType) =>
+            _allClassViewModels.GetOrAdd(classType, _ => new ReflectionClassViewModel(classType));
+
+        public ClassViewModel GetClassViewModel(INamedTypeSymbol classType) =>
+            _allClassViewModels.GetOrAdd(classType, _ => new SymbolClassViewModel(classType));
+
+        public ClassViewModel GetClassViewModel<T>() => GetClassViewModel(typeof(T));
+
         /// <summary>
         /// Gets a propertyViewModel based on the property selector.
         /// </summary>
@@ -98,199 +265,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="propertySelector"></param>
         /// <returns></returns>
-        public static PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
+        public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
         {
             var objModel = GetClassViewModel<T>();
             return objModel.PropertyBySelector(propertySelector);
         }
-
-        public static bool IsValidViewModelClass(string name)
-        {
-            if (name == "Image") return false;
-            if (name == "IdentityUserRole") return false;
-            if (name == "IdentityRole") return false;
-            if (name == "IdentityRoleClaim") return false;
-            if (name == "IdentityUserClaim") return false;
-            if (name == "IdentityUserLogin") return false;
-            if (name == "IdentityUserToken") return false;
-            return true;
-        }
-
-
-
-        /// <summary>
-        /// Gets a unique key for the collection.
-        /// </summary>
-        /// <param name="classType"></param>
-        /// <returns></returns>
-        private static string GetKey(TypeViewModel type)
-        {
-            if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
-            {
-                return GetKey(((ReflectionTypeWrapper)(type.Wrapper)).Info);
-            }
-            else
-            {
-                return GetKey((INamedTypeSymbol)(((SymbolTypeWrapper)(type.Wrapper)).Symbol));
-            }
-        }
-        /// <summary>
-        /// Gets a unique key for the collection.
-        /// </summary>
-        /// <param name="classType"></param>
-        /// <returns></returns>
-        private static string GetKey(Type classType)
-        {
-            return string.Format("{0}", classType.FullName);
-        }
-
-        /// <summary>
-        /// Gets a unique key for the collection.
-        /// </summary>
-        /// <param name="classType"></param>
-        /// <returns></returns>
-
-        private static string GetKey(INamedTypeSymbol classType)
-        {
-            List<string> namespaces = new List<string>();
-            var curNamespace = classType.ContainingNamespace;
-            while (curNamespace.CanBeReferencedByName)
-            {
-                namespaces.Add(curNamespace.Name);
-                curNamespace = curNamespace.ContainingNamespace;
-            }
-            namespaces.Reverse();
-
-            var fullNamespace = string.Join(".", namespaces);
-
-            return string.Format("{0}", $"{fullNamespace}.{classType.Name}");
-        }
-
-        public static IEnumerable<ClassViewModel> Models
-        {
-            get
-            {
-                return _models.Values;
-            }
-        }
-
-        /// <summary>
-        /// Adds a context to the reflection repository. Do this on startup with all the contexts.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static List<ClassViewModel> AddContext<T>(string area = "") where T : DbContext
-        {
-            return AddContext(typeof(T), area);
-        }
-
-
-        /// <summary>
-        /// Adds a context to the reflection repository. Do this on startup with all the contexts.
-        /// </summary>
-        /// <typeparam name="t">Type of DbContext to add.</typeparam>
-        /// <returns></returns>
-        public static List<ClassViewModel> AddContext(Type t, string area = "")
-        {
-            var context = new ClassViewModel(t, null, null, false);
-            return AddContext(context, area);
-        }
-
-        public static List<ClassViewModel> AddContext(INamedTypeSymbol contextSymbol, string area = "") // where T: AppDbContext
-        {
-            var context = new ClassViewModel(contextSymbol, null, null, false);
-            // Reflect on the AppDbContext
-            return AddContext(context, area);
-        }
-
-        public static List<ClassViewModel> AddContext(ClassViewModel context, string area = "")
-        {
-            _contextNamespace = context.Namespace;
-            // Lock so that parallel execution only uses this once at a time.
-            lock (_lock)
-            {
-                var models = new List<ClassViewModel>();
-                foreach (var prop in context.Properties)
-                {
-                    if ((prop.Type.IsCollection || prop.IsDbSet)
-                        && IsValidViewModelClass(prop.PureType.Name)
-                        && !prop.IsInternalUse)
-                    {
-                        var model = ReflectionRepository.GetClassViewModel(classType: prop.PureType, hasDbSet: prop.IsDbSet);
-                        if (model != null)
-                        {
-                            model.ContextPropertyName = prop.Name;
-                            model.OnContext = true;
-                            model.ContextPropertyName = prop.Name;
-                            models.Add(model);
-                        }
-                    }
-                }
-                // Check for other associated types that are not dbsets
-                foreach (var model in models.ToList())
-                {
-                    AddChildModels(models, model);
-                }
-
-                return models;
-            }
-
-        }
-
-        private static void AddChildModels(List<ClassViewModel> models, ClassViewModel model)
-        {
-            foreach (var prop in model.Properties.Where(p => !p.IsInternalUse && p.PureType.IsPOCO && IsValidViewModelClass(p.PureType.Name)))
-            {
-                var propModel = prop.PureType.ClassViewModel;
-                if (propModel != null && !propModel.HasDbSet && !models.Contains(propModel))
-                {
-                    models.Add(propModel);
-                    AddChildModels(models, propModel);
-                }
-            }
-            foreach (var method in model.Methods.Where(p => !p.IsInternalUse && !p.ReturnType.IsVoid && p.ReturnType.PureType.IsPOCO))
-            {
-                // Get a unique key
-                string key = GetKey(method.ReturnType.PureType);
-                lock (models)
-                {
-                    if (!models.Any(f => f.Name == method.ReturnType.PureType.Name))
-                    {
-                        var methodModel = new ClassViewModel(method.ReturnType.PureType, "", "", false);
-                        models.Add(methodModel);
-                        AddChildModels(models, methodModel);
-                    }
-                }
-                // Iterate each of the incoming arguments and check them
-                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.Type.IsPOCO))
-                {
-                    string argKey = GetKey(arg.Type);
-                    lock (models)
-                    {
-                        if (!models.Any(f => f.Name == arg.Type.Name))
-                        {
-                            var argModel = new ClassViewModel(arg.Type, "", "", false);
-                            models.Add(argModel);
-                            AddChildModels(models, argModel);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// All the namespaces in the models.
-        /// </summary>
-        public static IEnumerable<string> Namespaces
-        {
-            get
-            {
-                var result = _models.Select(f => f.Value.Namespace).Distinct().ToList();
-                // Make sure we add the namespace of the context
-                if (!result.Contains(_contextNamespace)) result.Add(_contextNamespace);
-                return result;
-            }
-        }
-
     }
 }

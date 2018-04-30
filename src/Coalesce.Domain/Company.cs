@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace Coalesce.Domain
 {
@@ -17,14 +19,43 @@ namespace Coalesce.Domain
         public string State { get; set; }
         public string ZipCode { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         [InverseProperty("Company")]
         public ICollection<Person> Employees { get; set; }
 
         [NotMapped]
         [ListText]
-        public string AltName { get
+        public string AltName => Name + ": " + City;
+
+        [Coalesce]
+        public static ICollection<Company> GetCertainItems(AppDbContext db, bool isDeleted = false)
+        {
+            return db.Companies.Where(f => f.IsDeleted == isDeleted).ToList();
+        }
+
+        public class DefaultSource : StandardDataSource<Company, AppDbContext>
+        {
+            public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }
+
+            //public override IQueryable<Company> GetQuery(IDataSourceParameters parameters)
+            //{
+            //    if (User.)
+            //}
+        }
+
+        public class Behaviors : StandardBehaviors<Company, AppDbContext>
+        {
+            public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
+
+            public override Task ExecuteDeleteAsync(Company item)
             {
-                return Name + ": " + City;
+                // Soft-deletable items. After deleting a company item,
+                // it should still be listed in the admin pages, but with an IsActive flag false.
+                // This lets us test behavior around reloading soft-deleted items, and keeping them in their parent collection after a soft delete.
+
+                item.IsDeleted = true;
+                return Db.SaveChangesAsync();
             }
         }
     }

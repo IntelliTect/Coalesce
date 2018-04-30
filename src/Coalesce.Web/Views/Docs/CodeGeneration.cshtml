@@ -34,7 +34,7 @@
         <p>
             To startup.cs add the following line to the ConfigureServices method. This seeds the ReflectionRepository with the objects from your data context. This can then be used to access server side view models that represent your data model at runtime. This allows you to easily do dynamic view generation.
         </p>
-        <code>ReflectionRepository.AddContext&lt;DbContext&gt;();</code>
+        <code>ReflectionRepository.Global.AddContext&lt;DbContext&gt;();</code>
     </li>
     <li>
         <p>

@@ -30,42 +30,86 @@
         </p>
         <div>
             <span style="width: 50px; display: inline-block">Tables: </span>
-            @foreach (var vm in ReflectionRepository.Models.Where(f => f.HasDbSet || f.IsDto))
+            @foreach (var vm in ReflectionRepository.Global.ApiBackedClasses)
             {
                 <span>• <a asp-action="Table" asp-controller="@vm.Name" style="padding-right: 15px">@vm.DisplayName</a></span>
             }
         </div>
         <div>
             <span style="width: 50px; display: inline-block">Cards: </span>
-            @foreach (var vm in ReflectionRepository.Models.Where(f => f.HasDbSet || f.IsDto))
+            @foreach (var vm in ReflectionRepository.Global.ApiBackedClasses)
             {
                 <span>• <a asp-action="Cards" asp-controller="@vm.Name" style="padding-right: 15px">@vm.DisplayName</a></span>
             }
         </div>
     </div>
 </div>
-<hr />
-<div class="row">
-    <div class="col-md-3">
-        <h1 style="margin-top: 0">Open Cases</h1>
-        <a asp-controller="Cases" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Log a New Case</a>
+
+<div class="card">
+    <div class="card-body">
+        <h2>Weather</h2>
+
+        <dl class="dl-horizontal" data-bind="with: weatherService.getWeather.result">
+            <dt>Temp</dt>
+            <dd data-bind="text: tempFahrenheit"></dd>
+            <dt>Humidity</dt>
+            <dd data-bind="text: humidity"></dd>
+        </dl>
     </div>
-    <div class="col-md-4" style="margin-top: 24px">
-        <label>
-            Search
-        </label>
-        <input type="text" value="" data-bind="textInput: search" class="form-control" placeholder="Search" />
-    </div>
-    <div class="col-md-2" style="margin-top: 24px">
-        <label>
-            Call Server Methods:
-        </label>
-        <button class="btn btn-primary" data-bind="click: randomizeDatesAndStatus">Randomize Dates & Status</button>
-    </div>
-    <span class="label label-info" style="float: right; font-size: 14px" data-bind="fadeVisible: isLoading(), text: 'Loading...'"></span>
 </div>
-<hr />
-<div class="flex-card-container" data-bind="foreach: items, visible: isLoaded" style="display: none">
+
+<div class="card" style="margin-left: 0; margin-right: 0; margin-top: 20px" data-bind="with: allOpenCases">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <span class="label label-info pull-right" style="font-size: 14px" 
+                      data-bind="fadeVisible: isLoading">
+                    Loading...
+                </span>
+                <h1 style="margin: 0">
+                    Open Cases        
+                </h1>
+            </div> 
+            <div class="col-md-6">
+                <a asp-controller="Cases" asp-action="Create" class="btn btn-sm btn-primary pull-right" >
+                <i class="fa fa-plus"></i> Log a New Case
+                </a>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+            <div class="col-md-4">
+                <label>
+                    Search
+                </label>
+                <input type="text" value="" data-bind="textInput: search" class="form-control" placeholder="Search" />
+            </div>
+            <div class="col-md-4">
+                <label>
+                    Query: Opened After Date
+                </label>
+                <!-- ko with: dataSource -->
+                <div class="input-group date">
+                    <input data-bind="datePicker: minDate, format: 'M/D/YYYY h:mm a'" type="text" class="form-control">
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar"></span>
+                    </span>
+                </div>
+                <!-- /ko -->
+            </div>
+            <div class="col-md-4">
+                <label style="display: block">
+                    Call Server Methods:
+                </label>
+                <button class="btn btn-primary" data-bind="click: randomizeDatesAndStatus.invoke">Randomize Dates & Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="flex-card-container" data-bind="foreach: allOpenCases.items, visible: allOpenCases.isLoaded" style="display: none">
     <div class="flex-card ">
         <div class="card-heading">
             <h3 class="card-title">
@@ -101,6 +145,21 @@
                         <dt>Assigned to</dt>
                         <dd data-bind="with: assignedTo"><a data-bind="text: name, attr: {href: '/people/index/' + personId()}"></a></dd>
                     </dl>
+
+
+                    @* Some tests for dropdowns. *@
+                    @*
+                    @(Knockout.SelectFor<Case>(c => c.Description))
+                    <select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
+
+                    </select>
+                    
+                    <select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
+
+                    </select>
+                    <select data-bind="select2Ajax: assignedToId, object: assignedTo, setObject: true, itemViewModel: ViewModels.Person, idField: 'personId', textField: 'name', url: '/api/person/list'">
+
+                    </select>*@
                 </div>
             </div>
             <div class="row">
@@ -137,5 +196,5 @@
 
 
 @section Scripts{
-    <script src="~/js/demo.index.js"></script>
+    <script src="~/js/demo.index.js" asp-append-version="true"></script>
 }

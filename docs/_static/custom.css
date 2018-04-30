@@ -1,0 +1,312 @@
+
+
+
+
+/* .c {
+    color: #998;
+    font-style: italic
+} */
+
+/* .err {
+    color: #a61717;
+    background-color: #e3d2d2
+} */
+
+span.ctor-param {
+    font-weight: normal;
+    font-size: 90%;
+    padding-left: 10px;
+}
+span.ctor-param::after {
+    content: ')';
+}
+span.ctor-param::before {
+    content: '(constructor param #';
+}
+
+.rst-content code.literal {
+    font-size: 12px;
+    padding: 1px 3px;
+}
+.rst-content code.literal[class~="c#"],
+.rst-content code.literal.typescript {
+    color: #404040;
+}
+
+dt {
+    padding-top: 10px;
+}
+dd {
+    font-size: 16px;
+}
+
+.k, .kt, .keyword, .keyword.type {
+    color: #458;
+    font-weight: normal;
+}
+
+.name, .n, .nc {
+    font-weight: bold;
+}
+.name.class {
+    color: #458;
+    font-weight: bold
+} 
+
+.name.attribute, .na {
+    color: teal
+}
+
+
+
+/*
+
+
+    Below you will find commented-out style rules for the short class names
+    used in syntax-highlighted code blocks.
+    Unforunately, our inline code blocks generate the long names.
+    Here's an answer about this:
+    https://stackoverflow.com/questions/21591107/sphinx-inline-code-highlight
+    I don't know what the mapping between short and long names is,
+    and the answers in that file look like more work than they're worth,
+    so I'm just adding them here as I come across them.
+
+*/
+
+
+/* .o {
+    font-weight: bold
+} */
+
+/* .cm {
+    color: #998;
+    font-style: italic
+} */
+
+/* .cp {
+    color: #999;
+    font-weight: bold
+} */
+
+/* .c1 {
+    color: #998;
+    font-style: italic
+} */
+
+/* .cs {
+    color: #999;
+    font-weight: bold;
+    font-style: italic
+} */
+
+/* .gd {
+    color: #000;
+    background-color: #fdd
+} */
+
+/* .gd .x {
+    color: #000;
+    background-color: #faa
+} */
+
+/* .ge {
+    font-style: italic
+} */
+
+/* .gr {
+    color: #a00
+} */
+
+/* .gh {
+    color: #999
+} */
+
+/* .gi {
+    color: #000;
+    background-color: #dfd
+} */
+
+/* .gi .x {
+    color: #000;
+    background-color: #afa
+} */
+
+/* .go {
+    color: #888
+} */
+
+/* .gp {
+    color: #555
+} */
+
+/* .gs {
+    font-weight: bold
+} */
+
+/* .gu {
+    color: purple;
+    font-weight: bold
+} */
+
+/* .gt {
+    color: #a00
+} */
+
+/* .kc {
+    font-weight: bold
+} */
+
+/* .kd {
+    font-weight: bold
+} */
+
+/* .kn {
+    font-weight: bold
+} */
+
+/* .kp {
+    font-weight: bold
+} */
+
+/* .kr {
+    font-weight: bold
+} */
+
+/* .m {
+    color: #099
+} */
+
+/* .s {
+    color: #d14
+} */
+
+/* .n {
+    color: #333
+} */
+
+/* .nb {
+    color: #0086b3
+} */
+
+/* .no {
+    color: teal
+} */
+
+/* .ni {
+    color: purple
+} */
+
+/* .ne {
+    color: #900;
+    font-weight: bold
+} */
+
+/* .nf {
+    color: #900;
+    font-weight: bold
+} */
+
+/* .nn {
+    color: #555
+} */
+
+/* .nt {
+    color: navy
+} */
+
+/* .nv {
+    color: teal
+} */
+
+/* .ow {
+    font-weight: bold
+} */
+
+/* .w {
+    color: #bbb
+} */
+
+/* .mf {
+    color: #099
+} */
+
+/* .mh {
+    color: #099
+} */
+
+/* .mi {
+    color: #099
+} */
+
+/* .mo {
+    color: #099
+} */
+
+/* .sb {
+    color: #d14
+} */
+
+/* .sc {
+    color: #d14
+} */
+
+/* .sd {
+    color: #d14
+} */
+
+/* .s2 {
+    color: #d14
+} */
+
+/* .se {
+    color: #d14
+} */
+
+/* .sh {
+    color: #d14
+} */
+
+/* .si {
+    color: #d14
+} */
+
+/* .sx {
+    color: #d14
+} */
+
+/* .sr {
+    color: #009926
+} */
+
+/* .s1 {
+    color: #d14
+} */
+
+/* .ss {
+    color: #990073
+} */
+
+/* .bp {
+    color: #999
+} */
+
+/* .vc {
+    color: teal
+} */
+
+/* .vg {
+    color: teal
+} */
+
+/* .vi {
+    color: teal
+} */
+
+/* .il {
+    color: #099
+} */
+
+/* .gc {
+    color: #999;
+    background-color: #EAF2F5
+} */

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Domain
 {
-    public class TemporaryDbContextFactory : IDbContextFactory<AppDbContext>
+    public class TemporaryDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
-        public AppDbContext Create(DbContextFactoryOptions options)
+        public AppDbContext CreateDbContext(string[] args)
         {
             var builder = new DbContextOptionsBuilder<AppDbContext>();
             builder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDb;Trusted_Connection=True;");

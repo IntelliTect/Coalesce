@@ -5,8 +5,8 @@ Designed to help you quickly build amazing sites, Coalesce is a rapid-developmen
   * EF Core
   * TypeScript
   * Visual Studio 2017
-  
-Branch 2.0: [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/2.0?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/2.0)
+
+Branch dev:    [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/dev?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/dev)
 
 Branch master: [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/master?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/master)
 
@@ -70,3 +70,7 @@ We have had great success with what we term hybrid-SPA applications. This is an 
 With this in mind, we have tried to build Coalesce so that another framework could be easily added at a later date. 
 
 Currently, we are pondering support for the latest version of Angular, however some of us have feeling toward Vue.js and Aurelia. Input and of course pull requests are welcome. 
+
+### Contributing
+
+See the contribution guide [here](https://github.com/IntelliTect/Coalesce/blob/2.0/CONTRIBUTING.md).

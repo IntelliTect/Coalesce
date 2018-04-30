@@ -1,26 +1,103 @@
-version: 1.0.{build}
-branches:
-  only:
-  - master
-  - 2.0
+
+environment:
+  coalesce_version: 2.0.0
+
 image: Visual Studio 2017
-configuration: Debug
-platform: Any CPU
+cache: 
+  - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
+  - '%LocalAppData%\Yarn\cache'
+nuget:
+  disable_publish_on_pr: true
 before_build:
-- cmd: >-
-    nuget restore
-
-    cd src\Coalesce.Web
-
-    npm install
-
-    npm -g install gulp-cli
-
-    gulp coalesce
-
-    cd ..\Coalesce.Domain
-
-    dotnet ef database update
+  - ps: Install-Product node 9
+  - cmd: node --version && npm --version
+  - cmd: dotnet restore
+  - cmd: cd ./src/Coalesce.Web && yarn
+  - cmd: cd ./src/Coalesce.Web.Vue && yarn
+  - cmd: cd ./src/coalesce-vue && yarn && yarn build
+  - cmd: yarn global add gulp-cli
+  # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
+  # I don't want to add gulp to Coalesce.Web.Vue
+  - cmd: cd ./src/Coalesce.Web && gulp coalesce-ko
+  - cmd: cd ./src/Coalesce.Web && gulp coalesce-vue
+# Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
+# cd ..\Coalesce.Domain
+# dotnet ef database update --framework netcoreapp2.0
+# test: off
 build:
   project: Coalesce.sln
   verbosity: minimal
+after_build:
+  - dotnet pack -c %CONFIGURATION% 
+artifacts:
+  - path: '**\*.nupkg'
+
+
+for:
+
+# Dev builds - publish to MyGet as "x.x.x-alpha-yyy"
+- 
+  branches:
+    only:
+      - dev
+
+  init:
+  - ps: >-
+      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        $env:coalesce_version = "$env:coalesce_version-pr-$env:APPVEYOR_PULL_REQUEST_NUMBER"
+      }
+      Update-AppveyorBuild -Version "$env:coalesce_version-alpha-$env:appveyor_build_number"
+
+  configuration: Debug
+
+  deploy:
+    provider: NuGet
+    server: https://www.myget.org/F/intellitect-coalesce/api/v2/package
+    api_key:
+      secure: byg3MYXl6/q/Y9tKACVcywkrtdqs4i2ISNSNTDoH/Eg9wz2+CUFHI5ir3zMddwSr
+    artifact: /.*\.nupkg/
+
+# Release candidates - publish to NuGet as "x.x.x-rc-yyy"
+- 
+  branches:
+    only:
+      - /release\/.*/
+
+  init:
+  - ps: >-
+      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        $env:coalesce_version = "$env:coalesce_version-pr-$env:APPVEYOR_PULL_REQUEST_NUMBER"
+      }
+      Update-AppveyorBuild -Version "$env:coalesce_version-rc-$env:appveyor_build_number"
+
+  configuration: Release
+  
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
+    artifact: /.*\.nupkg/
+
+# Releases - publish to NuGet as "x.x.x"
+- 
+  branches:
+    only:
+      - master
+
+  init:
+  - ps: >-
+      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        $env:coalesce_version = "$env:coalesce_version-release-pr-$env:APPVEYOR_PULL_REQUEST_NUMBER-$env:appveyor_build_number"
+      }
+      Update-AppveyorBuild -Version "$env:coalesce_version"
+
+  configuration: Release
+  
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
+    artifact: /.*\.nupkg/
+
+
+

@@ -1,13 +1,12 @@
-﻿@using IntelliTect.Coalesce.Helpers
-@using IntelliTect.Coalesce.Models
+﻿@using IntelliTect.Coalesce.Knockout.Helpers
+@using IntelliTect.Coalesce.Knockout.Models
 @using Coalesce.Domain
 @{
     ViewBag.Title = "Test Person";
 }
 <div class="container">
 
-    <div  style="display:none;" class="alert alert-warning" data-bind="fadeVisible: isDirty" role="alert">Oh Snap</div></div>
-
+    <div  style="display:none;" class="alert alert-warning" data-bind="fadeVisible: isDirty" role="alert">Oh Snap</div>
 
     <h2 data-bind="text: name"></h2>
     <input type="text" data-bind="value: firstName" />
@@ -48,10 +47,9 @@
             </tr>
         </tbody>
     </table>
-@section Scripts
+</div>
 
+@section Scripts
 {
     <script src="~/js/persontest.js"></script>
-
 }
-</div>

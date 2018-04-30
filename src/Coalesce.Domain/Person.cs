@@ -1,6 +1,6 @@
-﻿using IntelliTect.Coalesce.Data;
+﻿using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,16 +8,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.Models;
-using static Coalesce.Domain.Case;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 
 namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
-    public class Person : IIncludable<Person>, IBeforeSave<Person, AppDbContext>
+    [TypeScriptPartial]
+    public class Person
     {
         public enum Genders
         {
@@ -38,6 +35,7 @@ namespace Coalesce.Domain
         {
             //Address = new Address();
         }
+
         /// <summary>
         /// ID for the person object.
         /// </summary>
@@ -64,7 +62,6 @@ namespace Coalesce.Domain
         [Display(Order = 3)]
         [MinLength(length: 3)]
         [MaxLength(100)]
-        [Edit(Roles = "Admin")]
         [Search]
         public string LastName { get; set; }
 
@@ -76,7 +73,6 @@ namespace Coalesce.Domain
         /// <summary>
         /// Genetic Gender of the person. 
         /// </summary>
-        [Read(Roles = "Admin")]
         public Genders Gender { get; set; }
 
         /// <summary>
@@ -93,29 +89,18 @@ namespace Coalesce.Domain
 
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTime? BirthDate { get; set; }
+
         [Hidden]
         public DateTime? LastBath { get; set; }
+
         [Hidden]
         public DateTimeOffset? NextUpgrade { get; set; }
 
 
-        public int? PersonStatsId { get; set; }
         [Hidden]
-        public PersonStats PersonStats {get
-            {
-                return new PersonStats { Height = 10, Weight = 20, PersonStatsId = 1 };
-            }
-        }
-
-        [NotMapped]
-        [Hidden]
-        public TimeZoneInfo TimeZone { get; set; }
-
-
-        //public Address Address { get; set; }
+        public PersonStats PersonStats => new PersonStats { Name = Name, Height = 10, Weight = 20 };
 
         [InternalUse]
-        [FileDownload]
         public byte[] ProfilePic { get; set; }
 
         /// <summary>
@@ -123,44 +108,37 @@ namespace Coalesce.Domain
         /// </summary>
         [ListText]
         [NotMapped]
-        public string Name
-        {
-            get
-            {
-                return String.Format("{0} {1} {2}", Title, FirstName, LastName);
-            }
-        }
+        public string Name => $"{Title} {FirstName} {LastName}";
 
         /// <summary>
         /// Company ID this person is employed by
         /// </summary>
         [ClientValidation(IsRequired = true, AllowSave = false)]
         public int CompanyId { get; set; }
+
         /// <summary>
         /// Company loaded from the Company ID
         /// </summary>
         public Company Company { get; set; }
 
         /// <summary>
-        /// Adds the text to the first name.
+        /// Sets the FirstName to the given text.
         /// </summary>
-        /// <param name="addition"></param>
-        /// <returns></returns>
-        public Person Rename(string addition)
+        [Coalesce]
+        public Person Rename(string name)
         {
-            FirstName += addition;
+            FirstName = name;
             return this;
         }
-
 
         /// <summary>
         /// Removes spaces from the name and puts in dashes
         /// </summary>
-        /// <param name="addition"></param>
-        /// <returns></returns>
-        public void ChangeSpacesToDashesInName()
+        [Coalesce, LoadFromDataSource(typeof(WithoutCases))]
+        public ItemResult ChangeSpacesToDashesInName()
         {
             FirstName = FirstName.Replace(" ", "-");
+            return true;
         }
 
         /// <summary>
@@ -169,104 +147,193 @@ namespace Coalesce.Domain
         /// <param name="numberOne"></param>
         /// <param name="numberTwo"></param>
         /// <returns></returns>
-        public static int Add(int numberOne, int numberTwo)
+        [Coalesce]
+        public static ItemResult<int> Add(int numberOne, int numberTwo)
         {
-            return numberOne + numberTwo;
+            try
+            {
+                return new ItemResult<int>(numberOne + numberTwo);
+            }
+            catch
+            {
+                return "Integers too large";
+            }
         }
 
         /// <summary>
         /// Returns the user name
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
-        [Execute(Roles = "Admin")]
+        [Coalesce,Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
-            if (user!= null && user.Identity != null) return user.Identity.Name;
-            return "Unknown";
+            return user?.Identity?.Name ?? "Unknown";
         }
+
+        [Coalesce]
+        [ControllerAction(Method = HttpMethod.Get)]
+        public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
+        {
+            return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
+        }
+
+        [Coalesce]
+        [ControllerAction(Method = HttpMethod.Get)]
+        public string FullNameAndAge(AppDbContext db)
+        {
+            return $"{FirstName} {LastName} {BirthDate?.ToShortDateString() ?? "None"}";
+        }
+
+        [Coalesce]
+        [ControllerAction(Method = HttpMethod.Delete)]
+        public static bool RemovePersonById(AppDbContext db, int id)
+        {
+            var person = db.People.FirstOrDefault(f => f.PersonId == id);
+            if (person != null)
+            {
+                db.People.Remove(person);
+                foreach (var c in db.Cases.Where(f => f.AssignedToId == id))
+                {
+                    c.AssignedToId = null;
+                }
+                foreach (var c in db.Cases.Where(f => f.ReportedById == id))
+                {
+                    c.ReportedById = null;
+                }
+                db.SaveChanges();
+                return true;
+            }
+            return false;
+        }
+
+        [Coalesce]
+        [ControllerAction(Method = HttpMethod.Put)]
+        public string ObfuscateEmail(AppDbContext db)
+        {
+            var random = (new Random()).Next();
+            this.Email = $"test{random}@test.com";
+            return $"New Email is: {this.Email}";
+        }
+
+        [Coalesce]
+        [ControllerAction(Method = HttpMethod.Patch)]
+        public Person ChangeFirstName (string firstName)
+        {
+            this.FirstName = firstName;
+            return this;
+        }
+
 
 
         /// <summary>
         /// Returns the user name
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
+        [Coalesce]
         public static string GetUserPublic(ClaimsPrincipal user)
         {
-            if (user != null && user.Identity != null) return user.Identity.Name;
-            return "Unknown";
+            return user?.Identity?.Name ?? "Unknown";
         }
 
         /// <summary>
         /// Gets all the first names starting with the characters.
         /// </summary>
-        /// <param name="characters"></param>
-        /// <param name="db"></param>
-        /// <returns></returns>
-        [Execute]
-        public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
+        [Coalesce,Execute]
+        public static IEnumerable<string> NamesStartingWith(AppDbContext db, string characters)
         {
-            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
+            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
 
         /// <summary>
-        /// Gets all the first names starting with the characters.
+        /// Gets people matching the criteria, paginated by parameter 'page'.
         /// </summary>
-        /// <param name="characters"></param>
-        /// <param name="db"></param>
-        /// <returns></returns>
-        public static IEnumerable<string> NamesStartingWithPublic(string characters, AppDbContext db)
+        [Coalesce]
+        public static ListResult<Person> SearchPeople(AppDbContext db, PersonCriteria criteria, int page)
         {
-            return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.FirstName).ToList();
+            const int pageSize = 10;
+            IQueryable<Person> query = db.People;
+
+            if (!string.IsNullOrEmpty(criteria.Name))
+            {
+                query = query.Where(f => f.FirstName.StartsWith(criteria.Name) || f.LastName.StartsWith(criteria.Name));
+            }
+            if (criteria.BirthdayMonth >= 1 && criteria.BirthdayMonth >= 12)
+            {
+                query = query.Where(f => f.BirthDate != null && f.BirthDate.Value.Month == criteria.BirthdayMonth);
+            }
+            if (!string.IsNullOrWhiteSpace(criteria.EmailDomain))
+            {
+                query = query.Where(f => f.Email.Contains($"@{criteria.EmailDomain}"));
+            }
+
+            return new ListResult<Person>(query, page, pageSize);
         }
 
-        public static IQueryable<Person> NamesStartingWithAWithCases(AppDbContext db)
+        [Coalesce, DefaultDataSource]
+        public class WithoutCases : StandardDataSource<Person, AppDbContext>
         {
-            db.Cases
+            public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
+
+            public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
+                //=> Db.People.Include(p => p.Company);
+                => Db.People.IncludeChildren();
+        }
+
+        public class Behaviors : StandardBehaviors<Person, AppDbContext>
+        {
+            public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
+
+            public override ItemResult BeforeSave(SaveKind kind, Person oldItem, Person item)
+            {
+                if (kind == SaveKind.Update && item.FirstName != null && item.FirstName.Length < 2)
+                {
+                    return "First Name must be at least 2 characters.";
+                }
+
+                if (item.FirstName?.Contains("[user]") ?? false)
+                {
+                    item.FirstName = item.FirstName.Replace("[user]", User.Identity.Name);
+                }
+                return true;
+            }
+        }
+    }
+
+
+    [Coalesce]
+    public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbContext>
+    {
+        public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
+
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
+        {
+            Db.Cases
                 .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .Where(c => c.Status == Case.Statuses.Open || c.Status == Case.Statuses.InProgress)
                 .Load();
 
-            return db.People
+            return Db.People
                 .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
                 .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
                 .Where(f => f.FirstName.StartsWith("A"));
         }
-        
+    }
 
-        /// <summary>
-        /// People whose last name starts with B or c
-        /// </summary>
-        /// <param name="db"></param>
-        /// <returns></returns>
-        public static IQueryable<Person> BorCPeople(AppDbContext db)
-        {
-            return db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
-        }
- 
+    /// <summary>
+    /// People whose last name starts with B or c
+    /// </summary>
+    [Coalesce]
+    public class BOrCPeople : StandardDataSource<Person, AppDbContext>
+    {
+        public BOrCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
-        public IQueryable<Person> Include(IQueryable<Person> entities, string include = null)
-        {
-            if (include == "none")
-                return entities;
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
+            Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
+    }
 
-            return entities.Include(f => f.CasesAssigned)
-                .Include(f => f.CasesReported)
-                .Include(f => f.Company);
-        }
-
-        public ValidateResult<Person> BeforeSave(Person original, AppDbContext db, ClaimsPrincipal user, string includes)
-        {
-            // Check to make sure the name is a certain length after it has been saved.
-            if (PersonId >0 && FirstName != null && FirstName.Length < 2 )
-            {
-                FirstName = original.FirstName;
-                return new ValidateResult<Domain.Person>(false, "First Name cannot be this short. Reverting.", this);
-            }
-
-            return true;
-        }
+    public class PersonCriteria
+    {
+        public string Name { get; set; }
+        public int? BirthdayMonth { get; set; }
+        public string EmailDomain { get; set; }
     }
 }

@@ -7,101 +7,88 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Text;
+using IntelliTect.Coalesce.Helpers.Search;
+using System.Linq.Expressions;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class PropertyViewModel
+    public abstract class PropertyViewModel : IAttributeProvider, IValueViewModel
     {
-        /// <summary>
-        /// .net PropertyInfo class that gives reflected information about the property.
-        /// </summary>
-        internal PropertyWrapper Wrapper { get; }
-
-        internal PropertyViewModel(PropertyWrapper propertyWrapper, ClassViewModel parent, int classFieldOrder)
-        {
-            Wrapper = propertyWrapper;
-            Parent = parent;
-            ClassFieldOrder = classFieldOrder;
-        }
-        public PropertyViewModel(PropertyInfo propertyInfo, ClassViewModel parent, int classFieldOrder)
-        {
-            Wrapper = new ReflectionPropertyWrapper(propertyInfo);
-            Parent = parent;
-            ClassFieldOrder = classFieldOrder;
-        }
-
-        public PropertyViewModel(IPropertySymbol propertySymbol, ClassViewModel parent, int classFieldOrder)
-        {
-            Wrapper = new SymbolPropertyWrapper(propertySymbol);
-            Parent = parent;
-            ClassFieldOrder = classFieldOrder;
-        }
-
-        public TypeViewModel Type => new TypeViewModel(Wrapper.Type);
-
-        /// <summary>
-        /// Order rank of the field in the model.
-        /// </summary>
-        public int ClassFieldOrder { get; }
-
+        private const string ConventionalIdSuffix = "Id";
 
         /// <summary>
         /// Name of the property
         /// </summary>
-        public string Name => Wrapper.Name;
+        public abstract string Name { get; }
+
+        public TypeViewModel Type { get; protected set; }
+
+        public abstract string Comment { get; }
+
+        public abstract bool HasGetter { get; }
+
+        public abstract bool HasSetter { get; }
+
+        public abstract bool IsVirtual { get; }
+
+        public abstract bool IsStatic { get; }
+
+        /// <summary>
+        /// Convenient accessor for the PropertyInfo when in reflection-based contexts.
+        /// </summary>
+        public virtual PropertyInfo PropertyInfo => throw new InvalidOperationException("PropertyInfo not available in the current context");
+
+        /// <summary>
+        /// Order rank of the field in the model.
+        /// </summary>
+        public int ClassFieldOrder { get; internal set; }
+
+        /// <summary>
+        /// The class that the property was declared on. 
+        /// For the class that is the context in which the property was requested,
+        /// use <see cref="EffectiveParent"/>
+        /// </summary>
+        public ClassViewModel Parent { get; protected set; }
+        
+        /// <summary>
+        /// The class that is the context in which the property was requested.
+        /// Not nessecarily the class that the property is declared on. For that, use <see cref="Parent"/>
+        /// </summary>
+        public ClassViewModel EffectiveParent { get; protected set; }
 
         /// <summary>
         /// Name of the property sent by Json over the wire. Camel Cased Name
         /// </summary>
-        public string JsonName => Wrapper.Name.ToCamelCase();
+        public string JsonName => Name.ToCamelCase();
 
-        public string Comment
-        {
-            get
-            {
-                return Regex.Replace(Wrapper.Comment, "\n(\\s+)", "\n        // ");
-            }
-        }
         /// <summary>
-        /// Name of the type
+        /// Returns true if this property has the InternalUse Attribute 
         /// </summary>
-        public string TypeName => Wrapper.Type.Name;
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
-        public ClassViewModel Parent { get; }
+        /// <summary>
+        /// Returns whether or not the property may be exposed to the client.
+        /// </summary>
+        public bool IsClientProperty => !IsInternalUse && HasGetter;
 
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
-        public TypeViewModel PureType => new TypeViewModel(Wrapper.Type.PureType);
+        public TypeViewModel PureType => Type.PureType;
 
-        public bool PureTypeOnContext => PureType.ClassViewModel?.OnContext ?? false;
-
-        /// <summary>
-        /// Gets the name for the API call.
-        /// </summary>
-        public string Api
-        {
-            get
-            {
-                if (Wrapper.Type.IsGeneric && Wrapper.Type.IsCollection)
-                {
-                    if (IsManytoManyCollection)
-                    {
-                        return Object.ApiUrl;
-                    }
-                }
-                return Object.ApiUrl;
-            }
-        }
+        public bool PureTypeOnContext => PureType.ClassViewModel?.IsDbMappedType ?? false;
 
         public string JsVariable => Name.ToCamelCase();
 
-        private static readonly Regex JsKeywordRegex = new Regex(
-                "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$");
+        public static readonly Regex JsKeywordRegex = new Regex(
+            "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true" +
+            "|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import" +
+            "|public|return|static|switch|typeof|default|extends|finally|package|private" +
+            "|continue|debugger|function|arguments|interface|protected|implements|instanceof)$");
 
         /// <summary>
         /// Returns true if the value if JsVariable is a reserved keyword in JavaScript.
@@ -109,298 +96,68 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool JsVariableIsReserved => JsKeywordRegex.IsMatch(JsVariable);
 
         /// <summary>
-        /// Returns the correctly-prefixed version of the value of JsVariable for use in Knockout bindings
-        /// </summary>
-        public string JsVariableForBinding => JsVariableIsReserved ? $"$data.{JsVariable}" : JsVariable;
-
-        /// <summary>
-        /// Name of the Valid Value list object in JS in Pascal case.
-        /// </summary>
-        public string ValidValueListName => Name + "ValidValues";
-
-
-        /// <summary>
-        /// Text property name for knockout, for things like enums. PureType+'Text'
+        /// Text property name for things like enums. PureType+'Text'
         /// </summary>
         public string JsTextPropertyName => JsVariable + "Text";
 
         /// <summary>
-        /// Text property name for knockout bindings, for things like enums. PureType+'Text'
+        /// Returns true if the property is class outside the system Namespace, but is not a string or array
         /// </summary>
-        public string JsTextPropertyNameForBinding => JsVariableForBinding + "Text";
-
-
-        /// <summary>
-        /// Returns true if the property is class outside the system NameSpace, but is not a string, array, or filedownload
-        /// </summary>
-        public bool IsPOCO
-        {
-            get
-            {
-                return !Wrapper.Type.Namespace.StartsWith("System") &&
-                  !Wrapper.Type.IsString &&
-                  Wrapper.Type.IsClass &&
-                  !Wrapper.Type.IsArray &&
-                  !Wrapper.Type.IsCollection &&
-                  !IsFileDownload;
-            }
-        }
-
-        public bool IsStatic
-        {
-            get
-            {
-                return Wrapper.IsStatic;
-            }
-        }
-
-        /// <summary>
-        /// Returns true if this property is a complex type.
-        /// </summary>
-        public bool IsComplexType => IsPOCO && Object.IsComplexType;
-
-
-        /// <summary>
-        /// True if this property has a ViewModel.
-        /// </summary>
-        public bool HasViewModel => Object != null && !IsInternalUse;
+        public bool IsPOCO => Type.IsPOCO;
 
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
-        public ClassViewModel Object => Wrapper.Type.PureType.ClassViewModel;
-
-        public bool IsDbSet => Type.Name.Contains("DbSet");
-
-
+        public ClassViewModel Object => PureType.ClassViewModel;
+        
         /// <summary>
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
         /// </summary>
-        public bool IsManytoManyCollection => Wrapper.Type.IsCollection && Wrapper.HasAttribute<ManyToManyAttribute>();
-
-        /// <summary>
-        /// True if this property has the ClientValidation Attribute
-        /// </summary>
-        public bool HasClientValidation => Wrapper.HasAttribute<ClientValidationAttribute>();
+        public bool IsManytoManyCollection => Type.IsCollection && HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
         /// True if the client should save data when there is a ClientValidation error. False is default.
         /// </summary>
-        public bool ClientValidationAllowSave
-        {
-            get
-            {
-                if (!HasClientValidation) return false;
-                var allowSave = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.AllowSave)) as bool?;
-                return allowSave.HasValue && allowSave.Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Knockout JS text for the validation.
-        /// </summary>
-        public string ClientValidationKnockoutJs
-        {
-            get
-            {
-
-                var isRequired = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool?;
-                var minValue = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinValue)) as double?;
-                var maxValue = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MaxValue)) as double?;
-                var minLength = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MinLength)) as int?;
-                var maxLength = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.MaxLength)) as int?;
-                var pattern = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.Pattern));
-                var step = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.Step)) as double?;
-                var isEmail = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsEmail)) as bool?;
-                var isPhoneUs = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsPhoneUs)) as bool?;
-                var equal = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.Equal));
-                var notEqual = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.NotEqual));
-                var isDate = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDate)) as bool?;
-                var isDateIso = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDateIso)) as bool?;
-                var isNumber = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsNumber)) as bool?;
-                var isDigit = Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsDigit)) as bool?;
-                var customName = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.CustomName));
-                var customValue = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.CustomValue));
-                var errorMessage = Wrapper.GetAttributeObject<ClientValidationAttribute, string>(nameof(ClientValidationAttribute.ErrorMessage));
-
-
-                var validations = new List<string>();
-
-                if (isRequired.HasValue && isRequired.Value)
-                {
-                    validations.Add($"required: {KoValidationOptions("true", errorMessage ?? $"{(IdPropertyObjectProperty ?? this).DisplayName} is required.")}");
-                }
-                else if (IsRequired)
-                {
-                    string message = null;
-                    if (Wrapper.HasAttribute<RequiredAttribute>())
-                    {
-                        message = Wrapper.GetAttributeObject<RequiredAttribute, string>(nameof(RequiredAttribute.ErrorMessage));
-                    }
-                    if (string.IsNullOrWhiteSpace(message))
-                    {
-                        var name = (IdPropertyObjectProperty ?? this).DisplayName;
-                        message = $"{name} is required.";
-                    }
-
-                    validations.Add($"required: {KoValidationOptions("true", message)}");
-                }
-
-
-                if (Range != null)
-                {
-                    var message = Wrapper.GetAttributeObject<RangeAttribute, string>(nameof(RangeAttribute.ErrorMessage));
-                    validations.Add($"minLength: {KoValidationOptions(Range.Item1.ToString(), message)}, maxLength: {KoValidationOptions(Range.Item2.ToString(), message)}");
-                }
-                else
-                {
-                    if (MinLength.HasValue)
-                    {
-                        var message = Wrapper.GetAttributeObject<MinLengthAttribute, string>(nameof(MinLengthAttribute.ErrorMessage));
-                        validations.Add($"minLength: {KoValidationOptions(MinLength.Value.ToString(), message)}");
-                    }
-                    else if (minLength.HasValue && minLength.Value != int.MaxValue)
-                    {
-                        validations.Add($"minLength: {KoValidationOptions(minLength.Value.ToString(), errorMessage)}");
-                    }
-
-                    if (MaxLength.HasValue)
-                    {
-                        var message = Wrapper.GetAttributeObject<MaxLengthAttribute, string>(nameof(MaxLengthAttribute.ErrorMessage));
-                        validations.Add($"maxLength: {KoValidationOptions(MaxLength.Value.ToString(), message)}");
-                    }
-                    else if (maxLength.HasValue && maxLength.Value != int.MinValue)
-                    {
-                        validations.Add($"maxLength: {KoValidationOptions(maxLength.Value.ToString(), errorMessage)}");
-                    }
-                }
-
-                if (minValue.HasValue && minValue.Value != double.MaxValue)
-                    validations.Add($"min: {KoValidationOptions(minValue.Value.ToString(), errorMessage)}");
-                if (maxValue.HasValue && maxValue.Value != double.MinValue)
-                    validations.Add($"max: {KoValidationOptions(maxValue.Value.ToString(), errorMessage)}");
-                if (pattern != null)
-                    validations.Add($"pattern: {KoValidationOptions($"'{pattern}'", errorMessage)}");
-                if (step.HasValue && step.Value != 0)
-                    validations.Add($"step: {KoValidationOptions($"{step.Value}", errorMessage)}");
-                if (isEmail.HasValue && isEmail.Value)
-                    validations.Add($"email: {KoValidationOptions("true", errorMessage)}");
-                if (isPhoneUs.HasValue && isPhoneUs.Value)
-                    validations.Add($"phoneUS: {KoValidationOptions("true", errorMessage)}");
-                if (equal != null)
-                    validations.Add($"equal: {KoValidationOptions($"{equal}", errorMessage)}");
-                if (notEqual != null)
-                    validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
-                if (isDate.HasValue && isDate.Value)
-                    validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");
-                if (isDateIso.HasValue && isDateIso.Value)
-                    validations.Add($"isDateISO: {KoValidationOptions("true", errorMessage)}");
-                if (isNumber.HasValue && isNumber.Value)
-                    validations.Add($"isNumber: {KoValidationOptions("true", errorMessage)}");
-                if (isDigit.HasValue && isDigit.Value)
-                    validations.Add($"isDigit: {KoValidationOptions("true", errorMessage)}");
-                if (!string.IsNullOrWhiteSpace(customName) && !string.IsNullOrWhiteSpace(customValue))
-                    validations.Add($"{customName}: {customValue}");
-
-                return string.Join(", ", validations);
-            }
-        }
-
-        private string AddErrorMessage(string errorMessage)
-        {
-            string message = null;
-
-            if (!string.IsNullOrWhiteSpace(errorMessage)) message = $", message: \"{errorMessage}\"";
-
-            return message;
-        }
-
-        private string KoValidationOptions(string value, string errorMessage)
-        {
-            string message = AddErrorMessage(errorMessage);
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                return $"{{params: {value}, message: \"{errorMessage}\"}}";
-            }
-            else
-            {
-                return value;
-            }
-        }
+        public bool ClientValidationAllowSave =>
+            this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.AllowSave) ?? false;
 
         /// <summary>
         /// Returns the name of the collection to map as a direct many-to-many collection
         /// </summary>
-        public string ManyToManyCollectionName
-        {
-            get
-            {
-                return Wrapper.GetAttributeValue<ManyToManyAttribute>(nameof(ManyToManyAttribute.CollectionName)) as string;
-            }
-        }
+        public string ManyToManyCollectionName => this.GetAttributeValue<ManyToManyAttribute>(a => a.CollectionName);
 
         /// <summary>
         /// Property on the other side of the many-to-many relationship.
         /// </summary>
-        public PropertyViewModel ManyToManyCollectionProperty
-        {
-            get
-            {
-                foreach (var prop in Object.Properties)
-                {
-                    if (prop.IsPOCO && prop.Object.Name != Parent.Name)
-                    {
-                        return prop;
-                    }
-                }
-                return null;
-            }
-        }
-
-
-        /// <summary>
-        /// Returns true if this property has the InternalUse Attribute 
-        /// </summary>
-        public bool IsInternalUse
-        {
-            get
-            {
-                return Wrapper.HasAttribute<InternalUseAttribute>();
-            }
-        }
-
-        /// <summary>
-        /// Returns true if this property has the FileDownload Attribute.
-        /// </summary>
-        public bool IsFileDownload
-        {
-            get
-            {
-                return Wrapper.HasAttribute<FileDownloadAttribute>();
-            }
-        }
-
-
-        /// <summary>
-        /// Only available on reflected types, not during Roslyn compile.
-        /// </summary>
-        public PropertyInfo PropertyInfo { get { return Wrapper.PropertyInfo; } }
-
+        public PropertyViewModel ManyToManyCollectionProperty =>
+            Object.Properties.FirstOrDefault(prop => prop.IsPOCO && !prop.Object.Equals(Parent));
 
         /// <summary>
         /// True if the property is read only.
         /// </summary>
-        public bool IsReadOnly { get { return !CanWrite && CanRead; } }
+        public bool IsReadOnly => !IsClientWritable && HasGetter;
+
+        /// <summary>
+        /// True if the property can be sent from the client to the server.
+        /// This includes normal writable properties, as well as primary keys.
+        /// </summary>
+        public bool IsClientSerializable => (IsClientWritable || IsPrimaryKey) && HasSetter && !IsPOCO && !Type.IsCollection;
+
         /// <summary>
         /// True if the property can be written.
         /// </summary>
-        public bool CanWrite { get { return Wrapper.CanWrite && !IsPrimaryKey && !HasReadOnlyAttribute && !HasReadOnlyApiAttribute; } }
-        /// <summary>
-        /// True if the property can be read.
-        /// </summary>
-        public bool CanRead { get { return Wrapper.CanRead; } }
+        public bool IsClientWritable => 
+            !IsInternalUse 
+            && HasSetter 
+            // Exclude object properties with setters that aren't DB mapped - 
+            // these are probably Owned Types, which we don't currently support editing.
+            && (!IsPOCO || Object.HasDbSet) 
 
-
+            && !IsPrimaryKey 
+            && !HasReadOnlyAttribute
+            && !HasReadOnlyApiAttribute 
+            && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
+        
         /// <summary>
         /// True if the property has the DateType(DateOnly) Attribute.
         /// </summary>
@@ -408,7 +165,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var dateType = Wrapper.GetAttributeValue<DateTypeAttribute, DateTypeAttribute.DateTypes>(nameof(DateTypeAttribute.DateType));
+                var dateType = this.GetAttributeValue<DateTypeAttribute, DateTypeAttribute.DateTypes>(a => a.DateType);
                 if (dateType != null)
                 {
                     return dateType.Value == DateTypeAttribute.DateTypes.DateOnly;
@@ -417,75 +174,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string DateFormat
-        {
-            get
-            {
-                if (IsDateOnly)
-                {
-                    return "M/D/YYYY";
-                }
-                else
-                {
-                    return "M/D/YYYY h:mm a";
-                }
-            }
-        }
-
         /// <summary>
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                var displayName = Wrapper.GetAttributeValue<DisplayNameAttribute>(nameof(DisplayNameAttribute.DisplayName)) as string;
-                if (displayName != null) return displayName;
-                displayName = Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Name)) as string;
-                if (displayName != null) return displayName;
-                else return Regex.Replace(Name, "[A-Z]", " $0").Trim();
-            }
-        }
-
-        public string DisplayNameLabel(string labelOverride)
-        {
-            return labelOverride ?? DisplayName;
-        }
+        public string DisplayName =>
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
-        public bool HasValidValues
-        {
-            get { return IsManytoManyCollection || ApiController != null; }
-        }
-
-        /// <summary>
-        /// If this is an object, the name of the API controller serving this data. Or null if none.
-        /// </summary>
-        public string ApiController
-        {
-            get
-            {
-                if (Object == null || !Object.OnContext) return null;
-
-                if (IsPOCO && !IsComplexType) return Name;
-                // TODO: Fix this so it is right. 
-                //if (IsGeneric)
-                //{
-                //    if (MvcHelper.GetApiControllerNames().Contains(ContainedType.Name + "Controller"))
-                //    {
-                //        return ContainedType.Name + "Controller";
-                //    }
-                //}
-                //if (MvcHelper.GetApiControllerNames().Contains(TypeName + "Controller"))
-                //{
-                //    return TypeName + "Controller";
-                //}
-                return null;
-            }
-        }
+        public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.
@@ -497,47 +198,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (IsId) return true;
             if (IsInternalUse) return true;
             // Check the attribute
-            var value = Wrapper.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(nameof(HiddenAttribute.Area));
+            var value = this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area);
             if (value != null) return value.Value == area || value.Value == HiddenAttribute.Areas.All;
             return false;
         }
 
+        public bool HasReadOnlyAttribute => this.HasAttribute<ReadOnlyAttribute>();
 
-        /// <summary>
-        /// For the specified area, returns true if the property has a hidden attribute.
-        /// </summary>
-        /// <returns></returns>
-        public string ListGroup
-        {
-            get
-            {
-                return (string)Wrapper.GetAttributeValue<ListGroupAttribute>(nameof(ListGroupAttribute.Group));
-            }
-        }
-
-        /// <summary>
-        /// True if the property has the ReadOnly attribute.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReadOnlyAttribute
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ReadOnlyAttribute>();
-            }
-        }
-
-        /// <summary>
-        /// True if the property has the ReadonlyApi attribute.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReadOnlyApiAttribute
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ReadOnlyApiAttribute>();
-            }
-        }
+#pragma warning disable CS0618 // Type or member is obsolete
+        public bool HasReadOnlyApiAttribute => this.HasAttribute<ReadOnlyApiAttribute>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// True if the property has the Required attribute, or if the value type is not nullable.
@@ -546,11 +216,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var value = Wrapper.HasAttribute<RequiredAttribute>();
-                if (value) return true;
+                if (this.HasAttribute<RequiredAttribute>()) return true;
 
-                value = Wrapper.HasAttribute<ClientValidationAttribute>();
-                if (value && Wrapper.GetAttributeValue<ClientValidationAttribute>(nameof(ClientValidationAttribute.IsRequired)) as bool? == false) return false;
+                // Explicit == false is intentional - if the parameter is missing, GetAttributeValue returns null.
+                if (this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired) == false) return false;
 
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
                 if (IsForeignKey && !Type.IsNullable) return true;
@@ -558,7 +227,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsPrimaryKey) return false;  // Because it will be created by the server.
                 // TODO: Figure out how to handle situations where we want to hand back an invalid model because the server side is going to figure things out for us.
                 //if (IsId && !IsNullable) return true;
-                if (Wrapper.Type.IsCollection) return false;
+                if (Type.IsCollection) return false;
                 return false;
             }
         }
@@ -566,24 +235,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the MinLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MinLength
-        {
-            get
-            {
-                return (int?)Wrapper.GetAttributeValue<MinLengthAttribute>(nameof(MinLengthAttribute.Length));
-            }
-        }
+        public int? MinLength => this.GetAttributeValue<MinLengthAttribute, int>(a => a.Length);
+        
         /// <summary>
         /// Returns the MaxLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MaxLength
-        {
-            get
-            {
-                return (int?)Wrapper.GetAttributeValue<MaxLengthAttribute>(nameof(MaxLengthAttribute.Length));
-            }
-        }
-
+        public int? MaxLength => this.GetAttributeValue<MaxLengthAttribute, int>(a => a.Length);
+        
         /// <summary>
         /// Returns the range of valid values or null if they don't exist. (min, max)
         /// </summary>
@@ -591,8 +249,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var min = Wrapper.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
-                var max = Wrapper.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
+                var min = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
+                var max = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
                 if (min != null && max != null) return new Tuple<object, object>(min, max);
                 return null;
             }
@@ -601,125 +259,90 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.
         /// </summary>
-        public bool IsSearch
+        public bool IsSearchable(ClassViewModel rootModel)
         {
-            get
+            if (!HasAttribute<SearchAttribute>()) return false;
+
+            var rootModelName = rootModel?.Name;
+            if (rootModelName == null) return true;
+
+            var whitelist = this.GetAttributeValue<SearchAttribute>(a => a.RootWhitelist);
+            if (!string.IsNullOrWhiteSpace(whitelist))
             {
-                return Wrapper.HasAttribute<SearchAttribute>();
+                return whitelist.Split(',').Contains(rootModelName);
             }
+
+            var blacklist = this.GetAttributeValue<SearchAttribute>(a => a.RootBlacklist);
+            if (!string.IsNullOrWhiteSpace(blacklist))
+            {
+                return !blacklist.Split(',').Contains(rootModelName);
+            }
+
+            return true;
         }
 
         /// <summary>
-        /// Now to search for the string when this is a search property.
+        /// How to search for the string when this is a search property.
         /// </summary>
-        public SearchAttribute.SearchMethods SearchMethod
-        {
-            get
-            {
-                var searchMethod = Wrapper.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(nameof(SearchAttribute.SearchMethod));
-                if (searchMethod != null)
-                {
-                    return searchMethod.Value;
-                }
-                return SearchAttribute.SearchMethods.BeginsWith;
-            }
-        }
+        public SearchAttribute.SearchMethods SearchMethod =>
+            this.GetAttributeValue<SearchAttribute, SearchAttribute.SearchMethods>(a => a.SearchMethod)
+            ?? SearchAttribute.SearchMethods.BeginsWith;
 
         /// <summary>
-        /// Returns the actual name of the method to use for searching.
+        /// Returns the Linq.Dynamic-interpretable string representation of the method invocation that will perform search on the property.
         /// </summary>
-        public string SearchMethodName
-        {
-            get
-            {
-                switch (SearchMethod)
-                {
-                    case SearchAttribute.SearchMethods.Contains:
-                        // There isn't a good way to do case insensitive contains. This ends up being done on the client side.
-                        // Not sure how to get like '%abc%'
-                        // return @"IndexOf(""{0}"", System.StringComparison.OrdinalIgnoreCase) >= 0";
-                        return @"ToLower().IndexOf((""{0}"").ToLower()) >= 0";
-                    case SearchAttribute.SearchMethods.BeginsWith:
-                    default:
-                        return @"StartsWith(""{0}"")";
-                }
-            }
-        }
+        public string SearchMethodCall => SearchMethod == SearchAttribute.SearchMethods.Contains
+            ? @"ToLower().IndexOf((""{0}"").ToLower()) >= 0"
+            : @"ToLower().StartsWith((""{0}"").ToLower())";
 
         /// <summary>
         /// True if the search term should be split on spaces and evaluated individually with or.
         /// </summary>
-        public bool SearchIsSplitOnSpaces
-        {
-            get
-            {
-                var isSplitOnSpaces = Wrapper.GetAttributeValue<SearchAttribute, bool>(nameof(SearchAttribute.IsSplitOnSpaces));
-                if (isSplitOnSpaces != null)
-                {
-                    return isSplitOnSpaces.Value;
-                }
-                return false;
-            }
-        }
+        public bool SearchIsSplitOnSpaces =>
+            this.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? false;
 
         /// <summary>
         /// Returns the fields to search for this object. This could be just the field itself 
         /// or a number of child fields if this is an object or collection.
         /// </summary>
-        /// <param name="depth"></param>
-        /// <param name="maxDepth"></param>
-        /// <returns></returns>
-        public Dictionary<string, PropertyViewModel> SearchTerms(int depth, int maxDepth = 3)
+        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel rootModel, int depth = 0, int maxDepth = 2, bool force = false)
         {
-            var result = new Dictionary<string, PropertyViewModel>();
+            if (!force && !IsSearchable(rootModel)) yield break;
+
             if (this.PureType.HasClassViewModel)
             {
-
                 // If we will exceed the depth don't try to query on an object.
-                if (depth < maxDepth - 1)
+                if (depth < maxDepth)
                 {
                     // Remove this item and add the child's search items with a prepended property name
-                    var childResult = this.Type.PureType.ClassViewModel.SearchProperties(depth + 1);
-                    foreach (var childProp in childResult)
+                    var childProperties = this.Type.PureType.ClassViewModel.SearchProperties(rootModel, depth + 1, maxDepth);
+
+                    if (this.Type.IsCollection)
                     {
-                        if (this.Type.IsCollection)
-                        {
-                            result.Add($"{this.Name}[].{childProp.Key}", childProp.Value);
-                        }
-                        else
-                        {
-                            result.Add($"{this.Name}.{childProp.Key}", childProp.Value);
-                        }
+                        yield return new SearchableCollectionProperty(this, childProperties);
+                    }
+                    else
+                    {
+                        yield return new SearchableObjectProperty(this, childProperties);
                     }
                 }
             }
             else
             {
-                // This is just a regular field, add it.
-                result.Add(this.Name, this);
+                yield return new SearchableValueProperty(this);
             }
-            return result;
         }
 
 
         /// <summary>
         /// Returns true if this property is the field to be used for list text and marked with the ListText Attribute.
         /// </summary>
-        public bool IsListText
-        {
-            get
-            {
-                return Wrapper.HasAttribute<ListTextAttribute>();
-            }
-        }
+        public bool IsListText => this.HasAttribute<ListTextAttribute>();
 
         /// <summary>
         /// Returns true if this property is a primary or foreign key.
         /// </summary>
-        public bool IsId
-        {
-            get { return IsPrimaryKey || IsForeignKey; }
-        }
+        public bool IsId => IsPrimaryKey || IsForeignKey;
 
 
         /// <summary>
@@ -729,140 +352,101 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (Wrapper.HasAttribute<KeyAttribute>())
+                // EffectiveParent used here because primary keys may be declared on a base class (as they are with AspNetCore.Identity).
+                if (!EffectiveParent.IsDbMappedType && !Parent.IsDto)
+                    return false;
+                if (this.HasAttribute<KeyAttribute>())
                     return true;
-                else if (string.Compare(Name, "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
-                else if (string.Compare(Name, Parent.Name + "Id", StringComparison.InvariantCultureIgnoreCase) == 0) return true;
-                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Compare(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase) == 0) return true;
+                else if (string.Equals(Name, ConventionalIdSuffix, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+                else if (string.Equals(Name, Parent.Name + ConventionalIdSuffix, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Equals(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
                 return false;
 
             }
         }
 
         /// <summary>
-        /// Returns true if this property's name ends with Id.
+        /// Returns true if this property is a foreign key. Guarantees that <see cref="ReferenceNavigationProperty"/> is not null.
         /// </summary>
-        public bool IsForeignKey
-        {
-            // TODO: should this be the same as IsPrimaryKey
-            get
-            {
-                if (IsPOCO) return false;
-                if (Wrapper.HasAttribute<ForeignKeyAttribute>() && !IsPOCO)
-                {
-                    return true;
-                }
-                if (this.Name.EndsWith("Id") && !IsPrimaryKey && Parent.PropertyByName(Name.Substring(0, Name.Length - 2)) != null)
-                {
-                    return true;
-                }
-                if (Parent.Properties.Any(p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name))))
-                {
-                    // You can also put the attribute on the POCO property and refer to the key property. This detects that.
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
+        public bool IsForeignKey => ReferenceNavigationProperty != null;
 
 
         /// <summary>
-        /// If this is an object, returns the name of the property that holds the ID. 
+        /// If this is a reference navigation property, returns the property that holds the foreign key. 
         /// </summary>
-        public string ObjectIdPropertyName
+        public PropertyViewModel ForeignKeyProperty
         {
             get
             {
-                // Use the foreign key attribute
-                var value = (string)Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name));
-                if (value != null) return value;
-                // See if this is a one-to-one using the parent's key
-                // Look up the other object and check the key
-                var vm = ReflectionRepository.GetClassViewModel(PureType.Name);
-                if (vm != null)
-                {
-                    if (vm.IsOneToOne)
-                    {
-                        return Parent.PrimaryKey.Name;
-                    }
-                }
-                // Look on the Object for the key in case of a commonly keyed one-to-one
-                return PureType.Name + "Id";
-            }
-        }
+                // ForeignKeyProperty only has meaning on reference navigation props.
+                // If this prop isn't a POCO, that definitely isn't true.
+                if (!Type.IsPOCO) return null;
 
+                // Types/props that aren't DB mapped don't have properties that have relational meaning.
+                // EffectiveParent used here to correctly handle properties on base classes -
+                // we need to know that the class that is ultimately used is DB mapped.
+                if (!IsDbMapped || !EffectiveParent.IsDbMappedType) return null;
 
-        /// <summary>
-        /// If this is an object, returns the property that holds the ID. 
-        /// </summary>
-        public PropertyViewModel ObjectIdProperty
-        {
-            get
-            {
-                return Parent.PropertyByName(ObjectIdPropertyName);
-            }
-        }
+                var name =
+                    // Use the foreign key attribute
+                    this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
 
+                    // Use the ForeignKey Attribute on the key property if it is there.
+                    ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
 
-        public string IdFieldCollection
-        {
-            get
-            {
-                if (IsManytoManyCollection)
-                {
-                    return PureType + "Ids";
-                }
-                else
-                {
-                    return PureType + "Id";
-                }
-            }
-        }
+                    // See if this is a one-to-one using the parent's key
+                    // Look up the other object and check the key
+                    ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey.Name : null)
 
-        /// <summary>
-        /// Gets the name of the property that this ID property points to.
-        /// </summary>
-        private string IdPropertyObjectPropertyName
-        {
-            get
-            {
-                if (IsForeignKey)
-                {
-                    /// Use the ForeignKey Attribute if it is there.
-                    var value = (string)Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name));
-                    if (value != null) return value;
+                    // Look for a property that follows convention.
+                    ?? Name + ConventionalIdSuffix;
 
-                    // Use the ForeignKey Attribute on the object property if it is there.
-                    var prop = Parent.Properties.SingleOrDefault(p => Name == (string)p.Wrapper.GetAttributeValue<ForeignKeyAttribute>(nameof(ForeignKeyAttribute.Name)));
-                    if (prop != null) return prop.Name;
-
-                    // Else, by convention remove the Id at the end.
-                    return Name.Substring(0, Name.Length - 2);
-                }
-                else
+                var prop = EffectiveParent.PropertyByName(name);
+                if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)
                 {
                     return null;
                 }
+
+                return prop;
             }
         }
 
         /// <summary>
         /// Gets the property that is the object reference for this ID property.
         /// </summary>
-        public PropertyViewModel IdPropertyObjectProperty
+        public PropertyViewModel ReferenceNavigationProperty
         {
             get
             {
-                if (string.IsNullOrEmpty(IdPropertyObjectPropertyName))
+                // ReferenceNavigationProperty only has meaning on foreign key props.
+                // Eliminate out anything that can't be a key right away.
+                if (!Type.IsValidKeyType) return null;
+
+                // Types/props that aren't DB mapped don't have properties that have relational meaning.
+                // EffectiveParent used here to correctly handle properties on base classes -
+                // we need to know that the class that is ultimately used is DB mapped.
+                if (!IsDbMapped || !EffectiveParent.IsDbMappedType) return null;
+
+                var name =
+                    // Use the ForeignKey Attribute if it is there.
+                    this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
+
+                    // Use the ForeignKey Attribute on the object property if it is there.
+                    ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+
+                    // Else, by convention remove the Id at the end.
+                    ?? (Name.EndsWith(ConventionalIdSuffix) ? Name.Substring(0, Name.Length - ConventionalIdSuffix.Length) : null);
+
+                var prop = EffectiveParent.PropertyByName(name);
+                if (prop == null || !prop.IsPOCO || !prop.IsDbMapped)
                 {
                     return null;
                 }
-                else
-                {
-                    return Parent.PropertyByName(IdPropertyObjectPropertyName);
-                }
+
+                return prop;
             }
         }
 
@@ -872,7 +456,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 int order = 10000;
-                var value = (int?)Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Order));
+                var value = this.GetAttributeValue<DisplayAttribute, int>(a => a.Order);
                 if (value != null) order = value.Value;
                 // Format them to be sorted.
                 return string.Format($"{order:D7}:{ClassFieldOrder:D3}");
@@ -885,9 +469,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var order = (int?)Wrapper.GetAttributeValue<DefaultOrderByAttribute>(nameof(DefaultOrderByAttribute.FieldOrder));
-                var direction = Wrapper.GetAttributeValue<DefaultOrderByAttribute, DefaultOrderByAttribute.OrderByDirections>(nameof(DefaultOrderByAttribute.OrderByDirection));
-                var fieldName = Wrapper.GetAttributeValue<DefaultOrderByAttribute>(nameof(DefaultOrderByAttribute.FieldName)) as string;
+                var order = this.GetAttributeValue<DefaultOrderByAttribute, int>(a => a.FieldOrder);
+                var direction = this.GetAttributeValue<DefaultOrderByAttribute, DefaultOrderByAttribute.OrderByDirections>(nameof(DefaultOrderByAttribute.OrderByDirection));
+                var fieldName = this.GetAttributeValue<DefaultOrderByAttribute>(a => a.FieldName);
                 if (order != null && direction != null)
                 {
                     var name = Name;
@@ -903,54 +487,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
         /// <summary>
-        /// Returns the URL for the List Editor with the ???Id= query string.
-        /// Ex: Adult/table?adultId=
-        /// </summary>
-        public string ListEditorUrl
-        {
-            get
-            {
-                if (InverseIdProperty == null) { return null; }
-                return string.Format("{0}/table?{1}=", Object.ApiUrl.Replace("api/", ""), InverseIdProperty.JsonName);
-            }
-        }
-        /// <summary>
-        /// Returns the core URL for the List Editor.
-        /// </summary>
-        public string ListEditorUrlName
-        {
-            get { return string.Format("{0}ListUrl", Name); }
-        }
-
-        public bool HasViewModelProperty
-        {
-            get
-            {
-                if (IsInternalUse) return false;
-                if (PureType.Name == "Image") return false;
-                if (PureType.Name == "IdentityRole") return false;
-                if (PureType.Name == "IdentityUserRole") return false;
-                if (PureType.Name == "IdentityUserClaim") return false;
-                if (PureType.Name == "IdentityUserLogin") return false;
-                return true;
-            }
-        }
-
-        public bool HasInverseProperty
-        {
-            get { return Wrapper.HasAttribute<InversePropertyAttribute>(); }
-        }
-
-        /// <summary>
-        /// For a many to many collection this is the reference to this object from the contained object.
+        /// If this property is a collection navigation property (the "many"), 
+        /// returns the reference navigation property on the collected type that represents the 
+        /// "one" end of the one-to-many relationship.
         /// </summary>
         public PropertyViewModel InverseProperty
         {
             get
             {
-                var name = Wrapper.GetAttributeObject<InversePropertyAttribute, string>(nameof(InversePropertyAttribute.Property));
+                var name = this.GetAttributeValue<InversePropertyAttribute>(a => a.Property);
                 if (name != null)
                 {
                     var inverseProperty = Object.PropertyByName(name);
@@ -965,7 +511,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// For a many to many collection this is the ID reference to this object from the contained object.
+        /// For a collection navigation property, this is the ID reference to this object from the contained object.
         /// </summary>
         public PropertyViewModel InverseIdProperty
         {
@@ -974,35 +520,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var inverseProperty = InverseProperty;
                 if (inverseProperty != null)
                 {
-                    return inverseProperty.ObjectIdProperty;
+                    return inverseProperty.ForeignKeyProperty;
                 }
                 return null;
             }
         }
 
+        public override string ToString() => $"{Name} : {Type.FullyQualifiedName}";
 
-        /// <summary>
-        /// Name of the database column
-        /// </summary>
-        public string ColumnName
-        {
-            get
-            {
-                //TODO: Make this more robust
-                return Name;
-            }
-        }
+        public string SecurityToString() => $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
 
-        public override string ToString()
-        {
-            return $"{Name} : {TypeName}";
-        }
-
-        public string SecurityToString()
-        {
-
-            return $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
-        }
         public string SecurityEditToString()
         {
             if (IsInternalUse) return "None";
@@ -1013,6 +540,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             return "Allow";
         }
+
         public string SecurityReadToString()
         {
             if (IsInternalUse) return "None";
@@ -1020,23 +548,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "Allow";
         }
 
-        public SecurityInfoProperty SecurityInfo
+        public PropertySecurityInfo SecurityInfo
         {
             get
             {
-                var result = new SecurityInfoProperty();
+                var result = new PropertySecurityInfo();
 
-                if (Wrapper.HasAttribute<ReadAttribute>())
+                if (HasAttribute<ReadAttribute>())
                 {
                     result.IsRead = true;
-                    var roles = (string)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.Roles));
+                    var roles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
                     result.ReadRoles = roles;
                 }
 
-                if (Wrapper.HasAttribute<EditAttribute>())
+                if (HasAttribute<EditAttribute>())
                 {
                     result.IsEdit = true;
-                    var roles = (string)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Roles));
+                    var roles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
                     result.EditRoles = roles;
                 }
 
@@ -1044,292 +572,75 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-
-        /// <summary>
-        /// Object is not in the database, but hyndrated via other means.
-        /// </summary>
-        public bool IsExternal
-        {
-            get
-            {
-                return IsPOCO && ObjectIdProperty != null && HasNotMapped;
-            }
-        }
-
-
         /// <summary>
         /// Has the NotMapped attribute.
         /// </summary>
-        public bool HasNotMapped
-        {
-            get
-            {
-                return Wrapper.HasAttribute<NotMappedAttribute>();
-            }
-        }
+        public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
+
+        public bool IsDbMapped => !HasNotMapped && (Object?.IsDbMappedType ?? true);
 
         /// <summary>
-        /// If true, this property should be searchable on the URL line. 
+        /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 
         /// </summary>
-        public bool IsUrlParameter
-        {
-            get
-            {
-                return !IsComplexType && (!Type.IsClass || Type.IsString) && !Type.IsArray && (!Type.IsGeneric || (Type.IsNullable && Type.PureType.IsNumber));
-            }
-        }
+        public bool IsUrlFilterParameter => 
+            IsClientProperty && !HasNotMapped && (Type.IsPrimitive || Type.IsDate);
 
-        /// <summary>
-        /// List of words already used in the API for other things.
-        /// </summary>
-        private static string ReservedUrlParameterNames =
-            "fields,include,includes,orderby,orderbydescending,page,pagesize,where,listdatasource,case,params,if,this,base";
-        /// <summary>
-        /// Name of the field to use in the API. If this is in ReservedUrlParameterNames, then my is added to the name.
-        /// </summary>
-        public string UrlParameterName
-        {
-            get
-            {
-                if (ReservedUrlParameterNames.Contains(Name.ToLower()))
-                {
-                    return "my" + Name;
-                }
-                return Name.ToCamelCase();
-            }
-        }
-
-        /// <summary>
-        /// True if this property has the Includes Attribute
-        /// </summary>
-        public bool HasDtoIncludes
-        {
-            get
-            {
-                return Wrapper.HasAttribute<DtoIncludesAttribute>();
-            }
-        }
 
         /// <summary>
         /// Returns a list of content views from the Includes attribute
         /// </summary>
-        public List<string> DtoIncludes
-        {
-            get
-            {
-                var includes = (Wrapper.GetAttributeValue<DtoIncludesAttribute>(nameof(DtoIncludesAttribute.ContentViews)) as string).Trim();
-                return includes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
-            }
-        }
-
-        /// <summary>
-        /// True if this property has the Excludes Attribute
-        /// </summary>
-        public bool HasDtoExcludes
-        {
-            get
-            {
-                return Wrapper.HasAttribute<DtoExcludesAttribute>();
-            }
-        }
+        public IEnumerable<string> DtoIncludes =>
+            (this.GetAttributeValue<DtoIncludesAttribute>(a => a.ContentViews) ?? "")
+            .Trim()
+            .Split(',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s));
 
         /// <summary>
         /// Returns a list of content views from the Excludes attribute
         /// </summary>
-        public List<string> DtoExcludes
+        public IEnumerable<string> DtoExcludes =>
+            (this.GetAttributeValue<DtoExcludesAttribute>(a => a.ContentViews) ?? "")
+            .Trim()
+            .Split(',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s));
+
+        /// <summary>
+        /// Returns the role the property plays in a relational model.
+        /// </summary>
+        public PropertyRole Role
         {
             get
             {
-                var excludes = (Wrapper.GetAttributeValue<DtoExcludesAttribute>(nameof(DtoExcludesAttribute.ContentViews)) as string).Trim();
-                return excludes.Split(new char[] { ',' }).ToList().ConvertAll(s => s.Trim());
-            }
-        }
 
-        private string GetPropertySetterConditional(bool isForEdit)
-        {
-            var readRoles = (SecurityInfo.IsSecuredProperty && SecurityInfo.ReadRolesList.Count() > 0) ?
-                string.Join(" || ", SecurityInfo.ReadRolesList.Select(s => $"is{s}")) : "";
-            var editRoles = isForEdit && (SecurityInfo.IsSecuredProperty && SecurityInfo.EditRolesList.Count() > 0) ?
-                string.Join(" || ", SecurityInfo.EditRolesList.Select(s => $"is{s}")) : "";
-            var includes = HasDtoIncludes ? string.Join(" || ", DtoIncludes.Select(s => $"include{s}")) : "";
-            var excludes = HasDtoExcludes ? string.Join(" || ", DtoExcludes.Select(s => $"exclude{s}")) : "";
-
-            var statement = new List<string>();
-            if (!string.IsNullOrEmpty(readRoles)) statement.Add($"({readRoles})");
-            if (!string.IsNullOrEmpty(editRoles)) statement.Add($"({editRoles})");
-            if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
-            if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
-
-            return string.Join(" && ", statement);
-        }
-
-        public string ObjToDtoPropertySetter(string objectName)
-        {
-            string setter;
-            if (Type.IsCollection)
-            {
-                if (PureType.HasClassViewModel)
+                if (IsPrimaryKey)
                 {
-                    // Only check the includes tree for things that are in the database.
-                    // Otherwise, this would break IncludesExternal.
-                    var sb = new StringBuilder();
+                    return PropertyRole.PrimaryKey;
+                }
+                else if (IsForeignKey)
+                {
+                    return PropertyRole.ForeignKey;
+                }
 
-                    // Set this as a variable once and then use it below. This prevents multiple-evaluation of computed getter-only properties.
-                    sb.AppendLine($"var propVal{Name} = obj.{Name};");
-
-                    sb.Append("            ");
-                    sb.Append($"if (propVal{Name} != null");
-                    if (PureType.ClassViewModel.HasDbSet)
+                var obj = Object;
+                if (obj != null && obj.IsDbMappedType)
+                {
+                    if (Type.IsCollection && obj.PrimaryKey != null && InverseProperty != null)
                     {
-                        sb.Append($" && (tree == null || tree[nameof({objectName}.{Name})] != null)");
+                        return PropertyRole.CollectionNavigation;
                     }
-                    sb.Append(") {");
-                    sb.AppendLine();
-                    sb.Append("                ");
-                    sb.Append($"{objectName}.{Name} = propVal{Name}");
-
-                    var defaultOrderBy = PureType.ClassViewModel.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
-                    if (defaultOrderBy != null)
+                    else if (ForeignKeyProperty != null)
                     {
-                        sb.Append($".OrderBy(\"{defaultOrderBy}\")");
+                        return PropertyRole.ReferenceNavigation;
                     }
-
-                    sb.Append($".Select(f => {PureType.Name}DtoGen.Create(f, user, includes, objects, tree?[nameof({objectName}.{Name})])).ToList();");
-
-                    sb.AppendLine();
-                    sb.Append("            ");
-                    if (PureType.ClassViewModel.HasDbSet)
-                    {
-                        sb.Append("}");
-                        // If we know for sure that we're loading these things (becuse the IncludeTree said so),
-                        // but EF didn't load any, then add a blank collection so the client will delete any that already exist.
-                        sb.Append($" else if (propVal{Name} == null && tree?[nameof({objectName}.{Name})] != null)");
-                        sb.Append(" {");
-                        sb.AppendLine();
-                        sb.Append("                ");
-                        sb.Append($"{objectName}.{Name} = new {PureType.Name}DtoGen[0];");
-                        sb.AppendLine();
-                        sb.Append("            ");
-                        sb.Append("}");
-                    }
-                    else
-                    {
-                        sb.Append("}");
-                    }
-
-                    sb.AppendLine();
-                    setter = sb.ToString();
-                }
-                else
-                {
-                    setter = $@"{objectName}.{Name} = obj.{Name};";
                 }
 
-            }
-            else if (Type.HasClassViewModel)
-            {
-                // Only check the includes tree for things that are in the database.
-                // Otherwise, this would break IncludesExternal.
-                string treeCheck = Type.ClassViewModel.HasDbSet ? $"if (tree == null || tree[nameof({objectName}.{Name})] != null)" : "";
-                setter = $@"{treeCheck}
-                {objectName}.{Name} = {Type.Name}DtoGen.Create(obj.{Name}, user, includes, objects, tree?[nameof({objectName}.{Name})]);
-";
-            }
-            else
-            {
-                setter = $"{objectName}.{Name} = obj.{Name};";
-            }
-
-            var statement = GetPropertySetterConditional(false);
-            if (!string.IsNullOrWhiteSpace(statement))
-            {
-                return $@"            if ({statement})
-            {{
-                {setter}
-            }}
-";
-            }
-            else
-            {
-                return $"            {setter}\n";
+                return PropertyRole.Value;
             }
         }
 
-        public string DtoToObjPropertySetter()
-        {
-            if (IgnorePropertyInUpdates)
-            {
-                return "";
-            }
-            else
-            {
-                var name = Name;
-                if (!Type.IsNullable && Type.CsDefaultValue != "null" && !Type.IsByteArray)
-                {
-                    if (Type.IsDate) name = $"({name} ?? DateTime.Today)";
-                    else name = $"({name} ?? {Type.CsDefaultValue})";
-                }
-                var setter = $"entity.{Name} = {Type.ExplicitConversionType}{name};";
-
-                var statement = GetPropertySetterConditional(true);
-                if (!string.IsNullOrWhiteSpace(statement))
-                {
-                    return $@"          if ({statement})
-            {{
-                {setter}
-            }}
-";
-                }
-                else
-                {
-                    return $"\t\t\t{setter}{Environment.NewLine}";
-                }
-            }
-        }
-
-        private bool IgnorePropertyInUpdates
-        {
-            get
-            {
-                return (SecurityInfo.IsSecuredProperty && string.IsNullOrEmpty(SecurityInfo.EditRoles)) ||
-                    IsReadOnly ||
-                    (IsPOCO && !IsComplexType) ||
-                    IsManytoManyCollection ||
-                    Type.IsCollection ||
-                    IsInternalUse;
-            }
-        }
-
-        //foreach (var prop in _sourceVm.Properties.Where(f => f.IsReadOnly))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForSourceMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Don't assign objects, only their IDs.
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsPOCO && !f.IsComplexType))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Remove many to many relationships.
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsManytoManyCollection))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Remove collections.
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.Type.IsCollection))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-        //    // Remove internal use
-        //    foreach (var prop in _sourceVm.Properties.Where(f => f.IsInternalUse))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //        //objToDtoMap = objToDtoMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
-
-        //    // Set up incoming security
-        //    foreach (var prop in _sourceVm.Properties.Where(f => !f.SecurityInfo.IsEditable(_user)))
-        //    {
-        //        dtoToObjMap = dtoToObjMap.ForMember(prop.Name, opt => opt.Ignore());
-        //    }
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

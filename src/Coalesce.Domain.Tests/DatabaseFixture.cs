@@ -1,26 +1,42 @@
-﻿using Coalesce.Domain;
+﻿using System;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace Coalesce.Domain.Tests
 {
-    public class DatabaseFixture
+    public class DatabaseFixture : IDisposable
     {
-        public AppDbContext Db { get; private set; }
-
         public DatabaseFixture()
         {
             var dbOptionBuilder = new DbContextOptionsBuilder();
             dbOptionBuilder.UseSqlServer(
-                "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDomainTest;Trusted_Connection=True;"
+                "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDomainTest;Integrated Security=True;"
             );
             Db = new AppDbContext(dbOptionBuilder.Options);
             // Wipe the database out first;
             Db.Database.EnsureDeleted();
             // Add some data to it.
             SampleData.Initialize(Db);
+
+            ReflectionRepository.Global.AddAssembly<DbContext>();
         }
+
+        public AppDbContext Db { get; }
+
+        public void Dispose()
+        {
+            if (Db == null) return;
+            Db.Database.EnsureDeleted();
+            Db.Dispose();
+        }
+    }
+
+    [CollectionDefinition("Domain Test Database Collection")]
+    public class DatabaseCollection : ICollectionFixture<DatabaseFixture>
+    {
+        // This class has no code, and is never created. Its purpose is simply
+        // to be the place to apply [CollectionDefinition] and all the
+        // ICollectionFixture<> interfaces.
     }
 }

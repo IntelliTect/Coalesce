@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// <summary>
     /// Class that contains security information for a class or property based on the Read and Edit attributes
     /// </summary>
-    public class SecurityInfoProperty
+    public class PropertySecurityInfo
     {
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;
@@ -19,7 +19,9 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
 
 
-        public List<string> EditRolesList { get
+        public List<string> EditRolesList
+        {
+            get
             {
                 if (!string.IsNullOrEmpty(EditRoles))
                 {
@@ -54,13 +56,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// Returns true for a property if this property has some sort of security.
         /// </summary>
         /// <returns></returns>
-        public bool IsSecuredProperty
-        {
-            get
-            {
-                return IsEdit || IsRead;
-            }
-        }
+        public bool IsSecuredProperty => IsEdit || IsRead;
 
         /// <summary>
         /// If true, the user can edit the field.
@@ -108,29 +104,16 @@ namespace IntelliTect.Coalesce.DataAnnotations
             return true;
         }
 
-        public string ReadRolesExternal
-        {
-            get
-            {
-                return string.Join(",", ReadRolesList);
-            }
-        }
+        public string ReadRolesExternal => string.Join(",", ReadRolesList);
 
-        public string EditRolesExternal
-        {
-            get
-            {
-                return string.Join(",", EditRolesList);
-            }
-        }
-
+        public string EditRolesExternal => string.Join(",", EditRolesList);
 
 
         public override string ToString()
         {
             string result = "";
-            if (IsRead) { result += $"Read: {ReadRolesExternal} "; }
-            if (IsEdit) { result += $"Edit: {EditRolesExternal} "; }
+            if (IsRead) { result += $"Read: {ReadRoles} "; }
+            if (IsEdit) { result += $"Edit: {EditRoles} "; }
             if (result == "") result = "None";
             return result;
         }

@@ -9,146 +9,105 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
+using IntelliTect.Coalesce.Models;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class MethodViewModel
+    public enum MethodTransportType
     {
-        internal MethodWrapper Wrapper { get; }
+        ItemResult,
+        ListResult,
+    }
 
-        internal MethodViewModel(MethodWrapper wrapper, ClassViewModel parent, int classMethodOrder)
+    public abstract class MethodViewModel : IAttributeProvider
+    {
+        internal MethodViewModel(ClassViewModel parent)
         {
-            Wrapper = wrapper;
             Parent = parent;
-            ClassMethodOrder = classMethodOrder;
         }
+
+        public ClassViewModel Parent { get; }
+
+        public abstract bool IsStatic { get; }
+
+        public abstract string Comment { get; }
+
+        public abstract string Name { get; }
+
+        public abstract TypeViewModel ReturnType { get; }
+
+        public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
         /// <summary>
-        /// Order rank of the method in the model.
+        /// True if the method's return type is explicitly declared 
         /// </summary>
-        public int ClassMethodOrder { get; }
-
-
-
-        public bool IsStatic
-        {
-            get
-            {
-                return Wrapper.IsStatic;
-            }
-        }
-
-        public bool IsIQueryableOfParent
-        {
-            get
-            {
-                return IsStatic && ReturnType.IsA<IQueryable>() && ReturnType.PureType.Name == Parent.Name;
-            }
-        }
-
-        public string JsVariable
-        {
-            get
-            {
-                if (Wrapper.Name == "Validate") return "serverValidate";
-                return Name.ToCamelCase();
-            }
-        }
-        public string JsVariableResult { get { return JsVariable + "Result"; } }
-        public string JsVariableResultRaw { get { return JsVariable + "ResultRaw"; } }
-        public string JsVariableIsLoading { get { return JsVariable + "IsLoading"; } }
-        public string JsVariableMessage { get { return JsVariable + "Message"; } }
-        public string JsVariableWasSuccessful { get { return JsVariable + "WasSuccessful"; } }
-        public string JsVariableUi { get { return JsVariable + "Ui"; } }
-        public string JsVariableModal { get { return JsVariable + "Modal"; } }
-        public string JsVariableArgs { get { return JsVariable + "Args"; } }
-        public string JsVariableWithArgs { get { return JsVariable + "WithArgs"; } }
-
-        public string Comment { get { return Wrapper.Comment; } }
+        public bool ReturnsListResult => ReturnType.IsA(typeof(ListResult<>));
 
         /// <summary>
-        /// Name of the property
+        /// The return type of the essential data returned by the method.
+        /// This discounts any <see cref="ItemResult"/> or <see cref="ListResult{T}"/> that may be wrapped around its return type.
+        /// For <see cref="ListResult{T}"/> returns, this will be <see cref="IList{T}"/>.
+        /// For <see cref="ItemResult{T}"/> returns, this will be T.
+        /// For any plain return type T, this will be T.
         /// </summary>
-        public string Name { get { return Wrapper.Name; } }
-
+        public TypeViewModel ResultType =>
+              ReturnsListResult
+            ? ReturnType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type // Will be a constructed generic IList<T>
+            : ReturnType.IsA(typeof(ItemResult<>))
+            ? ReturnType.PureType
+            : ReturnType.IsA(typeof(ItemResult))
+            ? new ReflectionTypeViewModel(typeof(void))
+            : ReturnType;
 
         /// <summary>
-        /// Name of the class that is used for storing arguments on the client.
+        /// The transport object that is returned by the API controller.
         /// </summary>
-        public string ArgsName { get { return Wrapper.Name + "Args"; } }
-
-
-        /// <summary>
-        /// Name of the type
-        /// </summary>
-        public TypeViewModel ReturnType
-        {
-            get
-            {
-                return new TypeViewModel(Wrapper.ReturnType);
-            }
-        }
+        public MethodTransportType TransportType => ReturnsListResult
+            ? MethodTransportType.ListResult
+            : MethodTransportType.ItemResult;
 
         /// <summary>
-        /// Type of the return. 
+        /// The generic parameter to the <see cref="TransportType"/>. Can possibly be void.
         /// </summary>
-        public string ReturnTypeName
-        {
-            get
-            {
-                return ReturnType.NameWithTypeParams;
-            }
-        }
+        public TypeViewModel TransportTypeGenericParameter => ReturnsListResult
+            ? ResultType.PureType
+            : ResultType;
+
+        /// <summary>
+        /// Returns true if this method is marked as InternalUse. Not exposed through the API
+        /// </summary>
+        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
+        
+        
+        public HttpMethod ApiActionHttpMethod =>
+            this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ?? HttpMethod.Post;
+
+        public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
+        public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
+
+        /// <summary>
+        /// Return type of the controller action for the method.
+        /// </summary>
+        public string ApiActionReturnTypeDeclaration => TransportTypeGenericParameter.IsVoid
+            ? TransportType.ToString()
+            : $"{TransportType}<{TransportTypeGenericParameter.DtoFullyQualifiedName}>";
 
 
         /// <summary>
-        /// Type of the return. Object if void.
+        /// Convenient accessor for the MethodInfo when in reflection-based contexts.
         /// </summary>
-        public string ReturnTypeNameForApi
-        {
-            get
-            {
-                string result = ReturnType.NameWithTypeParams;
-                if (result == "Void") return "object";
-                result = result.Replace("IQueryable", "IEnumerable");
-                result = result.Replace("ICollection", "IEnumerable");
-                if (ReturnType.IsCollection && ReturnType.PureType.HasClassViewModel)
-                {
-                    result = result.Replace($"<{ReturnType.PureType.ClassViewModel.Name}>", $"<{ReturnType.PureType.ClassViewModel.DtoName}>");
-                }
-                else if (!ReturnType.IsCollection && ReturnType.HasClassViewModel)
-                {
-                    result = $"{ReturnType.ClassViewModel.DtoName}";
-                }
-                return result;
-            }
-        }
+        public virtual MethodInfo MethodInfo => throw new InvalidOperationException("MethodInfo not available in the current context");
 
-        /// <summary>
-        /// List of parameters
-        /// </summary>
-        public IEnumerable<ParameterViewModel> Parameters { get { return Wrapper.Parameters; } }
+        public string JsVariable => Name.ToCamelCase();
 
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
         /// </summary>
-        public IEnumerable<ParameterViewModel> ClientParameters { get { return Wrapper.Parameters.Where(f => !f.IsDI); } }
+        public IEnumerable<ParameterViewModel> ClientParameters => Parameters.Where(f => !f.IsDI);
 
-        /// <summary>
-        /// Gets the TypeScript parameters for this method call.
-        /// </summary>
-        public string TsParameters
-        {
-            get
-            {
-                string result = "";
-                result = string.Join(", ", ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name)));
-                if (!string.IsNullOrWhiteSpace(result)) result = result + ", ";
-                result = result + "callback?: any, reload?: boolean";
-                return result;
-            }
-        }
+        public bool IsModelInstanceMethod => !IsStatic && !Parent.IsService;
 
         /// <summary>
         /// Gets the CS parameters for this method call.
@@ -157,106 +116,34 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var parameters = Parameters.Where(f => !f.IsManualDI).ToArray();
-                // When static add an id that specifies the object to work on.
-                string result = "";
-                if (!IsStatic)
+                var parameters = Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
+                var outParameters = new List<string>();
+
+                // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
+                if (IsModelInstanceMethod)
                 {
-                    result = $"{Parent.PrimaryKey.PureType.Name} id";
-                    if (parameters.Any()) result += ", ";
+                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
+                    outParameters.Add($"{Parent.PrimaryKey.PureType.FullyQualifiedName} id");
                 }
-                result += string.Join(", ", parameters.Select(f => f.CsDeclaration));
-                return result;
+                outParameters.AddRange(parameters.Select(f => f.CsDeclaration));
+                return string.Join(", ", outParameters);
             }
         }
 
         /// <summary>
         /// Gets the CS arguments passed to this method call.
         /// </summary>
-        public string CsArguments
-        {
-            get
-            {
-                var result = string.Join(", ", Parameters.Select(f => f.CsArgumentName));
-                return result;
-            }
-        }
+        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgument));
 
-
-        /// <summary>
-        /// Gets the js arguments passed to this method call.
-        /// </summary>
-        public string JsArguments(string obj = "", bool callback = false)
-        {
-            string result;
-            if (obj != "")
-            {
-                result = string.Join(", ", ClientParameters.Select(f => $"{obj}.{f.Name.ToCamelCase()}()"));
-            }
-            else
-            {
-                result = string.Join(", ", ClientParameters.Select(f => obj + f.Name.ToCamelCase()));
-            }
-            if (callback)
-            {
-                if (!string.IsNullOrEmpty(result))
-                {
-                    result = result + ", ";
-                }
-                result = result + "callback";
-            }
-            return result;
-        }
-
-        public string JsPostObject
-        {
-            get
-            {
-                var result = "{" + Environment.NewLine;
-                if (!IsStatic)
-                {
-                    result = result + "                        id: self.myId";
-                    if (Parameters.Any()) result = result + ", " + Environment.NewLine;
-                }
-
-                result += string.Join(", " + Environment.NewLine, ClientParameters.Select(f => $"                        {f.Name}: {f.TsConversion(f.Name)}"));
-                result += Environment.NewLine + "                    }";
-                return result;
-
-            }
-        }
-
-
-        public ClassViewModel Parent { get; }
-
-        /// <summary>
-        /// Gets the name for the API call.
-        /// </summary>
-        public string ApiUrl
-        {
-            get
-            {
-                return $"{Parent.ApiUrl}/{Name}";
-            }
-        }
 
         /// <summary>
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                var displayName = Wrapper.GetAttributeValue<DisplayNameAttribute>(nameof(DisplayNameAttribute.DisplayName)) as string;
-                if (displayName != null) return displayName;
-                displayName = Wrapper.GetAttributeValue<DisplayAttribute>(nameof(DisplayAttribute.Name)) as string;
-                if (displayName != null) return DisplayName;
-                else return Regex.Replace(Name, "[A-Z]", " $0").Trim();
-            }
-        }
-
-
+        public string DisplayName =>
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            Regex.Replace(Name, "[A-Z]", " $0").Trim();
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.
@@ -265,53 +152,33 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public bool IsHidden(HiddenAttribute.Areas area)
         {
-            var hiddenArea = (Nullable<HiddenAttribute.Areas>)Wrapper.GetAttributeValue<DisplayNameAttribute>(nameof(DisplayNameAttribute.DisplayName));
-            if (hiddenArea == null) return false;
+            var hiddenArea = this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area);
+            if (!hiddenArea.HasValue) return false;
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public SecurityInfoMethod SecurityInfo
-        {
-            get
-            {
-                var result = new SecurityInfoMethod();
-
-                if (Wrapper.HasAttribute<ExecuteAttribute>())
-                {
-                    result.IsExecute = true;
-                    var roles = (string)Wrapper.GetAttributeValue<ExecuteAttribute>(nameof(ExecuteAttribute.Roles));
-                    result.ExecuteRoles = roles;
-                }
-
-                return result;
-            }
-        }
+        public ExecuteSecurityInfo SecurityInfo => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
 
         /// <summary>
-        /// Returns true if this method is marked as InternalUse. Not exposed through the API
+        /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsInternalUse
+        public bool IsClientMethod => !IsInternalUse && !SecurityInfo.Execute.NoAccess && 
+            // Services only have instance methods - no static methods.
+            (!Parent.IsService || !IsStatic) && 
+            // Interface services always expose all their declared methods.
+            ((Parent.IsService && Parent.Type.IsInterface) || HasAttribute<CoalesceAttribute>());
+
+        public string LoadFromDataSourceName
         {
             get
             {
-                return Wrapper.HasAttribute<InternalUseAttribute>();
+                var type = this.GetAttributeValue<LoadFromDataSourceAttribute>(a => a.DataSourceType);
+                if (type == null) return Api.DataSources.DataSourceFactory.DefaultSourceName;
+                return type.ClientTypeName;
             }
         }
 
-        /// <summary>
-        /// If true, this is a client side method.
-        /// </summary>
-        public bool IsClientMethod
-        {
-            get
-            {
-                return !IsInternalUse && 
-                    Name != "BeforeSave" && 
-                    Name != "AfterSave" && 
-                    Name != "BeforeDelete" && 
-                    Name != "AfterDelete" &&
-                    Name != "Exclude";
-            }
-        }
+        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

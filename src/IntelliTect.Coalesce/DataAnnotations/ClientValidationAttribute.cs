@@ -28,10 +28,12 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public double Step { get; set; }
         public bool IsEmail { get; set; }
         public bool IsPhoneUs { get; set; }
+
         /// <summary>
         /// This is an unquoted string when converted to JS. Use '' to specify strings.
         /// </summary>
         public string Equal { get; set; }
+
         /// <summary>
         /// This is an unquoted string when converted to JS. Use '' to specify strings.
         /// </summary>
@@ -40,14 +42,17 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public bool IsDateIso { get; set; }
         public bool IsNumber { get; set; }
         public bool IsDigit { get; set; }
+
         /// <summary>
         /// Allows specifying a name used in a custom validation. .extend({ CustomName: CustomValue })
         /// </summary>
         public string CustomName { get; set; }
+
         /// <summary>
         /// Allows specifying a value used in a custom validation. .extend({ CustomName: CustomValue })
         /// </summary>
         public string CustomValue { get; set; }
+
         /// <summary>
         /// Gets or sets an error message to associate with a validation control if validation fails.
         /// </summary>

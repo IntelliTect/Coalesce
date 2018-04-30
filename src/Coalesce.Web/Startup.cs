@@ -11,7 +11,9 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using IntelliTect.Coalesce.Mapping;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using IntelliTect.Coalesce;
+using Coalesce.Domain.Services;
 
 namespace Coalesce.Web
 {
@@ -37,6 +39,15 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddCoalesce(builder => builder
+                .AddContext<AppDbContext>()
+                .UseDefaultDataSource(typeof(MyDataSource<,>))
+                .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+                .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
+            );
+
+            services.AddCors();
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -49,7 +60,14 @@ namespace Coalesce.Web
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
 
-            ReflectionRepository.AddContext<AppDbContext>();
+            services.AddScoped<IWeatherService, WeatherService>();
+
+            services.AddAuthentication(DemoMiddleware.AuthenticationScheme)
+                .AddCookie(DemoMiddleware.AuthenticationScheme, options => {
+                    options.AccessDeniedPath = "/Account/AccessDenied/";
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/LogOff";
+                });
 
             RoleMapping.Add("Admin", "S-1-5-4");  // Interactive user.
             RoleMapping.Add("User", "S-1-1-0");  // Everyone who has logged on.
@@ -62,21 +80,13 @@ namespace Coalesce.Web
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
 
-            // Add the platform handler to the request pipeline.
             app.UseStaticFiles();
 
             app.UseDeveloperExceptionPage();
 
             // *** DEMO ONLY ***
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                AuthenticationScheme = DemoMiddleware.AuthenticationScheme,
-                LoginPath = "/Account/Login/",
-                AccessDeniedPath = "/Account/AccessDenied/",
-                AutomaticAuthenticate = true,
-                AutomaticChallenge = true
-            });
-            app.UseDemoMiddleware();
+            app.UseAuthentication();
+            app.UseMiddleware<DemoMiddleware>();
 
             app.UseMvc(routes =>
             {
@@ -89,15 +99,6 @@ namespace Coalesce.Web
                     template: "{controller}/{action}/{id?}",
                     defaults: new { controller = "Home", action = "Index" });
             });
-
-            var classNameParts = GetType().FullName.Split(new char[] { '.' });
-            var ns = string.Join(".", classNameParts.Take(classNameParts.Length - 1));
-            //foreach (var model in ReflectionRepository.Models.Where(m => m.PrimaryKey != null && m.OnContext))
-            //{
-            //    Mapper.AddMap(model.Type, Type.GetType($"{ns}.Models.{model.Type.Name}DtoGen"));
-            //}
-
-            SampleData.Initialize(app.ApplicationServices.GetService<AppDbContext>());
         }
 
     }

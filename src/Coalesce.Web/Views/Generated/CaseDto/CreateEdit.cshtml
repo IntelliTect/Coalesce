@@ -1,66 +1,66 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
+@using IntelliTect.Coalesce.Knockout.Helpers
+
+<div class="card">
+    <div class="card-heading">
         <div class="btn-group pull-right">
-            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
-            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+            <button onclick="window.history.back()" class="btn btn-xs btn-default"><i class="fa fa-arrow-left"></i> Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i> Refresh</button>
         </div>
-        <h1 class="clearfix" style="display:inline-block;">Case Dto</h1>
+        <h1 class="card-title clearfix" style="display:inline-block;">Case Dto</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div class="form-horizontal">
-            <div class="form-group btn-warning" data-bind="if: errorMessage()">
+            <div class="form-group btn-warning" style="display: none" data-bind="if: errorMessage(), visible: errorMessage()">
                 <label class="col-md-4 control-label">Error</label>
                 <div class="col-md-8">
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Title</label>
-<div class="col-md-8 prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDto>(p => p.Title))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Assigned To Name</label>
-<div class="col-md-8 prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, false))</div>                    </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Title</label>
+                <div class="col-md-8 prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDto>(p => p.Title))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Assigned To Name</label>
+                <div class="col-md-8 prop-assignedToName">@(Knockout.DisplayFor<Coalesce.Domain.CaseDto>(p => p.AssignedToName, false))</div>
+            </div>
         </div>
-    </div>
-    <div class="panel-body">
     </div>
 </div>
 
 
-    @section Scripts
-    {
-    <script>
-        var acaseDto = new ViewModels.CaseDto();
-        acaseDto.includes = "Editor";
 
-        acaseDto.saveCallbacks.push(function(obj){
-            // If there is a new id, set the one for this page
-            if (!intellitect.utilities.GetUrlParameter('id')){
-                if (acaseDto.myId){
-                    var newUrl = intellitect.utilities.SetUrlParameter(window.location.href, "id", acaseDto.myId);
-                    window.history.replaceState(null, window.document.title, newUrl);
-                }
+@section Scripts
+{
+<script>
+    var model = new ViewModels.CaseDto();
+    model.includes = "Editor";
+    model.saveCallbacks.push(function(obj){
+        // If there is a new id, set the one for this page
+        if (!Coalesce.Utilities.GetUrlParameter('id')){
+            if (model.myId) {
+                var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
+                window.history.replaceState(null, window.document.title, newUrl);
             }
-        });
-
-        @if (ViewBag.Id != null)
-                {
-                    @:acaseDto.load('@ViewBag.Id');
-                }
-        @foreach (var kvp in ViewBag.ParentIds)
-                {
-                    @:acaseDto.@(((string)(@kvp.Key)))(@kvp.Value);
-                }
-
-        window.onbeforeunload = function(){
-            if (acaseDto.isDirty()) acaseDto.save();
         }
-
-        acaseDto.isSavingAutomatically = false;
-        acaseDto.loadChildren(function() {
-            ko.applyBindings(acaseDto);
-            acaseDto.isSavingAutomatically = true;
-        });
-    </script>
+    });
+    @if (ViewBag.Id != null)
+    {
+        @:model.load('@ViewBag.Id');
     }
+    @foreach (var kvp in ViewBag.ParentIds)
+    {
+        @:model.@(((string)(@kvp.Key)))(@kvp.Value);
+    }
+
+    window.onbeforeunload = function(){
+        if (model.isDirty()) model.save();
+    }
+    model.coalesceConfig.autoSaveEnabled(false);
+    model.loadChildren(function() {
+        ko.applyBindings(model);
+        model.coalesceConfig.autoSaveEnabled(true);
+    });
+</script>
+}

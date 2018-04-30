@@ -9,131 +9,82 @@ using System.Text.RegularExpressions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Helpers.Search;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class ClassViewModel
+    public abstract class ClassViewModel : IAttributeProvider
     {
-        internal ClassWrapper Wrapper { get; }
-        private string _controllerName;
-        private string _apiName;
-        /// <summary>
-        /// Has a DbSet property in the Context.
-        /// </summary>
-        public bool HasDbSet { get; }
-        // <summary>
-        // If true, this object doesn't exist in the database and is only used in methods.
-        // This will just generate minimal typescript for this object.
-        // </summary>
-        //public bool IsUnMapped { get; }
-        //  TODO: Get base URL
-        protected string baseUrl = "";
+        protected IReadOnlyCollection<PropertyViewModel> _Properties;
+        protected IReadOnlyCollection<MethodViewModel> _Methods;
 
-        protected ICollection<PropertyViewModel> _Properties;
-        protected ICollection<MethodViewModel> _Methods;
+        public abstract string Name { get; }
+        public abstract string Comment { get; }
+        public TypeViewModel Type { get; protected set; }
 
-        public ClassViewModel(TypeViewModel type, string controllerName, string apiName, bool hasDbSet)
-    : this(controllerName, apiName, hasDbSet)
-        {
-            if (type.Wrapper is Wrappers.ReflectionTypeWrapper)
-            {
-                Wrapper = new ReflectionClassWrapper(((ReflectionTypeWrapper)(type.Wrapper)).Info);
-            }
-            else
-            {
-                Wrapper = new SymbolClassWrapper((INamedTypeSymbol)(((SymbolTypeWrapper)(type.Wrapper)).Symbol));
-            }
-        }
-
-        public ClassViewModel(Type type, string controllerName, string apiName, bool hasDbSet)
-            : this(controllerName, apiName, hasDbSet)
-        {
-            Wrapper = new ReflectionClassWrapper(type);
-        }
-
-        public ClassViewModel(ITypeSymbol classSymbol, string controllerName, string apiName, bool hasDbSet) : this(controllerName, apiName, hasDbSet)
-        {
-            Wrapper = new SymbolClassWrapper(classSymbol);
-        }
-
-        private ClassViewModel(string controllerName, string apiName, bool hasDbSet)
-        {
-            if (!string.IsNullOrWhiteSpace(controllerName))
-            {
-                _controllerName = controllerName.Replace("Controller", "");
-            }
-            _apiName = apiName;
-            HasDbSet = hasDbSet;
-
-        }
-
-        public string Name
-        {
-            get { return Wrapper.Name; }
-        }
-
-        public string FullName
-        {
-            get { return Wrapper.Namespace + "." + Wrapper.Name; }
-        }
-
-        public string Comment { get { return Wrapper.Comment; } }
-
-        public string ControllerName
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(_controllerName)) return _controllerName;
-                return Name;
-            }
-        }
-        public string ApiName
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(_apiName)) return _apiName;
-                return Name;
-            }
-        }
-        public string DtoName
-        {
-            get
-            {
-                if (IsDto) return Name;
-                return $"{Name}DtoGen";
-            }
-        }
-
-        public ClassViewModel BaseViewModel
-        {
-            get
-            {
-                if (IsDto) return DtoBaseViewModel;
-                return this;
-            }
-        }
-        /// <summary>
-        /// Returns true if this is a DTO that uses another underlying type specifed in DtoBaseViewModel.
-        /// </summary>
-        public bool IsDto { get { return Wrapper.IsDto; } }
+        public string FullyQualifiedName => Type.FullyQualifiedName;
 
         /// <summary>
-        /// The ClassViewModel this DTO is based on.
+        /// Returns the name of the type to be used by the client, or in other cases
+        /// where the type name should be overridable using the [Coalesce] attribute.
+        /// This includes places where there could be name conflicts that should be resolvable
+        /// by allowing the developer to override the type name for generation.
         /// </summary>
-        public ClassViewModel DtoBaseViewModel { get { return Wrapper.DtoBaseType; } }
+        public string ClientTypeName =>
+            // Check for an override first
+            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ??
+            // If no override, check for an interface service, and trim the conventional 'I' if found.
+            (IsService && Type.IsInterface && Name[0] == 'I' && char.IsUpper(Name[1]) ? Name.Substring(1) : null) ??
+            // Nothing special - just use the name.
+            Name;
 
+        public string ControllerName => ClientTypeName;
+
+        public string ApiControllerClassName
+        {
+            get
+            {
+                var overrideName = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerName);
+                if (!string.IsNullOrWhiteSpace(overrideName)) return overrideName;
+
+                var suffix = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerSuffix) ?? "";
+                return $"{ControllerName}Controller{suffix}";
+            }
+        }
+
+        public string ApiRouteControllerPart => ControllerName;
+
+        public string ViewControllerClassName => $"{ControllerName}Controller";
+
+        public string ApiActionAccessModifier =>
+            this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiActionsProtected) ?? false
+            ? "protected"
+            : "public";
+
+        public string DtoName => IsDto ? FullyQualifiedName : $"{Name}DtoGen";
+
+        public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel : this;
+
+        /// <summary>
+        /// If this class implements IClassDto, return true.
+        /// </summary>
+        public bool IsDto => Type.IsA(typeof(IClassDto<>));
+
+        /// <summary>
+        /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
+        /// </summary>
+        public ClassViewModel DtoBaseViewModel => IsDto
+            ? Type.GenericArgumentsFor(typeof(IClassDto<>)).First().ClassViewModel
+            : null;
 
         /// <summary>
         /// Name of the ViewModelClass
         /// </summary>
-        public string ViewModelClassName
-        {
-            get { return Name; }
-        }
+        public string ViewModelClassName => ClientTypeName;
 
         public string ViewModelGeneratedClassName
         {
@@ -142,7 +93,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (!HasTypeScriptPartial)
                     return ViewModelClassName;
 
-                var name = Wrapper.GetAttributeValue<TypeScriptPartialAttribute>(nameof(TypeScriptPartialAttribute.BaseClassName)) as string;
+                var name = this.GetAttributeValue<TypeScriptPartialAttribute>(a => a.BaseClassName);
 
                 if (string.IsNullOrEmpty(name)) return $"{ViewModelClassName}Partial";
 
@@ -150,150 +101,181 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public string Namespace { get { return Wrapper.Namespace; } }
+        public bool ApiRouted => this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiRouted) ?? true;
 
-        /// <summary>
-        /// Name of an instance of the ViewModelClass
-        /// </summary>
-        public string ViewModelObjectName
-        {
-            get { return ViewModelClassName.ToCamelCase(); }
-        }
         /// <summary>
         /// Name of the List ViewModelClass
         /// </summary>
-        public string ListViewModelClassName
-        {
-            get { return Name + "List"; }
-        }
+        public string ListViewModelClassName => ClientTypeName + "List";
+
+        public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
+
+        public string ServiceClientClassName => ClientTypeName + "Client";
+
         /// <summary>
         /// Name of an instance of the List ViewModelClass
         /// </summary>
-        public string ListViewModelObjectName
-        {
-            get { return ListViewModelClassName.ToCamelCase(); }
-        }
+        public string ListViewModelObjectName => ListViewModelClassName.ToCamelCase();
+
+        #region Member Info - Properties & Methods
+
+        protected abstract IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent);
+        protected abstract IReadOnlyCollection<MethodViewModel> RawMethods { get; }
+        protected abstract IReadOnlyCollection<TypeViewModel> RawNestedTypes { get; }
 
         /// <summary>
-        /// All properties for the object
+        /// All properties for the object.
+        /// This collection is not filtered to only those properties which should be exposed to the client.
         /// </summary>
-        public ICollection<PropertyViewModel> Properties
+        /// <remarks>
+        /// This collection is internal to prevent accidental exposing of properties that should not be exposed.
+        /// </remarks>
+        internal IReadOnlyCollection<PropertyViewModel> Properties
         {
             get
             {
-                if (_Properties == null)
-                {
-                    _Properties = new List<PropertyViewModel>();
-                    int count = 1;
-                    foreach (var pw in Wrapper.Properties)
-                    {
-                        if (_Properties.Any(f => f.Name == pw.Name))
-                        {
-                            // This is a duplicate. Keep the one that isn't virtual
-                            if (!pw.IsVirtual)
-                            {
-                                _Properties.Remove(_Properties.First(f => f.Name == pw.Name));
-                                var prop = new PropertyViewModel(pw, this, count);
-                                _Properties.Add(prop);
-                            }
-                        }
-                        else
-                        {
-                            var prop = new PropertyViewModel(pw, this, count);
-                            _Properties.Add(prop);
-                        }
-                        count++;
-                    }
+                if (_Properties != null) return _Properties;
 
-                }
-                return _Properties;
-            }
-        }
-
-        /// <summary>
-        /// All the methods for the Class
-        /// </summary>
-        public ICollection<MethodViewModel> Methods
-        {
-            get
-            {
-                if (_Methods == null)
+                var properties = new List<PropertyViewModel>();
+                int count = 1;
+                foreach (var prop in RawProperties(this))
                 {
-                    _Methods = new List<MethodViewModel>();
-                    int count = 1;
-                    foreach (var mw in Wrapper.Methods)
+                    if (properties.Any(f => f.Name == prop.Name))
                     {
-                        if (!IsDto || (mw.Name != "Update" && mw.Name != "CreateInstance"))
+                        // This is a duplicate. Keep the one that isn't virtual
+                        if (!prop.IsVirtual)
                         {
-                            _Methods.Add(new MethodViewModel(mw, this, count));
-                            count++;
+                            properties.Remove(properties.First(f => f.Name == prop.Name));
+                            prop.ClassFieldOrder = count;
+                            properties.Add(prop);
                         }
                     }
+                    else
+                    {
+                        prop.ClassFieldOrder = count;
+                        properties.Add(prop);
+                    }
+                    count++;
                 }
 
-                return _Methods;
+                // Don't assign to _Properties until the end in order to avoid threading issues.
+                // If _Properties were mutable, we could potentially have two threads attempting to build the same collection at once.
+                return _Properties = properties.AsReadOnly();
             }
         }
 
+        /// <summary>
+        /// Properties on the class that are permitted to be exposed to the client.
+        /// </summary>
+        public IEnumerable<PropertyViewModel> ClientProperties => Properties.Where(p => p.IsClientProperty);
+
+        public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
+            .Where(p =>
+                !p.IsInternalUse && p.HasSetter && p.HasAttribute<CoalesceAttribute>()
+                // These are the only supported types, for now
+                && (p.Type.IsPrimitive || p.Type.IsDate)
+            );
 
         /// <summary>
-        /// Returns the property ID field.
+        /// List of method names that should not be exposed to the client.
         /// </summary>
-        public PropertyViewModel PrimaryKey
+        private readonly string[] excludedMethodNames = new[] {
+            nameof(object.ToString),
+            nameof(object.Equals),
+            nameof(object.GetHashCode),
+            nameof(object.GetType),
+        };
+
+        /// <summary>
+        /// All the methods for the Class.
+        /// This collection is NOT filtered to only client methods.
+        /// It IS filtered by common methods that 
+        /// </summary>
+        /// <remarks>
+        /// This collection is internal to prevent accidental exposing of methods that should not be exposed.
+        /// </remarks>
+        internal IReadOnlyCollection<MethodViewModel> Methods =>
+            _Methods ?? (_Methods = RawMethods
+                .Where(m => !excludedMethodNames.Contains(m.Name))
+                .Where(m => !IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo)))
+                .ToList().AsReadOnly());
+
+        public IEnumerable<MethodViewModel> ClientMethods =>
+            Methods.Where(m => m.IsClientMethod);
+
+        internal IEnumerable<TypeViewModel> ClientNestedTypes =>
+            RawNestedTypes.Where(t => !t.IsInternalUse);
+
+        public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
+            .DataSources
+            .Where(d => d.DeclaredFor.Equals(this))
+            .Select(d => d.StrategyClass)
+            .OrderBy(d => d.ClientTypeName);
+
+        /// <summary>
+        /// Returns a property matching the name if it exists.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public PropertyViewModel PropertyByName(string key)
         {
-            get { return Properties.FirstOrDefault(f => f.IsPrimaryKey); }
+            if (string.IsNullOrEmpty(key)) return null;
+            return Properties.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
-        /// Use the ListText Attribute first, then Name and then ID.
+        /// Returns a client method matching the name if it exists.
+        /// Non-client-exposed methods will not be returned.
         /// </summary>
-        public PropertyViewModel ListTextProperty
+        /// <param name="name">The name of the method to look for. 
+        /// Coalesce doesn't support exposing method overloads - 
+        /// in the case of overloads, the first matching method will be returned.</param>
+        /// <param name="isStatic">Whether to look for a static or instance method. 
+        /// If null, the first match will be returned.</param>
+        /// <returns></returns>
+        public MethodViewModel MethodByName(string name, bool? isStatic = null)
         {
-            get
-            {
-                if (Properties.Any(f => f.IsListText))
-                {
-                    return Properties.First(f => f.IsListText);
-                }
-                if (Properties.Any(f => f.Name == "Name"))
-                {
-                    return Properties.First(f => f.Name == "Name");
-                }
-                return this.PrimaryKey;
-            }
+            return ClientMethods.FirstOrDefault(f =>
+                string.Equals(f.Name, name, StringComparison.InvariantCultureIgnoreCase)
+                && (isStatic == null || f.IsStatic == isStatic));
         }
 
+        /// <summary>
+        /// Returns a property matching the name if it exists.
+        /// </summary>
+        /// <param name="propertySelector"></param>
+        /// <returns></returns>
+        public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
+        {
+            PropertyInfo propInfo = propertySelector.GetExpressedProperty();
+            if (propInfo == null) throw new ArgumentException("Could not find property");
+            return PropertyByName(propInfo.Name);
+        }
 
-        public string ApiUrl
-        {
-            get { return baseUrl + @"api/" + ApiName; }
-        }
-        public string ViewUrl
-        {
-            get { return baseUrl + ControllerName; }
-        }
+        #endregion
+
+        #region Searching/Sorting
 
         public string DefaultOrderByClause(string prependText = "")
         {
             var defaultOrderBy = DefaultOrderBy.ToList();
-            if (defaultOrderBy.Any())
-            {
-                var orderByClauseList = new List<string>();
-                foreach (var orderInfo in defaultOrderBy)
-                {
-                    if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
-                    {
-                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
-                    }
-                    else
-                    {
-                        orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
-                    }
-                }
-                return string.Join(",", orderByClauseList);
-            }
-            return null;
 
+            if (defaultOrderBy.Count == 0) return null;
+
+            var orderByClauseList = new List<string>();
+            foreach (var orderInfo in defaultOrderBy)
+            {
+                if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
+                {
+                    orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
+                }
+                else
+                {
+                    orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
+                }
+            }
+
+            return string.Join(",", orderByClauseList);
         }
 
         /// <summary>
@@ -312,28 +294,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         result.Add(orderInfo);
                     }
                 }
+
                 // Nothing found, order by ListText and then ID.
-                if (!result.Any())
+                if (result.Count == 0)
                 {
-                    if (PropertyByName("Name") != null && !PropertyByName("Name").HasNotMapped)
+                    var nameProp = PropertyByName("Name");
+                    if (nameProp?.HasNotMapped == false && nameProp.IsClientProperty)
                     {
-                        result.Add(
-                            new OrderByInformation()
-                            {
-                                FieldName = "Name",
-                                OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
-                                FieldOrder = 1
-                            });
+                        result.Add(new OrderByInformation()
+                        {
+                            FieldName = "Name",
+                            OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
+                            FieldOrder = 1
+                        });
                     }
-                    else if (Properties.Any(f => f.IsPrimaryKey))
+                    else if (PrimaryKey != null)
                     {
-                        result.Add(
-                            new OrderByInformation()
-                            {
-                                FieldName = Properties.First(f => f.IsPrimaryKey).Name,
-                                OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
-                                FieldOrder = 1
-                            });
+                        result.Add(new OrderByInformation()
+                        {
+                            FieldName = PrimaryKey.Name,
+                            OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
+                            FieldOrder = 1
+                        });
                     }
                 }
                 return result.OrderBy(f => f.FieldOrder);
@@ -346,314 +328,112 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public Dictionary<string, PropertyViewModel> SearchProperties(int depth = 0)
+        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel rootModel = null, int depth = 0, int maxDepth = 2)
         {
             // Only go down three levels.
-            if (depth == 3) return new Dictionary<string, PropertyViewModel>();
+            if (depth == 3) yield break;
 
-            var searchProperties = Properties.Where(f => f.IsSearch).ToList();
-            var result = new Dictionary<string, PropertyViewModel>();
-            if (searchProperties.Any())
+            var searchProperties = Properties.Where(f => f.IsSearchable(rootModel)).ToList();
+            if (searchProperties.Count > 0)
             {
                 // Process these items to make sure we have things we can search on.
-                foreach (var prop in searchProperties)
+                foreach (var property in searchProperties)
                 {
                     // Get all the child items
-                    foreach (var kvp in prop.SearchTerms(depth))
+                    foreach (var searchProperty in property.SearchProperties(rootModel, depth, maxDepth))
                     {
-                        result.Add(kvp.Key, kvp.Value);
+                        yield return searchProperty;
                     }
                 }
+                yield break;
             }
-            else
+
+            yield return new[]
             {
-                var prop = Properties.FirstOrDefault(
-                    f => string.Compare(f.Name, "Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
-                if (prop != null)
-                {
-                    result.Add(prop.Name, prop);
-                }
+                PropertyByName("Name"),
+                Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
+                PrimaryKey
             }
-            if (!result.Any())
-            {
-                var prop = Properties.FirstOrDefault(
-                    f => string.Compare(f.Name, $"{f.Parent.Name}Name", StringComparison.InvariantCultureIgnoreCase) == 0 && !f.HasNotMapped);
-                if (prop != null)
-                {
-                    result.Add(prop.Name, prop);
-                }
-            }
-            if (!result.Any())
-            {
-                var prop = Properties.FirstOrDefault(f => f.IsPrimaryKey);
-                if (prop != null)
-                {
-                    result.Add(prop.Name, prop);
-                }
-            }
-            return result;
+            .Where(p => p.IsClientProperty && p?.HasNotMapped == false)
+            .Select(p => new SearchableValueProperty(p))
+            .FirstOrDefault();
         }
+
+        #endregion
 
         /// <summary>
-        /// Returns a property matching the name if it exists.
+        /// Returns the property ID field.
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public PropertyViewModel PropertyByName(string key)
-        {
-            return Properties.FirstOrDefault(f => string.Compare(f.Name, key, StringComparison.InvariantCultureIgnoreCase) == 0);
-        }
+        public PropertyViewModel PrimaryKey => Properties.FirstOrDefault(f => f.IsPrimaryKey);
 
         /// <summary>
-        /// Returns a method matching the name if it exists.
+        /// Use the ListText Attribute first, then Name and then ID.
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public MethodViewModel MethodByName(string key)
-        {
-            return Methods.FirstOrDefault(f => string.Compare(f.Name, key, StringComparison.InvariantCultureIgnoreCase) == 0);
-        }
+        public PropertyViewModel ListTextProperty =>
+            ClientProperties.FirstOrDefault(f => f.IsListText) ??
+            ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
+            PrimaryKey;
 
-        /// <summary>
-        /// Returns a property matching the name if it exists.
-        /// </summary>
-        /// <param name="propertySelector"></param>
-        /// <returns></returns>
-        public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
-        {
-            PropertyInfo propInfo = GetPropertyInfo<T, TProperty>(propertySelector);
-            if (propInfo == null) throw new ArgumentException("Could not find property");
-            return PropertyByName(propInfo.Name);
-        }
-
-
-        // http://stackoverflow.com/questions/671968/retrieving-property-name-from-lambda-expression
-        private PropertyInfo GetPropertyInfo<TSource, TProperty>(Expression<Func<TSource, TProperty>> propertyLambda)
-        {
-            Type type = typeof(TSource);
-            MemberExpression member;
-
-            // Check to see if the node type is a Convert type (this is the case with enums)
-            if (propertyLambda.Body.NodeType == ExpressionType.Convert)
-            {
-                member = ((UnaryExpression)propertyLambda.Body).Operand as MemberExpression;
-            }
-            else
-            {
-                member = propertyLambda.Body as MemberExpression;
-            }
-            if (member == null)
-            {
-                // Handle the case of a nullable.
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a method, not a property.",
-                    propertyLambda.ToString()));
-            }
-
-            PropertyInfo propInfo = member.Member as PropertyInfo;
-            if (propInfo == null)
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, not a property.",
-                    propertyLambda.ToString()));
-
-            if (type != propInfo.ReflectedType &&
-                !type.IsSubclassOf(propInfo.ReflectedType))
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a property that is not from type {1}.",
-                    propertyLambda.ToString(),
-                    type));
-
-            return propInfo;
-        }
-
-        /// <summary>
-        /// Returns true if this is a complex type.
-        /// </summary>
-        public bool IsOneToOne
-        {
-            get
-            {
-                if (PrimaryKey == null) return false;
-                return PrimaryKey.IsForeignKey;
-            }
-        }
-
-        /// <summary>
-        /// Returns true if this is a complex type.
-        /// </summary>
-        public bool IsComplexType
-        {
-            get
-            {
-                return HasAttribute<ComplexTypeAttribute>();
-            }
-        }
+        public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
         /// <summary>
         /// Returns true if this class has a partial typescript file.
         /// </summary>
         public bool HasTypeScriptPartial => HasAttribute<TypeScriptPartialAttribute>();
 
+        public bool WillCreateViewController =>
+            this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateView) ?? true;
+
+        public bool WillCreateApiController =>
+            this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateApi) ?? true;
 
         /// <summary>
-        /// Returns true if the attribute exists.
+        /// Returns a human-readable string that represents the name of this type to the client.
         /// </summary>
-        /// <typeparam name="TAttribute"></typeparam>
-        /// <returns></returns>
-        public bool HasAttribute<TAttribute>() where TAttribute : Attribute
-        {
-            return Wrapper.HasAttribute<TAttribute>();
-        }
+        public string DisplayName => ClientTypeName.ToProperCase();
 
-        public bool WillCreateViewController
-        {
-            get
-            {
-                var value = (Nullable<bool>)Wrapper.GetAttributeValue<CreateControllerAttribute>(nameof(CreateControllerAttribute.WillCreateView));
-                return value == null || value.Value;
-            }
-        }
-        public bool WillCreateApiController
-        {
-            get
-            {
-                var value = (Nullable<bool>)Wrapper.GetAttributeValue<CreateControllerAttribute>(nameof(CreateControllerAttribute.WillCreateApi));
-                return value == null || value.Value;
-            }
-        }
+        public bool IsDbMappedType => HasDbSet || (DtoBaseViewModel?.HasDbSet ?? false);
 
         /// <summary>
-        /// Returns the DisplayName Attribute or 
-        /// puts a space before every upper class letter aside from the first one.
+        /// Has a DbSet property in the Context.
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                return Regex.Replace(Name, "[A-Z]", " $0").Trim();
-            }
-        }
+        public bool HasDbSet { get; internal set; }
 
-        public bool HasViewModel
-        {
-            get
-            {
-                if (Name == "IdentityRole") return false;
-                return true;
-            }
-        }
+        private ClassSecurityInfo _securityInfo;
 
-        public override string ToString()
-        {
-            return $"{Name} : {Wrapper}";
-        }
+        public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
+            this.GetSecurityPermission<ReadAttribute>(),
+            this.GetSecurityPermission<EditAttribute>(),
+            this.GetSecurityPermission<DeleteAttribute>(),
+            this.GetSecurityPermission<CreateAttribute>()
+        ));
 
-        public string TableName
-        {
-            get
-            {
-                string tableName = (string)Wrapper.GetAttributeValue<TableAttribute>(nameof(TableAttribute.Name)) ?? ContextPropertyName;
+        public ExecuteSecurityInfo ExecuteSecurity => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
 
-                if (tableName != null)
-                    return "dbo." + tableName;
+        public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
 
-                return "dbo." + Name;
-            }
-        }
+        public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
+            Type.GetAttributeValue<TAttribute>(valueName);
 
-        public string ContextPropertyName { get; set; }
-        public bool OnContext { get; set; }
+        public bool HasAttribute<TAttribute>() where TAttribute : Attribute =>
+            Type.HasAttribute<TAttribute>();
 
-        private SecurityInfoClass _securityInfo;
-        public SecurityInfoClass SecurityInfo
-        {
-            get
-            {
-                if (_securityInfo == null)
-                {
-                    _securityInfo = new SecurityInfoClass(
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<ReadAttribute>()),
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<EditAttribute>()),
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<DeleteAttribute>()),
-                        new SecurityInfoPermission(Wrapper.GetSecurityAttribute<CreateAttribute>())
-                    );
+        protected SecurityPermission GetSecurityAttribute<TAttribute>()
+            where TAttribute : SecurityAttribute =>
+            !HasAttribute<TAttribute>()
+            ? new SecurityPermission()
+            : new SecurityPermission(
+                level: this.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized,
+                roles: this.GetAttributeValue<TAttribute>(a => a.Roles),
+                name: typeof(TAttribute).Name.Replace("Attribute", string.Empty)
+            );
 
-                    //if (HasAttribute<ReadAttribute>())
-                    //{
-                    //    _securityInfo.IsRead = true;
-                    //    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.AllowAnonymous));
-                    //    if (allowAnonmous.HasValue) _securityInfo.AllowAnonymousRead = allowAnonmous.Value;
-                    //    var roles = (string)Wrapper.GetAttributeValue<ReadAttribute>(nameof(ReadAttribute.Roles));
-                    //    _securityInfo.ReadRoles = roles;
-                    //}
+        public override string ToString() => FullyQualifiedName;
 
-                    //if (HasAttribute<EditAttribute>())
-                    //{
-                    //    _securityInfo.IsEdit = true;
-                    //    var allowAnonmous = (bool?)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.AllowAnonymous));
-                    //    if (allowAnonmous.HasValue) _securityInfo.AllowAnonymousEdit = allowAnonmous.Value;
-                    //    var roles = (string)Wrapper.GetAttributeValue<EditAttribute>(nameof(EditAttribute.Roles));
-                    //    _securityInfo.EditRoles = roles;
-                    //}
-                }
+        public override bool Equals(object obj) =>
+            Object.ReferenceEquals(this, obj)
+            || (obj is ClassViewModel that && this.Type.Equals(that.Type));
 
-                return _securityInfo;
-            }
-        }
-
-        /// <summary>
-        /// Returns true if any of the properties allow for a save when there is a validation issue. (warnings)
-        /// </summary>
-        public bool ClientValidationAllowSave
-        {
-            get
-            {
-                return Properties.Any(f => f.ClientValidationAllowSave);
-            }
-        }
-
-        public string DtoIncludesAsCS()
-        {
-            var includeList = Properties
-                                .Where(p => p.HasDtoIncludes)
-                                .SelectMany(p => p.DtoIncludes)
-                                .Distinct()
-                                .Select(include => $"bool include{include} = includes == \"{include}\";")
-                                .ToList();
-
-            return string.Join($"{Environment.NewLine}\t\t\t", includeList);
-        }
-
-        public string DtoExcludesAsCS()
-        {
-            var excludeList = Properties
-                                .Where(p => p.HasDtoExcludes)
-                                .SelectMany(p => p.DtoExcludes)
-                                .Distinct()
-                                .Select(exclude => $"bool exclude{exclude} = includes == \"{exclude}\";")
-                                .ToList();
-            return string.Join($"{Environment.NewLine}\t\t\t", excludeList);
-        }
-
-        public string PropertyRolesAsCS()
-        {
-            var allPropertyRoles = Properties.Aggregate(new List<string>(), (p, c) => p.Union(c.SecurityInfo.EditRolesList.Union(c.SecurityInfo.ReadRolesList)).ToList());
-
-            var output = allPropertyRoles.Select(role => $"bool is{role} = false;").ToList();
-            output.Add("if (user != null)");
-            output.Add("{");
-            output.AddRange(allPropertyRoles.Select(role => $"\tis{role} = user.IsInRole(\"{role}\");"));
-            output.Add("}");
-
-            return string.Join($"{Environment.NewLine}\t\t\t", output);
-        }
-
-        public Type Type
-        {
-            get
-            {
-                return Wrapper.Info;
-            }
-        }
+        public override int GetHashCode() => this.Type.GetHashCode();
     }
 }

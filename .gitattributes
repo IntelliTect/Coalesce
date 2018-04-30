@@ -1,0 +1,6 @@
+
+*.g.cs linguist-generated=true
+*.g.ts linguist-generated=true
+*.generated.d.ts linguist-generated=true
+src/Coalesce.Web/Scripts/Coalesce/* linguist-generated=true
+src/Coalesce.Web/Views/Generated/* linguist-generated=true

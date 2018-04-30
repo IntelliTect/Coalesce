@@ -14,9 +14,9 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelView()
         {
-            ReflectionRepository.AddContext<AppDbContext>();
+            ReflectionRepository.Global.AddAssembly<AppDbContext>();
 
-            var person = ReflectionRepository.GetClassViewModel<Person>();
+            var person = ReflectionRepository.Global.GetClassViewModel<Person>();
 
             Assert.NotNull(person);
 
@@ -38,10 +38,10 @@ namespace Coalesce.Web.Tests
         [Fact]
         public void ModelViewAttributes()
         {
-            ReflectionRepository.AddContext<AppDbContext>();
+            ReflectionRepository.Global.AddAssembly<AppDbContext>();
 
-            var caseProduct = ReflectionRepository.GetClassViewModel<CaseProduct>();
-            var person = ReflectionRepository.GetClassViewModel<Person>();
+            var caseProduct = ReflectionRepository.Global.GetClassViewModel<CaseProduct>();
+            var person = ReflectionRepository.Global.GetClassViewModel<Person>();
 
             Assert.NotNull(caseProduct);
 

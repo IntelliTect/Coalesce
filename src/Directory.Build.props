@@ -1,0 +1,32 @@
+<Project>
+  <PropertyGroup>
+    <Company>IntelliTect</Company>
+    <Authors>IntelliTect</Authors>
+    <Product>Coalesce Web Framework</Product>
+    <Copyright>Copyright IntelliTect © 2017, All Rights Reserved.</Copyright>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    
+    <!-- CS1591: Missing XML comment for publicly visible type or member -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Version Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</Version>
+    <PackageVersion Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</PackageVersion>
+
+    <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageTags>IntelliTect Coalesce MVC API Web Framework Generation Generator</PackageTags>
+
+    <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <LangVersion>7.1</LangVersion>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(IsPackable) == 'true'">
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.7.4" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

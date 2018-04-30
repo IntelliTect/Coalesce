@@ -1,76 +1,99 @@
 ﻿using Coalesce.Domain.External;
-using IntelliTect.Coalesce.Data;
+using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Coalesce.Domain
 {
     [Table("Case")]
     [Create(PermissionLevel = SecurityPermissionLevels.AllowAll)]
-    public class Case : IIncludable<Case>, IIncludeExternal<Case>
+    public class Case
     {
         public enum Statuses
         {
             Open,
+
             [Display(Name = "In Progress")]
             InProgress,
+
             Resolved,
+
             [Display(Name = "Closed, No Solution")]
             ClosedNoSolution,
+
             Cancelled
         }
+
         /// <summary>
         /// The Primary key for the Case object
         /// </summary>
         [Key]
         public int CaseKey { get; set; }
+
+        [ListText]
         [ClientValidation(IsRequired = true, ErrorMessage = "You must enter a title for the case.")]
         [Search(IsSplitOnSpaces = true, SearchMethod = SearchAttribute.SearchMethods.Contains)]
         public string Title { get; set; }
+
         [Search]
         public string Description { get; set; }
+
         [DateType()]
         public DateTimeOffset OpenedAt { get; set; }
 
         public int? AssignedToId { get; set; }
+
         [ForeignKey("AssignedToId")]
         [DtoExcludes("PersonListGen")]
         public Person AssignedTo { get; set; }
 
         public int? ReportedById { get; set; }
+
         [ForeignKey("ReportedById")]
         [DtoExcludes("PersonListGen")]
         [Display(Name = "Reported By")]
         public Person ReportedBy { get; set; }
 
-        [FileDownload]
         public byte[] Attachment { get; set; }
 
-        [ListGroup("Severity")]
         public string Severity { get; set; }
+
         public Statuses Status { get; set; }
+
         [ManyToMany("Products")]
         [Search]
         public ICollection<CaseProduct> CaseProducts { get; set; }
 
-
         public int? DevTeamAssignedId { get; set; }
-        //[NotMapped]
-        [ForeignKey("DevTeamAssignedId")]
+
+        [NotMapped]
+        // [ForeignKey("DevTeamAssignedId")]
         public DevTeam DevTeamAssigned { get; set; }
 
+        // EF does support TimeSpans. Some of our projects also do.
+        public TimeSpan Duration { get; set; }
 
+
+        // Arbitrary endpoint to "test" method collection return types.
+        [Coalesce]
+        public static ICollection<Case> GetSomeCases(AppDbContext db) => db.Cases.Take(10).ToList();
+
+        [Coalesce]
         public static int GetAllOpenCasesCount(AppDbContext db)
         {
             return db.Cases.Count(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress);
         }
 
+        [Coalesce]
         public static void RandomizeDatesAndStatus(AppDbContext db)
         {
             Random random = new Random();
@@ -83,28 +106,23 @@ namespace Coalesce.Domain
             db.SaveChanges();
         }
 
-        public static IQueryable<Case> GetAllOpenCases(AppDbContext db)
+        public class AllOpenCases : StandardDataSource<Case, AppDbContext>
         {
-            return db.Cases.Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress).Include(c => c.AssignedTo).Include(c => c.ReportedBy);
-        }
+            public AllOpenCases(CrudContext<AppDbContext> context) : base(context) { }
 
-        public IQueryable<Case> Include(IQueryable<Case> entities, string include = null)
-        {
-            return entities.Include(c => c.ReportedBy)
-                .Include(c => c.AssignedTo)
-                .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product);
-            //return entities.Include(c => c.CaseProducts);
-        }
+            [Coalesce]
+            public DateTimeOffset? MinDate { get; set; }
 
-        public IEnumerable<Case> IncludeExternal(IEnumerable<Case> entities, string include = null)
-        {
-            return entities.IncludeExternal(f => f.DevTeamAssigned);
+            public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases
+                .Where(c => c.Status == Statuses.Open || c.Status == Statuses.InProgress)
+                .Where(c => MinDate == null || c.OpenedAt > MinDate)
+                .IncludeChildren();
         }
 
         /// <summary>
         /// Returns a list of summary information about Cases
         /// </summary>
-        /// <returns></returns>
+        [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {
             return CaseSummary.GetCaseSummary(db);

@@ -16,6 +16,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             Ascending = 0,
             Descending = 1
         }
+
         public OrderByDirections OrderByDirection { get; set; }
         public int FieldOrder { get; set; }
 

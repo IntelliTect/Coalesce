@@ -1,159 +1,301 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
+@using IntelliTect.Coalesce.Knockout.Helpers
+
+<div class="card">
+    <div class="card-heading">
         <div class="btn-group pull-right">
-            <button onclick="window.history.back()" class="btn btn-sm btn-default">Back</button>
-            <button data-bind="click:function() { load(); }" class="btn btn-sm btn-default">Refresh</button>
+            <button onclick="window.history.back()" class="btn btn-xs btn-default"><i class="fa fa-arrow-left"></i> Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i> Refresh</button>
         </div>
-        <h1 class="clearfix" style="display:inline-block;">Person</h1>
+        <h1 class="card-title clearfix" style="display:inline-block;">Person</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div class="form-horizontal">
-            <div class="form-group btn-warning" data-bind="if: errorMessage()">
+            <div class="form-group btn-warning" style="display: none" data-bind="if: errorMessage(), visible: errorMessage()">
                 <label class="col-md-4 control-label">Error</label>
                 <div class="col-md-8">
                     <div class="form-control-static" data-bind="text: errorMessage"></div>
                 </div>
             </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Title</label>
-<div class="col-md-8 prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">First Name</label>
-<div class="col-md-8 prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Last Name</label>
-<div class="col-md-8 prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Email</label>
-<div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Gender</label>
-<div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Cases Assigned</label>
-<div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: CasesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Cases Reported</label>
-<div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: CasesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Birth Date</label>
-<div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Name</label>
-<div class="col-md-8 prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))</div>                    </div>
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Company</label>
-<div class="col-md-7 prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>                            <div class="col-md-1" data-bind="with: company">
-                                <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
-                            </div>
-                    </div>
-        </div>
-    </div>
-    <div class="panel-body">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Actions</h4>
-                </div>
-                <table class="table">
-                    <tr>
-                        <th style="width:20%;">Action</th>
-                        <th style="width:50%;">Result</th>
-                        <th style="width:20%;">Successful</th>
-                        <th style="width:10%;"></th>
-                    </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: renameModal">Rename</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: renameResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: renameWasSuccessful"></span>
-                                <span class="" data-bind="text: renameMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: renameIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button class="btn btn-default btn-xs" data-bind="click: changeSpacesToDashesInNameModal">Change Spaces To Dashes In Name</button>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: changeSpacesToDashesInNameResult"></span>
-                            </td>
-                            <td>
-                                <span class="" data-bind="text: changeSpacesToDashesInNameWasSuccessful"></span>
-                                <span class="" data-bind="text: changeSpacesToDashesInNameMessage"></span>
-                            </td>
-                            <td>
-                                <span class="label label-info" data-bind="fadeVisible: changeSpacesToDashesInNameIsLoading()">Loading</span>
-                            </td>
-                        </tr>
-                </table>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Title</label>
+                <div class="col-md-8 prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</div>
             </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">First Name</label>
+                <div class="col-md-8 prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Last Name</label>
+                <div class="col-md-8 prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Email</label>
+                <div class="col-md-8 prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Gender</label>
+                <div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Cases Assigned</label>
+                <div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Cases Reported</label>
+                <div class="col-md-8 prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Birth Date</label>
+                <div class="col-md-8 prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Name</label>
+                <div class="col-md-8 prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, false))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Company</label>
+                <div class="col-md-7 prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</div>
+                <div class="col-md-1" data-bind="with: company">
+                    <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-    <!-- Modal for method: Rename -->
-    <div id='method-Rename' class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Rename</h4>
-                </div>
-                <div class="modal-body form-horizontal">
-                        <div class="form-group">
-                            <label class="col-md-4 control-label">Addition</label>
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" data-bind="value: renameArgs.addition">
-                            </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-ok">OK</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+<div class="card">
+    <div class="card-heading">
+        <h3 class="card-title">Actions</h3>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Action</th>
+                    <th style="width: 50%;">Result</th>
+                    <th style="width: 20%;">Successful</th>
+                    <th style="width: 10%;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-bind="with: rename">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-Rename').modal() }">
+                            Rename
+                        </button>
+                    </td>
+                    <td>
+                        <dl class="dl-horizontal" data-bind="with: result">
+                            <dt>Title</dt>
+                            <dd data-bind="text: title"></dd>
+                            <dt>First Name</dt>
+                            <dd data-bind="text: firstName"></dd>
+                            <dt>Last Name</dt>
+                            <dd data-bind="text: lastName"></dd>
+                            <dt>Email</dt>
+                            <dd data-bind="text: email"></dd>
+                            <dt>Gender</dt>
+                            <dd data-bind="text: gender"></dd>
+                            <dt>Cases Assigned</dt>
+                            <dd data-bind="text: casesAssigned"></dd>
+                            <dt>Cases Reported</dt>
+                            <dd data-bind="text: casesReported"></dd>
+                            <dt>Birth Date</dt>
+                            <dd data-bind="text: birthDate"></dd>
+                            <dt>Name</dt>
+                            <dd data-bind="text: name"></dd>
+                            <dt>Company</dt>
+                            <dd data-bind="text: company"></dd>
+                        </dl>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: changeSpacesToDashesInName">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Change Spaces To Dashes In Name
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: fullNameAndAge">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Full Name And Age
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: obfuscateEmail">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Obfuscate Email
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: changeFirstName">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-ChangeFirstName').modal() }">
+                            Change First Name
+                        </button>
+                    </td>
+                    <td>
+                        <dl class="dl-horizontal" data-bind="with: result">
+                            <dt>Title</dt>
+                            <dd data-bind="text: title"></dd>
+                            <dt>First Name</dt>
+                            <dd data-bind="text: firstName"></dd>
+                            <dt>Last Name</dt>
+                            <dd data-bind="text: lastName"></dd>
+                            <dt>Email</dt>
+                            <dd data-bind="text: email"></dd>
+                            <dt>Gender</dt>
+                            <dd data-bind="text: gender"></dd>
+                            <dt>Cases Assigned</dt>
+                            <dd data-bind="text: casesAssigned"></dd>
+                            <dt>Cases Reported</dt>
+                            <dd data-bind="text: casesReported"></dd>
+                            <dt>Birth Date</dt>
+                            <dd data-bind="text: birthDate"></dd>
+                            <dt>Name</dt>
+                            <dd data-bind="text: name"></dd>
+                            <dt>Company</dt>
+                            <dd data-bind="text: company"></dd>
+                        </dl>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    @section Scripts
-    {
-    <script>
-        var aperson = new ViewModels.Person();
-        aperson.includes = "Editor";
+<!-- Modal for method: Rename -->
+<div class="modal fade" id="method-Rename" tabindex="-1" role="dialog" data-bind="with: rename">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Rename</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: args">
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Name</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: name'>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        aperson.saveCallbacks.push(function(obj){
-            // If there is a new id, set the one for this page
-            if (!intellitect.utilities.GetUrlParameter('id')){
-                if (aperson.myId){
-                    var newUrl = intellitect.utilities.SetUrlParameter(window.location.href, "id", aperson.myId);
-                    window.history.replaceState(null, window.document.title, newUrl);
-                }
+<!-- Modal for method: ChangeFirstName -->
+<div class="modal fade" id="method-ChangeFirstName" tabindex="-1" role="dialog" data-bind="with: changeFirstName">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Change First Name</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: args">
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>First Name</label>
+                    <div class="col-md-8">
+                        <input type='text' class='form-control' data-bind='value: firstName'>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+<script>
+    var model = new ViewModels.Person();
+    model.includes = "Editor";
+    model.saveCallbacks.push(function(obj){
+        // If there is a new id, set the one for this page
+        if (!Coalesce.Utilities.GetUrlParameter('id')){
+            if (model.myId) {
+                var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
+                window.history.replaceState(null, window.document.title, newUrl);
             }
-        });
-
-        @if (ViewBag.Id != null)
-                {
-                    @:aperson.load('@ViewBag.Id');
-                }
-        @foreach (var kvp in ViewBag.ParentIds)
-                {
-                    @:aperson.@(((string)(@kvp.Key)))(@kvp.Value);
-                }
-
-        window.onbeforeunload = function(){
-            if (aperson.isDirty()) aperson.save();
         }
-
-        aperson.isSavingAutomatically = false;
-        aperson.loadChildren(function() {
-            ko.applyBindings(aperson);
-            aperson.isSavingAutomatically = true;
-        });
-    </script>
+    });
+    @if (ViewBag.Id != null)
+    {
+        @:model.load('@ViewBag.Id');
     }
+    @foreach (var kvp in ViewBag.ParentIds)
+    {
+        @:model.@(((string)(@kvp.Key)))(@kvp.Value);
+    }
+
+    window.onbeforeunload = function(){
+        if (model.isDirty()) model.save();
+    }
+    model.coalesceConfig.autoSaveEnabled(false);
+    model.loadChildren(function() {
+        ko.applyBindings(model);
+        model.coalesceConfig.autoSaveEnabled(true);
+    });
+</script>
+}

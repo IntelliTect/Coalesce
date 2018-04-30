@@ -1,24 +1,33 @@
 ﻿using System.Security.Claims;
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Collections.Concurrent;
-using IntelliTect.Coalesce.Interfaces;
-using IntelliTect.Coalesce.Helpers.IncludeTree;
 
 namespace IntelliTect.Coalesce.Mapping
 {
-    public static class Mapper<T, TDto> where TDto : IClassDto<T, TDto>, new()
+    public static class Mapper
     {
-        public static TDto ObjToDtoMapper(T obj, ClaimsPrincipal user, string includes, IncludeTree tree = null)
+        public static TDto MapToDto<T, TDto>(this T obj, IMappingContext context, IncludeTree tree = null)
+             where TDto : IClassDto<T>, new()
         {
-            var creator = new TDto();
-            var dto = creator.CreateInstance(obj, user, includes, null, tree);
-            
+            if (obj == null) return default;
+
+            // See if the object is already created, but only if we aren't restricting by an includes tree.
+            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
+            if (tree == null && context.TryGetMapping(obj, out TDto existing)) return existing;
+
+            var dto = new TDto();
+            if (tree == null) context.AddMapping(obj, dto);
+
+            dto.MapFrom(obj, context, tree);
+
             return dto;
         }
 
-        public static void DtoToObjMapper(TDto dto, T entity, ClaimsPrincipal user, string includes)
+        public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)
+             where TDto : IClassDto<T>, new()
         {
-            dto.Update(entity, user, includes);
+            dto.MapTo(entity, context);
+            return entity;
         }
     }
 }

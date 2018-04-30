@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -65,7 +65,7 @@ namespace Coalesce.Web
                 };
 
             var identity = new ClaimsIdentity(claims, "AutoSignIn");
-            await context.Authentication.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
+            await context.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
         }
     }
 }

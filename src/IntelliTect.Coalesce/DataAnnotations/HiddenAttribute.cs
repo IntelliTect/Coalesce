@@ -17,6 +17,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             List = 1,
             Edit = 2
         }
+
         public Areas Area { get; set; }
 
         public HiddenAttribute(Areas area = Areas.All)

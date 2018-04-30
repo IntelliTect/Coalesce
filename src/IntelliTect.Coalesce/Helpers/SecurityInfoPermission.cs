@@ -1,5 +1,4 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.TypeDefinition.Wrappers;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -8,75 +7,53 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.Helpers
 {
-    public class SecurityInfoPermission
+    public class SecurityPermission
     {
-        private AttributeData _attributeData;
-        private SecurityAttribute _attribute;
 
-        private List<string> _roleList = null;
-
-        public SecurityInfoPermission(AttributeWrapper attribute)
+        public SecurityPermission()
         {
-            _attributeData = attribute.AttributeData;
-            _attribute = attribute.Attribute;
-            if (_attributeData != null)
-            {
-                HasAttribute = true;
-                PermissionLevel = (SecurityPermissionLevels)_attributeData.GetPropertyValue("PermissionLevel", SecurityPermissionLevels.AllowAuthorized);
-                Roles = PermissionLevel != SecurityPermissionLevels.DenyAll ? (string)_attributeData.GetPropertyValue("Roles", string.Empty) : string.Empty;
-                Name = _attributeData.AttributeClass.Name.Replace("Attribute", string.Empty);
-            }
-            else if (_attribute != null)
-            {
-                HasAttribute = true;
-                PermissionLevel = _attribute.PermissionLevel;                
-                Roles = PermissionLevel != SecurityPermissionLevels.DenyAll ? _attribute.Roles : string.Empty;
-                Name = _attribute.GetType().Name.Replace("Attribute", string.Empty);
-            }
+            HasAttribute = false;
         }
 
-        public bool HasAttribute { get; private set; } = false;
-        public SecurityPermissionLevels PermissionLevel { get; private set; } = SecurityPermissionLevels.AllowAuthorized;
-        public string Roles { get; private set; } = "";
-        public string Name { get; private set; } = "";
+        public SecurityPermission(SecurityPermissionLevels level, string roles, string name)
+        {
+            HasAttribute = true;
+            PermissionLevel = level;
+            Roles = PermissionLevel != SecurityPermissionLevels.DenyAll ? roles : string.Empty;
+            Name = name;
+        }
+
+        public bool HasAttribute { get; } = false;
+        public SecurityPermissionLevels PermissionLevel { get; } = SecurityPermissionLevels.AllowAuthorized;
+        public string Roles { get; } = "";
+        public string Name { get; } = "";
                 
 
-        public bool AllowAnonymous { get { return PermissionLevel == SecurityPermissionLevels.AllowAll; } }
-        public bool NoAccess { get { return PermissionLevel == SecurityPermissionLevels.DenyAll; } }
+        public bool AllowAnonymous => PermissionLevel == SecurityPermissionLevels.AllowAll;
+        public bool NoAccess => PermissionLevel == SecurityPermissionLevels.DenyAll;
+        public bool HasRoles => RoleList.Any();
 
-        public bool HasRoles { get { return RoleList.Count() > 0; } }
+        private IReadOnlyList<string> _roleList = null;
 
-        public List<string> RoleList
+        public IReadOnlyList<string> RoleList
         {
             get
             {
-                if (_roleList == null)
+                if (_roleList != null) return _roleList;
+
+                var list = new List<string>();
+                if (!string.IsNullOrEmpty(Roles))
                 {
-                    _roleList = new List<string>();
-                    if (!string.IsNullOrEmpty(Roles))
-                    {
-                        var roles = Roles.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        _roleList.AddUnique(roles.SelectMany(role => RoleMapping.Map(role)));
-                        _roleList.AddUnique(roles);
-                    }
+                    var roles = Roles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    list.AddRange(roles.SelectMany(RoleMapping.Map).Union(roles).Distinct());
                 }
-                return _roleList;
+                return _roleList = list.AsReadOnly();
             }
         }
 
-        public string ExternalRoleList
-        {
-            get
-            {
-                return string.Join(",", RoleList);
-            }
-        }
+        public string ExternalRoleList => string.Join(",", RoleList);
 
-
-        public string ToStringWithName()
-        {
-            return $"{Name}: {ToString()}";
-        }
+        public string ToStringWithName() => $"{Name}: {ToString()}";
 
         public override string ToString()
         {

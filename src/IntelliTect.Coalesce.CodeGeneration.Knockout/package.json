@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "name": "coalesce-cg-knockout",
+  "private": true,
+  "devDependencies": {
+    "@types/bootstrap": "^3.3.36",
+    "@types/bootstrap.v3.datetimepicker": "^4.17.46",
+    "@types/jquery": "^3.2.17",
+    "@types/knockout": "^3.4.47",
+    "@types/knockout.validation": "0.0.36",
+    "@types/select2": "^4.0.41",
+    "@types/moment": "2.11.29"
+  }
+}

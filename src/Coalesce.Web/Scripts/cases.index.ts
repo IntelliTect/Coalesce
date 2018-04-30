@@ -1,9 +1,8 @@
-﻿/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="intellitect.references.d.ts" />
+﻿/// <reference path="viewmodels.generated.d.ts" />
 
 module Cases {
     var viewModel: CaseDetailModel;
-    var status: string = intellitect.utilities.GetUrlParameter("status");
+    var status: string | null = Coalesce.Utilities.GetUrlParameter("status");
 
     $(function () {
         viewModel = new CaseDetailModel();
@@ -18,14 +17,14 @@ module Cases {
         load() {
             if (status != null && status != '') {
                 if (status == 'allOpen') {
-                    this.cases.listDataSource = ListViewModels.CaseDataSources.GetAllOpenCases;
+                    this.cases.dataSource = new this.cases.dataSources.AllOpenCases();
                 }
                 else {
                     let retrievedStatus = new ViewModels.Case().statusValues.filter(function (obj) {
-                        return obj.value.toLowerCase() == status.toLowerCase();
+                        return obj.value.toLowerCase() == (status || "").toLowerCase();
                     });
                     if (retrievedStatus.length > 0) {
-                        this.cases.query = { status: retrievedStatus[0].id };
+                        this.cases.filter = { status: retrievedStatus[0].id.toString() };
                     }
                 }
             }

@@ -2,22 +2,9 @@
 
   <PropertyGroup>
     <Description>Coalesce.Web.Tests Class Library</Description>
-    <VersionPrefix>1.1.0</VersionPrefix>
-    <Authors>IntelliTect</Authors>
-    <TargetFramework>net46</TargetFramework>
-    <AssemblyName>Coalesce.Web.Tests</AssemblyName>
-    <PackageId>Coalesce.Web.Tests</PackageId>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x86</PlatformTarget>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,27 +15,21 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Coalesce.Web\Coalesce.Web.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170502-03" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.2" />
-    <PackageReference Include="Selenium.WebDriver" Version="3.4.0" />
-    <PackageReference Include="System.Linq" Version="4.3.0" />
-    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
-    <PackageReference Include="System.Management.Automation" Version="6.1.7601.17515" />
-    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20171012-09" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" />
+    <PackageReference Include="xunit" Version="2.3.0" />
+    
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="3.6.0" />
   </ItemGroup>
 
   <Target Name="PrecompileScript" BeforeTargets="BeforeBuild">
-    <Exec Command="taskkill /IM Coalesce.Web.exe /F" />
+    <Exec Command="taskkill /IM Coalesce.Web.exe /F" ContinueOnError="true" />
   </Target>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
 
 </Project>

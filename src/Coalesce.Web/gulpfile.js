@@ -10,7 +10,7 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     sass = require('gulp-sass'),
     typescriptCompiler = require('gulp-typescript'),
-    rimraf = require('rimraf'),
+    del = require('del'),
     path = require('path'),
     shell = require('gulp-shell'),
     gutil = require('gulp-util'),
@@ -21,7 +21,7 @@ var gulp = require('gulp'),
 // Initialize directory paths.
 var paths = {
     // Source Directory Paths
-    bower: "./bower_components/",
+    npm: "./node_modules/",
     scripts: "Scripts/",
     styles: "Styles/",
     wwwroot: "./wwwroot/",
@@ -41,8 +41,8 @@ function getFolders(dir) {
         });
 }
 
-gulp.task('clean-images', function (cb) {
-    rimraf(paths.img, cb);
+gulp.task('clean-images', function () {
+    return del(paths.img);
 });
 
 gulp.task("copy-images", ['clean-images'], function () {
@@ -55,38 +55,30 @@ gulp.task('img:watch', function () {
 });
 
 gulp.task("clean-lib", function (cb) {
-    rimraf(paths.lib, cb);
+    return del(paths.img);
 });
 
-gulp.task("copy-lib", ['clean-lib'], function () {
-    var bower = {
-        "bootstrap": "bootstrap/dist/**/bootstrap*.{js,map,css}",
-        "bootstrap/fonts": "bootstrap/fonts/*.{,eot,svg,ttf,woff,woff2}",
-        "jquery": "jquery/dist/jquery*.{js,map}",
-        "font-awesome": "components-font-awesome/**/*.{css,otf,eot,svg,ttf,woff,woff2}",
-        "simple-line-icons": "simple-line-icons/**/*.{css,otf,eot,svg,ttf,woff,woff2}",
-        "uniform": "jquery.uniform/**/{jquery.uniform.js,uniform.default.css}",
-        "bootstrap-switch": "bootstrap-switch/dist/**/*.{js,css}",
-        "bootstrap-daterangepicker": "bootstrap-daterangepicker/*.{js,css}",
-        "bootstrap-hover-dropdown": "bootstrap-hover-dropdown/bootstrap-hover-dropdown*.js",
-        "counter-up": "counter-up/*.js",
-        "waypoints": "waypoints/lib/jquery.waypoints.js",
-        "morris": "morris.js/morris.{css,js}",
-        "fullcalendar": "fullcalendar/dist/fullcalendar.{css,js}",
-        "jqvmap": "jqvmap/jqvmap/**/j*.{css,js}",
-        "moment": "moment/moment.js",
-        "jquery-slimscroll": "jquery.slimscroll/jquery.*.js",
-        "knockout": "knockout/dist/*.js",
-        "knockout-validation": "knockout-validation/dist/*.js",
-        "select2": "select2/dist/**/*.{css,js}",
-        "bootstrap-datetimepicker": "eonasdan-bootstrap-datetimepicker/build/**/*.{css,js}"
-    };
+gulp.task("copy-lib",
+    ["clean-lib"],
+    function () {
+        const packages = {
+            "bootstrap": "bootstrap-sass/assets/**/bootstrap*.{js,map}",
+            "bootstrap/fonts": "bootstrap-sass/assets/fonts/**/*.{,eot,svg,ttf,woff,woff2}",
+            "jquery": "jquery/dist/*.{js,map}",
+            "font-awesome": "components-font-awesome/**/*.{css,otf,eot,svg,ttf,woff,woff2}",
+            "moment": "moment/moment.js",
+            "knockout": "knockout/build/output/*.js",
+            "knockout-validation": "knockout.validation/dist/*.js",
+            "select2": "select2/dist/**/*.{css,js}",
+            "select2-bootstrap": "select2-bootstrap-theme/dist/*.css",
+            "bootstrap-datetimepicker": "eonasdan-bootstrap-datetimepicker/build/**/*.{css,js}"
+        };
 
-    for (var destinationDir in bower) {
-        gulp.src(paths.bower + bower[destinationDir])
-          .pipe(gulp.dest(paths.lib + destinationDir));
-    }
-});
+        for (var destinationDir in packages) {
+            gulp.src(paths.npm + packages[destinationDir])
+                .pipe(gulp.dest(paths.lib + destinationDir));
+        }
+    });
 
 gulp.task("copy-files", ['copy-lib', 'ts', 'copy-js']);
 
@@ -100,49 +92,32 @@ gulp.task('js:watch', function () {
 });
 
 
-gulp.task("sass", function () {
-    //gulp.src([paths.styles + '/*.scss', 'Areas/*/Styles/*.scss'])
-    // get the files from the root
-    gulp.src(paths.styles + '/*.scss')
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(paths.css));
+gulp.task("sass",
+    function () {
+        return gulp.src(paths.styles + "/*.scss")
+            .pipe(sass({
+                includePaths: [paths.npm + "bootstrap-sass/assets/stylesheets"]
+            }).on("error", sass.logError))
+            .pipe(gulp.dest(paths.css));
+    });
 
-    //// get the files from the areas
-    //gulp.src('Areas/**/Styles/*.scss')
-    //.pipe(sass().on('error', sass.logError))
-    //    .pipe(flatten({ includeParents: 1 }))
-    //    .pipe(rename(function(path) {
-    //        var originalPath = path.dirname;
-    //        path.dirname += '/css';
-    //}))
-    //.pipe(gulp.dest(paths.wwwroot));
-});
+gulp.task("sass:watch",
+    function () {
+        gulp.watch([paths.styles + "/*.scss"], ["sass"]);
+    });
 
-gulp.task('sass:watch', function () {
-    gulp.watch([paths.styles + '/*.scss'], ['sass']);
-    //gulp.watch([paths.styles + '/*.scss', 'Areas/**/Styles/*.scss'], ['sass']);
-});
 
+gulp.task("ts:local",
+    function () {
+        gulp.watch([paths.scripts + "/*.ts"], ["ts"]);
+    });;
 
 gulp.task('ts', function () {
-    // compile the intellitect code into an intellitect.js file
-    var intellitectTypescriptProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'intellitect.js' });
-    var intellitectResult = gulp.src([paths.scripts + '/Coalesce/intellitect*.ts', '!' + paths.scripts + '/*.d.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(intellitectTypescriptProject));
-
-    intellitectResult.dts
-        .pipe(gulp.dest(paths.js));
-
-    intellitectResult.js
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(paths.js));
-
     // compile the root generated code into an app.js file
     var rootAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/{Ko,ko}*.ts', '!' + paths.scripts + '/*.d.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(rootAppJsProject));
+    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/*.ts', '!' + paths.scripts + '/*.d.ts'])
+        .pipe(sourcemaps.init())
+        .pipe(rootAppJsProject());
 
     rootApp.dts
         .pipe(gulp.dest(paths.js));
@@ -151,62 +126,31 @@ gulp.task('ts', function () {
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
 
-    // compile the area generated code into an app.js file
-    //var folders = getFolders('Areas');
-
-    //folders.map(function (folder) {
-    //    var areaAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    //    var areaApp = gulp.src([path.join('Areas', folder, 'Scripts', '**/{Ko,ko}*.ts'), path.join('!Areas', folder, '**/*.d.ts')])
-	//	.pipe(sourcemaps.init())
-	//	.pipe(typescriptCompiler(areaAppJsProject));
-
-    //    areaApp.dts
-	//		.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-
-    //    areaApp.js
-	//		.pipe(sourcemaps.write('.'))
-	//		.pipe(gulp.dest(path.join(paths.wwwroot, folder, 'js')));
-    //});
-
-    // now compile the root individual page files
+    // now compile the individual page files
     var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
-    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{intellitect,Ko,ko}*.ts'])
-    .pipe(sourcemaps.init())
-    .pipe(typescriptCompiler(individualFileTypescriptProject));
+    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{coalesce,Ko,ko}*.ts'])
+        .pipe(sourcemaps.init())
+        .pipe(individualFileTypescriptProject());
 
     individualTsResult.dts.pipe(gulp.dest(paths.js));
 
     individualTsResult.js
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(paths.js));
-
-    //// now compile the areas individual page files
-    //var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json')
-    //var individualTsResult = gulp.src(['Areas/**/Scripts/*.ts', '!Areas/**/Scripts/**/{intellitect,Ko,ko}*.ts'])
-    //.pipe(sourcemaps.init())
-    //.pipe(typescriptCompiler(individualFileTypescriptProject));
-
-    //individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    //individualTsResult.js
-    //.pipe(sourcemaps.write('.'))
-    //    .pipe(flatten({ includeParents: 1 }))
-    //    .pipe(rename(function (path) {
-    //        var originalPath = path.dirname;
-    //        path.dirname += '/js';
-    //    }))
-    //    .pipe(gulp.dest(paths.wwwroot));
-});
-
-gulp.task("copy-ts", ['ts'], function () {
-    gulp.src(paths.scripts + "*.{ts,js.map}")
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
 });
 
-gulp.task('ts:watch', function () {
-    gulp.watch([paths.scripts + '*.ts'], ['ts']);
-    //gulp.watch([paths.scripts + '*.ts', 'Areas/**/Scripts/*.ts'], ['ts']);
-});
+gulp.task("copy-ts",
+    ["ts"],
+    function () {
+        gulp.src(paths.scripts + "*.{ts,js.map}")
+            .pipe(gulp.dest(paths.js));
+    });
+
+gulp.task("ts:watch",
+    function () {
+        gulp.watch([paths.scripts + "/**/*.ts"], ["ts:local"]);
+        gulp.watch([paths.scripts + "/Partials/*.ts"], ["ts"]);
+    });
 
 gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
 });
@@ -215,69 +159,40 @@ gulp.task('default', ['copy-lib', 'sass', 'ts', 'watch'], function () {
 });
 
 
-var componentModelVersion = "1.1.0";
-var codeGeneratorsMvcVersion = componentModelVersion;
-var nlogExtensionsVersion = "1.1.0";
+var coalesceBuildDir = `${require('os').tmpdir()}/CoalesceExe`;
 
-gulp.task('nuget:publish:ComponentModel',
-    shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
-        'push ' +
-        '..\\..\\artifacts\\bin\\IntelliTect.Coalesce\\debug\\IntelliTect.Coalesce.' + componentModelVersion + '.nupkg ' +
-        '536300da-5e23-433c-8f45-f84e9a225b4b ' +
-        '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
-);
+gulp.task('coalesce:cleanbuild', function (cb) {
+    return del(coalesceBuildDir, { force: true });
+});
 
-gulp.task('nuget:publish:CodeGeneratorsMvc',
-    shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
-        'push ' +
-        '..\\..\\artifacts\\bin\\IntelliTect.Coalesce.CodeGeneration\\debug\\IntelliTect.Coalesce.CodeGeneration.' + codeGeneratorsMvcVersion + '.nupkg ' +
-        '536300da-5e23-433c-8f45-f84e9a225b4b ' +
-        '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
-);
-
-gulp.task('nuget:publish:NLogExtensions',
-    shell.task(['bower_components\\eonasdan-bootstrap-datetimepicker\\src\\nuget\\nuget ' +
-        'push ' +
-        '..\\..\\artifacts\\bin\\IntelliTect.NLog.Extensions\\debug\\IntelliTect.NLog.Extensions.' + nlogExtensionsVersion + '.nupkg ' +
-        '536300da-5e23-433c-8f45-f84e9a225b4b ' +
-        '-Source https://www.myget.org/F/intellitect-public/api/v2/package'])
-);
-
-gulp.task('coalesce:build', shell.task([
-        //'if exist "%temp%/CoalesceExe" rmdir "%temp%/CoalesceExe" /s /q',
-        'dotnet msbuild /t:restore /v:q "../../submodules/Coalesce/src/IntelliTect.Coalesce.Cli"',
-        'dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o %temp%/CoalesceExe -f net46'
+gulp.task('coalesce:build', ['coalesce:cleanbuild'], shell.task([
+        'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.Cli"',
+        `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}" -f netcoreapp2.0`
     ],{ verbose: true }
 ));
 
 // Build is required every time because the templates are compiled into the dll.
 // Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
-gulp.task('coalesce', ['coalesce:build'], shell.task
+gulp.task('coalesce-ko', ['coalesce:build'], shell.task
     ([
-        '"%temp%/CoalesceExe/IntelliTect.Coalesce.Cli.exe" ' +
-        '-dc AppDbContext -dp ..\\Coalesce.Domain -wp .\\ -filesOnly true -ns Coalesce.Web'
+        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" ../../coalesce-ko.json ` 
+    //    `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --verbosity debug ` 
+    ],
+    { verbose: true }
+));
+
+gulp.task('coalesce-vue', ['coalesce:build'], shell.task
+    ([
+        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" ../../coalesce-vue.json ` 
+    //    `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --verbosity debug ` 
     ],
     { verbose: true }
 ));
 
 
-
-//gulp.task('coalesce:area', ['coalesce:build'], function (cb) {
-//    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
-//        console.log(stdout);
-//        console.log(stderr);
-//        console.log(err);
-//        cb(err);
-//    });
-//});
-
-//gulp.task('coalesce:area-all', ['coalesce'], function (cb) {
-//    exec('"./CoalesceExe/IntelliTect.Coalesce.Cli.exe" -dc AppDbContext -dp ../Coalesce.Domain -wp ./ -filesOnly true -a TestArea', function (err, stdout, stderr) {
-//        console.log(stdout);
-//        console.log(stderr);
-//        console.log(err);
-//        cb(err);
-//    });
-//});
-
-gulp.task('nuget:publish', ['nuget:publish:ComponentModel', 'nuget:publish:CodeGeneratorsMvc', 'nuget:publish:NLogExtensions']);
+gulp.task('coalesce:debug', ['coalesce:build'], shell.task
+    ([
+        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --debug --verbosity debug`
+    ],
+    { verbose: true }
+    ));

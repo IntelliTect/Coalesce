@@ -1,16 +1,16 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "noImplicitAny": false,
+    "strict": true,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false,
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,
     "module": "system",
     "target": "es5"
   },
-  "exclude": [
-    "bower_components",
-    "node_modules",
-    "wwwroot"
+  "include": [
+    "Scripts"
   ]
 }

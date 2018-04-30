@@ -12,7 +12,9 @@
 <h3>Annotation List</h3>
 <ul>
     <li><a href="#ClientValidation">Client Validation</a></li>
+    <li><a href="#Controller">Controller</a></li>
     <li><a href="#Create">Create</a></li>
+    <li><a href="#CreateController">CreateController</a></li>
     <li><a href="#DateType">Date Type</a></li>
     <li><a href="#DefaultOrderBy">Default Order By</a></li>
     <li><a href="#Delete">Delete</a></li>
@@ -74,6 +76,31 @@
     }
 </code>
 </pre>
+
+<a name="Controller"></a>
+<h3>Controller</h3>
+<p>Allows for control over the generated MVC Controllers. Properties include:</p>
+<h4>ApiRouted</h4>
+<p>
+    Use cases include:
+    <ul>
+        <li>Wanting to define your routes through IRouteBuilder in Startup.cs instead</li>
+        <li>Not wanting API controllers to be exposed by default.</li>
+        <li>Wanting to route to your own custom controller that inherits from a generated API controller in order to implement more granular or complex authorization logic.</li>
+    </ul>    
+</p>
+<pre>
+<code class="language-html">
+    [Controller(ApiRouted = false)]
+    public class Person
+    {
+        public int PersonId { get; set; }
+
+        ...
+    }
+</code>
+</pre>
+
 <a name="Create"></a>
 <h3>Create</h3>
 <p>Controls whether creation of a new object of this type is allowed from the client side.</p>

@@ -58,7 +58,7 @@ for:
 - 
   branches:
     only:
-      - /rel\/.*/
+      - /release\/.*/
 
   init:
   - ps: >-

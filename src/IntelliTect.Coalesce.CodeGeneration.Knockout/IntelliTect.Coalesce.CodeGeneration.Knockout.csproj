@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Knockout code generation for Coalesce</Description>
+    <Description>Knockout.js code generation for IntelliTect.Coalesce</Description>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Description>Knockout.js shared code for both server and code generation projects for IntelliTect.Coalesce</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   

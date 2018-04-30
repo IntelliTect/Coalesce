@@ -1,4 +1,7 @@
 
+environment:
+  coalesce_version: 2.0.0
+
 image: Visual Studio 2017
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
@@ -32,11 +35,15 @@ artifacts:
 
 for:
 
+# Dev builds - publish to MyGet as "x.x.x-alpha-yyy"
 - 
-  version: 2.0.0-alpha-{build}
   branches:
     only:
       - dev
+
+  init:
+  - ps: >-
+      Update-AppveyorBuild -Version "$env:coalesce_version-alpha-$env:appveyor_build_number"
 
   configuration: Debug
 
@@ -47,20 +54,41 @@ for:
       secure: byg3MYXl6/q/Y9tKACVcywkrtdqs4i2ISNSNTDoH/Eg9wz2+CUFHI5ir3zMddwSr
     artifact: /.*\.nupkg/
 
+# Release candidates - publish to NuGet as "x.x.x-rc-yyy"
+- 
+  branches:
+    only:
+      - /rel\/.*/
 
-# - 
-#   version: 2.0.0
-#   branches:
-#     only:
-#       - /rel\/[0-9\.]*/
+  init:
+  - ps: >-
+      Update-AppveyorBuild -Version "$env:coalesce_version-rc-$env:appveyor_build_number"
 
-#   configuration: Release
+  configuration: Release
   
-#   deploy:
-#     provider: NuGet
-#     api_key:
-#       secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
-#     artifact: /.*\.nupkg/
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
+    artifact: /.*\.nupkg/
+
+# Releases - publish to NuGet as "x.x.x"
+- 
+  branches:
+    only:
+      - master
+
+  init:
+  - ps: >-
+      Update-AppveyorBuild -Version "$env:coalesce_version"
+
+  configuration: Release
+  
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
+    artifact: /.*\.nupkg/
 
 
 

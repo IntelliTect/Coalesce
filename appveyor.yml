@@ -1,10 +1,5 @@
-version: 2.0.0-alpha-{build}
-branches:
-  only:
-  - master
-  - dev
+
 image: Visual Studio 2017
-configuration: Debug
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
   - '%LocalAppData%\Yarn\cache'
@@ -33,9 +28,39 @@ after_build:
   - dotnet pack -c %CONFIGURATION% 
 artifacts:
   - path: '**\*.nupkg'
-deploy:
-  provider: NuGet
-  server: https://www.myget.org/F/intellitect-coalesce/api/v2/package
-  api_key:
-    secure: byg3MYXl6/q/Y9tKACVcywkrtdqs4i2ISNSNTDoH/Eg9wz2+CUFHI5ir3zMddwSr
-  artifact: /.*\.nupkg/
+
+
+for:
+
+- 
+  version: 2.0.0-alpha-{build}
+  branches:
+    only:
+      - dev
+
+  configuration: Debug
+
+  deploy:
+    provider: NuGet
+    server: https://www.myget.org/F/intellitect-coalesce/api/v2/package
+    api_key:
+      secure: byg3MYXl6/q/Y9tKACVcywkrtdqs4i2ISNSNTDoH/Eg9wz2+CUFHI5ir3zMddwSr
+    artifact: /.*\.nupkg/
+
+
+# - 
+#   version: 2.0.0
+#   branches:
+#     only:
+#       - /rel\/[0-9\.]*/
+
+#   configuration: Release
+  
+#   deploy:
+#     provider: NuGet
+#     api_key:
+#       secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
+#     artifact: /.*\.nupkg/
+
+
+

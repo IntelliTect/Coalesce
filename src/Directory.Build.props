@@ -10,10 +10,8 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <VersionPrefix>2.0.0</VersionPrefix>
-    <PackageVersionPrefix>2.0.0</PackageVersionPrefix>
-    <VersionSuffix Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">alpha-$(APPVEYOR_BUILD_NUMBER)</VersionSuffix>
-    <PackageVersionSuffix Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">alpha-$(APPVEYOR_BUILD_NUMBER)</PackageVersionSuffix>
+    <Version Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</Version>
+    <PackageVersion Condition="'$(APPVEYOR_BUILD_VERSION)' != ''">$(APPVEYOR_BUILD_VERSION)</PackageVersion>
 
     <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>

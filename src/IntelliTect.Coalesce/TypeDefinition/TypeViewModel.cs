@@ -68,6 +68,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public TypeDiscriminator TsTypeKind =>
             IsString ? TypeDiscriminator.String :
+            IsGuid ? TypeDiscriminator.String :
             IsByteArray ? TypeDiscriminator.String :
             IsNumber ? TypeDiscriminator.Number :
             IsBool ? TypeDiscriminator.Boolean :
@@ -105,6 +106,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsDateTime) return "DateTime.Parse";
                 if (IsDateTimeOffset) return "DateTimeOffset.Parse";
                 if (IsBool) return "Convert.ToBoolean";
+                if (IsGuid) return "Guid.Parse";
                 return "(object)";
             }
         }
@@ -119,7 +121,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the type is supported by Coalesce as a key type.
         /// </summary>
-        public bool IsValidKeyType => IsString || IsIntegral;
+        public bool IsValidKeyType => IsString || IsIntegral || IsGuid;
 
         /// <summary>
         /// Best approximation of a TypeScript type definition for the type.
@@ -131,6 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsByteArray) return "string";
                 if (IsCollection && IsNumber) return "number[]";
                 if (IsCollection) return PureType.TsTypePlain + "[]";
+                if (IsGuid) return "string";
                 return TsTypePlain;
             }
         }
@@ -152,7 +155,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Best approximation of a TypeScript type definition for the type, not accounting for arrays.
         /// Collection types will be typed as "any". Use TsType to get correct collection types.
         /// </summary>
-        public string TsTypePlain
+        private string TsTypePlain
         {
             get
             {
@@ -186,6 +189,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if the property is a string.
         /// </summary>
         public bool IsString => Name == "String";
+
+        public bool IsGuid => this.IsA<Guid>();
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime

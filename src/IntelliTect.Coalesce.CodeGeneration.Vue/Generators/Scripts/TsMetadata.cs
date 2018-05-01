@@ -158,25 +158,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        /// <summary>
-        /// For a given type, if that type is a primitive type,
-        /// return the string type discriminator
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns>"number", "boolean", "string", "enum", or "date"</returns>
-        private string GetPrimitiveTypeDiscriminator(TypeViewModel type)
-        {
-            if (type.IsNumber
-                || type.IsBool
-                || type.IsString
-                || type.IsByteArray
-            ) return type.TsType;
-
-            if (type.IsEnum) return "enum";
-            if (type.IsDate) return "date";
-            return null;
-        }
-
         private void WriteClassPropertiesMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
         {
             using (b.Block("props:", ','))

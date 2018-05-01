@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
 
 namespace Coalesce.Domain
@@ -14,6 +15,8 @@ namespace Coalesce.Domain
         public string Name { get; set; }
 
         public ProductDetails Details { get; set; }
+
+        public Guid UniqueId { get; set; }
     }
 
     public class ProductDetails

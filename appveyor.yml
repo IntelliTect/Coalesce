@@ -16,7 +16,7 @@ before_build:
   - ps: npm whoami
   - cmd: node --version && npm --version
   - cmd: dotnet restore
-  - ps: cd ./src/coalesce-vue; yarn; yarn version --new-version "$env:coalesce_version"; yarn build
+  - cmd: cd ./src/coalesce-vue && yarn && yarn version --no-git-tag-version --new-version %APPVEYOR_BUILD_VERSION% && yarn build
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
   - cmd: yarn global add gulp-cli

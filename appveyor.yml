@@ -16,9 +16,9 @@ before_build:
   - ps: npm whoami
   - cmd: node --version && npm --version
   - cmd: dotnet restore
+  - cmd: cd ./src/coalesce-vue && yarn && && yarn version --new-version "$env:coalesce_version" && yarn build
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
-  - cmd: cd ./src/coalesce-vue && yarn && && yarn version --new-version "$env:coalesce_version" && yarn build
   - cmd: yarn global add gulp-cli
   # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
   # I don't want to add gulp to Coalesce.Web.Vue

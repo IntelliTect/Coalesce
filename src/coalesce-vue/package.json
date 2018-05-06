@@ -1,6 +1,6 @@
 {
   "name": "coalesce-vue",
-  "version": "dev",
+  "version": "2.1.0-dev-001",
   "description": "Coalesce core scripts for Vue.js",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

@@ -80,6 +80,7 @@ export type ApiResultPromise<T> = Promise<AxiosItemResult<T> | AxiosListResult<T
 
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export const AxiosClient = axios.create()
+AxiosClient.defaults.baseURL = '/api'
 
 export type ItemApiReturnType<T extends (this: null, ...args: any[]) => ItemResultPromise<any>> 
     = ReturnType<T> extends void ? void

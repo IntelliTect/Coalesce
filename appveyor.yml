@@ -1,6 +1,8 @@
 
 environment:
   coalesce_version: 2.1.0
+  NPM_TOKEN:
+    secure: PpvAZnPCnGvKx69JHFV2FowUIpo0jgV1g1jJpuuPmDyZij9RwMcjuGIAKfsSiaQH
 
 image: Visual Studio 2017
 cache: 
@@ -10,11 +12,13 @@ nuget:
   disable_publish_on_pr: true
 before_build:
   - ps: Install-Product node 9
+  - ps: '"//registry.npmjs.org/:_authToken=$env:NPM_TOKEN`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
+  - ps: npm whoami
   - cmd: node --version && npm --version
   - cmd: dotnet restore
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
-  - cmd: cd ./src/coalesce-vue && yarn && yarn build
+  - cmd: cd ./src/coalesce-vue && yarn && && yarn version --new-version "$env:coalesce_version" && yarn build
   - cmd: yarn global add gulp-cli
   # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
   # I don't want to add gulp to Coalesce.Web.Vue
@@ -57,6 +61,9 @@ for:
       secure: byg3MYXl6/q/Y9tKACVcywkrtdqs4i2ISNSNTDoH/Eg9wz2+CUFHI5ir3zMddwSr
     artifact: /.*\.nupkg/
 
+  after_deploy:
+    - npm publish --tag dev --access public
+
 # Release candidates - publish to NuGet as "x.x.x-rc-yyy"
 - 
   branches:
@@ -98,6 +105,9 @@ for:
     api_key:
       secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
     artifact: /.*\.nupkg/
+
+  after_deploy:
+    - npm publish --tag latest --access public
 
 
 

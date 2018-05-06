@@ -1,19 +1,18 @@
 {
-  "name": "VuePlayground",
+  "name": "coalesce-web-vue",
   "private": true,
   "version": "0.0.0",
   "dependencies": {
-    "axios": "^0.17.1",
+    "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
     "coalesce-vue": "link:../coalesce-vue",
     "date-fns": "^2.0.0-alpha.7",
     "lodash-es": "^4.17.5",
-    "luxon": "^0.5.3",
     "qs": "^6.5.1",
     "vue": "^2.5.13",
     "vue-axios": "^2.0.2",
     "vue-router": "^3.0.1",
-    "vuetify": "1.0.3"
+    "vuetify": "^1.0.17"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.0",
@@ -27,7 +26,7 @@
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "~1.1.6",
     "isomorphic-fetch": "^2.2.1",
-    "node-sass": "^4.7.2",
+    "node-sass": "^4.9.0",
     "postcss-loader": "^2.0.10",
     "precss": "^3.1.0",
     "sass-loader": "^6.0.6",

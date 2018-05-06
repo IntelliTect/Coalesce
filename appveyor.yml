@@ -62,7 +62,7 @@ for:
     artifact: /.*\.nupkg/
 
   after_deploy:
-    - npm publish --tag dev --access public
+    cmd: cd ./src/coalesce-vue && npm publish --tag dev --access public
 
 # Release candidates - publish to NuGet as "x.x.x-rc-yyy"
 - 
@@ -107,7 +107,7 @@ for:
     artifact: /.*\.nupkg/
 
   after_deploy:
-    - npm publish --tag latest --access public
+    cmd: cd ./src/coalesce-vue && npm publish --tag latest --access public
 
 
 

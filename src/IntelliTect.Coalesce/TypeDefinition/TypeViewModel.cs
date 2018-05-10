@@ -190,7 +190,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsString => Name == "String";
 
-        public bool IsGuid => this.IsA<Guid>();
+        public bool IsGuid => NullableUnderlyingType.IsA<Guid>();
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
@@ -208,7 +208,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsByteArray => PureType.Name == nameof(Byte) && IsArray;
         
         /// <summary>
-        /// Returns true if the type is any integral type, except <see cref="char"/>
+        /// Returns true if the type is any integral type or a nullable version of such a type, except <see cref="char"/>
         /// </summary>
         public bool IsIntegral
         {

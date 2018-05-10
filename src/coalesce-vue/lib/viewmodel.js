@@ -1,5 +1,6 @@
 import debounce from 'lodash-es/debounce';
 import { resolvePropMeta } from './metadata';
+import { ListParameters } from './api-client';
 import { modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
@@ -7,7 +8,9 @@ import { modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
  * @param metadata The metadata describing the properties to add.
  */
 export function defineProps(ctor, metadata) {
-    Object.defineProperties(ctor.prototype, Object.keys(metadata.props).reduce(function (descriptors, propName) {
+    Object.defineProperties(ctor.prototype, Object
+        .keys(metadata.props)
+        .reduce(function (descriptors, propName) {
         descriptors[propName] = {
             enumerable: true,
             get: function () {
@@ -33,6 +36,8 @@ DESIGN NOTES
         when Coalesce isn't creating ViewModel instances on the developers' behalf.
         It prevents the existance of deeply nested, difficult-to-access (or even find at all) instances
         that are difficult to configure. Ideally, all ViewModels exist on instances of components.
+        This also allows subclassing of ViewModel classes at will because any place where a ViewModel
+        is instantiated can be replaced with any other subclass of that ViewModel by the developer with ease.
 */
 var ViewModel = /** @class */ (function () {
     function ViewModel(
@@ -74,8 +79,8 @@ var ViewModel = /** @class */ (function () {
          * A function for invoking the /delete endpoint, and a set of properties about the state of the last call.
          */
         this.$delete = this.$apiClient.$makeCaller("item", function (c) { return function () { return c.delete(_this.$primaryKey); }; });
-        // Internal autosave state - seal to prevent unnessecary reactivity
-        this._autoSaveState = Object.seal({ on: false, cleanup: null });
+        // Internal autosave state
+        this._autoSaveState = new AutoCallState();
         if (initialData) {
             if (!initialData.$metadata) {
                 throw "Initial data must have a $metadata property.";
@@ -143,26 +148,11 @@ var ViewModel = /** @class */ (function () {
             }
         }, wait);
         var watcher = vue.$watch(function () { return _this.$isDirty; }, enqueueSave);
-        var destroyHook = function () { return _this.$stopAutoSave(); };
-        vue.$on('hook:beforeDestroy', destroyHook);
-        this._autoSaveState.cleanup = function () {
-            if (!_this._autoSaveState.on)
-                return;
-            watcher(); // This destroys the watcher
-            enqueueSave.cancel();
-            // Cleanup the hook, in case we're not responding to beforeDestroy but instead to a direct call to $stopAutoSave.
-            // If we didn't do this, autosave could later get disabled when the original component is destroyed, 
-            // even though if was later attached to a different component that is still alive.
-            vue.$off('hook:beforeDestroy', destroyHook);
-        };
-        this._autoSaveState.on = true;
+        startAutoCall(this._autoSaveState, vue, watcher, enqueueSave);
     };
     /** Stops auto-saving if it is currently enabled. */
     ViewModel.prototype.$stopAutoSave = function () {
-        if (!this._autoSaveState.on)
-            return;
-        this._autoSaveState.cleanup();
-        this._autoSaveState.on = false;
+        stopAutoCall(this._autoSaveState);
     };
     /**
      * Returns a string representation of the object, or one of its properties, suitable for display.
@@ -204,3 +194,132 @@ var ViewModel = /** @class */ (function () {
     return ViewModel;
 }());
 export { ViewModel };
+// Model<TModel["$metadata"]>
+var ListViewModel = /** @class */ (function () {
+    function ListViewModel(
+    // The following MUST be declared in the constructor so its value will be available to property initializers.
+    /** The metadata representing the type of data that this ViewModel handles. */
+    $metadata, 
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
+    $apiClient) {
+        var _this = this;
+        this.$metadata = $metadata;
+        this.$apiClient = $apiClient;
+        this.$params = new ListParameters();
+        /**
+         * A function for invoking the /load endpoint, and a set of properties about the state of the last call.
+         */
+        this.$load = this.$apiClient
+            .$makeCaller("list", function (c) { return function () { return c.list(_this.$params); }; });
+        /**
+         * A function for invoking the /count endpoint, and a set of properties about the state of the last call.
+         */
+        this.$count = this.$apiClient
+            .$makeCaller("item", function (c) { return function () { return c.count(_this.$params); }; });
+        // Internal autoload state
+        this._autoLoadState = new AutoCallState();
+    }
+    Object.defineProperty(ListViewModel.prototype, "$items", {
+        // TODO: merge in the result, don't replace the existing one??
+        // .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
+        /**
+         * The current set of items that have been loaded into this ListViewModel.
+         */
+        get: function () { return this.$load.result; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ListViewModel.prototype, "$hasPreviousPage", {
+        /** True if the page set in $params.page is greater than 1 */
+        get: function () { return (this.$params.page || 1) > 1; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ListViewModel.prototype, "$hasNextPage", {
+        /** True if the count retrieved from the last load indicates that there are pages after the page set in $params.page */
+        get: function () { return (this.$params.page || 1) < (this.$load.pageCount || 0); },
+        enumerable: true,
+        configurable: true
+    });
+    /** Decrement the page parameter by 1 if there is a previous page. */
+    ListViewModel.prototype.$previousPagePage = function () { if (this.$hasPreviousPage)
+        this.$params.page = (this.$params.page || 1) - 1; };
+    /** Increment the page parameter by 1 if there is a next page. */
+    ListViewModel.prototype.$nextPage = function () { if (this.$hasNextPage)
+        this.$params.page = (this.$params.page || 1) + 1; };
+    /**
+     * Starts auto-loading of the list as changes to its parameters occur.
+     * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+     * @param wait Time in milliseconds to debounce loads for
+     * @param predicate A function that will be called before loading that can return false to prevent a load.
+     */
+    ListViewModel.prototype.$startAutoLoad = function (vue, wait, predicate) {
+        var _this = this;
+        if (wait === void 0) { wait = 1000; }
+        this.$stopAutoLoad();
+        var enqueueLoad = debounce(function () {
+            if (!_this._autoLoadState.on)
+                return;
+            // Check the predicate again incase its state has changed while we were waiting for the debouncing timer.
+            if (predicate && !predicate(_this)) {
+                return;
+            }
+            if (_this.$load.isLoading && _this.$load.concurrencyMode != "cancel") {
+                // Load already in progress. Enqueue another attempt.
+                enqueueLoad();
+            }
+            else {
+                // No loads in progress, or concurrency is set to cancel - go for it.
+                _this.$load();
+            }
+        }, wait);
+        var onChange = function () {
+            if (predicate && !predicate(_this)) {
+                return;
+            }
+            enqueueLoad();
+        };
+        var watcher = vue.$watch(function () { return _this.$params; }, onChange, { deep: true });
+        startAutoCall(this._autoLoadState, vue, watcher, enqueueLoad);
+    };
+    /** Stops auto-loading if it is currently enabled. */
+    ListViewModel.prototype.$stopAutoLoad = function () {
+        stopAutoCall(this._autoLoadState);
+    };
+    return ListViewModel;
+}());
+export { ListViewModel };
+/* Internal members/helpers */
+var AutoCallState = /** @class */ (function () {
+    function AutoCallState() {
+        this.on = false;
+        this.cleanup = null;
+        // Seal to prevent unnessecary reactivity
+        return Object.seal(this);
+    }
+    return AutoCallState;
+}());
+function startAutoCall(state, vue, watcher, debouncer) {
+    var destroyHook = function () { return stopAutoCall(state); };
+    vue.$on('hook:beforeDestroy', destroyHook);
+    state.cleanup = function () {
+        if (!state.on)
+            return;
+        // Destroy the watcher
+        watcher();
+        // Cancel the debouncing timer if there is one.
+        if (debouncer)
+            debouncer.cancel();
+        // Cleanup the hook, in case we're not responding to beforeDestroy but instead to a direct call to stopAutoCall.
+        // If we didn't do this, autosave could later get disabled when the original component is destroyed, 
+        // even though if was later attached to a different component that is still alive.
+        vue.$off('hook:beforeDestroy', destroyHook);
+    };
+    state.on = true;
+}
+function stopAutoCall(state) {
+    if (!state.on)
+        return;
+    state.cleanup();
+    state.on = false;
+}

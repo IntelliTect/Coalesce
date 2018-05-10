@@ -12,8 +12,42 @@ import { mapToDto, mapValueToDto, convertValueToModel } from './model';
 import axios from 'axios';
 import * as qs from 'qs';
 import Vue from 'vue';
+var DataSourceParameters = /** @class */ (function () {
+    function DataSourceParameters() {
+        this.includes = null;
+        this.dataSource = null;
+    }
+    return DataSourceParameters;
+}());
+export { DataSourceParameters };
+var FilterParameters = /** @class */ (function (_super) {
+    __extends(FilterParameters, _super);
+    function FilterParameters() {
+        var _this = _super.call(this) || this;
+        _this.search = null;
+        _this.filter = null;
+        return _this;
+    }
+    return FilterParameters;
+}(DataSourceParameters));
+export { FilterParameters };
+var ListParameters = /** @class */ (function (_super) {
+    __extends(ListParameters, _super);
+    function ListParameters() {
+        var _this = _super.call(this) || this;
+        _this.page = 1;
+        _this.pageSize = 25;
+        _this.orderBy = null;
+        _this.orderByDescending = null;
+        _this.fields = null;
+        return _this;
+    }
+    return ListParameters;
+}(FilterParameters));
+export { ListParameters };
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export var AxiosClient = axios.create();
+AxiosClient.defaults.baseURL = '/api';
 var ApiClient = /** @class */ (function () {
     function ApiClient($metadata) {
         this.$metadata = $metadata;
@@ -78,7 +112,7 @@ var ApiClient = /** @class */ (function () {
         }, {});
         // Map the 'filter' object, ensuring all values are strings.
         var filter = wideParams.filter;
-        if (typeof filter == 'object') {
+        if (typeof filter == 'object' && filter) {
             for (var key in filter) {
                 if (filter[key] !== undefined) {
                     paramsObject["filter." + key] = filter[key];
@@ -229,9 +263,28 @@ var ApiState = /** @class */ (function (_super) {
      * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
      */
     ApiState.prototype.setConcurrency = function (mode) {
+        // This method exists as a way to configure this in a chainable way when instantiating API callers.
         this._concurrencyMode = mode;
         return this;
     };
+    Object.defineProperty(ApiState.prototype, "concurrencyMode", {
+        /**
+         * Get or set the concurrency mode for this API caller. Default is "disallow".
+         * @param mode Behavior for when a request is made while there is already an outstanding request.
+         *
+         * "cancel" - cancel the outstanding request first.
+         *
+         * "disallow" - throw an error.
+         *
+         * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+         */
+        get: function () { return this._concurrencyMode; },
+        set: function (val) { this.setConcurrency(val); },
+        enumerable: true,
+        configurable: true
+    });
+    ;
+    ;
     /**
      * Attach a callback to be invoked when the request to this endpoint succeeds.
      * @param onFulfilled A callback to be called when a request to this endpoint succeeds.

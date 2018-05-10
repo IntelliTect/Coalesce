@@ -13,7 +13,7 @@ declare module "axios" {
 }
 import { ModelType, Method, Service, ApiRoutedType, DataSourceType, Value, CollectionValue, VoidValue } from './metadata';
 import { Model, DataSource } from './model';
-import { AxiosPromise, AxiosResponse, AxiosRequestConfig, AxiosInstance } from 'axios';
+import { AxiosResponse, AxiosRequestConfig, AxiosInstance } from 'axios';
 export interface ApiResult {
     wasSuccessful: boolean;
     message?: string;
@@ -34,23 +34,51 @@ export interface ListResult<T = any> extends ApiResult {
     totalCount: number;
 }
 export interface DataSourceParameters {
-    includes?: string;
-    dataSource?: DataSource<DataSourceType>;
+    /** An string that the server may use to include/exclude certain data from the results. See Coalesce's full documentation for details. */
+    includes?: string | null;
+    /**
+     * A data source instance that will be used to load the data.
+     * Classes are found in `models.g.ts` as `<ModelName>.DataSources.<DataSourceName>`, e.g. `Person.DataSources.WithRelations`.
+     */
+    dataSource?: DataSource<DataSourceType> | null;
+}
+export declare class DataSourceParameters {
+    constructor();
 }
 export interface FilterParameters extends DataSourceParameters {
-    search?: string;
+    /** A search term to search by. Searching behavior is determined by the server. */
+    search?: string | null;
+    /** A collection of key-value pairs to filter by. Behavior is dependent on the type of each field, see Coalesce's full documentation for details. */
     filter?: {
         [fieldName: string]: string;
-    };
+    } | null;
+}
+export declare class FilterParameters extends DataSourceParameters {
+    constructor();
 }
 export interface ListParameters extends FilterParameters {
-    page?: number;
-    pageSize?: number;
-    orderBy?: string;
-    orderByDescending?: string;
-    fields?: string[];
+    /** The page of data to request, starting at 1. */
+    page?: number | null;
+    /** The number of items per page to request. */
+    pageSize?: number | null;
+    /**
+     * The name of a field to order the results by.
+     *  If this and `orderByDescending` are blank, default ordering determined by the server will be used.
+     * */
+    orderBy?: string | null;
+    /**
+     * The name of a field to order the results by in descending order.
+     * If this and `orderBy` are blank, default ordering determined by the server will be used.
+     * */
+    orderByDescending?: string | null;
+    /**
+     * A list of field names to request. The results returned will only have these fields populated - all other fields will be null.
+     */
+    fields?: string[] | null;
 }
-export declare type ApiResponse<T> = Promise<AxiosResponse<T>>;
+export declare class ListParameters extends FilterParameters {
+    constructor();
+}
 export declare type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>;
 export declare type AxiosListResult<T> = AxiosResponse<ListResult<T>>;
 export declare type ItemResultPromise<T> = Promise<AxiosResponse<ItemResult<T>>>;
@@ -100,11 +128,11 @@ export declare class ApiClient<T extends ApiRoutedType> {
     protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: CollectionValue): AxiosResponse<ListResult<TResult>>;
 }
 export declare class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<TModel["$metadata"]> {
-    get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
-    list(parameters?: ListParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ListResult<TModel>>>;
-    count(parameters?: FilterParameters, config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>>;
-    save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
-    delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): Promise<AxiosResponse<ItemResult<TModel>>>;
+    get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel>;
+    list(parameters?: ListParameters, config?: AxiosRequestConfig): ListResultPromise<TModel>;
+    count(parameters?: FilterParameters, config?: AxiosRequestConfig): ItemResultPromise<number>;
+    save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel>;
+    delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel>;
     /** Value metadata for handling ItemResult returns from the standard API endpoints. */
     private $itemValueMeta;
     /** Value metadata for handling ListResult returns from the standard API endpoints. */
@@ -137,6 +165,17 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
      * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
      */
     setConcurrency(mode: ApiCallerConcurrency): this;
+    /**
+     * Get or set the concurrency mode for this API caller. Default is "disallow".
+     * @param mode Behavior for when a request is made while there is already an outstanding request.
+     *
+     * "cancel" - cancel the outstanding request first.
+     *
+     * "disallow" - throw an error.
+     *
+     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     */
+    concurrencyMode: ApiCallerConcurrency;
     private _cancelToken;
     private _callbacks;
     /**

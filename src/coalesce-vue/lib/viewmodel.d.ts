@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { AxiosResponse } from 'axios';
 import { ModelType, CollectionProperty, PropertyOrName, PropNames } from './metadata';
-import { ItemResult, ItemApiState, ModelApiClient } from './api-client';
+import { ItemResult, ItemApiState, ListResult, ListApiState, ModelApiClient, ListParameters } from './api-client';
 import { Model } from './model';
 import { Indexable } from './util';
 /**
@@ -71,4 +71,46 @@ export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi ex
         $metadata: TModel["$metadata"], 
         /** Instance of an API client for the model through which direct, stateless API requests may be made. */
         $apiClient: TApi, initialData?: TModel);
+}
+export declare abstract class ListViewModel<TModel extends Model<ModelType>, TApi extends ModelApiClient<TModel>> {
+    /** The metadata representing the type of data that this ViewModel handles. */
+    readonly $metadata: TModel["$metadata"];
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
+    readonly $apiClient: TApi;
+    $params: ListParameters;
+    /**
+     * A function for invoking the /load endpoint, and a set of properties about the state of the last call.
+     */
+    $load: ListApiState<() => Promise<AxiosResponse<ListResult<TModel>>>, TModel> & (() => Promise<AxiosResponse<ListResult<TModel>>>);
+    /**
+     * The current set of items that have been loaded into this ListViewModel.
+     */
+    readonly $items: TModel[] | null;
+    /** True if the page set in $params.page is greater than 1 */
+    readonly $hasPreviousPage: boolean;
+    /** True if the count retrieved from the last load indicates that there are pages after the page set in $params.page */
+    readonly $hasNextPage: boolean;
+    /** Decrement the page parameter by 1 if there is a previous page. */
+    $previousPagePage(): void;
+    /** Increment the page parameter by 1 if there is a next page. */
+    $nextPage(): void;
+    /**
+     * A function for invoking the /count endpoint, and a set of properties about the state of the last call.
+     */
+    $count: ItemApiState<() => Promise<AxiosResponse<ItemResult<number>>>, number> & (() => Promise<AxiosResponse<ItemResult<number>>>);
+    private _autoLoadState;
+    /**
+     * Starts auto-loading of the list as changes to its parameters occur.
+     * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+     * @param wait Time in milliseconds to debounce loads for
+     * @param predicate A function that will be called before loading that can return false to prevent a load.
+     */
+    $startAutoLoad(vue: Vue, wait?: number, predicate?: (viewModel: this) => boolean): void;
+    /** Stops auto-loading if it is currently enabled. */
+    $stopAutoLoad(): void;
+    constructor(
+        /** The metadata representing the type of data that this ViewModel handles. */
+        $metadata: TModel["$metadata"], 
+        /** Instance of an API client for the model through which direct, stateless API requests may be made. */
+        $apiClient: TApi);
 }

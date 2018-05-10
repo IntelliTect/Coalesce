@@ -54,22 +54,74 @@ export interface ListResult<T = any> extends ApiResult {
 /* Api Parameter Objects */
 
 export interface DataSourceParameters {
-    includes?: string
-    dataSource?: DataSource<DataSourceType>
+    /** An string that the server may use to include/exclude certain data from the results. See Coalesce's full documentation for details. */
+    includes?: string | null
+
+    /** 
+     * A data source instance that will be used to load the data. 
+     * Classes are found in `models.g.ts` as `<ModelName>.DataSources.<DataSourceName>`, e.g. `Person.DataSources.WithRelations`.
+     */
+    dataSource?: DataSource<DataSourceType> | null
 }
-export interface FilterParameters extends DataSourceParameters {
-    search?: string
-    filter?: { [fieldName: string]: string }
-}
-export interface ListParameters extends FilterParameters {
-    page?: number
-    pageSize?: number
-    orderBy?: string
-    orderByDescending?: string
-    fields?: string[]
+export class DataSourceParameters {
+    constructor() {
+        this.includes = null;
+        this.dataSource = null;
+    }
 }
 
-export type ApiResponse<T> = Promise<AxiosResponse<T>>
+export interface FilterParameters extends DataSourceParameters {
+    /** A search term to search by. Searching behavior is determined by the server. */
+    search?: string | null
+
+    /** A collection of key-value pairs to filter by. Behavior is dependent on the type of each field, see Coalesce's full documentation for details. */
+    filter?: { [fieldName: string]: string } | null
+}
+export class FilterParameters extends DataSourceParameters {
+    constructor() {
+        super();
+        this.search = null;
+        this.filter = null;
+    }
+}
+
+export interface ListParameters extends FilterParameters {
+    /** The page of data to request, starting at 1. */
+    page?: number | null
+
+    /** The number of items per page to request. */
+    pageSize?: number | null
+
+    /** 
+     * The name of a field to order the results by.
+     *  If this and `orderByDescending` are blank, default ordering determined by the server will be used. 
+     * */
+    orderBy?: string | null
+    /** 
+     * The name of a field to order the results by in descending order. 
+     * If this and `orderBy` are blank, default ordering determined by the server will be used. 
+     * */
+
+    orderByDescending?: string | null
+
+    /**
+     * A list of field names to request. The results returned will only have these fields populated - all other fields will be null.
+     */
+    fields?: string[] | null
+}
+export class ListParameters extends FilterParameters {
+    constructor() {
+        super();
+        this.page = 1;
+        this.pageSize = 25;
+        this.orderBy = null;
+        this.orderByDescending = null;
+        this.fields = null;
+    }
+}
+
+
+
 export type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>
 export type AxiosListResult<T> = AxiosResponse<ListResult<T>>
 export type ItemResultPromise<T> = Promise<AxiosResponse<ItemResult<T>>>
@@ -209,7 +261,7 @@ export class ApiClient<T extends ApiRoutedType> {
 
         // Map the 'filter' object, ensuring all values are strings.
         const filter = wideParams.filter;
-        if (typeof filter == 'object') {
+        if (typeof filter == 'object' && filter) {
             for (var key in filter) {
                 if (filter[key] !== undefined) {
                     paramsObject["filter." + key] = filter[key];
@@ -263,7 +315,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
 
     // TODO: should the standard set of endpoints be prefixed with '$'?
 
-    public get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
+    public get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel> {
         return AxiosClient
             .get(
                 `/${this.$metadata.controllerRoute}/get/${id}`, 
@@ -272,7 +324,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
             .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$itemValueMeta))
     }
     
-    public list(parameters?: ListParameters, config?: AxiosRequestConfig) {
+    public list(parameters?: ListParameters, config?: AxiosRequestConfig): ListResultPromise<TModel> {
         return AxiosClient
             .get(
                 `/${this.$metadata.controllerRoute}/list`, 
@@ -281,7 +333,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
             .then<AxiosListResult<TModel>>(r => this.$hydrateListResult(r, this.$collectionValueMeta))
     }
     
-    public count(parameters?: FilterParameters, config?: AxiosRequestConfig) {
+    public count(parameters?: FilterParameters, config?: AxiosRequestConfig): ItemResultPromise<number> {
         return AxiosClient
             .get<ItemResult<number>>(
                 `/${this.$metadata.controllerRoute}/count`, 
@@ -289,7 +341,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
             )
     }
     
-    public save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
+    public save(item: TModel, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel> {
         return AxiosClient
             .post(
                 `/${this.$metadata.controllerRoute}/save`,
@@ -299,7 +351,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<T
             .then<AxiosItemResult<TModel>>(r => this.$hydrateItemResult(r, this.$itemValueMeta))
     }
     
-    public delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig) {
+    public delete(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel> {
         return AxiosClient
             .post(
                 `/${this.$metadata.controllerRoute}/delete/${id}`,
@@ -364,9 +416,24 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
      * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
      */
     setConcurrency(mode: ApiCallerConcurrency) {
+        // This method exists as a way to configure this in a chainable way when instantiating API callers.
         this._concurrencyMode = mode;
         return this;
     }
+
+    /**
+     * Get or set the concurrency mode for this API caller. Default is "disallow".
+     * @param mode Behavior for when a request is made while there is already an outstanding request.
+     * 
+     * "cancel" - cancel the outstanding request first. 
+     * 
+     * "disallow" - throw an error. 
+     * 
+     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     */
+    get concurrencyMode() { return this._concurrencyMode };
+    set concurrencyMode(val: ApiCallerConcurrency) { this.setConcurrency(val) };
+
 
     // Undefined initially to prevent unneeded reactivity
     private _cancelToken: CancelTokenSource | undefined;

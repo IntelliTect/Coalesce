@@ -865,6 +865,12 @@ export const Product = domain.types.Product = {
       get typeDef() { return (domain.types.ProductDetails as ObjectType) },
       role: "value",
     },
+    uniqueId: {
+      name: "uniqueId",
+      displayName: "Unique Id",
+      type: "string",
+      role: "value",
+    },
   },
   methods: {
   },

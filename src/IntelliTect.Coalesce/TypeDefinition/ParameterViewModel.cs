@@ -97,7 +97,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string PascalCaseName => Name.ToPascalCase();
 
-        public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsDate || Type.IsBool || Type.IsEnum;
+        public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsGuid || Type.IsDate || Type.IsBool || Type.IsEnum;
 
         public string CsDeclaration
         {

@@ -248,6 +248,7 @@ export interface Product extends Model<typeof metadata.Product> {
   productId: number | null
   name: string | null
   details: ProductDetails | null
+  uniqueId: string | null
 }
 export class Product {
   

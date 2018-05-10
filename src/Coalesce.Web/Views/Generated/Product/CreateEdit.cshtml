@@ -25,6 +25,10 @@
                 <label class="col-md-4 control-label">Details</label>
                 <div class="col-md-8 prop-details">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Details, false))</div>
             </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Unique Id</label>
+                <div class="col-md-8 prop-uniqueId">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.UniqueId))</div>
+            </div>
         </div>
     </div>
 </div>

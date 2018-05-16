@@ -279,6 +279,21 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
       .then<AxiosResponse<ItemResult<$models.WeatherData>>>(r => this.$hydrateItemResult(r, $method.return))
   }
   
+  public getWeatherAsync(location: $models.Location | null, dateTime: Date | null, $config?: AxiosRequestConfig) {
+    const $method = this.$metadata.methods.getWeatherAsync
+    const $params = this.$mapParams($method, {
+      location,
+      dateTime,
+    })
+    return AxiosClient
+      .post(
+        `/${this.$metadata.controllerRoute}/GetWeatherAsync`,
+        qs.stringify($params),
+        this.$options(undefined, $config)
+      )
+      .then<AxiosResponse<ItemResult<$models.WeatherData>>>(r => this.$hydrateItemResult(r, $method.return))
+  }
+  
 }
 
 

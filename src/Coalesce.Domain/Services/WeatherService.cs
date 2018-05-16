@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Coalesce.Domain.Services
 {
@@ -11,6 +12,8 @@ namespace Coalesce.Domain.Services
     public interface IWeatherService
     {
         WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime);
+
+        Task<WeatherData> GetWeatherAsync(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime);
     }
 
     public class WeatherService : IWeatherService
@@ -23,8 +26,14 @@ namespace Coalesce.Domain.Services
         }
 
 
-        public WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime) 
+        public WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
             => new WeatherData { TempFahrenheit = 42, Humidity = db.Cases.Count(), Location = location };
+
+        public async Task<WeatherData> GetWeatherAsync (AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
+        {
+            await Task.Delay(2000);
+            return GetWeather(parameterDbContext, location, dateTime);
+        }
     }
 
     public class Location
@@ -32,7 +41,6 @@ namespace Coalesce.Domain.Services
         public string City { get; set; }
         public string State { get; set; }
         public string Zip { get; set; }
-
     }
 
     public class WeatherData

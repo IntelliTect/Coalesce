@@ -29,6 +29,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         }
 
         public CoalesceConfiguration Config { get; }
+        public ILogger<GenerationExecutor> Logger { get; private set; }
 
         public Task GenerateAsync<TGenerator>()
             where TGenerator : IRootGenerator
@@ -67,18 +68,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             var provider = services.BuildServiceProvider();
 
-            var logger = provider.GetRequiredService<ILogger<GenerationExecutor>>();
+            Logger = provider.GetRequiredService<ILogger<GenerationExecutor>>();
             var genContext = provider.GetRequiredService<GenerationContext>();
 
-            logger.LogInformation("Loading Projects:");
-            await LoadProjects(provider, logger, genContext);
+            Logger.LogInformation("Loading Projects:");
+            await LoadProjects(provider, Logger, genContext);
 
             // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
-            logger.LogInformation("Gathering Types");
+            Logger.LogInformation("Gathering Types");
             var rr = ReflectionRepository.Global;
             var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
 
-            logger.LogInformation($"Analyzing {types.Count()} Types");
+            Logger.LogInformation($"Analyzing {types.Count()} Types");
             rr.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
 
 
@@ -87,12 +88,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             var issues = validationResult.Where(r => !r.WasSuccessful);
             foreach (var issue in issues)
             {
-                if (issue.IsWarning) logger.LogWarning(issue.ToString());
-                else logger.LogError(issue.ToString());
+                if (issue.IsWarning) Logger.LogWarning(issue.ToString());
+                else Logger.LogError(issue.ToString());
             }
             if (issues.Any(i => !i.IsWarning))
             {
-                logger.LogError("Model validation failed. Exiting.");
+                Logger.LogError("Model validation failed. Exiting.");
                 return;
             }
 
@@ -107,11 +108,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 .WithModel(rr)
                 .WithOutputPath(outputPath);
 
-            logger.LogInformation("Starting Generation");
+            Logger.LogInformation("Starting Generation");
 
             await generator.GenerateAsync();
 
-            logger.LogInformation("Generation Complete");
+            Logger.LogInformation("Generation Complete");
 
         }
 

@@ -32,34 +32,65 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsStatic { get; }
 
+        /// <summary>
+        /// True if the method returns a <see cref="Task"/>
+        /// </summary>
+        public bool IsAwaitable => ReturnType.IsA<Task>();
+
         public abstract string Comment { get; }
 
         public abstract string Name { get; }
 
+        /// <summary>
+        /// Provides the raw, unaltered return type of the method.
+        /// </summary>
         public abstract TypeViewModel ReturnType { get; }
+
+        /// <summary>
+        /// Provides the return type of the method, excluding any <see cref="Task{T}"/> that may wrap it.
+        /// </summary>
+        public TypeViewModel TaskUnwrappedReturnType
+        {
+            get
+            {
+                if (!IsAwaitable) return ReturnType;
+
+                if (ReturnType.IsA(typeof(Task<>))) return ReturnType.FirstTypeArgument;
+
+                // Return type is a task, but not a generic task. Effective type is void.
+                return new ReflectionTypeViewModel(typeof(void));
+            }
+        }
 
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
         /// <summary>
         /// True if the method's return type is explicitly declared 
         /// </summary>
-        public bool ReturnsListResult => ReturnType.IsA(typeof(ListResult<>));
+        public bool ReturnsListResult => TaskUnwrappedReturnType.IsA(typeof(ListResult<>));
 
         /// <summary>
         /// The return type of the essential data returned by the method.
-        /// This discounts any <see cref="ItemResult"/> or <see cref="ListResult{T}"/> that may be wrapped around its return type.
+        /// This discounts any <see cref="ItemResult"/> or <see cref="ListResult{T}"/> that may be wrapped 
+        /// around its return type, as well as any <see cref="Task"/> or <see cref="Task{T}"/>
         /// For <see cref="ListResult{T}"/> returns, this will be <see cref="IList{T}"/>.
         /// For <see cref="ItemResult{T}"/> returns, this will be T.
         /// For any plain return type T, this will be T.
         /// </summary>
-        public TypeViewModel ResultType =>
-              ReturnsListResult
-            ? ReturnType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type // Will be a constructed generic IList<T>
-            : ReturnType.IsA(typeof(ItemResult<>))
-            ? ReturnType.PureType
-            : ReturnType.IsA(typeof(ItemResult))
-            ? new ReflectionTypeViewModel(typeof(void))
-            : ReturnType;
+        public TypeViewModel ResultType
+        {
+            get
+            {
+                var retType = TaskUnwrappedReturnType;
+
+                return
+                      // For ReturnsListResult, the result will be a constructed generic IList<T>
+                      ReturnsListResult ? retType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type
+                    : retType.IsA(typeof(ItemResult<>)) ? retType.FirstTypeArgument
+                    : retType.IsA(typeof(ItemResult)) ? new ReflectionTypeViewModel(typeof(void))
+                    : retType;
+            }
+        }
 
         /// <summary>
         /// The transport object that is returned by the API controller.
@@ -89,6 +120,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         /// <summary>
         /// Return type of the controller action for the method.
+        /// If the method is async, this will not include the Task that wraps the result.
         /// </summary>
         public string ApiActionReturnTypeDeclaration => TransportTypeGenericParameter.IsVoid
             ? TransportType.ToString()

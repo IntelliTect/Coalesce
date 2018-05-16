@@ -170,7 +170,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             foreach (var method in Model.ClientMethods)
             {
                 var returnType = method.ApiActionReturnTypeDeclaration;
-                if (!method.IsStatic)
+                if (!method.IsStatic || method.IsAwaitable)
                 {
                     returnType = $"async Task<{returnType}>";
                 }

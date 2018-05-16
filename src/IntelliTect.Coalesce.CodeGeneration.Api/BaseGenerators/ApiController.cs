@@ -91,12 +91,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         public void WriteMethodInvocation(CSharpCodeBuilder b, MethodViewModel method, string owningMember)
         {
             // Don't try to store the result in the variable if the method returns void.
-            if (!method.ReturnType.IsVoid)
+            if (!method.TaskUnwrappedReturnType.IsVoid)
             {
                 b.Append($"var {MethodResultVar} = ");
             }
 
-            b.Line($"{owningMember}.{method.Name}({method.CsArguments});");
+            var awaitSymbol = method.IsAwaitable ? "await " : "";
+            b.Line($"{awaitSymbol}{owningMember}.{method.Name}({method.CsArguments});");
         }
 
         /// <summary>
@@ -113,7 +114,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             var resultType = method.ResultType;
 
             // For methods that return ItemResult<> or ListResult<>, grab the core result data from the appropriate member.
-            if (method.ReturnType.IsA(typeof(ItemResult<>)))
+            if (method.TaskUnwrappedReturnType.IsA(typeof(ItemResult<>)))
             {
                 resultVar += ".Object";
             }
@@ -123,7 +124,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 resultVar += ".List";
             }
 
-            if (method.ReturnType.IsA<ApiResult>())
+            if (method.TaskUnwrappedReturnType.IsA<ApiResult>())
             {
                 // For any ApiResult return type, pass it to our ApiResult ctor to grab the WasSuccessful and Message props.
                 // For list results, this also copies paging information.
@@ -158,8 +159,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     b.Append($"Mapper.MapToDto<{resultType.PureType.ClassViewModel.FullyQualifiedName}, {resultType.PureType.ClassViewModel.DtoName}>");
 
                     // Only attempt to pull the include tree out of the result if the user actually typed their return type as an IQueryable.
-                    var includeTreeForMapping = resultType.IsA<IQueryable>() 
-                        ? $"includeTree ?? ({resultVar} as IQueryable)?.GetIncludeTree()" 
+                    var includeTreeForMapping = resultType.IsA<IQueryable>()
+                        ? $"includeTree ?? ({resultVar} as IQueryable)?.GetIncludeTree()"
                         : "includeTree";
 
                     b.Append($"(o, mappingContext, {includeTreeForMapping})).ToList();");

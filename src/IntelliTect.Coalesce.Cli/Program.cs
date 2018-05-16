@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.CodeGeneration.Analysis;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
@@ -107,7 +108,16 @@ namespace IntelliTect.Coalesce.Cli
             }
 
             var executor = new GenerationExecutor(config, logLevel);
-            await executor.GenerateAsync(rootGenerator);
+            try
+            {
+                await executor.GenerateAsync(rootGenerator);
+            }
+            catch (ProjectAnalysisException e)
+            {
+                // Only write the message here, not a full exception.ToString() w/ stack trace
+                executor.Logger.LogError(e.Message);
+                return -1;
+            }
 
             if (!Debugger.IsAttached) return 0;
             Console.WriteLine("Press Enter to quit");

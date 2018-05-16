@@ -44,10 +44,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
             foreach (var method in Model.ClientMethods)
             {
+                var returnType = method.ApiActionReturnTypeDeclaration;
+                if (method.IsAwaitable)
+                {
+                    returnType = $"async Task<{returnType}>";
+                }
+
                 b.DocComment($"Method: {method.Name}");
                 b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
                 b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual {method.ApiActionReturnTypeDeclaration} {method.Name} ({method.CsParameters})"))
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.Name} ({method.CsParameters})"))
                 {
                     if (method.ResultType.HasClassViewModel ||
                        (method.ResultType.PureType.HasClassViewModel && method.ResultType.IsCollection))

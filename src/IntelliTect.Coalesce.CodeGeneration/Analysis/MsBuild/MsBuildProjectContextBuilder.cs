@@ -161,7 +161,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             if (result.ExitCode != 0)
             {
                 throw new ProjectAnalysisException(
-                    $"Evaluating & building dependencies exited with code {result.ExitCode}",
+                    $"{projectPath}: Evaluating & building dependencies exited with code {result.ExitCode}",
                     outputLines);
             }
             try

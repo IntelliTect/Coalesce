@@ -596,6 +596,11 @@ namespace IntelliTect.Coalesce
         {
             var (result, tree) = await GetListAsync(parameters);
 
+            if (!result.WasSuccessful || result.List == null)
+            {
+                return new ListResult<TDto>(result);
+            }
+
             TransformResults(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);

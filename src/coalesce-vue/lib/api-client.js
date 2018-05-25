@@ -8,6 +8,14 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
 import { mapToDto, mapValueToDto, convertValueToModel } from './model';
 import axios from 'axios';
 import * as qs from 'qs';
@@ -91,9 +99,9 @@ var ApiClient = /** @class */ (function () {
      */
     ApiClient.prototype.$options = function (parameters, config, queryParams) {
         // Merge standard Coalesce params with general configured params if there are any.
-        var mergedParams = Object.assign({}, queryParams, config && config.params ? config.params : null, this.$serializeParams(parameters));
+        var mergedParams = __assign({}, queryParams, (config && config.params ? config.params : null), this.$serializeParams(parameters));
         // Params come last to overwrite config.params with our merged params object.
-        return Object.assign({}, { cancelToken: this._nextCancelToken && this._nextCancelToken.token }, config, { params: mergedParams });
+        return __assign({ cancelToken: (this._nextCancelToken && this._nextCancelToken.token) || undefined }, config, { params: mergedParams });
     };
     ApiClient.prototype.$serializeParams = function (parameters) {
         if (!parameters)

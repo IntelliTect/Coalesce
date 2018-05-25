@@ -13,13 +13,10 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 /** Utility function for creating the required properties of `EnumType<>` from an array of `EnumValue`  */
 export function getEnumMeta(values) {
     return {
-        valueLookup: __assign({}, values.reduce(function (obj, v) {
-            return Object.assign(obj, (_a = {},
-                _a[v.strValue] = v,
-                _a[v.value] = v,
-                _a));
+        valueLookup: values.reduce(function (obj, v) {
+            return __assign({}, obj, (_a = {}, _a[v.strValue] = v, _a[v.value] = v, _a));
             var _a;
-        }, {})),
+        }, {}),
         values: values
     };
 }

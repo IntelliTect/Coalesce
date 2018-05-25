@@ -227,18 +227,17 @@ export class ApiClient<T extends ApiRoutedType> {
         config?: AxiosRequestConfig,
         queryParams?: any
     ): AxiosRequestConfig {
-        // Merge standard Coalesce params with general configured params if there are any.
-        var mergedParams: any = { 
-            ...queryParams,
-            ...(config && config.params ? config.params : null), 
-            ...this.$serializeParams(parameters)
-        }
-
-        // Params come last to overwrite config.params with our merged params object.
         return {
-            cancelToken: this._nextCancelToken && this._nextCancelToken.token, 
+            cancelToken: (this._nextCancelToken && this._nextCancelToken!.token) || undefined, 
             ...config, 
-            params: mergedParams
+
+            // Merge standard Coalesce params with general configured params if there are any.
+            // Params come last to overwrite config.params with our merged params object.
+            params: { 
+                ...queryParams,
+                ...(config && config.params ? config.params : null), 
+                ...this.$serializeParams(parameters)
+            }
         }
     }
 

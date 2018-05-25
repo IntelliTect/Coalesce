@@ -193,10 +193,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                             restorePackages = true;
                         }
                         else if (TestLinesForRetry(
+                            // "Error CSxxxx" - don't trigger retries on any C# errors.
+                            // This will include "type or namespace 'x' could not be found".
+                            "error cs"
+                        ))
+                        {
+                            // Don't retry
+                        }
+                        else if (TestLinesForRetry(
                              "not copy the file",
                              "not found",
                              "could not find",
-                             "could not be found",
+                             "could not be found", // Caution: "type or namespace 'x' could not be found" looks like this.
                              "msb3491",
                              "being used by another process"
                         )) {

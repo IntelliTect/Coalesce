@@ -354,7 +354,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
                 PrimaryKey
             }
-            .Where(p => p.IsClientProperty && p?.HasNotMapped == false)
+            .Where(p => p != null && p.IsClientProperty && p.HasNotMapped == false)
             .Select(p => new SearchableValueProperty(p))
             .FirstOrDefault();
         }

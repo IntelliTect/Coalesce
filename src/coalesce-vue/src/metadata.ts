@@ -144,12 +144,13 @@ export function getEnumMeta<K extends string>(values: EnumMember[]): {
     readonly values: EnumMember[]
 } {
     return {
-        valueLookup: {
-            ...values.reduce((obj, v) => Object.assign(obj, {
+        valueLookup: 
+            values.reduce((obj, v) => { return { 
+                ...obj, 
                 [v.strValue]: v, 
                 [v.value]: v
-            } as EnumMembers<K>), {} as any)
-        }, 
+            } as EnumMembers<K>}, {} as any)
+        , 
         values: values
     }
 }

@@ -1,4 +1,4 @@
-
+skip_tags: true
 environment:
   coalesce_version: 2.1.0
   NPM_TOKEN:

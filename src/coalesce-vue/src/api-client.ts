@@ -3,7 +3,7 @@
 declare module "vue/types/vue" {
     interface VueConstructor<V extends Vue = Vue> {
         util: {
-            defineReactive: (obj: any, key: string, val: any, setter: Function | null, shallow: boolean) => void
+            defineReactive: (obj: any, key: string, val: any, setter?: Function | null, shallow?: boolean) => void
         }
     }
 }
@@ -547,7 +547,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
             const value = this[stateProp]
             // Don't define sealed object properties (e.g. this._callbacks)
             if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(this, stateProp, this[stateProp], null, true)
+                Vue.util.defineReactive(this, stateProp, this[stateProp])
             }
         }
     }

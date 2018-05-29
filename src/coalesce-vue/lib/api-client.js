@@ -98,10 +98,10 @@ var ApiClient = /** @class */ (function () {
      * @param queryParams An object with an additional querystring parameters.
      */
     ApiClient.prototype.$options = function (parameters, config, queryParams) {
-        // Merge standard Coalesce params with general configured params if there are any.
-        var mergedParams = __assign({}, queryParams, (config && config.params ? config.params : null), this.$serializeParams(parameters));
-        // Params come last to overwrite config.params with our merged params object.
-        return __assign({ cancelToken: (this._nextCancelToken && this._nextCancelToken.token) || undefined }, config, { params: mergedParams });
+        return __assign({ cancelToken: (this._nextCancelToken && this._nextCancelToken.token) || undefined }, config, { 
+            // Merge standard Coalesce params with general configured params if there are any.
+            // Params come last to overwrite config.params with our merged params object.
+            params: __assign({}, queryParams, (config && config.params ? config.params : null), this.$serializeParams(parameters)) });
     };
     ApiClient.prototype.$serializeParams = function (parameters) {
         if (!parameters)
@@ -384,7 +384,7 @@ var ApiState = /** @class */ (function (_super) {
             var value = this[stateProp];
             // Don't define sealed object properties (e.g. this._callbacks)
             if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(this, stateProp, this[stateProp], null, true);
+                Vue.util.defineReactive(this, stateProp, this[stateProp]);
             }
         }
     };

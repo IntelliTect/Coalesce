@@ -29,13 +29,14 @@ export declare function convertToModel<TMeta extends ClassType, TModel extends M
 export declare function convertValueToModel(value: any, metadata: Value): any | null;
 /**
  * Maps the given object with data properties into a valid implemenation of TModel.
- * This function returns a new copy of its input and all descendent properties of its input - it does not preserve original objects.
+ * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
  * @param object The object with data properties that should be mapped to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
 export declare function mapToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {
     [k: string]: any;
 }, metadata: TMeta): TModel;
+export declare function updateFromModel<TMeta extends ClassType, TModel extends Model<TMeta>>(target: TModel, source: TModel): TModel;
 export declare function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null;
 export declare function mapValueToDto(value: any, metadata: Value): any | null;
 /**

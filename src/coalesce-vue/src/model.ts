@@ -195,7 +195,7 @@ export function convertValueToModel(value: any, metadata: Value): any | null {
 
 /**
  * Maps the given object with data properties into a valid implemenation of TModel.
- * This function returns a new copy of its input and all descendent properties of its input - it does not preserve original objects.
+ * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
  * @param object The object with data properties that should be mapped to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
@@ -205,8 +205,44 @@ export function mapToModel<TMeta extends ClassType, TModel extends Model<TMeta>>
     return new ModelConversionVisitor("map").visitObject(object, metadata);
 }
 
+export function updateFromModel<TMeta extends ClassType, TModel extends Model<TMeta>>(target: TModel, source: TModel): TModel {
 
+    return Object.assign(target, source);
+    // I was going to go further with this and make it more like the Knockout code,
+    // but I'm not sure that's whats best. The knockout code did what it did largely to trick
+    // knockout into being performant. I think that if complex object merging strategies are needed,
+    // we should build that as a configurable feature of the ViewModels, and not have it be the default behavior.
+    // For now, we'll just object.assign and call it good.
 
+    /*
+    const metadata = target.$metadata;
+
+    for (const prop of Object.values(metadata.props).filter(p => p.type == "collection")) {
+
+        switch (prop.type) {
+            case "collection":
+                switch (prop.role) {
+                    case "value":
+                        // something 
+                        break;
+                    case "collectionNavigation":
+                        // something 
+                        break;
+                }
+                break;
+            case "model":
+            case "object":
+                // something 
+                break;
+            default: 
+                // @ts-ignore
+                target[propName] = source[propName];
+        }
+    }
+
+    // Continue for objects, and then for values, in a similar fashion to the knockout code.
+    */
+}
 
 class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | undefined> {
     private depth: number = 0;

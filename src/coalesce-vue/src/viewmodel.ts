@@ -5,7 +5,7 @@ import debounce from 'lodash-es/debounce';
 
 import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, ObjectType } from './metadata';
 import { ApiClient, ItemResult, ItemApiState, ListResult, ListApiState, ModelApiClient, ListParameters } from './api-client';
-import { Model, modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
+import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
 import { Indexable } from './util';
 import { Cancelable } from 'lodash';
 
@@ -82,8 +82,13 @@ export abstract class ViewModel<
      */
     public $load = this.$apiClient.$makeCaller("item",
         c => (id?: string | number) => c.get(id != null ? id : this.$primaryKey))
-        // TODO: merge in the result, don't replace the existing one.
-        .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
+        .onFulfilled(() => { 
+            if (this.$load.result) {
+                updateFromModel(this.$data, this.$load.result);
+                this.$isDirty = false; 
+            }
+
+        })
 
     /**
      * A function for invoking the /save endpoint, and a set of properties about the state of the last call.
@@ -97,14 +102,15 @@ export abstract class ViewModel<
             return c.save(this.$data);
         })
         .onFulfilled(() => { 
+            // Only load the save response if the data hasn't changed since we sent it.
+            // If the data has changed, loading the response would overwrite users' changes.
             if (!this.$isDirty){
-                // Only load the save response if the data hasn't changed since we sent it.
-                // If the data has changed, loading the response would overwrite users' changes.
-                // TODO: merge in the result, don't replace the existing one.
-                this.$data = this.$save.result || this.$data; 
+                if (this.$save.result) {
+                    updateFromModel(this.$data, this.$save.result);
+                    // Set the new state of our data as being clean (since we just made a change to it)
+                    this.$isDirty = false;
+                }
 
-                // Set the new state of our data as being clean (since we just made a change to it)
-                this.$isDirty = false;
             }
         })
         

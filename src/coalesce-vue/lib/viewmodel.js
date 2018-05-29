@@ -1,7 +1,7 @@
 import debounce from 'lodash-es/debounce';
 import { resolvePropMeta } from './metadata';
 import { ListParameters } from './api-client';
-import { modelDisplay, propDisplay, mapToDto, convertToModel } from './model';
+import { modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
  * @param ctor The class to add wrapper properties to
@@ -53,8 +53,12 @@ var ViewModel = /** @class */ (function () {
          * A function for invoking the /get endpoint, and a set of properties about the state of the last call.
          */
         this.$load = this.$apiClient.$makeCaller("item", function (c) { return function (id) { return c.get(id != null ? id : _this.$primaryKey); }; })
-            // TODO: merge in the result, don't replace the existing one.
-            .onFulfilled(function () { _this.$data = _this.$load.result || _this.$data; _this.$isDirty = false; });
+            .onFulfilled(function () {
+            if (_this.$load.result) {
+                updateFromModel(_this.$data, _this.$load.result);
+                _this.$isDirty = false;
+            }
+        });
         /**
          * A function for invoking the /save endpoint, and a set of properties about the state of the last call.
          */
@@ -66,13 +70,14 @@ var ViewModel = /** @class */ (function () {
             return c.save(_this.$data);
         }; })
             .onFulfilled(function () {
+            // Only load the save response if the data hasn't changed since we sent it.
+            // If the data has changed, loading the response would overwrite users' changes.
             if (!_this.$isDirty) {
-                // Only load the save response if the data hasn't changed since we sent it.
-                // If the data has changed, loading the response would overwrite users' changes.
-                // TODO: merge in the result, don't replace the existing one.
-                _this.$data = _this.$save.result || _this.$data;
-                // Set the new state of our data as being clean (since we just made a change to it)
-                _this.$isDirty = false;
+                if (_this.$save.result) {
+                    updateFromModel(_this.$data, _this.$save.result);
+                    // Set the new state of our data as being clean (since we just made a change to it)
+                    _this.$isDirty = false;
+                }
             }
         });
         /**

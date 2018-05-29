@@ -1,7 +1,7 @@
 declare module "vue/types/vue" {
     interface VueConstructor<V extends Vue = Vue> {
         util: {
-            defineReactive: (obj: any, key: string, val: any, setter: Function | null, shallow: boolean) => void;
+            defineReactive: (obj: any, key: string, val: any, setter?: Function | null, shallow?: boolean) => void;
         };
     }
 }

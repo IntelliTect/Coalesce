@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.Coalesce.Api.DataSources
 {
@@ -94,7 +95,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                     Metadata = property,
                     CacheToken = property,
                 })
-            ));
+            ), new LoggerFactory() );
 
             // Enter a nested scope for binding the properties on our dataSource
             // (we're now 1 level deep instead of 0 levels deep).

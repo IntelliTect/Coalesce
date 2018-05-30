@@ -12,7 +12,7 @@ namespace Coalesce.Web
     {
         public static void Main(string[] args)
         {
-            var host = BuildWebHost(args);
+            var host = CreateWebHostBuilder(args).Build();
 
             // https://docs.microsoft.com/en-us/aspnet/core/migration/1x-to-2x/#move-database-initialization-code
             using (var scope = host.Services.CreateScope())
@@ -33,10 +33,9 @@ namespace Coalesce.Web
 
             host.Run();
         }
-        
-        public static IWebHost BuildWebHost(string[] args) =>
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
+                .UseStartup<Startup>();
     }
 }

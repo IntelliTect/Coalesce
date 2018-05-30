@@ -1,5 +1,6 @@
 using System;
 using System.Security.Claims;
+using Coalesce.Domain;
 using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;

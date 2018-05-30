@@ -5,8 +5,8 @@
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
     <!--
       IMPORTANT NOTE REGARDING ENTITYFRAMEWORK MIGRATIONS (Ctrl+f: EFCore, EF Core):
-      All EF commands need to be ran with - -framework netcoreapp2.0. E.g.:
-      dotnet ef database update - -framework netcoreapp2.0 
+      All EF commands need to be ran with - -framework netcoreapp2.1. E.g.:
+      dotnet ef database update - -framework netcoreapp2.1 
       (no space between the dashes; space is there because double dash is illegal in XML comments).
     -->
     <TargetFrameworks>netstandard2.0;netcoreapp2.1;net462</TargetFrameworks>

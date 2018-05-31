@@ -20,7 +20,7 @@ before_build:
 # test: off
 build:
   project: Coalesce.sln
-  verbosity: normal
+  verbosity: minimal
 after_build:
   - dotnet pack -c %CONFIGURATION% 
 artifacts:

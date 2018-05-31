@@ -17,7 +17,7 @@ before_build:
   - ps: '"//registry.npmjs.org/:_authToken=$env:NPM_TOKEN`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
   - ps: npm whoami
   - cmd: node --version && npm --version
-  - cmd: dotnet restore
+  - cmd: C:\dotnet21\dotnet.exe restore
   - cmd: cd ./src/coalesce-vue && yarn && yarn version --no-git-tag-version --new-version %APPVEYOR_BUILD_VERSION% && yarn build
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
@@ -34,7 +34,7 @@ build:
   project: Coalesce.sln
   verbosity: minimal
 after_build:
-  - dotnet pack -c %CONFIGURATION% 
+  - cmd: C:\dotnet21\dotnet.exe pack -c %CONFIGURATION% 
 artifacts:
   - path: '**\*.nupkg'
 

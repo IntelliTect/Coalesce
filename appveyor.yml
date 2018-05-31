@@ -15,10 +15,11 @@ nuget:
 before_build:
   - ps: Install-Product node 9
   - ps: >-
-    if ($env:APPVEYOR_PULL_REQUEST_NUMBER -neq "") {
+      if ($env:APPVEYOR_PULL_REQUEST_NUMBER -neq "") {
         '"//registry.npmjs.org/:_authToken=$env:NPM_TOKEN`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
         npm whoami
-    }
+      }
+
   - cmd: node --version && npm --version
   - cmd: dotnet restore
   - cmd: cd ./src/coalesce-vue && yarn && yarn version --no-git-tag-version --new-version %APPVEYOR_BUILD_VERSION% && yarn build
@@ -35,7 +36,7 @@ before_build:
 # test: off
 build:
   project: Coalesce.sln
-  verbosity: minimal
+  verbosity: normal
 after_build:
   - dotnet pack -c %CONFIGURATION% 
 artifacts:

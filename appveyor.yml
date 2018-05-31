@@ -1,23 +1,23 @@
 skip_tags: true
 environment:
   coalesce_version: 2.1.0
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
   NPM_TOKEN:
     secure: PpvAZnPCnGvKx69JHFV2FowUIpo0jgV1g1jJpuuPmDyZij9RwMcjuGIAKfsSiaQH
 
-image: Visual Studio 2017
+image: Visual Studio 2017 Preview
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
   - '%LocalAppData%\Yarn\cache'
 nuget:
   disable_publish_on_pr: true
 before_build:
-  - ps: invoke-webrequest -Out dotnet21.zip https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip
-  - ps: Expand-Archive dotnet21.zip -Force -DestinationPath c:\dotnet21\ > $null
   - ps: Install-Product node 9
   - ps: '"//registry.npmjs.org/:_authToken=$env:NPM_TOKEN`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
   - ps: npm whoami
   - cmd: node --version && npm --version
-  - cmd: C:\dotnet21\dotnet.exe restore
+  - cmd: dotnet restore
   - cmd: cd ./src/coalesce-vue && yarn && yarn version --no-git-tag-version --new-version %APPVEYOR_BUILD_VERSION% && yarn build
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
@@ -34,7 +34,7 @@ build:
   project: Coalesce.sln
   verbosity: minimal
 after_build:
-  - cmd: C:\dotnet21\dotnet.exe pack -c %CONFIGURATION% 
+  - dotnet pack -c %CONFIGURATION% 
 artifacts:
   - path: '**\*.nupkg'
 

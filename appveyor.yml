@@ -13,23 +13,7 @@ cache:
 nuget:
   disable_publish_on_pr: true
 before_build:
-  - ps: Install-Product node 9
-  - ps: >-
-      if ($env:APPVEYOR_PULL_REQUEST_NUMBER -neq "") {
-        '"//registry.npmjs.org/:_authToken=$env:NPM_TOKEN`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
-        npm whoami
-      }
-
-  - cmd: node --version && npm --version
-  - cmd: dotnet restore
-  - cmd: cd ./src/coalesce-vue && yarn && yarn version --no-git-tag-version --new-version %APPVEYOR_BUILD_VERSION% && yarn build
-  - cmd: cd ./src/Coalesce.Web && yarn
-  - cmd: cd ./src/Coalesce.Web.Vue && yarn
-  - cmd: yarn global add gulp-cli
-  # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
-  # I don't want to add gulp to Coalesce.Web.Vue
-  - cmd: cd ./src/Coalesce.Web && gulp coalesce-ko
-  - cmd: cd ./src/Coalesce.Web && gulp coalesce-vue
+  - ps: ./build/before_build.ps1
 # Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
 # cd ..\Coalesce.Domain
 # dotnet ef database update --framework netcoreapp2.1

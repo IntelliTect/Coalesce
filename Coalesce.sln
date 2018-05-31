@@ -42,6 +42,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.CodeGe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.CodeGeneration.Api", "src\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj", "{2F87C06D-22C5-453C-94DB-D78B1D8CAED6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6AE7A58D-0F88-443F-9443-3E0569853B85}"
+	ProjectSection(SolutionItems) = preProject
+		build\before_build.ps1 = build\before_build.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_x86|Any CPU = debug_x86|Any CPU

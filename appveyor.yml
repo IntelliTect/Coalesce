@@ -11,6 +11,8 @@ cache:
 nuget:
   disable_publish_on_pr: true
 before_build:
+  - ps: invoke-webrequest -Out dotnet21.zip https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip
+  - ps: Expand-Archive dotnet21.zip -Force -DestinationPath c:\dotnet21\ > $null
   - ps: Install-Product node 9
   - ps: '"//registry.npmjs.org/:_authToken=$env:NPM_TOKEN`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
   - ps: npm whoami

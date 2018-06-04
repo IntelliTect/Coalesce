@@ -20,7 +20,7 @@ before_build:
 # dotnet ef database update --framework netcoreapp2.1
 # test: off
 build_script:
-  - msbuild .\Coalesce.sln /p:Configuration=%CONFIGURATION% /verbosity:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild Coalesce.sln /p:Configuration=%CONFIGURATION% /verbosity:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 after_build:
   - dotnet pack -c %CONFIGURATION% 
 artifacts:

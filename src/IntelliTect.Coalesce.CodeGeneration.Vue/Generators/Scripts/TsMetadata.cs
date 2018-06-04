@@ -138,7 +138,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 foreach (var value in model.EnumValues)
                 {
                     // TODO: allow for localization of displayName
-                    b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value}' }},");
+                    b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value.ToProperCase()}' }},");
                 }
                 b.Line("]),");
             }

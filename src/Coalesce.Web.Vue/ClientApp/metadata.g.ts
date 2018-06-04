@@ -10,7 +10,7 @@ export const Genders = domain.enums.Genders = {
   displayName: "Genders",
   type: "enum",
   ...getEnumMeta<"NonSpecified"|"Male"|"Female">([
-    { value: 0, strValue: 'NonSpecified', displayName: 'NonSpecified' },
+    { value: 0, strValue: 'NonSpecified', displayName: 'Non Specified' },
     { value: 1, strValue: 'Male', displayName: 'Male' },
     { value: 2, strValue: 'Female', displayName: 'Female' },
   ]),
@@ -21,9 +21,9 @@ export const Statuses = domain.enums.Statuses = {
   type: "enum",
   ...getEnumMeta<"Open"|"InProgress"|"Resolved"|"ClosedNoSolution"|"Cancelled">([
     { value: 0, strValue: 'Open', displayName: 'Open' },
-    { value: 1, strValue: 'InProgress', displayName: 'InProgress' },
+    { value: 1, strValue: 'InProgress', displayName: 'In Progress' },
     { value: 2, strValue: 'Resolved', displayName: 'Resolved' },
-    { value: 3, strValue: 'ClosedNoSolution', displayName: 'ClosedNoSolution' },
+    { value: 3, strValue: 'ClosedNoSolution', displayName: 'Closed No Solution' },
     { value: 4, strValue: 'Cancelled', displayName: 'Cancelled' },
   ]),
 }

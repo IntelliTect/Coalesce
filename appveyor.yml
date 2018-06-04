@@ -2,11 +2,12 @@ skip_tags: true
 environment:
   coalesce_version: 2.1.0
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  NET_CORE_VERSION: netcoreapp2.1
   NPM_TOKEN:
     secure: PpvAZnPCnGvKx69JHFV2FowUIpo0jgV1g1jJpuuPmDyZij9RwMcjuGIAKfsSiaQH
 
-image: Visual Studio 2017 Preview
+image: Visual Studio 2017
 cache: 
   - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
   - '%LocalAppData%\Yarn\cache'

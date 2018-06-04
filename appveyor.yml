@@ -13,6 +13,7 @@ cache:
   - '%LocalAppData%\Yarn\cache'
 nuget:
   disable_publish_on_pr: true
+platform: Any CPU
 before_build:
   - ps: ./build/before_build.ps1
 # Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
@@ -20,7 +21,7 @@ before_build:
 # dotnet ef database update --framework netcoreapp2.1
 # test: off
 build_script:
-  - msbuild "C:\projects\coalesce\Coalesce.sln" /p:Configuration=%CONFIGURATION% /verbosity:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild "C:\projects\coalesce\Coalesce.sln" /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% /verbosity:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 after_build:
   - dotnet pack -c %CONFIGURATION% 
 artifacts:

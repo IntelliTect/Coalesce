@@ -61,8 +61,10 @@ export abstract class ViewModel<
     // Will always be reactive - is definitely assigned in the ctor.
     public $data: Indexable<TModel>
 
-    // Won't be reactive, and shouldn't be.
-    private _pristineDto: any;
+    // Must be initialized so it will be reactive.
+    // If this isn't reactive, $isDirty won't be reactive.
+	// Technically this will always be initialized by the setting of `$isDirty` in the ctor.
+    private _pristineDto: any = null;
 
     /**
      * Gets or sets the primary key of the ViewModel's data.
@@ -102,15 +104,23 @@ export abstract class ViewModel<
             return c.save(this.$data);
         })
         .onFulfilled(() => { 
-            // Only load the save response if the data hasn't changed since we sent it.
-            // If the data has changed, loading the response would overwrite users' changes.
-            if (!this.$isDirty){
-                if (this.$save.result) {
-                    updateFromModel(this.$data, this.$save.result);
-                    // Set the new state of our data as being clean (since we just made a change to it)
-                    this.$isDirty = false;
-                }
+            if (!this.$save.result) {
+                // Can't do anything useful if the save returned no data.
+                return;
+            }
 
+            if (this.$isDirty) {
+                // If our model DID change while the save was in-flight,
+                // update the pristine version of the model with what came back from the save,
+                // but don't load the data into the `$data` prop.
+                // This helps `$isDirty` to work as expected.
+                this._pristineDto = mapToDto(this.$save.result)
+            } else {
+                // Only load the save response if the data hasn't changed since we sent it.
+                // If the data has changed, loading the response would overwrite users' changes.
+                updateFromModel(this.$data, this.$save.result);
+                // Set the new state of our data as being clean (since we just made a change to it)
+                this.$isDirty = false;
             }
         })
         
@@ -150,6 +160,12 @@ export abstract class ViewModel<
 
                 // No saves in progress - go ahead and save now.
                 this.$save()
+                    // After the save finishes, attempt another autosave.
+                    // If the model has become dirty since the last save,
+                    // we need to save again.
+                    // This will happen if the state of the model changes while the save
+                    // is in-flight.
+                    .then(enqueueSave) 
             }
         }, wait)
 

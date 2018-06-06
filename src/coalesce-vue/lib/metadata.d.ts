@@ -90,7 +90,7 @@ export interface Service extends Metadata, ApiRoutedType {
 /** Represents a value of an enum */
 export interface EnumMember {
     readonly strValue: string;
-    readonly displayName: string;
+    displayName: string;
     readonly value: number;
 }
 /** A dictionary with both string and numeric keys for looking up `EnumValue` objects by their string or numeric value. */

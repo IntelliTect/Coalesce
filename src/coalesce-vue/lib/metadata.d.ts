@@ -184,16 +184,19 @@ export declare type CustomTypeValue = EnumValue | ObjectValue | ModelValue;
 export declare type NonCollectionValue = PrimitiveValue | DateValue | CustomTypeValue;
 /** Union of all representations of the usage of a type */
 export declare type Value = NonCollectionValue | CollectionValue;
+export interface PropertyBase {
+    readonly isReadOnly?: true | undefined;
+}
 /** Represents a primitive property */
-export interface PrimitiveProperty extends PrimitiveValue {
+export interface PrimitiveProperty extends PropertyBase, PrimitiveValue {
     readonly role: "value";
 }
-export interface PrimaryKeyProperty extends PrimitiveValue {
+export interface PrimaryKeyProperty extends PropertyBase, PrimitiveValue {
     readonly role: "primaryKey";
     readonly type: "string" | "number";
 }
 /** Represents a property that serves as a foreign key */
-export interface ForeignKeyProperty extends PrimitiveValue {
+export interface ForeignKeyProperty extends PropertyBase, PrimitiveValue {
     readonly role: "foreignKey";
     readonly type: "string" | "number";
     readonly principalKey: PrimaryKeyProperty;
@@ -201,26 +204,26 @@ export interface ForeignKeyProperty extends PrimitiveValue {
     readonly navigationProp?: ModelReferenceNavigationProperty;
 }
 /** Represents a date property */
-export interface DateProperty extends DateValue {
+export interface DateProperty extends PropertyBase, DateValue {
 }
 /** Represents an enum property */
-export interface EnumProperty extends EnumValue {
+export interface EnumProperty extends PropertyBase, EnumValue {
 }
 /** Represents an object property */
-export interface ObjectProperty extends ObjectValue {
+export interface ObjectProperty extends PropertyBase, ObjectValue {
 }
 /**
  * Represents a model property that simply exists as a value,
  * not as a relational navigation property.
  */
-export interface ModelValueProperty extends ModelValue {
+export interface ModelValueProperty extends PropertyBase, ModelValue {
     readonly role: "value";
 }
 /**
  * Represents an object property that represents the foreign end of
  * a 1-to-1 or 1-to-many relationship in a relational model.
  */
-export interface ModelReferenceNavigationProperty extends ModelValue {
+export interface ModelReferenceNavigationProperty extends PropertyBase, ModelValue {
     readonly role: "referenceNavigation";
     readonly foreignKey: ForeignKeyProperty;
     readonly principalKey: PrimaryKeyProperty;
@@ -229,14 +232,14 @@ export interface ModelReferenceNavigationProperty extends ModelValue {
  * Represents a collection property that simple contains values that do not
  * have any special meaning in a relational model.
  */
-export interface BasicCollectionProperty extends CollectionValue {
+export interface BasicCollectionProperty extends PropertyBase, CollectionValue {
     readonly role: "value";
 }
 /**
  * Represents a collection property that represents
  * the foreign objects in a many-to-1 relationship in a relational model.
  */
-export interface ModelCollectionNavigationProperty extends CollectionValue {
+export interface ModelCollectionNavigationProperty extends PropertyBase, CollectionValue {
     readonly role: "collectionNavigation";
     /**
      * Reference to the property on the type contained in this collection that relates

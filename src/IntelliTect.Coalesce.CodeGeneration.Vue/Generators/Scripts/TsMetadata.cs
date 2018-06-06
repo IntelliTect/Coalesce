@@ -216,6 +216,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.StringProp("role", "value");
                         break;
                 }
+
+                if (prop.IsReadOnly)
+                {
+                    b.Line("isReadOnly: true,");
+                }
             }
         }
 

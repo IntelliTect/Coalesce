@@ -16,10 +16,10 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
+import Vue from 'vue';
 import { mapToDto, mapValueToDto, convertValueToModel } from './model';
 import axios from 'axios';
 import * as qs from 'qs';
-import Vue from 'vue';
 var DataSourceParameters = /** @class */ (function () {
     function DataSourceParameters() {
         this.includes = null;

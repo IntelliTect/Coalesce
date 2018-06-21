@@ -258,9 +258,10 @@ export interface Method extends Metadata {
         [paramName in string]: Value;
     };
 }
-export declare type PropNames<TMeta extends ClassType, Kind extends Property = Property> = {
-    [K in keyof TMeta["props"]]: TMeta["props"][K] extends Kind ? K : never;
-}[keyof TMeta["props"]];
+export declare type PropsNames<Props extends ClassType["props"], Kind extends Property = Property> = {
+    [K in Extract<keyof Props, string>]: Props[K] extends Kind ? K : never;
+}[Extract<keyof Props, string>];
+export declare type PropNames<TMeta extends ClassType, Kind extends Property = Property> = PropsNames<ClassType["props"], Kind>;
 export declare type PropertyOrName<TMeta extends ClassType> = Property | PropNames<TMeta, Property>;
 export declare function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string): Exclude<TProp, string>;
 export declare function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string, slient: true): Exclude<TProp, string> | undefined;

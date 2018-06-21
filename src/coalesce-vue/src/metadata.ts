@@ -384,8 +384,13 @@ export interface Method extends Metadata  {
    -----------------------------
 */
 
-export type PropNames<TMeta extends ClassType, Kind extends Property = Property>
-    = { [K in keyof TMeta["props"]]: TMeta["props"][K] extends Kind ? K : never }[keyof TMeta["props"]];
+
+export type PropsNames<Props extends ClassType["props"], Kind extends Property = Property> = { 
+    [K in Extract<keyof Props, string>]: Props[K] extends Kind ? K : never 
+}[Extract<keyof Props, string>];
+
+export type PropNames<TMeta extends ClassType, Kind extends Property = Property> = 
+    PropsNames<ClassType["props"], Kind>;
 
 // This doesn't support restriction of property kind - typescript makes unintelligible intellisense tooltips if we do.
 export type PropertyOrName<TMeta extends ClassType>

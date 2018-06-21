@@ -247,6 +247,8 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
         var output = {};
         for (var propName in props) {
             var propMeta = props[propName];
+            if (propMeta.isReadOnly)
+                continue;
             if (propName in value) {
                 var newValue = this.visitValue(value[propName], propMeta);
                 if (newValue !== undefined) {

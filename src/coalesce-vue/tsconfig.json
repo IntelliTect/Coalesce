@@ -10,10 +10,19 @@
     "declaration": true,
     "lib": ["es2015", "es2017", "dom"],
 
-    "outDir": "./lib",
+    "types": [
+      "node",
+      "jest"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
   },
     
-  "include": [
-      "src/**/*"
-  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

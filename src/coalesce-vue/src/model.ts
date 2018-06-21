@@ -27,6 +27,7 @@ class Visitor<TValue = any, TArray = any[], TObject = any> {
 
     public visitValue(value: any, meta: Value): TValue | TArray | TObject {
         switch (meta.type) {
+            case undefined: throw "Missing type on value metadata";
             case "model": return this.visitModelValue(value, meta);
             case "object": return this.visitObjectValue(value, meta);
             case "collection": return this.visitCollection(value, meta);
@@ -257,6 +258,9 @@ class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | 
         const output: any = {}
         for (const propName in props) {
             const propMeta = props[propName];
+            
+            if (propMeta.isReadOnly) continue;
+
             if (propName in value) {
                 const newValue = this.visitValue(value[propName], propMeta);
                 if (newValue !== undefined) {
@@ -290,9 +294,10 @@ class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | 
         // If we've exceded max depth, return undefined to prevent the 
         // creation of an entry in the parent object for this collection.
         if (this.depth >= this.maxObjectDepth) return undefined;
-        this.depth++;
+        
+        // Don't increase depth for collections - only objects increase depth.
         const ret = super.visitCollection(value, meta);
-        this.depth--;
+        
         return ret;
     }
 
@@ -332,7 +337,7 @@ export function mapValueToDto(value: any, metadata: Value): any | null {
 
 
 /** Visitor that maps its input to a string representation of its value, suitable for display. */
-class GetDisplayVisitor extends Visitor<string | null, string | null, string | null> {
+class DisplayVisitor extends Visitor<string | null, string | null, string | null> {
     public visitObject(value: any, meta: ClassType): string | null {
         if (value == null) return value;
 
@@ -364,7 +369,7 @@ class GetDisplayVisitor extends Visitor<string | null, string | null, string | n
                 )
                 .join(", ")
         }
-        return value.length.toLocaleString();
+        return value.length.toLocaleString() + " items"; // TODO: i18n
     }
 
     public visitEnumValue(value: any, meta: EnumValue): string | null {
@@ -386,7 +391,7 @@ class GetDisplayVisitor extends Visitor<string | null, string | null, string | n
 }
 
 /** Singleton instance of `GetDisplayVisitor`, since the visitor is stateless. */
-const displayVisitor = new GetDisplayVisitor();
+const displayVisitor = new DisplayVisitor();
 
 /**
  * Given a model instance, return a string representation of the instance suitable for display.

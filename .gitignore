@@ -40,6 +40,9 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
+# Jest Coverage
+coverage/
+
 *_i.c
 *_p.c
 *_i.h

@@ -71,20 +71,21 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 yield break;
             }
 
+            var propType = Property.Type;
             var propertyAccessor = propertyParent == null
                 ? Property.Name
                 : $"{propertyParent}.{Property.Name}";
 
-            if (Property.Type.IsDate)
+            if (propType.IsDate)
             {
                 string DateLiteral(DateTime date)
                 {
-                    if (Property.Type.IsDateTimeOffset && date.Kind != DateTimeKind.Utc)
+                    if (propType.IsDateTimeOffset && date.Kind != DateTimeKind.Utc)
                         throw new ArgumentException("datetimeoffset comparand must be a UTC date.");
 
                     return $"{Property.PureType.Name}" +
                         $"({date.Year}, {date.Month}, {date.Day}, {date.Hour}, {date.Minute}, {date.Second}" +
-                        $"{(Property.Type.IsDateTimeOffset ? " , TimeSpan(0)" : "")})";
+                        $"{(propType.IsDateTimeOffset ? " , TimeSpan(0)" : "")})";
                 }
 
 
@@ -101,7 +102,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         out dt
                     ))
                     {
-                        if (Property.Type.IsDateTimeOffset)
+                        if (propType.IsDateTimeOffset)
                             dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
 
                         if (formatInfo.Value == (ParseFlags.HaveYear | ParseFlags.HaveMonth))
@@ -141,7 +142,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         range = TimeSpan.FromMinutes(1);
                     }
 
-                    if (Property.Type.IsDateTimeOffset)
+                    if (propType.IsDateTimeOffset)
                         dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
 
                     yield return (
@@ -151,9 +152,9 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     yield break;
                 }
             }
-            else if (Property.Type.IsEnum)
+            else if (propType.IsEnum)
             {
-                var enumValuePair = Property.Type.EnumValues
+                var enumValuePair = propType.EnumValues
                     .FirstOrDefault(kvp => string.Equals(kvp.Value, rawSearchTerm, StringComparison.InvariantCultureIgnoreCase));
                 
                 // If the input string mapped to a valid enum value, search by the int value of that enum value.
@@ -162,19 +163,23 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     yield return (Property, $"({propertyAccessor} == \"{enumValuePair.Value}\")");
                 }
             }
-            else if (Property.Type.IsNumber)
+            else if (propType.IsNumber || propType.IsGuid)
             {
-                var propertyClrType = Property.Type.TypeInfo;
+                var propertyClrType = propType.TypeInfo;
                 var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(propertyClrType);
                 // This allows us to check if the conversion is valid without exceptions
                 // (in our code, anyway - the default implementation of this is just a try catch anyway)
                 if (typeConverter.IsValid(rawSearchTerm))
                 {
-                    var numberValue = typeConverter.ConvertFromString(rawSearchTerm);
-                    yield return (Property, $"({propertyAccessor} == {numberValue})");
+                    var comparand = typeConverter.ConvertFromString(rawSearchTerm);
+                    if (propType.IsGuid)
+                    {
+                        comparand = $"\"{comparand}\"";
+                    }
+                    yield return (Property, $"({propertyAccessor} == {comparand})");
                 }
             }
-            else if (Property.Type.IsString)
+            else if (propType.IsString)
             {
                 // Theoretical support for EF.Functions.Like. Not yet supported in DynamicLinq.
                 // https://github.com/StefH/System.Linq.Dynamic.Core/issues/105

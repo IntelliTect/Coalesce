@@ -210,12 +210,17 @@ namespace IntelliTect.Coalesce
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(item =>
                     {
-                        try { return Convert.ChangeType(item, prop.Type.NullableUnderlyingType.TypeInfo); }
+                        var type = prop.Type.NullableUnderlyingType.TypeInfo;
+                        try
+                        {
+                            if (type == typeof(Guid)) return Guid.Parse(item);
+                            return Convert.ChangeType(item, type);
+                        }
                         catch { return null; }
                     })
                     .Where(item => item != null)
                     .Select((item, i) => (
-                        Param: item, 
+                        Param: item,
                         Clause: $"it.{prop.Name} == @{i}"
                     ))
                     .ToList();

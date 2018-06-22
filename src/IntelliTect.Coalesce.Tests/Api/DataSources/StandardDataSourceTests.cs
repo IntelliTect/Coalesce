@@ -80,8 +80,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Precondition
             Assert.True(prop.IsInternalUse);
-
-
+            
             Assert.Single(query);
         }
 
@@ -97,8 +96,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Precondition
             Assert.True(prop.HasNotMapped);
-
-
+            
             Assert.Single(query);
         }
 
@@ -113,8 +111,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Preconditions
             Assert.False(CrudContext.User.IsInRole(role));
             Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
-
-
+            
             Assert.Single(query);
         }
 
@@ -129,8 +126,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Precondition
             Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
-
-
+            
             Assert.Empty(query);
         }
         
@@ -157,10 +153,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTime>(
                 m => m.DateTime, fieldValue, inputValue);
 
-            if (shouldMatch)
-                Assert.Single(query);
-            else
-                Assert.Empty(query);
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
 
@@ -191,10 +184,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTimeOffset>(
                 m => m.DateTimeOffset, fieldValue, inputValue);
 
-            if (shouldMatch)
-                Assert.Single(query);
-            else
-                Assert.Empty(query);
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
         [Theory]
@@ -213,10 +203,50 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             var (prop, query) = PropertyFiltersTestHelper<Case, Case.Statuses>(
                 m => m.Status, propValue, inputValue.ToString());
 
-            if (shouldMatch)
-                Assert.Single(query);
-            else
-                Assert.Empty(query);
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        }
+
+        public static IEnumerable<object[]> Filter_MatchesGuidData = new[]
+        {
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), "{1358AEE1-4CFF-4957-961C-2A60F769BD41}" },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), "1358AEE1-4CFF-4957-961C-2A60F769BD41" },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), " 1358AEE1-4CFF-4957-961C-2A60F769BD41 " },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), " 1358AEE14CFF4957961C2A60F769BD41 " },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), "{1358aee1-4cff-4957-961c-2a60f769bd41}" },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), "1358aee1-4cff-4957-961c-2a60f769bd41" },
+            new object[] { true,
+                Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"),
+                "null,1358aee1-4cff-4957-961c-2a60f769bd41" },
+            new object[] { true,
+                Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"),
+                "DF657AE0-7A0F-4949-9A77-F617CDD21E33,1358aee1-4cff-4957-961c-2a60f769bd41" },
+
+            new object[] { false,
+                Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"),
+                "08DACB7C-BF2E-42B6-AC7A-A499AD659F5C" },
+            new object[] { false,
+                Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"),
+                "2311EC89-EE9E-42C8-AC14-87D0AC535F6A,361DF78D-24BB-4E0A-8D38-81DF73ACE1CA" },
+
+            new object[] { true, Guid.Empty, "00000000-0000-0000-0000-000000000000" },
+            new object[] { false, Guid.Empty, "1358AEE1-4CFF-4957-961C-2A60F769BD41" },
+            
+            // Null or empty inputs always do nothing - these will always match.
+            new object[] { true, Guid.Empty, "" },
+            new object[] { true, Guid.Empty, null },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), "" },
+            new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), null },
+        };
+
+        [Theory]
+        [MemberData(nameof(Filter_MatchesGuidData))]
+        public void ApplyListPropertyFilter_WhenPropIsGuid_FiltersProp(
+            bool shouldMatch, Guid propValue, string inputValue)
+        {
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Guid>(
+                m => m.Guid, propValue, inputValue);
+
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
         [Theory]
@@ -237,17 +267,20 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             var (prop, query) = PropertyFiltersTestHelper<ComplexModel, int>(
                 m => m.Int, propValue, inputValue);
 
-            if (shouldMatch)
-                Assert.Single(query);
-            else
-                Assert.Empty(query);
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
         [Theory]
         [InlineData(true, "propVal", "propVal")]
         [InlineData(true, "propVal", "")]
+
+        // Null or empty inputs always do nothing - these will always match.
         [InlineData(true, "propVal", null)]
+        [InlineData(true, null, null)]
+        [InlineData(true, null, "")]
+
         [InlineData(true, "propVal", "prop*")]
+        [InlineData(false, null, "prop")]
         [InlineData(false, "propVal", "proppVal")]
         [InlineData(false, "propVal", "3")]
         [InlineData(false, "propVal", "propp*")]
@@ -259,10 +292,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
                 m => m.String, propValue, inputValue);
 
-            if (shouldMatch)
-                Assert.Single(query);
-            else
-                Assert.Empty(query);
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
 
@@ -301,10 +331,38 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             var (prop, query) = SearchTestHelper<ComplexModel, string>(
                 m => m.String, propValue, inputValue);
 
-            if (shouldMatch)
-                Assert.Single(query);
-            else
-                Assert.Empty(query);
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        }
+
+        [Theory]
+        [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
+        [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]
+        [InlineData(false, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "A6740FB5-99DE-4079-B6F7-A1692772A0A4")]
+        public void ApplyListSearchTerm_WhenFieldIsGuid_SearchesField(
+            bool shouldMatch, string propValue, string inputValue)
+        {
+            var (prop, query) = SearchTestHelper<ComplexModel, Guid>(
+                m => m.Guid, Guid.Parse(propValue), $"{nameof(ComplexModel.Guid)}:{inputValue}");
+
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        }
+
+        [Theory]
+        [InlineData(true, 0, "0")]
+        [InlineData(true, int.MaxValue, "2147483647")]
+        [InlineData(false, int.MaxValue, "2147483648")]
+        [InlineData(true, 2, "2")]
+        [InlineData(true, 22, "22")]
+        [InlineData(false, 3, "2")]
+        [InlineData(false, 2, "22")]
+        [InlineData(false, 22, "2")]
+        public void ApplyListSearchTerm_WhenFieldIsIntegral_SearchesField(
+            bool shouldMatch, int propValue, string inputValue)
+        {
+            var (prop, query) = SearchTestHelper<ComplexModel, int>(
+                m => m.Int, propValue, $"{nameof(ComplexModel.Int)}:{inputValue}");
+
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
         [Fact]

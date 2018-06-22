@@ -37,6 +37,29 @@ export const Course = <ModelType>{
   }
 };
 
+export const Advisor = <ModelType>{
+  ...metaBase,
+  get keyProp() {
+    return this.props.advisorId;
+  },
+  get displayProp() {
+    return this.props.name;
+  },
+  controllerRoute: "Advisors",
+  dataSources: {},
+  methods: {},
+  props: {
+    courseId: {
+      ...value("advisorId"),
+      type: "number"
+    },
+    name: {
+      ...value("name"),
+      type: "string"
+    }
+  }
+};
+
 export const Student = <ObjectType>{
   ...metaBase,
   get displayProp() {
@@ -50,6 +73,10 @@ export const Student = <ObjectType>{
     name: {
       ...value("name"),
       type: "string"
+    },
+    isEnrolled: {
+      ...value("isEnrolled"),
+      type: "boolean"
     },
     birthDate: {
       ...value("birthDate"),
@@ -79,16 +106,13 @@ export const Student = <ObjectType>{
           { value: 12, strValue: "Senior", displayName: "Senior" }
         ])
       }
+    },
+    advisor: {
+      ...value("advisor"),
+      type: "model",
+      typeDef: Advisor
     }
   }
-};
-
-// Have to set this up like this because its self-referential,
-// and jest does weird things to file-scoped vars.
-Student.props.friend = <ObjectProperty>{
-  ...value("friend"),
-  type: "object",
-  typeDef: Student
 };
 
 export const DisplaysStudent = <ObjectType>{

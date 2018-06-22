@@ -87,8 +87,9 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     }
 
     public visitObject(value: any, meta: ClassType) {
-        if (!value) return null;
-        if (typeof value !== "object") throw `Value for object ${meta.name} was not an object`;
+        if (value == null) return null;
+        if (typeof value !== "object" || Array.isArray(value)) 
+            throw `Value for object ${meta.name} was not an object`;
 
         // Prevent infinite recursion on circular object graphs.
         if (this.objects.has(value)) return this.objects.get(value);
@@ -131,7 +132,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     }
 
     public visitCollection(value: any[], meta: CollectionValue) {
-        if (!value) return null;
+        if (value == null) return null;
         if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
 
         if (this.mode == "convert") {
@@ -147,7 +148,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     }
 
     public visitDateValue(value: any, meta: DateValue) {
-        if (!value) return null;
+        if (value == null) return null;
         
         if (value instanceof Date) {
             if (this.mode == "convert") {
@@ -158,11 +159,58 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
                 return new Date(value);
             }
         } else {
+            if (typeof value !== "string") {
+                // dateFns `toDate` is way too lenient - 
+                // it will parse any number as milliseconds since the epoch,
+                // and parses `true` as the epoch.
+                throw `Recieved unparsable date: ${value}`;
+            }
             var date = toDate(value);
             if (!isValid(date)) {
-                console.warn(`Recieved unparsable date: ${value}`);
+                throw `Recieved unparsable date: ${value}`;
             }
             return date;
+        }
+    }
+
+    private visitNumeric(value: any, meta: EnumValue | (PrimitiveValue & { type: "number" })) {
+        if (value == null) return null;
+
+        if (typeof value === "number") return value;
+
+        if (typeof value !== "string") {
+            // We don't want to parse things like booleans into numbers.
+            // Strings are all we should be handling.
+            throw `Recieved unparsable ${meta.type}: ${value}`;
+        }
+
+        const parsed = Number(value);
+        if (isNaN(parsed)) {
+            throw `Recieved unparsable ${meta.type}: ${value}`;
+        }
+        return parsed;
+    }
+
+    public visitEnumValue(value: any, meta: EnumValue) {
+        return this.visitNumeric(value, meta);
+    }
+
+    public visitPrimitiveValue(value: any, meta: PrimitiveValue) {
+        if (value == null) return null;
+
+        switch (meta.type) {
+            case "number":
+                return this.visitNumeric(value, meta as (typeof meta & { type: "number" }));
+            case "boolean":
+                if (typeof value === "boolean") return value;
+                if (value === "false") return false;
+                if (value === "true") return true;
+                throw `Recieved unparsable boolean ${value}`
+            case "string":
+                if (typeof value === "string") return value;
+                return String(value);
+            default:
+                throw `Unhandled primitive value type ${meta.type}`
         }
     }
 
@@ -186,7 +234,7 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
 /**
  * Transforms a raw value into a valid implemenation of a model value.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
- * @param object The value that should be converted
+ * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
 export function convertValueToModel(value: any, metadata: Value): any | null {
@@ -204,6 +252,17 @@ export function mapToModel<TMeta extends ClassType, TModel extends Model<TMeta>>
     if (!object) return object;
 
     return new ModelConversionVisitor("map").visitObject(object, metadata);
+}
+
+/**
+ * Maps a raw value into a valid implemenation of a model value.
+ * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
+ * @param value The value that should be converted
+ * @param metadata The metadata describing the value
+ */
+export function mapValueToModel(value: any, metadata: Value): any | null {
+    if (value === null || value === undefined) return value;
+    return new ModelConversionVisitor("map").visitValue(value, metadata);
 }
 
 export function updateFromModel<TMeta extends ClassType, TModel extends Model<TMeta>>(target: TModel, source: TModel): TModel {

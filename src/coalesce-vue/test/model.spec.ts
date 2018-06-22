@@ -7,15 +7,15 @@ const basicStudent = {
   name: "Bob"
 };
 
-describe("modelDisplay", () => {
-  test("returns value for value prop", () => {
+describe("modelDisplay - returns value for", () => {
+  test("value prop", () => {
     const meta = basicStudent.$metadata;
     expect(meta.displayProp).toBe(meta.props.name);
 
     expect(model.modelDisplay(basicStudent)).toBe(basicStudent.name);
   });
 
-  test("returns value for object prop", () => {
+  test("object prop", () => {
     expect(
       model.modelDisplay({
         $metadata: $metadata.DisplaysStudent,
@@ -108,6 +108,9 @@ describe("mapToDto", () => {
   // TODO
 });
 
+
+// For some property [0] on student, maps [1] to expected dto [2]
+// using the metadata for property [0] on student to map.
 describe.each([
   ["birthDate", null, null],
   [

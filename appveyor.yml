@@ -19,11 +19,10 @@ before_build:
   - cmd: cd ./src/coalesce-vue && yarn && yarn version --no-git-tag-version --new-version %APPVEYOR_BUILD_VERSION% && yarn build && yarn test
   - cmd: cd ./src/Coalesce.Web && yarn
   - cmd: cd ./src/Coalesce.Web.Vue && yarn
-  - cmd: yarn global add gulp-cli
   # Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
   # I don't want to add gulp to Coalesce.Web.Vue
-  - cmd: cd ./src/Coalesce.Web && gulp coalesce-ko
-  - cmd: cd ./src/Coalesce.Web && gulp coalesce-vue
+  - cmd: cd ./src/Coalesce.Web && yarn gulp coalesce-ko
+  - cmd: cd ./src/Coalesce.Web && yarn gulp coalesce-vue
 # Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
 # cd ..\Coalesce.Domain
 # dotnet ef database update --framework netcoreapp2.0

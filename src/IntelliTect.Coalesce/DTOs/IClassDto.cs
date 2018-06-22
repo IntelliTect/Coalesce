@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
 {
-    public interface IClassDto<in T> 
+    public interface IClassDto<in T>
     {
         void MapTo(T obj, IMappingContext context);
 

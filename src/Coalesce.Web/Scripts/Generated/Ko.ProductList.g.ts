@@ -18,6 +18,7 @@ module ListViewModels {
         public filter: {
             productId?: string;
             name?: string;
+            uniqueId?: string;
         } | null = null;
         
         /** The namespace containing all possible values of this.dataSource. */

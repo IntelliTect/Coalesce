@@ -1,6 +1,16 @@
-import * as model from "@/model";
+import * as model from "../src/model";
 import * as $metadata from "./shared.metadata";
-import { ModelValue, ObjectValue, Value } from "@/metadata";
+import { ModelValue, ObjectValue, Value } from "../src/metadata";
+import { shortStringify } from "./test-utils";
+
+const studentProps = $metadata.Student.props;
+const studentValue = <ObjectValue>{
+  name: "student",
+  displayName: "Student",
+  role: "value",
+  type: "object",
+  typeDef: $metadata.Student
+};
 
 const basicStudent = {
   $metadata: $metadata.Student,
@@ -32,7 +42,7 @@ describe("propDisplay - resolves property", () => {
   });
 
   test("by object", () => {
-    expect(model.propDisplay(basicStudent, $metadata.Student.props.name)).toBe(
+    expect(model.propDisplay(basicStudent, studentProps.name)).toBe(
       basicStudent.name
     );
   });
@@ -47,6 +57,9 @@ describe.each([
   ["birthDate", new Date(1990, 0, 2, 3, 4, 5), "1990-1-2 03:04:05"],
   ["grade", null, null],
   ["grade", 11, "Junior"],
+  // Non-explicitly-defined enums should display the number value
+  // since there's nothing better to show:
+  ["grade", 111, "111"],
   ["isEnrolled", null, null],
   ["isEnrolled", true, "true"],
   ["courses", null, null],
@@ -76,9 +89,11 @@ describe.each([
   ["advisor", null, null],
   ["advisor", { advisorId: 1, name: "Steve" }, "Steve"]
 ])("propDisplay - displays property", (propName, value, expected) => {
-  const prop = $metadata.Student.props[propName];
+  const prop = studentProps[propName];
 
-  test(`for ${prop.type} ${value}, returns ${expected}`, () => {
+  test(`for ${prop.type} ${shortStringify(value)}, returns ${shortStringify(
+    expected
+  )}`, () => {
     expect(
       model.propDisplay(
         {
@@ -89,10 +104,6 @@ describe.each([
       )
     ).toBe(expected);
   });
-});
-
-describe("convertValueToModel", () => {
-  // TODO
 });
 
 describe("mapToModel", () => {
@@ -107,27 +118,27 @@ describe("mapToDto", () => {
   // TODO
 });
 
-
+/** Conversions which map the same in either direction between model and DTOs */
 const twoWayConversions = [
-  {meta: $metadata.Student.props.birthDate, model: null, dto: null },
+  { meta: studentProps.birthDate, model: null, dto: null },
   {
-    meta: $metadata.Student.props.birthDate,
+    meta: studentProps.birthDate,
     model: new Date("1990-01-02T03:04:05.000-08:00"),
     dto: "1990-01-02T03:04:05.000-08:00"
   },
-  {meta: $metadata.Student.props.name, model: null, dto: null},
-  {meta: $metadata.Student.props.name, model: "Bob", dto: "Bob"},
-  {meta: $metadata.Student.props.studentId, model: null, dto: null},
-  {meta: $metadata.Student.props.studentId, model: 1, dto: 1},
-  {meta: $metadata.Student.props.grade, model: null, dto: null},
-  {meta: $metadata.Student.props.grade, model: 11, dto: 11},
-  {meta: $metadata.Student.props.isEnrolled, model: null, dto: null},
-  {meta: $metadata.Student.props.isEnrolled, model: true, dto: true},
-  {meta: $metadata.Student.props.isEnrolled, model: false, dto: false},
-  {meta: $metadata.Student.props.courses, model: null, dto: null},
-  {meta: $metadata.Student.props.courses, model: [], dto: []},
+  { meta: studentProps.name, model: null, dto: null },
+  { meta: studentProps.name, model: "Bob", dto: "Bob" },
+  { meta: studentProps.studentId, model: null, dto: null },
+  { meta: studentProps.studentId, model: 1, dto: 1 },
+  { meta: studentProps.grade, model: null, dto: null },
+  { meta: studentProps.grade, model: 11, dto: 11 },
+  { meta: studentProps.isEnrolled, model: null, dto: null },
+  { meta: studentProps.isEnrolled, model: true, dto: true },
+  { meta: studentProps.isEnrolled, model: false, dto: false },
+  { meta: studentProps.courses, model: null, dto: null },
+  { meta: studentProps.courses, model: [], dto: [] },
   {
-    meta: $metadata.Student.props.courses,
+    meta: studentProps.courses,
     model: ["CSCD 210", "CSCD 211", "MATH 301"].map((name, i) => {
       return {
         $metadata: $metadata.Course,
@@ -144,158 +155,216 @@ const twoWayConversions = [
   },
 
   {
-    meta: <ObjectValue>{
-      name: "student",
-      displayName: "Student",
-      role: "value",
-      type: "object",
-      typeDef: $metadata.Student
-    },
+    meta: studentValue,
     model: {
       $metadata: $metadata.Student,
       studentId: 1,
-      name: "Steve",
+      name: "Steve"
     },
     dto: { name: "Steve", studentId: 1 }
   },
 
-  {
-    meta: <ObjectValue>{
-      name: "student",
-      displayName: "Student",
-      role: "value",
-      type: "object",
-      typeDef: $metadata.Student
-    },
-    model: null, dto: null
-  }
+  { meta: studentValue, model: null, dto: null }
 ];
 
-const shortStringify = (value: any) => {
-  let str = JSON.stringify(value)
-  const maxLen = 40;
-  if (str.length > maxLen) {
-    str = str.substr(0, maxLen) + "..."
-  }
-  return str;
-};
-
-describe.each([
-  ...twoWayConversions
-])("mapValueToDto", ({meta: value, model: modelValue, dto: dtoValue}) => {
-  describe(value.type, () => {
-    test(`for ${shortStringify(modelValue)}, returns ${shortStringify(dtoValue)}`, () => {
-      const mapped = model.mapValueToDto(modelValue, value)
-
-      if (typeof dtoValue == "object" && dtoValue != null) {
-        expect(mapped).toMatchObject(dtoValue);
-      } else {
-        expect(mapped).toBe(dtoValue);
-      }
-    });
-  });
-})
-
-function unparsable(meta: Value, error: string, ...values: any[]){
-  return values.map(value => {
-    return { meta, dto: value, error }
-  })
-}
+/**
+ * MODEL --> DTO TESTS
+ */
 describe.each([
   ...twoWayConversions,
-  {meta: $metadata.Student.props.name, model: "123", dto: 123},
-  {meta: $metadata.Student.props.name, model: "[object Object]", dto: {}},
-  {meta: $metadata.Student.props.name, model: "", dto: []},
-
-  {meta: $metadata.Student.props.studentId, model: 1, dto: "1"},
-  ...unparsable($metadata.Student.props.studentId, "unparsable number", 
-    true, "abc", {}, []),
-
-  {meta: $metadata.Student.props.isEnrolled, model: true, dto: "true", }, 
-  {meta: $metadata.Student.props.isEnrolled, model: false, dto: "false", }, 
-  ...unparsable($metadata.Student.props.isEnrolled, "unparsable boolean", 
-    123, "abc", {}, []),
-
-  {meta: $metadata.Student.props.grade, model: 11, dto: "11"},
-  // Enums should parse any number - not just valid enum values. This allows for flags enums.
-  {meta: $metadata.Student.props.grade, model: 123, dto: 123, }, 
-  ...unparsable($metadata.Student.props.grade, "unparsable enum", 
-    "abc", {}, [], true),
   
-  ...unparsable($metadata.Student.props.birthDate, "unparsable date", 
-    "abc", 123, {}, [], true),
-
-  ...unparsable($metadata.Student.props.courses, "was not an array", 
-    "abc", 123, {}, true),
-
-  ...unparsable($metadata.Student.props.advisor, "was not an object", 
-    "abc", 123, [], true),
-
-    
+  // Ensure child objects and collections are dropped.
+  // Also test that foreign keys are auto-populated
+  // from their reference prop if the FK itself is null.
   {
-    meta: <ObjectValue>{
-      name: "student",
-      displayName: "Student",
-      role: "value",
-      type: "object",
-      typeDef: $metadata.Student
+    meta: studentValue,
+    model: {
+      $metadata: $metadata.Student,
+      studentId: 1,
+      name: "Steve",
+      courses: [{$metadata: $metadata.Course, courseId: 1, name: "CS 101"}],
+      advisorId: null,
+      advisor: {
+        $metadata: $metadata.Advisor,
+        advisorId: 1,
+        name: "Joe",
+      }
     },
-    model: { studentId: 1, $metadata: $metadata.Student }, 
-    dto: { studentId: 1, extraneousProp: true }
+    dto: { name: "Steve", studentId: 1, advisorId: 1, }
+  },
+])(
+  "mapValueToDto",
+  ({ meta: value, model: modelValue, dto: dtoValue }) => {
+    describe(value.type, () => {
+      test(`for ${shortStringify(modelValue)}, returns ${shortStringify(
+        dtoValue
+      )}`, () => {
+        const mapped = model.mapValueToDto(modelValue, value);
+
+        if (typeof dtoValue == "object" && dtoValue != null) {
+          expect(mapped).toMatchObject(dtoValue);
+        } else {
+          expect(mapped).toBe(dtoValue);
+        }
+      });
+    });
   }
+);
 
-])("dto --> model", ({meta: value, model: modelValue, dto: dtoValue, error}: {meta: Value, model: any, dto: any, error?: string}) => {
-  const expectedOutcomeDesc = error
-    ? `throws /${error}/`
-    : `returns ${shortStringify(modelValue)}`
+function unparsable(meta: Value, error: string, ...values: any[]) {
+  return values.map(value => {
+    return { meta, dto: value, error };
+  });
+}
 
-  const testTitle = `for ${shortStringify(dtoValue)}, ${expectedOutcomeDesc}`
+/**
+ * DTO --> MODEL TESTS
+ */
+describe.each([
+  ...twoWayConversions,
+  { meta: studentProps.name, dto: 123, model: "123" },
+  { meta: studentProps.name, dto: {}, model: "[object Object]" },
+  { meta: studentProps.name, dto: [], model: "" },
 
-  describe("mapValueToModel", () => {
-    describe(value.type, () => {
-      test(testTitle, () => {
-        
-        const doMap = () => model.mapValueToModel(dtoValue, value);
-        if (error){
-          expect(doMap).toThrowError(new RegExp(error))
-          return;
-        }
-        const mapped = doMap()
+  { meta: studentProps.studentId, dto: "1", model: 1 },
+  ...unparsable(
+    studentProps.studentId,
+    "unparsable number",
+    true,
+    "abc",
+    {},
+    []
+  ),
 
-        if (typeof modelValue == "object" && modelValue != null) {
-          expect(mapped).toMatchObject(modelValue);
-        } else {
-          expect(mapped).toBe(modelValue);
-        }
-      });
-    });
-  })
+  { meta: studentProps.isEnrolled, dto: "true", model: true },
+  { meta: studentProps.isEnrolled, dto: "false", model: false },
+  ...unparsable(
+    studentProps.isEnrolled,
+    "unparsable boolean",
+    123,
+    "abc",
+    {},
+    []
+  ),
 
-  describe("convertValueToModel", () => {
-    describe(value.type, () => {
-      test(testTitle, () => {
+  { meta: studentProps.grade, dto: "11", model: 11 },
+  // Enums should parse any number - not just valid enum values. This allows for flags enums.
+  { meta: studentProps.grade, dto: 123, model: 123 },
+  ...unparsable(studentProps.grade, "unparsable enum", "abc", {}, [], true),
 
-        const doMap = () => model.convertValueToModel(dtoValue, value);
-        if (error){
-          expect(doMap).toThrowError(new RegExp(error))
-          return;
-        }
+  // Date
+  {
+    meta: studentProps.birthDate,
+    dto: new Date("1990-01-02T03:04:05.000-08:00"),
+    model: new Date("1990-01-02T03:04:05.000-08:00")
+  },
+  ...unparsable(
+    studentProps.birthDate,
+    "unparsable date",
+    "abc",
+    123,
+    {},
+    [],
+    true
+  ),
 
-        const mapped = doMap()
+  // Collection
+  ...unparsable(studentProps.courses, "was not an array", "abc", 123, {}, true),
 
-        if ((typeof modelValue == "object") && modelValue != null) {
-          if (typeof dtoValue == "object") {
-            // When both side are objects, check for === equality with the input,
-            // since `convertValueToModel` mutates its input - it shouldn't be
-            // returning new objects/arrays.
-            // Dates won't enter this case because typeof(new Date()) == "object", but the date DTO value is a string.
-            expect(mapped).toBe(dtoValue);
+  // Model
+  ...unparsable(
+    studentProps.advisor,
+    "was not an object",
+    "abc",
+    123,
+    [],
+    true
+  ),
+
+  // Object
+  {
+    meta: studentValue,
+    dto: { studentId: 1, extraneousProp: true },
+    model: { studentId: 1, $metadata: $metadata.Student }
+  }
+])(
+  "dto --> model",
+  ({
+    meta: value,
+    model: modelValue,
+    dto: dtoValue,
+    error
+  }: {
+    meta: Value;
+    model: any;
+    dto: any;
+    error?: string;
+  }) => {
+    const expectedOutcomeDesc = error
+      ? `throws /${error}/`
+      : `returns ${shortStringify(modelValue)}`;
+
+    const testTitle = `for ${shortStringify(dtoValue)}, ${expectedOutcomeDesc}`;
+
+    describe("mapValueToModel", () => {
+      describe(value.type, () => {
+        test(testTitle, () => {
+          const doMap = () => model.mapValueToModel(dtoValue, value);
+          if (error) {
+            expect(doMap).toThrowError(new RegExp(error));
+            return;
           }
-          expect(mapped).toMatchObject(modelValue);
-        } else {
-          expect(mapped).toBe(modelValue);
-        }
+          const mapped = doMap();
+
+          if (typeof modelValue == "object" && modelValue != null) {
+            // Expected model is an object, and not a value type.
+            // Deep-compare the object.
+
+            // Prevent stack overflows (CTRL+F: "Maximum call stack exceeded") due to circular metadata
+            // by replacing expected $metadata objects with jest magic.
+            // Currently, this is only replacing at the top-level.
+            // If these tests get more intricate, we might need to get fancier.
+            if (modelValue.$metadata) {
+              modelValue = {
+                ...modelValue,
+                $metadata: expect.objectContaining({name: modelValue.$metadata.name}),
+              }
+            }
+
+            expect(mapped).toMatchObject(modelValue);
+          } else {
+            expect(mapped).toBe(modelValue);
+          }
+        });
       });
     });
-  })
-});
+
+    describe("convertValueToModel", () => {
+      describe(value.type, () => {
+        test(testTitle, () => {
+          const doMap = () => model.convertValueToModel(dtoValue, value);
+          if (error) {
+            expect(doMap).toThrowError(new RegExp(error));
+            return;
+          }
+
+          const mapped = doMap();
+
+          if (typeof modelValue == "object" && modelValue != null) {
+            if (typeof dtoValue == "object") {
+              // When both side are objects, check for === equality with the input,
+              // since `convertValueToModel` mutates its input - it shouldn't be
+              // returning new objects/arrays.
+              // Dates won't enter this case when mapping from a string, because
+              // the date DTO value is a string - this behavior is desired and in fact required.
+              expect(mapped).toBe(dtoValue);
+            }
+            expect(mapped).toMatchObject(modelValue);
+          } else {
+            expect(mapped).toBe(modelValue);
+          }
+        });
+      });
+    });
+  }
+);

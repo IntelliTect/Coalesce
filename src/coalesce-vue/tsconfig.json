@@ -5,17 +5,10 @@
 
     "module": "es2015",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "es6",
     "strict": true,
     "declaration": true,
     "lib": ["es2015", "es2017", "dom"],
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
   },
     
   "exclude": [

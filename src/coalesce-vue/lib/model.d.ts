@@ -43,8 +43,26 @@ export declare function mapToModel<TMeta extends ClassType, TModel extends Model
  * @param metadata The metadata describing the value
  */
 export declare function mapValueToModel(value: any, metadata: Value): any | null;
+/**
+ * Updates the target model with values from the source model.
+ * Any properties defined on the source will be copied to the target.
+ * This perform a shallow copy of properties, using `Object.assign`.
+ * @param target The model to be updated.
+ * @param source The model whose values will be used to perform the update.
+ */
 export declare function updateFromModel<TMeta extends ClassType, TModel extends Model<TMeta>>(target: TModel, source: TModel): TModel;
+/**
+ * Maps the given object to a POJO suitable for JSON serialization.
+ * Will not serialize child objects or collections.
+ * @param object The object to map.
+ */
 export declare function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null;
+/**
+ * Maps the given value to a representation suitable for JSON serialization.
+ * Will not serialize the children of any objects encountered.
+ * Will serialize objects found in arrays.
+ * @param object The object to map.
+ */
 export declare function mapValueToDto(value: any, metadata: Value): any | null;
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
@@ -58,3 +76,10 @@ export declare function modelDisplay<T extends Model<TMeta>, TMeta extends Class
  * @param prop The property to be displayed - either the name of a property or a property metadata object.
  */
 export declare function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(item: T, prop: Property | PropNames<TMeta>): string | null;
+/**
+ * Given a value and metadata which describes that value,
+ * return a string representation of the value suitable for display.
+ * @param value Any value which is valid for the metadata provided.
+ * @param prop The metadata which describes the value given.
+ */
+export declare function valueDisplay<T extends Model<TMeta>, TMeta extends ClassType>(value: any, meta: Value): string | null;

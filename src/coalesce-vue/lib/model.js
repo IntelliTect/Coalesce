@@ -78,9 +78,9 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
         return _super.prototype.visitValue.call(this, value, meta);
     };
     ModelConversionVisitor.prototype.visitObject = function (value, meta) {
-        if (!value)
+        if (value == null)
             return null;
-        if (typeof value !== "object")
+        if (typeof value !== "object" || Array.isArray(value))
             throw "Value for object " + meta.name + " was not an object";
         // Prevent infinite recursion on circular object graphs.
         if (this.objects.has(value))
@@ -120,7 +120,7 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
     };
     ModelConversionVisitor.prototype.visitCollection = function (value, meta) {
         var _this = this;
-        if (!value)
+        if (value == null)
             return null;
         if (!Array.isArray(value))
             throw "Value for collection " + meta.name + " was not an array";
@@ -151,9 +151,15 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
             }
         }
         else {
+            if (typeof value !== "string") {
+                // dateFns `toDate` is way too lenient - 
+                // it will parse any number as milliseconds since the epoch,
+                // and parses `true` as the epoch.
+                throw "Received unparsable date: " + value;
+            }
             var date = toDate(value);
             if (!isValid(date)) {
-                throw "Recieved unparsable date: " + value;
+                throw "Received unparsable date: " + value;
             }
             return date;
         }
@@ -161,9 +167,16 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
     ModelConversionVisitor.prototype.visitNumeric = function (value, meta) {
         if (value == null)
             return null;
+        if (typeof value === "number")
+            return value;
+        if (typeof value !== "string") {
+            // We don't want to parse things like booleans into numbers.
+            // Strings are all we should be handling.
+            throw "Received unparsable " + meta.type + ": " + value;
+        }
         var parsed = Number(value);
         if (isNaN(parsed)) {
-            throw "Recieved unparsable " + meta.type + ": " + value;
+            throw "Received unparsable " + meta.type + ": " + value;
         }
         return parsed;
     };
@@ -183,7 +196,7 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
                     return false;
                 if (value === "true")
                     return true;
-                throw "Recieved unparsable boolean " + value;
+                throw "Received unparsable boolean " + value;
             case "string":
                 if (typeof value === "string")
                     return value;
@@ -238,6 +251,13 @@ export function mapValueToModel(value, metadata) {
         return value;
     return new ModelConversionVisitor("map").visitValue(value, metadata);
 }
+/**
+ * Updates the target model with values from the source model.
+ * Any properties defined on the source will be copied to the target.
+ * This perform a shallow copy of properties, using `Object.assign`.
+ * @param target The model to be updated.
+ * @param source The model whose values will be used to perform the update.
+ */
 export function updateFromModel(target, source) {
     return Object.assign(target, source);
     // I was going to go further with this and make it more like the Knockout code,
@@ -342,6 +362,11 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
     };
     return MapToDtoVisitor;
 }(Visitor));
+/**
+ * Maps the given object to a POJO suitable for JSON serialization.
+ * Will not serialize child objects or collections.
+ * @param object The object to map.
+ */
 export function mapToDto(object) {
     if (object === null || object === undefined)
         return null;
@@ -351,6 +376,12 @@ export function mapToDto(object) {
     var dto = new MapToDtoVisitor(1).visitObject(object, object.$metadata);
     return dto;
 }
+/**
+ * Maps the given value to a representation suitable for JSON serialization.
+ * Will not serialize the children of any objects encountered.
+ * Will serialize objects found in arrays.
+ * @param object The object to map.
+ */
 export function mapValueToDto(value, metadata) {
     if (value === null || value === undefined)
         return value;
@@ -404,8 +435,11 @@ var DisplayVisitor = /** @class */ (function (_super) {
         if (value == null)
             return value;
         var enumData = meta.typeDef.valueLookup[value];
+        // If we can't find the enum value exactly,
+        // just show the numeric value.
+        // TODO: support flags enums (see metadata.ts@EnumType)
         if (!enumData)
-            return '';
+            return value.toLocaleString();
         return enumData.displayName;
     };
     DisplayVisitor.prototype.visitDateValue = function (value, meta) {
@@ -443,4 +477,13 @@ export function propDisplay(item, prop) {
     var propMeta = resolvePropMeta(item.$metadata, prop);
     var value = item[propMeta.name];
     return displayVisitor.visitValue(value, propMeta);
+}
+/**
+ * Given a value and metadata which describes that value,
+ * return a string representation of the value suitable for display.
+ * @param value Any value which is valid for the metadata provided.
+ * @param prop The metadata which describes the value given.
+ */
+export function valueDisplay(value, meta) {
+    return displayVisitor.visitValue(value, meta);
 }

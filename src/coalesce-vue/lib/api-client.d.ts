@@ -123,7 +123,7 @@ export declare class ApiClient<T extends ApiRoutedType> {
      * @param queryParams An object with an additional querystring parameters.
      */
     protected $options(parameters?: ListParameters | FilterParameters | DataSourceParameters, config?: AxiosRequestConfig, queryParams?: any): AxiosRequestConfig;
-    private $serializeParams(parameters?);
+    private $serializeParams;
     protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: Value | VoidValue): AxiosResponse<ItemResult<TResult>>;
     protected $hydrateListResult<TResult>(value: AxiosListResult<TResult>, metadata: CollectionValue): AxiosResponse<ListResult<TResult>>;
 }
@@ -190,7 +190,7 @@ export declare abstract class ApiState<TCall extends (this: null, ...args: any[]
     onRejected(callback: (this: any, state: this) => void): this;
     protected abstract setResponseProps(data: ApiResult): void;
     invoke: TCall;
-    private _invokeInternal(thisArg, args);
+    private _invokeInternal;
     protected _makeReactive(): void;
     constructor(apiClient: ApiClient<any>, invoker: TCall);
 }

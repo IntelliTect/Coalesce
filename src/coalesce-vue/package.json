@@ -21,21 +21,23 @@
     "@types/jest": "^23.1.1",
     "jest": "^23.1.0",
     "ts-jest": "^22.4.6",
-    "typescript": "2.8.3"
+    "typescript": "2.9.2"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
     "prepack": "tsc -p ./tsconfig.build.json",
+    
+    "//": "No coverage by default because it breaks line numbers in error messages. `yarn test --coverage` to run it.",
     "test": "jest"
   },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "collectCoverage": true,
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
+    "collectCoverageFrom": [
+      "src/**",
+      "!src/index.ts"
+    ],
     "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [

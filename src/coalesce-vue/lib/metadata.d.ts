@@ -191,6 +191,7 @@ export interface PropertyBase {
 export interface PrimitiveProperty extends PropertyBase, PrimitiveValue {
     readonly role: "value";
 }
+/** Represents a property that serves as a primary key */
 export interface PrimaryKeyProperty extends PropertyBase, PrimitiveValue {
     readonly role: "primaryKey";
     readonly type: "string" | "number";

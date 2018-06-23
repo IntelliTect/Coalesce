@@ -1,4 +1,4 @@
-import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty } from "@/metadata";
+import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType } from "../src/metadata";
 
 const metaBase = {
   name: "model",
@@ -14,7 +14,10 @@ const value = (name: string = "prop") => {
   };
 };
 
-export const Course = <ModelType>{
+const Types: { [key: string]: ClassType } = {};
+export default Types;
+
+export const Course = Types.Course = <ModelType>{
   ...metaBase,
   get keyProp() {
     return this.props.courseId;
@@ -37,7 +40,7 @@ export const Course = <ModelType>{
   }
 };
 
-export const Advisor = <ModelType>{
+export const Advisor = Types.Advisor = <ModelType>{
   ...metaBase,
   get keyProp() {
     return this.props.advisorId;
@@ -49,7 +52,7 @@ export const Advisor = <ModelType>{
   dataSources: {},
   methods: {},
   props: {
-    courseId: {
+    advisorId: {
       ...value("advisorId"),
       type: "number"
     },
@@ -60,7 +63,7 @@ export const Advisor = <ModelType>{
   }
 };
 
-export const Student = <ObjectType>{
+export const Student = Types.Student = <ObjectType>{
   ...metaBase,
   get displayProp() {
     return this.props.name;
@@ -108,9 +111,22 @@ export const Student = <ObjectType>{
       }
     },
     advisor: {
-      ...value("advisor"),
+      name: "advisor",
+      displayName: "Advisor",
       type: "model",
+      role: "referenceNavigation",
+      get foreignKey() { return Types.Student.props.advisorId },
+      get principalKey() { return Advisor.keyProp },
       typeDef: Advisor
+    },
+    advisorId: {
+      name: "advisorId",
+      displayName: "AdvisorId",
+      type: "number",
+      role: "foreignKey",
+      get navigationProp() { return Types.Student.props.advisor },
+      get principalType() { return Types.Advisor },
+      get principalKey() { return Advisor.keyProp }
     }
   }
 };

@@ -1,9 +1,11 @@
 import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType } from "../src/metadata";
 
-const metaBase = {
-  name: "model",
-  displayName: "Model",
-  type: "object"
+const metaBase = (name: string = "model") => { 
+  return {
+    name: name,
+    displayName: name.substr(0, 1).toUpperCase() + name.substr(1),
+    type: "object"
+  };
 };
 
 const value = (name: string = "prop") => {
@@ -18,7 +20,7 @@ const Types: { [key: string]: ClassType } = {};
 export default Types;
 
 export const Course = Types.Course = <ModelType>{
-  ...metaBase,
+  ...metaBase("course"),
   get keyProp() {
     return this.props.courseId;
   },
@@ -41,7 +43,8 @@ export const Course = Types.Course = <ModelType>{
 };
 
 export const Advisor = Types.Advisor = <ModelType>{
-  ...metaBase,
+  ...metaBase("advisor"),
+  type: "model",
   get keyProp() {
     return this.props.advisorId;
   },
@@ -64,7 +67,7 @@ export const Advisor = Types.Advisor = <ModelType>{
 };
 
 export const Student = Types.Student = <ObjectType>{
-  ...metaBase,
+  ...metaBase("student"),
   get displayProp() {
     return this.props.name;
   },
@@ -132,7 +135,7 @@ export const Student = Types.Student = <ObjectType>{
 };
 
 export const DisplaysStudent = <ObjectType>{
-  ...metaBase,
+  ...metaBase(),
   get displayProp() {
     return this.props.student;
   },

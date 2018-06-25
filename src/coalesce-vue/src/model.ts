@@ -4,7 +4,7 @@ import * as toDate from 'date-fns/toDate'
 import * as isValid from 'date-fns/isValid'
 import * as format from 'date-fns/format'
 
-import { ClassType, ModelType, Property, ObjectType, PropNames, resolvePropMeta, CustomType, TypeDiscriminator, NonCollectionTypeDiscriminator, SimpleTypeDiscriminator, Value, EnumType, ModelValue, ObjectValue, EnumValue, PrimitiveValue, DateValue, CustomTypeValue, ValueMeta, CollectionValue, PrimitiveProperty, ForeignKeyProperty, DataSourceType } from "./metadata"
+import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata"
 import { Indexable } from './util'
 
 /**
@@ -23,57 +23,131 @@ export interface DataSource<TMeta extends DataSourceType> {
 
 
 
-class Visitor<TValue = any, TArray = any[], TObject = any> {
+abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
 
     public visitValue(value: any, meta: Value): TValue | TArray | TObject {
         switch (meta.type) {
-            case undefined: throw "Missing type on value metadata";
-            case "model": return this.visitModelValue(value, meta);
-            case "object": return this.visitObjectValue(value, meta);
-            case "collection": return this.visitCollection(value, meta);
-            case "enum": return this.visitEnumValue(value, meta);
-            case "date": return this.visitDateValue(value, meta);
-            default: return this.visitPrimitiveValue(value, meta);
+            case undefined: 
+                throw "Missing type on value metadata";
+
+            case "model": 
+            case "object": 
+                return this.visitObject(value, meta.typeDef);
+
+            case "collection": 
+                return this.visitCollection(value, meta);
+
+            case "enum": 
+                return this.visitEnumValue(value, meta);
+
+            case "date": 
+                return this.visitDateValue(value, meta);
+
+            default: 
+                return this.visitPrimitiveValue(value, meta);
         }
     }
     
-    public visitObject(value: any, meta: ClassType): TObject {
-        if (value == null) return value;
-        const props = meta.props;
-        const output: any = {}
-        for (const propName in props) {
-            if (propName in value) {
-                output[propName] = this.visitValue(value[propName], props[propName]);
+    public abstract visitObject(value: any, meta: ClassType): TObject;
+
+    protected abstract visitCollection(value: any[], meta: CollectionValue): TArray;
+
+    protected abstract visitPrimitiveValue(value: any, meta: PrimitiveValue): TValue;
+
+    protected abstract visitDateValue(value: any, meta: DateValue): TValue;
+
+    protected abstract visitEnumValue(value: any, meta: EnumValue): TValue;
+}
+
+function parseError(value: any, meta: { type: string, name: string }) {
+    return `Encountered unparsable ${typeof value} \`${value}\` for ${meta.type} '${meta.name}'`
+}
+
+/** 
+ * Attempts to change the input value into a correctly-typed 
+ * result given some metadata describing the desired result. 
+ * Values that cannot be converted will throw an error.
+*/
+export function parseValue(value: null | undefined, meta: Value): null;
+export function parseValue(value: any, meta: PrimitiveValue): null | string | number | boolean;
+export function parseValue(value: any, meta: PrimitiveValue & { type: "string" }): null | string;
+export function parseValue(value: any, meta: PrimitiveValue & { type: "number" }): null | number;
+export function parseValue(value: any, meta: PrimitiveValue & { type: "boolean" }): null | boolean;
+export function parseValue(value: any, meta: EnumValue): null | number;
+export function parseValue(value: any, meta: DateValue): null | Date;
+export function parseValue(value: any, meta: ModelValue): null | object;
+export function parseValue(value: any, meta: ObjectValue): null | object;
+export function parseValue(value: any[], meta: CollectionValue): Array<any>;
+export function parseValue(value: any, meta: Value): null | string | number | boolean | object | Date | Array<any> {
+    if (value == null) {
+        return null
+    }
+
+    const type = typeof value;
+
+    switch (meta.type) {
+        case "number":
+        case "enum":
+            if (type === "number") return value;
+
+            if (type !== "string") {
+                // We don't want to parse things like booleans into numbers.
+                // Strings are all we should be handling.
+                throw parseError(value, meta);
             }
-        }
-        return output;
-    }
 
-    public visitObjectValue(value: any, meta: ObjectValue): TObject {
-        return this.visitObject(value, meta.typeDef);
-    }
+            const parsed = Number(value);
+            if (isNaN(parsed)) {
+                throw parseError(value, meta);
+            }
+            return parsed;
 
-    public visitModelValue(value: any, meta: ModelValue): TObject {
-        return this.visitObject(value, meta.typeDef);
-    }
+        case "string":
+            if (type === "string") 
+                return value;
+            if (type === "object") 
+                throw parseError(value, meta)
+            return String(value);
 
-    public visitCollection(value: any[], meta: CollectionValue): TArray {
-        if (value == null) return value;
-        if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
+        case "boolean":
+            if (type === "boolean") 
+                return value;
+            if (value === "true") 
+                return true;
+            if (value === "false") 
+                return false;
+            throw parseError(value, meta)
 
-        return value.map((element, index) => this.visitValue(element, meta.itemType)) as any;
-    }
+        case "collection":
+            if (type !== "object" || !Array.isArray(value))
+                throw parseError(value, meta);
 
-    public visitPrimitiveValue(value: any, meta: PrimitiveValue): TValue {
-        return value;
-    }
+            return value;
 
-    public visitDateValue(value: any, meta: DateValue): TValue {
-        return value;
-    }
+        case "model":
+        case "object":
+            if (type !== "object" || Array.isArray(value))
+                throw parseError(value, meta);
+                
+            return value;
+                
+        case "date":
 
-    public visitEnumValue(value: any, meta: EnumValue): TValue {
-        return value;
+            const date = value instanceof Date 
+                ? value
+    
+                // dateFns `toDate` is way too lenient - 
+                // it will parse any number as milliseconds since the epoch,
+                // and parses `true` as the epoch.
+                // So, we restrict parsing to strings only.
+                : type === "string" ? toDate(value) : null;
+
+            if (!isValid(date)) {
+                throw parseError(value, meta);
+            }
+            
+            return date;
+
     }
 }
 
@@ -82,21 +156,26 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     private objects = new Map<object, object>();
 
     public visitValue(value: any, meta: Value): any {
+        // Models shouldn't contain undefined - only nulls where a value isn't present.
         if (value === undefined) return null;
+
         return super.visitValue(value, meta);
     }
 
-    public visitObject(value: any, meta: ClassType) {
+    public visitObject<TMeta extends ClassType>(value: null, meta: TMeta): null;
+    public visitObject<TMeta extends ClassType>(value: object, meta: TMeta): Model<TMeta>;
+    public visitObject<TMeta extends ClassType>(value: any, meta: TMeta): null | Model<TMeta> {
         if (value == null) return null;
+        
         if (typeof value !== "object" || Array.isArray(value)) 
-            throw `Value for object ${meta.name} was not an object`;
+            throw parseError(value, meta);
 
         // Prevent infinite recursion on circular object graphs.
-        if (this.objects.has(value)) return this.objects.get(value);
+        if (this.objects.has(value)) return this.objects.get(value)! as Model<TMeta>;
 
         const props = meta.props;
 
-        let target: any;
+        let target: Indexable<Model<TMeta>>;
         if (this.mode == "convert") {
             
             // If there already is metadata but it doesn't match,
@@ -105,15 +184,15 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
                 throw `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`   
             };
 
+            value.$metadata = meta;
             target = value;
         } else if (this.mode == "map") {
-            target = {};
+            target = { $metadata: meta };
         } else {
             throw `Unhandled mode ${this.mode}`
         }
 
         this.objects.set(value, target);
-        target.$metadata = meta;
 
         for (const propName in props) {
             const propVal = value[propName];
@@ -131,87 +210,41 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
         return target;
     }
 
-    public visitCollection(value: any[], meta: CollectionValue) {
+    protected visitCollection(value: any[] | null, meta: CollectionValue) {
         if (value == null) return null;
-        if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
+        const parsed = parseValue(value, meta);
 
         if (this.mode == "convert") {
-            for (let i = 0; i < value.length; i++) {
-                value[i] = this.visitValue(value[i], meta.itemType);
+            for (let i = 0; i < parsed.length; i++) {
+                parsed[i] = this.visitValue(parsed[i], meta.itemType);
             }
-            return value;
+            return parsed;
         } else if (this.mode == "map") {
-            return value.map((element, index) => this.visitValue(element, meta.itemType));
+            return parsed.map((element, index) => this.visitValue(element, meta.itemType));
         } else {
             throw `Unhandled mode ${this.mode}`
         }
     }
 
-    public visitDateValue(value: any, meta: DateValue) {
-        if (value == null) return null;
-        
-        if (value instanceof Date) {
-            if (this.mode == "convert") {
-                // Preserve object ref when converting.
-                return value;
-            } else if (this.mode == "map") {
-                // Get a new object ref when mapping
-                return new Date(value);
-            }
-        } else {
-            if (typeof value !== "string") {
-                // dateFns `toDate` is way too lenient - 
-                // it will parse any number as milliseconds since the epoch,
-                // and parses `true` as the epoch.
-                throw `Received unparsable date: ${value}`;
-            }
-            var date = toDate(value);
-            if (!isValid(date)) {
-                throw `Received unparsable date: ${value}`;
-            }
-            return date;
+    protected visitDateValue(value: any, meta: DateValue) {
+        const parsed = parseValue(value, meta);
+        if (parsed == null) return null;
+
+        if (this.mode == "convert") {
+            // Preserve object ref when converting.
+            return parsed;
+        } else if (this.mode == "map") {
+            // Get a new object ref when mapping
+            return new Date(parsed);
         }
     }
 
-    private visitNumeric(value: any, meta: EnumValue | (PrimitiveValue & { type: "number" })) {
-        if (value == null) return null;
-
-        if (typeof value === "number") return value;
-
-        if (typeof value !== "string") {
-            // We don't want to parse things like booleans into numbers.
-            // Strings are all we should be handling.
-            throw `Received unparsable ${meta.type}: ${value}`;
-        }
-
-        const parsed = Number(value);
-        if (isNaN(parsed)) {
-            throw `Received unparsable ${meta.type}: ${value}`;
-        }
-        return parsed;
+    protected visitEnumValue(value: any, meta: EnumValue) {
+        return parseValue(value, meta);
     }
 
-    public visitEnumValue(value: any, meta: EnumValue) {
-        return this.visitNumeric(value, meta);
-    }
-
-    public visitPrimitiveValue(value: any, meta: PrimitiveValue) {
-        if (value == null) return null;
-
-        switch (meta.type) {
-            case "number":
-                return this.visitNumeric(value, meta as (typeof meta & { type: "number" }));
-            case "boolean":
-                if (typeof value === "boolean") return value;
-                if (value === "false") return false;
-                if (value === "true") return true;
-                throw `Received unparsable boolean ${value}`
-            case "string":
-                if (typeof value === "string") return value;
-                return String(value);
-            default:
-                throw `Unhandled primitive value type ${meta.type}`
-        }
+    protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {
+        return parseValue(value, meta);
     }
 
     constructor(private mode: "map" | "convert") {
@@ -226,9 +259,11 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
  * @param object The object with data properties that should be converted to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
-export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(value: {[k: string]: any}, metadata: TMeta): TModel {
-    if (value == null) return value;
-    return new ModelConversionVisitor("convert").visitObject(value, metadata);
+export function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel {
+    if (object == null) {
+        throw `Cannot map null to model`
+    }
+    return new ModelConversionVisitor("convert").visitObject(object, metadata) as TModel;
 }
 
 /**
@@ -237,8 +272,7 @@ export function convertToModel<TMeta extends ClassType, TModel extends Model<TMe
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export function convertValueToModel(value: any, metadata: Value): any | null {
-    if (value == null) return value;
+export function convertValueToModel(value: any, metadata: Value): any {
     return new ModelConversionVisitor("convert").visitValue(value, metadata);
 }
 
@@ -249,9 +283,10 @@ export function convertValueToModel(value: any, metadata: Value): any | null {
  * @param metadata The metadata describing the TModel that is desired
  */
 export function mapToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {[k: string]: any}, metadata: TMeta): TModel {
-    if (!object) return object;
-
-    return new ModelConversionVisitor("map").visitObject(object, metadata);
+    if (object == null) {
+        throw `Cannot map null to model`
+    }
+    return new ModelConversionVisitor("map").visitObject(object, metadata) as TModel;
 }
 
 /**
@@ -260,8 +295,7 @@ export function mapToModel<TMeta extends ClassType, TModel extends Model<TMeta>>
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export function mapValueToModel(value: any, metadata: Value): any | null {
-    if (value === null || value === undefined) return value;
+export function mapValueToModel(value: any, metadata: Value): any {
     return new ModelConversionVisitor("map").visitValue(value, metadata);
 }
 
@@ -311,7 +345,11 @@ export function updateFromModel<TMeta extends ClassType, TModel extends Model<TM
     */
 }
 
-class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | undefined> {
+class MapToDtoVisitor extends Visitor<
+        null | undefined | string   | number   | boolean, 
+        null | undefined | string[] | number[] | boolean[] | object[], 
+        null | undefined | object
+    > {
     private depth: number = 0;
 
     public visitObject(value: any, meta: ClassType) {
@@ -331,7 +369,7 @@ class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | 
                 const newValue = this.visitValue(value[propName], propMeta);
                 if (newValue !== undefined) {
                     // Only store values that aren't undefined.
-                    // We don't any properties with undefined as their value - we shouldn't define these in the first place.
+                    // We don't support any properties with undefined as their value - we shouldn't define these in the first place.
                     output[propName] = newValue;
                 }
             }
@@ -356,26 +394,33 @@ class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | 
         return output;
     }
 
-    public visitCollection(value: any[], meta: CollectionValue) {
-        // If we've exceded max depth, return undefined to prevent the 
-        // creation of an entry in the parent object for this collection.
-        if (this.depth >= this.maxObjectDepth) return undefined;
+    protected visitCollection(value: any[] | null, meta: CollectionValue) {
+        if (this.depth >= this.maxObjectDepth) {
+            // If we've exceded max depth, return undefined to prevent the 
+            // creation of an entry in the parent object for this collection.
+            return undefined;
+        }
+
+        if (value == null) return null;
+        const parsed = parseValue(value, meta);
         
-        // Don't increase depth for collections - only objects increase depth.
-        const ret = super.visitCollection(value, meta);
-        
-        return ret;
+        return parsed.map(element => this.visitValue(element, meta.itemType)) as any[];
     }
 
-    public visitDateValue(value: any, meta: DateValue) {
-        if (isValid(value)) {
-            // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-            value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
-        } else if (value != null) {
-            console.warn(`Invalid date couldn't be mapped: ${value}`)
-            value = null
-        }
-        return value;
+    protected visitDateValue(value: any, meta: DateValue) {
+        const parsed = parseValue(value, meta);
+        if (parsed == null) return null;
+
+        // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+        return format(parsed, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+    }
+
+    protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {
+        return parseValue(value, meta);
+    }
+
+    protected visitEnumValue(value: any, meta: EnumValue) {
+        return parseValue(value, meta);
     }
 
     constructor(private maxObjectDepth: number = 1) {
@@ -389,7 +434,7 @@ class MapToDtoVisitor extends Visitor<any | undefined, any[] | undefined, any | 
  * @param object The object to map.
  */
 export function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): {} | null {
-    if (object === null || object === undefined) return null;
+    if (object == null) return null;
 
     if (!object.$metadata){
         throw "Object has no $metadata property."
@@ -422,21 +467,23 @@ class DisplayVisitor extends Visitor<string | null, string | null, string | null
             return this.visitValue(value[meta.displayProp.name], meta.displayProp);
         } else {
             // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
+            // With a tweak to also not serialize the $metadata prop.
             try {
-                return JSON.stringify(value, function (k, v) { return k ? "" + v : v; });
+                return JSON.stringify(value, (k, v) => k === "$metadata" ? undefined : (k ? "" + v : v));
             } catch {
                 return value.toLocaleString();
             }
         }
     }
 
-    public visitCollection(value: any[], meta: CollectionValue): string | null {
-        if (!value) return null;
-        if (!Array.isArray(value)) throw `Value for collection ${meta.name} was not an array`;
+    protected visitCollection(value: any[] | null, meta: CollectionValue): string | null {
+        if (value == null) return null;
+        value = parseValue(value, meta);
 
         // Is this what we want? I think so - its the cleanest option.
         // Perhaps an prop that controls this would be best.
         if (value.length == 0) return "";
+
         // TODO: a prop that controls this number would also be good.
         if (value.length <= 5) {
             return (value)
@@ -446,29 +493,34 @@ class DisplayVisitor extends Visitor<string | null, string | null, string | null
                 )
                 .join(", ")
         }
+
         return value.length.toLocaleString() + " items"; // TODO: i18n
     }
 
-    public visitEnumValue(value: any, meta: EnumValue): string | null {
-        if (value == null) return value;
+    protected visitEnumValue(value: any, meta: EnumValue): string | null {
+        const parsed = parseValue(value, meta);
+        if (parsed == null) return null;
+
         const enumData = meta.typeDef.valueLookup[value];
 
         // If we can't find the enum value exactly,
         // just show the numeric value.
         // TODO: support flags enums (see metadata.ts@EnumType)
-        if (!enumData) return value.toLocaleString();
+        if (!enumData) return parsed.toLocaleString();
 
         return enumData.displayName;
     }
 
-    public visitDateValue(value: any, meta: DateValue): string | null {
-        if (value == null) return value;
-        return value.toLocaleString();
+    protected visitDateValue(value: any, meta: DateValue): string | null {
+        const parsed = parseValue(value, meta);
+        if (parsed == null) return null;
+        return parsed.toLocaleString();
     }
 
-    public visitPrimitiveValue(value: any, meta?: PrimitiveValue): string | null {
-        if (value == null) return value;
-        return value.toLocaleString();
+    protected visitPrimitiveValue(value: any, meta: PrimitiveValue): string | null {
+        const parsed = parseValue(value, meta);
+        if (parsed == null) return null;
+        return parsed.toLocaleString();
     }
 }
 
@@ -482,10 +534,10 @@ const displayVisitor = new DisplayVisitor();
 export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(item: T): string | null {
     const modelMeta = item.$metadata
     if (!modelMeta) {
-        throw `Item passed to modelDisplay(item) is missing its $metadata property`
+        throw `Object has no $metadata property`
     }
 
-    return displayVisitor.visitObject(item, item.$metadata);
+    return displayVisitor.visitObject(item, modelMeta);
 }
 
 /**

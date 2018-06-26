@@ -91,18 +91,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.Line($"{param.JsVariable},");
                     }
                 }
+
                 b.Line("return AxiosClient");
                 using (b.Indented())
                 {
-                    bool needsHydration = method.ResultType.PureType.HasClassViewModel;
-
-                    // Include the generic param on the request if the result doesn't need to be hydrated.
-                    // TODO: date return types need to be hydrated, but aren't here.
-                    // Once we start generating method metadata, we can make a generic client-side hydration function
-                    // that will accept the ApiResult object and the method's metadata and perform whatever actions are needed.
-                    string requestGenericParam = !needsHydration ? $"<{resultType}>" : "";
-
-                    b.Line($".{method.ApiActionHttpMethodName.ToLower()}{requestGenericParam}(");
+                    b.Line($".{method.ApiActionHttpMethodName.ToLower()}(");
                     b.Indented($"`/${{this.$metadata.controllerRoute}}/{method.Name}`,");
                     switch (method.ApiActionHttpMethod)
                     {
@@ -117,13 +110,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                     b.Line(")");
 
-                    // TODO: date return types aren't handled here.
-                    // Need to finish writing the dto-to-model converter in model.ts,
-                    // then bring that in here and use it.
-                    //if (needsHydration)
-                    {
-                        b.Line($".then<AxiosResponse<{resultType}>>(r => this.$hydrate{method.TransportType}(r, $method.return))");
-                    }
+                    b.Line($".then<AxiosResponse<{resultType}>>(r => this.$hydrate{method.TransportType}(r, $method.return))");
                 }
             }
 

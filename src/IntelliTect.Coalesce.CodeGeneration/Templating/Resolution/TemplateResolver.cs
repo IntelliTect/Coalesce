@@ -18,9 +18,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
         public IResolvedTemplate Resolve(TemplateDescriptor descriptor)
         {
             return new ResolvedManifestResourceTemplate(descriptor);
-
-            // TODO: check the coalesce configuration for template overrides,
-            // and return a ResolvedFileSystemTemplate if found.
         }
     }
 }

@@ -194,8 +194,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.Type.HasClassViewModel))
                 {
                     // Parameter looks like an external type.
-                    // TODO: this doesn't actually give us anything,
-                    // because the generated typescript doesn't know how to call methods that have non-primitive properties.
                     ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.Type.ClassViewModel);
                 }
             }

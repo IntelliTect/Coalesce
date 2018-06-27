@@ -14,9 +14,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the name of the type to be used by the client.
         /// </summary>
-        public string ClientTypeName => 
-            this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ??
-            Name;
+        public string ClientTypeName => this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ?? Name;
 
         public abstract string FullyQualifiedName { get; }
 
@@ -30,7 +28,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsNullable { get; }
 
-        public abstract bool IsNullableType { get; }
+        public bool IsNullableType => IsA(typeof(Nullable<>));
 
         public abstract bool IsClass { get; }
 
@@ -42,6 +40,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract bool IsVoid { get; }
 
         public abstract Dictionary<int, string> EnumValues { get; }
+
         public abstract bool IsEnum { get; }
 
         public abstract TypeViewModel FirstTypeArgument { get; }
@@ -49,6 +48,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract TypeViewModel ArrayType { get; }
 
         public abstract bool IsA(Type type);
+
         public abstract TypeViewModel[] GenericArgumentsFor(Type type);
 
         public bool IsA<T>() => IsA(typeof(T));
@@ -112,13 +112,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// True if this is a boolean.
-        /// </summary>
-        public bool IsBool => NullableUnderlyingType.Name == nameof(Boolean);
-
-        public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
-
-        /// <summary>
         /// True if the type is supported by Coalesce as a key type.
         /// </summary>
         public bool IsValidKeyType => IsString || IsIntegral || IsGuid;
@@ -179,55 +172,55 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
 
         /// <summary>
+        /// True if this is a boolean.
+        /// </summary>
+        public bool IsBool => NullableUnderlyingType.IsA<bool>();
+
+        public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
+
+        /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
         public bool IsDate => IsDateTime || IsDateTimeOffset;
 
-
-
         /// <summary>
         /// True if the property is a string.
         /// </summary>
-        public bool IsString => Name == "String";
+        public bool IsString => IsA<string>();
 
         public bool IsGuid => NullableUnderlyingType.IsA<Guid>();
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
         /// </summary>
-        public bool IsDateTime => NullableUnderlyingType.Name == "DateTime";
+        public bool IsDateTime => NullableUnderlyingType.IsA<DateTime>();
 
         /// <summary>
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
-        public bool IsDateTimeOffset => NullableUnderlyingType.Name == "DateTimeOffset";
+        public bool IsDateTimeOffset => NullableUnderlyingType.IsA<DateTimeOffset>();
 
         /// <summary>
         /// Returns true if class is a Byte[]
         /// </summary>
-        public bool IsByteArray => PureType.Name == nameof(Byte) && IsArray;
-        
+        public bool IsByteArray => IsArray && PureType.IsA<Byte>();
+
         /// <summary>
         /// Returns true if the type is any integral type or a nullable version of such a type, except <see cref="char"/>
         /// </summary>
         public bool IsIntegral
         {
-            get 
+            get
             {
-                switch (NullableUnderlyingType.Name)
-                {
-                    case nameof(SByte):
-                    case nameof(Byte):
-                    case nameof(Int16):
-                    case nameof(UInt16):
-                    case nameof(Int32):
-                    case nameof(UInt32):
-                    case nameof(Int64):
-                    case nameof(UInt64):
-                        return true;
-                    default:
-                        return false;
-                }
+                var underlying = NullableUnderlyingType;
+                return underlying.IsA<SByte>()
+                    || underlying.IsA<Byte>()
+                    || underlying.IsA<Int16>()
+                    || underlying.IsA<UInt16>()
+                    || underlying.IsA<Int32>()
+                    || underlying.IsA<UInt32>()
+                    || underlying.IsA<Int64>()
+                    || underlying.IsA<UInt64>();
             }
         }
 
@@ -240,15 +233,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (IsIntegral) return true;
 
-                switch (NullableUnderlyingType.Name)
-                {
-                    case nameof(Single):
-                    case nameof(Double):
-                    case nameof(Decimal):
-                        return true;
-                    default:
-                        return false;
-                }
+                var underlying = NullableUnderlyingType;
+                return IsA<Single>() || IsA<Double>() || IsA<Decimal>();
             }
         }
 
@@ -256,7 +242,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If this represents a nullable type, returns the underlying type that is nullable.
         /// Otherwise, returns the current instance.
         /// </summary>
-        public TypeViewModel NullableUnderlyingType => (IsNullable && IsA(typeof(Nullable<>))) ? FirstTypeArgument : this;
+        public TypeViewModel NullableUnderlyingType => IsNullableType ? FirstTypeArgument : this;
 
         /// <summary>
         /// Gets the type name without any collection or nullable around it.
@@ -269,7 +255,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     return ArrayType;
                 }
-                if (IsGeneric && (IsCollection || IsNullable)) { return FirstTypeArgument; }
+
+                if (IsGeneric && (IsCollection || IsNullable))
+                {
+                    return FirstTypeArgument;
+                }
+
                 return this;
             }
         }
@@ -284,6 +275,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
         
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
         public string DtoFullyQualifiedName => IsCollection

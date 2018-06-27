@@ -14,6 +14,7 @@ if ($env:APPVEYOR_BUILD_VERSION -ne $null) {
   yarn version --no-git-tag-version --new-version $env:APPVEYOR_BUILD_VERSION
 }
 yarn build
+yarn test
 
 popd
 pushd .\src\Coalesce.Web

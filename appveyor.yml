@@ -35,7 +35,7 @@ for:
       - dev
 
   init:
-  - ps: ./build/init_dev.ps1
+    - ps: ./build/init_dev.ps1
 
   configuration: Debug
 
@@ -56,7 +56,7 @@ for:
       - /release\/.*/
 
   init:
-  - ps: ./build/init_release.ps1
+    - ps: ./build/init_release.ps1
 
   configuration: Release
   
@@ -75,7 +75,7 @@ for:
   init:
   # This one is a bit different from the others - we need to make sure the PR builds are completely unique,
   # and since we aren't appending "-rc-" or "-alpha-" into these versions, we need some other entropy into the version.
-  - ps: ./build/init_master.ps1
+    - ps: ./build/init_master.ps1
 
   configuration: Release
   

@@ -36,4 +36,8 @@ yarn gulp coalesce-ko
 popd
 pushd .\src\Coalesce.Web
 yarn gulp coalesce-vue
+
+popd
+pushd .\src\Coalesce.Domain
+dotnet ef database update --framework netcoreapp2.1
       

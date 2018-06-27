@@ -9,21 +9,19 @@ environment:
 
 image: Visual Studio 2017
 cache: 
- # - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
+  - '%LocalAppData%\NuGet\v3-cache'   # Nuget v3
   - '%LocalAppData%\Yarn\cache'
 nuget:
   disable_publish_on_pr: true
 platform: Any CPU
 before_build:
   - ps: ./build/before_build.ps1
-# Broken on appveyor currently - says  The specified framework 'Microsoft.NETCore.App', version '2.0' was not found ???
-# cd ..\Coalesce.Domain
-# dotnet ef database update --framework netcoreapp2.1
 # test: off
-build_script:
-  - dotnet build -c %CONFIGURATION% -v minimal
+build:
+  project: Coalesce.sln
+  verbosity: minimal
 after_build:
-  - dotnet pack -c %CONFIGURATION% 
+  - dotnet pack -c %CONFIGURATION%
 artifacts:
   - path: '**\*.nupkg'
 
@@ -37,12 +35,7 @@ for:
       - dev
 
   init:
-  - ps: >-
-      $env:coalesce_version = "$env:coalesce_version-alpha-$env:appveyor_build_number"; 
-      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
-        $env:coalesce_version = "$env:coalesce_version-pr-$env:APPVEYOR_PULL_REQUEST_NUMBER"
-      }
-      Update-AppveyorBuild -Version "$env:coalesce_version"
+  - ps: ./build/init_dev.ps1
 
   configuration: Debug
 
@@ -63,12 +56,7 @@ for:
       - /release\/.*/
 
   init:
-  - ps: >-
-      $env:coalesce_version = "$env:coalesce_version-rc-$env:appveyor_build_number";
-      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
-        $env:coalesce_version = "$env:coalesce_version-pr-$env:APPVEYOR_PULL_REQUEST_NUMBER"
-      }
-      Update-AppveyorBuild -Version "$env:coalesce_version"
+  - ps: ./build/init_release.ps1
 
   configuration: Release
   
@@ -87,11 +75,7 @@ for:
   init:
   # This one is a bit different from the others - we need to make sure the PR builds are completely unique,
   # and since we aren't appending "-rc-" or "-alpha-" into these versions, we need some other entropy into the version.
-  - ps: >-
-      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
-        $env:coalesce_version = "$env:coalesce_version-release-pr-$env:APPVEYOR_PULL_REQUEST_NUMBER-$env:appveyor_build_number"
-      }
-      Update-AppveyorBuild -Version "$env:coalesce_version"
+  - ps: ./build/init_master.ps1
 
   configuration: Release
   

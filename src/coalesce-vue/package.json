@@ -18,10 +18,35 @@
     "vue": "^2.5.13"
   },
   "devDependencies": {
-    "typescript": "2.8.3"
+    "@types/jest": "^23.1.1",
+    "jest": "^23.1.0",
+    "ts-jest": "^22.4.6",
+    "typescript": "2.9.2"
   },
   "scripts": {
-    "build": "tsc",
-    "prepack": "tsc"
+    "build": "tsc -p ./tsconfig.build.json",
+    "prepack": "tsc -p ./tsconfig.build.json",
+    
+    "//": "No coverage by default because it breaks line numbers in error messages. `yarn test --coverage` to run it.",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "src/**",
+      "!src/index.ts"
+    ],
+    "testEnvironment": "node",
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(.*\\.)?(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   }
 }

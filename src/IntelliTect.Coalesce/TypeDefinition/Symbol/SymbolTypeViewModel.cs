@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,44 +14,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public SymbolTypeViewModel(ITypeSymbol symbol)
         {
             Symbol = symbol;
-        }
 
-        public INamedTypeSymbol NamedSymbol
-        {
-            get
+            FirstTypeArgument = IsGeneric ? new SymbolTypeViewModel(NamedSymbol.TypeArguments.First()) : null;
+            ArrayType = IsArray ? new SymbolTypeViewModel(((IArrayTypeSymbol)Symbol).ElementType) : null;
+
+            var types = new List<INamedTypeSymbol>();
+            var target = Symbol as INamedTypeSymbol;
+            while (target != null)
             {
-                if (Symbol is INamedTypeSymbol)
-                {
-                    return ((INamedTypeSymbol)Symbol);
-                }
-                else
-                {
-                    throw new InvalidCastException("Cannot cast to INamedTypeSymbol");
-                }
+                types.Add(target);
+                target = target.BaseType;
             }
+            foreach (var iface in Symbol.AllInterfaces) types.Add(iface);
+            AssignableTo = types;
+            AssignableToLookup = types.ToLookup(t => t.MetadataName);
         }
 
+        public INamedTypeSymbol NamedSymbol => Symbol as INamedTypeSymbol ?? throw new InvalidCastException("Cannot cast to INamedTypeSymbol");
 
-        public override bool IsGeneric
-        {
-            get
-            {
-                try
-                {
-                    return NamedSymbol.IsGenericType;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
-
-        }
+        public override bool IsGeneric => (Symbol as INamedTypeSymbol)?.IsGenericType ?? false;
 
         public override string Name => Symbol.Name;
 
         public override bool IsCollection =>
-            !IsArray &&!IsString && Symbol.Interfaces.Any(f => f.Name.Contains("IEnumerable"));
+            !IsArray && !IsString && IsA<IEnumerable>();
 
         public override bool IsArray => Symbol.TypeKind == TypeKind.Array;
 
@@ -58,8 +45,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if the property is nullable.
         /// </summary>
         public override bool IsNullable => Symbol.IsReferenceType || IsNullableType;
-
-        public override bool IsNullableType => Symbol.Name.Contains(nameof(Nullable));
 
         public override bool IsClass => IsArray || Symbol.IsReferenceType;
 
@@ -73,28 +58,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsNullableType) return NullableUnderlyingType.EnumValues;
+
                 var result = new Dictionary<int, string>();
-                // TODO: This needs to be fixed
-                if (!IsArray)
+
+                if (!IsEnum) return result;
+
+                var enumType = NamedSymbol.EnumUnderlyingType;
+                var symbol = Symbol;
+
+                if (enumType != null)
                 {
-                    var enumType = NamedSymbol.EnumUnderlyingType;
-                    var symbol = Symbol;
-                    if (IsNullableType)
+                    foreach (var member in symbol.GetMembers().OfType<IFieldSymbol>())
                     {
-                        enumType = (PureType as SymbolTypeViewModel).NamedSymbol.EnumUnderlyingType;
-                        symbol = (PureType as SymbolTypeViewModel).Symbol;
-                    }
-                    if (enumType != null)
-                    {
-                        foreach (var member in symbol.GetMembers())
-                        {
-                            if (member is IFieldSymbol)
-                            {
-                                result.Add((int)((IFieldSymbol)member).ConstantValue, member.Name);
-                            }
-                        }
+                        result.Add((int)member.ConstantValue, member.Name);
                     }
                 }
+
                 return result;
             }
         }
@@ -111,27 +91,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override string FullNamespace =>
             (Symbol is IArrayTypeSymbol array ? array.ElementType : Symbol.ContainingSymbol).ToDisplayString(DefaultDisplayFormat);
 
-        public override TypeViewModel FirstTypeArgument =>
-            new SymbolTypeViewModel(NamedSymbol.TypeArguments.First());
+        public override TypeViewModel FirstTypeArgument { get; }
 
-        public override TypeViewModel ArrayType =>
-            new SymbolTypeViewModel(((IArrayTypeSymbol)Symbol).ElementType);
-        
-        public override ClassViewModel ClassViewModel
-        {
-            get
-            {
-                if (!HasClassViewModel) return null;
-                if (Symbol is INamedTypeSymbol nts) return ReflectionRepository.Global.GetClassViewModel(nts);
-                return null;
-            }
-        }
+        public override TypeViewModel ArrayType { get; }
+
+        public override ClassViewModel ClassViewModel =>
+            HasClassViewModel && Symbol is INamedTypeSymbol nts
+                ? ReflectionRepository.Global.GetClassViewModel(nts)
+                : null;
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);
 
         public override bool HasAttribute<TAttribute>() =>
             Symbol.HasAttribute<TAttribute>();
+
+
+        private ICollection<INamedTypeSymbol> AssignableTo { get; }
+        private ILookup<string, INamedTypeSymbol> AssignableToLookup { get; }
 
         /// <summary>
         /// Find the ITypeSymbol that satisfies the inheritance relationship "this : typeToCheck"
@@ -150,25 +127,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
             // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
 
-            INamedTypeSymbol IsBase(INamedTypeSymbol symbol)
-            {
-                if (symbol == null) return null;
-                if (symbol.MetadataName == typeToCheck.Name) return symbol;
-                else if (symbol.BaseType != null) return IsBase(symbol.BaseType);
-                return null;
-            }
-
-            // Check self & base classes.
-            var baseSymbol = IsBase(Symbol as INamedTypeSymbol);
-            if (baseSymbol != null) return baseSymbol;
-
-            // Check interfaces.
-            foreach (var symbol in Symbol.AllInterfaces)
-            {
-                if (symbol.MetadataName == typeToCheck.Name) return symbol;
-            }
-
-            return null;
+            return AssignableToLookup[typeToCheck.Name].FirstOrDefault();
         }
 
 
@@ -181,7 +140,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Select(t => new SymbolTypeViewModel(t))
             .ToArray();
 
-        public override bool IsA(Type typeToCheck) => GetSatisfyingBaseTypeSymbol(typeToCheck) != null;
+        public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;
 
         public override bool EqualsType(TypeViewModel b) =>
             b is SymbolTypeViewModel s ? FullyQualifiedName == s.FullyQualifiedName : false;

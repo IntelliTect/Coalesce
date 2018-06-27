@@ -67,10 +67,10 @@ export declare abstract class ViewModel<TModel extends Model<ModelType>, TApi ex
      */
     $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>): Model<ModelType> | null;
     constructor(
-        /** The metadata representing the type of data that this ViewModel handles. */
-        $metadata: TModel["$metadata"], 
-        /** Instance of an API client for the model through which direct, stateless API requests may be made. */
-        $apiClient: TApi, initialData?: TModel);
+    /** The metadata representing the type of data that this ViewModel handles. */
+    $metadata: TModel["$metadata"], 
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
+    $apiClient: TApi, initialData?: TModel);
 }
 export declare abstract class ListViewModel<TModel extends Model<ModelType>, TApi extends ModelApiClient<TModel>> {
     /** The metadata representing the type of data that this ViewModel handles. */
@@ -109,8 +109,8 @@ export declare abstract class ListViewModel<TModel extends Model<ModelType>, TAp
     /** Stops auto-loading if it is currently enabled. */
     $stopAutoLoad(): void;
     constructor(
-        /** The metadata representing the type of data that this ViewModel handles. */
-        $metadata: TModel["$metadata"], 
-        /** Instance of an API client for the model through which direct, stateless API requests may be made. */
-        $apiClient: TApi);
+    /** The metadata representing the type of data that this ViewModel handles. */
+    $metadata: TModel["$metadata"], 
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
+    $apiClient: TApi);
 }

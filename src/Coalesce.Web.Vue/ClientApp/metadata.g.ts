@@ -51,6 +51,7 @@ export const Case = domain.types.Case = {
       displayName: "Case Key",
       type: "number",
       role: "primaryKey",
+      isReadOnly: true,
     },
     title: {
       name: "title",
@@ -151,6 +152,7 @@ export const Case = domain.types.Case = {
       type: "object",
       get typeDef() { return (domain.types.DevTeam as ObjectType) },
       role: "value",
+      isReadOnly: true,
     },
     duration: {
       name: "duration",
@@ -247,6 +249,7 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Case Id",
       type: "number",
       role: "primaryKey",
+      isReadOnly: true,
     },
     title: {
       name: "title",
@@ -259,6 +262,7 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Assigned To Name",
       type: "string",
       role: "value",
+      isReadOnly: true,
     },
   },
   methods: {
@@ -286,6 +290,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Case Product Id",
       type: "number",
       role: "primaryKey",
+      isReadOnly: true,
     },
     caseId: {
       name: "caseId",
@@ -342,6 +347,7 @@ export const Company = domain.types.Company = {
       displayName: "Company Id",
       type: "number",
       role: "primaryKey",
+      isReadOnly: true,
     },
     name: {
       name: "name",
@@ -404,6 +410,7 @@ export const Company = domain.types.Company = {
       displayName: "Alt Name",
       type: "string",
       role: "value",
+      isReadOnly: true,
     },
   },
   methods: {
@@ -456,6 +463,7 @@ export const Person = domain.types.Person = {
       displayName: "Person Id",
       type: "number",
       role: "primaryKey",
+      isReadOnly: true,
     },
     title: {
       name: "title",
@@ -541,12 +549,14 @@ export const Person = domain.types.Person = {
       type: "object",
       get typeDef() { return (domain.types.PersonStats as ObjectType) },
       role: "value",
+      isReadOnly: true,
     },
     name: {
       name: "name",
       displayName: "Name",
       type: "string",
       role: "value",
+      isReadOnly: true,
     },
     companyId: {
       name: "companyId",
@@ -851,6 +861,7 @@ export const Product = domain.types.Product = {
       displayName: "Product Id",
       type: "number",
       role: "primaryKey",
+      isReadOnly: true,
     },
     name: {
       name: "name",
@@ -864,6 +875,7 @@ export const Product = domain.types.Product = {
       type: "object",
       get typeDef() { return (domain.types.ProductDetails as ObjectType) },
       role: "value",
+      isReadOnly: true,
     },
     uniqueId: {
       name: "uniqueId",
@@ -1023,6 +1035,7 @@ export const ProductDetails = domain.types.ProductDetails = {
       type: "object",
       get typeDef() { return (domain.types.StreetAddress as ObjectType) },
       role: "value",
+      isReadOnly: true,
     },
     companyHqAddress: {
       name: "companyHqAddress",
@@ -1030,6 +1043,7 @@ export const ProductDetails = domain.types.ProductDetails = {
       type: "object",
       get typeDef() { return (domain.types.StreetAddress as ObjectType) },
       role: "value",
+      isReadOnly: true,
     },
   },
 }
@@ -1088,6 +1102,7 @@ export const WeatherData = domain.types.WeatherData = {
       type: "object",
       get typeDef() { return (domain.types.Location as ObjectType) },
       role: "value",
+      isReadOnly: true,
     },
   },
 }

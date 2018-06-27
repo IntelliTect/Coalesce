@@ -90,7 +90,7 @@ export interface Service extends Metadata, ApiRoutedType {
 /** Represents a value of an enum */
 export interface EnumMember {
     readonly strValue: string;
-    readonly displayName: string;
+    displayName: string;
     readonly value: number;
 }
 /** A dictionary with both string and numeric keys for looking up `EnumValue` objects by their string or numeric value. */
@@ -184,16 +184,20 @@ export declare type CustomTypeValue = EnumValue | ObjectValue | ModelValue;
 export declare type NonCollectionValue = PrimitiveValue | DateValue | CustomTypeValue;
 /** Union of all representations of the usage of a type */
 export declare type Value = NonCollectionValue | CollectionValue;
+export interface PropertyBase {
+    readonly isReadOnly?: true | undefined;
+}
 /** Represents a primitive property */
-export interface PrimitiveProperty extends PrimitiveValue {
+export interface PrimitiveProperty extends PropertyBase, PrimitiveValue {
     readonly role: "value";
 }
-export interface PrimaryKeyProperty extends PrimitiveValue {
+/** Represents a property that serves as a primary key */
+export interface PrimaryKeyProperty extends PropertyBase, PrimitiveValue {
     readonly role: "primaryKey";
     readonly type: "string" | "number";
 }
 /** Represents a property that serves as a foreign key */
-export interface ForeignKeyProperty extends PrimitiveValue {
+export interface ForeignKeyProperty extends PropertyBase, PrimitiveValue {
     readonly role: "foreignKey";
     readonly type: "string" | "number";
     readonly principalKey: PrimaryKeyProperty;
@@ -201,26 +205,26 @@ export interface ForeignKeyProperty extends PrimitiveValue {
     readonly navigationProp?: ModelReferenceNavigationProperty;
 }
 /** Represents a date property */
-export interface DateProperty extends DateValue {
+export interface DateProperty extends PropertyBase, DateValue {
 }
 /** Represents an enum property */
-export interface EnumProperty extends EnumValue {
+export interface EnumProperty extends PropertyBase, EnumValue {
 }
 /** Represents an object property */
-export interface ObjectProperty extends ObjectValue {
+export interface ObjectProperty extends PropertyBase, ObjectValue {
 }
 /**
  * Represents a model property that simply exists as a value,
  * not as a relational navigation property.
  */
-export interface ModelValueProperty extends ModelValue {
+export interface ModelValueProperty extends PropertyBase, ModelValue {
     readonly role: "value";
 }
 /**
  * Represents an object property that represents the foreign end of
  * a 1-to-1 or 1-to-many relationship in a relational model.
  */
-export interface ModelReferenceNavigationProperty extends ModelValue {
+export interface ModelReferenceNavigationProperty extends PropertyBase, ModelValue {
     readonly role: "referenceNavigation";
     readonly foreignKey: ForeignKeyProperty;
     readonly principalKey: PrimaryKeyProperty;
@@ -229,14 +233,14 @@ export interface ModelReferenceNavigationProperty extends ModelValue {
  * Represents a collection property that simple contains values that do not
  * have any special meaning in a relational model.
  */
-export interface BasicCollectionProperty extends CollectionValue {
+export interface BasicCollectionProperty extends PropertyBase, CollectionValue {
     readonly role: "value";
 }
 /**
  * Represents a collection property that represents
  * the foreign objects in a many-to-1 relationship in a relational model.
  */
-export interface ModelCollectionNavigationProperty extends CollectionValue {
+export interface ModelCollectionNavigationProperty extends PropertyBase, CollectionValue {
     readonly role: "collectionNavigation";
     /**
      * Reference to the property on the type contained in this collection that relates
@@ -255,9 +259,10 @@ export interface Method extends Metadata {
         [paramName in string]: Value;
     };
 }
-export declare type PropNames<TMeta extends ClassType, Kind extends Property = Property> = {
-    [K in keyof TMeta["props"]]: TMeta["props"][K] extends Kind ? K : never;
-}[keyof TMeta["props"]];
+export declare type PropsNames<Props extends ClassType["props"], Kind extends Property = Property> = {
+    [K in Extract<keyof Props, string>]: Props[K] extends Kind ? K : never;
+}[Extract<keyof Props, string>];
+export declare type PropNames<TMeta extends ClassType, Kind extends Property = Property> = PropsNames<ClassType["props"], Kind>;
 export declare type PropertyOrName<TMeta extends ClassType> = Property | PropNames<TMeta, Property>;
 export declare function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string): Exclude<TProp, string>;
 export declare function resolvePropMeta<TProp extends Property>(metadata: ClassType, propOrString: TProp | string, slient: true): Exclude<TProp, string> | undefined;

@@ -1,4 +1,6 @@
 
+import Vue from 'vue';
+
 // Undocumented (but exposed) vue method for making properties reactive.
 declare module "vue/types/vue" {
     interface VueConstructor<V extends Vue = Vue> {
@@ -14,7 +16,7 @@ declare module "axios" {
       delete<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
       head<T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>;
     }
-  }
+}
 
 import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue } from './metadata'
 import { Model, convertToModel, mapToDto, mapValueToDto, DataSource, convertValueToModel } from './model'
@@ -22,7 +24,6 @@ import { OwnProps, Indexable } from './util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance, Cancel} from 'axios'
 import * as qs from 'qs'
-import Vue from 'vue';
 
 
 /* Api Response Objects */

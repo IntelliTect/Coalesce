@@ -6,17 +6,16 @@ Designed to help you quickly build amazing sites, Coalesce is a rapid-developmen
   * TypeScript
   * Visual Studio 2017
 
-Branch dev:    [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/dev?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/dev)
-
-Branch master: [![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/master?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/master)
+|master|dev (MyGet)
+|:--:|:--:
+|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg)](https://www.nuget.org/packages/IntelliTect.Coalesce)|[![MyGet](https://img.shields.io/myget/intellitect-coalesce/v/IntelliTect.Coalesce.svg)](https://www.myget.org/feed/intellitect-coalesce/package/nuget/IntelliTect.Coalesce)
+|[![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/master?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/master)|[![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/dev?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/dev)
 
 ## Bottom Line
 Projects that used to take us three weeks now take one week. 
 
 ## Learn More
 You can find a sample app with documentation here: http://coalesce.intellitect.com/
-
-A video walkthrough will be available soon.
 
 ## Get Started Fast
 We recommend using our starter project at at: https://github.com/IntelliTect/Coalesce.Starter
@@ -41,7 +40,7 @@ This project gives you everything you need to start building an amazing web site
 
 
 ## Why Coalesce
-Coalesce was created when developers at IntelliTect, after writing many web sites, got bored. We got bored of writing really awesome API and View Model code because making this code awesome takes lots of work. However, it is boring because, while not all the same, it ended up being very repetitive. Supporting paging, sorting, searching, data binding, security, etc. for every type of object is laborious. We also really disliked the auto generated MVC CRUD pages and thought users had the right to a better admin experience. 
+Coalesce was created when developers at IntelliTect, after writing many web sites, got bored. We got bored of writing really awesome API and View Model code because making this code awesome takes lots of work. However, it is boring because, while not all the same, it ended up being very repetitive. Supporting paging, sorting, searching, data binding, security, etc. for every type of object is laborious. We also really disliked the auto generated MVC CRUD pages and thought users had the right to a better admin experience.
 
 Specifically, we had a large line-of-business application to write which had a SPA page with over 300 fields on it. The thought of writing this by hand was just too daunting especially when the page needed to be saved as edits were made. 
 

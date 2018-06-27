@@ -14,8 +14,8 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 export function getEnumMeta(values) {
     return {
         valueLookup: values.reduce(function (obj, v) {
-            return __assign({}, obj, (_a = {}, _a[v.strValue] = v, _a[v.value] = v, _a));
             var _a;
+            return __assign({}, obj, (_a = {}, _a[v.strValue] = v, _a[v.value] = v, _a));
         }, {}),
         values: values
     };

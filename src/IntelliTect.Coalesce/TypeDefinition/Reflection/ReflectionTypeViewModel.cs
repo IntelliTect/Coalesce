@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,18 +14,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ReflectionTypeViewModel(Type type)
         {
             Info = type;
-        }
 
-        public override string Name => Info.Name.Replace("`1", "");
+            FirstTypeArgument = IsGeneric && Info.IsConstructedGenericType
+                ? new ReflectionTypeViewModel(Info.GenericTypeArguments[0])
+                : null;
 
-        public override object GetAttributeValue<TAttribute>(string valueName) =>
-            Info.GetAttributeValue<TAttribute>(valueName);
+            ArrayType = IsArray ? new ReflectionTypeViewModel(Info.GetElementType()) : null;
 
-        public override bool HasAttribute<TAttribute>() =>
-            Info.HasAttribute<TAttribute>();
-
-        private Type GetSatisfyingBaseType(Type type)
-        {
             IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
             {
                 // From https://stackoverflow.com/a/17143662
@@ -37,17 +33,34 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         .Distinct();
             }
 
-            return GetBaseClassesAndInterfaces(Info)
-                .Concat(new[] { Info })
+            BaseClassesAndInterfaces = GetBaseClassesAndInterfaces(Info).Concat(new[] { Info }).ToList();
+        }
+
+
+        // TODO: why is an arity of 1 removed from the name? Seems to be an oversight
+        // - If we're removing arity, we should remove any arity.
+        public override string Name => Info.Name.Replace("`1", "");
+
+        public override object GetAttributeValue<TAttribute>(string valueName) =>
+            Info.GetAttributeValue<TAttribute>(valueName);
+
+        public override bool HasAttribute<TAttribute>() =>
+            Info.HasAttribute<TAttribute>();
+
+        private ICollection<Type> BaseClassesAndInterfaces { get; }
+
+        private Type GetSatisfyingBaseType(Type type)
+        {
+            return BaseClassesAndInterfaces
                 .FirstOrDefault(x =>
                        x.Equals(type)
                     || x.IsSubclassOf(type)
                     || type.IsAssignableFrom(x)
-                    || x.IsGenericType && x.GetGenericTypeDefinition() == type
+                    || (x.IsGenericType && x.GetGenericTypeDefinition() == type)
                 );
         }
 
-        public override TypeViewModel[] GenericArgumentsFor(Type type) => 
+        public override TypeViewModel[] GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseType(type)?
             .GenericTypeArguments
             .Select(t => new ReflectionTypeViewModel(t))
@@ -55,16 +68,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;
 
-
         public override bool IsGeneric => Info.IsGenericType;
 
-        public override bool IsCollection => Info.GetInterface("IEnumerable") != null && !IsArray && !IsString;
+        public override bool IsCollection => IsA<IEnumerable>() && !IsArray && !IsString;
 
         public override bool IsArray => Info.IsArray;
 
         public override bool IsNullable => Info.IsClass || IsNullableType;
-
-        public override bool IsNullableType => Info.Name.Contains("Nullable");
 
         public override bool IsClass => Info.IsClass;
 
@@ -131,17 +141,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string FullyQualifiedName => GetFriendlyTypeName(Info);
 
+        public override TypeViewModel FirstTypeArgument { get; }
 
-        public override TypeViewModel FirstTypeArgument => 
-            new ReflectionTypeViewModel(Info.GenericTypeArguments.First());
+        public override TypeViewModel ArrayType { get; }
 
-        public override TypeViewModel ArrayType => IsArray
-            ? new ReflectionTypeViewModel(Info.GetElementType())
-            : null;
-
-        public override ClassViewModel ClassViewModel => HasClassViewModel
-            ? ReflectionRepository.Global.GetClassViewModel(Info)
-            : null;
+        public override ClassViewModel ClassViewModel =>
+            HasClassViewModel ? ReflectionRepository.Global.GetClassViewModel(Info) : null;
 
         public override Type TypeInfo => Info;
 

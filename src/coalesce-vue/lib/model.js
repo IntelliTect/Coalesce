@@ -18,6 +18,7 @@ var Visitor = /** @class */ (function () {
     }
     Visitor.prototype.visitValue = function (value, meta) {
         switch (meta.type) {
+            case undefined: throw "Missing type on value metadata";
             case "model": return this.visitModelValue(value, meta);
             case "object": return this.visitObjectValue(value, meta);
             case "collection": return this.visitCollection(value, meta);
@@ -77,9 +78,9 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
         return _super.prototype.visitValue.call(this, value, meta);
     };
     ModelConversionVisitor.prototype.visitObject = function (value, meta) {
-        if (!value)
+        if (value == null)
             return null;
-        if (typeof value !== "object")
+        if (typeof value !== "object" || Array.isArray(value))
             throw "Value for object " + meta.name + " was not an object";
         // Prevent infinite recursion on circular object graphs.
         if (this.objects.has(value))
@@ -119,7 +120,7 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
     };
     ModelConversionVisitor.prototype.visitCollection = function (value, meta) {
         var _this = this;
-        if (!value)
+        if (value == null)
             return null;
         if (!Array.isArray(value))
             throw "Value for collection " + meta.name + " was not an array";
@@ -137,7 +138,7 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
         }
     };
     ModelConversionVisitor.prototype.visitDateValue = function (value, meta) {
-        if (!value)
+        if (value == null)
             return null;
         if (value instanceof Date) {
             if (this.mode == "convert") {
@@ -150,11 +151,58 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
             }
         }
         else {
+            if (typeof value !== "string") {
+                // dateFns `toDate` is way too lenient - 
+                // it will parse any number as milliseconds since the epoch,
+                // and parses `true` as the epoch.
+                throw "Received unparsable date: " + value;
+            }
             var date = toDate(value);
             if (!isValid(date)) {
-                console.warn("Recieved unparsable date: " + value);
+                throw "Received unparsable date: " + value;
             }
             return date;
+        }
+    };
+    ModelConversionVisitor.prototype.visitNumeric = function (value, meta) {
+        if (value == null)
+            return null;
+        if (typeof value === "number")
+            return value;
+        if (typeof value !== "string") {
+            // We don't want to parse things like booleans into numbers.
+            // Strings are all we should be handling.
+            throw "Received unparsable " + meta.type + ": " + value;
+        }
+        var parsed = Number(value);
+        if (isNaN(parsed)) {
+            throw "Received unparsable " + meta.type + ": " + value;
+        }
+        return parsed;
+    };
+    ModelConversionVisitor.prototype.visitEnumValue = function (value, meta) {
+        return this.visitNumeric(value, meta);
+    };
+    ModelConversionVisitor.prototype.visitPrimitiveValue = function (value, meta) {
+        if (value == null)
+            return null;
+        switch (meta.type) {
+            case "number":
+                return this.visitNumeric(value, meta);
+            case "boolean":
+                if (typeof value === "boolean")
+                    return value;
+                if (value === "false")
+                    return false;
+                if (value === "true")
+                    return true;
+                throw "Received unparsable boolean " + value;
+            case "string":
+                if (typeof value === "string")
+                    return value;
+                return String(value);
+            default:
+                throw "Unhandled primitive value type " + meta.type;
         }
     };
     return ModelConversionVisitor;
@@ -173,7 +221,7 @@ export function convertToModel(value, metadata) {
 /**
  * Transforms a raw value into a valid implemenation of a model value.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
- * @param object The value that should be converted
+ * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
 export function convertValueToModel(value, metadata) {
@@ -192,6 +240,24 @@ export function mapToModel(object, metadata) {
         return object;
     return new ModelConversionVisitor("map").visitObject(object, metadata);
 }
+/**
+ * Maps a raw value into a valid implemenation of a model value.
+ * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
+ * @param value The value that should be converted
+ * @param metadata The metadata describing the value
+ */
+export function mapValueToModel(value, metadata) {
+    if (value === null || value === undefined)
+        return value;
+    return new ModelConversionVisitor("map").visitValue(value, metadata);
+}
+/**
+ * Updates the target model with values from the source model.
+ * Any properties defined on the source will be copied to the target.
+ * This perform a shallow copy of properties, using `Object.assign`.
+ * @param target The model to be updated.
+ * @param source The model whose values will be used to perform the update.
+ */
 export function updateFromModel(target, source) {
     return Object.assign(target, source);
     // I was going to go further with this and make it more like the Knockout code,
@@ -247,6 +313,8 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
         var output = {};
         for (var propName in props) {
             var propMeta = props[propName];
+            if (propMeta.isReadOnly)
+                continue;
             if (propName in value) {
                 var newValue = this.visitValue(value[propName], propMeta);
                 if (newValue !== undefined) {
@@ -277,9 +345,8 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
         // creation of an entry in the parent object for this collection.
         if (this.depth >= this.maxObjectDepth)
             return undefined;
-        this.depth++;
+        // Don't increase depth for collections - only objects increase depth.
         var ret = _super.prototype.visitCollection.call(this, value, meta);
-        this.depth--;
         return ret;
     };
     MapToDtoVisitor.prototype.visitDateValue = function (value, meta) {
@@ -295,6 +362,11 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
     };
     return MapToDtoVisitor;
 }(Visitor));
+/**
+ * Maps the given object to a POJO suitable for JSON serialization.
+ * Will not serialize child objects or collections.
+ * @param object The object to map.
+ */
 export function mapToDto(object) {
     if (object === null || object === undefined)
         return null;
@@ -304,18 +376,24 @@ export function mapToDto(object) {
     var dto = new MapToDtoVisitor(1).visitObject(object, object.$metadata);
     return dto;
 }
+/**
+ * Maps the given value to a representation suitable for JSON serialization.
+ * Will not serialize the children of any objects encountered.
+ * Will serialize objects found in arrays.
+ * @param object The object to map.
+ */
 export function mapValueToDto(value, metadata) {
     if (value === null || value === undefined)
         return value;
     return new MapToDtoVisitor(1).visitValue(value, metadata);
 }
 /** Visitor that maps its input to a string representation of its value, suitable for display. */
-var GetDisplayVisitor = /** @class */ (function (_super) {
-    __extends(GetDisplayVisitor, _super);
-    function GetDisplayVisitor() {
+var DisplayVisitor = /** @class */ (function (_super) {
+    __extends(DisplayVisitor, _super);
+    function DisplayVisitor() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    GetDisplayVisitor.prototype.visitObject = function (value, meta) {
+    DisplayVisitor.prototype.visitObject = function (value, meta) {
         if (value == null)
             return value;
         if (meta.displayProp) {
@@ -331,7 +409,7 @@ var GetDisplayVisitor = /** @class */ (function (_super) {
             }
         }
     };
-    GetDisplayVisitor.prototype.visitCollection = function (value, meta) {
+    DisplayVisitor.prototype.visitCollection = function (value, meta) {
         var _this = this;
         if (!value)
             return null;
@@ -351,30 +429,33 @@ var GetDisplayVisitor = /** @class */ (function (_super) {
             )
                 .join(", ");
         }
-        return value.length.toLocaleString();
+        return value.length.toLocaleString() + " items"; // TODO: i18n
     };
-    GetDisplayVisitor.prototype.visitEnumValue = function (value, meta) {
+    DisplayVisitor.prototype.visitEnumValue = function (value, meta) {
         if (value == null)
             return value;
         var enumData = meta.typeDef.valueLookup[value];
+        // If we can't find the enum value exactly,
+        // just show the numeric value.
+        // TODO: support flags enums (see metadata.ts@EnumType)
         if (!enumData)
-            return '';
+            return value.toLocaleString();
         return enumData.displayName;
     };
-    GetDisplayVisitor.prototype.visitDateValue = function (value, meta) {
+    DisplayVisitor.prototype.visitDateValue = function (value, meta) {
         if (value == null)
             return value;
         return value.toLocaleString();
     };
-    GetDisplayVisitor.prototype.visitPrimitiveValue = function (value, meta) {
+    DisplayVisitor.prototype.visitPrimitiveValue = function (value, meta) {
         if (value == null)
             return value;
         return value.toLocaleString();
     };
-    return GetDisplayVisitor;
+    return DisplayVisitor;
 }(Visitor));
 /** Singleton instance of `GetDisplayVisitor`, since the visitor is stateless. */
-var displayVisitor = new GetDisplayVisitor();
+var displayVisitor = new DisplayVisitor();
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
  * @param item The model instance to return a string representation of
@@ -396,4 +477,13 @@ export function propDisplay(item, prop) {
     var propMeta = resolvePropMeta(item.$metadata, prop);
     var value = item[propMeta.name];
     return displayVisitor.visitValue(value, propMeta);
+}
+/**
+ * Given a value and metadata which describes that value,
+ * return a string representation of the value suitable for display.
+ * @param value Any value which is valid for the metadata provided.
+ * @param prop The metadata which describes the value given.
+ */
+export function valueDisplay(value, meta) {
+    return displayVisitor.visitValue(value, meta);
 }

@@ -31,9 +31,9 @@ I don't want to add gulp to Coalesce.Web.Vue
 
 popd
 pushd .\src\Coalesce.Web
-gulp coalesce-ko
+yarn gulp coalesce-ko
 
 popd
 pushd .\src\Coalesce.Web
-gulp coalesce-vue
+yarn gulp coalesce-vue
       

@@ -49,6 +49,10 @@ var ViewModel = /** @class */ (function () {
         var _this = this;
         this.$metadata = $metadata;
         this.$apiClient = $apiClient;
+        // Must be initialized so it will be reactive.
+        // If this isn't reactive, $isDirty won't be reactive.
+        // Technically this will always be initialized by the setting of `$isDirty` in the ctor.
+        this._pristineDto = null;
         /**
          * A function for invoking the /get endpoint, and a set of properties about the state of the last call.
          */
@@ -70,14 +74,23 @@ var ViewModel = /** @class */ (function () {
             return c.save(_this.$data);
         }; })
             .onFulfilled(function () {
-            // Only load the save response if the data hasn't changed since we sent it.
-            // If the data has changed, loading the response would overwrite users' changes.
-            if (!_this.$isDirty) {
-                if (_this.$save.result) {
-                    updateFromModel(_this.$data, _this.$save.result);
-                    // Set the new state of our data as being clean (since we just made a change to it)
-                    _this.$isDirty = false;
-                }
+            if (!_this.$save.result) {
+                // Can't do anything useful if the save returned no data.
+                return;
+            }
+            if (_this.$isDirty) {
+                // If our model DID change while the save was in-flight,
+                // update the pristine version of the model with what came back from the save,
+                // but don't load the data into the `$data` prop.
+                // This helps `$isDirty` to work as expected.
+                _this._pristineDto = mapToDto(_this.$save.result);
+            }
+            else {
+                // Only load the save response if the data hasn't changed since we sent it.
+                // If the data has changed, loading the response would overwrite users' changes.
+                updateFromModel(_this.$data, _this.$save.result);
+                // Set the new state of our data as being clean (since we just made a change to it)
+                _this.$isDirty = false;
             }
         });
         /**
@@ -149,7 +162,13 @@ var ViewModel = /** @class */ (function () {
                     return;
                 }
                 // No saves in progress - go ahead and save now.
-                _this.$save();
+                _this.$save()
+                    // After the save finishes, attempt another autosave.
+                    // If the model has become dirty since the last save,
+                    // we need to save again.
+                    // This will happen if the state of the model changes while the save
+                    // is in-flight.
+                    .then(enqueueSave);
             }
         }, wait);
         var watcher = vue.$watch(function () { return _this.$isDirty; }, enqueueSave);

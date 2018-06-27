@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.Tests.Util
                     throw new ArgumentException($"Class {TargetType} not found in any C# embedded resources.");
                 }
 
-                ClassViewModel = ReflectionRepositoryFactory.Symbol.GetClassViewModel(TargetType);
+                ClassViewModel = ReflectionRepositoryFactory.Symbol.GetClassViewModel(locatedSymbol);
             }
         }
 

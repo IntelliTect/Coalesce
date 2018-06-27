@@ -8,7 +8,7 @@ node --version
 Write-Host "Npm Version:"
 npm --version
 dotnet restore
-pushd .\src\coalesce-vue
+Push-Location .\src\coalesce-vue
 yarn
 if ($env:APPVEYOR_BUILD_VERSION -ne $null) {
   yarn version --no-git-tag-version --new-version $env:APPVEYOR_BUILD_VERSION
@@ -16,12 +16,12 @@ if ($env:APPVEYOR_BUILD_VERSION -ne $null) {
 yarn build
 yarn test
 
-popd
-pushd .\src\Coalesce.Web
+Pop-Location
+Push-Location .\src\Coalesce.Web
 yarn
 
-popd
-pushd .\src\Coalesce.Web.Vue
+Pop-Location
+Push-Location .\src\Coalesce.Web.Vue
 yarn
 yarn global add gulp-cli
 
@@ -30,15 +30,15 @@ Currently, our coalesce scripts for vue is in the knockout web project's gulpfil
 I don't want to add gulp to Coalesce.Web.Vue
 #>
 
-popd
-pushd .\src\Coalesce.Web
+Pop-Location
+Push-Location .\src\Coalesce.Web
 yarn gulp coalesce-ko
 
-popd
-pushd .\src\Coalesce.Web
+Pop-Location
+Push-Location .\src\Coalesce.Web
 yarn gulp coalesce-vue
 
-popd
-pushd .\src\Coalesce.Domain
+Pop-Location
+Push-Location .\src\Coalesce.Domain
 dotnet ef database update --framework netcoreapp2.1
       

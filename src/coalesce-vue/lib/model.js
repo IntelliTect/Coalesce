@@ -18,52 +18,83 @@ var Visitor = /** @class */ (function () {
     }
     Visitor.prototype.visitValue = function (value, meta) {
         switch (meta.type) {
-            case undefined: throw "Missing type on value metadata";
-            case "model": return this.visitModelValue(value, meta);
-            case "object": return this.visitObjectValue(value, meta);
-            case "collection": return this.visitCollection(value, meta);
-            case "enum": return this.visitEnumValue(value, meta);
-            case "date": return this.visitDateValue(value, meta);
-            default: return this.visitPrimitiveValue(value, meta);
+            case undefined:
+                throw "Missing type on value metadata";
+            case "model":
+            case "object":
+                return this.visitObject(value, meta.typeDef);
+            case "collection":
+                return this.visitCollection(value, meta);
+            case "enum":
+                return this.visitEnumValue(value, meta);
+            case "date":
+                return this.visitDateValue(value, meta);
+            default:
+                return this.visitPrimitiveValue(value, meta);
         }
-    };
-    Visitor.prototype.visitObject = function (value, meta) {
-        if (value == null)
-            return value;
-        var props = meta.props;
-        var output = {};
-        for (var propName in props) {
-            if (propName in value) {
-                output[propName] = this.visitValue(value[propName], props[propName]);
-            }
-        }
-        return output;
-    };
-    Visitor.prototype.visitObjectValue = function (value, meta) {
-        return this.visitObject(value, meta.typeDef);
-    };
-    Visitor.prototype.visitModelValue = function (value, meta) {
-        return this.visitObject(value, meta.typeDef);
-    };
-    Visitor.prototype.visitCollection = function (value, meta) {
-        var _this = this;
-        if (value == null)
-            return value;
-        if (!Array.isArray(value))
-            throw "Value for collection " + meta.name + " was not an array";
-        return value.map(function (element, index) { return _this.visitValue(element, meta.itemType); });
-    };
-    Visitor.prototype.visitPrimitiveValue = function (value, meta) {
-        return value;
-    };
-    Visitor.prototype.visitDateValue = function (value, meta) {
-        return value;
-    };
-    Visitor.prototype.visitEnumValue = function (value, meta) {
-        return value;
     };
     return Visitor;
 }());
+function parseError(value, meta) {
+    return "Encountered unparsable " + typeof value + " `" + value + "` for " + meta.type + " '" + meta.name + "'";
+}
+export function parseValue(value, meta) {
+    if (value == null) {
+        return null;
+    }
+    var type = typeof value;
+    switch (meta.type) {
+        case "number":
+        case "enum":
+            if (type === "number")
+                return value;
+            if (type !== "string") {
+                // We don't want to parse things like booleans into numbers.
+                // Strings are all we should be handling.
+                throw parseError(value, meta);
+            }
+            var parsed = Number(value);
+            if (isNaN(parsed)) {
+                throw parseError(value, meta);
+            }
+            return parsed;
+        case "string":
+            if (type === "string")
+                return value;
+            if (type === "object")
+                throw parseError(value, meta);
+            return String(value);
+        case "boolean":
+            if (type === "boolean")
+                return value;
+            if (value === "true")
+                return true;
+            if (value === "false")
+                return false;
+            throw parseError(value, meta);
+        case "collection":
+            if (type !== "object" || !Array.isArray(value))
+                throw parseError(value, meta);
+            return value;
+        case "model":
+        case "object":
+            if (type !== "object" || Array.isArray(value))
+                throw parseError(value, meta);
+            return value;
+        case "date":
+            var date = value instanceof Date
+                ? value
+                // dateFns `toDate` is way too lenient - 
+                // it will parse any number as milliseconds since the epoch,
+                // and parses `true` as the epoch.
+                // So, we restrict parsing to strings only.
+                : type === "string" ? toDate(value) : null;
+            if (!isValid(date)) {
+                throw parseError(value, meta);
+            }
+            return date;
+    }
+}
 var ModelConversionVisitor = /** @class */ (function (_super) {
     __extends(ModelConversionVisitor, _super);
     function ModelConversionVisitor(mode) {
@@ -73,6 +104,7 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
         return _this;
     }
     ModelConversionVisitor.prototype.visitValue = function (value, meta) {
+        // Models shouldn't contain undefined - only nulls where a value isn't present.
         if (value === undefined)
             return null;
         return _super.prototype.visitValue.call(this, value, meta);
@@ -81,7 +113,7 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
         if (value == null)
             return null;
         if (typeof value !== "object" || Array.isArray(value))
-            throw "Value for object " + meta.name + " was not an object";
+            throw parseError(value, meta);
         // Prevent infinite recursion on circular object graphs.
         if (this.objects.has(value))
             return this.objects.get(value);
@@ -94,16 +126,16 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
                 throw "While trying to convert object, found metadata for " + value.$metadata.name + " where metadata for " + meta.name + " was expected.";
             }
             ;
+            value.$metadata = meta;
             target = value;
         }
         else if (this.mode == "map") {
-            target = {};
+            target = { $metadata: meta };
         }
         else {
             throw "Unhandled mode " + this.mode;
         }
         this.objects.set(value, target);
-        target.$metadata = meta;
         for (var propName in props) {
             var propVal = value[propName];
             if (!(propName in value) || propVal === undefined) {
@@ -122,88 +154,38 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
         var _this = this;
         if (value == null)
             return null;
-        if (!Array.isArray(value))
-            throw "Value for collection " + meta.name + " was not an array";
+        var parsed = parseValue(value, meta);
         if (this.mode == "convert") {
-            for (var i = 0; i < value.length; i++) {
-                value[i] = this.visitValue(value[i], meta.itemType);
+            for (var i = 0; i < parsed.length; i++) {
+                parsed[i] = this.visitValue(parsed[i], meta.itemType);
             }
-            return value;
+            return parsed;
         }
         else if (this.mode == "map") {
-            return value.map(function (element, index) { return _this.visitValue(element, meta.itemType); });
+            return parsed.map(function (element, index) { return _this.visitValue(element, meta.itemType); });
         }
         else {
             throw "Unhandled mode " + this.mode;
         }
     };
     ModelConversionVisitor.prototype.visitDateValue = function (value, meta) {
-        if (value == null)
+        var parsed = parseValue(value, meta);
+        if (parsed == null)
             return null;
-        if (value instanceof Date) {
-            if (this.mode == "convert") {
-                // Preserve object ref when converting.
-                return value;
-            }
-            else if (this.mode == "map") {
-                // Get a new object ref when mapping
-                return new Date(value);
-            }
+        if (this.mode == "convert") {
+            // Preserve object ref when converting.
+            return parsed;
         }
-        else {
-            if (typeof value !== "string") {
-                // dateFns `toDate` is way too lenient - 
-                // it will parse any number as milliseconds since the epoch,
-                // and parses `true` as the epoch.
-                throw "Received unparsable date: " + value;
-            }
-            var date = toDate(value);
-            if (!isValid(date)) {
-                throw "Received unparsable date: " + value;
-            }
-            return date;
+        else if (this.mode == "map") {
+            // Get a new object ref when mapping
+            return new Date(parsed);
         }
-    };
-    ModelConversionVisitor.prototype.visitNumeric = function (value, meta) {
-        if (value == null)
-            return null;
-        if (typeof value === "number")
-            return value;
-        if (typeof value !== "string") {
-            // We don't want to parse things like booleans into numbers.
-            // Strings are all we should be handling.
-            throw "Received unparsable " + meta.type + ": " + value;
-        }
-        var parsed = Number(value);
-        if (isNaN(parsed)) {
-            throw "Received unparsable " + meta.type + ": " + value;
-        }
-        return parsed;
     };
     ModelConversionVisitor.prototype.visitEnumValue = function (value, meta) {
-        return this.visitNumeric(value, meta);
+        return parseValue(value, meta);
     };
     ModelConversionVisitor.prototype.visitPrimitiveValue = function (value, meta) {
-        if (value == null)
-            return null;
-        switch (meta.type) {
-            case "number":
-                return this.visitNumeric(value, meta);
-            case "boolean":
-                if (typeof value === "boolean")
-                    return value;
-                if (value === "false")
-                    return false;
-                if (value === "true")
-                    return true;
-                throw "Received unparsable boolean " + value;
-            case "string":
-                if (typeof value === "string")
-                    return value;
-                return String(value);
-            default:
-                throw "Unhandled primitive value type " + meta.type;
-        }
+        return parseValue(value, meta);
     };
     return ModelConversionVisitor;
 }(Visitor));
@@ -213,10 +195,11 @@ var ModelConversionVisitor = /** @class */ (function (_super) {
  * @param object The object with data properties that should be converted to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
-export function convertToModel(value, metadata) {
-    if (value == null)
-        return value;
-    return new ModelConversionVisitor("convert").visitObject(value, metadata);
+export function convertToModel(object, metadata) {
+    if (object == null) {
+        throw "Cannot map null to model";
+    }
+    return new ModelConversionVisitor("convert").visitObject(object, metadata);
 }
 /**
  * Transforms a raw value into a valid implemenation of a model value.
@@ -225,8 +208,6 @@ export function convertToModel(value, metadata) {
  * @param metadata The metadata describing the value
  */
 export function convertValueToModel(value, metadata) {
-    if (value == null)
-        return value;
     return new ModelConversionVisitor("convert").visitValue(value, metadata);
 }
 /**
@@ -236,8 +217,9 @@ export function convertValueToModel(value, metadata) {
  * @param metadata The metadata describing the TModel that is desired
  */
 export function mapToModel(object, metadata) {
-    if (!object)
-        return object;
+    if (object == null) {
+        throw "Cannot map null to model";
+    }
     return new ModelConversionVisitor("map").visitObject(object, metadata);
 }
 /**
@@ -247,8 +229,6 @@ export function mapToModel(object, metadata) {
  * @param metadata The metadata describing the value
  */
 export function mapValueToModel(value, metadata) {
-    if (value === null || value === undefined)
-        return value;
     return new ModelConversionVisitor("map").visitValue(value, metadata);
 }
 /**
@@ -319,7 +299,7 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
                 var newValue = this.visitValue(value[propName], propMeta);
                 if (newValue !== undefined) {
                     // Only store values that aren't undefined.
-                    // We don't any properties with undefined as their value - we shouldn't define these in the first place.
+                    // We don't support any properties with undefined as their value - we shouldn't define these in the first place.
                     output[propName] = newValue;
                 }
             }
@@ -341,24 +321,29 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
         return output;
     };
     MapToDtoVisitor.prototype.visitCollection = function (value, meta) {
-        // If we've exceded max depth, return undefined to prevent the 
-        // creation of an entry in the parent object for this collection.
-        if (this.depth >= this.maxObjectDepth)
+        var _this = this;
+        if (this.depth >= this.maxObjectDepth) {
+            // If we've exceded max depth, return undefined to prevent the 
+            // creation of an entry in the parent object for this collection.
             return undefined;
-        // Don't increase depth for collections - only objects increase depth.
-        var ret = _super.prototype.visitCollection.call(this, value, meta);
-        return ret;
+        }
+        if (value == null)
+            return null;
+        var parsed = parseValue(value, meta);
+        return parsed.map(function (element) { return _this.visitValue(element, meta.itemType); });
     };
     MapToDtoVisitor.prototype.visitDateValue = function (value, meta) {
-        if (isValid(value)) {
-            // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-            value = format(value, 'YYYY-MM-DDTHH:mm:ss.SSSZ');
-        }
-        else if (value != null) {
-            console.warn("Invalid date couldn't be mapped: " + value);
-            value = null;
-        }
-        return value;
+        var parsed = parseValue(value, meta);
+        if (parsed == null)
+            return null;
+        // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
+        return format(parsed, 'YYYY-MM-DDTHH:mm:ss.SSSZ');
+    };
+    MapToDtoVisitor.prototype.visitPrimitiveValue = function (value, meta) {
+        return parseValue(value, meta);
+    };
+    MapToDtoVisitor.prototype.visitEnumValue = function (value, meta) {
+        return parseValue(value, meta);
     };
     return MapToDtoVisitor;
 }(Visitor));
@@ -368,7 +353,7 @@ var MapToDtoVisitor = /** @class */ (function (_super) {
  * @param object The object to map.
  */
 export function mapToDto(object) {
-    if (object === null || object === undefined)
+    if (object == null)
         return null;
     if (!object.$metadata) {
         throw "Object has no $metadata property.";
@@ -401,8 +386,9 @@ var DisplayVisitor = /** @class */ (function (_super) {
         }
         else {
             // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
+            // With a tweak to also not serialize the $metadata prop.
             try {
-                return JSON.stringify(value, function (k, v) { return k ? "" + v : v; });
+                return JSON.stringify(value, function (k, v) { return k === "$metadata" ? undefined : (k ? "" + v : v); });
             }
             catch (_a) {
                 return value.toLocaleString();
@@ -411,10 +397,9 @@ var DisplayVisitor = /** @class */ (function (_super) {
     };
     DisplayVisitor.prototype.visitCollection = function (value, meta) {
         var _this = this;
-        if (!value)
+        if (value == null)
             return null;
-        if (!Array.isArray(value))
-            throw "Value for collection " + meta.name + " was not an array";
+        value = parseValue(value, meta);
         // Is this what we want? I think so - its the cleanest option.
         // Perhaps an prop that controls this would be best.
         if (value.length == 0)
@@ -432,25 +417,28 @@ var DisplayVisitor = /** @class */ (function (_super) {
         return value.length.toLocaleString() + " items"; // TODO: i18n
     };
     DisplayVisitor.prototype.visitEnumValue = function (value, meta) {
-        if (value == null)
-            return value;
+        var parsed = parseValue(value, meta);
+        if (parsed == null)
+            return null;
         var enumData = meta.typeDef.valueLookup[value];
         // If we can't find the enum value exactly,
         // just show the numeric value.
         // TODO: support flags enums (see metadata.ts@EnumType)
         if (!enumData)
-            return value.toLocaleString();
+            return parsed.toLocaleString();
         return enumData.displayName;
     };
     DisplayVisitor.prototype.visitDateValue = function (value, meta) {
-        if (value == null)
-            return value;
-        return value.toLocaleString();
+        var parsed = parseValue(value, meta);
+        if (parsed == null)
+            return null;
+        return parsed.toLocaleString();
     };
     DisplayVisitor.prototype.visitPrimitiveValue = function (value, meta) {
-        if (value == null)
-            return value;
-        return value.toLocaleString();
+        var parsed = parseValue(value, meta);
+        if (parsed == null)
+            return null;
+        return parsed.toLocaleString();
     };
     return DisplayVisitor;
 }(Visitor));
@@ -463,9 +451,9 @@ var displayVisitor = new DisplayVisitor();
 export function modelDisplay(item) {
     var modelMeta = item.$metadata;
     if (!modelMeta) {
-        throw "Item passed to modelDisplay(item) is missing its $metadata property";
+        throw "Object has no $metadata property";
     }
-    return displayVisitor.visitObject(item, item.$metadata);
+    return displayVisitor.visitObject(item, modelMeta);
 }
 /**
  * Given a model instance and a descriptor of a property on the instance,

@@ -1,4 +1,4 @@
-import { ClassType, Property, PropNames, Value, DataSourceType } from "./metadata";
+import { ClassType, Property, PropNames, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata";
 /**
  * Represents a model with metadata information.
  */
@@ -12,12 +12,33 @@ export interface DataSource<TMeta extends DataSourceType> {
     readonly $metadata: TMeta;
 }
 /**
+ * Attempts to change the input value into a correctly-typed
+ * result given some metadata describing the desired result.
+ * Values that cannot be converted will throw an error.
+*/
+export declare function parseValue(value: null | undefined, meta: Value): null;
+export declare function parseValue(value: any, meta: PrimitiveValue): null | string | number | boolean;
+export declare function parseValue(value: any, meta: PrimitiveValue & {
+    type: "string";
+}): null | string;
+export declare function parseValue(value: any, meta: PrimitiveValue & {
+    type: "number";
+}): null | number;
+export declare function parseValue(value: any, meta: PrimitiveValue & {
+    type: "boolean";
+}): null | boolean;
+export declare function parseValue(value: any, meta: EnumValue): null | number;
+export declare function parseValue(value: any, meta: DateValue): null | Date;
+export declare function parseValue(value: any, meta: ModelValue): null | object;
+export declare function parseValue(value: any, meta: ObjectValue): null | object;
+export declare function parseValue(value: any[], meta: CollectionValue): Array<any>;
+/**
  * Transforms a given object with data properties into a valid implemenation of TModel.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
  * @param object The object with data properties that should be converted to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
-export declare function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(value: {
+export declare function convertToModel<TMeta extends ClassType, TModel extends Model<TMeta>>(object: {
     [k: string]: any;
 }, metadata: TMeta): TModel;
 /**
@@ -26,7 +47,7 @@ export declare function convertToModel<TMeta extends ClassType, TModel extends M
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export declare function convertValueToModel(value: any, metadata: Value): any | null;
+export declare function convertValueToModel(value: any, metadata: Value): any;
 /**
  * Maps the given object with data properties into a valid implemenation of TModel.
  * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
@@ -42,7 +63,7 @@ export declare function mapToModel<TMeta extends ClassType, TModel extends Model
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export declare function mapValueToModel(value: any, metadata: Value): any | null;
+export declare function mapValueToModel(value: any, metadata: Value): any;
 /**
  * Updates the target model with values from the source model.
  * Any properties defined on the source will be copied to the target.

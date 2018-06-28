@@ -9,8 +9,7 @@
       dotnet ef database update - -framework netcoreapp2.1 
       (no space between the dashes; space is there because double dash is illegal in XML comments).
     -->
-    <TargetFrameworks>netstandard2.0;netcoreapp2.1;net462</TargetFrameworks>
-    <RuntimeFrameworkVersion>2.1.0</RuntimeFrameworkVersion>
+    <TargetFrameworks>netstandard2.0;netcoreapp2.1;net471</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>

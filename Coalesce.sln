@@ -44,9 +44,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6AE7A58D-0F88-443F-9443-3E0569853B85}"
 	ProjectSection(SolutionItems) = preProject
 		build\before_build.ps1 = build\before_build.ps1
-		build\init_dev.ps1 = build\init_dev.ps1
-		build\init_master.ps1 = build\init_master.ps1
-		build\init_release.ps1 = build\init_release.ps1
 	EndProjectSection
 EndProject
 Global

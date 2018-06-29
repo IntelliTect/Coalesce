@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -22,7 +23,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsGeneric { get; }
 
-        public abstract bool IsCollection { get; }
+        public bool IsCollection => IsA<IEnumerable>() && !IsArray && !IsString;
 
         public abstract bool IsArray { get; }
 

@@ -36,9 +36,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Name => Symbol.Name;
 
-        public override bool IsCollection =>
-            !IsArray && !IsString && IsA<IEnumerable>();
-
         public override bool IsArray => Symbol.TypeKind == TypeKind.Array;
 
         /// <summary>
@@ -106,8 +103,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool HasAttribute<TAttribute>() =>
             Symbol.HasAttribute<TAttribute>();
 
-
+        /// <summary>
+        /// The set of types that an object of the current represented type is assignable to.
+        /// </summary>
         private ICollection<INamedTypeSymbol> AssignableTo { get; }
+
+        /// <summary>
+        /// A lookup based on <see cref="AssignableTo"/>, keyed by <see cref="ISymbol.MetadataName"/>
+        /// </summary>
         private ILookup<string, INamedTypeSymbol> AssignableToLookup { get; }
 
         /// <summary>

@@ -1,16 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>.NET Core command-line tooling for IntelliTect.Coalesce code generation</Description>
-
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputType>Exe</OutputType>
+    <ToolCommandName>coalesce</ToolCommandName>
     <PackAsTool>true</PackAsTool>
-
+    <OutputType>Exe</OutputType>
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>
-    <PackageType>DotnetCliTool</PackageType>
-    <!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
   </PropertyGroup>
 
   <PropertyGroup>

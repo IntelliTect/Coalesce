@@ -1,7 +1,5 @@
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
-//@ts-ignore
-// import { VSelect } from 'vuetify/es5/components/VSelect';
 import CDisplay from './c-display';
 import MetadataComponent from './c-metadata-component'
 import { ApiClient, ModelApiClient } from 'coalesce-vue/lib/api-client';

@@ -36,5 +36,5 @@
   </v-select>
 </template>
 
-<script lang="ts" src="./c-select.ts"/>
+<script lang="ts" src="./c-select.ts"></script>
 

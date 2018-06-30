@@ -48,7 +48,10 @@ namespace Coalesce.Web.Vue
                 app.UseDeveloperExceptionPage();
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
-                    HotModuleReplacement = true
+                    HotModuleReplacement = true,
+
+                    // Use a slightly-tweaked version of vue-cli's webpack config to work around a few bugs.
+                    ConfigFile = "webpack.config.aspnetcore-hmr.js",
                 });
             }
             else
@@ -69,15 +72,22 @@ namespace Coalesce.Web.Vue
                 await next.Invoke();
             });
 
+            app.UseStaticFiles();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
-
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new { controller = "Home", action = "Index" });
+            });
+            
+            app.MapWhen(x => !x.Request.Path.Value.StartsWith("/api"), builder =>
+            {
+                builder.UseMvc(routes =>
+                {
+                    routes.MapSpaFallbackRoute(
+                        name: "spa-fallback",
+                        defaults: new { controller = "Home", action = "Index" });
+                });
             });
         }
     }

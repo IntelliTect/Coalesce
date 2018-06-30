@@ -3,7 +3,7 @@ import Vue from 'vue';
 
 // Undocumented (but exposed) vue method for making properties reactive.
 declare module "vue/types/vue" {
-    interface VueConstructor<V extends Vue = Vue> {
+    interface VueConstructor {
         util: {
             defineReactive: (obj: any, key: string, val: any, setter?: Function | null, shallow?: boolean) => void
         }

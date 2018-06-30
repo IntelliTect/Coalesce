@@ -48,4 +48,4 @@
 </template>
 
 
-<script lang="ts" src="./c-datetime-picker.ts"/>
+<script lang="ts" src="./c-datetime-picker.ts"></script>

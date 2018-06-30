@@ -1,16 +1,34 @@
 {
   "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "es2015",
-    "moduleResolution": "node",
-    "target": "es5",
+    "allowSyntheticDefaultImports": true,
+    "noEmitOnError": true,
     "sourceMap": true,
-    "strict": true,
-    "lib": ["es2015", "es2017", "dom"]
+    "baseUrl": ".",
+    "types": [
+      "node",
+      "jest"
+    ],
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
   "exclude": [
-      "bin",
-      "node_modules"
+    "node_modules"
   ]
 }

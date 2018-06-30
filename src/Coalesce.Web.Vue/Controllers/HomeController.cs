@@ -11,7 +11,7 @@ namespace VuePlayground.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            return File("~/index.html", "text/html");
         }
 
         public IActionResult Error()

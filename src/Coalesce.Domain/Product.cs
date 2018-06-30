@@ -16,6 +16,7 @@ namespace Coalesce.Domain
 
         public ProductDetails Details { get; set; }
 
+        [Column("ProductUniqueId")]
         public Guid UniqueId { get; set; }
     }
 

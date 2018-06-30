@@ -13,7 +13,7 @@
     "eonasdan-bootstrap-datetimepicker": "4.17.47",
     "select2-bootstrap-theme": "0.1.0-beta.10",
     "bootstrap-sass": "3.3.7"
-  }, 
+  },
   "devDependencies": {
     "@types/bootstrap": "3.3.39",
     "@types/bootstrap.v3.datetimepicker": "4.17.46",

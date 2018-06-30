@@ -10,8 +10,8 @@ npm --version
 dotnet restore
 Push-Location .\src\coalesce-vue
 yarn
-if ($env:APPVEYOR_BUILD_VERSION -ne $null) {
-  yarn version --no-git-tag-version --new-version $env:APPVEYOR_BUILD_VERSION
+if ($env:coalesce_version -ne $null) {
+  yarn version --no-git-tag-version --new-version $env:coalesce_version
 }
 yarn build
 yarn test

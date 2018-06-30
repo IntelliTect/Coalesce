@@ -41,4 +41,5 @@ yarn gulp coalesce-vue
 Pop-Location
 Push-Location .\src\Coalesce.Domain
 dotnet ef database update --framework netcoreapp2.1
+Pop-Location
       

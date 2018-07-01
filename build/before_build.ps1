@@ -23,7 +23,6 @@ yarn
 Pop-Location
 Push-Location .\src\Coalesce.Web.Vue
 yarn
-yarn global add gulp-cli
 
 <#
 Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 

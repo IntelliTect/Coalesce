@@ -363,7 +363,7 @@ class MapToDtoVisitor extends Visitor<
         for (const propName in props) {
             const propMeta = props[propName];
             
-            if (propMeta.notSerializable) continue;
+            if (propMeta.dontSerialize) continue;
 
             if (propName in value) {
                 const newValue = this.visitValue(value[propName], propMeta);
@@ -426,7 +426,7 @@ class MapToDtoVisitor extends Visitor<
     /**
      * Create a new DTO mapper, allowing recursive mapping up to the specified depth.
      * @param maxObjectDepth The maximum depth to serialize objects and collections at.
-     * Any property with `propMeta.notSerializable == true` will always be ignored, regardless of depth.
+     * Any property with `propMeta.dontSerialize == true` will always be ignored, regardless of depth.
      */
     constructor(private maxObjectDepth: number = 3) {
         // Depth of 3 here is a 'sensible default' for cases where object/collection properties 

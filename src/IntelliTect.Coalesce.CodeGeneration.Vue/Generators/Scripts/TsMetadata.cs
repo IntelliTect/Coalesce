@@ -221,7 +221,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 // because there are likely going to be more that are serializable than not.
                 if (!prop.IsClientSerializable)
                 {
-                    b.Line("notSerializable: true,");
+                    b.Line("dontSerialize: true,");
                 }
             }
         }

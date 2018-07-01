@@ -289,6 +289,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 }
 
                 b.Line();
+
+                // Objects are skipped in the loop because objects will be examined
+                // at the same time that their corresponding foreign key is examined.
                 foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsClientWritable && f.Object == null))
                 {
                     if (prop.Type.IsDate)

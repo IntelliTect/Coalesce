@@ -217,9 +217,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         break;
                 }
 
-                if (prop.IsReadOnly)
+                // We store the negative case instead of the positive
+                // because there are likely going to be more that are serializable than not.
+                if (!prop.IsClientSerializable)
                 {
-                    b.Line("isReadOnly: true,");
+                    b.Line("notSerializable: true,");
                 }
             }
         }

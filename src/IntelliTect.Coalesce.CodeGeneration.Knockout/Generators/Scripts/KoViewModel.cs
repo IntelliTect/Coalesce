@@ -291,7 +291,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         b.Line($"self.{prop.JsVariable}.subscribe(self.autoSave);");
                     }
 
-                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsManytoManyCollection))
+                    foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsClientWritable && p.IsManytoManyCollection))
                     {
                         b.Line();
                         b.Line($"self.{prop.ManyToManyCollectionName.ToCamelCase()}.subscribe<KnockoutArrayChange<{prop.ManyToManyCollectionProperty.Object.ViewModelClassName}>[]>(changes => {{");

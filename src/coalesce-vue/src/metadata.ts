@@ -282,7 +282,8 @@ export type Value =
 */
 
 export interface PropertyBase {
-    readonly isReadOnly?: true | undefined
+    /** True if the property shouldn't be included when mapping to a DTO. */
+    notSerializable?: boolean | undefined
 }
 
 /** Represents a primitive property */

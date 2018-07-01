@@ -363,7 +363,7 @@ class MapToDtoVisitor extends Visitor<
         for (const propName in props) {
             const propMeta = props[propName];
             
-            if (propMeta.isReadOnly) continue;
+            if (propMeta.notSerializable) continue;
 
             if (propName in value) {
                 const newValue = this.visitValue(value[propName], propMeta);
@@ -423,7 +423,15 @@ class MapToDtoVisitor extends Visitor<
         return parseValue(value, meta);
     }
 
-    constructor(private maxObjectDepth: number = 1) {
+    /**
+     * Create a new DTO mapper, allowing recursive mapping up to the specified depth.
+     * @param maxObjectDepth The maximum depth to serialize objects and collections at.
+     * Any property with `propMeta.notSerializable == true` will always be ignored, regardless of depth.
+     */
+    constructor(private maxObjectDepth: number = 3) {
+        // Depth of 3 here is a 'sensible default' for cases where object/collection properties 
+        // have been marked as serializable. Most of the time, no depth will be reached because
+        // the default in the generated metadata is that no objects/collections are serializable.
         super();
     }
 }
@@ -440,7 +448,7 @@ export function mapToDto<T extends Model<ClassType>>(object: T | null | undefine
         throw "Object has no $metadata property."
     }
     
-    var dto = new MapToDtoVisitor(1).visitObject(object, object.$metadata);
+    var dto = new MapToDtoVisitor().visitObject(object, object.$metadata);
 
     return dto;
 }
@@ -453,7 +461,7 @@ export function mapToDto<T extends Model<ClassType>>(object: T | null | undefine
  */
 export function mapValueToDto(value: any, metadata: Value): any | null {
     if (value === null || value === undefined) return value;
-    return new MapToDtoVisitor(1).visitValue(value, metadata);
+    return new MapToDtoVisitor().visitValue(value, metadata);
 }
 
 

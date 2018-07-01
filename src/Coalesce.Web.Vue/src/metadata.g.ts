@@ -51,7 +51,6 @@ export const Case = domain.types.Case = {
       displayName: "Case Key",
       type: "number",
       role: "primaryKey",
-      isReadOnly: true,
     },
     title: {
       name: "title",
@@ -88,6 +87,7 @@ export const Case = domain.types.Case = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      notSerializable: true,
     },
     reportedById: {
       name: "reportedById",
@@ -106,6 +106,7 @@ export const Case = domain.types.Case = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as ForeignKeyProperty },
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      notSerializable: true,
     },
     attachment: {
       name: "attachment",
@@ -139,6 +140,7 @@ export const Case = domain.types.Case = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
+      notSerializable: true,
     },
     devTeamAssignedId: {
       name: "devTeamAssignedId",
@@ -152,7 +154,7 @@ export const Case = domain.types.Case = {
       type: "object",
       get typeDef() { return (domain.types.DevTeam as ObjectType) },
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
     duration: {
       name: "duration",
@@ -249,7 +251,6 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Case Id",
       type: "number",
       role: "primaryKey",
-      isReadOnly: true,
     },
     title: {
       name: "title",
@@ -262,7 +263,7 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Assigned To Name",
       type: "string",
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
   },
   methods: {
@@ -290,7 +291,6 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Case Product Id",
       type: "number",
       role: "primaryKey",
-      isReadOnly: true,
     },
     caseId: {
       name: "caseId",
@@ -309,6 +309,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
+      notSerializable: true,
     },
     productId: {
       name: "productId",
@@ -327,6 +328,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
+      notSerializable: true,
     },
   },
   methods: {
@@ -347,7 +349,6 @@ export const Company = domain.types.Company = {
       displayName: "Company Id",
       type: "number",
       role: "primaryKey",
-      isReadOnly: true,
     },
     name: {
       name: "name",
@@ -404,13 +405,14 @@ export const Company = domain.types.Company = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
+      notSerializable: true,
     },
     altName: {
       name: "altName",
       displayName: "Alt Name",
       type: "string",
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
   },
   methods: {
@@ -463,7 +465,6 @@ export const Person = domain.types.Person = {
       displayName: "Person Id",
       type: "number",
       role: "primaryKey",
-      isReadOnly: true,
     },
     title: {
       name: "title",
@@ -510,6 +511,7 @@ export const Person = domain.types.Person = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as ForeignKeyProperty },
+      notSerializable: true,
     },
     casesReported: {
       name: "casesReported",
@@ -524,6 +526,7 @@ export const Person = domain.types.Person = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as ForeignKeyProperty },
+      notSerializable: true,
     },
     birthDate: {
       name: "birthDate",
@@ -549,14 +552,14 @@ export const Person = domain.types.Person = {
       type: "object",
       get typeDef() { return (domain.types.PersonStats as ObjectType) },
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
     name: {
       name: "name",
       displayName: "Name",
       type: "string",
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
     companyId: {
       name: "companyId",
@@ -575,6 +578,7 @@ export const Person = domain.types.Person = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
+      notSerializable: true,
     },
   },
   methods: {
@@ -861,7 +865,6 @@ export const Product = domain.types.Product = {
       displayName: "Product Id",
       type: "number",
       role: "primaryKey",
-      isReadOnly: true,
     },
     name: {
       name: "name",
@@ -875,7 +878,7 @@ export const Product = domain.types.Product = {
       type: "object",
       get typeDef() { return (domain.types.ProductDetails as ObjectType) },
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
     uniqueId: {
       name: "uniqueId",
@@ -1035,7 +1038,7 @@ export const ProductDetails = domain.types.ProductDetails = {
       type: "object",
       get typeDef() { return (domain.types.StreetAddress as ObjectType) },
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
     companyHqAddress: {
       name: "companyHqAddress",
@@ -1043,7 +1046,7 @@ export const ProductDetails = domain.types.ProductDetails = {
       type: "object",
       get typeDef() { return (domain.types.StreetAddress as ObjectType) },
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
   },
 }
@@ -1102,7 +1105,7 @@ export const WeatherData = domain.types.WeatherData = {
       type: "object",
       get typeDef() { return (domain.types.Location as ObjectType) },
       role: "value",
-      isReadOnly: true,
+      notSerializable: true,
     },
   },
 }

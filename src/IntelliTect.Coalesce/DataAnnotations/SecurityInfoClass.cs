@@ -127,7 +127,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 if (Read.HasRoles && user != null)
                     return Read.RoleList.Any(s => user.IsInRole(s));
             }
-            return user == null || user.Identity.IsAuthenticated;
+            return user == null || (user.Identity?.IsAuthenticated ?? false);
         }
 
         public bool IsCreateAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Create, user);
@@ -146,7 +146,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                     return action.RoleList.Any(s => user.IsInRole(s));
             }
 
-            return user == null || user.Identity.IsAuthenticated;
+            return user == null || (user.Identity?.IsAuthenticated ?? false);
         }
 
         public bool AllowAnonymousAny => Read.AllowAnonymous || Edit.AllowAnonymous || Delete.AllowAnonymous || Create.AllowAnonymous;

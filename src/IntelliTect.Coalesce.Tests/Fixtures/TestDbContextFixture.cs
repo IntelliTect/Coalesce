@@ -7,9 +7,9 @@ using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Fixtures
 {
-    public class TestDbContextTests
+    public class TestDbContextFixture
     {
-        public TestDbContextTests()
+        public TestDbContextFixture()
         {
             Db = new TestDbContext();
             CrudContext = new CrudContext<TestDbContext>(Db, new System.Security.Claims.ClaimsPrincipal())

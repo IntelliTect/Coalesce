@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace IntelliTect.Coalesce.Tests.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
     public class ComplexModel
     {
+        [DefaultOrderBy(FieldOrder = 2)]
         public int ComplexModelId { get; set; }
 
         [InverseProperty(nameof(Test.ComplexModel))]
@@ -35,10 +36,21 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         [NotMapped]
         public string UnmappedSettableString { get; set; }
 
-        [Read(Roles = "Admin")]
+        [Read(Roles = RoleNames.Admin)]
         public string AdminReadableString { get; set; }
 
+        [Read(Roles = RoleNames.Admin)]
+        public int AdminReadableReferenceNavigationId { get; set; }
+
+        [Read(Roles = RoleNames.Admin)]
+        public ComplexModel AdminReadableReferenceNavigation { get; set; }
+        
+        public int ReferenceNavigationId { get; set; }
+        public ComplexModel ReferenceNavigation { get; set; }
+
+
         // Default searchable property
+        [DefaultOrderBy(FieldOrder = 1)]
         public string Name { get; set; }
 
 

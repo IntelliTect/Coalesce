@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -29,7 +30,7 @@ namespace IntelliTect.Coalesce.Tests.Util
             var rr = new ReflectionRepository();
 
             // Just picking an arbitrary class that should always be in the test assembly.
-            rr.AddAssembly<TargetClasses.ComplexModel>();
+            rr.AddAssembly<ComplexModel>();
             return rr;
         }
 

@@ -280,7 +280,6 @@ namespace IntelliTect.Coalesce
                         string finalSearchClause = string.Join(" || ", expressions);
                         return query.Where(finalSearchClause);
                     }
-
                 }
             }
 
@@ -389,26 +388,62 @@ namespace IntelliTect.Coalesce
             var orderByParams = parameters.OrderByList;
             if (!orderByParams.Any(p => p.Key == "none"))
             {
-                foreach (var orderByParam in orderByParams)
-                {
-                    string fieldName = orderByParam.Key;
-                    var prop = ClassViewModel.PropertyByName(fieldName);
-                    if (!fieldName.Contains(".") && prop != null && prop.IsPOCO)
+                var clauses = orderByParams
+                    .Select(orderByParam =>
                     {
-                        // The property is a POCO without any property specified.
-                        // Get the default order by for the object's type to figure out what field to sort by.
-                        string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
+                        string fieldName = orderByParam.Key;
+                        string direction = orderByParam.Value.ToString();
 
-                        // The default order by clause has an order associated, but we want to override it
-                        // with the order that the client specified. A string replacement will do.
-                        clause = clause.Replace("ASC", orderByParam.Value.ToString().ToUpper());
-                        clause = clause.Replace("DESC", orderByParam.Value.ToString().ToUpper());
-                        query = query.OrderBy(clause);
-                    }
-                    else
-                    {
-                        query = query.OrderBy(string.Join(", ", orderByParams.Select(f => $"{fieldName} {f.Value}")));
-                    }
+                        // Validate that the field accessor is a valid property
+                        // that the current user is allowed to read.
+                        var parts = fieldName.Split('.');
+                        PropertyViewModel prop = null;
+                        foreach (var part in parts)
+                        {
+                            if (prop != null && !prop.IsPOCO)
+                            {
+                                // We're accessing a nested prop, but the parent isn't an object,
+                                // so this can't be valid.
+                                return null;
+                            }
+
+                            prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
+
+                            // Check if the new prop exists and is readable by user.
+                            if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadable(User))
+                                return null;
+
+                            // If the prop is an object that isn't readable, then this is no good.
+                            if (prop.IsPOCO && !prop.Object.SecurityInfo.IsReadAllowed(User))
+                                return null;
+                        }
+
+                        if (prop.IsPOCO)
+                        {
+                            // The property is a POCO, not a value.
+                            // Get the default order by for the object's type to figure out what field to sort by.
+                            string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
+
+                            // The default order by clause has an order associated, but we want to override it
+                            // with the order that the client specified. A string replacement will do.
+                            return clause
+                                .Replace("ASC", direction.ToUpper())
+                                .Replace("DESC", direction.ToUpper());
+                        }
+                        else
+                        {
+                            // We've validated that `fieldName` is a valid acccessor for a comparable property,
+                            // and that the user is allowed to read it.
+                            return $"{fieldName} {direction}";
+                        }
+                    })
+                    // Take all the clauses up until an invalid one is found.
+                    .TakeWhile(clause => clause != null)
+                    .ToList();
+
+                if (clauses.Any())
+                {
+                    query = query.OrderBy(string.Join(", ", clauses));
                 }
             }
 
@@ -431,16 +466,6 @@ namespace IntelliTect.Coalesce
             if (defaultOrderBy != null)
             {
                 query = query.OrderBy(defaultOrderBy);
-            }
-            // Use the Name property if it exists.
-            else if (ClassViewModel.ClientProperties.Any(f => f.Name == "Name"))
-            {
-                query = query.OrderBy("Name");
-            }
-            // Use the ID property.
-            else
-            {
-                query = query.OrderBy(ClassViewModel.PrimaryKey.Name);
             }
             return query;
         }

@@ -1,7 +1,9 @@
-﻿using IntelliTect.Coalesce.Tests.Util;
+﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using Xunit;
 
@@ -10,24 +12,25 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
     public class TypeViewModelTests
     {
         [Theory]
+        [Description("https://github.com/IntelliTect/Coalesce/issues/28")]
         // With class name as a substring in a namespace.
         [ClassViewModelData(
-            typeof(TargetClasses.ComplexModel),
-            "MyTestProject.Web.Models", nameof(TargetClasses.ComplexModel.Tests),
+            typeof(ComplexModel),
+            "MyTestProject.Web.Models", nameof(ComplexModel.Tests),
             "System.Collections.Generic.ICollection<MyTestProject.Web.Models.TestDtoGen>")]
         [ClassViewModelData(
-            typeof(TargetClasses.ComplexModel),
-            "MyTestProject.Web.Models", nameof(TargetClasses.ComplexModel.SingleTest),
+            typeof(ComplexModel),
+            "MyTestProject.Web.Models", nameof(ComplexModel.SingleTest),
             "MyTestProject.Web.Models.TestDtoGen")]
 
         // With class name as a distinct namespace.
         [ClassViewModelData(
-            typeof(TargetClasses.ComplexModel),
-            "MyProject.Test.Models", nameof(TargetClasses.ComplexModel.Tests),
+            typeof(ComplexModel),
+            "MyProject.Test.Models", nameof(ComplexModel.Tests),
             "System.Collections.Generic.ICollection<MyProject.Test.Models.TestDtoGen>")]
         [ClassViewModelData(
-            typeof(TargetClasses.ComplexModel),
-            "MyProject.Test.Models", nameof(TargetClasses.ComplexModel.SingleTest),
+            typeof(ComplexModel),
+            "MyProject.Test.Models", nameof(ComplexModel.SingleTest),
             "MyProject.Test.Models.TestDtoGen")]
         public void NullableTypeForDto_DoesNotMangleNamespace(
             ClassViewModelData data,

@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Api
         public string Search { get; set; }
 
         /// <inheritdoc cref="IFilterParameters.Filter" />
-        public Dictionary<string, string> Filter { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Filter { get; set;  } = new Dictionary<string, string>();
         
         /// <inheritdoc />
         IDictionary<string, string> IFilterParameters.Filter => Filter;

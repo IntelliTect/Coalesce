@@ -1,15 +1,17 @@
 ﻿using IntelliTect.Coalesce.Helpers.Search;
 using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests
+namespace IntelliTect.Coalesce.Tests.Api
 {
     public class SearchTests
     {
@@ -53,32 +55,12 @@ namespace IntelliTect.Coalesce.Tests
         [MemberData(nameof(Search_DateTimeOffsetsData))]
         public void Search_DateTimeOffset_RespectsTimeZone(bool expectedMatch, string searchTerm, int utcOffset, DateTimeOffset searchCandidate)
         {
-            var classViewModel = new ReflectionClassViewModel(typeof(ComplexModel));
-
-            var searchClauses = classViewModel
-                .PropertyByName(nameof(ComplexModel.DateTimeOffset))
-                .SearchProperties(classViewModel)
-                .SelectMany(p => p.GetLinqDynamicSearchStatements(
-                    new ClaimsPrincipal(),
-                    TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(utcOffset), "test", "test"),
-                    // "it" is a linq-dynamic-ism.
-                    // We have to do this because our property is named DateTimeOffset,
-                    // which conflics with the type name "DateTimeOffset".
-                    "it",
-                    searchTerm
-                ))
-                .Select(t => t.statement)
-                .ToList();
-
-            var matchedItems = new[] { new ComplexModel { DateTimeOffset = searchCandidate } }
-                .AsQueryable()
-                .Where(string.Join(" || ", searchClauses))
-                .ToList();
-
-            if (expectedMatch)
-                Assert.True(matchedItems.Count == 1, $"{searchTerm} didn't match {searchCandidate}.");
-            else
-                Assert.False(matchedItems.Count == 1, $"{searchTerm} matched on {searchCandidate}, but shouldn't have.");
+            SearchHelper(
+                (ComplexModel t) => t.DateTimeOffset,
+                searchTerm,
+                searchCandidate,
+                expectedMatch,
+                TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(utcOffset), "test", "test"));
         }
 
 
@@ -105,32 +87,86 @@ namespace IntelliTect.Coalesce.Tests
         [MemberData(nameof(Search_MatchesDateTimesData))]
         public void Search_DateTime_IsTimeZoneAgnostic(bool expectedMatch, string searchTerm, DateTime searchCandidate)
         {
-            var classViewModel = new ReflectionClassViewModel(typeof(ComplexModel));
+            SearchHelper(
+                (ComplexModel t) => t.DateTime,
+                searchTerm,
+                searchCandidate,
+                expectedMatch,
+                TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(new Random().Next(-11, 12)), "test", "test"));
+        }
 
-            var random = new Random();
+        [Theory]
+        [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
+        [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]
+        [InlineData(false, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "A6740FB5-99DE-4079-B6F7-A1692772A0A4")]
+        public void Search_Guid_SearchesCorrectly(
+            bool shouldMatch, string propValue, string inputValue)
+        {
+            SearchHelper(
+                (ComplexModel t) => t.Guid,
+                inputValue,
+                Guid.Parse(propValue),
+                shouldMatch);
+        }
 
-            var searchClauses = classViewModel
-                .PropertyByName(nameof(ComplexModel.DateTime))
-                .SearchProperties(classViewModel)
+        [Theory]
+        [InlineData(true, 0, "0")]
+        [InlineData(true, int.MaxValue, "2147483647")]
+        [InlineData(false, int.MaxValue, "2147483648")]
+        [InlineData(true, 2, "2")]
+        [InlineData(true, 22, "22")]
+        [InlineData(false, 3, "2")]
+        [InlineData(false, 2, "22")]
+        [InlineData(false, 22, "2")]
+        public void Search_Int_SearchesCorrectly(
+            bool shouldMatch, int propValue, string inputValue)
+        {
+            SearchHelper(
+                (ComplexModel t) => t.Int,
+                inputValue,
+                propValue,
+                shouldMatch);
+        }
+
+
+
+        private void SearchHelper<T, TProp>(
+            Expression<Func<T, TProp>> propSelector,
+            string searchTerm,
+            TProp searchCandidate,
+            bool expectedMatch,
+            TimeZoneInfo timeZoneInfo = null
+        )
+            where T : new()
+        {
+            var classViewModel = new ReflectionClassViewModel(typeof(T));
+            var prop = classViewModel.PropertyBySelector(propSelector);
+
+            var searchClauses = prop
+                .SearchProperties(classViewModel, maxDepth: 1, force: true)
                 .SelectMany(p => p.GetLinqDynamicSearchStatements(
                     new ClaimsPrincipal(),
-                    // DateTime fields should be timezone agnostic. We pick a random timezone to fuzz this test a bit.
-                    TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(random.Next(-11, 12)), "test", "test"),
+                    timeZoneInfo ?? TimeZoneInfo.Local,
                     "it",
                     searchTerm
                 ))
                 .Select(t => t.statement)
                 .ToList();
 
-            var matchedItems = new[] { new ComplexModel { DateTime = searchCandidate } }
-                .AsQueryable()
-                .Where(string.Join(" || ", searchClauses))
-                .ToList();
+            T model = new T();
+            prop.PropertyInfo.SetValue(model, searchCandidate);
+
+            var matchedItems = searchClauses.Any()
+                ? new[] { model }
+                    .AsQueryable()
+                    .Where(string.Join(" || ", searchClauses))
+                    .ToArray()
+                : new T[0];
 
             if (expectedMatch)
-                Assert.True(matchedItems.Count == 1, $"{searchTerm} didn't match {searchCandidate}.");
+                Assert.True(matchedItems.Length == 1, $"{searchTerm} didn't match {searchCandidate}.");
             else
-                Assert.False(matchedItems.Count == 1, $"{searchTerm} matched on {searchCandidate}, but shouldn't have.");
+                Assert.False(matchedItems.Length == 1, $"{searchTerm} matched on {searchCandidate}, but shouldn't have.");
         }
     }
 }

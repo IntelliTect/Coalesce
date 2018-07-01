@@ -39,7 +39,10 @@ namespace IntelliTect.Coalesce.Tests.Util
             else if (ViewModelType == typeof(SymbolClassViewModel))
             {
                 var locatedSymbol = ReflectionRepositoryFactory.Symbols
-                    .Where(symbol => symbol.Name == TargetType.Name)
+                    .Where(symbol =>
+                        symbol.MetadataName == TargetType.Name
+                        && new SymbolTypeViewModel(symbol).FullNamespace == TargetType.Namespace
+                    )
                     .SingleOrDefault();
 
                 if (locatedSymbol == null)

@@ -134,17 +134,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         /// <summary>
         /// True if the property is read only.
+        /// <para/>
+        /// Essentially the inverse of <see cref="IsClientWritable"/>.
         /// </summary>
         public bool IsReadOnly => !IsClientWritable && HasGetter;
 
         /// <summary>
-        /// True if the property can be sent from the client to the server.
-        /// This includes normal writable properties, as well as primary keys.
+        /// True if the property can be sent from the client to the server
+        /// using the standard, generated DTOs.
+        /// <para/>
+        /// This includes normal, writable value properties, as well as primary keys.
         /// </summary>
         public bool IsClientSerializable => (IsClientWritable || IsPrimaryKey) && HasSetter && !IsPOCO && !Type.IsCollection;
 
         /// <summary>
-        /// True if the property can be written.
+        /// True if the value of the property can be modified by the client in a persistable way.
+        /// <para/>
+        /// This effectively means that when a change is made to the property
+        /// on the client, a `Save` call should be made to persist that change to the database.
+        /// <para/>
+        /// This does not mean that the property's value will be serialized to a DTO,
+        /// but instead that a change to the property may change the serialized object.
         /// </summary>
         public bool IsClientWritable => 
             !IsInternalUse 
@@ -499,8 +509,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var name = this.GetAttributeValue<InversePropertyAttribute>(a => a.Property);
                 if (name != null)
                 {
-                    var inverseProperty = Object.PropertyByName(name);
-                    return inverseProperty;
+                    return Object.PropertyByName(name);
                 }
                 else if (Object != null)
                 {
@@ -557,15 +566,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (HasAttribute<ReadAttribute>())
                 {
                     result.IsRead = true;
-                    var roles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
-                    result.ReadRoles = roles;
+                    result.ReadRoles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
                 }
 
                 if (HasAttribute<EditAttribute>())
                 {
                     result.IsEdit = true;
-                    var roles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
-                    result.EditRoles = roles;
+                    result.EditRoles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
                 }
 
                 return result;

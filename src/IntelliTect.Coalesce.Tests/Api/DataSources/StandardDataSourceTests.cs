@@ -14,7 +14,7 @@ using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Api.DataSources
 {
-    public class StandardDataSourceTests : TestDbContextTests
+    public class StandardDataSourceTests : TestDbContextFixture
     {
         public StandardDataSource<Case, TestDbContext> CaseSource { get; }
 
@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             Db.Set<TModel>().Add(model);
             Db.SaveChanges();
             
-            var query = source.ApplyListPropertyFilters(Db.Set<TModel>(), filterParams);
+            var query = source.ApplyListFiltering(Db.Set<TModel>(), filterParams);
 
             return (propInfo, query);
         }
@@ -296,30 +296,183 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         }
 
 
-
-
-        private (PropertyViewModel, IQueryable<TModel>) SearchTestHelper<TModel, TProp>(
-            Expression<Func<TModel, TProp>> propSelector,
-            TProp propValue,
-            string filterValue
-        )
-            where TModel : class, new()
+        [Fact]
+        public void ApplyListClientSpecifiedSorting_ChecksPropAuthorization()
         {
-            var filterParams = new FilterParameters
+            var models = new[]
             {
-                Search = filterValue
+                new ComplexModel { ComplexModelId = 10, },
+                new ComplexModel { ComplexModelId = 9 },
+                new ComplexModel { ComplexModelId = 1, AdminReadableReferenceNavigationId = 10 },
+                new ComplexModel { ComplexModelId = 2, AdminReadableReferenceNavigationId = 9 },
             };
-            var source = Source<TModel>();
-            var propInfo = source.ClassViewModel.PropertyBySelector(propSelector);
 
-            var model = new TModel();
-            propInfo.PropertyInfo.SetValue(model, propValue);
-            Db.Set<TModel>().Add(model);
-            Db.SaveChanges();
+            var source = Source<ComplexModel>();
+            source.Db.AddRange(models);
+            source.Db.SaveChanges();
 
-            var query = source.ApplyListSearchTerm(Db.Set<TModel>(), filterParams);
+            // Order should be the same for both the unsorted and the unauthorized sorted order.
+            source.Query().AssertOrder(models);
 
-            return (propInfo, query);
+            // Order should do nothing because the prop is unauthorized.
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
+                }))
+                .AssertOrder(models);
+
+            // Order should do nothing because the prop is unauthorized.
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)} ASC, {nameof(ComplexModel.ComplexModelId)} DESC"
+                }))
+                .AssertOrder(models);
+
+
+            // Order should work because the user is now part of the required role.
+            source.User.AddIdentity(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Role, RoleNames.Admin) }, "TestAuth"));
+            Assert.True(source.User.Identity.IsAuthenticated);
+            Assert.True(source.User.IsInRole(RoleNames.Admin));
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
+                }))
+                .AssertOrder(m => m.ComplexModelId, 10, 9, 2, 1);
+        }
+
+        [Fact]
+        public void ApplyListClientSpecifiedSorting_IgnoresInvalidProperties()
+        {
+            var source = Source<ComplexModel>()
+                .AddModel(new ComplexModel { ComplexModelId = 1, String = "def" })
+                .AddModel(new ComplexModel { ComplexModelId = 2, String = "abc" });
+
+            // Order should do nothing because "FOOBAR" isn't a valid prop.
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"FOOBAR ASC, {nameof(ComplexModel.String)} ASC"
+                }))
+                .AssertOrder(m => m.ComplexModelId, 1, 2);
+
+            // Order should do nothing because "ComplexModelId" isn't an object prop.
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"ComplexModelId.FooBar ASC"
+                }))
+                .AssertOrder(m => m.ComplexModelId, 1, 2);
+        }
+
+        [Fact]
+        public void ApplyListClientSpecifiedSorting_UsesDefaultOrderingForPoco()
+        {
+            var models = new[]
+            {
+                new ComplexModel { ComplexModelId = 2, Name = "abc" }, // reference: def 1
+                new ComplexModel { ComplexModelId = 1, Name = "def" }, // reference: def 3
+                new ComplexModel { ComplexModelId = 3, Name = "def" }, // reference: abc 2
+            };
+            models[0].ReferenceNavigation = models[1];
+            models[1].ReferenceNavigation = models[2];
+            models[2].ReferenceNavigation = models[0];
+
+            var source = Source<ComplexModel>();
+            source.Db.AddRange(models);
+            source.Db.SaveChanges();
+
+            // Precondition:
+            var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
+            Assert.Equal(2, defaultOrdering.Count());
+            Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].FieldName);
+            Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].FieldName);
+
+            source.User.LogIn();
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"{nameof(ComplexModel.ReferenceNavigation)} DESC"
+                }))
+                .AssertOrder(m => m.ComplexModelId, 1, 2, 3);
+        }
+
+        [Fact]
+        public void ApplyListDefaultSorting_UsesAttributeOrdering()
+        {
+            var models = new[]
+            {
+                new ComplexModel { ComplexModelId = 2, Name = "abc" },
+                new ComplexModel { ComplexModelId = 1, Name = "def" },
+                new ComplexModel { ComplexModelId = 3, Name = "def" },
+            };
+
+            var source = Source<ComplexModel>();
+            source.Db.AddRange(models);
+            source.Db.SaveChanges();
+
+            // Precondition:
+            var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
+            Assert.Equal(2, defaultOrdering.Count());
+            Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].FieldName);
+            Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].FieldName);
+
+            source.User.LogIn();
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
+                .AssertOrder(m => m.ComplexModelId, 2, 1, 3);
+        }
+
+        [Fact]
+        public void ApplyListDefaultSorting_UsesNameIfNoAttribute()
+        {
+            var models = new[]
+            {
+                new Product { ProductId = 2, Name = "abc" },
+                new Product { ProductId = 1, Name = "def" },
+                new Product { ProductId = 3, Name = "def" },
+            };
+
+            var source = Source<Product>();
+            source.Db.AddRange(models);
+            source.Db.SaveChanges();
+
+            // Precondition:
+            var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
+            Assert.Single(defaultOrdering);
+            Assert.Equal(nameof(Product.Name), defaultOrdering[0].FieldName);
+
+            source.User.LogIn();
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
+                .AssertOrder(m => m.ProductId, 2, 1, 3);
+        }
+
+        [Fact]
+        public void ApplyListDefaultSorting_FallsBackToId()
+        {
+            var models = new[]
+            {
+                new Person { PersonId = 2, },
+                new Person { PersonId = 1, },
+                new Person { PersonId = 3, },
+            };
+
+            var source = Source<Person>();
+            source.Db.AddRange(models);
+            source.Db.SaveChanges();
+
+            // Precondition:
+            var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
+            Assert.Single(defaultOrdering);
+            Assert.Equal(nameof(Person.PersonId), defaultOrdering[0].FieldName);
+
+            source.User.LogIn();
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
+                .AssertOrder(m => m.PersonId, 1, 2, 3);
         }
 
         [Theory]
@@ -328,51 +481,27 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         public void ApplyListSearchTerm_WhenTermTargetsField_SearchesField(
             bool shouldMatch, string propValue, string inputValue)
         {
-            var (prop, query) = SearchTestHelper<ComplexModel, string>(
-                m => m.String, propValue, inputValue);
-
-            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
-        }
-
-        [Theory]
-        [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
-        [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]
-        [InlineData(false, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "A6740FB5-99DE-4079-B6F7-A1692772A0A4")]
-        public void ApplyListSearchTerm_WhenFieldIsGuid_SearchesField(
-            bool shouldMatch, string propValue, string inputValue)
-        {
-            var (prop, query) = SearchTestHelper<ComplexModel, Guid>(
-                m => m.Guid, Guid.Parse(propValue), $"{nameof(ComplexModel.Guid)}:{inputValue}");
-
-            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
-        }
-
-        [Theory]
-        [InlineData(true, 0, "0")]
-        [InlineData(true, int.MaxValue, "2147483647")]
-        [InlineData(false, int.MaxValue, "2147483648")]
-        [InlineData(true, 2, "2")]
-        [InlineData(true, 22, "22")]
-        [InlineData(false, 3, "2")]
-        [InlineData(false, 2, "22")]
-        [InlineData(false, 22, "2")]
-        public void ApplyListSearchTerm_WhenFieldIsIntegral_SearchesField(
-            bool shouldMatch, int propValue, string inputValue)
-        {
-            var (prop, query) = SearchTestHelper<ComplexModel, int>(
-                m => m.Int, propValue, $"{nameof(ComplexModel.Int)}:{inputValue}");
-
-            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+            Source<ComplexModel>()
+                .AddModel(m => m.String, propValue)
+                .Query(s => s.ApplyListSearchTerm(s.Query(), new FilterParameters
+                {
+                    Search = inputValue
+                }))
+                .AssertMatched(shouldMatch);
         }
 
         [Fact]
         public void ApplyListSearchTerm_WhenTargetedPropNotAuthorized_IgnoresProp()
         {
-            const string role = RoleNames.Admin;
-            var (prop, query) = SearchTestHelper<ComplexModel, string>(
-                m => m.AdminReadableString, "propValue", "AdminReadableString:propV");
+            var query = Source<ComplexModel>()
+                .AddModel(m => m.AdminReadableString, "propValue", out PropertyViewModel prop)
+                .Query(s => s.ApplyListSearchTerm(s.Query(), new FilterParameters
+                {
+                    Search = "AdminReadableString:propV"
+                }));
 
             // Preconditions
+            const string role = RoleNames.Admin;
             Assert.False(CrudContext.User.IsInRole(role));
             Assert.True(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith);
             Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
@@ -380,7 +509,89 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Since searching by prop isn't valid for this specific property,
             // the search will instead treat the entire input as the search term.
             // Since this search term doesn't match the property's value, the results should be empty.
-            Assert.Empty(query);
+            query.AssertMatched(false);
+        }
+    }
+
+
+
+    internal static class DataSourceExtensions
+    {
+        public static StandardDataSource<TModel, TestDbContext> AddModel<TModel, TProp>(
+            this StandardDataSource<TModel, TestDbContext> source, Expression<Func<TModel, TProp>> propSelector, TProp propValue
+        )
+            where TModel : class, new()
+        {
+            return source.AddModel(propSelector, propValue, out _);
+        }
+
+        public static StandardDataSource<TModel, TestDbContext> AddModel<TModel, TProp>(
+            this StandardDataSource<TModel, TestDbContext> source, Expression<Func<TModel, TProp>> propSelector, TProp propValue, out PropertyViewModel propInfo
+        )
+            where TModel : class, new()
+        {
+            var model = new TModel();
+            propInfo = source.ClassViewModel.PropertyBySelector(propSelector);
+            propInfo.PropertyInfo.SetValue(model, propValue);
+            return source.AddModel(model);
+        }
+
+        public static StandardDataSource<TModel, TestDbContext> AddModel<TModel>(
+            this StandardDataSource<TModel, TestDbContext> source, TModel model
+        )
+            where TModel : class, new()
+        {
+            source.Db.Set<TModel>().Add(model);
+            source.Db.SaveChanges();
+            return source;
+        }
+
+        public static IQueryable<TModel> Query<TModel>(
+            this StandardDataSource<TModel, TestDbContext> source, Func<StandardDataSource<TModel, TestDbContext>, IQueryable<TModel>> method
+        )
+            where TModel : class, new()
+        {
+            return method(source);
+        }
+
+        public static IQueryable<TModel> Query<TModel>(this StandardDataSource<TModel, TestDbContext> source)
+            where TModel : class, new()
+        {
+            return source.Db.Set<TModel>();
+        }
+
+        public static void AssertMatched<TModel>(this IQueryable<TModel> query, bool shouldMatch)
+            where TModel : class, new()
+        {
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        }
+
+        public static void AssertOrder<TModel, TProp>(this IEnumerable<TModel> models, Func<TModel, TProp> propSelector, params TProp[] expectedOrder)
+        {
+            var modelsList = models.ToList();
+            Assert.Equal(expectedOrder.Length, modelsList.Count);
+
+            Assert.All(
+                modelsList.Zip(expectedOrder, (model, expected) => propSelector(model).Equals(expected)),
+                Assert.True
+            );
+        }
+
+        public static void AssertOrder<TModel>(this IEnumerable<TModel> models, params TModel[] expectedOrder)
+        {
+            var modelsList = models.ToList();
+            Assert.Equal(expectedOrder.Length, modelsList.Count);
+
+            Assert.All(
+                modelsList.Zip(expectedOrder, (model, expected) => model.Equals(expected)),
+                Assert.True
+            );
+        }
+
+        public static void LogIn(this ClaimsPrincipal user, string role = RoleNames.Admin)
+        {
+            var claims = role == null ? new Claim[0] : new[] { new Claim(ClaimTypes.Role, RoleNames.Admin) };
+            user.AddIdentity(new ClaimsIdentity(claims, "TestAuth"));
         }
     }
 }

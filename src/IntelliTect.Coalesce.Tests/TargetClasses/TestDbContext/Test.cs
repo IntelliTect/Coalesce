@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using System;
 using System.Collections.Generic;
 using System.Text;
 

@@ -142,7 +142,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <summary>
         /// Returns the user name
         /// </summary>
-        [Coalesce,Execute(Roles = "Admin")]
+        [Coalesce,Execute(Roles = RoleNames.Admin)]
         public static string GetUser(ClaimsPrincipal user)
         {
             if (user!= null && user.Identity != null) return user.Identity.Name;

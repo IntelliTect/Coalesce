@@ -76,7 +76,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public override bool IsEnum => Symbol.TypeKind == TypeKind.Enum;
+        public override bool IsEnum =>
+            IsNullableType ? NullableUnderlyingType.IsEnum : Symbol.TypeKind == TypeKind.Enum;
 
         public static readonly SymbolDisplayFormat DefaultDisplayFormat = SymbolDisplayFormat
             .FullyQualifiedFormat

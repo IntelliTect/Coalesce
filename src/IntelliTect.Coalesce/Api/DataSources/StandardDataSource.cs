@@ -121,6 +121,12 @@ namespace IntelliTect.Coalesce
 
             if (prop.Type.IsDate)
             {
+                // Literal string "null" should match null values if the prop is nullable.
+                if (prop.Type.IsNullable && value.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return query.Where($"it.{prop.Name} = null");
+                }
+
                 // See if they just passed in a date or a date and a time
                 if (DateTime.TryParse(value, out DateTime parsedValue))
                 {
@@ -176,34 +182,6 @@ namespace IntelliTect.Coalesce
                     return query.Where($"it.{prop.Name} == @0", value);
                 }
             }
-            else if (prop.Type.IsEnum)
-            {
-                var values = value
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(item => 
-                        prop.Type.EnumValues.SingleOrDefault(ev => 
-                            int.TryParse(item, out int intVal) 
-                            ? ev.Key == intVal 
-                            : ev.Value.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
-                            ).Value)
-                    .Where(item => item != null)
-                    .Select((item, i) => (
-                        Param: item,
-                        Clause: $"it.{prop.Name} == @{i}"
-                    ))
-                    .ToList();
-                
-                // Something was specified (since we didnt return early), but we couldn't parse it.
-                // Make our query return nothing since the targeted field could never equal an 
-                // unparsable value.
-                if (values.Count == 0)
-                    return query.Where(q => false);
-
-                return query.Where(
-                    string.Join(" || ", values.Select(v => v.Clause)),
-                    values.Select(v => v.Param).ToArray()
-                );
-            }
             else
             {
                 var values = value
@@ -211,16 +189,47 @@ namespace IntelliTect.Coalesce
                     .Select(item =>
                     {
                         var type = prop.Type.NullableUnderlyingType.TypeInfo;
+
+                        // The exact value "null" should match null values exactly.
+                        if (prop.Type.IsNullable && item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return (Success: true, Result: null);
+                        }
+
+                        if (prop.Type.IsEnum)
+                        {
+                            var inputIsInt = int.TryParse(item, out int intVal);
+
+                            var enumString = prop.Type.EnumValues.SingleOrDefault(ev =>
+                                inputIsInt
+                                    ? ev.Key == intVal
+                                    : ev.Value.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
+                                ).Value;
+
+                            // If SingleOrDefault doesn't match anything,
+                            // `.Value` will be default(string), which is null.
+                            // This is the parse failure case.
+                            if (enumString == null)
+                            {
+                                return (Success: false, Result: null);
+                            }
+
+                            return (Success: true, Result: enumString);
+                        }
+
                         try
                         {
-                            if (type == typeof(Guid)) return Guid.Parse(item);
-                            return Convert.ChangeType(item, type);
+                            object result =
+                                type == typeof(Guid) ? Guid.Parse(item)
+                                : Convert.ChangeType(item, type);
+
+                            return (Success: true, Result: result);
                         }
-                        catch { return null; }
+                        catch { return (Success: false, Result: null); }
                     })
-                    .Where(item => item != null)
-                    .Select((item, i) => (
-                        Param: item,
+                    .Where(conversion => conversion.Success)
+                    .Select((conversion, i) => (
+                        Param: conversion.Result,
                         Clause: $"it.{prop.Name} == @{i}"
                     ))
                     .ToList();

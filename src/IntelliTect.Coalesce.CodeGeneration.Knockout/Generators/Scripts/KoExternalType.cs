@@ -40,7 +40,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 foreach (PropertyViewModel prop in Model.ClientProperties)
                 {
                     b.Line($"public {prop.JsVariable}: {prop.Type.TsKnockoutType(true)} = {prop.Type.ObservableConstructorCall()};");
-                    if (prop.PureType.IsEnum)
+                    if (prop.Type.IsEnum)
                     {
                         b.Line($"public {prop.JsTextPropertyName} = {prop.Type.ObservableConstructorCall()};");
                     }

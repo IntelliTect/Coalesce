@@ -144,15 +144,22 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             new object[] { false, "2017-08-02T12:34:56", new DateTime(2017, 08, 2, 12, 34, 55) },
             new object[] { false, "2017-08-02T12:34:56", new DateTime(2017, 08, 2, 12, 34, 57) },
             new object[] { false, "can't parse", new DateTime(2017, 08, 2, 12, 34, 57) },
+            
+            // The exact value "null" should match null values exactly.
+            new object[] { true, "null", null },
+            
+            // Null or empty inputs always do nothing - these will always match.
+            new object[] { true, "", new DateTime(2017, 08, 2, 12, 34, 57) },
+            new object[] { true, null, new DateTime(2017, 08, 2, 12, 34, 57) },
         };
 
         [Theory]
         [MemberData(nameof(Filter_MatchesDateTimesData))]
         public void ApplyListPropertyFilter_WhenPropIsDateTime_FiltersProp(
-            bool shouldMatch, string inputValue, DateTime fieldValue)
+            bool shouldMatch, string inputValue, DateTime? fieldValue)
         {
-            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTime>(
-                m => m.DateTime, fieldValue, inputValue);
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTime?>(
+                m => m.DateTimeNullable, fieldValue, inputValue);
 
             Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
@@ -174,16 +181,23 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             new object[] { false, "2017-08-02T12:34:56", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 55, TimeSpan.FromHours(-8)) },
             new object[] { false, "2017-08-02T12:34:56", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
             new object[] { false, "can't parse", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
+            
+            // The exact value "null" should match null values exactly.
+            new object[] { true, "null", -8, null },
+            
+            // Null or empty inputs always do nothing - these will always match.
+            new object[] { true, "", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
+            new object[] { true, null, -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
         };
 
         [Theory]
         [MemberData(nameof(Filter_MatchesDateTimeOffsetsData))]
         public void ApplyListPropertyFilter_WhenPropIsDateTimeOffset_FiltersProp(
-            bool shouldMatch, string inputValue, int usersUtcOffset, DateTimeOffset fieldValue)
+            bool shouldMatch, string inputValue, int usersUtcOffset, DateTimeOffset? fieldValue)
         {
             CrudContext.TimeZone = TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(usersUtcOffset), "test", "test");
-            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTimeOffset>(
-                m => m.DateTimeOffset, fieldValue, inputValue);
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTimeOffset?>(
+                m => m.DateTimeOffsetNullable, fieldValue, inputValue);
 
             Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
@@ -192,17 +206,24 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         [InlineData(true, Case.Statuses.ClosedNoSolution, (int)Case.Statuses.ClosedNoSolution)]
         [InlineData(true, Case.Statuses.ClosedNoSolution, nameof(Case.Statuses.ClosedNoSolution))]
         // Erratic spaces intentional
-        [InlineData(true, Case.Statuses.ClosedNoSolution, "")]
         [InlineData(true, Case.Statuses.ClosedNoSolution, " 3 , 4 ")]
         [InlineData(true, Case.Statuses.ClosedNoSolution, "  closednosolution , Cancelled,  Resolved ")]
         [InlineData(false, Case.Statuses.ClosedNoSolution, 5)]
         [InlineData(false, Case.Statuses.ClosedNoSolution, "1,2")]
         [InlineData(false, Case.Statuses.ClosedNoSolution, "closed,Cancelled,Resolved")]
+
+        // The exact value "null" should match null values exactly.
+        [InlineData(true, null, "null")]
+        [InlineData(false, Case.Statuses.ClosedNoSolution, "null")]
+
+        // Null or empty inputs always do nothing - these will always match.
+        [InlineData(true, Case.Statuses.ClosedNoSolution, "")]
+        [InlineData(true, Case.Statuses.ClosedNoSolution, null)]
         public void ApplyListPropertyFilter_WhenPropIsEnum_FiltersProp(
-            bool shouldMatch, Case.Statuses propValue, object inputValue)
+            bool shouldMatch, Case.Statuses? propValue, object inputValue)
         {
-            var (prop, query) = PropertyFiltersTestHelper<Case, Case.Statuses>(
-                m => m.Status, propValue, inputValue.ToString());
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Case.Statuses?>(
+                m => m.EnumNullable, propValue, inputValue?.ToString());
 
             Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
@@ -235,6 +256,11 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Null or empty inputs always do nothing - these will always match.
             new object[] { true, Guid.Empty, "" },
             new object[] { true, Guid.Empty, null },
+
+            // String "null" input should match null values
+            new object[] { true, null, "null" },
+            new object[] { false, Guid.Empty, "null" },
+
             new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), "" },
             new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), null },
         };
@@ -242,10 +268,10 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         [Theory]
         [MemberData(nameof(Filter_MatchesGuidData))]
         public void ApplyListPropertyFilter_WhenPropIsGuid_FiltersProp(
-            bool shouldMatch, Guid propValue, string inputValue)
+            bool shouldMatch, Guid? propValue, string inputValue)
         {
-            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Guid>(
-                m => m.Guid, propValue, inputValue);
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Guid?>(
+                m => m.GuidNullable, propValue, inputValue);
 
             Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
@@ -257,16 +283,23 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         [InlineData(true, 1, " 1 ,  ")]
         [InlineData(true, 1, " 1 , $0.0 ")]
         [InlineData(true, 1, " 1 , string ")]
+
+        // Null or empty inputs always do nothing - these will always match.
         [InlineData(true, 1, "")]
         [InlineData(true, 1, null)]
+
+        // String "null" input should match null values
+        [InlineData(true, null, "null")]
+        [InlineData(false, 1, "null")]
+
         [InlineData(false, 1, " 3 , 2 ")]
         [InlineData(false, 1, "2")]
         [InlineData(false, 1, "string")]
         public void ApplyListPropertyFilter_WhenPropIsNumeric_FiltersProp(
-            bool shouldMatch, int propValue, string inputValue)
+            bool shouldMatch, int? propValue, string inputValue)
         {
-            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, int>(
-                m => m.Int, propValue, inputValue);
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, int?>(
+                m => m.IntNullable, propValue, inputValue);
 
             Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }

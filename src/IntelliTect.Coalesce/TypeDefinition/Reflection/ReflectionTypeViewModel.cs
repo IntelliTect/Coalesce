@@ -100,7 +100,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public override bool IsEnum => Info.IsEnum;
+        public override bool IsEnum =>
+            IsNullableType ? NullableUnderlyingType.IsEnum : Info.IsEnum;
 
         public override string FullNamespace => Info.Namespace;
 

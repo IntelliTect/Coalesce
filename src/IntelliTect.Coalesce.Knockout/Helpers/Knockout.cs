@@ -737,7 +737,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 returnString = DisplayObject(propertyModel, linkObject);
             }
-            else if (propertyModel.PureType.IsEnum)
+            else if (propertyModel.Type.IsEnum)
             {
                 returnString = DisplayEnum(propertyModel);
             }

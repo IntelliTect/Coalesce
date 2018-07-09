@@ -54,7 +54,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     b.DocComment(prop.Comment);
                     b.Line($"public {prop.JsVariable}: {prop.Type.TsKnockoutType(true)} = {prop.Type.ObservableConstructorCall()};");
-                    if (prop.PureType.IsEnum)
+                    if (prop.Type.IsEnum)
                     {
                         b.DocComment($"Text value for enumeration {prop.Name}");
                         b.Line($"public {prop.JsTextPropertyName}: KnockoutComputed<string | null> = ko.pureComputed(() => {{");
@@ -140,7 +140,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
 
                 b.Line();
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.PureType.IsEnum))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsEnum))
                 {
                     b.DocComment($"Array of all possible names & values of enum {prop.JsVariable}");
                     b.Line($"public {prop.JsVariable}Values: Coalesce.EnumValue[] = [ ");
@@ -325,7 +325,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             using (b.Block($"export namespace {Model.ViewModelGeneratedClassName}"))
             {
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.PureType.IsEnum))
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsEnum))
                 {
                     using (b.Block($"export enum {prop.Name}Enum"))
                     {

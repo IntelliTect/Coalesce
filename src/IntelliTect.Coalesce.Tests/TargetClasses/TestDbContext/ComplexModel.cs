@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
@@ -56,8 +57,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public string String { get; set; }
         public int Int { get; set; }
+        public int? IntNullable { get; set; }
         public long Long { get; set; }
         public Guid Guid { get; set; }
+        public Guid? GuidNullable { get; set; }
+
+
+        public Case.Statuses? EnumNullable { get; set; }
 
         // Add other kinds of properties, relationships, etc... as needed.
     }

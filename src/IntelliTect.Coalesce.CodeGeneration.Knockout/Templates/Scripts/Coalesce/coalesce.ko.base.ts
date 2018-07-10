@@ -608,7 +608,6 @@ module Coalesce {
                         if (typeof(callback) == "function") callback(this);
                     })
                     .fail((xhr: JQueryXHR) => {
-                        this.isLoaded(false);
                         const data: ItemResult | null = xhr.responseJSON
                         var errorMsg = "Could not load " + this.modelName + " with ID = " + id;
                         if (data && data.message) errorMsg = data.message;
@@ -928,7 +927,6 @@ module Coalesce {
                     var errorMsg = "Unknown Error";
                     if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
                     this.message(errorMsg);
-                    this.isLoaded(false);
 
                     if (this.coalesceConfig.showFailureAlerts())
                         this.coalesceConfig.onFailure()(this, "Could not get list of " + this.modelName + " items: " + errorMsg);

@@ -12,7 +12,7 @@
     "@types/lodash-es": "^4.17.0",
     "@types/qs": "^6.5.1",
     "axios": "^0.18.0",
-    "date-fns": "^2.0.0-alpha.7",
+    "date-fns": "2.0.0-alpha.7",
     "lodash-es": "^4.17.5",
     "qs": "^6.5.1",
     "vue": "^2.5.13"
@@ -26,7 +26,6 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
     "prepack": "tsc -p ./tsconfig.build.json",
-    
     "//": "No coverage by default because it breaks line numbers in error messages. `yarn test --coverage` to run it.",
     "test": "jest"
   },

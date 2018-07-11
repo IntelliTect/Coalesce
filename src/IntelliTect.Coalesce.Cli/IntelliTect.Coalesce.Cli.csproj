@@ -5,7 +5,6 @@
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Exe</OutputType>
-    <PackAsTool>true</PackAsTool>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>

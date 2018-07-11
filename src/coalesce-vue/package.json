@@ -8,6 +8,9 @@
   "author": "IntelliTect",
   "license": "Apache-2.0",
   "private": false,
+  "files": [
+    "lib", "src", "test", "tsconfig.json", "tsconfig.build.json"
+  ],
   "dependencies": {
     "@types/lodash-es": "^4.17.0",
     "@types/qs": "^6.5.1",

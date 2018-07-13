@@ -9,22 +9,29 @@
   "license": "Apache-2.0",
   "private": false,
   "files": [
-    "lib", "src", "test", "tsconfig.json", "tsconfig.build.json"
+    "lib",
+    "src",
+    "test",
+    "tsconfig.json",
+    "tsconfig.build.json"
   ],
   "dependencies": {
     "@types/lodash-es": "^4.17.0",
     "@types/qs": "^6.5.1",
     "axios": "^0.18.0",
-    "date-fns": "2.0.0-alpha.7",
-    "lodash-es": "^4.17.5",
+    "date-fns": "2.0.0-alpha.11",
+    "lodash-es": "^4.17.10",
     "qs": "^6.5.1",
     "vue": "^2.5.13"
   },
   "devDependencies": {
     "@types/jest": "^23.1.1",
+    "@vue/test-utils": "^1.0.0-beta.20",
     "jest": "^23.1.0",
     "ts-jest": "^22.4.6",
-    "typescript": "2.9.2"
+    "typescript": "2.9.2",
+    "vue-template-compiler": "^2.5.16",
+    "lodash": "^4.17.10"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
@@ -34,14 +41,21 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.tsx?$": "ts-jest"
+      "^.+\\.(j|t)sx?$": "ts-jest"
     },
     "collectCoverageFrom": [
       "src/**",
       "!src/index.ts"
     ],
+    "moduleNameMapper": {
+      "^vue$": "vue/dist/vue.common.js",
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "//": "Map the esm version of libs to the non-esm for the tests - jest doesn't do well with es modules & typescript. By some sheer chance of luck, the import statements can be written the same between the es and non-es versions of the files.",
+      "^date-fns/esm$": "date-fns",
+      "lodash-es": "lodash"
+    },
     "testEnvironment": "node",
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(.*\\.)?(jsx?|tsx?)$",
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",

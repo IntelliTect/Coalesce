@@ -18,9 +18,9 @@ declare module "axios" {
     }
 }
 
-import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue } from './metadata'
-import { Model, convertToModel, mapToDto, mapValueToDto, DataSource, convertValueToModel } from './model'
-import { OwnProps, Indexable } from './util'
+import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue } from '@/metadata'
+import { Model, convertToModel, mapToDto, mapValueToDto, DataSource, convertValueToModel } from '@/model'
+import { OwnProps, Indexable } from '@/util'
 
 import axios, { AxiosPromise, AxiosResponse, AxiosError, AxiosRequestConfig, Canceler, CancelTokenSource, CancelToken, AxiosInstance, Cancel} from 'axios'
 import * as qs from 'qs'

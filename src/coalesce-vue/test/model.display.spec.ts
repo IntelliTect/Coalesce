@@ -1,6 +1,6 @@
-import * as model from "../src/model";
-import * as $metadata from "./shared.metadata";
-import { ObjectValue, Value } from "../src/metadata";
+import * as model from "@/model";
+import * as $metadata from "./targets.metadata";
+import { ObjectValue, Value } from "@/metadata";
 import { shortStringify } from "./test-utils";
 
 const studentProps = $metadata.Student.props;

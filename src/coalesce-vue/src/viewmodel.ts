@@ -1,13 +1,12 @@
 
 import Vue from 'vue';
-import { AxiosResponse, AxiosError } from 'axios';
-import debounce from 'lodash-es/debounce';
 
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, ObjectType } from './metadata';
-import { ApiClient, ItemResult, ItemApiState, ListResult, ListApiState, ModelApiClient, ListParameters } from './api-client';
-import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
-import { Indexable } from './util';
-import { Cancelable } from 'lodash';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames } from '@/metadata';
+import { ModelApiClient, ListParameters } from '@/api-client';
+import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from '@/model';
+import { Indexable } from '@/util';
+import { debounce } from 'lodash-es'
+import { Cancelable } from 'lodash'
 
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
@@ -112,9 +111,13 @@ export abstract class ViewModel<
             if (this.$isDirty) {
                 // If our model DID change while the save was in-flight,
                 // update the pristine version of the model with what came back from the save,
-                // but don't load the data into the `$data` prop.
+                // and load the primary key, but don't load the data into the `$data` prop.
                 // This helps `$isDirty` to work as expected.
                 this._pristineDto = mapToDto(this.$save.result)
+
+                // The PK *MUST* be loaded so that the PK returned by a creation save call
+                // will be used by subsequent update calls.
+                this.$primaryKey = (this.$save.result as Indexable<TModel>)[this.$metadata.keyProp.name] 
             } else {
                 // Only load the save response if the data hasn't changed since we sent it.
                 // If the data has changed, loading the response would overwrite users' changes.

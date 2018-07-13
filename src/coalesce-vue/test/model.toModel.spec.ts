@@ -1,16 +1,16 @@
 
-import * as model from "../src/model";
-import * as $metadata from "./shared.metadata";
-import { ModelValue, ObjectValue, Value, ObjectType, CollectionValue } from "../src/metadata";
+import * as model from "@/model";
+import * as $metadata from "./targets.metadata";
+import { ModelValue, ObjectValue, Value, ObjectType, CollectionValue } from "@/metadata";
 import { shortStringify } from "./test-utils";
-import { Indexable } from "../src/util";
-import { twoWayConversions, studentValue, MappingData } from "./model.shared";
+import { Indexable } from "@/util";
+import { twoWayConversions, studentValue, MappingData, displaysStudentValue } from "./model.shared";
 
 const studentProps = $metadata.Student.props;
 
 function unparsable(meta: Value, ...values: any[]) {
   return values.map(value => {
-    return { meta, dto: value, error: `unparsable .* for ${meta.type} '${meta.name}'` };
+    return { meta, dto: value, error: `unparsable .* for ${meta.type} '${(meta.type == "model" || meta.type == "object" ? meta.typeDef.name : meta.name)}'` };
   });
 }
 
@@ -93,12 +93,12 @@ const dtoToModelMappings = <MappingData[]>[
 
   // Object
   {
-    meta: studentValue,
-    dto: { studentId: 1, extraneousProp: true },
-    model: { studentId: 1, $metadata: $metadata.Student }
+    meta: displaysStudentValue,
+    dto: { name: "bob", extraneousProp: true },
+    model: { name: "bob", $metadata: $metadata.DisplaysStudent }
   },
   ...unparsable(
-    studentValue,
+    displaysStudentValue,
     "abc",
     123,
     [],

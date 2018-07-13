@@ -1,11 +1,9 @@
 
 // Tedious imports for maximum tree shaking
-import * as toDate from 'date-fns/toDate'
-import * as isValid from 'date-fns/isValid'
-import * as format from 'date-fns/format'
+import { toDate, isValid, format } from 'date-fns/esm'
 
-import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata"
-import { Indexable } from './util'
+import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "@/metadata"
+import { Indexable } from '@/util'
 
 /**
  * Represents a model with metadata information.
@@ -411,8 +409,8 @@ class MapToDtoVisitor extends Visitor<
         const parsed = parseValue(value, meta);
         if (parsed == null) return null;
 
-        // TODO: exclude timezone (Z) for DateTime, keep it for DateTimeOffset
-        return format(parsed, 'YYYY-MM-DDTHH:mm:ss.SSSZ')
+        // TODO: exclude timezone (XXX) for DateTime, keep it for DateTimeOffset
+        return format(parsed, "YYYY-MM-DD'T'HH:mm:ss.SSSXXX")
     }
 
     protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {

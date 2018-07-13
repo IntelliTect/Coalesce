@@ -1,15 +1,23 @@
 
-import * as $metadata from "./shared.metadata";
-import { ObjectValue, Value } from "../src/metadata";
+import * as $metadata from "./targets.metadata";
+import { ObjectValue, Value, ModelValue } from "@/metadata";
 
 const studentProps = $metadata.Student.props;
 
-export const studentValue = <ObjectValue>{
+export const studentValue = <ModelValue>{
+  name: "student",
+  displayName: "Student",
+  role: "value",
+  type: "model",
+  typeDef: $metadata.Student
+};
+
+export const displaysStudentValue = <ObjectValue>{
   name: "student",
   displayName: "Student",
   role: "value",
   type: "object",
-  typeDef: $metadata.Student
+  typeDef: $metadata.DisplaysStudent
 };
 
 /** Conversions which map the same in either direction between model and DTOs */
@@ -57,7 +65,7 @@ export const twoWayConversions = <MappingData[]>[
     })
   },
 
-  // Object
+  // Model
   // valued-props off of the root object
   {
     meta: studentValue,
@@ -97,7 +105,7 @@ export const twoWayConversions = <MappingData[]>[
   // null root objects
   { meta: studentValue, model: null, dto: null },
 
-  // Model (object covers most of the cases here...
+  // Object (model covers most of the cases here...
   // just need to test the few special branches at the start for model values)
-  { meta: studentProps.advisor, model: null, dto: null }
+  { meta: displaysStudentValue, model: null, dto: null }
 ];

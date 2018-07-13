@@ -5,7 +5,7 @@ environment:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   NET_CORE_VERSION: netcoreapp2.1
   NPM_TOKEN:
-    secure: PpvAZnPCnGvKx69JHFV2FowUIpo0jgV1g1jJpuuPmDyZij9RwMcjuGIAKfsSiaQH
+    secure: dQCkkO4ezshvOI5/8Tml4T0EnIxjHv7nrXFsnq9dStEGBbcQNIWhb+gOBn9lacYs
 
 image: Visual Studio 2017
 cache: 

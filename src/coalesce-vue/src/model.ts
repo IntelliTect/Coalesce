@@ -410,7 +410,7 @@ class MapToDtoVisitor extends Visitor<
         if (parsed == null) return null;
 
         // TODO: exclude timezone (XXX) for DateTime, keep it for DateTimeOffset
-        return format(parsed, "YYYY-MM-DD'T'HH:mm:ss.SSSXXX")
+        return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     }
 
     protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {

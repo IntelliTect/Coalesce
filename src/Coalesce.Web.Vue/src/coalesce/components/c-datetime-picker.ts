@@ -29,7 +29,7 @@ export default class extends Vue {
     @Prop({type: String})
     public label?: string;
 
-    @Prop({default: 'MM/DD/YYYY h:mm A', type: String}) 
+    @Prop({default: 'MM/mm/yyyy h:mm A', type: String}) 
     public dateFormat!: string;
 
     get displayedValue() {
@@ -92,7 +92,7 @@ export default class extends Vue {
     menu = false
     selectedTab: "date" | "time" | null = null; // = "date"
 
-    get datePart() { return this.value && format(this.value, "YYYY-MM-DD") || null }
+    get datePart() { return this.value && format(this.value, "yyyy-MM-dd") || null }
     get timePart() { return this.value && format(this.value, "HH:mm") || null }
 }
 

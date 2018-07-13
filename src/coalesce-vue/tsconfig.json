@@ -9,8 +9,7 @@
     "target": "es5",
     "strict": true,
     "declaration": true,
-    "lib": ["es2015", "es2017", "dom"],
-    "baseUrl": "."
+    "lib": ["es2015", "es2017", "dom"]
   },
     
   "exclude": [

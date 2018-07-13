@@ -21,17 +21,18 @@
     "axios": "^0.18.0",
     "date-fns": "2.0.0-alpha.11",
     "lodash-es": "^4.17.10",
-    "qs": "^6.5.1",
-    "vue": "^2.5.13"
+    "qs": "^6.5.1"
+  },
+  "peerDependencies": {
+    "vue": "~2.5.16"
   },
   "devDependencies": {
     "@types/jest": "^23.1.1",
-    "@vue/test-utils": "^1.0.0-beta.20",
     "jest": "^23.1.0",
     "ts-jest": "^22.4.6",
     "typescript": "2.9.2",
-    "vue-template-compiler": "^2.5.16",
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.10",
+    "vue": "^2.5.16"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",

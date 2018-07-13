@@ -50,15 +50,14 @@ describe("propDisplay - resolves property", () => {
 describe("display", () => {
   test("returns json for object without displayProp", () => {
     const typeMeta = {
-      ...$metadata.Student,
+      ...$metadata.DisplaysStudent,
       displayProp: undefined,
     }
     const instance = {
       $metadata: typeMeta,
-      studentId: 1,
       name: "Bob",
     }
-    expect(model.modelDisplay(instance)).toBe("{\"studentId\":\"1\",\"name\":\"Bob\"}");
+    expect(model.modelDisplay(instance)).toBe("{\"name\":\"Bob\"}");
   });
 });
 

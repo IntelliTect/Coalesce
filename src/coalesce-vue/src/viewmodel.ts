@@ -8,6 +8,13 @@ import { Indexable } from './util';
 import { debounce } from 'lodash-es'
 import { Cancelable } from 'lodash'
 
+// These imports allow TypeScript to correctly name types in the generated declarations.
+// Without them, it will generate some horrible, huge relative paths that won't work on any other machine.
+// For example: import("../../../../Coalesce/src/coalesce-vue/src/api-client").ItemResult<TModel>
+import * as apiClient from './api-client';
+import * as axios from 'axios';
+
+
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
  * @param ctor The class to add wrapper properties to

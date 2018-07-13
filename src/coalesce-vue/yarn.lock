@@ -34,12 +34,6 @@
   version "6.5.1"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.5.1.tgz#a38f69c62528d56ba7bd1f91335a8004988d72f7"
 
-"@vue/test-utils@^1.0.0-beta.20":
-  version "1.0.0-beta.20"
-  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-1.0.0-beta.20.tgz#ef4505341b802f3de1c06b3cb8651378c87371fa"
-  dependencies:
-    lodash "^4.17.4"
-
 abab@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
@@ -717,10 +711,6 @@ date-fns@2.0.0-alpha.11:
   version "2.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.0.0-alpha.11.tgz#586e855107dc4717ba4d9f2c41cf12c3b72512c0"
 
-de-indent@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/de-indent/-/de-indent-1.0.2.tgz#b2038e846dc33baa5796128d0804b455b8c1e21d"
-
 debug@^2.1.2, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -1266,10 +1256,6 @@ has@^1.0.1:
   resolved "https://registry.yarnpkg.com/has/-/has-1.0.3.tgz#722d7cbfc1f6aa8241f16dd814e011e1f41e8796"
   dependencies:
     function-bind "^1.1.1"
-
-he@^1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
 
 home-or-tmp@^2.0.0:
   version "2.0.0"
@@ -3380,14 +3366,7 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vue-template-compiler@^2.5.16:
-  version "2.5.16"
-  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.5.16.tgz#93b48570e56c720cdf3f051cc15287c26fbd04cb"
-  dependencies:
-    de-indent "^1.0.2"
-    he "^1.1.0"
-
-vue@^2.5.13:
+vue@^2.5.16:
   version "2.5.16"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.16.tgz#07edb75e8412aaeed871ebafa99f4672584a0085"
 

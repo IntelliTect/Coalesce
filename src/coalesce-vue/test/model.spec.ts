@@ -2,7 +2,7 @@
 
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import { Indexable } from "lib/util";
+import { Indexable } from "../src/util";
 
 describe("updateFromModel", () => {
   test("shallow copies properties", () => {

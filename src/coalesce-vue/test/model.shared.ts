@@ -1,6 +1,6 @@
 
 import * as $metadata from "./targets.metadata";
-import { ObjectValue, Value, ModelValue } from "@/metadata";
+import { ObjectValue, Value, ModelValue } from "../src/metadata";
 
 const studentProps = $metadata.Student.props;
 

@@ -1,8 +1,8 @@
 
 
 import Vue from 'vue';
-import { AxiosClient, AxiosItemResult } from '@/api-client'
-import { mapToDto, mapToModel } from '@/model';
+import { AxiosClient, AxiosItemResult } from '../src/api-client'
+import { mapToDto, mapToModel } from '../src/model';
 
 import { StudentViewModel } from './targets.viewmodels';
 import { Student } from './targets.models';

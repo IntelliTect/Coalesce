@@ -10,12 +10,7 @@
     "strict": true,
     "declaration": true,
     "lib": ["es2015", "es2017", "dom"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
+    "baseUrl": "."
   },
     
   "exclude": [

@@ -1,4 +1,4 @@
-import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType } from "@/metadata";
+import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType } from "../src/metadata";
 
 const metaBase = (name: string = "model") => { 
   return {

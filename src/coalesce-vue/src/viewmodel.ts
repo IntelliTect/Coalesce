@@ -1,10 +1,10 @@
 
 import Vue from 'vue';
 
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames } from '@/metadata';
-import { ModelApiClient, ListParameters } from '@/api-client';
-import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from '@/model';
-import { Indexable } from '@/util';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames } from './metadata';
+import { ModelApiClient, ListParameters } from './api-client';
+import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
+import { Indexable } from './util';
 import { debounce } from 'lodash-es'
 import { Cancelable } from 'lodash'
 

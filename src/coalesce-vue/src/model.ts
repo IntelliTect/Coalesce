@@ -2,8 +2,8 @@
 // Tedious imports for maximum tree shaking
 import { toDate, isValid, format } from 'date-fns/esm'
 
-import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "@/metadata"
-import { Indexable } from '@/util'
+import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata"
+import { Indexable } from './util'
 
 /**
  * Represents a model with metadata information.

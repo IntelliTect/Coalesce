@@ -1,4 +1,4 @@
-import { ModelApiClient } from "@/api-client";
+import { ModelApiClient } from "../src/api-client";
 import * as $models from "./targets.models"
 import * as $metadata from "./targets.metadata"
 

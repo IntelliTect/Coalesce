@@ -29,7 +29,7 @@ export default class extends Vue {
     @Prop({type: String})
     public label?: string;
 
-    @Prop({default: 'MM/mm/yyyy h:mm A', type: String}) 
+    @Prop({default: 'MM/dd/yyyy h:mm A', type: String}) 
     public dateFormat!: string;
 
     get displayedValue() {

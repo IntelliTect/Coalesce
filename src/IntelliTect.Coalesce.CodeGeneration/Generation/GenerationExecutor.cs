@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                                 .GroupBy(r => new { r.Name, r.Version }).Select(g => g.First())
                                 .ToList();
 
-                            var gerationVersion = FileVersionInfo
+                            var generationVersion = FileVersionInfo
                                 .GetVersionInfo(Assembly.GetExecutingAssembly().Location)
                                 .ProductVersion
                                 // SourceLink will append the commit hash to the version, using '+' as a delimiter.
@@ -163,9 +163,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
                             foreach (var coalescePkg in coalescePackages)
                             {
-                                if (coalescePkg.Version != gerationVersion)
+                                if (coalescePkg.Version != generationVersion)
                                 {
-                                    logger.LogWarning($"Running Coalesce CLI {gerationVersion}, but {projectContext.ProjectFileName} references {coalescePkg.Name} {coalescePkg.Version}");
+                                    logger.LogWarning($"Running Coalesce CLI {generationVersion}, but {projectContext.ProjectFileName} references {coalescePkg.Name} {coalescePkg.Version}");
                                 }
                             }
                         }

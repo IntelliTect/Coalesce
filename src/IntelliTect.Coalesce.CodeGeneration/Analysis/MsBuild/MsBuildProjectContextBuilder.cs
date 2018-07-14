@@ -168,9 +168,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             {
                 var info = File.ReadAllText(projectInfoFile);
 
-                var buildContext = JsonConvert.DeserializeObject<MsBuildProjectContext>(info);
-
-                return buildContext;
+                return JsonConvert.DeserializeObject<MsBuildProjectContext>(info);
             }
             catch (Exception ex)
             {

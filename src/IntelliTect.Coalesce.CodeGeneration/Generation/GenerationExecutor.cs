@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
@@ -11,8 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -139,7 +142,35 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 {
                     try
                     {
-                        return provider.GetRequiredService<IProjectContextFactory>().CreateContext(config, restorePackages);
+                        var projectContext = provider.GetRequiredService<IProjectContextFactory>().CreateContext(config, restorePackages);
+
+                        // Warn if the Coalesce versions referenced in the project don't
+                        // match the version of the code generation being ran.
+                        if (projectContext is RoslynProjectContext roslynContext)
+                        {
+                            var coalescePackages = roslynContext
+                                .MsBuildProjectContext
+                                .PackageDependencies
+                                .Where(r => !string.IsNullOrEmpty(r.Version) && r.Name.StartsWith($"{nameof(IntelliTect)}.{nameof(Coalesce)}"))
+                                .GroupBy(r => new { r.Name, r.Version }).Select(g => g.First())
+                                .ToList();
+
+                            var gerationVersion = FileVersionInfo
+                                .GetVersionInfo(Assembly.GetExecutingAssembly().Location)
+                                .ProductVersion
+                                // SourceLink will append the commit hash to the version, using '+' as a delimiter.
+                                .Split('+').First();
+
+                            foreach (var coalescePkg in coalescePackages)
+                            {
+                                if (coalescePkg.Version != gerationVersion)
+                                {
+                                    logger.LogWarning($"Running Coalesce CLI {gerationVersion}, but {projectContext.ProjectFileName} references {coalescePkg.Name} {coalescePkg.Version}");
+                                }
+                            }
+                        }
+
+                        return projectContext;
                     }
                     catch (ProjectAnalysisException ex)
                     {

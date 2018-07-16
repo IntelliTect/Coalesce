@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             using (b.Block($"export class {Model.ViewModelGeneratedClassName} extends Coalesce.BaseViewModel"))
             {
                 b.Line($"public readonly modelName = \"{Model.ClientTypeName}\";");
-                b.Line($"public readonly primaryKeyName: keyof this = \"{Model.PrimaryKey.JsVariable}\";");
+                b.Line($"public readonly primaryKeyName = \"{Model.PrimaryKey.JsVariable}\";");
                 b.Line($"public readonly modelDisplayName = \"{Model.DisplayName}\";");
                 b.Line($"public readonly apiController = \"/{Model.ApiRouteControllerPart}\";");
                 b.Line($"public readonly viewController = \"/{Model.ControllerName}\";");

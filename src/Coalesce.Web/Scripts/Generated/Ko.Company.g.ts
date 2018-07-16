@@ -7,7 +7,7 @@ module ViewModels {
     
     export class Company extends Coalesce.BaseViewModel {
         public readonly modelName = "Company";
-        public readonly primaryKeyName: keyof this = "companyId";
+        public readonly primaryKeyName = "companyId";
         public readonly modelDisplayName = "Company";
         public readonly apiController = "/Company";
         public readonly viewController = "/Company";

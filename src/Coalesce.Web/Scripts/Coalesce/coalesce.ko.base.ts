@@ -48,7 +48,7 @@ module Coalesce {
         /**
             Gets the underlying observable that stores the object's explicit configuration value.
         */
-        public raw = (name: keyof this): KnockoutObservable<any> | undefined => {
+        public raw = (name: Extract<keyof this, string>): KnockoutObservable<any> | undefined => {
             return (this as any)["_" + name];
         }
     }
@@ -346,16 +346,16 @@ module Coalesce {
 
     export abstract class BaseViewModel implements LoadableViewModel, ClientMethodParent {
 
-        protected readonly abstract modelName: string;
-        protected readonly abstract modelDisplayName: string;
+        public readonly abstract modelName: string;
+        public readonly abstract modelDisplayName: string;
 
         // Typing this property as keyof this prevents us from using BaseViewModel amorphously.
         // It prevents assignment of an arbitrary derived type to a variable/parameter expecting BaseViewModel
         // because primaryKeyName on a derived type is wider than it is on BaseViewModel.
-        protected readonly abstract primaryKeyName: string;
+        public readonly abstract primaryKeyName: string;
 
         public readonly abstract apiController: string;
-        protected readonly abstract viewController: string;
+        public readonly abstract viewController: string;
 
         /**
             List of all possible data sources that can be set on the dataSource property.

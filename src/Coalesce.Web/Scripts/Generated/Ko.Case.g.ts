@@ -7,7 +7,7 @@ module ViewModels {
     
     export class Case extends Coalesce.BaseViewModel {
         public readonly modelName = "Case";
-        public readonly primaryKeyName: keyof this = "caseKey";
+        public readonly primaryKeyName = "caseKey";
         public readonly modelDisplayName = "Case";
         public readonly apiController = "/Case";
         public readonly viewController = "/Case";

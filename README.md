@@ -6,7 +6,7 @@ Coalesce is a framework for rapid-development of ASP.NET Core web applications. 
 
 ## Fundamentals
 
-* **Code Generation** Write your data model. We'll build the DTOs, API controllers, and TypeScript files that are needed to start building a front-end UI right away. A full suite of CRUD endpoints are created for you with inner-workings that are overridable.
+* **Code Generation** Write your data model. We'll build the DTOs, API controllers, and TypeScript files that are needed to start building a front-end UI right away. A full suite of CRUD endpoints are generated with inner-workings that are overridable.
 * **Extensibility** We don't want to box you in - one of the primary goals of Coalesce is to be as flexible as possible. If something that Coalesce is doing doesn't quite fit your needs, you should be able to configure it or override it easily. You should never feel like you need to eject from the framework.
 * **Security** Coalesce is designed with security in mind. All classes, properties, and methods can be restricted per-role, or their data even hidden entirely from the client. Row-level security can be implemented using custom data sources. The guiding principal here is that it should always be easy to know exactly what parts of your data Coalesce is exposing for you.
 

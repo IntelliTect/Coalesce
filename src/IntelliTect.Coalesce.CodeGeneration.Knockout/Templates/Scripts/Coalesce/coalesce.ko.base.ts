@@ -545,7 +545,6 @@ module Coalesce {
                     this.cancelAutoSave();
                     this.isSaving(true);
                     var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}&${this.dataSource.getQueryString()}`
-
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data: ItemResult) => {
                             this.isDirty(false);
@@ -679,7 +678,7 @@ module Coalesce {
             Deletes the object if a prompt for confirmation is answered affirmatively.
         */
         public deleteItemWithConfirmation = (callback?: () => void, message?: string): JQueryPromise<any> | undefined => {
-            if (typeofmessage != 'string') {
+            if (typeof message != 'string') {
                 message = "Delete this item?";
             }
             if (confirm(message)) {
@@ -870,7 +869,7 @@ module Coalesce {
         public abstract modelKeyName: string;
 
         // Reference to the class which this list represents.
-        protected abstract itemClass: new () => TItem;
+        protected abstract itemClass: new() => TItem;
 
         /**
             Properties which determine how this object behaves.

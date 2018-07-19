@@ -678,7 +678,7 @@ module Coalesce {
             Deletes the object if a prompt for confirmation is answered affirmatively.
         */
         public deleteItemWithConfirmation = (callback?: () => void, message?: string): JQueryPromise<any> | undefined => {
-            if (typeofmessage != 'string') {
+            if (typeof message != 'string') {
                 message = "Delete this item?";
             }
             if (confirm(message)) {

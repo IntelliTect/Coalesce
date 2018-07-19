@@ -29,9 +29,10 @@
   "devDependencies": {
     "@types/jest": "^23.1.1",
     "jest": "^23.1.0",
+    "jest-junit": "^5.1.0",
+    "lodash": "^4.17.10",
     "ts-jest": "^22.4.6",
     "typescript": "2.9.2",
-    "lodash": "^4.17.10",
     "vue": "^2.5.16"
   },
   "scripts": {

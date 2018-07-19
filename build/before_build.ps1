@@ -8,17 +8,19 @@ node --version
 Write-Host "Npm Version:"
 npm --version
 dotnet restore
+
+
 Push-Location .\src\coalesce-vue
 yarn
 if ($env:coalesce_version -ne $null) {
   yarn version --no-git-tag-version --new-version $env:coalesce_version
 }
 yarn build
-yarn test
+yarn test --coverage --reporters="default" --reporters="jest-junit"
 
-Pop-Location
-Push-Location .\src\Coalesce.Web
-yarn
+# upload results to AppVeyor
+$wc = New-Object 'System.Net.WebClient'
+$wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\junit.xml))
 
 Pop-Location
 Push-Location .\src\Coalesce.Web.Vue
@@ -26,16 +28,15 @@ yarn
 
 <#
 Currently, our coalesce scripts for vue is in the knockout web project's gulpfile. 
-I don't want to add gulp to Coalesce.Web.Vue
+I don't want to add gulp to Coalesce.Web.Vue. So, hence the `yarn gulp coalesce-vue` in Coalesce.Web.
 #>
 
 Pop-Location
 Push-Location .\src\Coalesce.Web
+yarn
 yarn gulp coalesce-ko
-
-Pop-Location
-Push-Location .\src\Coalesce.Web
 yarn gulp coalesce-vue
+yarn gulp build # Compile the TS/SCSS/etc for Coalesce.Web
 
 Pop-Location
 Push-Location .\src\Coalesce.Domain

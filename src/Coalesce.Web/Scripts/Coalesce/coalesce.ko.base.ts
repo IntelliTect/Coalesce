@@ -235,7 +235,7 @@ module Coalesce {
         /** True if last invocation of method was successful. */
         public wasSuccessful: KnockoutObservable<boolean | null> = ko.observable(null);
 
-        constructor (protected parent: TParent) { }
+        constructor(protected parent: TParent) { }
 
         protected abstract loadResponse: (data: ApiResult, callback?: (result: TResult) => void, reload?: boolean) => void;
 
@@ -542,8 +542,8 @@ module Coalesce {
             if (!this.isLoading()) {
                 if (this.validate()) {
                     if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
+                    this.cancelAutoSave();
                     this.isSaving(true);
-
                     var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}&${this.dataSource.getQueryString()}`
 
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
@@ -573,7 +573,7 @@ module Coalesce {
                         })
                         .always(() => {
                             this.isSaving(false);
-                            if (typeof(callback) == "function") {
+                            if (typeof (callback) == "function") {
                                 callback(this);
                             }
                             if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onFinishBusy()(this);
@@ -599,13 +599,13 @@ module Coalesce {
                 this.coalesceConfig.onStartBusy()(this);
 
                 var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Get/${id}?includes=${this.includes}&${this.dataSource.getQueryString()}`
-                
+
                 return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data: ItemResult) => {
                         this.errorMessage(null);
                         this.loadFromDto(data.object, true);
                         this.isLoaded(true);
-                        if (typeof(callback) == "function") callback(this);
+                        if (typeof (callback) == "function") callback(this);
                     })
                     .fail((xhr: JQueryXHR) => {
                         const data: ItemResult | null = xhr.responseJSON
@@ -658,7 +658,7 @@ module Coalesce {
                             this.coalesceConfig.onFailure()(this, errorMsg);
                     })
                     .always(() => {
-                        if (typeof(callback) == "function") {
+                        if (typeof (callback) == "function") {
                             callback(this);
                         }
                     });
@@ -669,7 +669,7 @@ module Coalesce {
                     this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
                     this.parent.isLoading(false);
                 }
-                if (typeof(callback) == "function") {
+                if (typeof (callback) == "function") {
                     callback(this);
                 }
             }
@@ -747,7 +747,7 @@ module Coalesce {
             @returns true if the callback was registered. false if the callback was already registered. 
         */
         public onSave = (callback: (self: this) => void): boolean => {
-            if (typeof(callback) == "function" && !this.saveCallbacks.filter(c => c == callback).length) {
+            if (typeof (callback) == "function" && !this.saveCallbacks.filter(c => c == callback).length) {
                 this.saveCallbacks.push(callback);
                 return true;
             }
@@ -760,9 +760,8 @@ module Coalesce {
                 this.isDirty(true);
                 if (this.coalesceConfig.autoSaveEnabled()) {
                     // Batch saves.
-                    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+                    this.cancelAutoSave();
                     this.saveTimeout = setTimeout(() => {
-                        this.saveTimeout = 0;
                         // If we have a save in progress, wait...
                         if (this.isSaving()) {
                             this.autoSave();
@@ -771,6 +770,14 @@ module Coalesce {
                         }
                     }, this.coalesceConfig.saveTimeoutMs());
                 }
+            }
+        }
+
+        /** Cancels a pending autosave if it exists. */
+        public cancelAutoSave = (): void => {
+            if (this.saveTimeout) {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = 0;
             }
         }
 
@@ -800,7 +807,7 @@ module Coalesce {
                     $('#modal-dialog').modal('show');
                     // Make the callback when the form closes.
                     $("#modal-dialog").on("hidden.bs.modal", () => {
-                        if (typeof(callback) == "function") callback(this);
+                        if (typeof (callback) == "function") callback(this);
                     });
                 })
                 .always(() => {
@@ -863,7 +870,7 @@ module Coalesce {
         public abstract modelKeyName: string;
 
         // Reference to the class which this list represents.
-        protected abstract itemClass: new() => TItem;
+        protected abstract itemClass: new () => TItem;
 
         /**
             Properties which determine how this object behaves.
@@ -919,9 +926,9 @@ module Coalesce {
                     this.totalCount(data.totalCount);
                     this.pageCount(data.pageCount);
                     this.page(data.page);
-                    this.message(typeof(data.message) == "string" ? data.message : null);
+                    this.message(typeof (data.message) == "string" ? data.message : null);
                     this.isLoaded(true);
-                    if (typeof(callback) == "function") callback(this);
+                    if (typeof (callback) == "function") callback(this);
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -1006,8 +1013,8 @@ module Coalesce {
             })
                 .done((data: ItemResult<number>) => {
                     this.count(data.object || 0);
-                    this.message(typeof(data.message) == "string" ? data.message : null);
-                    if (typeof(callback) == "function") callback();
+                    this.message(typeof (data.message) == "string" ? data.message : null);
+                    if (typeof (callback) == "function") callback();
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -1114,7 +1121,7 @@ module Coalesce {
                     } as any)
                         .done((data) => {
                             this.isLoading(false);
-                            if (typeof(callback) == "function") callback();
+                            if (typeof (callback) == "function") callback();
                         })
                         .fail((data) => {
                             if (this.coalesceConfig.showFailureAlerts())

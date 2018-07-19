@@ -545,7 +545,6 @@ module Coalesce {
                     this.cancelAutoSave();
                     this.isSaving(true);
                     var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}&${this.dataSource.getQueryString()}`
-
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data: ItemResult) => {
                             this.isDirty(false);
@@ -870,7 +869,7 @@ module Coalesce {
         public abstract modelKeyName: string;
 
         // Reference to the class which this list represents.
-        protected abstract itemClass: new () => TItem;
+        protected abstract itemClass: new() => TItem;
 
         /**
             Properties which determine how this object behaves.

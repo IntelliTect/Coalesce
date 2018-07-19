@@ -34,13 +34,6 @@ paths.img = paths.wwwroot + "/img/";
 paths.js = paths.wwwroot + "/js/";
 paths.lib = paths.wwwroot + "/lib/";
 
-function getFolders(dir) {
-    return fs.readdirSync(dir)
-        .filter(function (file) {
-            return fs.statSync(path.join(dir, file)).isDirectory();
-        });
-}
-
 gulp.task('clean-images', function () {
     return del(paths.img);
 });
@@ -107,10 +100,19 @@ gulp.task("sass:watch",
     });
 
 
-gulp.task("ts:local",
-    function () {
-        gulp.watch([paths.scripts + "/*.ts"], ["ts"]);
-    });;
+gulp.task("ts:local", function () {
+    // now compile the individual page files
+    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
+    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{coalesce,Ko,ko}*.ts'])
+        .pipe(sourcemaps.init())
+        .pipe(individualFileTypescriptProject());
+
+    individualTsResult.dts.pipe(gulp.dest(paths.js));
+
+    return individualTsResult.js
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(paths.js));
+});
 
 gulp.task('ts', function () {
     // compile the root generated code into an app.js file
@@ -155,11 +157,15 @@ gulp.task("ts:watch",
 gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
 });
 
-gulp.task('default', ['copy-lib', 'sass', 'ts', 'watch'], function () {
+gulp.task('build', ['copy-lib', 'sass', 'ts'], function () {
+});
+
+gulp.task('default', ['build', 'watch'], function () {
 });
 
 
 var coalesceBuildDir = `${require('os').tmpdir()}/CoalesceExe`;
+var dotnetCoalesce = `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll"`;
 
 gulp.task('coalesce:cleanbuild', function (cb) {
     return del(coalesceBuildDir, { force: true });
@@ -173,26 +179,20 @@ gulp.task('coalesce:build', ['coalesce:cleanbuild'], shell.task([
 
 // Build is required every time because the templates are compiled into the dll.
 // Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
-gulp.task('coalesce-ko', ['coalesce:build'], shell.task
-    ([
-        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" ../../coalesce-ko.json ` 
-    //    `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --verbosity debug ` 
-    ],
+gulp.task('coalesce-ko', ['coalesce:build'], shell.task(
+    `${dotnetCoalesce} ../../coalesce-ko.json `,
+    // `${dotnetCoalesce} ../../coalesce-ko.json --verbosity debug`,
     { verbose: true }
 ));
 
-gulp.task('coalesce-vue', ['coalesce:build'], shell.task
-    ([
-        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" ../../coalesce-vue.json ` 
-    //    `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --verbosity debug ` 
-    ],
+gulp.task('coalesce-vue', ['coalesce:build'], shell.task(
+    `${dotnetCoalesce} ../../coalesce-vue.json `,
+    // `${dotnetCoalesce} ../../coalesce-vue.json --verbosity debug `,
     { verbose: true }
 ));
 
 
-gulp.task('coalesce:debug', ['coalesce:build'], shell.task
-    ([
-        `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll" --debug --verbosity debug`
-    ],
+gulp.task('coalesce:debug', ['coalesce:build'], shell.task(
+    `${dotnetCoalesce} --debug --verbosity debug`,
     { verbose: true }
-    ));
+));

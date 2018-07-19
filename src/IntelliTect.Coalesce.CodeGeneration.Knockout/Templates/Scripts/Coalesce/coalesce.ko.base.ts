@@ -235,7 +235,7 @@ module Coalesce {
         /** True if last invocation of method was successful. */
         public wasSuccessful: KnockoutObservable<boolean | null> = ko.observable(null);
 
-        constructor (protected parent: TParent) { }
+        constructor(protected parent: TParent) { }
 
         protected abstract loadResponse: (data: ApiResult, callback?: (result: TResult) => void, reload?: boolean) => void;
 
@@ -542,10 +542,9 @@ module Coalesce {
             if (!this.isLoading()) {
                 if (this.validate()) {
                     if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onStartBusy()(this);
+                    this.cancelAutoSave();
                     this.isSaving(true);
-
                     var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}&${this.dataSource.getQueryString()}`
-
                     return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
                         .done((data: ItemResult) => {
                             this.isDirty(false);
@@ -599,7 +598,7 @@ module Coalesce {
                 this.coalesceConfig.onStartBusy()(this);
 
                 var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Get/${id}?includes=${this.includes}&${this.dataSource.getQueryString()}`
-                
+
                 return $.ajax({ method: "GET", url: url, xhrFields: { withCredentials: true } })
                     .done((data: ItemResult) => {
                         this.errorMessage(null);
@@ -760,9 +759,8 @@ module Coalesce {
                 this.isDirty(true);
                 if (this.coalesceConfig.autoSaveEnabled()) {
                     // Batch saves.
-                    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+                    this.cancelAutoSave();
                     this.saveTimeout = setTimeout(() => {
-                        this.saveTimeout = 0;
                         // If we have a save in progress, wait...
                         if (this.isSaving()) {
                             this.autoSave();
@@ -771,6 +769,14 @@ module Coalesce {
                         }
                     }, this.coalesceConfig.saveTimeoutMs());
                 }
+            }
+        }
+
+        /** Cancels a pending autosave if it exists. */
+        public cancelAutoSave = (): void => {
+            if (this.saveTimeout) {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = 0;
             }
         }
 

@@ -4,6 +4,7 @@
     <!-- All these frameworks are included for testing code generation. 
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
     <TargetFrameworks>netcoreapp2.1;net471</TargetFrameworks>
+    <RuntimeIdentifiers>win7-x86;win10-x64</RuntimeIdentifiers>
     <OutputType>Exe</OutputType>
     <PackageId>Coalesce.Web</PackageId>
     <UserSecretsId>aspnet-AspNetCoreTest-c1a899d5-70d6-46f0-ba4b-f4986ebe6948</UserSecretsId>

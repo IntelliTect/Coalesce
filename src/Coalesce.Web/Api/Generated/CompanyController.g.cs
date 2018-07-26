@@ -127,7 +127,7 @@ namespace Coalesce.Web.Api
             var methodResult = Coalesce.Domain.Company.GetCertainItems(Db, isDeleted);
             var result = new ItemResult<ICollection<CompanyDtoGen>>();
             var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, mappingContext, includeTree)).ToList();
+            result.Object = methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, mappingContext, includeTree)).ToList();
             return result;
         }
     }

@@ -298,7 +298,7 @@ namespace Coalesce.Web.Vue.Api
         {
             var methodResult = Coalesce.Domain.Person.NamesStartingWith(Db, characters);
             var result = new ItemResult<ICollection<string>>();
-            result.Object = methodResult.ToList();
+            result.Object = methodResult?.ToList();
             return result;
         }
 
@@ -313,7 +313,7 @@ namespace Coalesce.Web.Vue.Api
             var methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), page);
             var result = new ListResult<PersonDtoGen>(methodResult);
             var mappingContext = new MappingContext(User, "");
-            result.List = methodResult.List.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, includeTree)).ToList();
+            result.List = methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, includeTree)).ToList();
             return result;
         }
     }

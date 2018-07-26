@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     b.Line("var mappingContext = new MappingContext(User, \"\");");
 
                     // ToList the result (because it might be IQueryable - we need to execute the query before mapping)
-                    b.Append($"result.{resultProp} = {resultVar}.ToList().Select(o => ");
+                    b.Append($"result.{resultProp} = {resultVar}?.ToList().Select(o => ");
                     b.Append($"Mapper.MapToDto<{resultType.PureType.ClassViewModel.FullyQualifiedName}, {resultType.PureType.ClassViewModel.DtoName}>");
 
                     // Only attempt to pull the include tree out of the result if the user actually typed their return type as an IQueryable.
@@ -171,7 +171,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     // Return type is a collection of primitives or IClassDtos.
                     // This ToList() may end up being redundant, but it is guaranteed to be safe.
                     // The minimum type required here that handles all cases is IList<T> (required by a ListResult<T> return type).
-                    b.Line($"result.{resultProp} = {resultVar}.ToList();");
+                    b.Line($"result.{resultProp} = {resultVar}?.ToList();");
                 }
             }
             else

@@ -127,7 +127,7 @@ namespace Coalesce.Web.Vue.Api
             var methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
             var result = new ItemResult<ICollection<CaseDtoGen>>();
             var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, includeTree)).ToList();
+            result.Object = methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, includeTree)).ToList();
             return result;
         }
 

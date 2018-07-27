@@ -128,7 +128,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public override string ToString() => Name;
+        public override string ToString() => $"{Type} {Name}";
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;

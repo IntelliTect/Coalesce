@@ -130,7 +130,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Convenient accessor for the MethodInfo when in reflection-based contexts.
         /// </summary>
-        public virtual MethodInfo MethodInfo => throw new InvalidOperationException("MethodInfo not available in the current context");
+        public virtual MethodInfo MethodInfo => 
+            throw new InvalidOperationException("MethodInfo not available in the current context");
 
         public string JsVariable => Name.ToCamelCase();
 
@@ -212,5 +213,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+
+        public override string ToString()
+            => $"{ReturnType} {Name}({string.Join(",", Parameters)})";
     }
 }

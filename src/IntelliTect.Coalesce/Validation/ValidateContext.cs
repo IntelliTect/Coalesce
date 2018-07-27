@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Validation
 
             assert.IsTrue(repository.DiscoveredClassViewModels.Any(), "No types were discovered. Make sure all models have a DbSet on the context.");
             
-            foreach (var model in repository.Entities)
+            foreach (var model in repository.ApiBackedClasses)
             {
                 assert.Area = model.ToString();
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
@@ -79,33 +79,45 @@ namespace IntelliTect.Coalesce.Validation
                     }
                 }
 
-                // Validate Methods
-                foreach (var method in model.ClientMethods)
+                foreach (var method in model.Methods)
                 {
-                    assert.Area = $"{model}.{method}";
+                    assert.Area = $"{model}: {method}";
 
-                    foreach (var param in method.Parameters)
+                    if (method.IsClientMethod)
                     {
-                        assert.Area = $"{model}.{method}: {param}";
-
-                        if (method.IsModelInstanceMethod)
+                        foreach (var param in method.Parameters)
                         {
-                            var reserved = new[] { "id", "dataSourceFactory" };
-                            foreach (var name in reserved)
+                            assert.Area = $"{model}: {method}: {param}";
+
+                            if (method.IsModelInstanceMethod)
                             {
-                                assert.AreNotEqual("id", param.Name, "id is a reserved parameter name");
-                                assert.AreNotEqual("dataSourceFactory", param.Name, "dataSourceFactory is a reserved parameter name");
+                                var reserved = new[] {
+                                    "id",
+                                    "dataSourceFactory"
+                                };
+                                foreach (var name in reserved)
+                                {
+                                    assert.AreNotEqual(name, param.Name, $"{name} is a reserved parameter name");
+                                }
                             }
                         }
                     }
-                }
-            }
+                    else
+                    {
+                        assert.IsFalse(
+                            method.HasAttribute<ExecuteAttribute>(),
+                            "Non-exposed method has the [Execute] attribute - did you forget to add [Coalesce]?",
+                            isWarning: true);
 
-            // Validate data sources.
-            foreach (var model in repository.ApiBackedClasses)
-            {
+                        assert.IsFalse(
+                            method.HasAttribute<ControllerActionAttribute>(),
+                            "Non-exposed method has the [ControllerAction] attribute - did you forget to add [Coalesce]?",
+                            isWarning: true);
+                    }
+                }
+
                 assert.IsTrue(
-                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1, 
+                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
                     $"Cannot have multiple default data sources for {model}");
 
                 foreach (var source in model.ClientDataSources(repository))
@@ -116,7 +128,6 @@ namespace IntelliTect.Coalesce.Validation
                         $"Data sources can't be named {DataSourceFactory.DefaultSourceName} unless they're marked with {nameof(DefaultDataSourceAttribute)}"
                     );
                 }
-
             }
 
             // Validate the non-DbSet items (DTOs)
@@ -137,7 +148,7 @@ namespace IntelliTect.Coalesce.Validation
             {
                 assert.Area = $"External Model: {model}";
 
-                // Make sure these don't inherit from IClassDto because they should have an IEnumerable on the Context.
+                // Make sure these don't inherit from IClassDto because if they do, the [Coalesce] attribute was probably missed.
                 assert.IsTrue(model.DtoBaseViewModel == null, $"{model.FullyQualifiedName} appears to be a DTO but isn't marked with [Coalesce].");
             }
 

@@ -23,7 +23,7 @@ By contributing to IntelliTect, you assert that:
 * The contribution is your own original work.
 * You have the right to assign the copyright for the work (it is not owned by your employer, or
   you have been given copyright assignment in writing).
-* You [license](https://github.com/IntelliTect/Coalesce/blob/2.0/license.txt) the contribution under the terms applied to the rest of the IntelliTect project.
+* You [license](license.txt) the contribution under the terms applied to the rest of the IntelliTect project.
 
 ## Code
 ### Code style
@@ -64,11 +64,11 @@ Any new code should also have reasonable unit test coverage.
  * Test your changes and please help us out by updating and implementing some automated tests.
    It is recommended that all contributors spend some time looking over the tests in the source code.
    You can't go wrong emulating one of the existing tests and then changing it specific to the behavior you are testing.
- * See the [debugging/environment guide](https://github.com/IntelliTect/Coalesce/blob/2.0/ENVIRONMENT.md) for more details.
+ * See the [debugging/environment guide](ENVIRONMENT.md) for more details.
 
  ### Update documentation
  * Make sure you update or add documentation for the feature or bug you are fixing.
- * For help in setting up an environment to edit reStructuredText (VS Code is the recommended platform), see the [documentation environment guide](https://github.com/IntelliTect/Coalesce/blob/2.0/DOC_ENVIRONMENT.md) for more details.
+ * For help in setting up an environment to edit reStructuredText (VS Code is the recommended platform), see the [documentation environment guide](DOC_ENVIRONMENT.md) for more details.
 
  ### Prepare commits
 This section serves to help you understand what makes a good commit.
@@ -137,7 +137,7 @@ The only reasons a pull request should be closed and resubmitted are as follows:
    Then the old branch is closed with a note on the newer branch this supersedes #github_number.
 
 ## NuGet
-Currently [AppVeyor](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/2.0) is building and releasing NuGets on every merge to the release branch. All PRs should be merged into master and then a PR from master into release when new NuGets are needed. Avoid PRs from feature branches directly to the release branch.
+Currently [AppVeyor](https://ci.appveyor.com/project/IntelliTect/coalesce) is building and releasing NuGets on every merge to the release branch. All PRs should be merged into master and then a PR from master into release when new NuGets are needed. Avoid PRs from feature branches directly to the release branch.
 
 ## Other general information
 If you reformat code or hit core functionality without an approval from a person on the IntelliTect Team,

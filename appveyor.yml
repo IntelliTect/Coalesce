@@ -82,7 +82,7 @@ for:
   deploy:
     provider: NuGet
     api_key:
-      secure: yMgA4bGdgMlHdlEDUx4P4yPJr5jwDsJlo9s0AW2eQ6y7UjK0N+XUjQ4EyPBcZEGw
+      secure: 8osugkqmK1J5RfXPOkxGblQgpZUtENKpHGJ/wcsINvdoU+7/gHAE0Mjy2ipXtIZ+
     artifact: /.*\.nupkg/
 
 # Releases - publish to NuGet as "x.x.x"

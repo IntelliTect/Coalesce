@@ -35,4 +35,4 @@ After you create your project, you should start reading through [the Documentati
 
 ## Contributing
 
-See the contribution guide [here](https://github.com/IntelliTect/Coalesce/blob/2.0/CONTRIBUTING.md).
+See the contribution guide [here](CONTRIBUTING.md).

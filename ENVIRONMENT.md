@@ -25,8 +25,8 @@ In either case, and depending on what is being diagnosed, the default Exception 
 * Set breakpoints in either generated controllers, or in your own custom controllers.
 
 ## Environment Configuration
-* Visual Studio 2017 15.5.* (any edition).  Get it [here](https://www.visualstudio.com/downloads/).
-* .NET Core 2.0.* SDK.  Get it [here](https://www.microsoft.com/net/download/windows).
-* .NET Framework 4.6.2.  Get it [here](https://www.microsoft.com/net/download/windows) (if you didn't install it with Visual Studio).
+* Visual Studio 2017 15.7.* (any edition).  Get it [here](https://www.visualstudio.com/downloads/).
+* .NET Core 2.1.* SDK.  Get it [here](https://www.microsoft.com/net/download).
+* .NET Framework 4.6.2.  Get it [here](https://www.microsoft.com/net/download/dotnet-framework/net462) (if you didn't install it with Visual Studio).
 * An internet browser (Chrome, Edge, Firefox -- all are known to work).
 * You can use the Git source control client built into Visual Studio.

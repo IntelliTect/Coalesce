@@ -168,6 +168,7 @@ export const Case = domain.types.Case = {
     getSomeCases: {
       name: "getSomeCases",
       displayName: "Get Some Cases",
+      transportType: "item",
       params: {
       },
       return: {
@@ -187,6 +188,7 @@ export const Case = domain.types.Case = {
     getAllOpenCasesCount: {
       name: "getAllOpenCasesCount",
       displayName: "Get All Open Cases Count",
+      transportType: "item",
       params: {
       },
       return: {
@@ -199,6 +201,7 @@ export const Case = domain.types.Case = {
     randomizeDatesAndStatus: {
       name: "randomizeDatesAndStatus",
       displayName: "Randomize Dates And Status",
+      transportType: "item",
       params: {
       },
       return: {
@@ -211,6 +214,7 @@ export const Case = domain.types.Case = {
     getCaseSummary: {
       name: "getCaseSummary",
       displayName: "Get Case Summary",
+      transportType: "item",
       params: {
       },
       return: {
@@ -419,6 +423,7 @@ export const Company = domain.types.Company = {
     getCertainItems: {
       name: "getCertainItems",
       displayName: "Get Certain Items",
+      transportType: "item",
       params: {
         isDeleted: {
           name: "isDeleted",
@@ -585,6 +590,7 @@ export const Person = domain.types.Person = {
     rename: {
       name: "rename",
       displayName: "Rename",
+      transportType: "item",
       params: {
         id: {
           name: "id",
@@ -610,6 +616,7 @@ export const Person = domain.types.Person = {
     changeSpacesToDashesInName: {
       name: "changeSpacesToDashesInName",
       displayName: "Change Spaces To Dashes In Name",
+      transportType: "item",
       params: {
         id: {
           name: "id",
@@ -628,6 +635,7 @@ export const Person = domain.types.Person = {
     add: {
       name: "add",
       displayName: "Add",
+      transportType: "item",
       params: {
         numberOne: {
           name: "numberOne",
@@ -652,6 +660,7 @@ export const Person = domain.types.Person = {
     getUser: {
       name: "getUser",
       displayName: "Get User",
+      transportType: "item",
       params: {
       },
       return: {
@@ -664,6 +673,7 @@ export const Person = domain.types.Person = {
     personCount: {
       name: "personCount",
       displayName: "Person Count",
+      transportType: "item",
       params: {
         lastNameStartsWith: {
           name: "lastNameStartsWith",
@@ -682,6 +692,7 @@ export const Person = domain.types.Person = {
     fullNameAndAge: {
       name: "fullNameAndAge",
       displayName: "Full Name And Age",
+      transportType: "item",
       params: {
         id: {
           name: "id",
@@ -700,6 +711,7 @@ export const Person = domain.types.Person = {
     removePersonById: {
       name: "removePersonById",
       displayName: "Remove Person By Id",
+      transportType: "item",
       params: {
         id: {
           name: "id",
@@ -718,6 +730,7 @@ export const Person = domain.types.Person = {
     obfuscateEmail: {
       name: "obfuscateEmail",
       displayName: "Obfuscate Email",
+      transportType: "item",
       params: {
         id: {
           name: "id",
@@ -736,6 +749,7 @@ export const Person = domain.types.Person = {
     changeFirstName: {
       name: "changeFirstName",
       displayName: "Change First Name",
+      transportType: "item",
       params: {
         id: {
           name: "id",
@@ -761,6 +775,7 @@ export const Person = domain.types.Person = {
     getUserPublic: {
       name: "getUserPublic",
       displayName: "Get User Public",
+      transportType: "item",
       params: {
       },
       return: {
@@ -773,6 +788,7 @@ export const Person = domain.types.Person = {
     namesStartingWith: {
       name: "namesStartingWith",
       displayName: "Names Starting With",
+      transportType: "item",
       params: {
         characters: {
           name: "characters",
@@ -797,6 +813,7 @@ export const Person = domain.types.Person = {
     searchPeople: {
       name: "searchPeople",
       displayName: "Search People",
+      transportType: "list",
       params: {
         criteria: {
           name: "criteria",
@@ -1118,6 +1135,7 @@ export const WeatherService = domain.services.WeatherService = {
     getWeather: {
       name: "getWeather",
       displayName: "Get Weather",
+      transportType: "item",
       params: {
         location: {
           name: "location",
@@ -1144,6 +1162,7 @@ export const WeatherService = domain.services.WeatherService = {
     getWeatherAsync: {
       name: "getWeatherAsync",
       displayName: "Get Weather Async",
+      transportType: "item",
       params: {
         location: {
           name: "location",

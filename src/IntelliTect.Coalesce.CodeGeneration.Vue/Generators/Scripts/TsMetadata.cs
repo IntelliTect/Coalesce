@@ -250,6 +250,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 b.StringProp("name", method.JsVariable);
                 b.StringProp("displayName", method.DisplayName);
+                b.StringProp("transportType", method.TransportType.ToString().Replace("Result", "").ToLower());
 
                 using (b.Block("params:", ','))
                 {

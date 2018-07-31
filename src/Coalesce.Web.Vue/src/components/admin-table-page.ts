@@ -76,7 +76,7 @@ export default class extends Vue {
         this.person!.$apiClient.getUser()
       })
 
-      var caller = this.person!.$apiClient.$makeCaller("item", c => () => c.changeSpacesToDashesInName(1));
+      var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
       caller.result
     
       //this.person.$startAutoSave(this)

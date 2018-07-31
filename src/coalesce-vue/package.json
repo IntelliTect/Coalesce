@@ -32,7 +32,7 @@
     "jest-junit": "^5.1.0",
     "lodash": "^4.17.10",
     "ts-jest": "^22.4.6",
-    "typescript": "2.9.2",
+    "typescript": "3.1.0-dev.20180731",
     "vue": "^2.5.16"
   },
   "scripts": {

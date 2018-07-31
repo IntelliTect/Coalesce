@@ -381,6 +381,9 @@ export interface Method extends Metadata  {
     /** The return type of the method. */
     readonly return: Value | VoidValue
 
+    /** The transport container for the return type, corresponding to "ListResult" or "ItemResult". */
+    readonly transportType: "item" | "list"
+
     /** The parameters of the method */
     readonly params: { [paramName in string]: Value } 
 }

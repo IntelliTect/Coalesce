@@ -160,43 +160,47 @@ export class ApiClient<T extends ApiRoutedType> {
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
-     * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
+     * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: any, ...args: any[]) => ItemResultPromise<any>>(
-        resultType: "item",
-        invokerFactory: (client: this) => TCall
-    ): ItemApiState<TCall, ItemApiReturnType<TCall>> & TCall
+    $makeCaller<TArgs extends any[], TResult>(
+        resultType: "item" | ((methods: T["methods"]) => (Method & { transportType: "item" })),
+        invoker: TInvoker<TArgs, ItemResultPromise<TResult>, this>
+    ): ItemApiState<TArgs, TResult, this> & TCall<TArgs, ItemResultPromise<TResult>>
 
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
-     * @param invokerFactory method that will return a function that can be used to call the API. The signature of the returned function will be the call signature of the wrapper.
+     * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
-    $makeCaller<TCall extends (this: any, ...args: any[]) => ListResultPromise<any>>(
-        resultType: "list",
-        invokerFactory: (client: this) => TCall
-    ): ListApiState<TCall, ListApiReturnType<TCall>> & TCall
-    
-    $makeCaller<TCall extends (this: any, ...args: any[]) => Promise<AxiosResponse<ApiResult>>>(
-        resultType: "item" | "list", // TODO: Eventually this should be replaced with a metadata object I think
-        invokerFactory: (client: this) => TCall
-    ): ApiState<TCall, AnyApiReturnType<TCall>> & TCall
-    {
-        type TResult = AnyApiReturnType<TCall>;
+    $makeCaller<TArgs extends any[], TResult>(
+        resultType: "list" | ((methods: T["methods"]) => (Method & { transportType: "list" })),
+        invoker: TInvoker<TArgs, ListResultPromise<TResult>, this>
+    ): ListApiState<TArgs, TResult, this> & TCall<TArgs, ListResultPromise<TResult>>
+
+    $makeCaller<TArgs extends any[], TResult>(
+        resultType: "item" | "list" | ((methods: T["methods"]) => Method),
+        invoker: TInvoker<TArgs, ApiResultPromise<TResult>, this>
+    ): ApiState<TArgs, TResult, this> & TCall<TArgs, TResult>{
         
-        var instance: ApiState<TCall, TResult>;
+        if (typeof resultType === "function") {
+            resultType = resultType(this.$metadata.methods).transportType;
+        }
+        
+        // This is basically all just about resolving the overloads. 
+        // We use `any` because the types get really messy if you try to handle both types at once.
+
+        var instance: any;
         switch (resultType){
             case "item": 
-                instance = new ItemApiState<TCall, TResult>(this, invokerFactory(this));
+                instance = new ItemApiState<TArgs, TResult, this>(this, invoker);
                 break;
-            // Typescript is unhappy with giving TCall to ListApiState. No idea why, since the item one is fine.
             case "list": 
-                instance = new ListApiState<any, TResult>(this, invokerFactory(this));
+                instance = new ListApiState<TArgs, TResult, this>(this, invoker as any);
                 break;
             default: throw `Unknown result type ${resultType}`
         }
         
-        return instance as any;
+        return instance;
     }
 
     /**
@@ -211,7 +215,6 @@ export class ApiClient<T extends ApiRoutedType> {
         const formatted: { [paramName: string]: any } = {};
         for (var paramName in params) {
             const paramMeta = method.params[paramName];
-            const paramValue = params[paramName];
             formatted[paramName] = mapValueToDto(params[paramName], paramMeta)
         }
         return formatted;
@@ -382,7 +385,10 @@ export abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<
     
 }
 
-export abstract class ApiState<TCall extends (this: null, ...args: any[]) => ApiResultPromise<TResult>, TResult> extends Function {
+export type TInvoker<TArgs extends any[], TReturn, TClient extends ApiClient<any>> = (this: any, client: TClient, ...args: TArgs) => TReturn
+export type TCall<TArgs extends any[], TReturn> = (this: any, ...args: TArgs) => TReturn
+
+export abstract class ApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends Function {
 
     /** True if a request is currently pending. */
     isLoading: boolean = false
@@ -446,7 +452,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
 
     /**
      * Attach a callback to be invoked when the request to this endpoint succeeds.
-     * @param onFulfilled A callback to be called when a request to this endpoint succeeds.
+     * @param callback A callback to be called when a request to this endpoint succeeds.
      */
     onFulfilled(callback: (this: any, state: this) => void): this {
         this._callbacks.onFulfilled.push(callback)
@@ -455,7 +461,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
 
     /**
      * Attach a callback to be invoked when the request to this endpoint fails.
-     * @param onFulfilled A callback to be called when a request to this endpoint fails.
+     * @param callback A callback to be called when a request to this endpoint fails.
      */
     onRejected(callback: (this: any, state: this) => void): this {
         this._callbacks.onRejected.push(callback)
@@ -464,9 +470,9 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
 
     protected abstract setResponseProps(data: ApiResult): void
 
-    public invoke!: TCall
+    public invoke!: this
 
-    private _invokeInternal(thisArg: any, args: IArguments) {
+    private _invokeInternal(thisArg: any, ...args: TArgs) {
         if (this.isLoading) {
             if (this._concurrencyMode === "disallow") {
                 throw `Request is already pending for invoker ${this.invoker.toString()}`
@@ -486,7 +492,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
         try {
             const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
             this._cancelToken = token
-            promise = this.invoker.apply(thisArg, args)
+            promise = this.invoker.apply(thisArg, [this.apiClient, ...args])
         } finally {
             (this.apiClient as any)._nextCancelToken = null
         }
@@ -554,15 +560,16 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
     }
 
     constructor(
-        private readonly apiClient: ApiClient<any>,
-        private readonly invoker: TCall
+        private readonly apiClient: TClient,
+        private readonly invoker: TInvoker<TArgs, ApiResultPromise<TResult>, TClient>
     ) { 
         super();
-        
+
         // Create our invoker function that will ultimately be our instance object.
-        const invokeFunc: TCall = function invokeFunc() {
-            return invoke._invokeInternal(this, arguments);
-        } as TCall
+        const invokeFunc: TCall<TArgs, ApiResultPromise<TResult>> = function invokeFunc(this: any, ...args: TArgs) {
+            return invoke._invokeInternal(this, ...args);
+        } as TCall<TArgs, ApiResultPromise<TResult>>
+
         // Copy all properties from the class to the function.
         const invoke = Object.assign(invokeFunc, this);
         invoke.invoke = invoke;
@@ -572,7 +579,7 @@ export abstract class ApiState<TCall extends (this: null, ...args: any[]) => Api
     }
 }
 
-export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
+export class ItemApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends ApiState<TArgs, TResult, TClient> {
     /** Validation issues returned by the previous request. */
     validationIssues: ValidationIssue[] | null = null
 
@@ -580,9 +587,9 @@ export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResu
     result: TResult | null = null
 
     constructor(
-        apiClient: ApiClient<any>,
-        invoker: TCall) 
-    {
+        apiClient: TClient,
+        invoker: TInvoker<TArgs, ApiResultPromise<TResult>, TClient>
+    ) {
         super(apiClient, invoker);
         this._makeReactive();
     }
@@ -604,7 +611,7 @@ export class ItemApiState<TCall extends (this: null, ...args: any[]) => ItemResu
     }
 }
 
-export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResultPromise<TResult>, TResult> extends ApiState<TCall, TResult> {
+export class ListApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends ApiState<TArgs, TResult, TClient> {
     /** Page number returned by the previous request. */
     page: number | null = null
     /** Page size returned by the previous request. */
@@ -618,9 +625,9 @@ export class ListApiState<TCall extends (this: null, ...args: any[]) => ListResu
     result: TResult[] | null = null
 
     constructor(
-        apiClient: ApiClient<any>,
-        invoker: TCall) 
-    {
+        apiClient: TClient,
+        invoker: TInvoker<TArgs, ApiResultPromise<TResult>, TClient>
+    ) {
         super(apiClient, invoker);
         this._makeReactive();
     }

@@ -2,7 +2,7 @@
 import Vue from 'vue';
 
 import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames } from './metadata';
-import { ModelApiClient, ListParameters } from './api-client';
+import { ModelApiClient, ListParameters, DataSourceParameters } from './api-client';
 import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
 import { Indexable } from './util';
 import { debounce } from 'lodash-es'
@@ -85,11 +85,23 @@ export abstract class ViewModel<
     public get $isDirty() { return JSON.stringify(mapToDto(this.$data)) != JSON.stringify(this._pristineDto)}
     public set $isDirty(val) { if (val) throw "Can't set $isDirty to true manually"; this._pristineDto = mapToDto(this.$data) }
 
+
+    /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
+    public $params = new DataSourceParameters();
+
+    /** Wrapper for `$params.dataSource` */
+    public get $dataSource() { return this.$params.dataSource }
+    public set $dataSource(val) { this.$params.dataSource = val } 
+
+    /** Wrapper for `$params.includes` */
+    public get $includes() { return this.$params.includes }
+    public set $includes(val) { this.$params.includes = val } 
+
     /**
-     * A function for invoking the /get endpoint, and a set of properties about the state of the last call.
+     * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
      */
     public $load = this.$apiClient.$makeCaller("item",
-        c => (id?: string | number) => c.get(id != null ? id : this.$primaryKey))
+        (c, id?: string | number) => c.get(id != null ? id : this.$primaryKey, this.$params))
         .onFulfilled(() => { 
             if (this.$load.result) {
                 updateFromModel(this.$data, this.$load.result);
@@ -99,15 +111,15 @@ export abstract class ViewModel<
         })
 
     /**
-     * A function for invoking the /save endpoint, and a set of properties about the state of the last call.
+     * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
      */
     public $save = this.$apiClient.$makeCaller("item", 
-        c => () => {
+        c => {
             // Before we make the save call, set isDirty = false.
             // This lets us detect changes that happen to the model while our save request is pending.
             // If the model is dirty when the request completes, we'll not load the response from the server.
             this.$isDirty = false;
-            return c.save(this.$data);
+            return c.save(this.$data, this.$params);
         })
         .onFulfilled(() => { 
             if (!this.$save.result) {
@@ -135,10 +147,10 @@ export abstract class ViewModel<
         })
         
     /**
-     * A function for invoking the /delete endpoint, and a set of properties about the state of the last call.
+     * A function for invoking the `/delete` endpoint, and a set of properties about the state of the last call.
      */
     public $delete = this.$apiClient.$makeCaller("item",
-        c => () => c.delete(this.$primaryKey))
+        c => c.delete(this.$primaryKey, this.$params))
 
     // Internal autosave state
     private _autoSaveState = new AutoCallState()
@@ -262,15 +274,8 @@ export abstract class ListViewModel<
     TApi extends ModelApiClient<TModel>,
 > {
 
+    /** The parameters that will be passed to `/list` and `/count` calls. */
     public $params = new ListParameters();
-
-    /**
-     * A function for invoking the /load endpoint, and a set of properties about the state of the last call.
-     */
-    public $load = this.$apiClient
-        .$makeCaller("list", c => () => c.list(this.$params));
-        // TODO: merge in the result, don't replace the existing one??
-       // .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
 
     /**
      * The current set of items that have been loaded into this ListViewModel.
@@ -287,12 +292,20 @@ export abstract class ListViewModel<
     /** Increment the page parameter by 1 if there is a next page. */
     public $nextPage() { if (this.$hasNextPage) this.$params.page = (this.$params.page || 1) + 1 }
 
+
+    /**
+     * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
+     */
+    public $load = this.$apiClient
+        .$makeCaller("list", c => c.list(this.$params));
+        // TODO: merge in the result, don't replace the existing one??
+       // .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
     
     /**
-     * A function for invoking the /count endpoint, and a set of properties about the state of the last call.
+     * A function for invoking the `/count` endpoint, and a set of properties about the state of the last call.
      */
     public $count = this.$apiClient
-        .$makeCaller("item", c => () => c.count(this.$params));
+        .$makeCaller("item", c => c.count(this.$params));
 
     // Internal autoload state
     private _autoLoadState = new AutoCallState()

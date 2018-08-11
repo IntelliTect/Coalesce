@@ -15,7 +15,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Symbol = symbol;
 
-            FirstTypeArgument = IsGeneric ? new SymbolTypeViewModel(NamedSymbol.TypeArguments.First()) : null;
+            FirstTypeArgument = IsGeneric && NamedSymbol.Arity > 0 
+                ? new SymbolTypeViewModel(NamedSymbol.TypeArguments.First()) 
+                : null;
+
             ArrayType = IsArray ? new SymbolTypeViewModel(((IArrayTypeSymbol)Symbol).ElementType) : null;
 
             var types = new List<INamedTypeSymbol>();
@@ -85,6 +88,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix);
 
         public override string FullyQualifiedName => Symbol.ToDisplayString(DefaultDisplayFormat);
+
+        public static readonly SymbolDisplayFormat VerboseDisplayFormat = DefaultDisplayFormat
+            .RemoveMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.UseSpecialTypes)
+            .RemoveMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix)
+            .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.ExpandNullable);
+
+        // TODO: write tests that assert that this will format types the same 
+        // way as ReflectionTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
+        public override string VerboseFullyQualifiedName => Symbol.ToDisplayString(VerboseDisplayFormat);
 
         public override string FullNamespace =>
             (Symbol is IArrayTypeSymbol array ? array.ElementType : Symbol.ContainingSymbol).ToDisplayString(DefaultDisplayFormat);

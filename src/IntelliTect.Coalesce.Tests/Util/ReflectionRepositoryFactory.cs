@@ -13,6 +13,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 {
     internal static class ReflectionRepositoryFactory
     {
+        internal static readonly CSharpCompilation Compilation = GetCompilation();
         internal static readonly IEnumerable<INamedTypeSymbol> Symbols = GetAllSymbols();
 
         public static readonly ReflectionRepository Symbol = MakeFromSymbols();
@@ -34,7 +35,7 @@ namespace IntelliTect.Coalesce.Tests.Util
             return rr;
         }
 
-        private static List<INamedTypeSymbol> GetAllSymbols()
+        private static CSharpCompilation GetCompilation()
         {
             var asm = Assembly.GetExecutingAssembly();
 
@@ -50,7 +51,7 @@ namespace IntelliTect.Coalesce.Tests.Util
                 })
                 .ToList();
 
-            var compilation = CSharpCompilation.Create(
+            return CSharpCompilation.Create(
                 "SymbolAsm",
                 trees,
                 AppDomain.CurrentDomain
@@ -58,8 +59,16 @@ namespace IntelliTect.Coalesce.Tests.Util
                     .Where(a => !a.IsDynamic)
                     .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray()
             );
+        }
 
-            return compilation.Assembly.GlobalNamespace
+        private static List<INamedTypeSymbol> GetAllSymbols()
+        {
+            // Assembly.GlobalNamespace restricts us to only types declared in the C# files 
+            // that are being included.
+            // compilation.GlobalNamespace gives us ALL CLR types
+            // that are accessible, which is way more useful.
+            //return Compilation.Assembly.GlobalNamespace
+            return Compilation.GlobalNamespace
                 .Accept(new SymbolDiscoveryVisitor())
                 .ToList();
         }
@@ -83,11 +92,27 @@ namespace IntelliTect.Coalesce.Tests.Util
             {
                 yield return symbol;
 
-                foreach (var childSymbol in symbol.GetTypeMembers())
+                foreach (var childSymbol in symbol.GetMembers())
                 {
-                    //Once againt we must accept the children to visit 
-                    //all of their children
-                    foreach (var result in childSymbol.Accept(this)) yield return result;
+                    var accept = childSymbol.Accept(this);
+                    if (accept != null)
+                    {
+                        foreach (var result in accept) yield return result;
+                    }
+                }
+            }
+
+            public override IEnumerable<INamedTypeSymbol> VisitMethod(IMethodSymbol symbol)
+            {
+                // Hack to pick up any arbitrary constructed generic types
+                // that were specified as parameters to [ClassViewModelDataAttribute] in tests.
+                foreach (var attr in symbol.GetAttributes())
+                {
+                    if (attr.AttributeClass.Name == nameof(ClassViewModelDataAttribute))
+                    {
+                        var value = attr.GetPropertyValue("targetClass", null);
+                        if (value is INamedTypeSymbol namedType) yield return namedType;
+                    }
                 }
             }
         }

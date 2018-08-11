@@ -65,7 +65,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract IEnumerable<ParameterViewModel> Parameters { get; }
 
         /// <summary>
-        /// True if the method's return type is explicitly declared 
+        /// True if the method's return type is a <see cref="ListResult{T}"/>
         /// </summary>
         public bool ReturnsListResult => TaskUnwrappedReturnType.IsA(typeof(ListResult<>));
 

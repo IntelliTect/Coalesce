@@ -58,6 +58,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string String { get; set; }
         public int Int { get; set; }
         public int? IntNullable { get; set; }
+        public decimal? DecimalNullable { get; set; }
         public long Long { get; set; }
         public Guid Guid { get; set; }
         public Guid? GuidNullable { get; set; }

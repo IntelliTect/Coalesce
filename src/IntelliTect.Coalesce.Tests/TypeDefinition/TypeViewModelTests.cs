@@ -54,5 +54,20 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.Equal(expectedPropertyType, dtoPropType);
         }
 
+        [Theory]
+        [ClassViewModelData(typeof(decimal))]
+        [ClassViewModelData(typeof(decimal?))]
+        [ClassViewModelData(typeof(int))]
+        [ClassViewModelData(typeof(int?))]
+        [ClassViewModelData(typeof(short))]
+        [ClassViewModelData(typeof(short?))]
+        [ClassViewModelData(typeof(double))]
+        [ClassViewModelData(typeof(double?))]
+        public void IsNumber_TrueForNumbers(ClassViewModelData data)
+        {
+            ClassViewModel vm = data;
+
+            Assert.True(vm.Type.IsNumber);
+        }
     }
 }

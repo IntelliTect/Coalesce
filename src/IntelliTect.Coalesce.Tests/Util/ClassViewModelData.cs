@@ -38,16 +38,16 @@ namespace IntelliTect.Coalesce.Tests.Util
             }
             else if (ViewModelType == typeof(SymbolClassViewModel))
             {
+                var fqn = new ReflectionTypeViewModel(TargetType).VerboseFullyQualifiedName;
+                var symbolFormat = SymbolTypeViewModel.VerboseDisplayFormat;
+
                 var locatedSymbol = ReflectionRepositoryFactory.Symbols
-                    .Where(symbol =>
-                        symbol.MetadataName == TargetType.Name
-                        && new SymbolTypeViewModel(symbol).FullNamespace == TargetType.Namespace
-                    )
-                    .SingleOrDefault();
+                    .Where(symbol => symbol.ToDisplayString(symbolFormat) == fqn)
+                    .FirstOrDefault();
 
                 if (locatedSymbol == null)
                 {
-                    throw new ArgumentException($"Class {TargetType} not found in any C# embedded resources.");
+                    throw new ArgumentException($"Class {TargetType} ({fqn}) not found in any C# embedded resources.");
                 }
 
                 ClassViewModel = ReflectionRepositoryFactory.Symbol.GetClassViewModel(locatedSymbol);
@@ -90,6 +90,6 @@ namespace IntelliTect.Coalesce.Tests.Util
             => self.ClassViewModel;
 
         public override string ToString() =>
-            $"({(ViewModelType.Name.StartsWith("Sym") ? "Symbol" : "Reflect")}) {TargetType.Name}";
+            $"({(ViewModelType.Name.StartsWith("Sym") ? "Symbol" : "Reflect")}) {new ReflectionTypeViewModel(TargetType).FullyQualifiedName}";
     }
 }

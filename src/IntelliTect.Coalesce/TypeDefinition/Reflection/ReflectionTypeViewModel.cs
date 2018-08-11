@@ -140,6 +140,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string FullyQualifiedName => GetFriendlyTypeName(Info);
 
+        // TODO: write tests that assert that this will format types the same 
+        // way as SymbolTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
+        public override string VerboseFullyQualifiedName => FullyQualifiedName;
+
         public override TypeViewModel FirstTypeArgument { get; }
 
         public override TypeViewModel ArrayType { get; }

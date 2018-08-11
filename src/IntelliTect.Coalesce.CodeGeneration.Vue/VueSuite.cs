@@ -14,6 +14,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
+            // Output to "src" is the default folder for vue-cli based projects,
+            // which is the golden standard to support. Anything other than this
+            // can still be changed with configuration.
             yield return Generator<Scripts>()
                 .WithModel(Model)
                 .AppendOutputPath("src");

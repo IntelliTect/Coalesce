@@ -19,6 +19,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract string FullyQualifiedName { get; }
 
+        public abstract string VerboseFullyQualifiedName { get; }
+
         public abstract string FullNamespace { get; }
 
         public abstract bool IsGeneric { get; }
@@ -235,7 +237,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsIntegral) return true;
 
                 var underlying = NullableUnderlyingType;
-                return IsA<Single>() || IsA<Double>() || IsA<Decimal>();
+                return underlying.IsA<Single>()
+                    || underlying.IsA<Double>()
+                    || underlying.IsA<Decimal>();
             }
         }
 

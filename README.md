@@ -27,7 +27,7 @@ The best way to get started with Coalesce is using the `dotnet new` templates th
 After you create your project, you should start reading through [the Documentation](http://coalesce.readthedocs.io) to see all the things that Coalesce can do.
 
 ## Builds
-|channel|build|nuget|coalesce-vue
+|channel|build|IntelliTect.Coalesce|coalesce-vue
 |:--:|:--:|:--:|:--:
 |master|[![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/master?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/master)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg)](https://www.nuget.org/packages/IntelliTect.Coalesce)
 |dev|[![Build status](https://ci.appveyor.com/api/projects/status/mev829igrspj4x5s/branch/dev?svg=true)](https://ci.appveyor.com/project/IntelliTect/coalesce/branch/dev)|[![MyGet](https://img.shields.io/myget/intellitect-coalesce/v/IntelliTect.Coalesce.svg?label=myget)](https://www.myget.org/feed/intellitect-coalesce/package/nuget/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/dev.svg)](http://google.com)

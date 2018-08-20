@@ -320,10 +320,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (!(obj is TypeViewModel that)) return false;
 
-            return this.FullyQualifiedName == that.FullyQualifiedName;
+            return this.VerboseFullyQualifiedName == that.VerboseFullyQualifiedName;
         }
 
-        public override int GetHashCode() => this.FullyQualifiedName.GetHashCode();
+        public override int GetHashCode() => VerboseFullyQualifiedName.GetHashCode();
 
         // TODO: maybe retire this in favor of plain .Equals? Make sure that ReflectionTypeViewModel.FullyQualifiedName is correct, first.
         public abstract bool EqualsType(TypeViewModel b);

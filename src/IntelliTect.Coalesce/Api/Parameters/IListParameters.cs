@@ -7,7 +7,6 @@ namespace IntelliTect.Coalesce
     {
         /// <summary>
         /// The page of data being requested. 
-        /// This is not guaranteed to be a valid page that contains any data.
         /// </summary>
         int? Page { get; }
 

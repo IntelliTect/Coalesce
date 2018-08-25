@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>
+      Provides Swashbuckle SwaggerGen filters to enhance definitions of Coalesce APIs in OpenAPI documents.
+      Add using `services.AddSwaggerGen(c => { c.AddCoalesce(); });`.
+    </Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="3.0.0" />
+  </ItemGroup>
+
+</Project>

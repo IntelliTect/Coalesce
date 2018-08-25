@@ -5,15 +5,15 @@ using Microsoft.Extensions.Configuration;
 using Coalesce.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
+using Swashbuckle.AspNetCore.Swagger;
+using System.Collections.Generic;
 
 namespace Coalesce.Web
 {
@@ -31,6 +31,7 @@ namespace Coalesce.Web
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -47,6 +48,12 @@ namespace Coalesce.Web
             );
 
             services.AddCors();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.AddCoalesce();
+                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
 
             services.AddMvc().AddJsonOptions(options =>
             {
@@ -87,6 +94,12 @@ namespace Coalesce.Web
             // *** DEMO ONLY ***
             app.UseAuthentication();
             app.UseMiddleware<DemoMiddleware>();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.UseMvc(routes =>
             {

@@ -21,8 +21,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj" />
     <ProjectReference Include="..\IntelliTect.Coalesce.Knockout\IntelliTect.Coalesce.Knockout.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
+  </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.2" />
   </ItemGroup>

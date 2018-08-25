@@ -5,11 +5,10 @@ using System.Text;
 // Explicitly in IntelliTect.Coalesce to simplify typical using statements 
 namespace IntelliTect.Coalesce
 {
-
     public interface IFilterParameters : IDataSourceParameters
     {
         /// <summary>
-        /// A free-form search string specified by the requester.
+        /// A free-form search string.
         /// </summary>
         string Search { get; }
 

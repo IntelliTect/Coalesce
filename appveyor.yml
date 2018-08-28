@@ -1,6 +1,6 @@
 skip_tags: true
 environment:
-  coalesce_version: 2.1.0
+  coalesce_version: 2.2.0
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   NET_CORE_VERSION: netcoreapp2.1

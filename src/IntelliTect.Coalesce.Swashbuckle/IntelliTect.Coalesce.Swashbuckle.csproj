@@ -3,8 +3,9 @@
   <PropertyGroup>
     <Description>
       Provides Swashbuckle SwaggerGen filters to enhance definitions of Coalesce APIs in OpenAPI documents.
-      Add using `services.AddSwaggerGen(c => { c.AddCoalesce(); });`.
+      Add using `services.AddSwaggerGen(c => c.AddCoalesce() );`.
     </Description>
+    <!-- Don't put curly braces in the example in the description above - it will trigger https://github.com/Microsoft/msbuild/issues/1357 -->
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 

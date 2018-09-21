@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Vue.js code generation for IntelliTect.Coalesce</Description>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
   </PropertyGroup>

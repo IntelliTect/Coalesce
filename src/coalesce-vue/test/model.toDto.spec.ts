@@ -4,6 +4,7 @@ import { ModelValue, ObjectValue, Value, ObjectType, CollectionValue } from "../
 import { shortStringify } from "./test-utils";
 import { Indexable } from "../src/util";
 import { twoWayConversions, studentValue, MappingData } from "./model.shared";
+import { format } from "date-fns/esm";
 
 const studentProps = $metadata.Student.props;
 
@@ -60,7 +61,8 @@ describe.each(<MappingData[]>[
   {
     meta: studentProps.birthDate,
     model: "1990-01-02T03:04:05.000-08:00",
-    dto: "1990-01-02T03:04:05.000-08:00"
+    // We define the expected using date-fns's format to make this test timezone-independent.
+    dto: format("1990-01-02T03:04:05.000-08:00", "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
   },
   ...unmappable(studentProps.birthDate, new Date("!!Invalid"), 123, "abc", [], {} ),
 

@@ -550,11 +550,19 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
 
     protected _makeReactive() {
         // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
-        for (const stateProp in this) {
-            const value = this[stateProp]
+
+        // Use Object.keys to mock the behavior of 
+        // https://github.com/vuejs/vue/blob/4c7a87e2ef9c76b5b75d85102662a27165a23ec7/src/core/observer/index.js#L61
+        const keys = Object.keys(this)
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+
+            // @ts-ignore - Ignore indexer on type without indexer signature.
+            const value = this[key] 
+
             // Don't define sealed object properties (e.g. this._callbacks)
             if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(this, stateProp, this[stateProp])
+                Vue.util.defineReactive(this, key, value)
             }
         }
     }

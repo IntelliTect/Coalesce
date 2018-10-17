@@ -216,3 +216,4 @@ src/Coalesce.Web/output.txt
 # Allow everything in our targets directory, which has a folder named "build" which would otherwise get ignored.
 !src/IntelliTect.Coalesce.CodeGeneration/Analysis/MsBuild/Targets/build/
 
+.vscode

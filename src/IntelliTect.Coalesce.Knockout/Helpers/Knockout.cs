@@ -2,13 +2,9 @@
 using Microsoft.AspNetCore.Html;
 using System;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.Knockout.Helpers
@@ -22,10 +18,45 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             Time = 2
         }
 
+        /// <summary>
+        ///     The default number of Bootstrap grid columns the field label should span when calling
+        ///     <see cref="AddLabel(string,string,System.Nullable{int},System.Nullable{int})" />.  This sets up a site-wide
+        ///     default, which is 3 initially.
+        /// </summary>
         public static int DefaultLabelCols { get; set; } = 3;
+
+        /// <summary>
+        ///     The default number of Bootstrap grid columns the form input should span when calling
+        ///     <see cref="AddLabel(string,string,System.Nullable{int},System.Nullable{int})" />.  This sets up a site-wide
+        ///     default, which is 9 initially.
+        /// </summary>
         public static int DefaultInputCols { get; set; } = 9;
+
+
+        /// <summary>
+        ///     Sets the default date-only (<see cref="F:DateTimePreservationOptions.Date" />) format to be used by all
+        ///     date/time pickers.  Initially set to 'M/D/YYYY'.
+        /// </summary>
+        /// <remarks>
+        ///     See <a href="http://momentjs.com/docs/#/displaying/format/">The Moment.js documentation</a> for allowed formats.
+        /// </remarks>
         public static string DefaultDateFormat { get; set; } = "M/D/YYYY";
+
+        /// <summary>
+        ///     Sets the default time-only (<see cref="F:DateTimePreservationOptions.Time" />) format to be used by all
+        ///     date/time pickers.  Initially set to 'h:mm a'.
+        /// </summary>
+        /// <remarks>
+        ///     See <a href="http://momentjs.com/docs/#/displaying/format/">The Moment.js documentation</a> for allowed formats.
+        /// </remarks>
         public static string DefaultTimeFormat { get; set; } = "h:mm a";
+
+        /// <summary>
+        /// Sets the default format to be used by all date/time pickers that aren't date or time only.  Initially set to 'M/D/YYYY h:mm a'.
+        /// </summary>
+        /// <remarks>
+        ///     See <a href="http://momentjs.com/docs/#/displaying/format/">The Moment.js documentation</a> for allowed formats.
+        /// </remarks>>
         public static string DefaultDateTimeFormat { get; set; } = "M/D/YYYY h:mm a";
 
         /// <summary>
@@ -809,17 +840,5 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         #endregion
 
-        //public static HtmlString Select(string valueId)
-        //{
-        //    string result = string.Format(@"
-        //        <select class="""" style=""width: 100%;"" 
-        //            data-bind=""select2Ajax: {0}, url: '/api/adult/list', idField: 'AdultId', textField: 'NameAndBirthday', object: callLog().adult" placeholder = "Select Caller" >
-        //              < option ></ option >
-        //          </ select > ", 
-        //          valueId);
-
-
-        //    return new HtmlString(result);
-        //}
     }
 }

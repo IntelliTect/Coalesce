@@ -1,11 +1,13 @@
 ﻿using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Html;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
 using System.Linq;
+using System.Text;
 
 namespace IntelliTect.Coalesce.Knockout.Helpers
 {
@@ -76,10 +78,10 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         /// <returns></returns>
         public static HtmlString AddFormGroup(this string content)
         {
-            string result = string.Format(@"
+            string result = $@"
             <div class=""form-group"">
-                {0}
-            </div>", content);
+                {content}
+            </div>";
             return new HtmlString(result);
         }
 
@@ -88,11 +90,11 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             int myLabelCols = labelCols ?? DefaultLabelCols;
             int myInputCols = inputCols ?? DefaultInputCols;
 
-            string result = string.Format(@"
-                    <label class=""col-sm-{1} control-label"">{0}</label>
-                    <div class=""col-sm-{2}"">
-                        {3}
-                    </div>", label, myLabelCols, myInputCols, content);
+            string result = $@"
+                    <label class=""col-sm-{myLabelCols} control-label"">{label}</label>
+                    <div class=""col-sm-{myInputCols}"">
+                        {content}
+                    </div>";
             return new HtmlString(result);
         }
 
@@ -149,19 +151,13 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 }
             }
             if (!format.Contains("D")) icon = "fa-clock-o";
-            string result = string.Format(@"
+            string result = $@"
                     <div class=""input-group date"">
-                        <input data-bind=""datePicker: {0}, format: '{1}', preserveTime: {2}, preserveDate: {3} {5}"" type=""text"" class=""form-control"" />
+                        <input data-bind=""datePicker: {dataBinding}, format: '{format}', preserveTime: {(preserve == DateTimePreservationOptions.Time).ToString().ToLower()}, preserveDate: {(preserve == DateTimePreservationOptions.Date).ToString().ToLower()} {(stepping.HasValue ? $", stepping: {stepping}" : "")}"" type=""text"" class=""form-control"" />
                         <span class=""input-group-addon"">
-                            <span class=""fa {4}""></span>
+                            <span class=""fa {icon}""></span>
                         </span>
-                    </div>",
-                    dataBinding,
-                    format,
-                    (preserve == DateTimePreservationOptions.Time).ToString().ToLower(),
-                    (preserve == DateTimePreservationOptions.Date).ToString().ToLower(),
-                    icon,
-                    stepping.HasValue ? $", stepping: {stepping}" : "");
+                    </div>";
             return new HtmlString(result);
         }
 
@@ -169,56 +165,56 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding(), format, preserve, stepping);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding(), format, preserve, stepping);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, DateTime>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding(), format, preserve, stepping);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, DateTime?>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTime(propertyModel.JsVariableForBinding(), format, preserve, stepping);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset?>> propertySelector,
             string format = null, int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(label ?? propertyModel.DisplayName, propertyModel.JsVariableForBinding(), format, preserve, stepping, labelCols, inputCols);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
             string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(label ?? propertyModel.DisplayName, propertyModel.JsVariableForBinding(), format, preserve, stepping, labelCols, inputCols);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTime?>> propertySelector,
             string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(label ?? propertyModel.DisplayName, propertyModel.JsVariableForBinding(), format, preserve, stepping, labelCols, inputCols);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, DateTime>> propertySelector,
             string format = "M/D/YYYY", int? labelCols = null, int? inputCols = null, string label = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int stepping = 1)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return DateTimeWithLabel(label ?? propertyModel.DisplayName, propertyModel.JsVariableForBinding(), format, preserve, stepping, labelCols, inputCols);
         }
 
@@ -229,8 +225,8 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString TextArea(
             string bindingValue, string bindingName = "value", int? rows = 4)
         {
-            string result = string.Format(@"
-                <textarea class=""form-control"" data-bind=""{1}: {0}"" rows=""{2}""></textarea>", bindingValue, bindingName, rows.ToString());
+            string result = $@"
+                <textarea class=""form-control"" data-bind=""{bindingName}: {bindingValue}"" rows=""{rows.ToString()}""></textarea>";
             return new HtmlString(result);
         }
 
@@ -244,7 +240,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString TextAreaFor<T>(Expression<Func<T, string>> propertySelector,
             int? rows = null, string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextArea(propertyModel.JsVariableForBinding(), bindingName, rows);
         }
 
@@ -252,7 +248,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString TextAreaWithLabelFor<T>(Expression<Func<T, string>> propertySelector,
             int? rows = null, int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextAreaFor(propertySelector, rows).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
@@ -263,10 +259,9 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString TextInput(
             string bindingValue, string bindingName = "value")
         {
-            string result = string.Format(@"
-                <input type = ""text"" class=""form-control"" data-bind=""{1}: {0}"" />
-                ", bindingValue, bindingName);
-            return new HtmlString(result);
+            return new HtmlString($@"
+                <input type = ""text"" class=""form-control"" data-bind=""{bindingName}: {bindingValue}"" />
+                ");
         }
 
         public static HtmlString TextInputWithLabel(
@@ -278,14 +273,14 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, string>> propertySelector,
             int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return InputFor(propertySelector, bindingName).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, string>> propertySelector,
             string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextInput(propertyModel.JsVariableForBinding(), bindingName);
         }
         #endregion
@@ -294,28 +289,28 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, int>> propertySelector,
             int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return InputFor(propertySelector).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, int>> propertySelector,
             string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextInput(propertyModel.JsVariableForBinding(), bindingName);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, int?>> propertySelector,
     int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return InputFor(propertySelector).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, int?>> propertySelector,
             string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextInput(propertyModel.JsVariableForBinding(), bindingName);
         }
         #endregion
@@ -324,9 +319,9 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString Checkbox(
             string bindingValue, string bindingName = "checked")
         {
-            return new HtmlString(string.Format(@"
-                <input type = ""checkbox"" data-bind=""{1}: {0}"" />
-                ", bindingValue, bindingName));
+            return new HtmlString($@"
+                        <input type = ""checkbox"" data-bind=""{bindingName}: {bindingValue}"" />
+                        ");
         }
 
         public static HtmlString BooleanSelect(string bindingValue, string trueText, string falseText)
@@ -338,39 +333,39 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString InputFor<T>(Expression<Func<T, bool>> propertySelector, string bindingName = "checked")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return Checkbox(propertyModel.JsVariableForBinding(), bindingName);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, bool>> propertySelector,
             int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "checked")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return InputFor<T>(propertySelector, bindingName).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, bool?>> propertySelector, string bindingName = "checked")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return Checkbox(propertyModel.JsVariableForBinding(), bindingName);
         }
 
         public static HtmlString InputWithLabelFor<T>(Expression<Func<T, bool?>> propertySelector,
             int? labelCols = null, int? inputCols = null, string label = null, string bindingName = "checked")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return InputFor<T>(propertySelector, bindingName).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
         public static HtmlString BooleanValueFor<T>(Expression<Func<T, bool>> propertySelector, string trueText = "Yes", string falseText = "No")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return BooleanSelect(propertyModel.JsVariableForBinding(), trueText, falseText);
         }
 
         public static HtmlString BooleanValueFor<T>(Expression<Func<T, bool?>> propertySelector, string trueText = "Yes", string falseText = "No")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return BooleanSelect(propertyModel.JsVariableForBinding(), trueText, falseText);
         }
 
@@ -382,7 +377,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string endpointName = null,
             string placeholder = "")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             placeholder = placeholder ?? propertyModel.DisplayName;
             return SelectString(propertyModel, endpointName: endpointName, placeholder: placeholder);
         }
@@ -391,7 +386,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string endpointActionName = null,
             int? labelCols = null, int? inputCols = null, string label = null, string placeholder = "")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return SelectFor<T>(propertySelector, endpointActionName, placeholder: placeholder)
                 .AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
@@ -405,14 +400,11 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 resultField = $"resultField: '{propertyModel.JsonName}',";
             }
 
-            string result = string.Format($@"
+            return new HtmlString($@"
                     <select class=""form-control"" placeholder=""{placeholder}""
-                        data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, {resultField}" +
-                        $@"url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.ApiRouteControllerPart}/{endpointName}'"">
+                        data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, {resultField}url: coalesceConfig.baseApiUrl() + '/{propertyModel.Parent.ApiRouteControllerPart}/{endpointName}'"">
                         <option></option>
                     </select >");
-
-            return new HtmlString(result);
         }
 
         #endregion
@@ -421,7 +413,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString SelectWithLabelForObject<T>(Expression<Func<T, object>> propertySelector,
             int? labelCols = null, int? inputCols = null, string label = null, string placeholder = "")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return SelectForObject<T>(propertySelector, placeholder).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
@@ -429,12 +421,8 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string placeholder = "", string prefix = "")
         {
 
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            if (propertyModel != null)
-            {
-                return SelectObject(propertyModel, placeholder, prefix, propertyModel.ForeignKeyProperty == null ? !propertyModel.IsRequired : !propertyModel.ForeignKeyProperty.IsRequired);
-            }
-            return HtmlString.Empty;
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            return propertyModel != null ? SelectObject(propertyModel, placeholder, prefix, !propertyModel.ForeignKeyProperty?.IsRequired ?? !propertyModel.IsRequired) : HtmlString.Empty;
         }
 
         public static HtmlString SelectObject(PropertyViewModel propertyModel, string placeholder = "", string prefix = "", bool allowsClear = true)
@@ -462,30 +450,30 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             if (propertyModel.HasAttribute<SelectFilterAttribute>())
             {
-                var foreignPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.ForeignPropertyName);
-                var localValue = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.StaticPropertyValue);
+                string foreignPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.ForeignPropertyName);
+                string localValue = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.StaticPropertyValue);
 
-                var foreignProp = propertyModel.Object.PropertyByName(foreignPropName);
+                PropertyViewModel foreignProp = propertyModel.Object.PropertyByName(foreignPropName);
                 if (localValue != null)
                 {
                     filterString = $"?filter.{foreignProp.JsVariable}={System.Net.WebUtility.UrlEncode(localValue)}";
                 }
                 else
                 {
-                    var localPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.LocalPropertyName);
-                    var localPropObjName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.LocalPropertyObjectName);
+                    string localPropName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.LocalPropertyName);
+                    string localPropObjName = propertyModel.GetAttributeValue<SelectFilterAttribute>(a => a.LocalPropertyObjectName);
 
 
                     if (localPropObjName != null)
                     {
-                        var localPropObj = propertyModel.Parent.PropertyByName(localPropObjName.ToString());
-                        var localProp = localPropObj.PureType.ClassViewModel.PropertyByName((localPropName ?? foreignPropName).ToString());
+                        PropertyViewModel localPropObj = propertyModel.Parent.PropertyByName(localPropObjName);
+                        PropertyViewModel localProp = localPropObj.PureType.ClassViewModel.PropertyByName(localPropName ?? foreignPropName);
 
                         filterString = $"?filter.{foreignProp.JsVariable}=' + ({localPropObj.JsVariableForBinding()}() ? {localPropObj.JsVariableForBinding()}().{localProp.JsVariable}() : 'null') + '";
                     }
                     else
                     {
-                        var localProp = propertyModel.Parent.PropertyByName((localPropName ?? foreignPropName).ToString());
+                        PropertyViewModel localProp = propertyModel.Parent.PropertyByName(localPropName ?? foreignPropName);
                         filterString = $"?filter.{foreignProp.JsVariable}=' + {localProp.JsVariableForBinding()}() + '";
                     }
                 }
@@ -513,7 +501,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString SelectForManyToMany<T>(Expression<Func<T, object>> propertySelector, string placeholder = "", string prefix = "", string areaName = "", int pageSize = 25)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             if (propertyModel != null)
             {
                 return SelectForManyToMany(propertyModel, placeholder, prefix, areaName, pageSize);
@@ -549,8 +537,8 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString ModalFor<T>(string methodName, bool? isStatic = null, string elementId = null, bool includeWithBinding = true)
         {
-            var classModel = ReflectionRepository.Global.GetClassViewModel<T>();
-            var method = classModel.ClientMethods.FirstOrDefault(f => (isStatic == null || isStatic == f.IsStatic) && f.Name == methodName);
+            ClassViewModel classModel = ReflectionRepository.Global.GetClassViewModel<T>();
+            MethodViewModel method = classModel.ClientMethods.FirstOrDefault(f => (isStatic == null || isStatic == f.IsStatic) && f.Name == methodName);
             return ModalFor(method, elementId, includeWithBinding);
         }
 
@@ -563,7 +551,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
             var b = new HtmlCodeBuilder();
             b.Line($"<!-- Modal for method: {method.Name} -->");
-            var withBinding = includeWithBinding ? $"with: {method.JsVariable}" : null;
+            string withBinding = includeWithBinding ? $"with: {method.JsVariable}" : null;
 
             using (b
                 .TagBlock("div", new { @class = "modal fade", id = elementId, tabindex = -1, role = "dialog", data_bind = withBinding })
@@ -609,71 +597,69 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString InputFor<T>(Expression<Func<T, object>> propertySelector,
             string bindingName = "value")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextInput(propertyModel.JsVariableForBinding(), bindingName);
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, Enum>> propertySelector,
             string placeholder = "", int? labelCols = null, int? inputCols = null, string label = null)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return SelectFor(propertySelector, placeholder).AddLabel(label ?? propertyModel.DisplayName, labelCols, inputCols);
         }
 
         public static HtmlString SelectFor<T>(Expression<Func<T, Enum>> propertySelector,
             string placeholder = "")
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return SelectEnum(propertyModel, placeholder);
         }
 
         public static HtmlString SelectEnum(PropertyViewModel propertyModel, string placeholder = "")
         {
-            string result = string.Format(@"
+            var sb = new StringBuilder();
+            sb.AppendLine($@"
                 <select class=""form-control"" 
-                    data-bind=""select2: {0}"" 
-                    placeholder=""{1}"">",
-                propertyModel.JsVariableForBinding(), placeholder);
+                    data-bind=""select2: {propertyModel.JsVariableForBinding()}"" 
+                    placeholder=""{placeholder}"">");
 
-            foreach (var item in propertyModel.Type.EnumValues)
+            foreach (KeyValuePair<int, string> item in propertyModel.Type.EnumValues)
             {
-                result += string.Format(@"<option value=""{0}"">{1}</option>", item.Key, item.Value.ToProperCase());
+                sb.AppendLine($@"<option value=""{item.Key}"">{item.Value.ToProperCase()}</option>");
             }
-            result += "</select>";
-            return new HtmlString(result);
+            sb.AppendLine("</select>");
+            return new HtmlString(sb.ToString());
         }
 
 
 
         public static HtmlString ExpandButton(double size = 2)
         {
-            string result = string.Format(@"
-                <div class=""pull-right"" data-bind=""click: toggleIsExpanded"" style=""font-size: {0}em; cursor:pointer;"">
+            string result = $@"
+                <div class=""pull-right"" data-bind=""click: toggleIsExpanded"" style=""font-size: {size}em; cursor:pointer;"">
                          <i class=""fa fa-minus-circle"" data-bind=""visible: isExpanded()""></i>
                     <i class=""fa fa-plus-circle"" data-bind=""visible: !isExpanded()""></i>
-                </div>", size);
+                </div>";
 
             return new HtmlString(result);
         }
 
         public static HtmlString ModifiedOnFromNow(double size = 1, string format = "M/D/YY")
         {
-            string result = string.Format(@"
-                <div class=""modified-on"" style=""font-size: {1}em;"">
-                    <span data-bind=""text: modifiedOn().fromNow()""></span>
-                </div>"
-                , format, size);
+            string result = $@"
+                <div class=""modified-on"" style=""font-size: {size}em;"">
+                    <span data-bind=""moment: modifiedOn().fromNow(), format: '{format}'""></span>
+                </div>";
 
             return new HtmlString(result);
         }
 
         public static HtmlString ModifiedOn(double size = 1, string format = "M/D/YY")
         {
-            string result = string.Format(@"
-                <div class=""modified-on"" style=""font-size: {1}em;"">
-                    <span data-bind=""moment: modifiedOn, format: '{0}'""></span>
-                </div>"
-                , format, size);
+            string result = $@"
+                <div class=""modified-on"" style=""font-size: {size}em;"">
+                    <span data-bind=""moment: modifiedOn, format: '{format}'""></span>
+                </div>";
 
             return new HtmlString(result);
         }
@@ -683,17 +669,14 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString DisplayDateTime(string bindingValue, string format = null)
         {
             if (format == null) format = DefaultDateTimeFormat;
-            string result = string.Format(@"
-                <div class=""form-control-static"" data-bind=""moment: {0}, format: '{1}'"" ></div>"
-                , bindingValue, format);
-
-            return new HtmlString(result);
+            return new HtmlString($@"
+                <div class=""form-control-static"" data-bind=""moment: {bindingValue}, format: '{format}'"" ></div>");
         }
 
         public static HtmlString DisplayFor<T>(Expression<Func<T, DateTimeOffset>> propertySelector,
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             HtmlString returnString;
             switch (preserve)
             {
@@ -725,27 +708,23 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString DisplayManyToMany(PropertyViewModel propertyModel)
         {
-            string result = string.Format(@"
-                <div data-bind = ""foreach: {0} "">
-                    <div class=""form-control-static"" data-bind=""text: {1}""></div>
-                </div>",
-                propertyModel.ManyToManyCollectionName.ToCamelCase(), propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.JsVariableForBinding());
+            string result = $@"
+                <div data-bind = ""foreach: {propertyModel.ManyToManyCollectionName.ToCamelCase()} "">
+                    <div class=""form-control-static"" data-bind=""text: {propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.JsVariableForBinding()}""></div>
+                </div>";
 
             return new HtmlString(result);
         }
 
         public static HtmlString DisplayCheckbox(string bindingValue)
         {
-            string result = string.Format(@"
-                <input type=""checkbox"" disabled data-bind=""checked: {0}"" />",
-                bindingValue);
-
-            return new HtmlString(result);
+            return new HtmlString($@"
+                <input type=""checkbox"" disabled data-bind=""checked: {bindingValue}"" />");
         }
 
         public static HtmlString DisplayFor<T>(Expression<Func<T, object>> propertySelector, bool linkObject = false)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             HtmlString returnString;
 
             if (propertyModel.IsDateOnly)
@@ -782,27 +761,25 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString DisplayObject(PropertyViewModel propertyModel, bool linkObject = false)
         {
-            string result = "";
-            result += $@"
-                <div data-bind=""if: {propertyModel.JsVariableForBinding()}()"">";
+            var sb = new StringBuilder();
+            sb.AppendLine($@"<div data-bind=""if: {propertyModel.JsVariableForBinding()}()"">");
             if (linkObject && propertyModel.PureTypeOnContext)
             {
-                result += $@"
-                    <a class=""form-control-static"" data-bind=""attr: {{href: {propertyModel.JsVariableForBinding()}().editUrl()}}, text: {propertyModel.JsVariableForBinding()}().{propertyModel.Object.ListTextProperty.JsVariable}""></a>";
+                sb.AppendLine(
+                    $@"  <a class=""form-control-static"" data-bind=""attr: {{href: {propertyModel.JsVariableForBinding()}().editUrl()}}, text: {propertyModel.JsVariableForBinding()}().{propertyModel.Object.ListTextProperty.JsVariable}""></a>");
             }
             else
             {
-                result += $@"
-                    <div class=""form-control-static"" data-bind=""text: {propertyModel.JsVariableForBinding()}().{propertyModel.Object.ListTextProperty.JsVariable}""></div>";
+                sb.AppendLine(
+                    $@"  <div class=""form-control-static"" data-bind=""text: {propertyModel.JsVariableForBinding()}().{propertyModel.Object.ListTextProperty.JsVariable}""></div>");
             }
-            result += $@"
-                </div>";
-            result += $@"
-                <div data-bind=""if: !{propertyModel.JsVariableForBinding()}()"">
-                    <div class=""form-control-static"">None</div>
-                </div>";
 
-            return new HtmlString(result);
+            sb.AppendLine(@"</div>");
+            sb.AppendLine($@"<div data-bind=""if: !{propertyModel.JsVariableForBinding()}()"">
+                    <div class=""form-control-static"">None</div>
+                </div>");
+
+            return new HtmlString(sb.ToString());
         }
 
         public static HtmlString DisplayEnum(PropertyViewModel propertyModel)
@@ -812,28 +789,22 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString DisplayText(string bindingValue)
         {
-            string result = string.Format(@"
-                <div class=""form-control-static"" data-bind=""text: {0}()""></div>",
-                bindingValue);
-            return new HtmlString(result);
+            return new HtmlString($@"
+                <div class=""form-control-static"" data-bind=""text: {bindingValue}()""></div>");
         }
 
         public static HtmlString DisplayHtml<T>(Expression<Func<T, object>> propertySelector)
         {
-            var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
 
-            string result = string.Format(@"
-                <div class=""form-control-static"" data-bind=""html: {0}()""></div>",
-                propertyModel.JsVariableForBinding());
-            return new HtmlString(result);
+            return new HtmlString($@"
+                <div class=""form-control-static"" data-bind=""html: {propertyModel.JsVariableForBinding()}()""></div>");
         }
 
         public static HtmlString DisplayComment(string bindingValue)
         {
-            string result = string.Format(@"
-                <!-- Attempted to Display: {0} -->",
-                bindingValue);
-            return new HtmlString(result);
+            return new HtmlString($@"
+                <!-- Attempted to Display: {bindingValue} -->");
         }
 
 

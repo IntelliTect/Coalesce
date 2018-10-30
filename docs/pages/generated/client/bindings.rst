@@ -324,7 +324,7 @@ let
 Knockout Binding Defaults
 -------------------------
 
-These are static properties you can assign once somewhere in the app lifecycle startup to change the default markup generated server-side for the Knockout bindings.  Currently, there are defaults for the Bootstrap grid system width of ``<label>`` and ``<intput>`` tags, as well as default formats for the date pickers.
+These are static properties on :csharp:`IntelliTect.Coalesce.Knockout.Helpers.Knockout` you can assign to somewhere in the app lifecycle startup to change the default markup generated server-side when using ``@Knockout.*`` methods to render Knockout bindings in your ``.cshtml`` files.  Currently, there are defaults for the Bootstrap grid system width of ``<label>`` and ``<input>`` tags, as well as default formats for the date pickers.
 
 The date/time picker properties can be coupled with ``DateTimeOffset`` model properties to display time values localized for the current user's locale.  If you want to make the localization static, simply include a script block in your ``_Layout.cshtml`` or in a specific view that sets the default for Moment.js:
 

@@ -33,6 +33,49 @@ module ViewModels {
         
         
         
+        /**
+            Methods and properties for invoking server method AsyncMethodOnIClassDto.
+        */
+        public readonly asyncMethodOnIClassDto = new CaseDto.AsyncMethodOnIClassDto(this);
+        public static AsyncMethodOnIClassDto = class AsyncMethodOnIClassDto extends Coalesce.ClientMethod<CaseDto, string> {
+            public readonly name = 'AsyncMethodOnIClassDto';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (AsyncMethodOnIClassDto) with the given arguments */
+            public invoke = (input: string | null, callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), input: input }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new AsyncMethodOnIClassDto.Args(); 
+            public static Args = class Args {
+                public input: KnockoutObservable<string | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (AsyncMethodOnIClassDto) with an instance of AsyncMethodOnIClassDto.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.input(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                $promptVal = prompt('Input');
+                if ($promptVal === null) return;
+                var input: string = $promptVal;
+                return this.invoke(input, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
         
         /** 
             Load the ViewModel object from the DTO.

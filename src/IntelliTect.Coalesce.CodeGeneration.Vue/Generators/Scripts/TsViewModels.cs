@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
@@ -47,6 +48,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 //    b.Line($"get {prop.JsVariable}() {{ return this.$data.{prop.JsVariable} }}");
                 //    b.Line($"set {prop.JsVariable}(val) {{ this.$data.{prop.JsVariable} = val }}");
                 //}
+
+                foreach (var method in model.ClientMethods.Where(m => !m.IsStatic))
+                {
+                    string signature =
+                        string.Concat(method.ClientParameters.Select(f => $", {f.Name}: {new VueType(f.Type).TsType("$models")} | null"));
+
+                    // "item" or "list"
+                    var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
+
+                    b.Line($"public {method.JsVariable} = this.$apiClient.$makeCaller(\"{transportTypeSlug}\", ");
+                    b.Indented($"(c{signature}) => c.{method.JsVariable}(this.$primaryKey{string.Concat(method.ClientParameters.Select(p => ", " + p.Name))}))");
+                    b.Line();
+                }
 
                 using (b.Block($"constructor(initialData?: models.{name})"))
                 {

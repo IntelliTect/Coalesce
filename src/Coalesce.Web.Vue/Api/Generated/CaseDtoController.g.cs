@@ -115,5 +115,26 @@ namespace Coalesce.Web.Vue.Api
             => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
 
         // Methods from data class exposed through API Controller.
+
+        /// <summary>
+        /// Method: AsyncMethodOnIClassDto
+        /// </summary>
+        [HttpPost("AsyncMethodOnIClassDto")]
+        [Authorize]
+        public virtual async Task<ItemResult<string>> AsyncMethodOnIClassDto([FromServices] IDataSourceFactory dataSourceFactory, int id, string input)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>("Default");
+            var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<string>(itemResult);
+            }
+            var item = itemResult.Object;
+            var methodResult = await item.AsyncMethodOnIClassDto(input);
+            await Db.SaveChangesAsync();
+            var result = new ItemResult<string>();
+            result.Object = methodResult;
+            return result;
+        }
     }
 }

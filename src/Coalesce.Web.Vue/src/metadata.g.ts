@@ -271,6 +271,31 @@ export const CaseDto = domain.types.CaseDto = {
     },
   },
   methods: {
+    asyncMethodOnIClassDto: {
+      name: "asyncMethodOnIClassDto",
+      displayName: "Async Method On I Class Dto",
+      transportType: "item",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
+        input: {
+          name: "input",
+          displayName: "Input",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "string",
+      },
+    },
   },
   dataSources: {
     caseDtoSource: {

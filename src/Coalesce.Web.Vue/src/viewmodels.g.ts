@@ -5,6 +5,21 @@ import { ViewModel, ListViewModel, defineProps } from 'coalesce-vue/lib/viewmode
 
 export interface PersonViewModel extends models.Person {}
 export class PersonViewModel extends ViewModel<models.Person, apiClients.PersonApiClient> {
+  public rename = this.$apiClient.$makeCaller("item", 
+    (c, name: string | null) => c.rename(this.$primaryKey, name))
+  
+  public changeSpacesToDashesInName = this.$apiClient.$makeCaller("item", 
+    (c) => c.changeSpacesToDashesInName(this.$primaryKey))
+  
+  public fullNameAndAge = this.$apiClient.$makeCaller("item", 
+    (c) => c.fullNameAndAge(this.$primaryKey))
+  
+  public obfuscateEmail = this.$apiClient.$makeCaller("item", 
+    (c) => c.obfuscateEmail(this.$primaryKey))
+  
+  public changeFirstName = this.$apiClient.$makeCaller("item", 
+    (c, firstName: string | null) => c.changeFirstName(this.$primaryKey, firstName))
+  
   constructor(initialData?: models.Person) {
     super(metadata.Person, new apiClients.PersonApiClient(), initialData)
   }

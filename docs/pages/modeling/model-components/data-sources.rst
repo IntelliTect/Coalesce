@@ -104,7 +104,7 @@ The properties created on the TypeScript objects are observables so they may be 
     .. code-block:: typescript
 
         var list = new ListViewModels.PersonList();
-        var dataSource = new list.dataSources.NamesStartingWithA();
+        var dataSource = new list.dataSources.NamesStartingWith();
         dataSource.startsWith("Jo");
         dataSource.subscribe(list); // Optional - call to enable automatic reloading.
         list.dataSource = dataSource;

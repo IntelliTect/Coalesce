@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System;
 using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
+using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Coalesce.Web
@@ -53,7 +54,9 @@ namespace Coalesce.Web
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
-            services.AddMvc().AddJsonOptions(options =>
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
@@ -79,12 +82,8 @@ namespace Coalesce.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggingBuilder loggingBuilder)
+        public void Configure(IApplicationBuilder app)
         {
-            //loggingBuilder.MinimumLevel = LogLevel.Information;
-            loggingBuilder.AddConsole();
-            loggingBuilder.AddDebug();
-
             app.UseStaticFiles();
 
             app.UseDeveloperExceptionPage();

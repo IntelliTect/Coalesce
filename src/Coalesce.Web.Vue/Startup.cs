@@ -1,11 +1,10 @@
 using System;
-using System.Security.Claims;
 using Coalesce.Domain;
 using IntelliTect.Coalesce;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +24,8 @@ namespace Coalesce.Web.Vue
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -37,7 +37,10 @@ namespace Coalesce.Web.Vue
                 .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
             );
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+            services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);
+
+            RoleMapping.Add("Admin", "S-1-5-4"); // Interactive user.
+            RoleMapping.Add("User", "S-1-1-0"); // Everyone who has logged on
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +54,7 @@ namespace Coalesce.Web.Vue
                     HotModuleReplacement = true,
 
                     // Use a slightly-tweaked version of vue-cli's webpack config to work around a few bugs.
-                    ConfigFile = "webpack.config.aspnetcore-hmr.js",
+                    ConfigFile = "webpack.config.aspnetcore-hmr.js"
                 });
             }
             else
@@ -61,32 +64,25 @@ namespace Coalesce.Web.Vue
 
             app.UseStaticFiles();
 
+            // *** DEMO ONLY ***
             app.UseAuthentication();
-
-            // Demo only - logs everyone in as admin.
-            app.Use(async (context, next) =>
-            {
-                Claim[] claims = new[] { new Claim(ClaimTypes.Name, "DemoUser"), new Claim(ClaimTypes.Role, "Admin") };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-                await next.Invoke();
-            });
+            app.UseMiddleware<DemoMiddleware>();
 
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    "default",
+                    "{controller=Home}/{action=Index}/{id?}");
             });
-            
+
             app.MapWhen(x => !x.Request.Path.Value.StartsWith("/api"), builder =>
             {
                 builder.UseMvc(routes =>
                 {
                     routes.MapSpaFallbackRoute(
-                        name: "spa-fallback",
-                        defaults: new { controller = "Home", action = "Index" });
+                        "spa-fallback",
+                        new {controller = "Home", action = "Index"});
                 });
             });
         }

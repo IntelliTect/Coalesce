@@ -9,11 +9,9 @@ using IntelliTect.Coalesce.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
-using System.Linq;
 using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
 using Swashbuckle.AspNetCore.Swagger;
-using System.Collections.Generic;
 
 namespace Coalesce.Web
 {
@@ -81,11 +79,11 @@ namespace Coalesce.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, ILoggingBuilder loggingBuilder)
         {
-            //loggerFactory.MinimumLevel = LogLevel.Information;
-            loggerFactory.AddConsole();
-            loggerFactory.AddDebug();
+            //loggingBuilder.MinimumLevel = LogLevel.Information;
+            loggingBuilder.AddConsole();
+            loggingBuilder.AddDebug();
 
             app.UseStaticFiles();
 

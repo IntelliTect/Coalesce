@@ -1,5 +1,7 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -109,5 +111,15 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         public CoalesceServiceBuilder UseDefaultBehaviors(Type implementationType)
             => UseDefaultCrudStrategy(implementationType, Api.Behaviors.BehaviorsFactory.DefaultTypes.Keys);
+
+        /// <summary>
+        /// Convenience method to configure <see cref="CoalesceOptions"/>. 
+        /// Equivalent to <see cref="OptionsServiceCollectionExtensions.Configure{TOptions}(IServiceCollection, Action{TOptions})"/>
+        /// </summary>
+        public CoalesceServiceBuilder Configure(Action<CoalesceOptions> setupAction)
+        {
+            Services.Configure(setupAction);
+            return this;
+        }
     }
 }

@@ -8,16 +8,19 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
     public class ApiActionFilter : IApiActionFilter
     {
         protected readonly ILogger<ApiActionFilter> logger;
+        protected readonly IOptions<CoalesceOptions> options;
 
-        public ApiActionFilter(ILogger<ApiActionFilter> logger)
+        public ApiActionFilter(ILogger<ApiActionFilter> logger, IOptions<CoalesceOptions> options)
         {
             this.logger = logger;
+            this.options = options;
         }
 
         public virtual void OnActionExecuting(ActionExecutingContext context)
@@ -55,8 +58,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 if (context.Result == null)
                 {
                     var requestId = context.HttpContext.TraceIdentifier;
-                    var environment = context.HttpContext.RequestServices.GetRequiredService<IHostingEnvironment>();
-                    if (environment.IsDevelopment())
+                    if (options.Value.DetailedExceptionMessages)
                     {
                         context.Result = new JsonResult(
                             new ApiResult($"{context.Exception.Message} (request {requestId})")

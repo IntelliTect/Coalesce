@@ -45,7 +45,11 @@ namespace Coalesce.Web
                 builder
                     .AddContext<AppDbContext>()
                     .UseDefaultDataSource(typeof(MyDataSource<,>))
-                    .UseDefaultBehaviors(typeof(MyBehaviors<,>));
+                    .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+                    .Configure(o =>
+                    {
+                        o.DetailedExceptionMessages = true;
+                    });
 
                 // This breaks on non-windows platforms, see https://github.com/dotnet/corefx/issues/11897
                 builder.UseTimeZone(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)

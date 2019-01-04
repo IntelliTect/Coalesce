@@ -9,6 +9,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
+using System.Runtime.InteropServices;
 using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -39,12 +40,18 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCoalesce(builder => builder
-                .AddContext<AppDbContext>()
-                .UseDefaultDataSource(typeof(MyDataSource<,>))
-                .UseDefaultBehaviors(typeof(MyBehaviors<,>))
-                .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
-            );
+            services.AddCoalesce(builder =>
+            {
+                builder
+                    .AddContext<AppDbContext>()
+                    .UseDefaultDataSource(typeof(MyDataSource<,>))
+                    .UseDefaultBehaviors(typeof(MyBehaviors<,>));
+
+                // This breaks on non-windows platforms, see https://github.com/dotnet/corefx/issues/11897
+                builder.UseTimeZone(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")
+                    : TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles"));
+            });
 
             services.AddCors();
 

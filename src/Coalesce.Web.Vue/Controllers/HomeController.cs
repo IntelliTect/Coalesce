@@ -10,7 +10,7 @@ namespace Coalesce.Web.Vue.Controllers
         public IActionResult Index()
         {
 
-            IFileProvider provider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"public"));
+            IFileProvider provider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"wwwroot"));
             IFileInfo fileInfo = provider.GetFileInfo("index.html");
             var readStream = fileInfo.CreateReadStream();
 

@@ -4,14 +4,13 @@
   "version": "0.0.0",
   "scripts": {
     "build-lib": "yarn --cwd ../coalesce-vue && yarn --cwd ../coalesce-vue build",
-    "serve": "yarn run build-lib && vue-cli-service serve",
     "build": "yarn run build-lib && vue-cli-service build",
     "test": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "coalesce-vue": "link:../coalesce-vue",
-    "vue": "^2.5.16",
+    "vue": "^2.5.18",
     "vue-class-component": "^6.2.0",
     "vue-property-decorator": "^7.0.0",
     "vue-router": "^3.0.1",
@@ -30,7 +29,7 @@
     "sass-loader": "^7.0.3",
     "ts-jest": "^22.4.6",
     "typescript": "2.9.2",
-    "vue-template-compiler": "^2.5.16",
+    "vue-template-compiler": "^2.5.21",
     "webpack-hot-middleware": "^2.22.3"
   },
   "babel": {

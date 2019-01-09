@@ -131,6 +131,11 @@ namespace Coalesce.Domain
             return this;
         }
 
+        // Ad-hoc test case for https://github.com/IntelliTect/Coalesce/issues/109
+        // Migrate to a real test case once real tests exist for the code gen.
+        [NotMapped]
+        public ICollection<string> ArbitraryCollectionOfStrings { get; set; }
+
         /// <summary>
         /// Removes spaces from the name and puts in dashes
         /// </summary>

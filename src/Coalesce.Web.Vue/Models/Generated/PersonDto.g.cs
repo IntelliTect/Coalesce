@@ -29,6 +29,7 @@ namespace Coalesce.Web.Vue.Models
         public string Name { get; set; }
         public int? CompanyId { get; set; }
         public Coalesce.Web.Vue.Models.CompanyDtoGen Company { get; set; }
+        public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -51,6 +52,7 @@ namespace Coalesce.Web.Vue.Models
             this.NextUpgrade = obj.NextUpgrade;
             this.Name = obj.Name;
             this.CompanyId = obj.CompanyId;
+            this.ArbitraryCollectionOfStrings = obj.ArbitraryCollectionOfStrings;
             var propValCasesAssigned = obj.CasesAssigned;
             if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
             {

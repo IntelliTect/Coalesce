@@ -81,6 +81,7 @@ module ViewModels {
         
         /** Company loaded from the Company ID */
         public company: KnockoutObservable<ViewModels.Company | null> = ko.observable(null);
+        public arbitraryCollectionOfStrings: KnockoutObservableArray<string> = ko.observableArray([]);
         
         
         /** Display text for PersonStats */
@@ -341,6 +342,9 @@ module ViewModels {
                 // Merge the incoming array
                 Coalesce.KnockoutUtilities.RebuildArray(this.casesReported, data.casesReported, 'caseKey', Case, this, allowCollectionDeletes);
             }
+            if (data.arbitraryCollectionOfStrings != null) {
+                this.arbitraryCollectionOfStrings(data.arbitraryCollectionOfStrings);
+            }
             if (!data.personStats) { 
                 this.personStats(null);
             } else {
@@ -386,6 +390,7 @@ module ViewModels {
             }
             this.name(data.name);
             this.companyId(data.companyId);
+            this.arbitraryCollectionOfStrings(data.arbitraryCollectionOfStrings);
             if (this.coalesceConfig.onLoadFromDto()){
                 this.coalesceConfig.onLoadFromDto()(this as any);
             }
@@ -414,6 +419,7 @@ module ViewModels {
             if (!dto.companyId && this.company()) {
                 dto.companyId = this.company()!.companyId();
             }
+            dto.arbitraryCollectionOfStrings = this.arbitraryCollectionOfStrings();
             
             return dto;
         }

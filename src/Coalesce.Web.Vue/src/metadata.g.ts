@@ -610,6 +610,19 @@ export const Person = domain.types.Person = {
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
       dontSerialize: true,
     },
+    arbitraryCollectionOfStrings: {
+      name: "arbitraryCollectionOfStrings",
+      displayName: "Arbitrary Collection Of Strings",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "string",
+      },
+      role: "value",
+      dontSerialize: true,
+    },
   },
   methods: {
     rename: {

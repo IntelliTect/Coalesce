@@ -60,6 +60,10 @@
                     <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Arbitrary Collection Of Strings</label>
+                <div class="col-md-8 prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: arbitraryCollectionOfStrings().length + " Items"' ></div></div>
+            </div>
         </div>
     </div>
 </div>
@@ -107,6 +111,8 @@
                             <dd data-bind="text: name"></dd>
                             <dt>Company</dt>
                             <dd data-bind="text: company"></dd>
+                            <dt>Arbitrary Collection Of Strings</dt>
+                            <dd data-bind="text: arbitraryCollectionOfStrings"></dd>
                         </dl>
                     </td>
                     <td>
@@ -196,6 +202,8 @@
                             <dd data-bind="text: name"></dd>
                             <dt>Company</dt>
                             <dd data-bind="text: company"></dd>
+                            <dt>Arbitrary Collection Of Strings</dt>
+                            <dd data-bind="text: arbitraryCollectionOfStrings"></dd>
                         </dl>
                     </td>
                     <td>

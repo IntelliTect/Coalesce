@@ -4,7 +4,7 @@ import { ModelValue, ObjectValue, Value, ObjectType, CollectionValue } from "../
 import { shortStringify } from "./test-utils";
 import { Indexable } from "../src/util";
 import { twoWayConversions, studentValue, MappingData } from "./model.shared";
-import { format } from "date-fns/esm";
+import { format } from "date-fns";
 
 const studentProps = $metadata.Student.props;
 

@@ -1,6 +1,6 @@
 
-// Tedious imports for maximum tree shaking
-import { toDate, isValid, format } from 'date-fns/esm'
+// This will tree shake correctly as of v2.0.0-alpha.21
+import { toDate, isValid, format } from 'date-fns'
 
 import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata"
 import { Indexable } from './util'

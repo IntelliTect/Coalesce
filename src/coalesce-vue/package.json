@@ -19,7 +19,7 @@
     "@types/lodash-es": "^4.17.0",
     "@types/qs": "^6.5.1",
     "axios": "^0.18.0",
-    "date-fns": "2.0.0-alpha.11",
+    "date-fns": ">=2.0.0-alpha.26",
     "lodash-es": "^4.17.10",
     "qs": "^6.5.1"
   },
@@ -33,7 +33,7 @@
     "lodash": "^4.17.10",
     "ts-jest": "^22.4.6",
     "typescript": "3.1.0-dev.20180731",
-    "vue": "^2.5.16"
+    "vue": "^2.5.21"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",

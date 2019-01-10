@@ -1,19 +1,8 @@
 
-// Tedious imports for maximum tree shaking
-import * as isValid from 'date-fns/isValid'
-import * as toDate from 'date-fns/toDate'
-import * as format from 'date-fns/format'
-import * as parse from 'date-fns/parse'
-import * as setYear from 'date-fns/setYear'
-import * as setMonth from 'date-fns/setMonth'
-import * as setDate from 'date-fns/setDate'
-import * as setHours from 'date-fns/setHours'
-import * as setMinutes from 'date-fns/setMinutes'
+// This will tree shake correctly as of v2.0.0-alpha.21
+import { isValid, toDate, format, parse, setYear, setMonth, setDate, setHours, setMinutes } from 'date-fns';
 
-// import { format, parse, isValid, setYear, setMonth, setDate, setHours, setMinutes } from 'date-fns'
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-// import CDisplay from './c-display';
-import MetadataComponent from './c-metadata-component'
 
 @Component({
     name: 'c-datetime-picker',

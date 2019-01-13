@@ -169,6 +169,7 @@ export const Case = domain.types.Case = {
       name: "getSomeCases",
       displayName: "Get Some Cases",
       transportType: "item",
+      httpMethod: "POST",
       params: {
       },
       return: {
@@ -189,6 +190,7 @@ export const Case = domain.types.Case = {
       name: "getAllOpenCasesCount",
       displayName: "Get All Open Cases Count",
       transportType: "item",
+      httpMethod: "POST",
       params: {
       },
       return: {
@@ -202,6 +204,7 @@ export const Case = domain.types.Case = {
       name: "randomizeDatesAndStatus",
       displayName: "Randomize Dates And Status",
       transportType: "item",
+      httpMethod: "POST",
       params: {
       },
       return: {
@@ -215,6 +218,7 @@ export const Case = domain.types.Case = {
       name: "getCaseSummary",
       displayName: "Get Case Summary",
       transportType: "item",
+      httpMethod: "POST",
       params: {
       },
       return: {
@@ -275,6 +279,7 @@ export const CaseDto = domain.types.CaseDto = {
       name: "asyncMethodOnIClassDto",
       displayName: "Async Method On I Class Dto",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         id: {
           name: "id",
@@ -449,6 +454,7 @@ export const Company = domain.types.Company = {
       name: "getCertainItems",
       displayName: "Get Certain Items",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         isDeleted: {
           name: "isDeleted",
@@ -629,6 +635,7 @@ export const Person = domain.types.Person = {
       name: "rename",
       displayName: "Rename",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         id: {
           name: "id",
@@ -655,6 +662,7 @@ export const Person = domain.types.Person = {
       name: "changeSpacesToDashesInName",
       displayName: "Change Spaces To Dashes In Name",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         id: {
           name: "id",
@@ -674,6 +682,7 @@ export const Person = domain.types.Person = {
       name: "add",
       displayName: "Add",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         numberOne: {
           name: "numberOne",
@@ -699,6 +708,7 @@ export const Person = domain.types.Person = {
       name: "getUser",
       displayName: "Get User",
       transportType: "item",
+      httpMethod: "POST",
       params: {
       },
       return: {
@@ -712,6 +722,7 @@ export const Person = domain.types.Person = {
       name: "personCount",
       displayName: "Person Count",
       transportType: "item",
+      httpMethod: "GET",
       params: {
         lastNameStartsWith: {
           name: "lastNameStartsWith",
@@ -731,6 +742,7 @@ export const Person = domain.types.Person = {
       name: "fullNameAndAge",
       displayName: "Full Name And Age",
       transportType: "item",
+      httpMethod: "GET",
       params: {
         id: {
           name: "id",
@@ -750,6 +762,7 @@ export const Person = domain.types.Person = {
       name: "removePersonById",
       displayName: "Remove Person By Id",
       transportType: "item",
+      httpMethod: "DELETE",
       params: {
         id: {
           name: "id",
@@ -769,6 +782,7 @@ export const Person = domain.types.Person = {
       name: "obfuscateEmail",
       displayName: "Obfuscate Email",
       transportType: "item",
+      httpMethod: "PUT",
       params: {
         id: {
           name: "id",
@@ -788,6 +802,7 @@ export const Person = domain.types.Person = {
       name: "changeFirstName",
       displayName: "Change First Name",
       transportType: "item",
+      httpMethod: "PATCH",
       params: {
         id: {
           name: "id",
@@ -814,6 +829,7 @@ export const Person = domain.types.Person = {
       name: "getUserPublic",
       displayName: "Get User Public",
       transportType: "item",
+      httpMethod: "POST",
       params: {
       },
       return: {
@@ -827,6 +843,7 @@ export const Person = domain.types.Person = {
       name: "namesStartingWith",
       displayName: "Names Starting With",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         characters: {
           name: "characters",
@@ -852,6 +869,7 @@ export const Person = domain.types.Person = {
       name: "searchPeople",
       displayName: "Search People",
       transportType: "list",
+      httpMethod: "POST",
       params: {
         criteria: {
           name: "criteria",
@@ -1174,6 +1192,7 @@ export const WeatherService = domain.services.WeatherService = {
       name: "getWeather",
       displayName: "Get Weather",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         location: {
           name: "location",
@@ -1201,6 +1220,7 @@ export const WeatherService = domain.services.WeatherService = {
       name: "getWeatherAsync",
       displayName: "Get Weather Async",
       transportType: "item",
+      httpMethod: "POST",
       params: {
         location: {
           name: "location",

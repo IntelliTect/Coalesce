@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 "import * as $models from './models.g'",
                 "import * as qs from 'qs'",
                 "import { AxiosClient, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'",
-                "import { AxiosResponse, AxiosRequestConfig } from 'axios'",
+                "import { AxiosPromise, AxiosResponse, AxiosRequestConfig } from 'axios'",
             });
             b.Line();
 
@@ -73,14 +73,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 signature = $"id: {new VueType(model.PrimaryKey.Type).TsType(null)}, " + signature;
             }
 
-            using (b.Block($"public {method.JsVariable}({signature})"))
-            {
-                string resultType = method.TransportTypeGenericParameter.IsVoid
-                    ? $"{method.TransportType}<void>"
-                    : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
+            string resultType = method.TransportTypeGenericParameter.IsVoid
+                ? $"{method.TransportType}<void>"
+                : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
 
+            using (b.Block($"public {method.JsVariable}({signature}): AxiosPromise<{resultType}>"))
+            {
                 b.Line($"const $method = this.$metadata.methods.{method.JsVariable}");
-                using (b.Block($"const $params = this.$mapParams($method,", ')'))
+                using (b.Block($"const $params = "))
                 {
                     if (method.IsModelInstanceMethod)
                     {
@@ -92,26 +92,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                 }
 
-                b.Line("return AxiosClient");
-                using (b.Indented())
-                {
-                    b.Line($".{method.ApiActionHttpMethodName.ToLower()}(");
-                    b.Indented($"`/${{this.$metadata.controllerRoute}}/{method.Name}`,");
-                    switch (method.ApiActionHttpMethod)
-                    {
-                        case DataAnnotations.HttpMethod.Get:
-                        case DataAnnotations.HttpMethod.Delete:
-                            b.Indented($"this.$options(undefined, $config, $params)");
-                            break;
-                        default:
-                            b.Indented($"qs.stringify($params),");
-                            b.Indented($"this.$options(undefined, $config)");
-                            break;
-                    }
-                    b.Line(")");
-
-                    b.Line($".then<AxiosResponse<{resultType}>>(r => this.$hydrate{method.TransportType}(r, $method.return))");
-                }
+                b.Line("return this.$invoke($method, $params, $config)");
             }
 
             // Line between methods

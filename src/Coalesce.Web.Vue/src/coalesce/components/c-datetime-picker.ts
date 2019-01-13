@@ -18,7 +18,7 @@ export default class extends Vue {
     @Prop({type: String})
     public label?: string;
 
-    @Prop({default: 'MM/dd/yyyy h:mm A', type: String}) 
+    @Prop({default: 'MM/dd/yyyy h:mm aa', type: String}) 
     public dateFormat!: string;
 
     get displayedValue() {
@@ -38,7 +38,7 @@ export default class extends Vue {
             // If the input didn't match our format exactly, 
             // try parsing user input with general formatting interpretation (trying to be a good citizen)
             if (!isValid(value)) {
-                value = toDate(val)
+                value = new Date(val);
             }
             
             // If that didn't work, don't change the underlying value. Instead, display an error.

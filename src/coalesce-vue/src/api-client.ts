@@ -18,7 +18,7 @@ declare module "axios" {
     }
 }
 
-import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue } from './metadata'
+import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue, ItemMethod, ListMethod } from './metadata'
 import { Model, convertToModel, mapToDto, mapValueToDto, DataSource, convertValueToModel } from './model'
 import { OwnProps, Indexable } from './util'
 
@@ -163,7 +163,7 @@ export class ApiClient<T extends ApiRoutedType> {
      * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
     $makeCaller<TArgs extends any[], TResult>(
-        resultType: "item" | ((methods: T["methods"]) => (Method & { transportType: "item" })),
+        resultType: "item" | ItemMethod | ((methods: T["methods"]) => ItemMethod),
         invoker: TInvoker<TArgs, ItemResultPromise<TResult>, this>
     ): ItemApiState<TArgs, TResult, this> & TCall<TArgs, ItemResultPromise<TResult>>
 
@@ -173,23 +173,28 @@ export class ApiClient<T extends ApiRoutedType> {
      * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
     $makeCaller<TArgs extends any[], TResult>(
-        resultType: "list" | ((methods: T["methods"]) => (Method & { transportType: "list" })),
+        resultType: "list" | ListMethod | ((methods: T["methods"]) => ListMethod),
         invoker: TInvoker<TArgs, ListResultPromise<TResult>, this>
     ): ListApiState<TArgs, TResult, this> & TCall<TArgs, ListResultPromise<TResult>>
 
     $makeCaller<TArgs extends any[], TResult>(
-        resultType: "item" | "list" | ((methods: T["methods"]) => Method),
+        resultType: "item" | "list" | Method | ((methods: T["methods"]) => Method),
         invoker: TInvoker<TArgs, ApiResultPromise<TResult>, this>
     ): ApiState<TArgs, TResult, this> & TCall<TArgs, TResult>{
         
+        let meta: Method | undefined = undefined;
         if (typeof resultType === "function") {
-            resultType = resultType(this.$metadata.methods).transportType;
+            meta = resultType(this.$metadata.methods)
+            resultType = meta.transportType;
+        } else if (typeof resultType === "object") {
+            meta = resultType
+            resultType = resultType.transportType;
         }
         
         // This is basically all just about resolving the overloads. 
         // We use `any` because the types get really messy if you try to handle both types at once.
 
-        var instance: any;
+        var instance;
         switch (resultType){
             case "item": 
                 instance = new ItemApiState<TArgs, TResult, this>(this, invoker);
@@ -199,8 +204,55 @@ export class ApiClient<T extends ApiRoutedType> {
                 break;
             default: throw `Unknown result type ${resultType}`
         }
+
+        // Set this on the instance if we have it.
+        instance.metadata = meta;
+
+        return instance as any;
+    }
+
+    public $invoke(
+        method: ItemMethod,
+        params: { [P in keyof Method["params"]]: any; },
+        config?: AxiosRequestConfig
+    ): AxiosPromise<ItemResult<any>>;
+
+    public $invoke(
+        method: ListMethod,
+        params: { [P in keyof Method["params"]]: any; },
+        config?: AxiosRequestConfig
+    ): AxiosPromise<ListResult<any>>;
+    
+    /**
+     * Invoke the specified method using the provided set of parameters.
+     * @param method The metadata of the API  method to invoke
+     * @param params The parameters to provide to the API method.
+     * @param config A full `AxiosRequestConfig` to merge in.
+     */
+    public $invoke(
+        method: Method,
+        params: { [P in keyof Method["params"]]: any; },
+        config?: AxiosRequestConfig
+    ) {
+        params = this.$mapParams(method, params);
+        const hasBody = method.httpMethod != "GET" && method.httpMethod != "DELETE";
         
-        return instance;
+        return AxiosClient
+            .request({
+                method: method.httpMethod,
+                url: `/${this.$metadata.controllerRoute}/${method.name}`,
+                data: hasBody 
+                    ? qs.stringify(params) 
+                    : undefined,
+                ...this.$options(undefined, config, !hasBody ? params : undefined)
+            }
+            )
+            .then(r => {
+                switch (method.transportType) {
+                    case "item": return this.$hydrateItemResult(r, method.return)
+                    case "list": return this.$hydrateListResult(r, method.return)
+                }
+            })
     }
 
     /**
@@ -389,6 +441,9 @@ export type TInvoker<TArgs extends any[], TReturn, TClient extends ApiClient<any
 export type TCall<TArgs extends any[], TReturn> = (this: any, ...args: TArgs) => TReturn
 
 export abstract class ApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends Function {
+
+    /** The metadata of the method being called, if it was provided. */
+    metadata?: Method
 
     /** True if a request is currently pending. */
     isLoading: boolean = false
@@ -588,6 +643,10 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
 }
 
 export class ItemApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends ApiState<TArgs, TResult, TClient> {
+
+    /** The metadata of the method being called, if it was provided. */
+    metadata?: ItemMethod
+
     /** Validation issues returned by the previous request. */
     validationIssues: ValidationIssue[] | null = null
 
@@ -620,6 +679,10 @@ export class ItemApiState<TArgs extends any[], TResult, TClient extends ApiClien
 }
 
 export class ListApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends ApiState<TArgs, TResult, TClient> {
+
+    /** The metadata of the method being called, if it was provided. */
+    metadata?: ListMethod
+
     /** Page number returned by the previous request. */
     page: number | null = null
     /** Page size returned by the previous request. */

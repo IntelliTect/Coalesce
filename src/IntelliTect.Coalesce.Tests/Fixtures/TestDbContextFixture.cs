@@ -1,9 +1,5 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Fixtures
 {
@@ -12,7 +8,7 @@ namespace IntelliTect.Coalesce.Tests.Fixtures
         public TestDbContextFixture()
         {
             Db = new TestDbContext();
-            CrudContext = new CrudContext<TestDbContext>(Db, new System.Security.Claims.ClaimsPrincipal())
+            CrudContext = new CrudContext<TestDbContext>(Db, () => new System.Security.Claims.ClaimsPrincipal())
             {
                 ReflectionRepository = ReflectionRepositoryFactory.Reflection
             };

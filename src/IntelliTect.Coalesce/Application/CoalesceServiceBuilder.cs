@@ -1,7 +1,5 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -28,7 +26,7 @@ namespace IntelliTect.Coalesce
         {
             ReflectionRepository.Global.AddAssembly<TContext>();
             Services.AddScoped(sp => new CrudContext<TContext>(
-                sp.GetRequiredService<TContext>(),
+                sp.GetRequiredService<TContext>(), () => 
                 sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext.User,
                 sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local
             ));

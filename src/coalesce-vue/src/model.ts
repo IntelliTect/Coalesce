@@ -138,7 +138,7 @@ export function parseValue(value: any, meta: Value): null | string | number | bo
                 // it will parse any number as milliseconds since the epoch,
                 // and parses `true` as the epoch.
                 // So, we restrict parsing to strings only.
-                : type === "string" ? toDate(value) : null;
+                : type === "string" ? new Date(value) : null;
 
             if (!isValid(date)) {
                 throw parseError(value, meta);

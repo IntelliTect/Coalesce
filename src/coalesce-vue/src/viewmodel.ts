@@ -278,7 +278,6 @@ export abstract class ViewModel<
     }
 }
 
-
 // Model<TModel["$metadata"]>
 export abstract class ListViewModel<
     TModel extends Model<ModelType>,

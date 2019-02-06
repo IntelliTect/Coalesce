@@ -13,7 +13,7 @@
     <Version Condition="'$(COALESCE_VERSION)' != ''">$(COALESCE_VERSION)</Version>
     <PackageVersion Condition="'$(COALESCE_VERSION)' != ''">$(COALESCE_VERSION)</PackageVersion>
 
-    <PackageLicenseUrl>https://github.com/IntelliTect/Coalesce/blob/master/license.txt</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageTags>IntelliTect Coalesce MVC API Web Framework Generation Generator</PackageTags>

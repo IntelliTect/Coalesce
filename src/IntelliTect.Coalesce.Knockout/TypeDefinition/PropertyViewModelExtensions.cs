@@ -155,13 +155,13 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
             if (notEqual != null)
                 validations.Add($"notEqual: {KoValidationOptions($"{notEqual}", errorMessage)}");
             if (isDate.HasValue && isDate.Value)
-                validations.Add($"isDate: {KoValidationOptions("true", errorMessage)}");
+                validations.Add($"date: {KoValidationOptions("true", errorMessage)}");
             if (isDateIso.HasValue && isDateIso.Value)
-                validations.Add($"isDateISO: {KoValidationOptions("true", errorMessage)}");
+                validations.Add($"dateISO: {KoValidationOptions("true", errorMessage)}");
             if (isNumber.HasValue && isNumber.Value)
-                validations.Add($"isNumber: {KoValidationOptions("true", errorMessage)}");
+                validations.Add($"number: {KoValidationOptions("true", errorMessage)}");
             if (isDigit.HasValue && isDigit.Value)
-                validations.Add($"isDigit: {KoValidationOptions("true", errorMessage)}");
+                validations.Add($"digit: {KoValidationOptions("true", errorMessage)}");
             if (!string.IsNullOrWhiteSpace(customName) && !string.IsNullOrWhiteSpace(customValue))
                 validations.Add($"{customName}: {customValue}");
 

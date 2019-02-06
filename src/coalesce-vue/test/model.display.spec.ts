@@ -2,6 +2,7 @@ import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
 import { ObjectValue, Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
+import { format } from "date-fns/esm";
 
 const studentProps = $metadata.Student.props;
 
@@ -92,7 +93,10 @@ describe.each([
   { meta: studentProps.birthDate, model: null, display: null },
   { meta: studentProps.birthDate, model: undefined, display: null },
   { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1990-1-2 03:04:05" },
-  { meta: studentProps.birthDate, model: "1990-01-02T03:04:05.000-08:00", display: "1990-1-2 03:04:05" },
+  { meta: studentProps.birthDate, 
+    model: "1990-01-02T03:04:05.000-08:00", 
+    // We define the expected using date-fns's format to make this test timezone-independent.
+    display: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-M-d hh:mm:ss") },
   ...undisplayable(studentProps.birthDate, true, 123, "abc", {}, [], new Date("!!Invalid") ),
   
   { meta: studentProps.grade, model: undefined, display: null },

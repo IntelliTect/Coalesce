@@ -15,6 +15,10 @@
     .table-view-header {
         padding: 10px 15px;
     }
+    img.form-control-static {
+        max-width: 75px;
+        max-height: 75px;
+    }
 </style>
 <div class="table-view obj-case">
     <div class="table-view-header">
@@ -85,9 +89,25 @@
                             Reported By
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ReportedBy', 'fa-caret-down': orderByDescending() == 'ReportedBy'}"></i>
                         </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Image')}">
+                            Image
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Image', 'fa-caret-down': orderByDescending() == 'Image'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageName')}">
+                            Image Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ImageName', 'fa-caret-down': orderByDescending() == 'ImageName'}"></i>
+                        </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('Attachment')}">
                             Attachment
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Attachment', 'fa-caret-down': orderByDescending() == 'Attachment'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AttachmentName')}">
+                            Attachment Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AttachmentName', 'fa-caret-down': orderByDescending() == 'AttachmentName'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('PlainAttachment')}">
+                            Plain Attachment
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'PlainAttachment', 'fa-caret-down': orderByDescending() == 'PlainAttachment'}"></i>
                         </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
                             Severity
@@ -123,7 +143,11 @@
                             <td class="prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
                             <td class="prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
                             <td class="prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
+                            <td class="prop-image">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Image))</td>
+                            <td class="prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, true))</td>
                             <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
+                            <td class="prop-attachmentName">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.AttachmentName))</td>
+                            <td class="prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</td>
                             <td class="prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</td>
                             <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
                             <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
@@ -138,7 +162,11 @@
                             <td class="prop-openedAt">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt, true))</td>
                             <td class="prop-assignedTo">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo, true))</td>
                             <td class="prop-reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, true))</td>
+                            <td class="prop-image">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Image, true))</td>
+                            <td class="prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, true))</td>
                             <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, true))</td>
+                            <td class="prop-attachmentName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, true))</td>
+                            <td class="prop-plainAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.PlainAttachment, true))</td>
                             <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, true))</td>
                             <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, true))</td>
                             <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>

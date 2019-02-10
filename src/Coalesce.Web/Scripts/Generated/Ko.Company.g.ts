@@ -37,6 +37,7 @@ module ViewModels {
         
         
         
+        
         /** Add object to employees */
         public addToEmployees = (autoSave?: boolean | null): Person => {
             var newItem = new Person();
@@ -60,6 +61,7 @@ module ViewModels {
             () => this.coalesceConfig.baseViewUrl() + '/Person/Table?filter.companyId=' + this.companyId(),
             null, { deferEvaluation: true }
         );
+        
         
         
         

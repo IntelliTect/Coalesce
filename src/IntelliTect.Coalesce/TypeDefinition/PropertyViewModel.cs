@@ -73,16 +73,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns whether or not the property may be exposed to the client.
         /// </summary>
-        public bool IsClientProperty => !IsInternalUse && HasGetter;
+        public bool IsClientProperty => !IsInternalUse && HasGetter && !IsFile;
 
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
         public TypeViewModel PureType => Type.PureType;
-
+        
         public bool PureTypeOnContext => PureType.ClassViewModel?.IsDbMappedType ?? false;
 
+        public string FileMethodName => $"{Name}";
+
+
         public string JsVariable => Name.ToCamelCase();
+        public string JsVariableUrl => $"{JsVariable}Url";
 
         public static readonly Regex JsKeywordRegex = new Regex(
             "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true" +
@@ -171,6 +175,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the property has the DateType(DateOnly) Attribute.
         /// </summary>
+        public bool IsFile => this.HasAttribute<FileAttribute>();
+
+        /// <summary>
+        /// True if the property has the File Attribute.
+        /// </summary>
         public bool IsDateOnly
         {
             get
@@ -183,6 +192,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return false;
             }
         }
+
 
         /// <summary>
         /// Returns the DisplayName Attribute or 

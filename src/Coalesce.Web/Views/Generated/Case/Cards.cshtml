@@ -75,9 +75,13 @@
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, false))
                     </dd>
-                    <dt>Attachment</dt>
+                    <dt>Image Name</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, false))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, false))
+                    </dd>
+                    <dt>Attachment Name</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, false))
                     </dd>
                     <dt>Severity</dt>
                     <dd>

@@ -36,6 +36,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     "}",
                     ".table-view-header {",
                     "    padding: 10px 15px;",
+                    "}",
+                    "img.form-control-static {",
+                    "    max-width: 75px;",
+                    "    max-height: 75px;",
                     "}"
                 );
             }
@@ -68,7 +72,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     using (b.TagBlock("thead").TagBlock("tr"))
                     {
                         // Data column headers
-                        foreach (var prop in Model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                        foreach (var prop in Model.AdminPageProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                         {
                             if (!prop.Type.IsCollection)
                             {
@@ -94,7 +98,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         .TagBlock("tr", dataBind: $"css: {{'btn-warning': errorMessage()}}, attr: {{id: {Model.PrimaryKey.Name.ToCamelCase()}}}")
                     )
                     {
-                        var properties = Model.ClientProperties
+                        var properties = Model.AdminPageProperties
                             .Where(f => !f.IsHidden(HiddenAttribute.Areas.List))
                             .OrderBy(f => f.EditorOrder);
 

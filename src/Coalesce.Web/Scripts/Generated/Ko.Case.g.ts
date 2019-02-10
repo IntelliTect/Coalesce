@@ -34,7 +34,8 @@ module ViewModels {
         public assignedTo: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
         public reportedById: KnockoutObservable<number | null> = ko.observable(null);
         public reportedBy: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
-        public attachment: KnockoutObservable<string | null> = ko.observable(null);
+        public imageName: KnockoutObservable<string | null> = ko.observable(null);
+        public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
         
@@ -64,6 +65,22 @@ module ViewModels {
         public devTeamAssignedText: KnockoutComputed<string>;
         
         
+        /** File properties for Image */
+        public imageUrl: KnockoutComputed<string> = ko.pureComputed(() => {
+            return this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey() + '&' + this.dataSource.getQueryString();
+        });
+        
+        /** File properties for Attachment */
+        public attachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => {
+            return this.coalesceConfig.baseApiUrl() + this.apiController + '/Attachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString();
+        });
+        
+        /** File properties for PlainAttachment */
+        public plainAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => {
+            return this.coalesceConfig.baseApiUrl() + this.apiController + '/PlainAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString();
+        });
+        
+        
         
         /** Url for a table view of all members of collection CaseProducts for the current object. */
         public caseProductsListUrl: KnockoutComputed<string> = ko.computed(
@@ -87,6 +104,7 @@ module ViewModels {
             { id: 3, value: 'Closed No Solution' },
             { id: 4, value: 'Cancelled' },
         ];
+        
         
         
         /** 
@@ -164,7 +182,8 @@ module ViewModels {
             }
             this.assignedToId(data.assignedToId);
             this.reportedById(data.reportedById);
-            this.attachment(data.attachment);
+            this.imageName(data.imageName);
+            this.attachmentName(data.attachmentName);
             this.severity(data.severity);
             this.status(data.status);
             this.devTeamAssignedId(data.devTeamAssignedId);
@@ -194,7 +213,7 @@ module ViewModels {
             if (!dto.reportedById && this.reportedBy()) {
                 dto.reportedById = this.reportedBy()!.personId();
             }
-            dto.attachment = this.attachment();
+            dto.attachmentName = this.attachmentName();
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
@@ -292,7 +311,7 @@ module ViewModels {
             self.assignedTo.subscribe(self.autoSave);
             self.reportedById.subscribe(self.autoSave);
             self.reportedBy.subscribe(self.autoSave);
-            self.attachment.subscribe(self.autoSave);
+            self.attachmentName.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);

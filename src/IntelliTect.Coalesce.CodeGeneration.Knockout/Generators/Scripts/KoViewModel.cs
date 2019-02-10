@@ -84,6 +84,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
 
                 b.Line();
+                foreach (PropertyViewModel prop in Model.FileProperties)
+                {
+                    b.DocComment($"File properties for {prop.Name}");
+                    b.Line($"public {prop.JsVariableUrl}: KnockoutComputed<string> = ko.pureComputed(() => {{");
+                    b.Line($"    return this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileMethodName}?id=' + this.{prop.Parent.PrimaryKey.JsVariable}() + '&' + this.dataSource.getQueryString();");
+                    b.Line("});");                
+                }
+
+                b.Line();
                 foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.CollectionNavigation && !f.IsManytoManyCollection))
                 {
                     b.DocComment($"Add object to {prop.JsVariable}");
@@ -150,6 +159,30 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     }
                     b.Line("];");
                 }
+
+                b.Line();
+                foreach (var prop in Model.ClientProperties.Where(f => f.IsFile))
+                {
+                    b.DocComment($"Upload method for {prop.Name}");
+                    using (b.Block($"public {prop.JsVariable}Upload = (data: any, e: any): void =>"))
+                    {
+                        b.Line("let file = e.target.files[0];");
+                        b.Line("let formData = new FormData();");
+                        b.Line("formData.append(\"file\", file);");
+                        using (b.Block("$.ajax(")){
+                            b.Line($"type: \"POST\",");
+                            b.Line($"url: this.apiController +'/{prop.UploadUrl()}',");
+                            b.Line($"contentType: false,");
+                            b.Line($"processData: false,");
+                            b.Line($"data: formData,");
+                            b.Line($"success: (result) => {{}},");
+                            b.Line($"error: (result) => {{}}");
+                        }
+                    }
+                    b.Line("");
+                }
+
+
 
                 b.Line();
                 foreach (var method in Model.ClientMethods.Where(m => !m.IsStatic || m.ResultType.EqualsType(Model.Type)))

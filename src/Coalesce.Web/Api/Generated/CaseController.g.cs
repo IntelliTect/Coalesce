@@ -170,5 +170,91 @@ namespace Coalesce.Web.Api
             result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(methodResult, mappingContext, includeTree);
             return result;
         }
+
+        /// <summary>
+        /// File Upload: Image
+        /// </summary>
+        [HttpPost("Image")]
+        public virtual async Task<IActionResult> Image(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            using (var stream = new System.IO.MemoryStream())
+            {
+                file.CopyTo(stream);
+                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                itemResult.Object.Image = stream.ToArray();
+                await Db.SaveChangesAsync();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// File Download: Image
+        /// </summary>
+        [HttpGet("Image")]
+        public virtual async Task<IActionResult> Image(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Image == null) return NotFound();
+            string contentType = "image/*";
+            return File(itemResult.Object.Image, contentType, itemResult.Object.ImageName);
+        }
+
+        /// <summary>
+        /// File Upload: Attachment
+        /// </summary>
+        [HttpPost("Attachment")]
+        public virtual async Task<IActionResult> Attachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            using (var stream = new System.IO.MemoryStream())
+            {
+                file.CopyTo(stream);
+                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                itemResult.Object.Attachment = stream.ToArray();
+                itemResult.Object.AttachmentName = file.FileName;
+                await Db.SaveChangesAsync();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// File Download: Attachment
+        /// </summary>
+        [HttpGet("Attachment")]
+        public virtual async Task<IActionResult> Attachment(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Attachment == null) return NotFound();
+            string contentType = "";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = "application/octet-stream";
+            return File(itemResult.Object.Attachment, contentType, itemResult.Object.AttachmentName);
+        }
+
+        /// <summary>
+        /// File Upload: PlainAttachment
+        /// </summary>
+        [HttpPost("PlainAttachment")]
+        public virtual async Task<IActionResult> PlainAttachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            using (var stream = new System.IO.MemoryStream())
+            {
+                file.CopyTo(stream);
+                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+                itemResult.Object.PlainAttachment = stream.ToArray();
+                await Db.SaveChangesAsync();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// File Download: PlainAttachment
+        /// </summary>
+        [HttpGet("PlainAttachment")]
+        public virtual async Task<IActionResult> PlainAttachment(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.PlainAttachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            return File(itemResult.Object.PlainAttachment, contentType, "readme.txt");
+        }
     }
 }

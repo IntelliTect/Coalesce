@@ -91,6 +91,7 @@ module ViewModels {
         public companyText: KnockoutComputed<string>;
         
         
+        
         /** Add object to casesAssigned */
         public addToCasesAssigned = (autoSave?: boolean | null): Case => {
             var newItem = new Case();
@@ -157,6 +158,7 @@ module ViewModels {
             { id: 1, value: 'Male' },
             { id: 2, value: 'Female' },
         ];
+        
         
         /**
             Methods and properties for invoking server method Rename.

@@ -31,6 +31,8 @@ module ListViewModels {
             openedAt?: string;
             assignedToId?: string;
             reportedById?: string;
+            imageName?: string;
+            attachmentName?: string;
             severity?: string;
             status?: string;
             devTeamAssignedId?: string;

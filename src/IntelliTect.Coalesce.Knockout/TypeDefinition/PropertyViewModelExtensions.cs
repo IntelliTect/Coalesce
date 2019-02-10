@@ -42,6 +42,15 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
 
 
         /// <summary>
+        /// Returns the action method on the controller for the upload of this property if it is a file.
+        /// </summary>
+        public static string UploadUrl(this PropertyViewModel prop)
+        {
+            if (!prop.IsFile) { return null; }
+            return string.Format($"{prop.Name}Upload");
+        }
+
+        /// <summary>
         /// Gets the Knockout JS text for the validation.
         /// </summary>
         public static string ClientValidationKnockoutJs(this PropertyViewModel prop)

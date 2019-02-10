@@ -6,6 +6,7 @@ using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
@@ -84,7 +85,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"ListParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> ListImplementation(parameters, dataSource);");
-                
+
                 // ENDPOINT: /count
                 b.Line();
                 b.Line("[HttpGet(\"count\")]");
@@ -94,7 +95,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> CountImplementation(parameters, dataSource);");
             }
-            
+
             if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
             {
                 // ENDPOINT: /save
@@ -121,7 +122,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);");
             }
-            
+
             // ENDPOINT: /csvDownload
             b.DocComment($"Downloads CSV of {Model.DtoName}");
             b.Line("[HttpGet(\"csvDownload\")]");
@@ -130,7 +131,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             b.Indented($"ListParameters parameters,");
             b.Indented($"{dataSourceParameter})");
             b.Indented($"=> CsvDownloadImplementation(parameters, dataSource);");
-            
+
             // ENDPOINT: /csvText
             b.DocComment($"Returns CSV text of {Model.DtoName}");
             b.Line("[HttpGet(\"csvText\")]");
@@ -215,6 +216,61 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                     WriteMethodResultProcessBlock(b, method);
                 }
+            }
+            foreach (var fileProperty in Model.FileProperties)
+            {
+                string filenameProperty = fileProperty.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
+                string defaultFilename = fileProperty.GetAttributeValue<FileAttribute>(f => f.DefaultFilename)?.ToString();
+                string mimeType = fileProperty.GetAttributeValue<FileAttribute>(f => f.MimeType)?.ToString();
+                b.DocComment($"File Upload: {fileProperty.Name}");
+                // TODO: Figure out security
+                b.Line($"[HttpPost(\"{fileProperty.FileMethodName}\")]");
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileMethodName} (int id, IFormFile file, {dataSourceParameter})"))
+                {
+                    using (b.Block("using (var stream = new System.IO.MemoryStream())"))
+                    {
+                        b.Line("file.CopyTo(stream);");
+
+                        b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
+                        if (!string.IsNullOrWhiteSpace(filenameProperty) && !Model.PropertyByName(filenameProperty).IsReadOnly)
+                        {
+                            b.Line($"itemResult.Object.{filenameProperty} = file.FileName;");
+                        }
+                        b.Line("await Db.SaveChangesAsync();");
+                    }
+                    b.Line("return null;");
+                }
+
+                b.DocComment($"File Download: {fileProperty.Name}");
+                // TODO: Figure out security
+                b.Line($"[HttpGet(\"{fileProperty.FileMethodName}\")]");
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileMethodName} (int id, {dataSourceParameter})"))
+                {
+                    b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                    b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
+                    b.Line($"string contentType = \"{mimeType}\";");
+                    if (string.IsNullOrWhiteSpace(mimeType))
+                    {
+                        b.Line($"if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = \"application/octet-stream\";");
+                    }
+                    if (filenameProperty == null)
+                    {
+                        if (defaultFilename == null)
+                        {
+                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
+                        }
+                        else
+                        {
+                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, \"{defaultFilename}\");");
+                        }
+                    }
+                    else
+                    {
+                        b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{filenameProperty});");
+                    }
+                }
+
             }
         }
     }

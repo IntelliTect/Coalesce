@@ -254,6 +254,16 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         #endregion
 
+        #region File
+        public static HtmlString FileInput(
+            string bindingValue, string bindingName = "value")
+        {
+            return new HtmlString($@"
+                <input type = ""file"" class=""form-control"" data-bind=""{bindingName}: {bindingValue}"" />
+                ");
+        }
+        #endregion
+
         #region TextInput
 
         public static HtmlString TextInput(
@@ -521,11 +531,11 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     idField: '{3}', textField: '{4}', url: '/api/{5}/list?includes=none', pageSize: '{7}',""
                     class=""form-control"" multiple=""multiple"">
                 </select>",
-                prefix, 
-                propertyModel.ManyToManyCollectionName.ToCamelCase(), 
+                prefix,
+                propertyModel.ManyToManyCollectionName.ToCamelCase(),
                 propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
                 propertyModel.ManyToManyCollectionProperty.Object.PrimaryKey.Name,
-                propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name, 
+                propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name,
                 propertyModel.ManyToManyCollectionProperty.Object.ApiRouteControllerPart,
                 (string.IsNullOrWhiteSpace(areaName) ? "" : $"{areaName}."),
                 pageSize
@@ -565,7 +575,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     b.Line($"<h4 class='modal-title'>{method.Name.ToProperCase()}</h4>");
                 }
 
-                using (b.TagBlock("div", "modal-body form-horizontal", "with: args" ))
+                using (b.TagBlock("div", "modal-body form-horizontal", "with: args"))
                 {
                     foreach (ParameterViewModel arg in method.ClientParameters)
                     {
@@ -599,6 +609,13 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextInput(propertyModel.JsVariableForBinding(), bindingName);
+        }
+
+        public static HtmlString InputFor<T>(Expression<Func<T, byte[]>> propertySelector,
+            string bindingName = "file")
+        {
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            return new HtmlString(DisplayFile(propertyModel).ToString() + FileInput(propertyModel.JsVariableUrl, bindingName).ToString());
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, Enum>> propertySelector,
@@ -751,6 +768,10 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 returnString = DisplayEnum(propertyModel);
             }
+            else if (propertyModel.IsFile)
+            {
+                returnString = DisplayFile(propertyModel);
+            }
             else
             {
                 returnString = DisplayText(propertyModel.JsVariableForBinding());
@@ -806,6 +827,39 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             return new HtmlString($@"
                 <!-- Attempted to Display: {bindingValue} -->");
         }
+
+        public static HtmlString DisplayFile(PropertyViewModel propertyModel)
+        {
+            var mimeType = propertyModel.GetAttributeValue<FileAttribute>(f => f.MimeType);
+            if (mimeType != null && mimeType.ToLower().Contains("image"))
+            {
+                return DisplayFileImage(propertyModel);
+            }
+            else
+            {
+                return DisplayFileDownload(propertyModel);
+            }
+        }
+        public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
+        {
+            return new HtmlString($@"
+                <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsVariableUrl}}}"" />");
+        }
+
+        public static HtmlString DisplayFileDownload(PropertyViewModel propertyModel)
+        {
+            var filenameVariable = "'download'";
+            var defaultFilename = propertyModel.GetAttributeValue<FileAttribute>(f => f.DefaultFilename);
+            if (!string.IsNullOrWhiteSpace(defaultFilename)) filenameVariable = $"'defaultFilename'";
+            else
+            {
+                var filenameProperty = propertyModel.GetAttributeValue<FileAttribute>(f => f.DefaultFilename);
+                if (!string.IsNullOrWhiteSpace(filenameProperty)) filenameVariable = $"filenameProperty";
+            }
+            return new HtmlString($@"
+                <a href=""#"" data-bind=""attr: {{href: {propertyModel.JsVariableUrl}, download: {filenameVariable}}}""><i class=""fa fa-download""></i></a>");
+        }
+
 
 
 

@@ -18,6 +18,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         
         public override void BuildOutput(HtmlCodeBuilder b)
         {
+            using (b.TagBlock("style"))
+            {
+                b.Lines(
+                    "img.form-control-static {",
+                    "    max-width: 75px;",
+                    "    max-height: 75px;",
+                    "}"
+                );
+            }
+
             string viewModelsNamespace = "ViewModels";
             if (!string.IsNullOrWhiteSpace(AreaName))
             {
@@ -51,7 +61,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         b.Line("</div>");
                     }
 
-                    foreach (var prop in Model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)).OrderBy(f => f.EditorOrder))
+                    foreach (var prop in Model.AdminPageProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)).OrderBy(f => f.EditorOrder))
                     {
                         using (b.TagBlock("div", "form-group"))
                         {

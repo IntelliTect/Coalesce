@@ -1,5 +1,11 @@
 @using IntelliTect.Coalesce.Knockout.Helpers
 
+<style>
+    img.form-control-static {
+        max-width: 75px;
+        max-height: 75px;
+    }
+</style>
 <div class="card">
     <div class="card-heading">
         <div class="btn-group pull-right">
@@ -44,8 +50,24 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Image</label>
+                <div class="col-md-8 prop-image">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Image))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Image Name</label>
+                <div class="col-md-8 prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, false))</div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Attachment</label>
                 <div class="col-md-8 prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Attachment Name</label>
+                <div class="col-md-8 prop-attachmentName">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.AttachmentName))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Plain Attachment</label>
+                <div class="col-md-8 prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Severity</label>

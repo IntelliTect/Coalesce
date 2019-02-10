@@ -33,6 +33,8 @@ module ViewModels {
         
         
         
+        
+        
         /**
             Methods and properties for invoking server method AsyncMethodOnIClassDto.
         */

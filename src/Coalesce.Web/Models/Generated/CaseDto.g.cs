@@ -21,7 +21,8 @@ namespace Coalesce.Web.Models
         public Coalesce.Web.Models.PersonDtoGen AssignedTo { get; set; }
         public int? ReportedById { get; set; }
         public Coalesce.Web.Models.PersonDtoGen ReportedBy { get; set; }
-        public byte[] Attachment { get; set; }
+        public string ImageName { get; set; }
+        public string AttachmentName { get; set; }
         public string Severity { get; set; }
         public Coalesce.Domain.Case.Statuses? Status { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts { get; set; }
@@ -45,7 +46,8 @@ namespace Coalesce.Web.Models
             this.OpenedAt = obj.OpenedAt;
             this.AssignedToId = obj.AssignedToId;
             this.ReportedById = obj.ReportedById;
-            this.Attachment = obj.Attachment;
+            this.ImageName = obj.ImageName;
+            this.AttachmentName = obj.AttachmentName;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
@@ -91,7 +93,7 @@ namespace Coalesce.Web.Models
             entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             entity.AssignedToId = AssignedToId;
             entity.ReportedById = ReportedById;
-            entity.Attachment = Attachment;
+            entity.AttachmentName = AttachmentName;
             entity.Severity = Severity;
             entity.Status = (Status ?? entity.Status);
             entity.DevTeamAssignedId = DevTeamAssignedId;

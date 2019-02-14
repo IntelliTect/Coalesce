@@ -88,7 +88,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     b.DocComment($"File properties for {prop.Name}");
                     b.Line($"public {prop.JsVariableUrl}: KnockoutComputed<string> = ko.pureComputed(() => {{");
-                    b.Line($"    return this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileMethodName}?id=' + this.{prop.Parent.PrimaryKey.JsVariable}() + '&' + this.dataSource.getQueryString();");
+                    var fileUrl = $"this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileMethodName}";
+                    fileUrl += $"?id=' + this.{prop.Parent.PrimaryKey.JsVariable}()";
+                    fileUrl += " + '&' + this.dataSource.getQueryString()";
+                    if (!string.IsNullOrWhiteSpace(prop.FileHashProperty)) {
+                        fileUrl += $" + '&hash=' + this.{prop.FileHashProperty.ToCamelCase()}()";
+                    }
+                    b.Line($"    return {fileUrl};");
                     b.Line("});");                
                 }
 

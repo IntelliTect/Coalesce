@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190209232955_Attachments")]
+    [Migration("20190214041111_Attachments")]
     partial class Attachments
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
+                .HasAnnotation("ProductVersion", "2.2.2-servicing-10034")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -40,6 +40,10 @@ namespace Coalesce.Domain.Migrations
                     b.Property<TimeSpan>("Duration");
 
                     b.Property<byte[]>("Image");
+
+                    b.Property<string>("ImageHash");
+
+                    b.Property<long>("ImageSize");
 
                     b.Property<DateTimeOffset>("OpenedAt");
 

@@ -25,6 +25,8 @@ module ListViewModels {
             assignedToId?: string;
             reportedById?: string;
             imageName?: string;
+            imageSize?: string;
+            imageHash?: string;
             attachmentName?: string;
             severity?: string;
             status?: string;

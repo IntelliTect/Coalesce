@@ -65,18 +65,20 @@ namespace Coalesce.Domain
         [Display(Name = "Reported By")]
         public Person ReportedBy { get; set; }
 
-        [File("image/*", nameof(ImageName))]
+        [File("image/*", nameof(ImageName), nameof(ImageHash), nameof(ImageSize))]
         public byte[] Image { get; set; }
         public string ImageName { get {
                 return $"Case{CaseKey}.jpg";
             }
         }
+        public long ImageSize { get; set; }
+        public string ImageHash { get; set; }
 
         [File("", nameof(AttachmentName))]
         public byte[] Attachment { get; set; }
         public string AttachmentName { get; set; }
 
-        [File("application/octet-stream", null, "readme.txt")]
+        [File("application/octet-stream")]
         public byte[] PlainAttachment { get; set; }
 
         public string Severity { get; set; }

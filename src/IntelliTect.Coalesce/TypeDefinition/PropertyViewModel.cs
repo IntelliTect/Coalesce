@@ -177,6 +177,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsFile => this.HasAttribute<FileAttribute>();
 
+        public string FileFilenameProperty => this.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
+        public string FileMimeType => this.GetAttributeValue<FileAttribute>(f => f.MimeType)?.ToString();
+        public string FileHashProperty => this.GetAttributeValue<FileAttribute>(f => f.HashProperty)?.ToString();
+        public string FileSizeProperty => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty)?.ToString();
+
+
         /// <summary>
         /// True if the property has the File Attribute.
         /// </summary>

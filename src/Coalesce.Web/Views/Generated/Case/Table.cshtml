@@ -16,8 +16,11 @@
         padding: 10px 15px;
     }
     img.form-control-static {
-        max-width: 75px;
-        max-height: 75px;
+        max-width: 100px;
+        max-height: 100px;
+    }
+    .coalesce-upload-icon {
+        cursor: pointer;
     }
 </style>
 <div class="table-view obj-case">
@@ -97,6 +100,14 @@
                             Image Name
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ImageName', 'fa-caret-down': orderByDescending() == 'ImageName'}"></i>
                         </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageSize')}">
+                            Image Size
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ImageSize', 'fa-caret-down': orderByDescending() == 'ImageSize'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageHash')}">
+                            Image Hash
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ImageHash', 'fa-caret-down': orderByDescending() == 'ImageHash'}"></i>
+                        </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('Attachment')}">
                             Attachment
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Attachment', 'fa-caret-down': orderByDescending() == 'Attachment'}"></i>
@@ -145,6 +156,8 @@
                             <td class="prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
                             <td class="prop-image">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Image))</td>
                             <td class="prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, true))</td>
+                            <td class="prop-imageSize">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageSize))</td>
+                            <td class="prop-imageHash">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageHash))</td>
                             <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
                             <td class="prop-attachmentName">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.AttachmentName))</td>
                             <td class="prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</td>
@@ -164,6 +177,8 @@
                             <td class="prop-reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, true))</td>
                             <td class="prop-image">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Image, true))</td>
                             <td class="prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, true))</td>
+                            <td class="prop-imageSize">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageSize, true))</td>
+                            <td class="prop-imageHash">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageHash, true))</td>
                             <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, true))</td>
                             <td class="prop-attachmentName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, true))</td>
                             <td class="prop-plainAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.PlainAttachment, true))</td>

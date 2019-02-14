@@ -35,6 +35,8 @@ module ViewModels {
         public reportedById: KnockoutObservable<number | null> = ko.observable(null);
         public reportedBy: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
         public imageName: KnockoutObservable<string | null> = ko.observable(null);
+        public imageSize: KnockoutObservable<number | null> = ko.observable(null);
+        public imageHash: KnockoutObservable<string | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
@@ -67,7 +69,7 @@ module ViewModels {
         
         /** File properties for Image */
         public imageUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey() + '&' + this.dataSource.getQueryString();
+            return this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey() + '&' + this.dataSource.getQueryString() + '&hash=' + this.imageHash();
         });
         
         /** File properties for Attachment */
@@ -183,6 +185,8 @@ module ViewModels {
             this.assignedToId(data.assignedToId);
             this.reportedById(data.reportedById);
             this.imageName(data.imageName);
+            this.imageSize(data.imageSize);
+            this.imageHash(data.imageHash);
             this.attachmentName(data.attachmentName);
             this.severity(data.severity);
             this.status(data.status);
@@ -213,6 +217,8 @@ module ViewModels {
             if (!dto.reportedById && this.reportedBy()) {
                 dto.reportedById = this.reportedBy()!.personId();
             }
+            dto.imageSize = this.imageSize();
+            dto.imageHash = this.imageHash();
             dto.attachmentName = this.attachmentName();
             dto.severity = this.severity();
             dto.status = this.status();
@@ -311,6 +317,8 @@ module ViewModels {
             self.assignedTo.subscribe(self.autoSave);
             self.reportedById.subscribe(self.autoSave);
             self.reportedBy.subscribe(self.autoSave);
+            self.imageSize.subscribe(self.autoSave);
+            self.imageHash.subscribe(self.autoSave);
             self.attachmentName.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);

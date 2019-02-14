@@ -27,6 +27,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Lines(
                     ".card-view-header {",
                     "    padding: 10px 15px;",
+                    "}",
+                    "img.form-control-static {",
+                    "    max-width: 100px;",
+                    "    max-height: 100px;",
+                    "}",
+                    ".coalesce-upload-icon {",
+                    "    cursor: pointer;",
                     "}"
                 );
             }

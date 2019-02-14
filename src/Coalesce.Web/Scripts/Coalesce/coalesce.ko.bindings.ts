@@ -861,9 +861,15 @@ ko.bindingHandlers.formatNumberText = {
 };
 
 ko.bindingHandlers.file = {
-    init: (element, valueAccessor, allBindingsAccessor) => {
+    init: (element, valueAccessor, allBindingsAccessor, viewModel) => {
         // The incoming observable should be a URL of where to send this.
         // Hook up an event when the item changes.
+        var icon = $('<i class="fa fa-upload coalesce-upload-icon"></i>');
+        $(element).parent().append(icon);
+        $(element).hide();
+        icon.click(() => {
+            $(element).click();
+        })
         var value = valueAccessor();
         $(element).on('change', function () {
             var uploadUrl = ko.unwrap(value).toString();
@@ -873,6 +879,7 @@ ko.bindingHandlers.file = {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', uploadUrl, true);
             xhr.send(formData);
+            xhr.onreadystatechange = () => { if ($.isFunction(viewModel.load)) viewModel.load(); }
         });
     },
     update: (element, valueAccessor, allBindings, viewModel, bindingContext) => {

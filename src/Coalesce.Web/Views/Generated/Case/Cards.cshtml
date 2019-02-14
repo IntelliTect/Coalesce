@@ -6,6 +6,13 @@
     .card-view-header {
         padding: 10px 15px;
     }
+    img.form-control-static {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    .coalesce-upload-icon {
+        cursor: pointer;
+    }
 </style>
 
 <div class="card-view obj-case">
@@ -78,6 +85,14 @@
                     <dt>Image Name</dt>
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, false))
+                    </dd>
+                    <dt>Image Size</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageSize, false))
+                    </dd>
+                    <dt>Image Hash</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageHash, false))
                     </dd>
                     <dt>Attachment Name</dt>
                     <dd>

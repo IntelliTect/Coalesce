@@ -2,8 +2,11 @@
 
 <style>
     img.form-control-static {
-        max-width: 75px;
-        max-height: 75px;
+        max-width: 100px;
+        max-height: 100px;
+    }
+    .coalesce-upload-icon {
+        cursor: pointer;
     }
 </style>
 <div class="card">
@@ -56,6 +59,14 @@
             <div class="form-group">
                 <label class="col-md-4 control-label">Image Name</label>
                 <div class="col-md-8 prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, false))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Image Size</label>
+                <div class="col-md-8 prop-imageSize">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageSize))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Image Hash</label>
+                <div class="col-md-8 prop-imageHash">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageHash))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Attachment</label>

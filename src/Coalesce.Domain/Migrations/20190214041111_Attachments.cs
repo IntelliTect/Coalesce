@@ -18,6 +18,17 @@ namespace Coalesce.Domain.Migrations
                 table: "Case",
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "ImageHash",
+                table: "Case",
+                nullable: true);
+
+            migrationBuilder.AddColumn<long>(
+                name: "ImageSize",
+                table: "Case",
+                nullable: false,
+                defaultValue: 0L);
+
             migrationBuilder.AddColumn<byte[]>(
                 name: "PlainAttachment",
                 table: "Case",
@@ -32,6 +43,14 @@ namespace Coalesce.Domain.Migrations
 
             migrationBuilder.DropColumn(
                 name: "Image",
+                table: "Case");
+
+            migrationBuilder.DropColumn(
+                name: "ImageHash",
+                table: "Case");
+
+            migrationBuilder.DropColumn(
+                name: "ImageSize",
                 table: "Case");
 
             migrationBuilder.DropColumn(

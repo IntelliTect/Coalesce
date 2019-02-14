@@ -182,6 +182,12 @@ namespace Coalesce.Web.Api
                 file.CopyTo(stream);
                 var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 itemResult.Object.Image = stream.ToArray();
+                using (var sha256Hash = System.Security.Cryptography.SHA256.Create())
+                {
+                    var hash = sha256Hash.ComputeHash(itemResult.Object.Image);
+                    itemResult.Object.ImageHash = Convert.ToBase64String(hash);
+                }
+                itemResult.Object.ImageSize = file.Length;
                 await Db.SaveChangesAsync();
             }
             return null;
@@ -254,7 +260,7 @@ namespace Coalesce.Web.Api
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.PlainAttachment == null) return NotFound();
             string contentType = "application/octet-stream";
-            return File(itemResult.Object.PlainAttachment, contentType, "readme.txt");
+            return File(itemResult.Object.PlainAttachment, contentType);
         }
     }
 }

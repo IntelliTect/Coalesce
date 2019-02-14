@@ -219,9 +219,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
             foreach (var fileProperty in Model.FileProperties)
             {
-                string filenameProperty = fileProperty.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
-                string defaultFilename = fileProperty.GetAttributeValue<FileAttribute>(f => f.DefaultFilename)?.ToString();
-                string mimeType = fileProperty.GetAttributeValue<FileAttribute>(f => f.MimeType)?.ToString();
                 b.DocComment($"File Upload: {fileProperty.Name}");
                 // TODO: Figure out security
                 b.Line($"[HttpPost(\"{fileProperty.FileMethodName}\")]");
@@ -233,9 +230,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                         b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                         b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
-                        if (!string.IsNullOrWhiteSpace(filenameProperty) && !Model.PropertyByName(filenameProperty).IsReadOnly)
+                        if (!string.IsNullOrWhiteSpace(fileProperty.FileFilenameProperty) && !Model.PropertyByName(fileProperty.FileFilenameProperty).IsReadOnly)
                         {
-                            b.Line($"itemResult.Object.{filenameProperty} = file.FileName;");
+                            b.Line($"itemResult.Object.{fileProperty.FileFilenameProperty} = file.FileName;");
+                        }
+                        if (!string.IsNullOrWhiteSpace(fileProperty.FileHashProperty) && !Model.PropertyByName(fileProperty.FileHashProperty).IsReadOnly)
+                        {
+                            b.Line("using (var sha256Hash = System.Security.Cryptography.SHA256.Create())");
+                            b.Line("{");
+                            b.Line($"    var hash = sha256Hash.ComputeHash(itemResult.Object.{fileProperty.Name});");
+                            b.Line($"    itemResult.Object.{fileProperty.FileHashProperty} = Convert.ToBase64String(hash);");
+                            b.Line("}");
+                        }
+                        if (!string.IsNullOrWhiteSpace(fileProperty.FileSizeProperty) && !Model.PropertyByName(fileProperty.FileSizeProperty).IsReadOnly)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileSizeProperty} = file.Length;");
                         }
                         b.Line("await Db.SaveChangesAsync();");
                     }
@@ -249,25 +258,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 {
                     b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                     b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
-                    b.Line($"string contentType = \"{mimeType}\";");
-                    if (string.IsNullOrWhiteSpace(mimeType))
+                    b.Line($"string contentType = \"{fileProperty.FileMimeType}\";");
+                    if (string.IsNullOrWhiteSpace(fileProperty.FileMimeType))
                     {
                         b.Line($"if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = \"application/octet-stream\";");
                     }
-                    if (filenameProperty == null)
+                    if (fileProperty.FileFilenameProperty == null)
                     {
-                        if (defaultFilename == null)
-                        {
-                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
-                        }
-                        else
-                        {
-                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, \"{defaultFilename}\");");
-                        }
+                        b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
                     }
                     else
                     {
-                        b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{filenameProperty});");
+                        b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{fileProperty.FileFilenameProperty});");
                     }
                 }
 

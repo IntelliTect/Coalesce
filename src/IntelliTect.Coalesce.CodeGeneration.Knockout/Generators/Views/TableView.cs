@@ -38,8 +38,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     "    padding: 10px 15px;",
                     "}",
                     "img.form-control-static {",
-                    "    max-width: 75px;",
-                    "    max-height: 75px;",
+                    "    max-width: 100px;",
+                    "    max-height: 100px;",
+                    "}",
+                    ".coalesce-upload-icon {",
+                    "    cursor: pointer;",
                     "}"
                 );
             }

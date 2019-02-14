@@ -147,7 +147,7 @@ export type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResu
 type AnyApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
     = ReturnType<T> extends ApiResultPromise<infer S> ? S : any;
 
-export type ApiCallerConcurrency = "cancel" | "disallow" | "allow"
+export type ApiCallerConcurrency = "cancel" | "disallow" | "allow" | "debounce"
 
 export class ApiClient<T extends ApiRoutedType> {
 
@@ -470,11 +470,15 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
      * Set the concurrency mode for this API caller. Default is "disallow".
      * @param mode Behavior for when a request is made while there is already an outstanding request.
      * 
-     * "cancel" - cancel the outstanding request first. 
+     * "cancel" - Cancel the outstanding request first. 
      * 
-     * "disallow" - throw an error. 
+     * "debounce" - if a request is made while one is outstanding, enqueue it to start after the outstanding 
+     * request is done. If another request is made while one is already enqueued, the enqueued request is abandoned
+     * and replaced by the last request that was made.
      * 
-     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     * "disallow" - Throw an error. 
+     * 
+     * "allow" - Permit the second request to be made. The ultimate values of the state fields may not be representative of the last request made.
      */
     setConcurrency(mode: ApiCallerConcurrency) {
         // This method exists as a way to configure this in a chainable way when instantiating API callers.
@@ -527,12 +531,37 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
 
     public invoke!: this
 
-    private _invokeInternal(thisArg: any, ...args: TArgs) {
+    private _debounceSignal: { promise: Promise<void>, resolve: () => void, reject: () => void } | null = null;
+    private async _invokeInternal(thisArg: any, ...args: TArgs) {
         if (this.isLoading) {
             if (this._concurrencyMode === "disallow") {
                 throw `Request is already pending for invoker ${this.invoker.toString()}`
             } else if (this._concurrencyMode === "cancel") {
                 this.cancel()
+            } else if (this._concurrencyMode === "debounce") {
+                // If there's already a pending debounced request,
+                // reject it, and then create a new promise and await a successful signal.
+                if (this._debounceSignal) {
+                    this._debounceSignal.reject()
+                }
+
+                const signal: any = {};
+                signal.promise = new Promise((resolve, reject) => {
+                    signal.resolve = resolve;
+                    signal.reject = reject;
+                })
+                this._debounceSignal = signal;
+                
+                // Await completion of the current outstanding request,
+                // or until another call is made while we're still pending.
+                try {
+                    await signal.promise;
+                } catch {
+                    // Similar to the "cancel" mode,
+                    // aborted requests are not thrown as rejected promises,
+                    // but instead as a fulfilled promise with a void resolved value.
+                    return void 0;
+                }
             }
         }
 
@@ -547,60 +576,62 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
         try {
             const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
             this._cancelToken = token
-            promise = this.invoker.apply(thisArg, [this.apiClient, ...args])
+            const resp = await (this.invoker as any).apply(thisArg, [this.apiClient, ...args])
+
+            const data = resp.data
+            delete this._cancelToken
+            this.setResponseProps(data)
+
+            this._callbacks.onFulfilled.forEach(cb => cb.apply(thisArg, [this]))
+
+            this.isLoading = false
+
+            // We have to maintain the shape of the promise of the stateless invoke method.
+            // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
+            // The reason for this is that we can't change the return type of TCall while maintaining 
+            // the param signature (unless we required a full, explicit type annotation as a type parameter,
+            // but this would make the usability of apiCallers very unpleasant.)
+            // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
+            // but changing the implementation would be a significant breaking change by then.
+            return resp
+        } catch (thrown) {
+            if (axios.isCancel(thrown)) {
+                // No handling of anything for cancellations.
+                // A cancellation is deliberate and shouldn't be treated as an error state. Callbacks should not be called either - pretend the request never happened.
+                // If a compelling case for invoking callbacks on cancel is found,
+                // it should probably be implemented as a separate set of callbacks.
+                // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
+                // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
+                return;
+            } else {
+                var error = thrown as AxiosError;
+            }
+
+            delete this._cancelToken
+            this.wasSuccessful = false
+            const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
+            if (result && typeof result.data === "object") {
+                this.setResponseProps(result.data)
+            } else {
+                this.message = 
+                    typeof error.message === "string" ? error.message : 
+                    typeof error === "string" ? error :
+                    "A network error occurred" // TODO: i18n
+            }
+
+            this._callbacks.onRejected.forEach(cb => cb.apply(thisArg, [this]))
+
+            this.isLoading = false
+
+            return error
         } finally {
             (this.apiClient as any)._nextCancelToken = null
+
+            if (this._debounceSignal) {
+                this._debounceSignal.resolve()
+                this._debounceSignal = null;
+            }
         }
-
-        return promise
-            .then(resp => {
-                const data = resp.data
-                delete this._cancelToken
-                this.setResponseProps(data)
-
-                this._callbacks.onFulfilled.forEach(cb => cb.apply(thisArg, [this]))
-
-                this.isLoading = false
-
-                // We have to maintain the shape of the promise of the stateless invoke method.
-                // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
-                // The reason for this is that we can't change the return type of TCall while maintaining 
-                // the param signature (unless we required a full, explicit type annotation as a type parameter,
-                // but this would make the usability of apiCallers very unpleasant.)
-                // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
-                // but changing the implementation would be a significant breaking change by then.
-                return resp
-            }, (thrown: AxiosError | Cancel) => {
-                if (axios.isCancel(thrown)) {
-                    // No handling of anything for cancellations.
-                    // A cancellation is deliberate and shouldn't be treated as an error state. Callbacks should not be called either - pretend the request never happened.
-                    // If a compelling case for invoking callbacks on cancel is found,
-                    // it should probably be implemented as a separate set of callbacks.
-                    // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
-                    // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
-                    return;
-                } else {
-                    var error = thrown as AxiosError;
-                }
-
-                delete this._cancelToken
-                this.wasSuccessful = false
-                const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
-                if (result && typeof result.data === "object") {
-                    this.setResponseProps(result.data)
-                } else {
-                    this.message = 
-                        typeof error.message === "string" ? error.message : 
-                        typeof error === "string" ? error :
-                        "A network error occurred" // TODO: i18n
-                }
-
-                this._callbacks.onRejected.forEach(cb => cb.apply(thisArg, [this]))
-
-                this.isLoading = false
-
-                return error
-            })
     }
 
     protected _makeReactive() {

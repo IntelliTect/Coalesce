@@ -7,9 +7,12 @@ describe("$makeCaller", () => {
 
   const wait = async (wait: number) => await new Promise(resolve => setTimeout(resolve, wait))
 
-  const endpointMock = jest.fn().mockResolvedValue({ data: <ItemResult>{
-    wasSuccessful: true, object: "foo"
-  }})
+  let endpointMock: jest.Mock<any>;
+  beforeEach(() => {
+    endpointMock = jest.fn().mockResolvedValue({ data: <ItemResult>{
+      wasSuccessful: true, object: "foo"
+    }})
+  })
 
   test("passes parameters to invoker func", () => {
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => endpointMock(num))
@@ -69,6 +72,65 @@ describe("$makeCaller", () => {
     const concurrencyModeProp = Object.getOwnPropertyDescriptor(caller, 'concurrencyMode');
     expect(concurrencyModeProp).toBeUndefined();
 
+  })
+
+  test("debounce ignores redundant requests when resolving", async () => {
+    const caller = new StudentApiClient()
+      .$makeCaller("item", async (c, param: number) => { 
+        await wait(20)
+        return await endpointMock(param) 
+      })
+      .setConcurrency("debounce")
+
+    const calls = []
+    calls.push(caller(1))
+    calls.push(caller(2))
+    calls.push(caller(3))
+
+    await Promise.all(calls)
+
+    // Should only be two calls. 
+    // The first one should have completed,
+    // The second should be skipped because it was overwritten by the 3rd,
+    // and the 3rd should complete.
+    expect(endpointMock.mock.calls.length).toBe(2);
+    expect(endpointMock.mock.calls[0][0]).toBe(1);
+    expect(endpointMock.mock.calls[1][0]).toBe(3);
+    
+    expect(calls[0]).resolves.toBeTruthy();
+    expect(calls[1]).resolves.toBeFalsy();
+    expect(calls[2]).resolves.toBeTruthy();
+  })
+
+  test("debounce ignores redundant requests when throwing", async () => {
+    const caller = new StudentApiClient()
+      .$makeCaller("item", async (c, param: number) => { 
+        await wait(20)
+         // endpointMock in this case is just being used to record our parameter's value.
+         // In a real world case, the endpoint itself would throw.
+        await endpointMock(param)
+        throw "thrown"
+      })
+      .setConcurrency("debounce")
+
+    const calls = []
+    calls.push(caller(1))
+    calls.push(caller(2))
+    calls.push(caller(3))
+
+    await Promise.all(calls)
+
+    // Should only be two calls. 
+    // The first one should have completed,
+    // The second should be skipped because it was overwritten by the 3rd,
+    // and the 3rd should complete.
+    expect(endpointMock.mock.calls.length).toBe(2);
+    expect(endpointMock.mock.calls[0][0]).toBe(1);
+    expect(endpointMock.mock.calls[1][0]).toBe(3);
+    
+    expect(calls[0]).resolves.toBeTruthy();
+    expect(calls[1]).resolves.toBeFalsy();
+    expect(calls[2]).resolves.toBeTruthy();
   })
 
 })

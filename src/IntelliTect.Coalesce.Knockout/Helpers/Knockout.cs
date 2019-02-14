@@ -255,11 +255,21 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         #endregion
 
         #region File
-        public static HtmlString FileInput(
-            string bindingValue, string bindingName = "value")
+        public static HtmlString FileUploadButton(
+            string bindingValue, string bindingName = "fileUpload")
         {
             return new HtmlString($@"
-                <input type = ""file"" class=""form-control"" data-bind=""{bindingName}: {bindingValue}"" />
+                <button class=""btn btn-default coalesce-upload-button"" data-bind=""{bindingName}: {bindingValue}"">
+                    <i class=""fa fa-upload""></i>
+                </button>
+                ");
+        }
+
+        public static HtmlString FileUpload(
+   string bindingValue, string bindingName = "fileUpload")
+        {
+            return new HtmlString($@"
+                <i type=""file"" class=""fa fa-upload"" data-bind=""{bindingName}: {bindingValue}""></i>
                 ");
         }
         #endregion
@@ -612,10 +622,10 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         }
 
         public static HtmlString InputFor<T>(Expression<Func<T, byte[]>> propertySelector,
-            string bindingName = "file")
+            string bindingName = "fileUpload")
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            return new HtmlString(DisplayFile(propertyModel).ToString() + FileInput(propertyModel.JsVariableUrl, bindingName).ToString());
+            return new HtmlString(DisplayFile(propertyModel).ToString() + FileUploadButton(propertyModel.JsVariableUrl, bindingName).ToString());
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, Enum>> propertySelector,
@@ -837,7 +847,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             }
             else
             {
-                return DisplayFileDownload(propertyModel);
+                return DisplayFileDownloadButton(propertyModel);
             }
         }
         public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
@@ -846,12 +856,17 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsVariableUrl}}}"" />");
         }
 
-        public static HtmlString DisplayFileDownload(PropertyViewModel propertyModel)
+        public static HtmlString DisplayFileDownloadButton(PropertyViewModel propertyModel)
+        {
+            return DisplayFileDownload(propertyModel, "btn btn-default coalesce-download-button");
+        }
+
+        public static HtmlString DisplayFileDownload(PropertyViewModel propertyModel, string classes)
         {
             var filenameVariable = "'download'";
             if (!string.IsNullOrWhiteSpace(propertyModel.FileFilenameProperty)) filenameVariable = $"{propertyModel.FileFilenameProperty}";
             return new HtmlString($@"
-                <a href=""#"" data-bind=""attr: {{href: {propertyModel.JsVariableUrl}, download: {filenameVariable.ToCamelCase()}}}""><i class=""fa fa-download""></i></a>");
+                <a href=""#"" class=""{classes}"" data-bind=""attr: {{href: {propertyModel.JsVariableUrl}, download: {filenameVariable.ToCamelCase()}}}""><i class=""fa fa-download""></i></a>");
         }
 
 

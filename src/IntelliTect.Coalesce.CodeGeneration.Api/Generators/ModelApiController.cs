@@ -219,16 +219,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
             foreach (var fileProperty in Model.FileProperties)
             {
+                var returnType = $"Task<ItemResult<{Model.DtoName}>>";
                 b.DocComment($"File Upload: {fileProperty.Name}");
                 // TODO: Figure out security
                 b.Line($"[HttpPost(\"{fileProperty.FileMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileMethodName} (int id, IFormFile file, {dataSourceParameter})"))
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileMethodName} (int id, IFormFile file, {dataSourceParameter})"))
                 {
+                    b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                     using (b.Block("using (var stream = new System.IO.MemoryStream())"))
                     {
                         b.Line("file.CopyTo(stream);");
 
-                        b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                         b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
                         if (!string.IsNullOrWhiteSpace(fileProperty.FileFilenameProperty) && !Model.PropertyByName(fileProperty.FileFilenameProperty).IsReadOnly)
                         {
@@ -248,7 +249,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         }
                         b.Line("await Db.SaveChangesAsync();");
                     }
-                    b.Line("return null;");
+                    b.Line($"var result = new ItemResult<{Model.DtoName}>();");
+                    b.Line("var mappingContext = new MappingContext(User, \"\");");
+                    b.Line($"result.Object = Mapper.MapToDto<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>(itemResult.Object, mappingContext, null);");
+                    b.Line("return result;");
                 }
 
                 b.DocComment($"File Download: {fileProperty.Name}");

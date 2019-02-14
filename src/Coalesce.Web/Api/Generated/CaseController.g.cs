@@ -175,12 +175,12 @@ namespace Coalesce.Web.Api
         /// File Upload: Image
         /// </summary>
         [HttpPost("Image")]
-        public virtual async Task<IActionResult> Image(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<ItemResult<CaseDtoGen>> Image(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
         {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             using (var stream = new System.IO.MemoryStream())
             {
                 file.CopyTo(stream);
-                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 itemResult.Object.Image = stream.ToArray();
                 using (var sha256Hash = System.Security.Cryptography.SHA256.Create())
                 {
@@ -190,7 +190,10 @@ namespace Coalesce.Web.Api
                 itemResult.Object.ImageSize = file.Length;
                 await Db.SaveChangesAsync();
             }
-            return null;
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
         }
 
         /// <summary>
@@ -209,17 +212,20 @@ namespace Coalesce.Web.Api
         /// File Upload: Attachment
         /// </summary>
         [HttpPost("Attachment")]
-        public virtual async Task<IActionResult> Attachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<ItemResult<CaseDtoGen>> Attachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
         {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             using (var stream = new System.IO.MemoryStream())
             {
                 file.CopyTo(stream);
-                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 itemResult.Object.Attachment = stream.ToArray();
                 itemResult.Object.AttachmentName = file.FileName;
                 await Db.SaveChangesAsync();
             }
-            return null;
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
         }
 
         /// <summary>
@@ -239,16 +245,19 @@ namespace Coalesce.Web.Api
         /// File Upload: PlainAttachment
         /// </summary>
         [HttpPost("PlainAttachment")]
-        public virtual async Task<IActionResult> PlainAttachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<ItemResult<CaseDtoGen>> PlainAttachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
         {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             using (var stream = new System.IO.MemoryStream())
             {
                 file.CopyTo(stream);
-                var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
                 itemResult.Object.PlainAttachment = stream.ToArray();
                 await Db.SaveChangesAsync();
             }
-            return null;
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
         }
 
         /// <summary>

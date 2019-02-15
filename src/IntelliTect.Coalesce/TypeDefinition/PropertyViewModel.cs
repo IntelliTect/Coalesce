@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public bool PureTypeOnContext => PureType.ClassViewModel?.IsDbMappedType ?? false;
 
-        public string FileMethodName => $"{Name}";
+        public string FileControllerMethodName => $"{Name}";
 
 
         public string JsVariable => Name.ToCamelCase();

@@ -222,8 +222,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 var returnType = $"Task<ItemResult<{Model.DtoName}>>";
                 b.DocComment($"File Upload: {fileProperty.Name}");
                 // TODO: Figure out security
-                b.Line($"[HttpPost(\"{fileProperty.FileMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileMethodName} (int id, IFormFile file, {dataSourceParameter})"))
+                b.Line($"[HttpPost(\"{fileProperty.FileControllerMethodName}\")]");
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName} (int id, IFormFile file, {dataSourceParameter})"))
                 {
                     b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                     using (b.Block("using (var stream = new System.IO.MemoryStream())"))
@@ -257,8 +257,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                 b.DocComment($"File Download: {fileProperty.Name}");
                 // TODO: Figure out security
-                b.Line($"[HttpGet(\"{fileProperty.FileMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileMethodName} (int id, {dataSourceParameter})"))
+                b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName} (int id, {dataSourceParameter})"))
                 {
                     b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                     b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");

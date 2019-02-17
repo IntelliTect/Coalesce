@@ -852,8 +852,15 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         }
         public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
         {
-            return new HtmlString($@"
+            var result = new HtmlString($@"
                 <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsVariableUrl}}}"" />");
+            // Prevent request for unbound images.
+            result = new HtmlString($@"
+                <!-- ko if: {propertyModel.Parent.PrimaryKey.JsVariable}() -->
+                {result}
+                <!-- /ko -->
+            ");
+            return result;
         }
 
         public static HtmlString DisplayFileDownloadButton(PropertyViewModel propertyModel)
@@ -865,8 +872,17 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             var filenameVariable = "'download'";
             if (propertyModel.HasFileFilenameProperty) filenameVariable = $"{propertyModel.FileFilenameProperty.Name}";
-            return new HtmlString($@"
+            var result = new HtmlString($@"
                 <a href=""#"" class=""{classes}"" data-bind=""attr: {{href: {propertyModel.JsVariableUrl}, download: {filenameVariable.ToCamelCase()}}}""><i class=""fa fa-download""></i></a>");
+            if (propertyModel.HasFileHashProperty)
+            {
+                result = new HtmlString($@"
+                    <!-- ko if: {propertyModel.FileHashProperty.JsVariable}() -->
+                    {result}
+                    <!-- /ko -->
+                ");
+            }
+            return result;
         }
 
 

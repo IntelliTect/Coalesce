@@ -177,7 +177,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsFile => this.HasAttribute<FileAttribute>();
 
-        private string FileFilenamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
         public string FileMimeType
         {
             get
@@ -187,6 +186,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return attrValue;
             }
         }
+        private string FileFilenamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
         private string FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty)?.ToString();
         private string FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty)?.ToString();
 
@@ -194,13 +194,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public PropertyViewModel FileHashProperty => this.Parent.PropertyByName(this.FileHashPropertyName);
         public PropertyViewModel FileSizeProperty => this.Parent.PropertyByName(this.FileSizePropertyName);
 
-        public bool HasFileFilenameProperty => !string.IsNullOrWhiteSpace(this.FileFilenamePropertyName);
         public bool HasFileMimeType => !string.IsNullOrWhiteSpace(this.FileMimeType);
+        public bool HasFileFilenameProperty => !string.IsNullOrWhiteSpace(this.FileFilenamePropertyName);
         public bool HasFileHashProperty => !string.IsNullOrWhiteSpace(this.FileHashPropertyName);
         public bool HasFileSizeProperty => !string.IsNullOrWhiteSpace(this.FileSizePropertyName);
-
-        public bool IsExplicitlyLoaded => !this.IsFile && this.HasSetter && this.IsDbMapped;
-
 
 
         /// <summary>

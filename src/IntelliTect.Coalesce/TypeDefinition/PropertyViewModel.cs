@@ -177,10 +177,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsFile => this.HasAttribute<FileAttribute>();
 
-        public string FileFilenameProperty => this.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
-        public string FileMimeType => this.GetAttributeValue<FileAttribute>(f => f.MimeType)?.ToString();
-        public string FileHashProperty => this.GetAttributeValue<FileAttribute>(f => f.HashProperty)?.ToString();
-        public string FileSizeProperty => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty)?.ToString();
+        private string FileFilenamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
+        public string FileMimeType
+        {
+            get
+            {
+                var attrValue = this.GetAttributeValue<FileAttribute>(f => f.MimeType)?.ToString();
+                if (string.IsNullOrWhiteSpace(attrValue)) return "application/octet-stream";
+                return attrValue;
+            }
+        }
+        private string FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty)?.ToString();
+        private string FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty)?.ToString();
+
+        public PropertyViewModel FileFilenameProperty => this.Parent.PropertyByName(this.FileFilenamePropertyName);
+        public PropertyViewModel FileHashProperty => this.Parent.PropertyByName(this.FileHashPropertyName);
+        public PropertyViewModel FileSizeProperty => this.Parent.PropertyByName(this.FileSizePropertyName);
+
+        public bool HasFileFilenameProperty => !string.IsNullOrWhiteSpace(this.FileFilenamePropertyName);
+        public bool HasFileMimeType => !string.IsNullOrWhiteSpace(this.FileMimeType);
+        public bool HasFileHashProperty => !string.IsNullOrWhiteSpace(this.FileHashPropertyName);
+        public bool HasFileSizeProperty => !string.IsNullOrWhiteSpace(this.FileSizePropertyName);
+
+        public bool IsExplicitlyLoaded => !this.IsFile && this.HasSetter && this.IsDbMapped;
+
 
 
         /// <summary>

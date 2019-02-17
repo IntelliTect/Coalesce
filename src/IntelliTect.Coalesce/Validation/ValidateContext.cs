@@ -74,9 +74,9 @@ namespace IntelliTect.Coalesce.Validation
                         }
                         if (prop.IsFile)
                         {
-                            if (!string.IsNullOrWhiteSpace(prop.FileFilenameProperty)) assert.IsNotNull(prop.Parent.PropertyByName(prop.FileFilenameProperty), $"Cannot find filename property: {prop.Parent.Name}.{prop.FileFilenameProperty} for {prop.Name}");
-                            if (!string.IsNullOrWhiteSpace(prop.FileHashProperty)) assert.IsNotNull(prop.Parent.PropertyByName(prop.FileHashProperty), $"Cannot find file hash property: {prop.Parent.Name}.{prop.FileHashProperty} for {prop.Name}");
-                            if (!string.IsNullOrWhiteSpace(prop.FileSizeProperty)) assert.IsNotNull(prop.Parent.PropertyByName(prop.FileSizeProperty), $"Cannot find file size property: {prop.Parent.Name}.{prop.FileSizeProperty} for {prop.Name}");
+                            if (prop.HasFileFilenameProperty) assert.IsNotNull(prop.FileFilenameProperty, $"Cannot find filename property: {prop.Parent.Name}.{prop.FileFilenameProperty} for {prop.Name}");
+                            if (prop.HasFileHashProperty) assert.IsNotNull(prop.FileHashProperty, $"Cannot find file hash property: {prop.Parent.Name}.{prop.FileHashProperty} for {prop.Name}");
+                            if (prop.HasFileSizeProperty) assert.IsNotNull(prop.FileSizeProperty, $"Cannot find file size property: {prop.Parent.Name}.{prop.FileSizeProperty} for {prop.Name}");
                         }
                     }
                     catch (Exception ex)

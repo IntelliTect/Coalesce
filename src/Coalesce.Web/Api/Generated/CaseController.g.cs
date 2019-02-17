@@ -205,6 +205,7 @@ namespace Coalesce.Web.Api
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.Image == null) return NotFound();
             string contentType = "image/*";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = "application/octet-stream";
             return File(itemResult.Object.Image, contentType, itemResult.Object.ImageName);
         }
 
@@ -236,7 +237,7 @@ namespace Coalesce.Web.Api
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.Attachment == null) return NotFound();
-            string contentType = "";
+            string contentType = "application/octet-stream";
             if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = "application/octet-stream";
             return File(itemResult.Object.Attachment, contentType, itemResult.Object.AttachmentName);
         }
@@ -268,7 +269,8 @@ namespace Coalesce.Web.Api
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.PlainAttachment == null) return NotFound();
-            string contentType = "application/octet-stream";
+            string contentType = "text/plain";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = "application/octet-stream";
             return File(itemResult.Object.PlainAttachment, contentType);
         }
     }

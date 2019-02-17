@@ -91,8 +91,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     var fileUrl = $"this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileControllerMethodName}";
                     fileUrl += $"?id=' + this.{prop.Parent.PrimaryKey.JsVariable}()";
                     fileUrl += " + '&' + this.dataSource.getQueryString()";
-                    if (!string.IsNullOrWhiteSpace(prop.FileHashProperty)) {
-                        fileUrl += $" + '&hash=' + this.{prop.FileHashProperty.ToCamelCase()}()";
+                    if (prop.HasFileHashProperty) {
+                        fileUrl += $" + '&hash=' + this.{prop.FileHashProperty.JsVariable}()";
                     }
                     b.Line($"    return {fileUrl};");
                     b.Line("});");                

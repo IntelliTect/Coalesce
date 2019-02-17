@@ -78,7 +78,7 @@ namespace Coalesce.Domain
         public byte[] Attachment { get; set; }
         public string AttachmentName { get; set; }
 
-        [File("application/octet-stream")]
+        [File("text/plain")]
         public byte[] PlainAttachment { get; set; }
 
         public string Severity { get; set; }

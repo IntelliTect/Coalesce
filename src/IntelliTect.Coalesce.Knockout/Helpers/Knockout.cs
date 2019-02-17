@@ -864,7 +864,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString DisplayFileDownload(PropertyViewModel propertyModel, string classes)
         {
             var filenameVariable = "'download'";
-            if (!string.IsNullOrWhiteSpace(propertyModel.FileFilenameProperty)) filenameVariable = $"{propertyModel.FileFilenameProperty}";
+            if (propertyModel.HasFileFilenameProperty) filenameVariable = $"{propertyModel.FileFilenameProperty.Name}";
             return new HtmlString($@"
                 <a href=""#"" class=""{classes}"" data-bind=""attr: {{href: {propertyModel.JsVariableUrl}, download: {filenameVariable.ToCamelCase()}}}""><i class=""fa fa-download""></i></a>");
         }

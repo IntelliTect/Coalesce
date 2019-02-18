@@ -223,9 +223,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.DocComment($"File Upload: {fileProperty.Name}");
                 // TODO: Figure out security
                 b.Line($"[HttpPost(\"{fileProperty.FileControllerMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName} (int id, IFormFile file, {dataSourceParameter})"))
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Post (int id, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
                 {
                     b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                    b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return new ItemResult <{Model.DtoName}>(\"Not found\");");
                     using (b.Block("using (var stream = new System.IO.MemoryStream())"))
                     {
                         b.Line("file.CopyTo(stream);");
@@ -258,7 +259,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.DocComment($"File Download: {fileProperty.Name}");
                 // TODO: Figure out security
                 b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName} (int id, {dataSourceParameter})"))
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get (int id, {dataSourceParameter})"))
                 {
                     b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                     b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
@@ -276,6 +277,37 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{fileProperty.FileFilenameProperty.Name});");
                     }
                 }
+
+                b.DocComment($"File Delete: {fileProperty.Name}");
+                // TODO: Figure out security
+                b.Line($"[HttpDelete (\"{fileProperty.FileControllerMethodName}\")]");
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Delete (int id, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
+                {
+                    b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                    b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
+
+                    if (fileProperty.HasFileHashProperty && !fileProperty.FileHashProperty.IsReadOnly)
+                    {
+                        b.Line($"    itemResult.Object.{fileProperty.FileHashProperty.Name} = null;");
+                    }
+                    if (fileProperty.HasFileSizeProperty && !fileProperty.FileSizeProperty.IsReadOnly)
+                    {
+                        b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = 0;");
+                    }
+                    if (fileProperty.Type.IsNullable)
+                    {
+                        b.Line($"itemResult.Object.{fileProperty.Name} = null;");
+                    }
+                    else
+                    {
+                        b.Line($"itemResult.Object.{fileProperty.Name} = new byte[];");
+                    }
+                    b.Line("await Db.SaveChangesAsync();");
+                    b.Line("return Ok();");
+
+
+                }
+
             }
         }
     }

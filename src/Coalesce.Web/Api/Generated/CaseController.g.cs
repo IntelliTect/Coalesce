@@ -175,9 +175,10 @@ namespace Coalesce.Web.Api
         /// File Upload: Image
         /// </summary>
         [HttpPost("Image")]
-        public virtual async Task<ItemResult<CaseDtoGen>> Image(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<ItemResult<CaseDtoGen>> ImagePost(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Image == null) return new ItemResult<CaseDtoGen>("Not found");
             using (var stream = new System.IO.MemoryStream())
             {
                 file.CopyTo(stream);
@@ -200,7 +201,7 @@ namespace Coalesce.Web.Api
         /// File Download: Image
         /// </summary>
         [HttpGet("Image")]
-        public virtual async Task<IActionResult> Image(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<IActionResult> ImageGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.Image == null) return NotFound();
@@ -210,12 +211,28 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// File Delete: Image
+        /// </summary>
+        [HttpDelete("Image")]
+        public virtual async Task<IActionResult> ImageDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Image == null) return NotFound();
+            itemResult.Object.ImageHash = null;
+            itemResult.Object.ImageSize = 0;
+            itemResult.Object.Image = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
+
+        /// <summary>
         /// File Upload: Attachment
         /// </summary>
         [HttpPost("Attachment")]
-        public virtual async Task<ItemResult<CaseDtoGen>> Attachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<ItemResult<CaseDtoGen>> AttachmentPost(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Attachment == null) return new ItemResult<CaseDtoGen>("Not found");
             using (var stream = new System.IO.MemoryStream())
             {
                 file.CopyTo(stream);
@@ -233,7 +250,7 @@ namespace Coalesce.Web.Api
         /// File Download: Attachment
         /// </summary>
         [HttpGet("Attachment")]
-        public virtual async Task<IActionResult> Attachment(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<IActionResult> AttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.Attachment == null) return NotFound();
@@ -243,12 +260,26 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// File Delete: Attachment
+        /// </summary>
+        [HttpDelete("Attachment")]
+        public virtual async Task<IActionResult> AttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Attachment == null) return NotFound();
+            itemResult.Object.Attachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
+
+        /// <summary>
         /// File Upload: PlainAttachment
         /// </summary>
         [HttpPost("PlainAttachment")]
-        public virtual async Task<ItemResult<CaseDtoGen>> PlainAttachment(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<ItemResult<CaseDtoGen>> PlainAttachmentPost(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.PlainAttachment == null) return new ItemResult<CaseDtoGen>("Not found");
             using (var stream = new System.IO.MemoryStream())
             {
                 file.CopyTo(stream);
@@ -265,13 +296,26 @@ namespace Coalesce.Web.Api
         /// File Download: PlainAttachment
         /// </summary>
         [HttpGet("PlainAttachment")]
-        public virtual async Task<IActionResult> PlainAttachment(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        public virtual async Task<IActionResult> PlainAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.PlainAttachment == null) return NotFound();
             string contentType = "text/plain";
             if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = "application/octet-stream";
             return File(itemResult.Object.PlainAttachment, contentType);
+        }
+
+        /// <summary>
+        /// File Delete: PlainAttachment
+        /// </summary>
+        [HttpDelete("PlainAttachment")]
+        public virtual async Task<IActionResult> PlainAttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.PlainAttachment == null) return NotFound();
+            itemResult.Object.PlainAttachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
         }
     }
 }

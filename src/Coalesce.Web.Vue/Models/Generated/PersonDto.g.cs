@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
 namespace Coalesce.Web.Vue.Models
@@ -57,7 +56,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
             {
                 this.CasesAssigned = propValCasesAssigned
-                    .AsQueryable().OrderBy("CaseKey ASC").AsEnumerable<Coalesce.Domain.Case>()
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => f.CaseKey)
                     .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
             }
             else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
@@ -69,7 +68,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
             {
                 this.CasesReported = propValCasesReported
-                    .AsQueryable().OrderBy("CaseKey ASC").AsEnumerable<Coalesce.Domain.Case>()
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => f.CaseKey)
                     .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
             }
             else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)

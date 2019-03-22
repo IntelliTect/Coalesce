@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
             {
                 this.CasesAssigned = propValCasesAssigned
-                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => f.CaseKey)
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
                     .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
             }
             else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
@@ -68,7 +68,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
             {
                 this.CasesReported = propValCasesReported
-                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => f.CaseKey)
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
                     .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
             }
             else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)

@@ -37,7 +37,7 @@ namespace Coalesce.Domain
         /// The Primary key for the Case object
         /// </summary>
         [Key]
-        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending, FieldOrder = 2)]
+        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending, FieldOrder = 3)]
         public int CaseKey { get; set; }
 
         [ListText]
@@ -55,6 +55,7 @@ namespace Coalesce.Domain
 
         [ForeignKey("AssignedToId")]
         [DtoExcludes("PersonListGen")]
+        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending, FieldName = nameof(Person.FirstName), FieldOrder = 2)]
         public Person AssignedTo { get; set; }
 
         public int? ReportedById { get; set; }

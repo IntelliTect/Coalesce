@@ -256,6 +256,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Searching/Sorting
 
+        /// <summary>
+        /// Returns an expression suitable for usage with LINQ Dynamic
+        /// that represents the default sort ordering of instances of the class.
+        /// </summary>
         public string DefaultOrderByClause(string prependText = "")
         {
             var defaultOrderBy = DefaultOrderBy.ToList();
@@ -267,11 +271,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
                 {
-                    orderByClauseList.Add($"{prependText}{orderInfo.FieldName} ASC");
+                    orderByClauseList.Add($"{orderInfo.OrderExpression(prependText)} ASC");
                 }
                 else
                 {
-                    orderByClauseList.Add($"{prependText}{orderInfo.FieldName} DESC");
+                    orderByClauseList.Add($"{orderInfo.OrderExpression(prependText)} DESC");
                 }
             }
 

@@ -30,7 +30,7 @@ describe("autoSave", () => {
 
     // Length of a "tick" in milliseconds. Smaller == faster test run.
     // If this is too small then the test wont work.
-    const tickLength = 10;
+    const tickLength = 30;
 
     var savePromise: Promise<any>;
     const saveMock = student.$apiClient.save = jest

@@ -1,0 +1,192 @@
+﻿jobs:
+- job: Meta
+
+  steps:
+  - pwsh: Write-Host "##vso[build.addbuildtag]$(BuildTag)"
+    displayName: "Add Build Tag"
+
+  - pwsh: >
+      $path = "$(Build.Repository.LocalPath)\build\version.txt";
+      Write-Host "Grabbing version from: $path";
+
+      if(![System.IO.File]::Exists($path)){
+          Write-Error "File not found!";
+      }
+
+      $version = (Get-Content $path).Trim() + "$(VersionSuffix)";
+      Write-Host "Version found: $version";
+
+      try
+      {
+          [System.Management.Automation.SemanticVersion]::Parse($version);
+      }
+      catch
+      {
+          Write-Error "'$version' is an invalid SemVer version"
+      }
+
+      Write-Host "##vso[task.setvariable variable=CoalesceVersion;isOutput=true]$version";
+
+      $version > $(Build.ArtifactStagingDirectory)/coalesce-version.txt
+
+      echo "##vso[build.updatebuildnumber]$version"; #set the build number to be the Coalesce version
+    failOnStderr: true
+    name: buildBaseVersion
+    displayName: "Verify and set CoalesceVersion variable"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: coalesce-version.txt'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: coalesce-version
+
+- job: 
+  displayName: IntelliTect.Coalesce.*
+  dependsOn: Meta
+
+  variables:
+    CoalesceVersion: $[ dependencies.Meta.outputs['buildBaseVersion.CoalesceVersion'] ]
+
+  steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 2.2.101'
+    inputs:
+      version: 2.2.101
+
+  - task: NodeTool@0
+    displayName: 'Use Node 9.x'
+    inputs:
+      versionSpec: 9.x
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet restore'
+    inputs:
+      command: restore
+      projects: '**/*.csproj'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+      projects: 'src/IntelliTect.Coalesce*/*.csproj'
+      arguments: '--configuration $(BuildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet test'
+    inputs:
+      command: test
+      projects: 'src/IntelliTect.Coalesce*Test*/*.csproj'
+      arguments: '--configuration $(BuildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet publish CLI'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/IntelliTect.Coalesce.Cli/*.csproj'
+      arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/dotnet-coalesce'
+      zipAfterPublish: false
+      modifyOutputPath: false
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: dotnet-coalesce'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/dotnet-coalesce'
+      ArtifactName: 'dotnet-coalesce'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack'
+    inputs:
+      command: pack
+      packDirectory: '$(Build.ArtifactStagingDirectory)/packages'
+      nobuild: true
+      versioningScheme: byEnvVar
+      versionEnvVar: CoalesceVersion
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: NuGet Packages'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/packages'
+      ArtifactName: packages
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Coalesce.Web: yarn install'
+    inputs:
+      ProjectDirectory: src/Coalesce.Web
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Coalesce.Web: dotnet dotnet-coalesce.dll '
+    inputs:
+      command: custom
+      custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
+      arguments: 'coalesce-ko.json'
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Coalesce.Web: Yarn gulp build'
+    inputs:
+      ProjectDirectory: src/Coalesce.Web
+      Arguments: 'gulp build'
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Coalesce.Web.Vue: yarn install'
+    inputs:
+      ProjectDirectory: src/Coalesce.Web.Vue
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Coalesce.Web.Vue: dotnet dotnet-coalesce.dll '
+    inputs:
+      command: custom
+      custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
+      arguments: 'coalesce-vue.json'
+
+- job:
+  displayName: coalesce-vue
+  dependsOn: Meta
+
+  variables:
+    CoalesceVersion: $[ dependencies.Meta.outputs['buildBaseVersion.CoalesceVersion'] ]
+
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 9.x'
+    inputs:
+      versionSpec: 9.x
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Yarn install'
+    inputs:
+      ProjectDirectory: '$(CoalesceVueDir)'
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Yarn version'
+    inputs:
+      ProjectDirectory: '$(CoalesceVueDir)'
+      Arguments: 'version --no-git-tag-version --new-version $(CoalesceVersion)'
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Yarn build'
+    inputs:
+      ProjectDirectory: '$(CoalesceVueDir)'
+      Arguments: build
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Yarn test'
+    inputs:
+      ProjectDirectory: '$(CoalesceVueDir)'
+      Arguments: 'test --coverage --reporters=default --reporters=jest-junit'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results **/junit.xml'
+    inputs:
+      testResultsFiles: '**/junit.xml'
+      testRunTitle: 'coalesce-vue'
+
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Yarn pack'
+    inputs:
+      ProjectDirectory: '$(CoalesceVueDir)'
+      Arguments: 'pack -f $(Build.ArtifactStagingDirectory)/coalesce-vue.tgz'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: coalesce-vue'
+    inputs:
+      ArtifactName: 'coalesce-vue'

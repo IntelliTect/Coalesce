@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
 namespace Coalesce.Web.Vue.Models
@@ -48,7 +47,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValEmployees != null && (tree == null || tree[nameof(this.Employees)] != null))
             {
                 this.Employees = propValEmployees
-                    .AsQueryable().OrderBy("PersonId ASC").AsEnumerable<Coalesce.Domain.Person>()
+                    .OrderBy(f => f.PersonId)
                     .Select(f => f.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.Employees)])).ToList();
             }
             else if (propValEmployees == null && tree?[nameof(this.Employees)] != null)

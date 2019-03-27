@@ -1,6 +1,7 @@
+using System.IO;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using VuePlayground;
+using Microsoft.Extensions.Logging;
 
 namespace Coalesce.Web.Vue
 {
@@ -11,8 +12,15 @@ namespace Coalesce.Web.Vue
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging((context, builder) =>
+                {
+                    builder.AddConsole();
+                    builder.AddDebug();
+                })
                 .UseStartup<Startup>();
+        }
     }
 }

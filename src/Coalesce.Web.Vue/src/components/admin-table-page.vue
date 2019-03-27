@@ -135,6 +135,7 @@ export default class extends Vue {
         this.person!.$apiClient.fullNameAndAge(1)
         this.person!.$apiClient.personCount("Roberts")
         this.person!.$apiClient.getUser()
+        this.person!.$apiClient.changeFirstName(1, "Bob") 
       })
 
       var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));

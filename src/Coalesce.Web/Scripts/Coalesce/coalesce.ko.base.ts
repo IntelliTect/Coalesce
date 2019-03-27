@@ -903,7 +903,7 @@ module Coalesce {
             Load the list using current parameters for paging, searching, etc
             Result is placed into the items property.
         */
-        public load = (callback?: any): JQueryPromise<any> => {
+        public load = (callback?: ((self: this) => void) | null): JQueryPromise<any> => {
             this.coalesceConfig.onStartBusy()(this);
             this.isLoading(true);
 

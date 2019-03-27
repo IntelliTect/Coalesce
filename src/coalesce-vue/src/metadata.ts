@@ -376,18 +376,34 @@ export type Property =
    -----------------------------
 */
 
-export interface Method extends Metadata  {
-    
-    /** The return type of the method. */
-    readonly return: Value | VoidValue
+export interface MethodBase extends Metadata {
 
-    /** The transport container for the return type, corresponding to "ListResult" or "ItemResult". */
-    readonly transportType: "item" | "list"
+    /** The HTTP method to use when calling the method. */
+    readonly httpMethod: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
 
     /** The parameters of the method */
     readonly params: { [paramName in string]: Value } 
 }
 
+export interface ItemMethod extends MethodBase  {
+    
+    /** The return type of the method. */
+    readonly return: Value | VoidValue
+
+    /** The transport container for the return type, corresponding to "ListResult" or "ItemResult". */
+    readonly transportType: "item",
+}
+
+export interface ListMethod extends MethodBase  {
+    
+    /** The return type of the method. */
+    readonly return: CollectionValue
+
+    /** The transport container for the return type, corresponding to "ListResult" or "ItemResult". */
+    readonly transportType: "list",
+}
+
+export type Method = ItemMethod | ListMethod;
 
 
 

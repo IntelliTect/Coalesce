@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.Mapping.IncludeTrees;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +55,25 @@ namespace IntelliTect.Coalesce
                 // Nothing underneath - the new node is the tail. Return it up the call stack.
                 return _children[tree.PropertyName];
             }
+        }
+
+        /// <summary>
+        /// Shorthand for <code>Enumerable.Empty&lt;T&gt;().AsQueryable()</code>,
+        /// which can be used to build up a query upon which <code>GetIncludeTree</code> can be called.
+        /// </summary>
+        public static IQueryable<T> QueryFor<T>()
+        {
+            return Enumerable.Empty<T>().AsQueryable();
+        }
+
+        /// <summary>
+        /// Build an include tree for the specified type by providing a function
+        /// that will build up the query by calling <code>IncludedSeprately</code> 
+        /// and <code>ThenIncludedSeprately</code> on the query.
+        /// </summary>
+        public static IncludeTree For<T>(Func<IQueryable<T>, IIncludedSeparatelyQueryable<T, object>> builder)
+        {
+            return builder(Enumerable.Empty<T>().AsQueryable()).GetIncludeTree();
         }
 
         public static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)

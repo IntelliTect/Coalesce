@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace VuePlayground.Controllers
+namespace Coalesce.Web.Vue.Controllers
 {
     public class EventController : Controller
     {

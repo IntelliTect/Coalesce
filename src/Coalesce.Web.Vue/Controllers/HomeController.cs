@@ -1,17 +1,27 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 
-namespace VuePlayground.Controllers
+namespace Coalesce.Web.Vue.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IHostingEnvironment hostingEnvironment;
+
+        public HomeController(IHostingEnvironment hostingEnvironment)
+        {
+            this.hostingEnvironment = hostingEnvironment;
+        }
+
         public IActionResult Index()
         {
-            return File("~/index.html", "text/html");
+
+            IFileProvider provider = new PhysicalFileProvider(hostingEnvironment.WebRootPath);
+            IFileInfo fileInfo = provider.GetFileInfo("index.html");
+            var readStream = fileInfo.CreateReadStream();
+
+            return File(readStream, "text/html");
         }
 
         public IActionResult Error()

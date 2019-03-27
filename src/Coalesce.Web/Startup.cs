@@ -5,15 +5,15 @@ using Microsoft.Extensions.Configuration;
 using Coalesce.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
-using System.Linq;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Runtime.InteropServices;
 using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Coalesce.Web
 {
@@ -31,6 +31,7 @@ namespace Coalesce.Web
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -39,16 +40,34 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCoalesce(builder => builder
-                .AddContext<AppDbContext>()
-                .UseDefaultDataSource(typeof(MyDataSource<,>))
-                .UseDefaultBehaviors(typeof(MyBehaviors<,>))
-                .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
-            );
+            services.AddCoalesce(builder =>
+            {
+                builder
+                    .AddContext<AppDbContext>()
+                    .UseDefaultDataSource(typeof(MyDataSource<,>))
+                    .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+                    .Configure(o =>
+                    {
+                        o.DetailedExceptionMessages = true;
+                    });
+
+                // This breaks on non-windows platforms, see https://github.com/dotnet/corefx/issues/11897
+                builder.UseTimeZone(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")
+                    : TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles"));
+            });
 
             services.AddCors();
 
-            services.AddMvc().AddJsonOptions(options =>
+            services.AddSwaggerGen(c =>
+            {
+                c.AddCoalesce();
+                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
+
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
@@ -74,12 +93,8 @@ namespace Coalesce.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            //loggerFactory.MinimumLevel = LogLevel.Information;
-            loggerFactory.AddConsole();
-            loggerFactory.AddDebug();
-
             app.UseStaticFiles();
 
             app.UseDeveloperExceptionPage();
@@ -87,6 +102,12 @@ namespace Coalesce.Web
             // *** DEMO ONLY ***
             app.UseAuthentication();
             app.UseMiddleware<DemoMiddleware>();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.UseMvc(routes =>
             {

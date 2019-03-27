@@ -9,7 +9,7 @@ const config = require("@vue/cli-service/webpack.config.js")
 // ASP.NET Core will add its own HMR plugin, so we would otherwise end up with two of them.
 // Issue is similar to https://github.com/gaearon/react-hot-loader/issues/573#issuecomment-305714424
 const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin')
-config.plugins = config.plugins.filter(function(p) { return !( p instanceof HotModuleReplacementPlugin )});
+config.plugins = config.plugins.filter(function(p) { return !( p.constructor.name === "HotModuleReplacementPlugin")});
 
 // Workaround for https://github.com/aspnet/JavaScriptServices/issues/1495
 // The exact path here doesn't matter, since this webpack config is only used for HMR hosted inside

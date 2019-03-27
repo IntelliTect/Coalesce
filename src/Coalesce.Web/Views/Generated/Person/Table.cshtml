@@ -99,6 +99,7 @@
                             Company
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Company', 'fa-caret-down': orderByDescending() == 'Company'}"></i>
                         </th>
+                        <th>Arbitrary Collection Of Strings</th>
                         <th style="width: 1%">
                         </th>
                     </tr>
@@ -117,6 +118,7 @@
                             <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
                             <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
                             <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
+                            <td class="prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: arbitraryCollectionOfStrings().length + " Items"' ></div></td>
                         }
                         else
                         {
@@ -130,6 +132,7 @@
                             <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, true))</td>
                             <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
                             <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, true))</td>
+                            <td class="prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: arbitraryCollectionOfStrings().length + " Items"' ></div></td>
                         }
                         <td>
                             <!-- Editor buttons -->

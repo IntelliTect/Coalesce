@@ -192,8 +192,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     }
                     else
                     {
-                        b.Line($"var dataSource = dataSourceFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>(\"{method.LoadFromDataSourceName}\");");
-                        b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"var dataSource = dataSourceFactory.GetDataSource<" +
+                            $"{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>" +
+                            $"(\"{method.LoadFromDataSourceName}\");");
+
+                        if (Model.IsDto)
+                        {
+                            b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(id, new ListParameters());");
+                        }
+                        else
+                        {
+                            b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        }
                         using (b.Block("if (!itemResult.WasSuccessful)"))
                         {
                             b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");

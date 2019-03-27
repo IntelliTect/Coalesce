@@ -18,7 +18,7 @@ declare module "axios" {
     }
 }
 
-import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue } from './metadata'
+import { ModelType, ClassType, Method, Service, ApiRoutedType, DataSourceType, Value, ModelValue, CollectionValue, VoidValue, ItemMethod, ListMethod } from './metadata'
 import { Model, convertToModel, mapToDto, mapValueToDto, DataSource, convertValueToModel } from './model'
 import { OwnProps, Indexable } from './util'
 
@@ -147,7 +147,7 @@ export type ListApiReturnType<T extends (this: null, ...args: any[]) => ListResu
 type AnyApiReturnType<T extends (this: null, ...args: any[]) => ApiResultPromise<any>> 
     = ReturnType<T> extends ApiResultPromise<infer S> ? S : any;
 
-export type ApiCallerConcurrency = "cancel" | "disallow" | "allow"
+export type ApiCallerConcurrency = "cancel" | "disallow" | "allow" | "debounce"
 
 export class ApiClient<T extends ApiRoutedType> {
 
@@ -163,7 +163,7 @@ export class ApiClient<T extends ApiRoutedType> {
      * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
     $makeCaller<TArgs extends any[], TResult>(
-        resultType: "item" | ((methods: T["methods"]) => (Method & { transportType: "item" })),
+        resultType: "item" | ItemMethod | ((methods: T["methods"]) => ItemMethod),
         invoker: TInvoker<TArgs, ItemResultPromise<TResult>, this>
     ): ItemApiState<TArgs, TResult, this> & TCall<TArgs, ItemResultPromise<TResult>>
 
@@ -173,23 +173,28 @@ export class ApiClient<T extends ApiRoutedType> {
      * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
     $makeCaller<TArgs extends any[], TResult>(
-        resultType: "list" | ((methods: T["methods"]) => (Method & { transportType: "list" })),
+        resultType: "list" | ListMethod | ((methods: T["methods"]) => ListMethod),
         invoker: TInvoker<TArgs, ListResultPromise<TResult>, this>
     ): ListApiState<TArgs, TResult, this> & TCall<TArgs, ListResultPromise<TResult>>
 
     $makeCaller<TArgs extends any[], TResult>(
-        resultType: "item" | "list" | ((methods: T["methods"]) => Method),
+        resultType: "item" | "list" | Method | ((methods: T["methods"]) => Method),
         invoker: TInvoker<TArgs, ApiResultPromise<TResult>, this>
     ): ApiState<TArgs, TResult, this> & TCall<TArgs, TResult>{
         
+        let meta: Method | undefined = undefined;
         if (typeof resultType === "function") {
-            resultType = resultType(this.$metadata.methods).transportType;
+            meta = resultType(this.$metadata.methods)
+            resultType = meta.transportType;
+        } else if (typeof resultType === "object") {
+            meta = resultType
+            resultType = resultType.transportType;
         }
         
         // This is basically all just about resolving the overloads. 
         // We use `any` because the types get really messy if you try to handle both types at once.
 
-        var instance: any;
+        var instance;
         switch (resultType){
             case "item": 
                 instance = new ItemApiState<TArgs, TResult, this>(this, invoker);
@@ -199,8 +204,55 @@ export class ApiClient<T extends ApiRoutedType> {
                 break;
             default: throw `Unknown result type ${resultType}`
         }
+
+        // Set this on the instance if we have it.
+        instance.metadata = meta;
+
+        return instance as any;
+    }
+
+    public $invoke(
+        method: ItemMethod,
+        params: { [P in keyof Method["params"]]: any; },
+        config?: AxiosRequestConfig
+    ): AxiosPromise<ItemResult<any>>;
+
+    public $invoke(
+        method: ListMethod,
+        params: { [P in keyof Method["params"]]: any; },
+        config?: AxiosRequestConfig
+    ): AxiosPromise<ListResult<any>>;
+    
+    /**
+     * Invoke the specified method using the provided set of parameters.
+     * @param method The metadata of the API  method to invoke
+     * @param params The parameters to provide to the API method.
+     * @param config A full `AxiosRequestConfig` to merge in.
+     */
+    public $invoke(
+        method: Method,
+        params: { [P in keyof Method["params"]]: any; },
+        config?: AxiosRequestConfig
+    ) {
+        params = this.$mapParams(method, params);
+        const hasBody = method.httpMethod != "GET" && method.httpMethod != "DELETE";
         
-        return instance;
+        return AxiosClient
+            .request({
+                method: method.httpMethod,
+                url: `/${this.$metadata.controllerRoute}/${method.name}`,
+                data: hasBody 
+                    ? qs.stringify(params) 
+                    : undefined,
+                ...this.$options(undefined, config, !hasBody ? params : undefined)
+            }
+            )
+            .then(r => {
+                switch (method.transportType) {
+                    case "item": return this.$hydrateItemResult(r, method.return)
+                    case "list": return this.$hydrateListResult(r, method.return)
+                }
+            })
     }
 
     /**
@@ -390,6 +442,9 @@ export type TCall<TArgs extends any[], TReturn> = (this: any, ...args: TArgs) =>
 
 export abstract class ApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends Function {
 
+    /** The metadata of the method being called, if it was provided. */
+    metadata?: Method
+
     /** True if a request is currently pending. */
     isLoading: boolean = false
     
@@ -415,11 +470,15 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
      * Set the concurrency mode for this API caller. Default is "disallow".
      * @param mode Behavior for when a request is made while there is already an outstanding request.
      * 
-     * "cancel" - cancel the outstanding request first. 
+     * "cancel" - Cancel the outstanding request first. 
      * 
-     * "disallow" - throw an error. 
+     * "debounce" - if a request is made while one is outstanding, enqueue it to start after the outstanding 
+     * request is done. If another request is made while one is already enqueued, the enqueued request is abandoned
+     * and replaced by the last request that was made.
      * 
-     * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.
+     * "disallow" - Throw an error. 
+     * 
+     * "allow" - Permit the second request to be made. The ultimate values of the state fields may not be representative of the last request made.
      */
     setConcurrency(mode: ApiCallerConcurrency) {
         // This method exists as a way to configure this in a chainable way when instantiating API callers.
@@ -472,12 +531,37 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
 
     public invoke!: this
 
-    private _invokeInternal(thisArg: any, ...args: TArgs) {
+    private _debounceSignal: { promise: Promise<void>, resolve: () => void, reject: () => void } | null = null;
+    private async _invokeInternal(thisArg: any, ...args: TArgs) {
         if (this.isLoading) {
             if (this._concurrencyMode === "disallow") {
                 throw `Request is already pending for invoker ${this.invoker.toString()}`
             } else if (this._concurrencyMode === "cancel") {
                 this.cancel()
+            } else if (this._concurrencyMode === "debounce") {
+                // If there's already a pending debounced request,
+                // reject it, and then create a new promise and await a successful signal.
+                if (this._debounceSignal) {
+                    this._debounceSignal.reject()
+                }
+
+                const signal: any = {};
+                signal.promise = new Promise((resolve, reject) => {
+                    signal.resolve = resolve;
+                    signal.reject = reject;
+                })
+                this._debounceSignal = signal;
+                
+                // Await completion of the current outstanding request,
+                // or until another call is made while we're still pending.
+                try {
+                    await signal.promise;
+                } catch {
+                    // Similar to the "cancel" mode,
+                    // aborted requests are not thrown as rejected promises,
+                    // but instead as a fulfilled promise with a void resolved value.
+                    return void 0;
+                }
             }
         }
 
@@ -492,69 +576,79 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
         try {
             const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
             this._cancelToken = token
-            promise = this.invoker.apply(thisArg, [this.apiClient, ...args])
+            const resp = await (this.invoker as any).apply(thisArg, [this.apiClient, ...args])
+
+            const data = resp.data
+            delete this._cancelToken
+            this.setResponseProps(data)
+
+            this._callbacks.onFulfilled.forEach(cb => cb.apply(thisArg, [this]))
+
+            this.isLoading = false
+
+            // We have to maintain the shape of the promise of the stateless invoke method.
+            // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
+            // The reason for this is that we can't change the return type of TCall while maintaining 
+            // the param signature (unless we required a full, explicit type annotation as a type parameter,
+            // but this would make the usability of apiCallers very unpleasant.)
+            // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
+            // but changing the implementation would be a significant breaking change by then.
+            return resp
+        } catch (thrown) {
+            if (axios.isCancel(thrown)) {
+                // No handling of anything for cancellations.
+                // A cancellation is deliberate and shouldn't be treated as an error state. Callbacks should not be called either - pretend the request never happened.
+                // If a compelling case for invoking callbacks on cancel is found,
+                // it should probably be implemented as a separate set of callbacks.
+                // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
+                // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
+                return;
+            } else {
+                var error = thrown as AxiosError;
+            }
+
+            delete this._cancelToken
+            this.wasSuccessful = false
+            const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
+            if (result && typeof result.data === "object") {
+                this.setResponseProps(result.data)
+            } else {
+                this.message = 
+                    typeof error.message === "string" ? error.message : 
+                    typeof error === "string" ? error :
+                    "A network error occurred" // TODO: i18n
+            }
+
+            this._callbacks.onRejected.forEach(cb => cb.apply(thisArg, [this]))
+
+            this.isLoading = false
+
+            return error
         } finally {
             (this.apiClient as any)._nextCancelToken = null
+
+            if (this._debounceSignal) {
+                this._debounceSignal.resolve()
+                this._debounceSignal = null;
+            }
         }
-
-        return promise
-            .then(resp => {
-                const data = resp.data
-                delete this._cancelToken
-                this.setResponseProps(data)
-
-                this._callbacks.onFulfilled.forEach(cb => cb.apply(thisArg, [this]))
-
-                this.isLoading = false
-
-                // We have to maintain the shape of the promise of the stateless invoke method.
-                // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
-                // The reason for this is that we can't change the return type of TCall while maintaining 
-                // the param signature (unless we required a full, explicit type annotation as a type parameter,
-                // but this would make the usability of apiCallers very unpleasant.)
-                // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
-                // but changing the implementation would be a significant breaking change by then.
-                return resp
-            }, (thrown: AxiosError | Cancel) => {
-                if (axios.isCancel(thrown)) {
-                    // No handling of anything for cancellations.
-                    // A cancellation is deliberate and shouldn't be treated as an error state. Callbacks should not be called either - pretend the request never happened.
-                    // If a compelling case for invoking callbacks on cancel is found,
-                    // it should probably be implemented as a separate set of callbacks.
-                    // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
-                    // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
-                    return;
-                } else {
-                    var error = thrown as AxiosError;
-                }
-
-                delete this._cancelToken
-                this.wasSuccessful = false
-                const result = error.response as AxiosResponse<ListResult<TResult> | ItemResult<TResult>> | undefined
-                if (result && typeof result.data === "object") {
-                    this.setResponseProps(result.data)
-                } else {
-                    this.message = 
-                        typeof error.message === "string" ? error.message : 
-                        typeof error === "string" ? error :
-                        "A network error occurred" // TODO: i18n
-                }
-
-                this._callbacks.onRejected.forEach(cb => cb.apply(thisArg, [this]))
-
-                this.isLoading = false
-
-                return error
-            })
     }
 
     protected _makeReactive() {
         // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648 
-        for (const stateProp in this) {
-            const value = this[stateProp]
+
+        // Use Object.keys to mock the behavior of 
+        // https://github.com/vuejs/vue/blob/4c7a87e2ef9c76b5b75d85102662a27165a23ec7/src/core/observer/index.js#L61
+        const keys = Object.keys(this)
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+
+            // @ts-ignore - Ignore indexer on type without indexer signature.
+            const value = this[key] 
+
             // Don't define sealed object properties (e.g. this._callbacks)
             if (value == null || typeof value !== "object" || !Object.isSealed(value)) {
-                Vue.util.defineReactive(this, stateProp, this[stateProp])
+                Vue.util.defineReactive(this, key, value)
             }
         }
     }
@@ -580,6 +674,10 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
 }
 
 export class ItemApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends ApiState<TArgs, TResult, TClient> {
+
+    /** The metadata of the method being called, if it was provided. */
+    metadata?: ItemMethod
+
     /** Validation issues returned by the previous request. */
     validationIssues: ValidationIssue[] | null = null
 
@@ -612,6 +710,10 @@ export class ItemApiState<TArgs extends any[], TResult, TClient extends ApiClien
 }
 
 export class ListApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends ApiState<TArgs, TResult, TClient> {
+
+    /** The metadata of the method being called, if it was provided. */
+    metadata?: ListMethod
+
     /** Page number returned by the previous request. */
     page: number | null = null
     /** Page size returned by the previous request. */

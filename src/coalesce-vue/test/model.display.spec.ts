@@ -2,7 +2,7 @@ import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
 import { ObjectValue, Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
-import { format } from "date-fns/esm";
+import { format } from "date-fns";
 
 const studentProps = $metadata.Student.props;
 

@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce
         {
             ReflectionRepository.Global.AddAssembly<TContext>();
             Services.AddScoped(sp => new CrudContext<TContext>(
-                sp.GetRequiredService<TContext>(),
+                sp.GetRequiredService<TContext>(), () => 
                 sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext.User,
                 sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local
             ));
@@ -109,5 +109,15 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         public CoalesceServiceBuilder UseDefaultBehaviors(Type implementationType)
             => UseDefaultCrudStrategy(implementationType, Api.Behaviors.BehaviorsFactory.DefaultTypes.Keys);
+
+        /// <summary>
+        /// Convenience method to configure <see cref="CoalesceOptions"/>. 
+        /// Equivalent to <see cref="OptionsServiceCollectionExtensions.Configure{TOptions}(IServiceCollection, Action{TOptions})"/>
+        /// </summary>
+        public CoalesceServiceBuilder Configure(Action<CoalesceOptions> setupAction)
+        {
+            Services.Configure(setupAction);
+            return this;
+        }
     }
 }

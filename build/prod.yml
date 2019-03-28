@@ -1,5 +1,5 @@
 ﻿trigger: none
- pr: none
+pr: none
 
 variables:
   BuildConfiguration: Release

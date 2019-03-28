@@ -65,7 +65,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var returnIsListResult = method.ReturnsListResult;
             string signature =
-                string.Concat(method.ClientParameters.Select(f => $"{f.Name}: {new VueType(f.Type).TsType("$models")} | null, "))
+                string.Concat(method.ClientParameters.Select(f => $"{f.JsVariable}: {new VueType(f.Type).TsType("$models")} | null, "))
                 + "$config?: AxiosRequestConfig";
 
             if (method.IsModelInstanceMethod)

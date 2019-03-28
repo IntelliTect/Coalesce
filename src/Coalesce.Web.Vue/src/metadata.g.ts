@@ -506,7 +506,7 @@ export const Person = domain.types.Person = {
       name: "title",
       displayName: "Title",
       type: "enum",
-      get typeDef() { return domain.enums.Titles },
+      get typeDef() { return domain.enums.Nullable },
       role: "value",
     },
     firstName: {

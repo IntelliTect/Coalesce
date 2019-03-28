@@ -26,7 +26,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
 
             modelPrefix = modelPrefix != null ? modelPrefix + "." : "";
 
-            if (this.type.IsEnum) return $"{modelPrefix}{this.type.Name}";
+            if (this.type.IsEnum)
+            {
+                return modelPrefix + this.type.NullableUnderlyingType.ClientTypeName;
+            }
 
             return this.type.TsType
                 .Replace("ViewModels.", modelPrefix)

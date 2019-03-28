@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
 
 
-            foreach (var model in Model.ClientEnums.OrderBy(e => e.Name))
+            foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))
             {
                 WriteEnumMetadata(b, model);
             }
@@ -127,9 +127,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private void WriteEnumMetadata(TypeScriptCodeBuilder b, TypeViewModel model)
         {
-            using (b.Block($"export const {model.Name} = domain.enums.{model.Name} ="))
+            using (b.Block($"export const {model.ClientTypeName} = domain.enums.{model.ClientTypeName} ="))
             {
-                b.StringProp("name", model.Name.ToCamelCase());
+                b.StringProp("name", model.ClientTypeName.ToCamelCase());
                 b.StringProp("displayName", model.DisplayName);
                 b.StringProp("type", "enum");
 

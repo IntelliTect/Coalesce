@@ -15,7 +15,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the name of the type to be used by the client.
         /// </summary>
-        public string ClientTypeName => this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ?? Name;
+        public string ClientTypeName => IsNullableType
+            ? NullableUnderlyingType.ClientTypeName
+            : this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ?? Name;
 
         public abstract string FullyQualifiedName { get; }
 

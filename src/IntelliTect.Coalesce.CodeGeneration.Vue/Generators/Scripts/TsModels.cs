@@ -21,9 +21,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
          //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
             b.Line();
 
-            foreach (var model in Model.ClientEnums.OrderBy(e => e.Name))
+            foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))
             {
-                using (b.Block($"export enum {model.Name}"))
+                using (b.Block($"export enum {model.ClientTypeName}"))
                 {
                     foreach (var value in model.EnumValues)
                     {
@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     foreach (var prop in model.ClientProperties)
                     {
                         b.DocComment(prop.Comment);
-                        var typeString = new VueType(prop.Type).TsType();
+                        var typeString = new VueType(prop.Type.NullableUnderlyingType).TsType();
                         b.Line($"{prop.JsVariable}: {typeString} | null");
                     }
                 }

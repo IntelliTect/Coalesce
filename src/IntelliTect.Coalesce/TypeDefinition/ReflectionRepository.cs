@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ClassViewModel> ClientClasses => ApiBackedClasses.Union(ExternalTypes);
 
         public IEnumerable<TypeViewModel> ClientEnums => this.ClientClasses
-            .SelectMany(c => c.ClientProperties.Select(p => p.Type).Where(t => t.IsEnum))
+            .SelectMany(c => c.ClientProperties.Select(p => p.Type.NullableUnderlyingType).Where(t => t.IsEnum))
             .Distinct();
 
         public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>

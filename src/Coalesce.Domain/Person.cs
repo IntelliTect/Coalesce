@@ -45,7 +45,7 @@ namespace Coalesce.Domain
         /// Title of the person, Mr. Mrs, etc.
         /// </summary>
         [Display(Order = 1)]
-        public Titles Title { get; set; }
+        public Titles? Title { get; set; }
 
         /// <summary>
         /// First name of the person.

@@ -1,10 +1,9 @@
-﻿using Coalesce.Domain;
+﻿using System;
+using Coalesce.Domain;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
 
 namespace Coalesce.Web
 {
@@ -12,16 +11,16 @@ namespace Coalesce.Web
     {
         public static void Main(string[] args)
         {
-            var host = CreateWebHostBuilder(args).Build();
+            IWebHost host = CreateWebHostBuilder(args).Build();
 
             // https://docs.microsoft.com/en-us/aspnet/core/migration/1x-to-2x/#move-database-initialization-code
-            using (var scope = host.Services.CreateScope())
+            using (IServiceScope scope = host.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
+                IServiceProvider services = scope.ServiceProvider;
 
                 try
                 {
-                    Domain.SampleData.Initialize(services.GetService<AppDbContext>());
+                    SampleData.Initialize(services.GetService<AppDbContext>());
                 }
                 catch (Exception ex)
                 {
@@ -34,8 +33,15 @@ namespace Coalesce.Web
             host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging((context, builder) =>
+                {
+                    builder.AddConsole();
+                    builder.AddDebug();
+                })
                 .UseStartup<Startup>();
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
@@ -24,7 +25,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 "Newtonsoft.Json",
                 "System",
                 "System.Linq",
-                "System.Linq.Dynamic.Core",
                 "System.Collections.Generic",
                 "System.Security.Claims"
             };
@@ -202,10 +202,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         sb.Line($"{objectName}.{name} = propVal{name}");
 
-                        var defaultOrderBy = property.Object.DefaultOrderByClause()?.EscapeStringLiteralForCSharp();
-                        if (defaultOrderBy != null)
+                        var defaultOrderBy = property.Object.DefaultOrderBy;
+                        if (defaultOrderBy.Count > 0)
                         {
-                            sb.Indented($".AsQueryable().OrderBy(\"{defaultOrderBy}\").AsEnumerable<{property.PureType.FullyQualifiedName}>()");
+                            var orderByStatements = defaultOrderBy
+                                .Select((orderInfo, i) =>
+                                {
+                                    string prefix = i == 0 ? ".OrderBy" : ".ThenBy";
+
+                                    if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
+                                    {
+                                        return $"{prefix}(f => {orderInfo.OrderExpression("f.")})";
+                                    }
+                                    else
+                                    {
+                                        return $"{prefix}Descending(f => {orderInfo.OrderExpression("f.")})";
+                                    }
+                                });
+
+                            sb.Indented(string.Concat(orderByStatements));
                         }
 
                         sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.PureType.Name}DtoGen>(context, tree?[nameof({objectName}.{name})])).ToList();");
@@ -228,7 +243,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 }
                 else
                 {
-                    setter = $@"{objectName}.{name} = obj.{name};";
+                    setter = $"{objectName}.{name} = obj.{name};";
                 }
 
             }

@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
 namespace Coalesce.Web.Vue.Models
@@ -29,6 +28,7 @@ namespace Coalesce.Web.Vue.Models
         public string Name { get; set; }
         public int? CompanyId { get; set; }
         public Coalesce.Web.Vue.Models.CompanyDtoGen Company { get; set; }
+        public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -51,11 +51,12 @@ namespace Coalesce.Web.Vue.Models
             this.NextUpgrade = obj.NextUpgrade;
             this.Name = obj.Name;
             this.CompanyId = obj.CompanyId;
+            this.ArbitraryCollectionOfStrings = obj.ArbitraryCollectionOfStrings;
             var propValCasesAssigned = obj.CasesAssigned;
             if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
             {
                 this.CasesAssigned = propValCasesAssigned
-                    .AsQueryable().OrderBy("CaseKey ASC").AsEnumerable<Coalesce.Domain.Case>()
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
                     .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
             }
             else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
@@ -67,7 +68,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
             {
                 this.CasesReported = propValCasesReported
-                    .AsQueryable().OrderBy("CaseKey ASC").AsEnumerable<Coalesce.Domain.Case>()
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
                     .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
             }
             else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)

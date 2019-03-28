@@ -24,6 +24,11 @@ namespace IntelliTect.Coalesce
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
+            services.AddOptions<CoalesceOptions>().Configure<IHostingEnvironment>((opts, hosting) =>
+            {
+                opts.DetailedExceptionMessages = hosting.IsDevelopment();
+            });
+
             builder(new CoalesceServiceBuilder(services));
 
             // Needed for CrudContext to access the current user.

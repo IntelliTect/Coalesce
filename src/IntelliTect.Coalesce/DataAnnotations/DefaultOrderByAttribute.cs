@@ -36,7 +36,20 @@ namespace IntelliTect.Coalesce.DataAnnotations
     public class OrderByInformation
     {
         public string FieldName { get; set; }
+        public string FieldChildName { get; set; }
         public DefaultOrderByAttribute.OrderByDirections OrderByDirection { get; set; }
         public int FieldOrder { get; set; }
+        public string ObjectDefaultValue { get; internal set; }
+
+        public string OrderExpression(string prependText = "")
+        {
+            if (FieldChildName != null)
+            {
+                return $"({prependText}{FieldName} == null ? {ObjectDefaultValue}: {prependText}{FieldName}.{FieldChildName})";
+            }
+
+            return prependText + FieldName;
+        }
+
     }
 }

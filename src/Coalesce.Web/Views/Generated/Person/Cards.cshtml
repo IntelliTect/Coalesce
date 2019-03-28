@@ -95,6 +95,10 @@
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, false))
                     </dd>
+                    <dt>Arbitrary Collection Of Strings</dt>
+                    <dd>
+                        <div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: arbitraryCollectionOfStrings().length + " Items"' ></div>
+                    </dd>
                 </dl>
                 
                 <div style="margin-top: auto">

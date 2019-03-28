@@ -22,6 +22,13 @@ namespace Coalesce.Domain
         [ReadOnly(true)]
         public string AssignedToName { get; set; }
 
+        [Coalesce]
+        public async Task<string> AsyncMethodOnIClassDto(string input)
+        {
+            await Task.Delay(500);
+            return input;
+        }
+
         public void MapTo(Case obj, IMappingContext context)
         {
             obj.Title = Title;

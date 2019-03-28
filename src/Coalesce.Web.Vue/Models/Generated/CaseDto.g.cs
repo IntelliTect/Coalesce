@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 
 namespace Coalesce.Web.Vue.Models
@@ -55,7 +54,7 @@ namespace Coalesce.Web.Vue.Models
             if (propValCaseProducts != null && (tree == null || tree[nameof(this.CaseProducts)] != null))
             {
                 this.CaseProducts = propValCaseProducts
-                    .AsQueryable().OrderBy("CaseProductId ASC").AsEnumerable<Coalesce.Domain.CaseProduct>()
+                    .OrderBy(f => f.CaseProductId)
                     .Select(f => f.MapToDto<Coalesce.Domain.CaseProduct, CaseProductDtoGen>(context, tree?[nameof(this.CaseProducts)])).ToList();
             }
             else if (propValCaseProducts == null && tree?[nameof(this.CaseProducts)] != null)

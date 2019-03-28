@@ -173,7 +173,7 @@ gulp.task('coalesce:cleanbuild', function (cb) {
 
 gulp.task('coalesce:build', ['coalesce:cleanbuild'], shell.task([
         'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.Cli"',
-        `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}" -f netcoreapp2.1`
+        `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}" -f netcoreapp2.2`
     ],{ verbose: true }
 ));
 

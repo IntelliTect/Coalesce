@@ -207,6 +207,7 @@ export interface Person extends Model<typeof metadata.Person> {
   
   /** Company loaded from the Company ID */
   company: Company | null
+  arbitraryCollectionOfStrings: string[] | null
 }
 export class Person {
   

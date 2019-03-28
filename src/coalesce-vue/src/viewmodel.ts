@@ -110,6 +110,9 @@ export abstract class ViewModel<
 
         })
 
+    /** Whether or not to reload the ViewModel's `$data` with the response received from the server after a call to .$save(). */
+    public $loadResponseFromSaves = true;
+
     /**
      * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
      */
@@ -136,11 +139,19 @@ export abstract class ViewModel<
 
                 // The PK *MUST* be loaded so that the PK returned by a creation save call
                 // will be used by subsequent update calls.
-                this.$primaryKey = (this.$save.result as Indexable<TModel>)[this.$metadata.keyProp.name] 
+                this.$primaryKey = (this.$save.result as Indexable<TModel>)[this.$metadata.keyProp.name]
             } else {
-                // Only load the save response if the data hasn't changed since we sent it.
+
+                // else: Only load the save response if the data hasn't changed since we sent it.
                 // If the data has changed, loading the response would overwrite users' changes.
-                updateFromModel(this.$data, this.$save.result);
+                if (this.$loadResponseFromSaves) {
+                    updateFromModel(this.$data, this.$save.result);
+                } else {
+                    // The PK *MUST* be loaded so that the PK returned by a creation save call
+                    // will be used by subsequent update calls.
+                    this.$primaryKey = (this.$save.result as Indexable<TModel>)[this.$metadata.keyProp.name]
+                }
+
                 // Set the new state of our data as being clean (since we just made a change to it)
                 this.$isDirty = false;
             }
@@ -266,7 +277,6 @@ export abstract class ViewModel<
         this.$isDirty = false;
     }
 }
-
 
 // Model<TModel["$metadata"]>
 export abstract class ListViewModel<

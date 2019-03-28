@@ -37,6 +37,7 @@ namespace Coalesce.Domain
         /// The Primary key for the Case object
         /// </summary>
         [Key]
+        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending, FieldOrder = 3)]
         public int CaseKey { get; set; }
 
         [ListText]
@@ -47,13 +48,14 @@ namespace Coalesce.Domain
         [Search]
         public string Description { get; set; }
 
-        [DateType()]
+        [DateType(), DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending, FieldOrder = 1)]
         public DateTimeOffset OpenedAt { get; set; }
 
         public int? AssignedToId { get; set; }
 
         [ForeignKey("AssignedToId")]
         [DtoExcludes("PersonListGen")]
+        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending, FieldName = nameof(Person.FirstName), FieldOrder = 2)]
         public Person AssignedTo { get; set; }
 
         public int? ReportedById { get; set; }

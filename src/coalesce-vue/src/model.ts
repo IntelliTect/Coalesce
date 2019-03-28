@@ -1,6 +1,6 @@
 
-// Tedious imports for maximum tree shaking
-import { toDate, isValid, format } from 'date-fns/esm'
+// This will tree shake correctly as of v2.0.0-alpha.21
+import { toDate, isValid, format } from 'date-fns'
 
 import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata"
 import { Indexable } from './util'
@@ -138,7 +138,7 @@ export function parseValue(value: any, meta: Value): null | string | number | bo
                 // it will parse any number as milliseconds since the epoch,
                 // and parses `true` as the epoch.
                 // So, we restrict parsing to strings only.
-                : type === "string" ? toDate(value) : null;
+                : type === "string" ? new Date(value) : null;
 
             if (!isValid(date)) {
                 throw parseError(value, meta);

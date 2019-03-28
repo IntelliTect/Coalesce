@@ -488,10 +488,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     if (fieldName != null)
                     {
                         string defaultValue = Type.ClassViewModel?.PropertyByName(fieldName).Type.CsDefaultValue ?? "\"\"";
-
-                        name = $"({name} == null ? {defaultValue}: {name}.{fieldName})";
+                        
+                        return new OrderByInformation()
+                        {
+                            FieldName = name,
+                            FieldChildName = fieldName,
+                            ObjectDefaultValue = defaultValue,
+                            FieldOrder = order.Value,
+                            OrderByDirection = direction.Value
+                        };
                     }
-                    return new OrderByInformation() { FieldName = name, FieldOrder = order.Value, OrderByDirection = direction.Value };
+                    return new OrderByInformation() {
+                        FieldName = name,
+                        FieldOrder = order.Value,
+                        OrderByDirection = direction.Value
+                    };
                 }
                 return null;
             }

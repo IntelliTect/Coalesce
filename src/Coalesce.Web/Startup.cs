@@ -9,11 +9,11 @@ using IntelliTect.Coalesce.DataAnnotations;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using System;
-using System.Linq;
+using System.Runtime.InteropServices;
 using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
+using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Swagger;
-using System.Collections.Generic;
 
 namespace Coalesce.Web
 {
@@ -40,12 +40,22 @@ namespace Coalesce.Web
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCoalesce(builder => builder
-                .AddContext<AppDbContext>()
-                .UseDefaultDataSource(typeof(MyDataSource<,>))
-                .UseDefaultBehaviors(typeof(MyBehaviors<,>))
-                .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
-            );
+            services.AddCoalesce(builder =>
+            {
+                builder
+                    .AddContext<AppDbContext>()
+                    .UseDefaultDataSource(typeof(MyDataSource<,>))
+                    .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+                    .Configure(o =>
+                    {
+                        o.DetailedExceptionMessages = true;
+                    });
+
+                // This breaks on non-windows platforms, see https://github.com/dotnet/corefx/issues/11897
+                builder.UseTimeZone(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")
+                    : TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles"));
+            });
 
             services.AddCors();
 
@@ -55,7 +65,9 @@ namespace Coalesce.Web
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
-            services.AddMvc().AddJsonOptions(options =>
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
@@ -81,12 +93,8 @@ namespace Coalesce.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            //loggerFactory.MinimumLevel = LogLevel.Information;
-            loggerFactory.AddConsole();
-            loggerFactory.AddDebug();
-
             app.UseStaticFiles();
 
             app.UseDeveloperExceptionPage();

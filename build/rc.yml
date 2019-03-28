@@ -1,0 +1,11 @@
+﻿trigger: none
+pr: none
+
+variables:
+  BuildConfiguration: Release
+  BuildTag: rc
+  CoalesceVueDir: src/coalesce-vue
+  VersionSuffix: -rc.$(Build.BuildNumber)
+
+jobs:
+- template: common.yml

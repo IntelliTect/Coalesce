@@ -361,7 +361,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     using (b.Block($"if (data.{prop.JsonName} != null)"))
                     {
-                        if (prop.Object.PrimaryKey != null)
+                        if (prop.Object?.PrimaryKey != null)
                         {
                             b.Line("// Merge the incoming array");
                             b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, '{prop.Object.PrimaryKey.JsonName}', {prop.Object.ViewModelClassName}, this, allowCollectionDeletes);");

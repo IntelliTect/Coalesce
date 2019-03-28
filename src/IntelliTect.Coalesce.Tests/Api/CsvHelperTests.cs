@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.Tests.Api
                 Date = new DateTimeOffset(2017, 08, 01, 0, 0, 0, TimeSpan.FromHours(-8)),
                 IsTrue = false,
                 Foos = new[] { new Foo() },
-                Bar = new Bar { Foo = new Foo() }
+                Bar = new Bar { Foo = new Foo() } 
             };
 
             var csv = IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(new[]{ foo });

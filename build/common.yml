@@ -25,14 +25,14 @@
           Write-Error "'$version' is an invalid SemVer version"
       }
 
-      Write-Host "##vso[task.setvariable variable=CoalesceVersion;isOutput=true]$version";
+      Write-Host "##vso[task.setvariable variable=COALESCE_VERSION;isOutput=true]$version";
 
       $version > $(Build.ArtifactStagingDirectory)/coalesce-version.txt
 
-      echo "##vso[build.updatebuildnumber]$version"; #set the build number to be the Coalesce version
+      Write-Host "##vso[build.addbuildtag]$version"
     failOnStderr: true
     name: buildBaseVersion
-    displayName: "Verify and set CoalesceVersion variable"
+    displayName: "Verify and set COALESCE_VERSION variable"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: coalesce-version.txt'
@@ -45,7 +45,7 @@
   dependsOn: Meta
 
   variables:
-    CoalesceVersion: $[ dependencies.Meta.outputs['buildBaseVersion.CoalesceVersion'] ]
+    COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
 
   steps:
   - task: DotNetCoreInstaller@0
@@ -100,7 +100,7 @@
       packDirectory: '$(Build.ArtifactStagingDirectory)/packages'
       nobuild: true
       versioningScheme: byEnvVar
-      versionEnvVar: CoalesceVersion
+      versionEnvVar: COALESCE_VERSION
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: NuGet Packages'
@@ -143,7 +143,7 @@
   dependsOn: Meta
 
   variables:
-    CoalesceVersion: $[ dependencies.Meta.outputs['buildBaseVersion.CoalesceVersion'] ]
+    COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
 
   steps:
   - task: NodeTool@0
@@ -160,7 +160,7 @@
     displayName: 'Yarn version'
     inputs:
       ProjectDirectory: '$(CoalesceVueDir)'
-      Arguments: 'version --no-git-tag-version --new-version $(CoalesceVersion)'
+      Arguments: 'version --no-git-tag-version --new-version $(COALESCE_VERSION)'
 
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
     displayName: 'Yarn build'

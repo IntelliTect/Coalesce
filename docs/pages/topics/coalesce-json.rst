@@ -13,7 +13,7 @@ In Coalesce, all configuration of the code generation is done in a JSON file. Th
 File Resolution
 ---------------
 
-When the code generation is ran by invoking ``dotnet coalesce``, Coalesce will try to find a configuration file via the following means:
+When the code generation is run by invoking ``dotnet coalesce``, Coalesce will try to find a configuration file via the following means:
 
 #. If an argument is specified on the command line, it will be used as the location of the file. E.g. ``dotnet coalesce C:/Projects/MyProject/config.json``
 #. If no argument is given, Coalesce will try to use a file in the working directory named ``coalesce.json``

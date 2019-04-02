@@ -1,6 +1,6 @@
 
 
-import { ItemResult } from '../src/api-client'
+import { ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
 
 describe("$makeCaller", () => {
@@ -20,6 +20,21 @@ describe("$makeCaller", () => {
     const arg = 42;
     caller(arg);
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
+  })
+
+  test("allows return undefined from invoker func", () => {
+    const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => {
+      if (num == 42) {
+        return;
+      }
+      return (endpointMock(num) as ItemResultPromise<string>)
+    })
+
+    const arg = 42;
+    const result = caller(arg);
+
+    expect(result).resolves.toBeUndefined();
+    expect(endpointMock.mock.calls.length).toBe(0);
   })
 
   test("passes this to invoker func", async () => {

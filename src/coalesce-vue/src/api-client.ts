@@ -169,6 +169,16 @@ export class ApiClient<T extends ApiRoutedType> {
 
     /**
      * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+     * @param resultType "item" indicating that the API endpoint returns an ItemResult<T>
+     * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+     */
+    $makeCaller<TArgs extends any[], TResult>(
+        resultType: "item" | ItemMethod | ((methods: T["methods"]) => ItemMethod),
+        invoker: TInvoker<TArgs, ItemResultPromise<TResult> | undefined | void, this>
+    ): ItemApiState<TArgs, TResult, this> & TCall<TArgs, ItemResultPromise<TResult | undefined>>
+
+    /**
+     * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
      * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
      * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      */
@@ -177,10 +187,20 @@ export class ApiClient<T extends ApiRoutedType> {
         invoker: TInvoker<TArgs, ListResultPromise<TResult>, this>
     ): ListApiState<TArgs, TResult, this> & TCall<TArgs, ListResultPromise<TResult>>
 
+    /**
+     * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+     * @param resultType "list" indicating that the API endpoint returns an ListResult<T>
+     * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+     */
+    $makeCaller<TArgs extends any[], TResult>(
+        resultType: "list" | ListMethod | ((methods: T["methods"]) => ListMethod),
+        invoker: TInvoker<TArgs, ListResultPromise<TResult> | undefined | void, this>
+    ): ListApiState<TArgs, TResult, this> & TCall<TArgs, ListResultPromise<TResult | undefined>>
+
     $makeCaller<TArgs extends any[], TResult>(
         resultType: "item" | "list" | Method | ((methods: T["methods"]) => Method),
-        invoker: TInvoker<TArgs, ApiResultPromise<TResult>, this>
-    ): ApiState<TArgs, TResult, this> & TCall<TArgs, TResult>{
+        invoker: TInvoker<TArgs, ApiResultPromise<TResult> | undefined | void, this>
+    ): ApiState<TArgs, TResult, this> & TCall<TArgs, TResult | undefined | void>{
         
         let meta: Method | undefined = undefined;
         if (typeof resultType === "function") {
@@ -197,7 +217,7 @@ export class ApiClient<T extends ApiRoutedType> {
         var instance;
         switch (resultType){
             case "item": 
-                instance = new ItemApiState<TArgs, TResult, this>(this, invoker);
+                instance = new ItemApiState<TArgs, TResult, this>(this, invoker as any);
                 break;
             case "list": 
                 instance = new ListApiState<TArgs, TResult, this>(this, invoker as any);
@@ -437,8 +457,11 @@ export abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<
     
 }
 
-export type TInvoker<TArgs extends any[], TReturn, TClient extends ApiClient<any>> = (this: any, client: TClient, ...args: TArgs) => TReturn
-export type TCall<TArgs extends any[], TReturn> = (this: any, ...args: TArgs) => TReturn
+export type TInvoker<TArgs extends any[], TReturn, TClient extends ApiClient<any>> 
+    = (this: any, client: TClient, ...args: TArgs) => TReturn
+    
+export type TCall<TArgs extends any[], TReturn> 
+    = (this: any, ...args: TArgs) => TReturn
 
 export abstract class ApiState<TArgs extends any[], TResult, TClient extends ApiClient<any>> extends Function {
 
@@ -572,11 +595,16 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
         this.isLoading = true
 
         // Inject a cancellation token into the request.
-        var promise: ApiResultPromise<TResult>
         try {
             const token = (this.apiClient as any)._nextCancelToken = axios.CancelToken.source()
             this._cancelToken = token
-            const resp = await (this.invoker as any).apply(thisArg, [this.apiClient, ...args])
+            const promise = (this.invoker as any).apply(thisArg, [this.apiClient, ...args])
+
+            if (!promise) {
+                return void 0;
+            }
+
+            const resp = await promise;
 
             const data = resp.data
             delete this._cancelToken

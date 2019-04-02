@@ -601,6 +601,7 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
             const promise = (this.invoker as any).apply(thisArg, [this.apiClient, ...args])
 
             if (!promise) {
+                this.isLoading = false;
                 return void 0;
             }
 

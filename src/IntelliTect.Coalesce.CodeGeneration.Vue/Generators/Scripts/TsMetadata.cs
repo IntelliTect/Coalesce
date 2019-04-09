@@ -88,7 +88,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private void WriteCommonClassMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
         {
-            b.StringProp("name", model.ClientTypeName.ToCamelCase());
+            b.StringProp("name", model.ClientTypeName);
             b.StringProp("displayName", model.DisplayName);
             if (model.ListTextProperty != null)
             {
@@ -129,7 +129,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             using (b.Block($"export const {model.ClientTypeName} = domain.enums.{model.ClientTypeName} ="))
             {
-                b.StringProp("name", model.ClientTypeName.ToCamelCase());
+                b.StringProp("name", model.ClientTypeName);
                 b.StringProp("displayName", model.DisplayName);
                 b.StringProp("type", "enum");
 
@@ -148,7 +148,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             using (b.Block($"export const {model.ClientTypeName} = domain.services.{model.ClientTypeName} ="))
             {
-                b.StringProp("name", model.ClientTypeName.ToCamelCase());
+                b.StringProp("name", model.ClientTypeName);
                 b.StringProp("displayName", model.DisplayName);
 
                 b.StringProp("type", "service");

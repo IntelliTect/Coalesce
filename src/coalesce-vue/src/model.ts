@@ -528,6 +528,13 @@ class DisplayVisitor extends Visitor<string | null, string | null, string | null
     protected visitPrimitiveValue(value: any, meta: PrimitiveValue): string | null {
         const parsed = parseValue(value, meta);
         if (parsed == null) return null;
+        if (typeof parsed == "number") {
+            // Don't locale-string numbers - it puts in thousands separators.
+            // This may seem like a neat idea, until you start displaying things 
+            // like PKs, FKs, or numbers like order numbers, invoice numbers.
+            // That is to say, numbers without any useful meaning to their magnitude.
+            return parsed.toString();
+        }
         return parsed.toLocaleString();
     }
 }

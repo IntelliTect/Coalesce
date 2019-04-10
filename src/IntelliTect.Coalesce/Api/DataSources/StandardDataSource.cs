@@ -547,6 +547,22 @@ namespace IntelliTect.Coalesce
         public virtual void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters) { }
 
         /// <summary>
+        /// Perform a transformation of the results after the query has been evaluated.
+        /// The purpose of this is for populating unmapped propertes on entities.
+        /// If possible, this sort of mutation should be performed in a custom IClassDto.
+        /// 
+        /// DO NOT modify any database-mapped fields in this method - doing so will have adverse
+        /// effects when a data source is used in an IBehaviors implementation - namely, mutations to mapped properties will be persisted.
+        /// </summary>
+        /// <param name="results">The items to be transformed.</param>
+        /// <param name="parameters">The parameters by which to filter.</param>
+        public virtual Task TransformResultsAsync(IReadOnlyList<T> results, IDataSourceParameters parameters)
+        {
+            TransformResults(results, parameters);
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
         /// Returns a new collection of DTOs with only the fields specified by the IListParameters having values.
         /// </summary>
         /// <param name="mappedResult">The items to be trimmed.</param>
@@ -640,7 +656,7 @@ namespace IntelliTect.Coalesce
                 return new ListResult<TDto>(result);
             }
 
-            TransformResults(new ReadOnlyCollection<T>(result.List), parameters);
+            await TransformResultsAsync(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
             IList<TDto> mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
@@ -689,7 +705,7 @@ namespace IntelliTect.Coalesce
                 return new ItemResult<TDto>(result);
             }
 
-            TransformResults(Array.AsReadOnly(new[] { result.Object }), parameters);
+            await TransformResultsAsync(Array.AsReadOnly(new[] { result.Object }), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
             var mappedResult = Mapper.MapToDto<T, TDto>(result.Object, mappingContext, tree);

@@ -97,6 +97,13 @@ export interface ObjectType extends CustomReferenceTypeBase {
     readonly type: "object"
 }
 
+/** Flags representing the 3 different behaviors in Coalesce - Create, Edit, and Delete. */
+export enum BehaviorFlags {
+    Create = 1 << 0,
+    Edit = 1 << 1,
+    Delete = 1 << 2,
+}
+
 /** Represents a type that is part of a relational model and can be identified by a single, unique key. */
 export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
     readonly type: "model"
@@ -106,6 +113,9 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 
     /** The primary key property of the entity */
     readonly keyProp: Property
+
+    /** Flags indicating the create/edit/delete capabilities of the type. */
+    readonly behaviorFlags: BehaviorFlags
 
     /** The data sources that can be used to query the API for objects of this type. */
     readonly dataSources: { [sourceName in string]: DataSourceType }

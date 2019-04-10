@@ -6,7 +6,7 @@ import {
 
 const domain: Domain = { enums: {}, types: {}, services: {} }
 export const Genders = domain.enums.Genders = {
-  name: "genders",
+  name: "Genders",
   displayName: "Genders",
   type: "enum",
   ...getEnumMeta<"NonSpecified"|"Male"|"Female">([
@@ -16,7 +16,7 @@ export const Genders = domain.enums.Genders = {
   ]),
 }
 export const Statuses = domain.enums.Statuses = {
-  name: "statuses",
+  name: "Statuses",
   displayName: "Statuses",
   type: "enum",
   ...getEnumMeta<"Open"|"InProgress"|"Resolved"|"ClosedNoSolution"|"Cancelled">([
@@ -28,7 +28,7 @@ export const Statuses = domain.enums.Statuses = {
   ]),
 }
 export const Titles = domain.enums.Titles = {
-  name: "titles",
+  name: "Titles",
   displayName: "Titles",
   type: "enum",
   ...getEnumMeta<"Mr"|"Ms"|"Mrs"|"Miss">([
@@ -39,12 +39,13 @@ export const Titles = domain.enums.Titles = {
   ]),
 }
 export const Case = domain.types.Case = {
-  name: "case",
+  name: "Case",
   displayName: "Case",
   get displayProp() { return this.props.title }, 
   type: "model",
   controllerRoute: "Case",
   get keyProp() { return this.props.caseKey }, 
+  behaviorFlags: 7,
   props: {
     caseKey: {
       name: "caseKey",
@@ -233,7 +234,7 @@ export const Case = domain.types.Case = {
   dataSources: {
     allOpenCases: {
       type: "dataSource",
-      name: "allOpenCases",
+      name: "AllOpenCases",
       displayName: "All Open Cases",
       params: {
         minDate: {
@@ -247,12 +248,13 @@ export const Case = domain.types.Case = {
   },
 }
 export const CaseDto = domain.types.CaseDto = {
-  name: "caseDto",
+  name: "CaseDto",
   displayName: "Case Dto",
   get displayProp() { return this.props.caseId }, 
   type: "model",
   controllerRoute: "CaseDto",
   get keyProp() { return this.props.caseId }, 
+  behaviorFlags: 7,
   props: {
     caseId: {
       name: "caseId",
@@ -305,7 +307,7 @@ export const CaseDto = domain.types.CaseDto = {
   dataSources: {
     caseDtoSource: {
       type: "dataSource",
-      name: "caseDtoSource",
+      name: "CaseDtoSource",
       displayName: "Case Dto Source",
       params: {
       },
@@ -313,12 +315,13 @@ export const CaseDto = domain.types.CaseDto = {
   },
 }
 export const CaseProduct = domain.types.CaseProduct = {
-  name: "caseProduct",
+  name: "CaseProduct",
   displayName: "Case Product",
   get displayProp() { return this.props.caseProductId }, 
   type: "model",
   controllerRoute: "CaseProduct",
   get keyProp() { return this.props.caseProductId }, 
+  behaviorFlags: 7,
   props: {
     caseProductId: {
       name: "caseProductId",
@@ -371,12 +374,13 @@ export const CaseProduct = domain.types.CaseProduct = {
   },
 }
 export const Company = domain.types.Company = {
-  name: "company",
+  name: "Company",
   displayName: "Company",
   get displayProp() { return this.props.altName }, 
   type: "model",
   controllerRoute: "Company",
   get keyProp() { return this.props.companyId }, 
+  behaviorFlags: 6,
   props: {
     companyId: {
       name: "companyId",
@@ -481,7 +485,7 @@ export const Company = domain.types.Company = {
   dataSources: {
     defaultSource: {
       type: "dataSource",
-      name: "defaultSource",
+      name: "DefaultSource",
       displayName: "Default Source",
       params: {
       },
@@ -489,12 +493,13 @@ export const Company = domain.types.Company = {
   },
 }
 export const Person = domain.types.Person = {
-  name: "person",
+  name: "Person",
   displayName: "Person",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Person",
   get keyProp() { return this.props.personId }, 
+  behaviorFlags: 7,
   props: {
     personId: {
       name: "personId",
@@ -903,21 +908,21 @@ export const Person = domain.types.Person = {
   dataSources: {
     bOrCPeople: {
       type: "dataSource",
-      name: "bOrCPeople",
+      name: "BOrCPeople",
       displayName: "B Or C People",
       params: {
       },
     },
     namesStartingWithAWithCases: {
       type: "dataSource",
-      name: "namesStartingWithAWithCases",
+      name: "NamesStartingWithAWithCases",
       displayName: "Names Starting With A With Cases",
       params: {
       },
     },
     withoutCases: {
       type: "dataSource",
-      name: "withoutCases",
+      name: "WithoutCases",
       displayName: "Without Cases",
       isDefault: true,
       params: {
@@ -926,12 +931,13 @@ export const Person = domain.types.Person = {
   },
 }
 export const Product = domain.types.Product = {
-  name: "product",
+  name: "Product",
   displayName: "Product",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Product",
   get keyProp() { return this.props.productId }, 
+  behaviorFlags: 7,
   props: {
     productId: {
       name: "productId",
@@ -966,7 +972,7 @@ export const Product = domain.types.Product = {
   },
 }
 export const CaseSummary = domain.types.CaseSummary = {
-  name: "caseSummary",
+  name: "CaseSummary",
   displayName: "Case Summary",
   type: "object",
   props: {
@@ -1003,7 +1009,7 @@ export const CaseSummary = domain.types.CaseSummary = {
   },
 }
 export const DevTeam = domain.types.DevTeam = {
-  name: "devTeam",
+  name: "DevTeam",
   displayName: "Dev Team",
   get displayProp() { return this.props.name }, 
   type: "object",
@@ -1023,7 +1029,7 @@ export const DevTeam = domain.types.DevTeam = {
   },
 }
 export const Location = domain.types.Location = {
-  name: "location",
+  name: "Location",
   displayName: "Location",
   type: "object",
   props: {
@@ -1048,7 +1054,7 @@ export const Location = domain.types.Location = {
   },
 }
 export const PersonCriteria = domain.types.PersonCriteria = {
-  name: "personCriteria",
+  name: "PersonCriteria",
   displayName: "Person Criteria",
   get displayProp() { return this.props.name }, 
   type: "object",
@@ -1074,7 +1080,7 @@ export const PersonCriteria = domain.types.PersonCriteria = {
   },
 }
 export const PersonStats = domain.types.PersonStats = {
-  name: "personStats",
+  name: "PersonStats",
   displayName: "Person Stats",
   get displayProp() { return this.props.name }, 
   type: "object",
@@ -1100,7 +1106,7 @@ export const PersonStats = domain.types.PersonStats = {
   },
 }
 export const ProductDetails = domain.types.ProductDetails = {
-  name: "productDetails",
+  name: "ProductDetails",
   displayName: "Product Details",
   get displayProp() { return this.props.manufacturingAddress }, 
   type: "object",
@@ -1124,7 +1130,7 @@ export const ProductDetails = domain.types.ProductDetails = {
   },
 }
 export const StreetAddress = domain.types.StreetAddress = {
-  name: "streetAddress",
+  name: "StreetAddress",
   displayName: "Street Address",
   get displayProp() { return this.props.address }, 
   type: "object",
@@ -1156,7 +1162,7 @@ export const StreetAddress = domain.types.StreetAddress = {
   },
 }
 export const WeatherData = domain.types.WeatherData = {
-  name: "weatherData",
+  name: "WeatherData",
   displayName: "Weather Data",
   type: "object",
   props: {
@@ -1183,7 +1189,7 @@ export const WeatherData = domain.types.WeatherData = {
   },
 }
 export const WeatherService = domain.services.WeatherService = {
-  name: "weatherService",
+  name: "WeatherService",
   displayName: "Weather Service",
   type: "service",
   controllerRoute: "WeatherService",

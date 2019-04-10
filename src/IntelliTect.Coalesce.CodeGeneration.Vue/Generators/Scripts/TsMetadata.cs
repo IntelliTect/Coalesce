@@ -117,6 +117,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.StringProp("controllerRoute", model.ApiRouteControllerPart);
                 b.Line($"get keyProp() {{ return this.props.{model.PrimaryKey.JsVariable} }}, ");
 
+                var securityInfo = model.SecurityInfo;
+                int flags = 
+                    (securityInfo.IsCreateAllowed() ? 1 << 0 : 0) |
+                    (securityInfo.IsEditAllowed() ? 1 << 1 : 0) | 
+                    (securityInfo.IsDeleteAllowed() ? 1 << 2 : 0);
+                b.Prop("behaviorFlags", flags.ToString());
+
                 WriteClassPropertiesMetadata(b, model);
 
                 WriteClassMethodMetadata(b, model);

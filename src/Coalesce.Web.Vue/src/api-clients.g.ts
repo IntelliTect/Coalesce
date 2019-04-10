@@ -122,11 +122,12 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public changeFirstName(id: number, firstName: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public changeFirstName(id: number, firstName: string | null, title: $models.Titles | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.changeFirstName
     const $params =  {
       id,
       firstName,
+      title,
     }
     return this.$invoke($method, $params, $config)
   }

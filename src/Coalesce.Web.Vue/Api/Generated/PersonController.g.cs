@@ -258,7 +258,7 @@ namespace Coalesce.Web.Vue.Api
         /// </summary>
         [HttpPatch("ChangeFirstName")]
         [Authorize]
-        public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName)
+        public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName, Coalesce.Domain.Person.Titles? title)
         {
             IncludeTree includeTree = null;
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
@@ -268,7 +268,7 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult<PersonDtoGen>(itemResult);
             }
             var item = itemResult.Object;
-            var methodResult = item.ChangeFirstName(firstName);
+            var methodResult = item.ChangeFirstName(firstName, title);
             await Db.SaveChangesAsync();
             var result = new ItemResult<PersonDtoGen>();
             var mappingContext = new MappingContext(User, "");

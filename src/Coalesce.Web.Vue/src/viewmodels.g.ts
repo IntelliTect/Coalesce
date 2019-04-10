@@ -21,7 +21,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     (c) => c.obfuscateEmail(this.$primaryKey))
   
   public changeFirstName = this.$apiClient.$makeCaller("item", 
-    (c, firstName: string | null) => c.changeFirstName(this.$primaryKey, firstName))
+    (c, firstName: string | null, title: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title))
   
   constructor(initialData?: $models.Person) {
     super($metadata.Person, new $apiClients.PersonApiClient(), initialData)

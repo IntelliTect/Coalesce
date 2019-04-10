@@ -221,9 +221,10 @@ namespace Coalesce.Domain
 
         [Coalesce]
         [ControllerAction(Method = HttpMethod.Patch)]
-        public Person ChangeFirstName (string firstName)
+        public Person ChangeFirstName (string firstName, Titles? title)
         {
             this.FirstName = firstName;
+            Title = Title ?? title;
             return this;
         }
 

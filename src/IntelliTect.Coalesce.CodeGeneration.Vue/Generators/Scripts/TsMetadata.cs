@@ -407,7 +407,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 switch (kind)
                 {
                     case TypeDiscriminator.Enum:
-                        b.Line($"get {propName}() {{ return domain.enums.{t.Name} }},");
+                        b.Line($"get {propName}() {{ return domain.enums.{t.ClientTypeName} }},");
                         break;
 
                     case TypeDiscriminator.Model:

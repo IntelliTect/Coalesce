@@ -15,22 +15,24 @@
     "bootstrap-sass": "3.3.7"
   },
   "devDependencies": {
-    "@types/bootstrap": "3.3.39",
-    "@types/bootstrap.v3.datetimepicker": "4.17.46",
-    "@types/jquery": "3.3.1",
+    "@types/bootstrap": "3.3.42",
+    "@types/bootstrap.v3.datetimepicker": "4.17.47",
+    "@types/jquery": "3.3.29",
     "@types/knockout": "3.4.47",
     "@types/knockout.validation": "0.0.36",
     "@types/select2": "4.0.41",
     "@types/moment": "2.11.29",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
+    "gulp-flatten": "^0.4.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "^2.6.0",
-    "gulp-flatten": "^0.3.1",
     "gulp-sass": "^3.1.0",
-    "gulp-typescript": "^3.1.6",
-    "typescript": "^2.9.2",
-    "del": "3.0.0",
     "gulp-shell": "^0.5.2",
-    "gulp-util": "3.0.7"
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-typescript": "5.0.0-alpha.3",
+    "gulp-plumber": "^1.2.1",
+    "typescript": "^3.4.3",
+    "del": "^4.0.0",
+    "node-sass": "^4.11.0",
+    "natives": "1.1.6"
   }
 }

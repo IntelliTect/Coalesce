@@ -1,22 +1,17 @@
-﻿/// <binding AfterBuild='copy-files' ProjectOpened='default, copy-images' />
+﻿/// <binding ProjectOpened='default' />
 /*
 This file in the main entry point for defining Gulp tasks and using Gulp plugins.
 Click here to learn more. http://go.microsoft.com/fwlink/?LinkId=518007
 */
 
 var gulp = require('gulp'),
-    //debug = require('gulp-debug'),
-    flatten = require('gulp-flatten'),
     sourcemaps = require('gulp-sourcemaps'),
-    sass = require('gulp-sass'),
+    sassCompiler = require('gulp-sass'),
     typescriptCompiler = require('gulp-typescript'),
     del = require('del'),
-    path = require('path'),
     shell = require('gulp-shell'),
-    gutil = require('gulp-util'),
-    rename = require('gulp-rename'),
-    fs = require('fs'),
-    exec = require('child_process').exec;
+    plumber = require('gulp-plumber'), // Handles Gulp errors (https://www.npmjs.com/package/gulp-plumber)
+    fs = require('fs');
 
 // Initialize directory paths.
 var paths = {
@@ -34,165 +29,158 @@ paths.img = paths.wwwroot + "/img/";
 paths.js = paths.wwwroot + "/js/";
 paths.lib = paths.wwwroot + "/lib/";
 
-gulp.task('clean-images', function () {
-    return del(paths.img);
-});
 
-gulp.task("copy-images", ['clean-images'], function () {
-    gulp.src(paths.images + '**/*.{png,jpg,ico}')
+exports.cleanImages = function cleanLib() {
+    return del(paths.img);
+};
+
+exports.copyImages = gulp.series(exports.cleanImages, function copyStatic() {
+    return gulp
+        .src(paths.images + '**/*.{png,jpg,ico}')
         .pipe(gulp.dest(paths.img));
 });
 
-gulp.task('img:watch', function () {
-    gulp.watch(paths.images + '**/*.{png,jpg,ico}', ['copy-images']);
-});
+exports.watchImages = function watchImages() { 
+    return gulp.watch(paths.images + '**/*.{png,jpg,ico}', ['copy-images'], exports.copyImages) 
+};
 
-gulp.task("clean-lib", function (cb) {
-    return del(paths.img);
-});
+const npm = {
+    "bootstrap": "bootstrap-sass/assets/**/bootstrap*.{js,map}",
+    "bootstrap/fonts": "bootstrap-sass/assets/fonts/**/*.{,eot,svg,ttf,woff,woff2}",
+    "jquery": "jquery/dist/*.{js,map}",
+    "font-awesome": "components-font-awesome/**/*.{css,otf,eot,svg,ttf,woff,woff2}",
+    "moment": "moment/moment.js",
+    "knockout": "knockout/build/output/*.js",
+    "knockout-validation": "knockout.validation/dist/*.js",
+    "select2": "select2/dist/**/*.{css,js}",
+    "select2-bootstrap": "select2-bootstrap-theme/dist/*.css",
+    "bootstrap-datetimepicker": "eonasdan-bootstrap-datetimepicker/build/**/*.{css,js}"
+};
+exports.cleanLib = function cleanLib() {
+    return del(paths.lib);
+};
+exports.copyLib = gulp.series(exports.cleanLib, gulp.parallel(
+    Object
+        .keys(npm)
+        .map(destinationDir => {
+            const fn = function () {
+                return gulp
+                    .src(paths.npm + npm[destinationDir])
+                    .pipe(gulp.dest(paths.lib + destinationDir));
+            };
+            fn.displayName = `copyLib:${destinationDir}`;
+            return fn;
+        })
+    )
+);
 
-gulp.task("copy-lib",
-    ["clean-lib"],
-    function () {
-        const packages = {
-            "bootstrap": "bootstrap-sass/assets/**/bootstrap*.{js,map}",
-            "bootstrap/fonts": "bootstrap-sass/assets/fonts/**/*.{,eot,svg,ttf,woff,woff2}",
-            "jquery": "jquery/dist/*.{js,map}",
-            "font-awesome": "components-font-awesome/**/*.{css,otf,eot,svg,ttf,woff,woff2}",
-            "moment": "moment/moment.js",
-            "knockout": "knockout/build/output/*.js",
-            "knockout-validation": "knockout.validation/dist/*.js",
-            "select2": "select2/dist/**/*.{css,js}",
-            "select2-bootstrap": "select2-bootstrap-theme/dist/*.css",
-            "bootstrap-datetimepicker": "eonasdan-bootstrap-datetimepicker/build/**/*.{css,js}"
-        };
-
-        for (var destinationDir in packages) {
-            gulp.src(paths.npm + packages[destinationDir])
-                .pipe(gulp.dest(paths.lib + destinationDir));
-        }
-    });
-
-gulp.task("copy-files", ['copy-lib', 'ts', 'copy-js']);
-
-gulp.task("copy-js", function () {
-    gulp.src(paths.scripts + "*.js")
+exports.copyJs = function copyJs() {
+    return gulp.src(paths.scripts + "*.js")
         .pipe(gulp.dest(paths.js));
-});
+};
 
-gulp.task('js:watch', function () {
-    gulp.watch(paths.scripts + '/*.js', ['copy-js']);
-});
+exports.watchJs = function watchJs() { return gulp.watch(paths.scripts + '*.js', exports.copyJs) };
 
+exports.sass = function sass() {
+    return gulp
+        .src(paths.styles + '*.scss')
+        .pipe(plumber())
+        .pipe(sassCompiler().on('error', sassCompiler.logError))
+        .pipe(gulp.dest(paths.css));
+};
 
-gulp.task("sass",
-    function () {
-        return gulp.src(paths.styles + "/*.scss")
-            .pipe(sass({
-                includePaths: [paths.npm + "bootstrap-sass/assets/stylesheets"]
-            }).on("error", sass.logError))
-            .pipe(gulp.dest(paths.css));
+exports.watchSass = function watchSass() { return gulp.watch([paths.styles + '*.scss'], exports.sass) };
+
+exports.tsLocal = function tsLocal() {
+    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json', {
+        typescript: require('typescript')
     });
 
-gulp.task("sass:watch",
-    function () {
-        gulp.watch([paths.styles + "/*.scss"], ["sass"]);
-    });
-
-
-gulp.task("ts:local", function () {
-    // now compile the individual page files
-    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
-    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{coalesce,Ko,ko}*.ts'])
+    //var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
+    return gulp.src([paths.scripts + '*.ts', '!' + paths.scripts + '{coalesce,Ko,ko}*.ts'])
         .pipe(sourcemaps.init())
-        .pipe(individualFileTypescriptProject());
+        .pipe(individualFileTypescriptProject(typescriptCompiler.reporter.fullReporter(true)))
+        .js
+        .pipe(sourcemaps.write('.')).pipe(gulp.dest(paths.js));
+};
 
-    individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    return individualTsResult.js
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(paths.js));
-});
-
-gulp.task('ts', function () {
+exports.ts = gulp.parallel(exports.tsLocal, function ts() {
     // compile the root generated code into an app.js file
     var rootAppJsProject = typescriptCompiler.createProject('tsconfig.json', { outFile: 'app.js' });
-    var rootApp = gulp.src([paths.scripts + '/Generated/{Ko,ko}*.ts', paths.scripts + '/Partials/*.ts', '!' + paths.scripts + '/*.d.ts'])
+    return gulp.src([paths.scripts + 'viewmodels.generated.d.ts'])
+        .pipe(plumber())
         .pipe(sourcemaps.init())
-        .pipe(rootAppJsProject());
-
-    rootApp.dts
-        .pipe(gulp.dest(paths.js));
-
-    rootApp.js
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(paths.js));
-
-    // now compile the individual page files
-    var individualFileTypescriptProject = typescriptCompiler.createProject('tsconfig.json');
-    var individualTsResult = gulp.src([paths.scripts + '/*.ts', '!' + paths.scripts + '/{coalesce,Ko,ko}*.ts'])
-        .pipe(sourcemaps.init())
-        .pipe(individualFileTypescriptProject());
-
-    individualTsResult.dts.pipe(gulp.dest(paths.js));
-
-    individualTsResult.js
+        .pipe(rootAppJsProject())
+        .js
+        .pipe(plumber())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.js));
 });
 
-gulp.task("copy-ts",
-    ["ts"],
-    function () {
-        gulp.src(paths.scripts + "*.{ts,js.map}")
-            .pipe(gulp.dest(paths.js));
-    });
-
-gulp.task("ts:watch",
-    function () {
-        gulp.watch([paths.scripts + "/**/*.ts"], ["ts:local"]);
-        gulp.watch([paths.scripts + "/Partials/*.ts"], ["ts"]);
-    });
-
-gulp.task('watch', ['sass:watch', 'ts:watch', 'js:watch', 'img:watch'], function () {
+exports.copyTs = gulp.series(exports.ts, function copyTs() {
+    return gulp.src(paths.scripts + "*.{ts,js.map}")
+        .pipe(plumber())
+        .pipe(gulp.dest(paths.js));
 });
 
-gulp.task('build', ['copy-lib', 'sass', 'ts'], function () {
-});
+exports.watchTs = gulp.parallel(
+    function watchScripts() { return gulp.watch([paths.scripts + '**/*.ts'], exports.tsLocal) },
+    function watchPartials() { return gulp.watch([paths.scripts + 'Partials/*.ts'], exports.ts) }
+);
 
-gulp.task('default', ['build', 'watch'], function () {
-});
+exports.copyFiles = gulp.parallel(
+    exports.sass,
+    exports.copyLib,
+    exports.copyImages,
+    exports.copyTs,
+    exports.copyJs,
+);
+exports.copyAll = exports.copyFiles;
+
+exports.watch = gulp.parallel(
+    exports.watchSass,
+    exports.watchTs,
+    exports.watchImages,
+    exports.watchJs
+);
+
+exports.default = gulp.series(
+    exports.copyAll, exports.watch
+);
 
 
 var coalesceBuildDir = `${require('os').tmpdir()}/CoalesceExe`;
 var dotnetCoalesce = `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll"`;
 
-gulp.task('coalesce:cleanbuild', function (cb) {
+exports.coalesceCleanBuild = function coalesceCleanBuild() {
     return del(coalesceBuildDir, { force: true });
-});
+};
 
-gulp.task('coalesce:build', ['coalesce:cleanbuild'], shell.task([
-        'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.Cli"',
-        `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}" -f netcoreapp2.2`
-    ],{ verbose: true }
-));
+exports.coalesceBuild = gulp.series(
+    exports.coalesceCleanBuild,
+    shell.task([
+            'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.Cli"',
+            `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}" -f netcoreapp2.2`
+        ],{ verbose: true }
+    )
+)
 
-// Build is required every time because the templates are compiled into the dll.
-// Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
-gulp.task('coalesce-ko', ['coalesce:build'], shell.task(
-    `${dotnetCoalesce} ../../coalesce-ko.json `,
-    // `${dotnetCoalesce} ../../coalesce-ko.json --verbosity debug`,
-    { verbose: true }
-));
+const coalesceKoGen = shell.task(`${dotnetCoalesce} ../../coalesce-ko.json `, { verbose: true });
+coalesceKoGen.displayName = "coalesceKoGen";
 
-gulp.task('coalesce-vue', ['coalesce:build'], shell.task(
-    `${dotnetCoalesce} ../../coalesce-vue.json `,
-    // `${dotnetCoalesce} ../../coalesce-vue.json --verbosity debug `,
-    { verbose: true }
-));
+exports.coalesceKo = gulp.series(
+    // Build is required every time because the templates are compiled into the dll.
+    // Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
+    exports.coalesceBuild,
+    coalesceKoGen,
+    exports.copyTs
+);
 
+const coalesceVueGen = shell.task(`${dotnetCoalesce} ../../coalesce-vue.json `, { verbose: true });
+coalesceVueGen.displayName = "coalesceVueGen";
+exports.coalesceVue = gulp.series(exports.coalesceBuild, coalesceVueGen);
 
-gulp.task('coalesce:debug', ['coalesce:build'], shell.task(
-    `${dotnetCoalesce} --debug --verbosity debug`,
-    { verbose: true }
-));
+// gulp.task('coalesce:debug', ['coalesce:build'], shell.task(
+//     `${dotnetCoalesce} --debug --verbosity debug`,
+//     { verbose: true }
+// ));

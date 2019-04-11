@@ -29,7 +29,7 @@ ko.bindingHandlers.select2Ajax = {
         const format = allBindings.has("format") ? allBindings.get("format") : '{0}';
         const setObject = allBindings.has("setObject") ? allBindings.get("setObject") : false;
         const itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
-        const object: KnockoutObservable<Coalesce.BaseViewModel> = allBindings.has('object') ? allBindings.get('object') : null;
+        const object: KnockoutObservable<Coalesce.BaseViewModel | null> = allBindings.has('object') ? allBindings.get('object') : null;
         const selectOnClose = allBindings.has("selectOnClose") ? allBindings.get("selectOnClose") : false;
         const openOnFocus = allBindings.has("openOnFocus") ? allBindings.get("openOnFocus") : false; // This doesn't work in IE (GE: 2016-09-27)
         const allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
@@ -259,7 +259,7 @@ ko.bindingHandlers.select2Ajax = {
 
 // Multi-select Select2 binding that uses an AJAX call for the list of valid values.
 ko.bindingHandlers.select2AjaxMultiple = {
-    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+    init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         const url = allBindings.get('url');
         const itemViewModel: new (newItem: object) => Coalesce.BaseViewModel = allBindings.get('itemViewModel');
 
@@ -518,7 +518,7 @@ ko.bindingHandlers.select2AjaxText = {
                             if (typeof item === "object" && resultField) {
                                 item = item[resultField];
                             }
-                            
+
                             if (item === undefined || item === null) {
                                 continue;
                             }
@@ -566,9 +566,9 @@ ko.bindingHandlers.select2AjaxText = {
         var value = valueAccessor()();
         var options;
         if (value) {
-          options = $(element).find('option[value="' + value.toString().replace(/"/g, '\\"') + '"]');
+            options = $(element).find('option[value="' + value.toString().replace(/"/g, '\\"') + '"]');
         } else {
-          options = $(element).find('option[value="' + value + '"]');
+            options = $(element).find('option[value="' + value + '"]');
         }
 
 
@@ -623,7 +623,7 @@ ko.bindingHandlers.select2 = {
         const validationCore = ko.bindingHandlers['validationCore'];
         if (!validationCore.init) throw "Fatal: validationCore.init missing"
         validationCore.init(element, valueAccessor, allBindings, viewModel, bindingContext);
-        
+
         // The validation message needs to go after the new select2 dropdown, not before it.
         $(element).next(".validationMessage").insertAfter($(element).nextAll(".select2").first());
     },
@@ -635,7 +635,7 @@ ko.bindingHandlers.select2 = {
 
 
 ko.bindingHandlers.datePicker = {
-    init: function (element, valueAccessor: () => KnockoutObservable<moment.Moment>, allBindings, viewModel, bindingContext) {
+    init: function (element, valueAccessor: () => KnockoutObservable<moment.Moment | null>, allBindings, viewModel, bindingContext) {
         // See if we should use the parent element 
         var theElement = $(element).parent(".input-group.date") || $(element);
 
@@ -654,12 +654,12 @@ ko.bindingHandlers.datePicker = {
                 newValue = newValue;
             } else if (preserveTime) {
                 // This is a date entry, keep the time. 
-                var unwrappedTime = moment.duration(unwrappedValue.format('HH:mm:ss'));
+                var unwrappedTime = moment.duration((unwrappedValue || moment()).format('HH:mm:ss'));
                 newValue = moment(newValue.format("YYYY/MM/DD"), "YYYY/MM/DD").add(unwrappedTime);
             } else if (preserveDate) {
                 // This is a time entry, keep the date.
                 var newTime = moment.duration(newValue.format('HH:mm:ss'));
-                newValue = moment(unwrappedValue.format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
+                newValue = moment((unwrappedValue || moment()).format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
             }
 
             return newValue;
@@ -700,7 +700,7 @@ ko.bindingHandlers.datePicker = {
         const validationCore = ko.bindingHandlers['validationCore'];
         if (!validationCore.init) throw "Fatal: validationCore.init missing"
         validationCore.init(element, valueAccessor, allBindings, viewModel, bindingContext);
-        
+
         // The validation message needs to go after the input group with the button.
         $(element).next(".validationMessage").insertAfter($(theElement));
     },
@@ -722,7 +722,7 @@ ko.bindingHandlers.saveImmediately = {
         }
 
         // Set up to save immediately when the cursor enters and return to a regular state when it leaves.
-        var oldTimeoutValue: number;
+        var oldTimeoutValue: number | null;
         $(element).on("focus", function () {
             oldTimeoutValue = viewModel.coalesceConfig.saveTimeoutMs.raw();
             viewModel.coalesceConfig.saveTimeoutMs(0);
@@ -741,7 +741,7 @@ ko.bindingHandlers.delaySave = {
             console.error("delaySave binding was used in a context where $data is not a Coalesce.BaseViewModel");
             return;
         }
-        var existingAutoSaveValueRaw: boolean;
+        var existingAutoSaveValueRaw: boolean | null;
 
         // Set up to not save immediately when the cursor enters and return to a regular state when it leaves.
         $(element).on("focus", function () {
@@ -980,4 +980,4 @@ ko.virtualElements.allowedBindings['let'] = true;
 
         }
     };
-} ());
+}());

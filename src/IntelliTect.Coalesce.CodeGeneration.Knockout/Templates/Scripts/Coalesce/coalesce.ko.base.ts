@@ -9,7 +9,10 @@ module Coalesce {
     }
 
     interface ComputedConfiguration<T> extends KnockoutComputed<T> {
-        raw: () => T
+        raw: () => T | null
+
+        // Writes of null are fine.
+        (value: T | null): void;
     };
 
     interface CoalesceConfiguration {
@@ -27,7 +30,7 @@ module Coalesce {
             const k = "_" + name;
             const raw = this[k] = ko.observable<TProp>(null);
             var computed: ComputedConfiguration<TProp>;
-            computed = ko.computed<TProp>({
+            computed = ko.computed<TProp | null>({
                 deferEvaluation: true, // This is essential. If not deferred, the observable will be immediately evaluated without parentConfig being set.
                 read: () => {
                     var rawValue = raw();
@@ -572,7 +575,7 @@ module Coalesce {
                         })
                         .always(() => {
                             this.isSaving(false);
-                            if (typeof(callback) == "function") {
+                            if (typeof (callback) == "function") {
                                 callback(this);
                             }
                             if (this.coalesceConfig.showBusyWhenSaving()) this.coalesceConfig.onFinishBusy()(this);
@@ -604,7 +607,7 @@ module Coalesce {
                         this.errorMessage(null);
                         this.loadFromDto(data.object, true);
                         this.isLoaded(true);
-                        if (typeof(callback) == "function") callback(this);
+                        if (typeof (callback) == "function") callback(this);
                     })
                     .fail((xhr: JQueryXHR) => {
                         const data: ItemResult | null = xhr.responseJSON
@@ -657,7 +660,7 @@ module Coalesce {
                             this.coalesceConfig.onFailure()(this, errorMsg);
                     })
                     .always(() => {
-                        if (typeof(callback) == "function") {
+                        if (typeof (callback) == "function") {
                             callback(this);
                         }
                     });
@@ -668,7 +671,7 @@ module Coalesce {
                     this.parentCollection.splice(this.parentCollection().indexOf(this), 1);
                     this.parent.isLoading(false);
                 }
-                if (typeof(callback) == "function") {
+                if (typeof (callback) == "function") {
                     callback(this);
                 }
             }
@@ -746,7 +749,7 @@ module Coalesce {
             @returns true if the callback was registered. false if the callback was already registered. 
         */
         public onSave = (callback: (self: this) => void): boolean => {
-            if (typeof(callback) == "function" && !this.saveCallbacks.filter(c => c == callback).length) {
+            if (typeof (callback) == "function" && !this.saveCallbacks.filter(c => c == callback).length) {
                 this.saveCallbacks.push(callback);
                 return true;
             }
@@ -806,7 +809,7 @@ module Coalesce {
                     $('#modal-dialog').modal('show');
                     // Make the callback when the form closes.
                     $("#modal-dialog").on("hidden.bs.modal", () => {
-                        if (typeof(callback) == "function") callback(this);
+                        if (typeof (callback) == "function") callback(this);
                     });
                 })
                 .always(() => {
@@ -869,7 +872,7 @@ module Coalesce {
         public abstract modelKeyName: string;
 
         // Reference to the class which this list represents.
-        protected abstract itemClass: new() => TItem;
+        protected abstract itemClass: new () => TItem;
 
         /**
             Properties which determine how this object behaves.
@@ -925,9 +928,9 @@ module Coalesce {
                     this.totalCount(data.totalCount);
                     this.pageCount(data.pageCount);
                     this.page(data.page);
-                    this.message(typeof(data.message) == "string" ? data.message : null);
+                    this.message(typeof (data.message) == "string" ? data.message : null);
                     this.isLoaded(true);
-                    if (typeof(callback) == "function") callback(this);
+                    if (typeof (callback) == "function") callback(this);
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -1012,8 +1015,8 @@ module Coalesce {
             })
                 .done((data: ItemResult<number>) => {
                     this.count(data.object || 0);
-                    this.message(typeof(data.message) == "string" ? data.message : null);
-                    if (typeof(callback) == "function") callback();
+                    this.message(typeof (data.message) == "string" ? data.message : null);
+                    if (typeof (callback) == "function") callback();
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -1120,7 +1123,7 @@ module Coalesce {
                     } as any)
                         .done((data) => {
                             this.isLoading(false);
-                            if (typeof(callback) == "function") callback();
+                            if (typeof (callback) == "function") callback();
                         })
                         .fail((data) => {
                             if (this.coalesceConfig.showFailureAlerts())

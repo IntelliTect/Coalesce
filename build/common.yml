@@ -147,9 +147,9 @@
 
   steps:
   - task: NodeTool@0
-    displayName: 'Use Node 9.x'
+    displayName: 'Use Node 10.x'
     inputs:
-      versionSpec: 9.x
+      versionSpec: 10.x
 
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
     displayName: 'Yarn install'

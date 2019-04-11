@@ -11,7 +11,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     "item", 
     (c, name: string | null) => c.rename(this.$primaryKey, name),
     () => ({name: null as string | null, }),
-    (c, args) => c.rename(this.$primaryKey, , args.name))
+    (c, args) => c.rename(this.$primaryKey, args.name))
   
   /** Removes spaces from the name and puts in dashes */
   public changeSpacesToDashesInName = this.$apiClient.$makeCaller(
@@ -36,7 +36,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     "item", 
     (c, firstName: string | null, title: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
     () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
-    (c, args) => c.changeFirstName(this.$primaryKey, , args.firstName, , args.title))
+    (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
   
   constructor(initialData?: $models.Person) {
     super($metadata.Person, new $apiClients.PersonApiClient(), initialData)
@@ -51,7 +51,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     "item", 
     (c, numberOne: number | null, numberTwo: number | null) => c.add(numberOne, numberTwo),
     () => ({numberOne: null as number | null, numberTwo: null as number | null, }),
-    (c, args) => c.add(, args.numberOne, , args.numberTwo))
+    (c, args) => c.add(args.numberOne, args.numberTwo))
   
   /** Returns the user name */
   public getUser = this.$apiClient.$makeCaller(
@@ -64,13 +64,13 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     "item", 
     (c, lastNameStartsWith: string | null) => c.personCount(lastNameStartsWith),
     () => ({lastNameStartsWith: null as string | null, }),
-    (c, args) => c.personCount(, args.lastNameStartsWith))
+    (c, args) => c.personCount(args.lastNameStartsWith))
   
   public removePersonById = this.$apiClient.$makeCaller(
     "item", 
     (c, id: number | null) => c.removePersonById(id),
     () => ({id: null as number | null, }),
-    (c, args) => c.removePersonById(, args.id))
+    (c, args) => c.removePersonById(args.id))
   
   /** Returns the user name */
   public getUserPublic = this.$apiClient.$makeCaller(
@@ -84,14 +84,14 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     "item", 
     (c, characters: string | null) => c.namesStartingWith(characters),
     () => ({characters: null as string | null, }),
-    (c, args) => c.namesStartingWith(, args.characters))
+    (c, args) => c.namesStartingWith(args.characters))
   
   /** Gets people matching the criteria, paginated by parameter 'page'. */
   public searchPeople = this.$apiClient.$makeCaller(
     "list", 
     (c, criteria: $models.PersonCriteria | null, page: number | null) => c.searchPeople(criteria, page),
     () => ({criteria: null as $models.PersonCriteria | null, page: null as number | null, }),
-    (c, args) => c.searchPeople(, args.criteria, , args.page))
+    (c, args) => c.searchPeople(args.criteria, args.page))
   
   constructor() {
     super($metadata.Person, new $apiClients.PersonApiClient())
@@ -156,7 +156,7 @@ export class CompanyListViewModel extends ListViewModel<$models.Company, $apiCli
     "item", 
     (c, isDeleted: boolean | null) => c.getCertainItems(isDeleted),
     () => ({isDeleted: null as boolean | null, }),
-    (c, args) => c.getCertainItems(, args.isDeleted))
+    (c, args) => c.getCertainItems(args.isDeleted))
   
   constructor() {
     super($metadata.Company, new $apiClients.CompanyApiClient())

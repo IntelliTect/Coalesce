@@ -108,7 +108,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Indented($"\"{transportTypeSlug}\", ");
             b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
             b.Indented($"() => {argsConstructor},");
-            b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => ", args." + p.Name))}))");
+            b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => "args." + p.Name))}))");
         }
     }
 }

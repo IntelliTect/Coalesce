@@ -283,19 +283,20 @@ module ViewModels {
             public readonly verb = 'PATCH';
             
             /** Calls server method (ChangeFirstName) with the given arguments */
-            public invoke = (firstName: string | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), firstName: firstName }, callback, reload);
+            public invoke = (firstName: string | null, title: number | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), firstName: firstName, title: title }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
             public args = new ChangeFirstName.Args(); 
             public static Args = class Args {
                 public firstName: KnockoutObservable<string | null> = ko.observable(null);
+                public title: KnockoutObservable<number | null> = ko.observable(null);
             };
             
             /** Calls server method (ChangeFirstName) with an instance of ChangeFirstName.Args, or the value of this.args if not specified. */
             public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invoke(args.firstName(), callback, reload);
+                return this.invoke(args.firstName(), args.title(), callback, reload);
             }
             
             /** Invokes the method after displaying a browser-native prompt for each argument. */
@@ -304,7 +305,10 @@ module ViewModels {
                 $promptVal = prompt('First Name');
                 if ($promptVal === null) return;
                 var firstName: string = $promptVal;
-                return this.invoke(firstName, callback, reload);
+                $promptVal = prompt('Title');
+                if ($promptVal === null) return;
+                var title: number = parseInt($promptVal);
+                return this.invoke(firstName, title, callback, reload);
             };
             
             protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {

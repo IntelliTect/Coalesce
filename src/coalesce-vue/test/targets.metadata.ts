@@ -1,4 +1,4 @@
-import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType } from "../src/metadata";
+import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType, Domain, ForeignKeyProperty, PrimaryKeyProperty, ModelReferenceNavigationProperty } from "../src/metadata";
 
 const metaBase = (name: string = "model") => { 
   return {
@@ -15,12 +15,12 @@ const value = (name: string = "prop") => {
   };
 };
 
-const Types: { [key: string]: ClassType } = {};
-export default Types;
+const domain: Domain = { enums: {}, types: {}, services: {} }
 
-export const Course = Types.Course = <ModelType>{
+export const Course = domain.types.Course = {
   ...metaBase("course"),
   type: "model",
+  behaviorFlags: 7,
   get keyProp() {
     return this.props.courseId;
   },
@@ -32,19 +32,24 @@ export const Course = Types.Course = <ModelType>{
   methods: {},
   props: {
     courseId: {
-      ...value("courseId"),
+      name: 'courseId',
+      displayName: 'CourseId',
+      role: 'value',
       type: "number"
     },
     name: {
-      ...value("name"),
+      name: 'name',
+      displayName: 'Name',
+      role: 'value',
       type: "string"
     }
   }
 };
 
-export const Advisor = Types.Advisor = <ModelType>{
+export const Advisor = domain.types.Advisor = {
   ...metaBase("advisor"),
   type: "model",
+  behaviorFlags: 7,
   get keyProp() {
     return this.props.advisorId;
   },
@@ -56,19 +61,24 @@ export const Advisor = Types.Advisor = <ModelType>{
   methods: {},
   props: {
     advisorId: {
-      ...value("advisorId"),
+      name: 'advisorId',
+      displayName: 'AdvisorId',
+      role: 'primaryKey',
       type: "number"
     },
     name: {
-      ...value("name"),
+      name: 'name',
+      displayName: 'Name',
+      role: 'value',
       type: "string"
     }
   }
 };
 
-export const Student = Types.Student = <ModelType>{
+export const Student = domain.types.Student = {
   ...metaBase("student"),
   type: "model",
+  behaviorFlags: 7,
   get displayProp() {
     return this.props.name;
   },
@@ -77,37 +87,92 @@ export const Student = Types.Student = <ModelType>{
   },
   controllerRoute: "Students",
   dataSources: {},
-  methods: {},
+  methods: {
+    personCount: {
+      name: "personCount",
+      displayName: "Person Count",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        lastNameStartsWith: {
+          name: "lastNameStartsWith",
+          displayName: "Last Name Starts With",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "number",
+      },
+    },
+    fullNameAndAge: {
+      name: "fullNameAndAge",
+      displayName: "Full Name And Age",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "string",
+      },
+    },
+  },
   props: {
     studentId: {
-      ...value("studentId"),
+      name: 'studentId',
+      displayName: 'StudentId',
+      role: 'value',
       type: "number"
     },
     name: {
-      ...value("name"),
+      name: 'name',
+      displayName: 'Name',
+      role: 'value',
       type: "string"
     },
     isEnrolled: {
-      ...value("isEnrolled"),
+      name: 'isEnrolled',
+      displayName: 'IsEnrolled',
+      role: 'value',
       type: "boolean"
     },
     birthDate: {
-      ...value("birthDate"),
+      name: 'birthDate',
+      displayName: 'BirthDate',
+      role: 'value',
       type: "date"
     },
-    courses: <ModelCollectionNavigationProperty>{
-      ...value("courses"),
+    courses: {
+      name: 'courses',
+      displayName: "Courses",
       role: "collectionNavigation",
       type: "collection",
       dontSerialize: true,
+      get foreignKey() { return (domain.types.Course as ModelType).props.courseId as ForeignKeyProperty },
       itemType: {
-        ...value("$collectionValue"),
+        name: '$collectionValue',
+        role: 'value',
+        displayName: "",
         type: "model",
         typeDef: Course,
       }
     },
     grade: {
-      ...value("grade"),
+      name: 'grade',
+      displayName: 'Grade',
+      role: 'value',
       type: "enum",
       typeDef: {
         name: "grades",
@@ -127,8 +192,8 @@ export const Student = Types.Student = <ModelType>{
       type: "model",
       role: "referenceNavigation",
       dontSerialize: true,
-      get foreignKey() { return Types.Student.props.advisorId },
-      get principalKey() { return Advisor.keyProp },
+      get foreignKey() { return domain.types.Student.props.advisorId as ForeignKeyProperty },
+      get principalKey() { return Advisor.keyProp as PrimaryKeyProperty },
       typeDef: Advisor
     },
     advisorId: {
@@ -136,9 +201,9 @@ export const Student = Types.Student = <ModelType>{
       displayName: "AdvisorId",
       type: "number",
       role: "foreignKey",
-      get navigationProp() { return Types.Student.props.advisor },
-      get principalType() { return Types.Advisor },
-      get principalKey() { return Advisor.keyProp }
+      get navigationProp() { return domain.types.Student.props.advisor as ModelReferenceNavigationProperty },
+      get principalType() { return domain.types.Advisor as ModelType },
+      get principalKey() { return Advisor.keyProp as PrimaryKeyProperty }
     }
   }
 };
@@ -162,3 +227,18 @@ export const DisplaysStudent = <ObjectType>{
     }
   }
 };
+
+interface AppDomain extends Domain {
+  enums: {
+  }
+  types: {
+    Student: typeof Student,
+    Advisor: typeof Advisor
+    Course: typeof Course,
+    DisplaysStudent: typeof DisplaysStudent,
+  }
+  services: {
+  }
+}
+
+export default domain as AppDomain

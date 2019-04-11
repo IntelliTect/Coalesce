@@ -1,8 +1,8 @@
 
 import Vue from 'vue';
 
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames } from './metadata';
-import { ModelApiClient, ListParameters, DataSourceParameters } from './api-client';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, Method } from './metadata';
+import { ModelApiClient, ListParameters, DataSourceParameters, ParamsObject, ListApiState, ItemApiState, ItemResultPromise, ListResultPromise } from './api-client';
 import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
 import { Indexable } from './util';
 import { debounce } from 'lodash-es'
@@ -298,9 +298,9 @@ export abstract class ListViewModel<
     public get $hasNextPage() { return (this.$params.page || 1) < (this.$load.pageCount || 0) }
 
     /** Decrement the page parameter by 1 if there is a previous page. */
-    public $previousPagePage() { if (this.$hasPreviousPage) this.$params.page = (this.$params.page || 1) - 1 }
+    public $previousPagePage() { if (this.$hasPreviousPage) this.$params.page = (this.$params.page || 1) - 1; }
     /** Increment the page parameter by 1 if there is a next page. */
-    public $nextPage() { if (this.$hasNextPage) this.$params.page = (this.$params.page || 1) + 1 }
+    public $nextPage() { if (this.$hasNextPage) this.$params.page = (this.$params.page || 1) + 1; }
 
 
     /**
@@ -370,6 +370,39 @@ export abstract class ListViewModel<
     ) {
     }
 }
+
+// This ended up being replaced by the 'args' overloads of apiClient.$makeCaller.
+// export class InstanceMethodViewModel<
+//     TModel extends Model<ModelType>,
+//     TApi extends ModelApiClient<Model<TModel["$metadata"]>>,
+//     TMethod extends Method
+// > {
+    
+//     $args: ParamsObject<TMethod>;
+
+//     $invoke = this.$apiClient.$makeCaller(
+//         this.$metadata as any, 
+//         (c: TApi) => c.$invoke(this.$metadata as any, this.$args)) as any as (
+//     TMethod["transportType"] extends "item" 
+//         ? ItemApiState<[ParamsObject<TMethod>], any, any> & (() => ItemResultPromise<any>)
+//         : ListApiState<[ParamsObject<TMethod>], any, any> & (() => ListResultPromise<any>)
+//         )
+        
+
+//     constructor(public readonly $model: TModel, public readonly $metadata: TMethod, public readonly $apiClient: TApi) {
+//         const self = this;
+//         this.$args =  {
+//             get id() { return ($model as any)[$model.$metadata.keyProp.name] },
+//             ...Object
+//                 .values(this.$metadata.params)
+//                 .filter(p => p.name != 'id')
+//                 .reduce((prev, cur) => {
+//                     prev[cur.name] = null;
+//                     return prev;
+//                 }, {} as any)
+//         }
+//     }
+// }
 
 
 

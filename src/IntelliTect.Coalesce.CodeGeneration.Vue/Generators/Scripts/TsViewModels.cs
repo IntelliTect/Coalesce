@@ -51,15 +51,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 foreach (var method in model.ClientMethods.Where(m => !m.IsStatic))
                 {
-                    string signature =
-                        string.Concat(method.ClientParameters.Select(f => $", {f.Name}: {new VueType(f.Type).TsType("$models")} | null"));
-
-                    // "item" or "list"
-                    var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
-
-                    b.DocComment(method.Comment, true);
-                    b.Line($"public {method.JsVariable} = this.$apiClient.$makeCaller(\"{transportTypeSlug}\", ");
-                    b.Indented($"(c{signature}) => c.{method.JsVariable}(this.$primaryKey{string.Concat(method.ClientParameters.Select(p => ", " + p.Name))}))");
+                    WriteMethodCaller(b, method);
                 }
 
                 b.Line();
@@ -84,15 +76,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 foreach (var method in model.ClientMethods.Where(m => m.IsStatic))
                 {
-                    string signature =
-                        string.Concat(method.ClientParameters.Select(f => $", {f.Name}: {new VueType(f.Type).TsType("$models")} | null"));
-
-                    // "item" or "list"
-                    var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
-
-                    b.DocComment(method.Comment, true);
-                    b.Line($"public {method.JsVariable} = this.$apiClient.$makeCaller(\"{transportTypeSlug}\", ");
-                    b.Indented($"(c{signature}) => c.{method.JsVariable}({string.Join(", ", method.ClientParameters.Select(p => p.Name))}))");
+                    WriteMethodCaller(b, method);
                 }
 
                 b.Line();
@@ -102,6 +86,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
             }
             b.Line();
+        }
+
+        private static void WriteMethodCaller(TypeScriptCodeBuilder b, MethodViewModel method)
+        {
+            string signature =
+                        string.Concat(method.ClientParameters.Select(f => $", {f.Name}: {new VueType(f.Type).TsType("$models")} | null"));
+
+            string argsConstructor =
+                "({" +
+                string.Concat(method.ClientParameters.Select(f => $"{f.Name}: null as {new VueType(f.Type).TsType("$models")} | null, ")) +
+                "})";
+
+            string pkArg = method.IsStatic ? "" : "this.$primaryKey, ";
+
+            // "item" or "list"
+            var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
+
+            b.DocComment(method.Comment, true);
+            b.Line($"public {method.JsVariable} = this.$apiClient.$makeCaller(");
+            b.Indented($"\"{transportTypeSlug}\", ");
+            b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
+            b.Indented($"() => {argsConstructor},");
+            b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => ", args." + p.Name))}))");
         }
     }
 }

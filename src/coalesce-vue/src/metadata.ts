@@ -47,6 +47,13 @@ export type NonCollectionTypeDiscriminator = ValueTypeDiscriminator | ClassTypeD
 /** Union of all valid type discriminators. */
 export type TypeDiscriminator = NonCollectionTypeDiscriminator | "collection"
 
+/** Maps a type discriminator to its best match TypeScript type */
+export type TypeDiscriminatorToType<T> = 
+ T extends "string" ? string
+: T extends "number" ? number
+: T extends "boolean" ? boolean
+: T extends "date" ? Date
+: any
 
 
 

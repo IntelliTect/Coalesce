@@ -121,10 +121,10 @@
       arguments: 'coalesce-ko.json'
 
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Coalesce.Web: Yarn gulp build'
+    displayName: 'Coalesce.Web: Yarn gulp copyAll'
     inputs:
       ProjectDirectory: src/Coalesce.Web
-      Arguments: 'gulp build'
+      Arguments: 'gulp copyAll'
 
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
     displayName: 'Coalesce.Web.Vue: yarn install'

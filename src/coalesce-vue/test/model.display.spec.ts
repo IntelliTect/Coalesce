@@ -92,11 +92,11 @@ describe.each([
 
   { meta: studentProps.birthDate, model: null, display: null },
   { meta: studentProps.birthDate, model: undefined, display: null },
-  { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1990-1-2 03:04:05" },
+  { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1/2/1990 3:04:05 AM" },
   { meta: studentProps.birthDate, 
     model: "1990-01-02T03:04:05.000-08:00", 
     // We define the expected using date-fns's format to make this test timezone-independent.
-    display: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-M-d hh:mm:ss") },
+    display: format(new Date("1990-01-02T03:04:05.000-08:00"), "M/d/yyyy h:mm:ss aaa") },
   ...undisplayable(studentProps.birthDate, true, 123, "abc", {}, [], new Date("!!Invalid") ),
   
   { meta: studentProps.grade, model: undefined, display: null },
@@ -145,7 +145,10 @@ describe.each([
 
   { meta: studentProps.advisor, model: null, display: null },
   { meta: studentProps.advisor, model: { advisorId: 1, name: "Steve" }, display: "Steve" },
-])("valueDisplay", ({ meta, model: modelValue, display, error }) => {
+])("valueDisplay", (x) => {
+
+  const { meta, model: modelValue, display, error } = x as typeof x & {error?: string};
+
   describe(meta.type, () => {
 
     const expectedOutcomeDesc = error

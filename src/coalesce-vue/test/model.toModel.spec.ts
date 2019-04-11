@@ -187,8 +187,8 @@ dtoToModelMappings.forEach(
 
 // Test both `map` and `convert` cases 
 // for starting with an object via `<>ToModel` methods.
-describe.each(["convertToModel", "mapToModel"])
-("%s", (methodName: "convertToModel" | "mapToModel") => {
+describe.each<"convertToModel" | "mapToModel">(["convertToModel", "mapToModel"])
+("%s", (methodName) => {
 
   test("preserves circular references", () => {
     const childDto = {} as any

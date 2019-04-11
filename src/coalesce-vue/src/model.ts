@@ -522,7 +522,7 @@ class DisplayVisitor extends Visitor<string | null, string | null, string | null
     protected visitDateValue(value: any, meta: DateValue): string | null {
         const parsed = parseValue(value, meta);
         if (parsed == null) return null;
-        return parsed.toLocaleString();
+        return format(parsed, 'M/d/yyyy h:mm:ss aaa');
     }
 
     protected visitPrimitiveValue(value: any, meta: PrimitiveValue): string | null {

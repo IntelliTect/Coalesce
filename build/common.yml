@@ -54,9 +54,9 @@
       version: 2.2.101
 
   - task: NodeTool@0
-    displayName: 'Use Node 9.x'
+    displayName: 'Use Node 10.x'
     inputs:
-      versionSpec: 9.x
+      versionSpec: 10.x
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet restore'

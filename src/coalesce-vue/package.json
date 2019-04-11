@@ -16,24 +16,24 @@
     "tsconfig.build.json"
   ],
   "dependencies": {
-    "@types/lodash-es": "^4.17.0",
-    "@types/qs": "^6.5.1",
+    "@types/lodash-es": "^4.17.3",
+    "@types/qs": "^6.5.3",
     "axios": "^0.18.0",
     "date-fns": ">=2.0.0-alpha.26",
     "lodash-es": "^4.17.10",
-    "qs": "^6.5.1"
+    "qs": "^6.7.0"
   },
   "peerDependencies": {
     "vue": "~2.5.16"
   },
   "devDependencies": {
-    "@types/jest": "^23.1.1",
-    "jest": "^23.1.0",
-    "jest-junit": "^5.1.0",
+    "@types/jest": "^24.0.11",
+    "jest": "^24.7.1",
+    "jest-junit": "^6.3.0",
     "lodash": "^4.17.10",
-    "ts-jest": "^22.4.6",
-    "typescript": "3.1.0-dev.20180731",
-    "vue": "^2.5.21"
+    "ts-jest": "^24.0.2",
+    "typescript": "3.4.3",
+    "vue": "^2.6.10"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",

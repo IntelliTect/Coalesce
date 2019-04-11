@@ -228,14 +228,14 @@ export class ApiClient<T extends ApiRoutedType> {
      * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
      * @param invokerFactory method that will call the API with an args object as the only parameter. This may be called by using `.withArgs()` on the function that is returned from `$makeCaller`. The value of the args object will default to `.args` if not specified.
      */
-    $makeCaller<TArgs extends any[], TArgsObj, TResult, TTransportType extends TransportTypeSpecifier<T>>(
+    $makeCaller<TArgs extends any[], TArgsObj extends {}, TResult, TTransportType extends TransportTypeSpecifier<T>>(
         resultType: TTransportType,
         invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult>, this>,
         argsFactory?: () => TArgsObj,
         argsInvoker?: TArgsInvoker<TArgsObj, ResultPromiseType<TTransportType, TResult>, this>
     ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult, this> & TCall<TArgs, ResultPromiseType<TTransportType, TResult>>
 
-    $makeCaller<TArgs extends any[], TArgsObj, TResult, TTransportType extends TransportTypeSpecifier<T>>(
+    $makeCaller<TArgs extends any[], TArgsObj extends {}, TResult, TTransportType extends TransportTypeSpecifier<T>>(
         resultType: TTransportType,
         invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult> | undefined | void, this>,
         argsFactory?: () => TArgsObj,

@@ -128,7 +128,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
         public void OnResultExecuted(ResultExecutedContext context)
         {
-            throw new NotImplementedException();
+            // not needed
         }
     }
 }

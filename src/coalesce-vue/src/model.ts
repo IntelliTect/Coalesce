@@ -8,7 +8,7 @@ import { Indexable } from './util'
 /**
  * Represents a model with metadata information.
  */
-export interface Model<TMeta extends ClassType> {
+export interface Model<TMeta extends ClassType = ClassType> {
     readonly $metadata: TMeta;
 }
 

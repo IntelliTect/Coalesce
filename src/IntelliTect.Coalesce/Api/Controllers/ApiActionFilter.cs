@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
@@ -51,6 +52,17 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (context.Exception != null && !context.ExceptionHandled)
             {
+                if (context.Exception is OperationCanceledException
+                    && context.HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    // Request was aborted by client. We don't want to log this.
+                    // The response we send back also doesn't matter because
+                    // the client will never see it.
+                    context.ExceptionHandled = true;
+                    context.Result = new StatusCodeResult(400);
+                    return;
+                }
+
                 logger?.LogError(context.Exception, context.Exception.Message);
                 context.ExceptionHandled = true;
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
@@ -81,6 +93,42 @@ namespace IntelliTect.Coalesce.Api.Controllers
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
+        }
+
+        public void OnResultExecuting(ResultExecutingContext context)
+        {
+            var response = context.HttpContext.Response;
+
+            int statusCode;
+            ApiResult result;
+
+            switch (context.Result)
+            {
+                case ForbidResult forbidResult:
+                    // ForbidResult is the authentication flow response for a 403.
+                    // This happens when you return Forbid() in a controller, 
+                    // or when authorization fails via the [Authorize] attribute.
+
+                    // An IAlwaysRunResultFilter is the only way we can intercept this response
+                    // and turn it into a ProblemDetails.
+
+                    statusCode = StatusCodes.Status403Forbidden;
+                    result = new ApiResult("Access Denied.");
+                    break;
+
+                default:
+                    return;
+            }
+
+            context.Result = new JsonResult(result)
+            {
+                StatusCode = statusCode,
+            };
+        }
+
+        public void OnResultExecuted(ResultExecutedContext context)
+        {
+            throw new NotImplementedException();
         }
     }
 }

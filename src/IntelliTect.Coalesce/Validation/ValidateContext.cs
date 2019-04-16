@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.Validation
             var assert = new ValidationHelper();
 
             assert.IsTrue(repository.DiscoveredClassViewModels.Any(), "No types were discovered. Make sure all models have a DbSet on the context.");
-            
+
             foreach (var model in repository.ApiBackedClasses)
             {
                 assert.Area = model.ToString();
@@ -71,6 +71,25 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist");
                             assert.IsNotNull(prop.ManyToManyCollectionProperty.Object.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty.Object.ViewModelClassName}");
+                        }
+                        if (prop.IsFile)
+                        {
+                            if (prop.HasFileNameProperty)
+                            {
+                                assert.IsNotNull(prop.FileNameProperty, $"Cannot find filename property: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
+                                assert.IsTrue(prop.FileNameProperty.Type.TypeInfo == typeof(string), $"Filename property must be a string: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
+                            }
+
+                            if (prop.HasFileHashProperty)
+                            {
+                                assert.IsNotNull(prop.FileHashProperty, $"Cannot find file hash property: {prop.Parent.Name}.{prop.FileHashProperty} for {prop.Name}");
+                                assert.IsTrue(prop.FileHashProperty.Type.TypeInfo == typeof(string), $"File Hash property must be a string: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
+                            }
+                            if (prop.HasFileSizeProperty)
+                            {
+                                assert.IsNotNull(prop.FileSizeProperty, $"Cannot find file size property: {prop.Parent.Name}.{prop.FileSizeProperty} for {prop.Name}");
+                                assert.IsTrue(prop.FileHashProperty.Type.IsNumber, $"File Size property must be a number: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
+                            }
                         }
                     }
                     catch (Exception ex)

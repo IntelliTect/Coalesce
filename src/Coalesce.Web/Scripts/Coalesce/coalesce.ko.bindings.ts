@@ -860,6 +860,37 @@ ko.bindingHandlers.formatNumberText = {
     }
 };
 
+ko.bindingHandlers.fileUpload = {
+    init: (element, valueAccessor, allBindingsAccessor, viewModel) => {
+        // The incoming observable should be a URL of where to send this.
+        // Hook up an event when the item changes.
+        var input = $('<input type="file" style="display:none">');
+        $(element).parent().append(input);
+        $(element).click(() => {
+            $(input).click();
+        })
+        var value = valueAccessor();
+        $(input).on('change', function () {
+            var uploadUrl = ko.unwrap(value).toString();
+            var inputElement: any = input[0];
+            let file: File = inputElement.files[0];
+            let formData = new FormData();
+            formData.append('file', file, file.name);
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if ($.isFunction(viewModel.load)) viewModel.loadFromDto(JSON.parse(xhr.response).object);
+                }
+            }
+            xhr.open('PUT', uploadUrl, true);
+            xhr.send(formData);
+        });
+    },
+    update: (element, valueAccessor, allBindings, viewModel, bindingContext) => {
+        // Nothing should change.
+    }
+}
+
 // http://xion.io/post/code/knockout-let-binding.html
 ko.bindingHandlers['let'] = {
     init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {

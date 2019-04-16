@@ -65,7 +65,21 @@ namespace Coalesce.Domain
         [Display(Name = "Reported By")]
         public Person ReportedBy { get; set; }
 
+        [File("image/jpeg", nameof(ImageName), nameof(ImageHash), nameof(ImageSize))]
+        public byte[] Image { get; set; }
+        public string ImageName { get {
+                return $"Case{CaseKey}.jpg";
+            }
+        }
+        public long ImageSize { get; set; }
+        public string ImageHash { get; set; }
+
+        [File(NameProperty = nameof(AttachmentName))]
         public byte[] Attachment { get; set; }
+        public string AttachmentName { get; set; }
+
+        [File("text/plain")]
+        public byte[] PlainAttachment { get; set; }
 
         public string Severity { get; set; }
 
@@ -83,6 +97,7 @@ namespace Coalesce.Domain
 
         // EF does support TimeSpans. Some of our projects also do.
         public TimeSpan Duration { get; set; }
+
 
 
         // Arbitrary endpoint to "test" method collection return types.

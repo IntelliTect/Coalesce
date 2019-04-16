@@ -158,6 +158,7 @@ module ViewModels {
             { id: 2, value: 'Female' },
         ];
         
+        
         /**
             Methods and properties for invoking server method Rename.
             Sets the FirstName to the given text.

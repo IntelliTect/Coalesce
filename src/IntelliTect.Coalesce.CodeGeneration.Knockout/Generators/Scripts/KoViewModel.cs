@@ -152,6 +152,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
 
                 b.Line();
+                foreach (PropertyViewModel prop in Model.FileProperties)
+                {
+                    b.DocComment($"URL for file '{prop.Name}'");
+                    b.Line($"public {prop.JsUrlPropertyName}: KnockoutComputed<string> = ko.pureComputed(() => ");
+                    var fileUrl = $"this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileControllerMethodName}";
+                    fileUrl += $"?id=' + this.{prop.Parent.PrimaryKey.JsVariable}()";
+                    fileUrl += " + '&' + this.dataSource.getQueryString()";
+                    if (prop.FileHashProperty?.IsClientProperty ?? false)
+                    {
+                        fileUrl += $" + '&hash=' + this.{prop.FileHashProperty.JsVariable}()";
+                    }
+                    b.Indented(fileUrl);
+                    b.Line(");");
+
+                    b.DocComment($"Upload file '{prop.Name}'");
+                    using (b.Block($"public {prop.JsVariable}Upload = (file: File): void =>"))
+                    {
+                        b.Line("let formData = new FormData();");
+                        b.Line("formData.append(\"file\", file);");
+                        using (b.Block("$.ajax(", ")")){
+                            b.Line($"type: \"PUT\",");
+                            b.Line($"url: this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileControllerMethodName}?id=' + this.{prop.Parent.PrimaryKey.JsVariable}(),");
+                            b.Line($"contentType: false,");
+                            b.Line($"processData: false,");
+                            b.Line($"data: formData,");
+                        }
+                    }
+                    b.Line("");
+                }
+
+
+
+                b.Line();
                 foreach (var method in Model.ClientMethods.Where(m => !m.IsStatic || m.ResultType.EqualsType(Model.Type)))
                 {
                     WriteClientMethodDeclaration(b, method, Model.ViewModelGeneratedClassName, true, true);

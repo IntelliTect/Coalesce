@@ -6,6 +6,7 @@ using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
@@ -84,7 +85,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"ListParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> ListImplementation(parameters, dataSource);");
-                
+
                 // ENDPOINT: /count
                 b.Line();
                 b.Line("[HttpGet(\"count\")]");
@@ -94,7 +95,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> CountImplementation(parameters, dataSource);");
             }
-            
+
             if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
             {
                 // ENDPOINT: /save
@@ -121,7 +122,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);");
             }
-            
+
             // ENDPOINT: /csvDownload
             b.DocComment($"Downloads CSV of {Model.DtoName}");
             b.Line("[HttpGet(\"csvDownload\")]");
@@ -130,7 +131,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             b.Indented($"ListParameters parameters,");
             b.Indented($"{dataSourceParameter})");
             b.Indented($"=> CsvDownloadImplementation(parameters, dataSource);");
-            
+
             // ENDPOINT: /csvText
             b.DocComment($"Returns CSV text of {Model.DtoName}");
             b.Line("[HttpGet(\"csvText\")]");
@@ -214,6 +215,108 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     }
 
                     WriteMethodResultProcessBlock(b, method);
+                }
+            }
+
+
+            foreach (var fileProperty in Model.FileProperties)
+            {
+                var returnType = $"Task<ItemResult<{Model.DtoName}>>";
+
+                if (securityInfo.IsReadAllowed())
+                {
+                    b.DocComment($"File Download: {fileProperty.Name}");
+                    b.Line($"{securityInfo.ReadAnnotation}");
+                    b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
+                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get ({primaryKeyParameter}, {dataSourceParameter})"))
+                    {
+                        b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
+                        b.Line($"string contentType = \"{fileProperty.FileMimeType}\";");
+
+                        if (fileProperty.FileNameProperty == null)
+                        {
+                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
+                        }
+                        else
+                        {
+                            using (b.Block($"if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.{fileProperty.FileNameProperty.Name}, out contentType)))"))
+                            {
+                                b.Line($"contentType = \"{fileProperty.FileMimeType}\";");
+                            }
+
+                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{fileProperty.FileNameProperty.Name});");
+                        }
+                    }
+                }
+
+                if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
+                {
+                    b.DocComment($"File Upload: {fileProperty.Name}");
+                    b.Line($"{securityInfo.SaveAnnotation}");
+                    b.Line($"[HttpPut(\"{fileProperty.FileControllerMethodName}\")]");
+                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Put ({primaryKeyParameter}, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
+                    {
+                        b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"if (!itemResult.WasSuccessful) return new ItemResult<{Model.DtoName}>(itemResult);");
+                        using (b.Block("using (var stream = new System.IO.MemoryStream())"))
+                        {
+                            b.Line("await file.CopyToAsync(stream);");
+
+                            b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
+
+                            if (fileProperty.FileNameProperty?.HasSetter ?? false)
+                            {
+                                b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = file.FileName;");
+                            }
+
+                            if (fileProperty.FileHashProperty?.HasSetter ?? false)
+                            {
+                                using (b.Block("using (var sha256Hash = System.Security.Cryptography.SHA256.Create())"))
+                                {
+                                    b.Line($"var hash = sha256Hash.ComputeHash(itemResult.Object.{fileProperty.Name});");
+                                    b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = Convert.ToBase64String(hash);");
+                                }
+                            }
+
+                            if (fileProperty.FileSizeProperty?.HasSetter ?? false)
+                            {
+                                b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = file.Length;");
+                            }
+
+                            b.Line("await Db.SaveChangesAsync();");
+                        }
+                        b.Line($"var result = new ItemResult<{Model.DtoName}>();");
+                        b.Line("var mappingContext = new MappingContext(User, \"\");");
+                        b.Line($"result.Object = Mapper.MapToDto<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>(itemResult.Object, mappingContext, null);");
+                        b.Line("return result;");
+                    }
+
+                    b.DocComment($"File Delete: {fileProperty.Name}");
+                    b.Line($"{securityInfo.SaveAnnotation}");
+                    b.Line($"[HttpDelete (\"{fileProperty.FileControllerMethodName}\")]");
+                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Delete ({primaryKeyParameter}, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
+                    {
+                        b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"if (!itemResult.WasSuccessful) return NotFound();");
+
+                        if (fileProperty.FileNameProperty?.HasSetter ?? false)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = null;");
+                        }
+                        if (fileProperty.FileHashProperty?.HasSetter ?? false)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = null;");
+                        }
+                        if (fileProperty.FileSizeProperty?.HasSetter ?? false)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = 0;");
+                        }
+                        b.Line($"itemResult.Object.{fileProperty.Name} = null;");
+
+                        b.Line("await Db.SaveChangesAsync();");
+                        b.Line("return Ok();");
+                    }
                 }
             }
         }

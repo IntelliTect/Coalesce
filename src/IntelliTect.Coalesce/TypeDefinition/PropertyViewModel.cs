@@ -73,14 +73,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns whether or not the property may be exposed to the client.
         /// </summary>
-        public bool IsClientProperty => !IsInternalUse && HasGetter;
+        public bool IsClientProperty => !IsInternalUse && HasGetter && !IsFile;
 
         /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
         public TypeViewModel PureType => Type.PureType;
-
+        
         public bool PureTypeOnContext => PureType.ClassViewModel?.IsDbMappedType ?? false;
+
+        public string FileControllerMethodName => Name;
+
 
         public string JsVariable => Name.ToCamelCase();
 
@@ -99,6 +102,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Text property name for things like enums. PureType+'Text'
         /// </summary>
         public string JsTextPropertyName => JsVariable + "Text";
+
+        /// <summary>
+        /// URL property name for <see cref="FileAttribute"/> related endpoints.
+        /// </summary>
+        public string JsUrlPropertyName => JsVariable + "Url";
 
         /// <summary>
         /// Returns true if the property is class outside the system Namespace, but is not a string or array
@@ -167,7 +175,34 @@ namespace IntelliTect.Coalesce.TypeDefinition
             && !HasReadOnlyAttribute
             && !HasReadOnlyApiAttribute 
             && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
+
+        /// <summary>
+        /// True if the property has the <see cref="FileAttribute"/> attribute.
+        /// </summary>
+        public bool IsFile => this.HasAttribute<FileAttribute>() && Type.IsByteArray;
+
+        public string FileMimeType
+        {
+            get
+            {
+                var attrValue = this.GetAttributeValue<FileAttribute>(f => f.MimeType)?.ToString();
+                if (string.IsNullOrWhiteSpace(attrValue)) return "application/octet-stream";
+                return attrValue;
+            }
+        }
+        private string FileNamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.NameProperty);
+        private string FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty);
+        private string FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty);
+
+        public PropertyViewModel FileNameProperty => this.Parent.PropertyByName(this.FileNamePropertyName);
+        public PropertyViewModel FileHashProperty => this.Parent.PropertyByName(this.FileHashPropertyName);
+        public PropertyViewModel FileSizeProperty => this.Parent.PropertyByName(this.FileSizePropertyName);
         
+        public bool HasFileNameProperty => !string.IsNullOrWhiteSpace(this.FileNamePropertyName);
+        public bool HasFileHashProperty => !string.IsNullOrWhiteSpace(this.FileHashPropertyName);
+        public bool HasFileSizeProperty => !string.IsNullOrWhiteSpace(this.FileSizePropertyName);
+
+
         /// <summary>
         /// True if the property has the DateType(DateOnly) Attribute.
         /// </summary>
@@ -183,6 +218,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return false;
             }
         }
+
 
         /// <summary>
         /// Returns the DisplayName Attribute or 

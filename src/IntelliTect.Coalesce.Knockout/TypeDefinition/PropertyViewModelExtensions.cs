@@ -39,8 +39,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
         /// Returns the core URL for the List Editor.
         /// </summary>
         public static string ListEditorUrlName(this PropertyViewModel prop) => string.Format("{0}ListUrl", prop.JsVariable);
-
-
+        
         /// <summary>
         /// Gets the Knockout JS text for the validation.
         /// </summary>

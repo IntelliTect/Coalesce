@@ -169,6 +169,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public IEnumerable<PropertyViewModel> ClientProperties => Properties.Where(p => p.IsClientProperty);
 
+        /// <summary>
+        /// Properties on the class that are available on the admin page. This is not filtered by IsHidden.
+        /// </summary>
+        public IEnumerable<PropertyViewModel> AdminPageProperties => Properties.Where(p => p.IsClientProperty || p.IsFile);
+
+        /// <summary>
+        /// Properties on the class that are marked with the [File] attribute.
+        /// </summary>
+        public IEnumerable<PropertyViewModel> FileProperties => Properties.Where(p => p.IsFile);
+
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>
                 !p.IsInternalUse && p.HasSetter && p.HasAttribute<CoalesceAttribute>()

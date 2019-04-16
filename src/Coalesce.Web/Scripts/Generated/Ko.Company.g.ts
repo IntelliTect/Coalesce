@@ -37,7 +37,6 @@ module ViewModels {
         
         
         
-        
         /** Add object to employees */
         public addToEmployees = (autoSave?: boolean | null): Person => {
             var newItem = new Person();

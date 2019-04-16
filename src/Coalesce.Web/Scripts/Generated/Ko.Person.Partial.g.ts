@@ -91,7 +91,6 @@ module ViewModels {
         public companyText: KnockoutComputed<string>;
         
         
-        
         /** Add object to casesAssigned */
         public addToCasesAssigned = (autoSave?: boolean | null): Case => {
             var newItem = new Case();

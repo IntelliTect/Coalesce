@@ -84,21 +84,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
 
                 b.Line();
-                foreach (PropertyViewModel prop in Model.FileProperties)
-                {
-                    b.DocComment($"File properties for {prop.Name}");
-                    b.Line($"public {prop.JsVariableUrl}: KnockoutComputed<string> = ko.pureComputed(() => {{");
-                    var fileUrl = $"this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileControllerMethodName}";
-                    fileUrl += $"?id=' + this.{prop.Parent.PrimaryKey.JsVariable}()";
-                    fileUrl += " + '&' + this.dataSource.getQueryString()";
-                    if (prop.HasFileHashProperty) {
-                        fileUrl += $" + '&hash=' + this.{prop.FileHashProperty.JsVariable}()";
-                    }
-                    b.Line($"    return {fileUrl};");
-                    b.Line("});");                
-                }
-
-                b.Line();
                 foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Role == PropertyRole.CollectionNavigation && !f.IsManytoManyCollection))
                 {
                     b.DocComment($"Add object to {prop.JsVariable}");
@@ -167,22 +152,31 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
 
                 b.Line();
-                foreach (var prop in Model.ClientProperties.Where(f => f.IsFile))
+                foreach (PropertyViewModel prop in Model.FileProperties)
                 {
-                    b.DocComment($"Upload method for {prop.Name}");
-                    using (b.Block($"public {prop.JsVariable}Upload = (data: any, e: any): void =>"))
+                    b.DocComment($"URL for file '{prop.Name}'");
+                    b.Line($"public {prop.JsUrlPropertyName}: KnockoutComputed<string> = ko.pureComputed(() => ");
+                    var fileUrl = $"this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileControllerMethodName}";
+                    fileUrl += $"?id=' + this.{prop.Parent.PrimaryKey.JsVariable}()";
+                    fileUrl += " + '&' + this.dataSource.getQueryString()";
+                    if (prop.FileHashProperty?.IsClientProperty ?? false)
                     {
-                        b.Line("let file = e.target.files[0];");
+                        fileUrl += $" + '&hash=' + this.{prop.FileHashProperty.JsVariable}()";
+                    }
+                    b.Indented(fileUrl);
+                    b.Line(");");
+
+                    b.DocComment($"Upload file '{prop.Name}'");
+                    using (b.Block($"public {prop.JsVariable}Upload = (file: File): void =>"))
+                    {
                         b.Line("let formData = new FormData();");
                         b.Line("formData.append(\"file\", file);");
-                        using (b.Block("$.ajax(")){
-                            b.Line($"type: \"POST\",");
-                            b.Line($"url: this.apiController +'/{prop.UploadUrl()}',");
+                        using (b.Block("$.ajax(", ")")){
+                            b.Line($"type: \"PUT\",");
+                            b.Line($"url: this.coalesceConfig.baseApiUrl() + this.apiController + '/{prop.FileControllerMethodName}?id=' + this.{prop.Parent.PrimaryKey.JsVariable}(),");
                             b.Line($"contentType: false,");
                             b.Line($"processData: false,");
                             b.Line($"data: formData,");
-                            b.Line($"success: (result) => {{}},");
-                            b.Line($"error: (result) => {{}}");
                         }
                     }
                     b.Line("");

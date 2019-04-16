@@ -625,7 +625,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string bindingName = "fileUpload")
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            return new HtmlString(DisplayFile(propertyModel).ToString() + FileUploadButton(propertyModel.JsVariableUrl, bindingName).ToString());
+            return new HtmlString(DisplayFile(propertyModel).ToString() + FileUploadButton(propertyModel.JsUrlPropertyName, bindingName).ToString());
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, Enum>> propertySelector,
@@ -853,7 +853,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
         {
             var result = new HtmlString($@"
-                <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsVariableUrl}}}"" />");
+                <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsUrlPropertyName}}}"" />");
             // Prevent request for unbound images.
             result = new HtmlString($@"
                 <!-- ko if: {propertyModel.Parent.PrimaryKey.JsVariable}() -->
@@ -870,11 +870,9 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString DisplayFileDownload(PropertyViewModel propertyModel, string classes)
         {
-            var filenameVariable = "'download'";
-            if (propertyModel.HasFileFilenameProperty) filenameVariable = $"{propertyModel.FileFilenameProperty.Name}";
             var result = new HtmlString($@"
-                <a href=""#"" class=""{classes}"" data-bind=""attr: {{href: {propertyModel.JsVariableUrl}, download: {filenameVariable.ToCamelCase()}}}""><i class=""fa fa-download""></i></a>");
-            if (propertyModel.HasFileHashProperty)
+                <a class=""{classes}"" data-bind=""attr: {{href: {propertyModel.JsUrlPropertyName}}}"" download><i class=""fa fa-download""></i></a>");
+            if (propertyModel.FileHashProperty?.IsClientProperty ?? false)
             {
                 result = new HtmlString($@"
                     <!-- ko if: {propertyModel.FileHashProperty.JsVariable}() -->

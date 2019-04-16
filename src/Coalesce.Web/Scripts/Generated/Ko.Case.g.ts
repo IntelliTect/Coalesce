@@ -67,22 +67,6 @@ module ViewModels {
         public devTeamAssignedText: KnockoutComputed<string>;
         
         
-        /** File properties for Image */
-        public imageUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey() + '&' + this.dataSource.getQueryString() + '&hash=' + this.imageHash();
-        });
-        
-        /** File properties for Attachment */
-        public attachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseApiUrl() + this.apiController + '/Attachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString();
-        });
-        
-        /** File properties for PlainAttachment */
-        public plainAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => {
-            return this.coalesceConfig.baseApiUrl() + this.apiController + '/PlainAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString();
-        });
-        
-        
         
         /** Url for a table view of all members of collection CaseProducts for the current object. */
         public caseProductsListUrl: KnockoutComputed<string> = ko.computed(
@@ -106,6 +90,63 @@ module ViewModels {
             { id: 3, value: 'Closed No Solution' },
             { id: 4, value: 'Cancelled' },
         ];
+        
+        
+        /** URL for file 'Image' */
+        public imageUrl: KnockoutComputed<string> = ko.pureComputed(() => 
+            this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey() + '&' + this.dataSource.getQueryString() + '&hash=' + this.imageHash()
+        );
+        
+        /** Upload file 'Image' */
+        public imageUpload = (file: File): void => {
+            let formData = new FormData();
+            formData.append("file", file);
+            $.ajax( {
+                type: "PUT",
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey(),
+                contentType: false,
+                processData: false,
+                data: formData,
+            })
+        }
+        
+        
+        /** URL for file 'Attachment' */
+        public attachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
+            this.coalesceConfig.baseApiUrl() + this.apiController + '/Attachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
+        );
+        
+        /** Upload file 'Attachment' */
+        public attachmentUpload = (file: File): void => {
+            let formData = new FormData();
+            formData.append("file", file);
+            $.ajax( {
+                type: "PUT",
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/Attachment?id=' + this.caseKey(),
+                contentType: false,
+                processData: false,
+                data: formData,
+            })
+        }
+        
+        
+        /** URL for file 'PlainAttachment' */
+        public plainAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
+            this.coalesceConfig.baseApiUrl() + this.apiController + '/PlainAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
+        );
+        
+        /** Upload file 'PlainAttachment' */
+        public plainAttachmentUpload = (file: File): void => {
+            let formData = new FormData();
+            formData.append("file", file);
+            $.ajax( {
+                type: "PUT",
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/PlainAttachment?id=' + this.caseKey(),
+                contentType: false,
+                processData: false,
+                data: formData,
+            })
+        }
         
         
         

@@ -882,7 +882,7 @@ ko.bindingHandlers.fileUpload = {
                     if ($.isFunction(viewModel.load)) viewModel.loadFromDto(JSON.parse(xhr.response).object);
                 }
             }
-            xhr.open('POST', uploadUrl, true);
+            xhr.open('PUT', uploadUrl, true);
             xhr.send(formData);
         });
     },

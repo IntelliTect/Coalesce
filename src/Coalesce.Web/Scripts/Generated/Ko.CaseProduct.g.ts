@@ -40,7 +40,6 @@ module ViewModels {
         
         
         
-        
         /** Pops up a stock editor for object case */
         public showCaseEditor: (callback?: any) => void;
         

@@ -124,16 +124,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             const int maxProjectLoadRetries = 10;
             const int projectLoadRetryDelayMs = 1000;
 
-            await Task.WhenAll(
-                Task.Run(async () =>
-                {
-                    genContext.WebProject = await TryLoadProject(Config.WebProject);
-                }),
-                Task.Run(async () =>
-                {
-                    genContext.DataProject = await TryLoadProject(Config.DataProject);
-                })
-            );
+            // We used to do these in parallel.
+            // However, that ends up causing more headache than its worth because
+            // it seems that more and more often, the projects step on 
+            // one another when they're building and end up failing due
+            // to file contention of some form or another.
+            genContext.DataProject = await TryLoadProject(Config.DataProject);
+            genContext.WebProject = await TryLoadProject(Config.WebProject);
+
+            //await Task.WhenAll(
+            //    Task.Run(async () =>
+            //    {
+            //        genContext.WebProject = await TryLoadProject(Config.WebProject);
+            //    }),
+            //    Task.Run(async () =>
+            //    {
+            //        genContext.DataProject = await TryLoadProject(Config.DataProject);
+            //    })
+            //);
 
             async Task<ProjectContext> TryLoadProject(ProjectConfiguration config)
             {

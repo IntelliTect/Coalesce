@@ -217,97 +217,107 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     WriteMethodResultProcessBlock(b, method);
                 }
             }
+
+
             foreach (var fileProperty in Model.FileProperties)
             {
                 var returnType = $"Task<ItemResult<{Model.DtoName}>>";
-                b.DocComment($"File Upload: {fileProperty.Name}");
-                // TODO: Figure out security
-                b.Line($"[HttpPost(\"{fileProperty.FileControllerMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Post (int id, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
-                {
-                    b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
-                    b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return new ItemResult <{Model.DtoName}>(\"Not found\");");
-                    using (b.Block("using (var stream = new System.IO.MemoryStream())"))
-                    {
-                        b.Line("file.CopyTo(stream);");
 
-                        b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
-                        if (fileProperty.HasFileFilenameProperty && !fileProperty.FileFilenameProperty.IsReadOnly)
-                        {
-                            b.Line($"itemResult.Object.{fileProperty.FileFilenameProperty.Name} = file.FileName;");
-                        }
-                        if (fileProperty.HasFileHashProperty && !fileProperty.FileHashProperty.IsReadOnly)
-                        {
-                            b.Line("using (var sha256Hash = System.Security.Cryptography.SHA256.Create())");
-                            b.Line("{");
-                            b.Line($"    var hash = sha256Hash.ComputeHash(itemResult.Object.{fileProperty.Name});");
-                            b.Line($"    itemResult.Object.{fileProperty.FileHashProperty.Name} = Convert.ToBase64String(hash);");
-                            b.Line("}");
-                        }
-                        if (fileProperty.HasFileSizeProperty && !fileProperty.FileSizeProperty.IsReadOnly)
-                        {
-                            b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = file.Length;");
-                        }
-                        b.Line("await Db.SaveChangesAsync();");
-                    }
-                    b.Line($"var result = new ItemResult<{Model.DtoName}>();");
-                    b.Line("var mappingContext = new MappingContext(User, \"\");");
-                    b.Line($"result.Object = Mapper.MapToDto<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>(itemResult.Object, mappingContext, null);");
-                    b.Line("return result;");
-                }
-
-                b.DocComment($"File Download: {fileProperty.Name}");
-                // TODO: Figure out security
-                b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get (int id, {dataSourceParameter})"))
+                if (securityInfo.IsReadAllowed())
                 {
-                    b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
-                    b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
-                    b.Line($"string contentType = \"{fileProperty.FileMimeType}\";");
-                    if (fileProperty.HasFileMimeType)
+                    b.DocComment($"File Download: {fileProperty.Name}");
+                    b.Line($"{securityInfo.ReadAnnotation}");
+                    b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
+                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get ({primaryKeyParameter}, {dataSourceParameter})"))
                     {
-                        b.Line($"if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType))) contentType = \"application/octet-stream\";");
-                    }
-                    if (fileProperty.FileFilenameProperty == null)
-                    {
-                        b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
-                    }
-                    else
-                    {
-                        b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{fileProperty.FileFilenameProperty.Name});");
+                        b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
+                        b.Line($"string contentType = \"{fileProperty.FileMimeType}\";");
+
+                        if (fileProperty.FileNameProperty == null)
+                        {
+                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
+                        }
+                        else
+                        {
+                            using (b.Block($"if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.{fileProperty.FileNameProperty.Name}, out contentType)))"))
+                            {
+                                b.Line($"contentType = \"{fileProperty.FileMimeType}\";");
+                            }
+
+                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{fileProperty.FileNameProperty.Name});");
+                        }
                     }
                 }
 
-                b.DocComment($"File Delete: {fileProperty.Name}");
-                // TODO: Figure out security
-                b.Line($"[HttpDelete (\"{fileProperty.FileControllerMethodName}\")]");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Delete (int id, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
+                if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
                 {
-                    b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
-                    b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
+                    b.DocComment($"File Upload: {fileProperty.Name}");
+                    b.Line($"{securityInfo.SaveAnnotation}");
+                    b.Line($"[HttpPut(\"{fileProperty.FileControllerMethodName}\")]");
+                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Put ({primaryKeyParameter}, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
+                    {
+                        b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"if (!itemResult.WasSuccessful) return new ItemResult<{Model.DtoName}>(itemResult);");
+                        using (b.Block("using (var stream = new System.IO.MemoryStream())"))
+                        {
+                            b.Line("await file.CopyToAsync(stream);");
 
-                    if (fileProperty.HasFileHashProperty && !fileProperty.FileHashProperty.IsReadOnly)
-                    {
-                        b.Line($"    itemResult.Object.{fileProperty.FileHashProperty.Name} = null;");
+                            b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
+
+                            if (fileProperty.FileNameProperty?.HasSetter ?? false)
+                            {
+                                b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = file.FileName;");
+                            }
+
+                            if (fileProperty.FileHashProperty?.HasSetter ?? false)
+                            {
+                                using (b.Block("using (var sha256Hash = System.Security.Cryptography.SHA256.Create())"))
+                                {
+                                    b.Line($"var hash = sha256Hash.ComputeHash(itemResult.Object.{fileProperty.Name});");
+                                    b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = Convert.ToBase64String(hash);");
+                                }
+                            }
+
+                            if (fileProperty.FileSizeProperty?.HasSetter ?? false)
+                            {
+                                b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = file.Length;");
+                            }
+
+                            b.Line("await Db.SaveChangesAsync();");
+                        }
+                        b.Line($"var result = new ItemResult<{Model.DtoName}>();");
+                        b.Line("var mappingContext = new MappingContext(User, \"\");");
+                        b.Line($"result.Object = Mapper.MapToDto<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>(itemResult.Object, mappingContext, null);");
+                        b.Line("return result;");
                     }
-                    if (fileProperty.HasFileSizeProperty && !fileProperty.FileSizeProperty.IsReadOnly)
+
+                    b.DocComment($"File Delete: {fileProperty.Name}");
+                    b.Line($"{securityInfo.SaveAnnotation}");
+                    b.Line($"[HttpDelete (\"{fileProperty.FileControllerMethodName}\")]");
+                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Delete ({primaryKeyParameter}, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
                     {
-                        b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = 0;");
-                    }
-                    if (fileProperty.Type.IsNullable)
-                    {
+                        b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                        b.Line($"if (!itemResult.WasSuccessful) return NotFound();");
+
+                        if (fileProperty.FileNameProperty?.HasSetter ?? false)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = null;");
+                        }
+                        if (fileProperty.FileHashProperty?.HasSetter ?? false)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = null;");
+                        }
+                        if (fileProperty.FileSizeProperty?.HasSetter ?? false)
+                        {
+                            b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = 0;");
+                        }
                         b.Line($"itemResult.Object.{fileProperty.Name} = null;");
-                    }
-                    else
-                    {
-                        b.Line($"itemResult.Object.{fileProperty.Name} = new byte[];");
-                    }
-                    b.Line("await Db.SaveChangesAsync();");
-                    b.Line("return Ok();");
 
-
+                        b.Line("await Db.SaveChangesAsync();");
+                        b.Line("return Ok();");
+                    }
                 }
-
             }
         }
     }

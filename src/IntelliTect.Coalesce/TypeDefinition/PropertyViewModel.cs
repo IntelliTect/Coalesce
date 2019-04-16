@@ -82,11 +82,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public bool PureTypeOnContext => PureType.ClassViewModel?.IsDbMappedType ?? false;
 
-        public string FileControllerMethodName => $"{Name}";
+        public string FileControllerMethodName => Name;
 
 
         public string JsVariable => Name.ToCamelCase();
-        public string JsVariableUrl => $"{JsVariable}Url";
 
         public static readonly Regex JsKeywordRegex = new Regex(
             "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true" +
@@ -103,6 +102,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Text property name for things like enums. PureType+'Text'
         /// </summary>
         public string JsTextPropertyName => JsVariable + "Text";
+
+        /// <summary>
+        /// URL property name for <see cref="FileAttribute"/> related endpoints.
+        /// </summary>
+        public string JsUrlPropertyName => JsVariable + "Url";
 
         /// <summary>
         /// Returns true if the property is class outside the system Namespace, but is not a string or array
@@ -171,11 +175,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             && !HasReadOnlyAttribute
             && !HasReadOnlyApiAttribute 
             && !(SecurityInfo.IsRead && !SecurityInfo.IsEdit);
-        
+
         /// <summary>
-        /// True if the property has the DateType(DateOnly) Attribute.
+        /// True if the property has the <see cref="FileAttribute"/> attribute.
         /// </summary>
-        public bool IsFile => this.HasAttribute<FileAttribute>();
+        public bool IsFile => this.HasAttribute<FileAttribute>() && Type.IsByteArray;
 
         public string FileMimeType
         {
@@ -186,22 +190,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return attrValue;
             }
         }
-        private string FileFilenamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.FilenameProperty)?.ToString();
-        private string FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty)?.ToString();
-        private string FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty)?.ToString();
+        private string FileNamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.NameProperty);
+        private string FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty);
+        private string FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty);
 
-        public PropertyViewModel FileFilenameProperty => this.Parent.PropertyByName(this.FileFilenamePropertyName);
+        public PropertyViewModel FileNameProperty => this.Parent.PropertyByName(this.FileNamePropertyName);
         public PropertyViewModel FileHashProperty => this.Parent.PropertyByName(this.FileHashPropertyName);
         public PropertyViewModel FileSizeProperty => this.Parent.PropertyByName(this.FileSizePropertyName);
-
-        public bool HasFileMimeType => !string.IsNullOrWhiteSpace(this.FileMimeType);
-        public bool HasFileFilenameProperty => !string.IsNullOrWhiteSpace(this.FileFilenamePropertyName);
+        
+        public bool HasFileNameProperty => !string.IsNullOrWhiteSpace(this.FileNamePropertyName);
         public bool HasFileHashProperty => !string.IsNullOrWhiteSpace(this.FileHashPropertyName);
         public bool HasFileSizeProperty => !string.IsNullOrWhiteSpace(this.FileSizePropertyName);
 
 
         /// <summary>
-        /// True if the property has the File Attribute.
+        /// True if the property has the DateType(DateOnly) Attribute.
         /// </summary>
         public bool IsDateOnly
         {

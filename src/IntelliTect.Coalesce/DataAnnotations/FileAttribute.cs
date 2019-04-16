@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <summary>
         /// Name of the property that will hold the filename.
         /// </summary>
-        public string FilenameProperty { get; set; }
+        public string NameProperty { get; set; }
         /// <summary>
         /// Property to store the file hash into
         /// </summary>
@@ -29,12 +29,12 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public string SizeProperty { get; set; }
 
         public FileAttribute(string mimeType = "application/octet-stream", 
-                             string filenameProperty = null, 
+                             string nameProperty = null, 
                              string hashProperty = null,
                              string sizeProperty = null)
         {
             this.MimeType = mimeType;
-            this.FilenameProperty = filenameProperty;
+            this.NameProperty = nameProperty;
             this.HashProperty = hashProperty;
             this.SizeProperty = sizeProperty;
         }

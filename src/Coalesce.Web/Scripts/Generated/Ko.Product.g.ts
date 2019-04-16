@@ -39,7 +39,6 @@ module ViewModels {
         
         
         
-        
         /** 
             Load the ViewModel object from the DTO.
             @param data: The incoming data object to load.

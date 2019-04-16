@@ -671,11 +671,11 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             return new HtmlString(result);
         }
 
-        public static HtmlString ModifiedOnFromNow(double size = 1, string format = "M/D/YY")
+        public static HtmlString ModifiedOnFromNow(double size = 1)
         {
             string result = $@"
                 <div class=""modified-on"" style=""font-size: {size}em;"">
-                    <span data-bind=""moment: modifiedOn().fromNow(), format: '{format}'""></span>
+                    <span data-bind=""momentFromNow: modifiedOn""></span>
                 </div>";
 
             return new HtmlString(result);

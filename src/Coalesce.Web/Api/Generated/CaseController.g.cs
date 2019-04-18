@@ -254,7 +254,7 @@ namespace Coalesce.Web.Api
         /// <summary>
         /// File Download: PlainAttachment
         /// </summary>
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("PlainAttachment")]
         public virtual async Task<IActionResult> PlainAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
         {
@@ -302,7 +302,7 @@ namespace Coalesce.Web.Api
         /// <summary>
         /// File Upload: RestrictedUploadAttachment
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, SuperUser")]
         [HttpPut("RestrictedUploadAttachment")]
         public virtual async Task<ItemResult<CaseDtoGen>> RestrictedUploadAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
         {

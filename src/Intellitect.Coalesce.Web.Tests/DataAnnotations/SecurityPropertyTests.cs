@@ -14,15 +14,14 @@ namespace Intellitect.Coalesce.Web.Tests.DataAnnotations
     public class SecurityPropertyTests
     {
         [TestMethod]
-        public void CasePlainAttachmentProperty_ReadPermitAuthorizedOnly_ControllerHasAttributeAuthorized()
+        public void CasePlainAttachmentProperty_ReadAllowAll_ControllerAllowAnonymous()
         {
             Type caseController = typeof(CaseController);
 
             var methodInfo = caseController.GetMembers()
                 .First(m => m.Name.Equals("PlainAttachmentGet"));
-            var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles;
-            Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AuthorizeAttribute)).Any());
-            Assert.IsNull(authorizedRoles);
+
+            Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AllowAnonymousAttribute)).Any());
         }
 
         [TestMethod]
@@ -32,36 +31,29 @@ namespace Intellitect.Coalesce.Web.Tests.DataAnnotations
             var methodInfo = caseController.GetMembers()
                 .First(m => m.Name.Equals("PlainAttachmentPut"));
             var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles;
+
             Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AuthorizeAttribute)).Any());
             Assert.IsNull(authorizedRoles);
 
         }
 
         [TestMethod]
-        public void CaseRestrictedDownloadProperty_ReadAdminRoleOnly_ControllerHasRoleAdmin()
+        [DataRow("RestrictedDownloadAttachmentGet", "Admin")]
+        [DataRow("RestrictedUploadAttachmentPut", "Admin, SuperUser")]
+        public void PropertyHasRoleRetriction_ContollerHasRoles(string controllerMethodName, string roles)
         {
             Type caseController = typeof(CaseController);
             var methodInfo = caseController.GetMembers()
-                .First(m => m.Name.Equals("RestrictedDownloadAttachmentGet"));
-             var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles.Split();
+                .First(m => m.Name.Equals(controllerMethodName));
+            var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles;
+            var expectedRoles = roles.Split(",", StringSplitOptions.RemoveEmptyEntries);
 
             Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AuthorizeAttribute)).Any());
-            Assert.IsTrue(authorizedRoles.Contains<string>("Admin"));
+            foreach (string role in expectedRoles)
+            {
+                Assert.IsTrue(authorizedRoles.Contains(role.Trim()));
+            }
         }
-
-        [TestMethod]
-        public void CaseRestrictedUploadProperty_EditAdminRoleOnly_ControllerHasRoleAdmin()
-        {
-            Type caseController = typeof(CaseController);
-            var methodInfo = caseController.GetMembers()
-                .First(m => m.Name.Equals("RestrictedUploadAttachmentPut"));
-            var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles.Split();
-
-            Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AuthorizeAttribute)).Any());
-            Assert.IsTrue(authorizedRoles.Contains<string>("Admin"));
-
-        }
-
 
     }
 }

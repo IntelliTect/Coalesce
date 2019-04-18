@@ -223,7 +223,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             {
                 var returnType = $"Task<ItemResult<{Model.DtoName}>>";
 
-                if (securityInfo.IsReadAllowed())
+                if (fileProperty.SecurityInfo.IsRead)
                 {
                     b.DocComment($"File Download: {fileProperty.Name}");
                     b.Line($"{securityInfo.ReadAnnotation}");

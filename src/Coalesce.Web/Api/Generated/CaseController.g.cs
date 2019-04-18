@@ -180,10 +180,10 @@ namespace Coalesce.Web.Api
         {
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (itemResult.Object?.Image == null) return NotFound();
-            string contentType = "image/*";
+            string contentType = "image/jpeg";
             if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType)))
             {
-                contentType = "image/*";
+                contentType = "image/jpeg";
             }
             return File(itemResult.Object.Image, contentType, itemResult.Object.ImageName);
         }
@@ -283,19 +283,6 @@ namespace Coalesce.Web.Api
             itemResult.Object.Attachment = null;
             await Db.SaveChangesAsync();
             return Ok();
-        }
-
-        /// <summary>
-        /// File Download: PlainAttachment
-        /// </summary>
-        [AllowAnonymous]
-        [HttpGet("PlainAttachment")]
-        public virtual async Task<IActionResult> PlainAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
-        {
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (itemResult.Object?.PlainAttachment == null) return NotFound();
-            string contentType = "text/plain";
-            return File(itemResult.Object.PlainAttachment, contentType);
         }
 
         /// <summary>

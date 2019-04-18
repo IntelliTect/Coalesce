@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,25 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// </summary>
     public class PropertySecurityInfo
     {
+        public PropertySecurityInfo(SecurityPermission read, SecurityPermission edit,
+            SecurityPermission delete)
+        {
+            Read = read;
+            Edit = edit;
+            Delete = delete;
+        }
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;
         public string EditRoles { get; set; } = "";
         public string ReadRoles { get; set; } = "";
 
+        public SecurityPermission Read { get; set; }
+        public SecurityPermission Edit { get; set; }
+        public SecurityPermission Delete { get; set; }
+
+        public bool AllowAnonymousAny => Read.AllowAnonymous || Edit.AllowAnonymous || Delete.AllowAnonymous;
+
+        public bool AllowAnonymousAll => Read.AllowAnonymous && Edit.AllowAnonymous && Delete.AllowAnonymous;
 
 
         public List<string> EditRolesList
@@ -103,6 +118,73 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
             return true;
         }
+
+        /// <summary>
+        /// Returns an annotation for reading things (List/Get)
+        /// </summary>
+        public string ReadAnnotation
+        {
+            get
+            {
+                if (Read.NoAccess) throw NoAccessException();
+                if (AllowAnonymousAll) return string.Empty;
+                if (Read.AllowAnonymous || Edit.AllowAnonymous || Delete.AllowAnonymous) return "[AllowAnonymous]";
+                if (Read.HasRoles) return $"[Authorize(Roles=\"{AllRoles()}\")]";
+
+                return "[Authorize]";
+            }
+        }
+
+        /// <summary>
+        /// Returns an annotation for editing things
+        /// </summary>
+        public string EditAnnotation
+        {
+            get
+            {
+                if (Edit.NoAccess) throw NoAccessException();
+                if (AllowAnonymousAll) return string.Empty;
+                if (Edit.AllowAnonymous) return "[AllowAnonymous]";
+                if (Edit.HasRoles) return $"[Authorize(Roles=\"{Edit.ExternalRoleList}\")]";
+
+                return "[Authorize]";
+            }
+        }
+
+        /// <summary>
+        /// Returns an annotation for deleting things (Delete)
+        /// </summary>
+        public string DeleteAnnotation
+        {
+            get
+            {
+                if (Delete.NoAccess) throw NoAccessException();
+                if (AllowAnonymousAll) return string.Empty;
+                if (Delete.AllowAnonymous) return "[AllowAnonymous]";
+                if (Delete.HasRoles) return $"[Authorize(Roles=\"{Delete.ExternalRoleList}\")]";
+
+                return "[Authorize]";
+            }
+        }
+
+        /// <summary>
+        /// This is checked, and this exception thrown, to prevent accidents in code generation.
+        /// </summary>
+        /// <returns></returns>
+        private Exception NoAccessException()
+            => new InvalidOperationException(
+                $"Cannot emit an annotation for permission level {SecurityPermissionLevels.DenyAll}. Templates shouldn't emit anything in such cases.");
+
+        private string AllRoles()
+        {
+            var result = Read.RoleList
+                .Union(Delete.RoleList)
+                .ToList();
+
+            if (result.Count() == 0) return "";
+            return string.Join(",", result);
+        }
+
 
         public string ReadRolesExternal => string.Join(",", ReadRolesList);
 

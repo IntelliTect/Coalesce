@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 if (fileProperty.SecurityInfo.IsRead)
                 {
                     b.DocComment($"File Download: {fileProperty.Name}");
-                    b.Line($"{securityInfo.ReadAnnotation}");
+                    b.Line($"{fileProperty.SecurityInfo.ReadAnnotation}");
                     b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
                     using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get ({primaryKeyParameter}, {dataSourceParameter})"))
                     {
@@ -253,7 +253,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
                 {
                     b.DocComment($"File Upload: {fileProperty.Name}");
-                    b.Line($"{securityInfo.SaveAnnotation}");
+                    b.Line($"{fileProperty.SecurityInfo.EditAnnotation}");
                     b.Line($"[HttpPut(\"{fileProperty.FileControllerMethodName}\")]");
                     using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Put ({primaryKeyParameter}, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
                     {
@@ -293,7 +293,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     }
 
                     b.DocComment($"File Delete: {fileProperty.Name}");
-                    b.Line($"{securityInfo.SaveAnnotation}");
+                    b.Line($"{securityInfo.DeleteAnnotation}");
                     b.Line($"[HttpDelete (\"{fileProperty.FileControllerMethodName}\")]");
                     using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Delete ({primaryKeyParameter}, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
                     {

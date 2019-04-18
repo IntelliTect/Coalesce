@@ -128,7 +128,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             {
                 if (Read.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
-                if (Read.AllowAnonymous || Edit.AllowAnonymous || Delete.AllowAnonymous) return "[AllowAnonymous]";
+                if (AllowAnonymousAny) return "[AllowAnonymous]";
                 if (Read.HasRoles) return $"[Authorize(Roles=\"{AllRoles()}\")]";
 
                 return "[Authorize]";

@@ -149,6 +149,44 @@ module ViewModels {
         }
         
         
+        /** URL for file 'RestrictedUploadAttachment' */
+        public restrictedUploadAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
+            this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedUploadAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
+        );
+        
+        /** Upload file 'RestrictedUploadAttachment' */
+        public restrictedUploadAttachmentUpload = (file: File): void => {
+            let formData = new FormData();
+            formData.append("file", file);
+            $.ajax( {
+                type: "PUT",
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedUploadAttachment?id=' + this.caseKey(),
+                contentType: false,
+                processData: false,
+                data: formData,
+            })
+        }
+        
+        
+        /** URL for file 'RestrictedDownloadAttachment' */
+        public restrictedDownloadAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
+            this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedDownloadAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
+        );
+        
+        /** Upload file 'RestrictedDownloadAttachment' */
+        public restrictedDownloadAttachmentUpload = (file: File): void => {
+            let formData = new FormData();
+            formData.append("file", file);
+            $.ajax( {
+                type: "PUT",
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedDownloadAttachment?id=' + this.caseKey(),
+                contentType: false,
+                processData: false,
+                data: formData,
+            })
+        }
+        
+        
         
         /** 
             Load the ViewModel object from the DTO.

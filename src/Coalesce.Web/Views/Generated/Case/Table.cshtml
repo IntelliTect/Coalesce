@@ -120,6 +120,14 @@
                             Plain Attachment
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'PlainAttachment', 'fa-caret-down': orderByDescending() == 'PlainAttachment'}"></i>
                         </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedUploadAttachment')}">
+                            Restricted Upload Attachment
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'RestrictedUploadAttachment', 'fa-caret-down': orderByDescending() == 'RestrictedUploadAttachment'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedDownloadAttachment')}">
+                            Restricted Download Attachment
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'RestrictedDownloadAttachment', 'fa-caret-down': orderByDescending() == 'RestrictedDownloadAttachment'}"></i>
+                        </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
                             Severity
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Severity', 'fa-caret-down': orderByDescending() == 'Severity'}"></i>
@@ -161,6 +169,8 @@
                             <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
                             <td class="prop-attachmentName">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.AttachmentName))</td>
                             <td class="prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</td>
+                            <td class="prop-restrictedUploadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment))</td>
+                            <td class="prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, true))</td>
                             <td class="prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</td>
                             <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
                             <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
@@ -182,6 +192,8 @@
                             <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, true))</td>
                             <td class="prop-attachmentName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, true))</td>
                             <td class="prop-plainAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.PlainAttachment, true))</td>
+                            <td class="prop-restrictedUploadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment, true))</td>
+                            <td class="prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, true))</td>
                             <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, true))</td>
                             <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, true))</td>
                             <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>

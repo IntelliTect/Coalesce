@@ -14,36 +14,14 @@ namespace Intellitect.Coalesce.Web.Tests.DataAnnotations
     public class SecurityPropertyTests
     {
         [TestMethod]
-        public void CasePlainAttachmentProperty_ReadAllowAll_ControllerAllowAnonymous()
+        [DataRow(typeof(CaseController), "RestrictedDownloadAttachmentGet", "Admin")]
+        [DataRow(typeof(CaseController), "RestrictedUploadAttachmentPut", "ADMIN, SuperUser")]
+        public void PropertyHasRoleRetriction_GeneratedControllerHasRoles(
+            Type controller, 
+            string controllerMethodName, 
+            string roles)
         {
-            Type caseController = typeof(CaseController);
-
-            var methodInfo = caseController.GetMembers()
-                .First(m => m.Name.Equals("PlainAttachmentGet"));
-
-            Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AllowAnonymousAttribute)).Any());
-        }
-
-        [TestMethod]
-        public void CasePlainAttachmentProperty_EditPermitAuthorizedOnly_ControllerHasAttributeAuthorized()
-        {
-            Type caseController = typeof(CaseController);
-            var methodInfo = caseController.GetMembers()
-                .First(m => m.Name.Equals("PlainAttachmentPut"));
-            var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles;
-
-            Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AuthorizeAttribute)).Any());
-            Assert.IsNull(authorizedRoles);
-
-        }
-
-        [TestMethod]
-        [DataRow("RestrictedDownloadAttachmentGet", "Admin")]
-        [DataRow("RestrictedUploadAttachmentPut", "Admin, SuperUser")]
-        public void PropertyHasRoleRetriction_ContollerHasRoles(string controllerMethodName, string roles)
-        {
-            Type caseController = typeof(CaseController);
-            var methodInfo = caseController.GetMembers()
+            var methodInfo = controller.GetMembers()
                 .First(m => m.Name.Equals(controllerMethodName));
             var authorizedRoles = methodInfo.GetCustomAttribute<AuthorizeAttribute>().Roles;
             var expectedRoles = roles.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -51,8 +29,21 @@ namespace Intellitect.Coalesce.Web.Tests.DataAnnotations
             Assert.IsTrue(methodInfo.GetCustomAttributes(typeof(AuthorizeAttribute)).Any());
             foreach (string role in expectedRoles)
             {
-                Assert.IsTrue(authorizedRoles.Contains(role.Trim()));
+                Assert.IsTrue(authorizedRoles.Contains(role.Trim(), StringComparison.InvariantCultureIgnoreCase));
             }
+        }
+
+        [TestMethod]
+        [DataRow(typeof(CaseController),"PlainAttachmentPut", typeof(AuthorizeAttribute))]
+        [DataRow(typeof(CaseController),"PlainAttachmentGet", typeof(AllowAnonymousAttribute))]
+        public void PropertyHasSecurityAttribute_GeneratedControllerHasExpectedAttribute(
+            Type controller,
+            string controllerMethodName, 
+            Type expectedControllerAttribute)
+        {
+            var methodInfo = controller.GetMembers()
+                .First(m => m.Name.Equals(controllerMethodName));
+            Assert.IsTrue(methodInfo.GetCustomAttributes(expectedControllerAttribute).Any());
         }
 
     }

@@ -613,18 +613,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     this.GetSecurityPermission<EditAttribute>(),
                     this.GetSecurityPermission<DeleteAttribute>());
 
-                if (HasAttribute<ReadAttribute>())
-                {
-                    result.IsRead = true;
-                    result.ReadRoles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
-                }
-
-                if (HasAttribute<EditAttribute>())
-                {
-                    result.IsEdit = true;
-                    result.EditRoles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
-                }
-
                 return result;
             }
         }

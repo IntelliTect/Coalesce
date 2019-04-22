@@ -19,6 +19,14 @@ namespace IntelliTect.Coalesce.DataAnnotations
             Read = read;
             Edit = edit;
             Delete = delete;
+
+            IsRead = !read.NoAccess;
+            ReadRoles = read.Roles;
+
+
+            IsEdit = !edit.NoAccess;
+            EditRoles = edit.Roles;
+
         }
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;
@@ -95,7 +103,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
             return true;
         }
-        
+
         // If true, the user can view the property
         public bool IsReadable(ClaimsPrincipal user)
         {
@@ -109,7 +117,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                         return false;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // This happens when the trust is lost between the client and the domain.
                     if (ex.Message.Contains("trust")) return false;

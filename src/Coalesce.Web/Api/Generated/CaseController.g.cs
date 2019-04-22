@@ -172,6 +172,23 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// File Download: Image
+        /// </summary>
+        [Authorize]
+        [HttpGet("Image")]
+        public virtual async Task<IActionResult> ImageGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Image == null) return NotFound();
+            string contentType = "image/jpeg";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType)))
+            {
+                contentType = "image/jpeg";
+            }
+            return File(itemResult.Object.Image, contentType, itemResult.Object.ImageName);
+        }
+
+        /// <summary>
         /// File Upload: Image
         /// </summary>
         [Authorize]
@@ -212,6 +229,23 @@ namespace Coalesce.Web.Api
             itemResult.Object.Image = null;
             await Db.SaveChangesAsync();
             return Ok();
+        }
+
+        /// <summary>
+        /// File Download: Attachment
+        /// </summary>
+        [Authorize]
+        [HttpGet("Attachment")]
+        public virtual async Task<IActionResult> AttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Attachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.AttachmentName, out contentType)))
+            {
+                contentType = "application/octet-stream";
+            }
+            return File(itemResult.Object.Attachment, contentType, itemResult.Object.AttachmentName);
         }
 
         /// <summary>
@@ -297,6 +331,19 @@ namespace Coalesce.Web.Api
             itemResult.Object.PlainAttachment = null;
             await Db.SaveChangesAsync();
             return Ok();
+        }
+
+        /// <summary>
+        /// File Download: RestrictedUploadAttachment
+        /// </summary>
+        [Authorize]
+        [HttpGet("RestrictedUploadAttachment")]
+        public virtual async Task<IActionResult> RestrictedUploadAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.RestrictedUploadAttachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            return File(itemResult.Object.RestrictedUploadAttachment, contentType);
         }
 
         /// <summary>

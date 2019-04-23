@@ -86,7 +86,15 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Restricted Download Attachment</label>
-                <div class="col-md-8 prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, false))</div>
+                <div class="col-md-8 prop-restrictedDownloadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Restricted Meta Attachment</label>
+                <div class="col-md-8 prop-restrictedMetaAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Internal Use File Size</label>
+                <div class="col-md-8 prop-internalUseFileSize">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.InternalUseFileSize))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Severity</label>

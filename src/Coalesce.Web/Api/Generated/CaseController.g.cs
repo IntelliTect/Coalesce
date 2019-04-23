@@ -428,5 +428,61 @@ namespace Coalesce.Web.Api
             await Db.SaveChangesAsync();
             return Ok();
         }
+
+        /// <summary>
+        /// File Download: RestrictedMetaAttachment
+        /// </summary>
+        [Authorize]
+        [HttpGet("RestrictedMetaAttachment")]
+        public virtual async Task<IActionResult> RestrictedMetaAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.RestrictedMetaAttachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.InternalUseFileName, out contentType)))
+            {
+                contentType = "application/octet-stream";
+            }
+            return File(itemResult.Object.RestrictedMetaAttachment, contentType, itemResult.Object.InternalUseFileName);
+        }
+
+        /// <summary>
+        /// File Upload: RestrictedMetaAttachment
+        /// </summary>
+        [Authorize]
+        [HttpPut("RestrictedMetaAttachment")]
+        public virtual async Task<ItemResult<CaseDtoGen>> RestrictedMetaAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
+            using (var stream = new System.IO.MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                itemResult.Object.RestrictedMetaAttachment = stream.ToArray();
+                itemResult.Object.InternalUseFileName = file.FileName;
+                itemResult.Object.InternalUseFileSize = file.Length;
+                await Db.SaveChangesAsync();
+            }
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
+        }
+
+        /// <summary>
+        /// File Delete: RestrictedMetaAttachment
+        /// </summary>
+        [Authorize]
+        [HttpDelete("RestrictedMetaAttachment")]
+        public virtual async Task<IActionResult> RestrictedMetaAttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return NotFound();
+            itemResult.Object.InternalUseFileName = null;
+            itemResult.Object.InternalUseFileSize = 0;
+            itemResult.Object.RestrictedMetaAttachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
     }
 }

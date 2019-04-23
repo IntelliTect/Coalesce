@@ -38,6 +38,7 @@ module ViewModels {
         public imageSize: KnockoutObservable<number | null> = ko.observable(null);
         public imageHash: KnockoutObservable<string | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
+        public internalUseFileSize: KnockoutObservable<number | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
         
@@ -187,6 +188,25 @@ module ViewModels {
         }
         
         
+        /** URL for file 'RestrictedMetaAttachment' */
+        public restrictedMetaAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
+            this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedMetaAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
+        );
+        
+        /** Upload file 'RestrictedMetaAttachment' */
+        public restrictedMetaAttachmentUpload = (file: File): void => {
+            let formData = new FormData();
+            formData.append("file", file);
+            $.ajax( {
+                type: "PUT",
+                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedMetaAttachment?id=' + this.caseKey(),
+                contentType: false,
+                processData: false,
+                data: formData,
+            })
+        }
+        
+        
         
         /** 
             Load the ViewModel object from the DTO.
@@ -267,6 +287,7 @@ module ViewModels {
             this.imageSize(data.imageSize);
             this.imageHash(data.imageHash);
             this.attachmentName(data.attachmentName);
+            this.internalUseFileSize(data.internalUseFileSize);
             this.severity(data.severity);
             this.status(data.status);
             this.devTeamAssignedId(data.devTeamAssignedId);
@@ -299,6 +320,7 @@ module ViewModels {
             dto.imageSize = this.imageSize();
             dto.imageHash = this.imageHash();
             dto.attachmentName = this.attachmentName();
+            dto.internalUseFileSize = this.internalUseFileSize();
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
@@ -399,6 +421,7 @@ module ViewModels {
             self.imageSize.subscribe(self.autoSave);
             self.imageHash.subscribe(self.autoSave);
             self.attachmentName.subscribe(self.autoSave);
+            self.internalUseFileSize.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);

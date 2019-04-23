@@ -64,5 +64,4 @@ namespace IntelliTect.Coalesce.Web.Tests
             Assert.True(methodInfo.GetCustomAttributes(expectedControllerAttribute).Any());
         }
 
-    }
 }

@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 if (fileProperty.SecurityInfo.IsRead)
                 {
                     b.DocComment($"File Download: {fileProperty.Name}");
-                    b.Line($"{fileProperty.SecurityInfo.ReadAnnotation}");
+                    b.Line($"{ReadAnnotation(fileProperty.SecurityInfo)}");
                     b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
                     using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get ({primaryKeyParameter}, {dataSourceParameter})"))
                     {
@@ -253,7 +253,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
                 {
                     b.DocComment($"File Upload: {fileProperty.Name}");
-                    b.Line($"{fileProperty.SecurityInfo.EditAnnotation}");
+                    b.Line($"{EditAnnotation(fileProperty.SecurityInfo)}");
                     b.Line($"[HttpPut(\"{fileProperty.FileControllerMethodName}\")]");
                     using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Put ({primaryKeyParameter}, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
                     {
@@ -320,5 +320,60 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 }
             }
         }
+
+
+
+        private bool AllowAnonymousAll(PropertySecurityInfo securityInfo)
+        {
+            return securityInfo.Read.AllowAnonymous &&
+                securityInfo.Edit.AllowAnonymous &&
+                securityInfo.Delete.AllowAnonymous;
+        }
+
+        /// <summary>
+        /// Returns an annotation for reading things (List/Get)
+        /// </summary>
+        private string ReadAnnotation(PropertySecurityInfo securityInfo)
+        {
+            if (securityInfo.Read.NoAccess) throw NoAccessException();
+            if (AllowAnonymousAll(securityInfo)) return string.Empty;
+            if (securityInfo.Read.AllowAnonymous || securityInfo.Edit.AllowAnonymous) return "[AllowAnonymous]";
+            if (securityInfo.Read.HasRoles) return $"[Authorize(Roles=\"{AllRoles(securityInfo)}\")]";
+
+            return "[Authorize]";
+        }
+
+        /// <summary>
+        /// Returns an annotation for editing things
+        /// </summary>
+        private string EditAnnotation(PropertySecurityInfo securityInfo)
+        {
+            
+            if (securityInfo.Edit.NoAccess) throw NoAccessException();
+            if (AllowAnonymousAll(securityInfo)) return string.Empty;
+            if (securityInfo.Edit.AllowAnonymous) return "[AllowAnonymous]";
+            if (securityInfo.Edit.HasRoles) return $"[Authorize(Roles=\"{securityInfo.Edit.ExternalRoleList}\")]";
+
+            return "[Authorize]";
+        }
+
+        private string AllRoles(PropertySecurityInfo securityInfo)
+        {
+
+            var result = securityInfo.Read.RoleList
+                .Union(securityInfo.Delete.RoleList)
+                .ToList();
+
+            if (result.Count() == 0) return "";
+            return string.Join(",", result);
+        }
+
+        /// <summary>
+        /// This is checked, and this exception thrown, to prevent accidents in code generation.
+        /// </summary>
+        /// <returns></returns>
+        private Exception NoAccessException()
+            => new InvalidOperationException(
+                $"Cannot emit an annotation for permission level {SecurityPermissionLevels.DenyAll}. Templates shouldn't emit anything in such cases.");
     }
 }

@@ -94,6 +94,13 @@ namespace Coalesce.Domain
         [File]
         public byte[] RestrictedDownloadAttachment { get; set; }
 
+        [File(NameProperty = nameof(InternalUseFileName),
+            SizeProperty = nameof(InternalUseFileSize))]
+        public byte[] RestrictedMetaAttachment { get; set; }
+        [InternalUse]
+        public string InternalUseFileName { get; set; }
+        [InternalUse]
+        public long InternalUseFileSize { get; set; }
 
         public string Severity { get; set; }
 

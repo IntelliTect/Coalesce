@@ -21,7 +21,10 @@ namespace Coalesce.Web.Vue.Models
         public Coalesce.Web.Vue.Models.PersonDtoGen AssignedTo { get; set; }
         public int? ReportedById { get; set; }
         public Coalesce.Web.Vue.Models.PersonDtoGen ReportedBy { get; set; }
-        public byte[] Attachment { get; set; }
+        public string ImageName { get; set; }
+        public long? ImageSize { get; set; }
+        public string ImageHash { get; set; }
+        public string AttachmentName { get; set; }
         public string Severity { get; set; }
         public Coalesce.Domain.Case.Statuses? Status { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseProductDtoGen> CaseProducts { get; set; }
@@ -45,7 +48,10 @@ namespace Coalesce.Web.Vue.Models
             this.OpenedAt = obj.OpenedAt;
             this.AssignedToId = obj.AssignedToId;
             this.ReportedById = obj.ReportedById;
-            this.Attachment = obj.Attachment;
+            this.ImageName = obj.ImageName;
+            this.ImageSize = obj.ImageSize;
+            this.ImageHash = obj.ImageHash;
+            this.AttachmentName = obj.AttachmentName;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
@@ -91,7 +97,9 @@ namespace Coalesce.Web.Vue.Models
             entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             entity.AssignedToId = AssignedToId;
             entity.ReportedById = ReportedById;
-            entity.Attachment = Attachment;
+            entity.ImageSize = (ImageSize ?? entity.ImageSize);
+            entity.ImageHash = ImageHash;
+            entity.AttachmentName = AttachmentName;
             entity.Severity = Severity;
             entity.Status = (Status ?? entity.Status);
             entity.DevTeamAssignedId = DevTeamAssignedId;

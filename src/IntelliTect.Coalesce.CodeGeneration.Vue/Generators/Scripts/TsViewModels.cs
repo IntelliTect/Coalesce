@@ -20,15 +20,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("import * as $metadata from './metadata.g'");
             b.Line("import * as $models from './models.g'");
             b.Line("import * as $apiClients from './api-clients.g'");
-            b.Line("import { ViewModel, ListViewModel, defineProps } from 'coalesce-vue/lib/viewmodel'");
+            b.Line("import { ViewModel, ListViewModel, ViewModelTypeLookup } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
-            foreach (var model in Model.Entities)
+            foreach (var model in Model.ApiBackedClasses)
             {
                 WriteViewModel(b, model);
                 WriteListViewModel(b, model);
                 b.Line();
             }
+
+            using (b.Block("const viewModelTypeLookup = ", " as ViewModelTypeLookup"))
+            {
+                foreach (var model in Model.ApiBackedClasses)
+                {
+                    using (b.Block($"{model.ViewModelClassName}:", ","))
+                    {
+                        b.Line($"viewModel: {model.ViewModelClassName}ViewModel,");
+                        b.Line($"listViewModel: {model.ListViewModelClassName}ViewModel");
+                    }
+                }
+            }
+
+            b.Line();
+            b.Line("export default viewModelTypeLookup;");
+
+            //b.Line();
+            //b.Lines(
+            //    "export const viewModelMap = new ViewModelMap(model => {",
+            //    "    var ctor = (viewModelTypeLookup as ViewModelTypeLookup)[model.$metadata.name].viewModel;",
+            //    "    return new ctor(model);",
+            //    "})"
+            //);
 
             return Task.FromResult(b.ToString());
         }
@@ -39,15 +62,32 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             string viewModelName = $"{name}ViewModel";
             string metadataName = $"$metadata.{name}";
 
-            b.Line($"export interface {viewModelName} extends $models.{name} {{}}");
-            using (b.Block($"export class {viewModelName} extends ViewModel<$models.{name}, $apiClients.{name}ApiClient>"))
+            //b.Line($"export interface {viewModelName} extends $models.{name} {{}}");
+            using (b.Block($"export class {viewModelName} extends ViewModel<$models.{name}, $apiClients.{name}ApiClient> implements $models.{name} "))
             {
-                // This is an alternative to calling defineProps() on each class that causes larger and more cluttered files:
-                //foreach (var prop in model.ClientProperties)
-                //{
-                //    b.Line($"get {prop.JsVariable}() {{ return this.$data.{prop.JsVariable} }}");
-                //    b.Line($"set {prop.JsVariable}(val) {{ this.$data.{prop.JsVariable} = val }}");
-                //}
+                foreach (var prop in model.ClientProperties)
+                {
+                    b.DocComment(prop.Comment);
+                    var typeString = new VueType(prop.Type.NullableUnderlyingType).TsType(modelPrefix: "$models", viewModel: true);
+                    b.Line($"{prop.JsVariable}: {typeString} | null = null;");
+                }
+
+                foreach (var prop in model.ClientProperties)
+                {
+                    if (prop.Type.TsTypeKind == TypeDiscriminator.Collection && prop.PureType.TsTypeKind == TypeDiscriminator.Model)
+                    {
+                        b.Line();
+
+                        var vt = new VueType(prop.PureType);
+                        string propVmName = vt.TsType(viewModel: true);
+
+                        b.Line();
+                        using (b.Block($"public addTo{prop.Name}(): {propVmName}"))
+                        {
+                            b.Line($"return this.$addChild('{prop.JsVariable}', () => new {propVmName}())");
+                        }
+                    }
+                }
 
                 foreach (var method in model.ClientMethods.Where(m => !m.IsStatic))
                 {
@@ -60,7 +100,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Line($"super({metadataName}, new $apiClients.{name}ApiClient(), initialData)");
                 }
             }
-            b.Line($"defineProps({viewModelName}, $metadata.{name})");
+            // b.Line($"defineProps({viewModelName}, $metadata.{name})");
             b.Line();
         }
 
@@ -99,15 +139,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 "})";
 
             string pkArg = method.IsStatic ? "" : "this.$primaryKey, ";
-
-            // "item" or "list"
+            
             var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
 
             b.DocComment(method.Comment, true);
             b.Line($"public {method.JsVariable} = this.$apiClient.$makeCaller(");
+            // "item" or "list"
             b.Indented($"\"{transportTypeSlug}\", ");
+            // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
             b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
+            // The factory function to return a new args object. Args object lives on `caller.args`
             b.Indented($"() => {argsConstructor},");
+            // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
             b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => "args." + p.Name))}))");
         }
     }

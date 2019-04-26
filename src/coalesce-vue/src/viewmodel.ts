@@ -1,7 +1,7 @@
 
 import Vue from 'vue';
 
-import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, Method } from './metadata';
+import { ModelType, CollectionProperty, PropertyOrName, resolvePropMeta, PropNames, Method, ClassType } from './metadata';
 import { ModelApiClient, ListParameters, DataSourceParameters, ParamsObject, ListApiState, ItemApiState, ItemResultPromise, ListResultPromise } from './api-client';
 import { Model, modelDisplay, propDisplay, mapToDto, convertToModel, updateFromModel } from './model';
 import { Indexable } from './util';
@@ -15,57 +15,63 @@ import * as apiClient from './api-client';
 import * as axios from 'axios';
 
 
-/**
- * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
- * @param ctor The class to add wrapper properties to
- * @param metadata The metadata describing the properties to add.
- */
-export function defineProps<T extends new() => ViewModel<any, any>>(ctor: T, metadata: ModelType)
-{
-    Object.defineProperties(ctor.prototype,     
-    Object
-        .keys(metadata.props)
-        .reduce(function (descriptors, propName) {
-            descriptors[propName] = {
-                enumerable: true,
-                get: function(this: InstanceType<T>) {
-                    return this.$data[propName]
-                },
-                set: function(this: InstanceType<T>, val: any) {
-                    this.$data[propName] = val
-                }
-            }
-            return descriptors
-        }, {} as PropertyDescriptorMap)
-    )
-}
+// /**
+//  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
+//  * @param ctor The class to add wrapper properties to
+//  * @param metadata The metadata describing the properties to add.
+//  */
+// export function defineProps<T extends new() => ViewModel<any, any>>(ctor: T, metadata: ModelType)
+// {
+//     Object.defineProperties(ctor.prototype,     
+//     Object
+//         .keys(metadata.props)
+//         .reduce(function (descriptors, propName) {
+//             descriptors[propName] = {
+//                 enumerable: true,
+//                 get: function(this: InstanceType<T>) {
+//                     return this.$data[propName]
+//                 },
+//                 set: function(this: InstanceType<T>, val: any) {
+//                     this.$data[propName] = val
+//                 }
+//             }
+//             return descriptors
+//         }, {} as PropertyDescriptorMap)
+//     )
+// }
 
 /*
 DESIGN NOTES
-    - ViewModel deliberately has TModel as its only type parameter.
+    - ViewModel deliberately does not have TModel as a type parameter.
         The type of the metadata is always accessed off of TModel as TModel["$metadata"].
         This makes the intellisense in IDEs quite nice. If TMeta is a type param,
         we end up with the type of implemented classes taking several pages of the intellisense tooltip.
         With this, we can still strongly type off of known information of TMeta (like PropNames<TModel["$metadata"]>),
         but without cluttering up tooltips with the entire type structure of the metadata.
-    - ViewModels never instantiate other ViewModels on the users' behalf. ViewModels must always be instantiated explicitly.
-        This makes it much easier to reason about the behavior of a program
-        when Coalesce isn't creating ViewModel instances on the developers' behalf.
-        It prevents the existance of deeply nested, difficult-to-access (or even find at all) instances
-        that are difficult to configure. Ideally, all ViewModels exist on instances of components.
-        This also allows subclassing of ViewModel classes at will because any place where a ViewModel
-        is instantiated can be replaced with any other subclass of that ViewModel by the developer with ease.
 */
 
+type AutoSaveOptions<TThis> = {
+    /** Time, in milliseconds, to debounce saves for.  */
+    wait?: number, 
+    /** A function that will be called before autosaving that can return false to prevent a save. */
+    predicate?: (viewModel: TThis) => boolean,
+    /** If true, auto-saving will also be enabled for all view models that are 
+     * reachable from the navigation properties & collections of the current view model.
+     * 
+     * If a predicate is provided, the predicate will only affect the current view model.
+     * Explicitly call `$startAutoSave` on other ViewModels if they require predicates. */
+    deep?: boolean
+}
 export abstract class ViewModel<
-    TModel extends Model<ModelType>,
-    TApi extends ModelApiClient<TModel>,
+    TModel extends Model<ModelType> = Model<ModelType>,
+    TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
+    TPrimaryKey extends string | number = string | number
 > implements Model<TModel["$metadata"]> {
     /**
      * Object which holds all of the data represented by this ViewModel.
      */
     // Will always be reactive - is definitely assigned in the ctor.
-    public $data: Indexable<TModel>
+    // public $data: Indexable<TModel>
 
     // Must be initialized so it will be reactive.
     // If this isn't reactive, $isDirty won't be reactive.
@@ -75,15 +81,15 @@ export abstract class ViewModel<
     /**
      * Gets or sets the primary key of the ViewModel's data.
      */
-    public get $primaryKey() { return this.$data[this.$metadata.keyProp.name] }
-    public set $primaryKey(val) { this.$data[this.$metadata.keyProp.name] = val }
+    public get $primaryKey() { return (this as any as Indexable<TModel>)[this.$metadata.keyProp.name] as TPrimaryKey }
+    public set $primaryKey(val) { (this as any as Indexable<TModel>)[this.$metadata.keyProp.name] = val }
 
     /**
      * Returns true if the values of the savable data properties of this ViewModel 
      * have changed since the last load, save, or the last time $isDirty was set to false.
      */
-    public get $isDirty() { return JSON.stringify(mapToDto(this.$data)) != JSON.stringify(this._pristineDto)}
-    public set $isDirty(val) { if (val) throw "Can't set $isDirty to true manually"; this._pristineDto = mapToDto(this.$data) }
+    public get $isDirty() { return JSON.stringify(mapToDto(this)) != JSON.stringify(this._pristineDto)}
+    public set $isDirty(val) { if (val) throw "Can't set $isDirty to true manually"; this._pristineDto = mapToDto(this) }
 
 
     /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
@@ -91,23 +97,22 @@ export abstract class ViewModel<
 
     /** Wrapper for `$params.dataSource` */
     public get $dataSource() { return this.$params.dataSource }
-    public set $dataSource(val) { this.$params.dataSource = val } 
+    public set $dataSource(val) { this.$params.dataSource = val }
 
     /** Wrapper for `$params.includes` */
     public get $includes() { return this.$params.includes }
-    public set $includes(val) { this.$params.includes = val } 
+    public set $includes(val) { this.$params.includes = val }
 
     /**
      * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
      */
     public $load = this.$apiClient.$makeCaller("item",
-        (c, id?: string | number) => c.get(id != null ? id : this.$primaryKey, this.$params))
+        (c, id?: TPrimaryKey) => c.get(id != null ? id : this.$primaryKey, this.$params))
         .onFulfilled(() => { 
             if (this.$load.result) {
-                updateFromModel(this.$data, this.$load.result);
+                this.$loadFromModel(this.$load.result);
                 this.$isDirty = false; 
             }
-
         })
 
     /** Whether or not to reload the ViewModel's `$data` with the response received from the server after a call to .$save(). */
@@ -122,7 +127,7 @@ export abstract class ViewModel<
             // This lets us detect changes that happen to the model while our save request is pending.
             // If the model is dirty when the request completes, we'll not load the response from the server.
             this.$isDirty = false;
-            return c.save(this.$data, this.$params);
+            return c.save(this as any as TModel, this.$params);
         })
         .onFulfilled(() => { 
             if (!this.$save.result) {
@@ -142,10 +147,12 @@ export abstract class ViewModel<
                 this.$primaryKey = (this.$save.result as Indexable<TModel>)[this.$metadata.keyProp.name]
             } else {
 
-                // else: Only load the save response if the data hasn't changed since we sent it.
-                // If the data has changed, loading the response would overwrite users' changes.
+                // else: model isn't dirty.
+                // Since the data hasn't changed since we sent the save (since $isDirty === false),
+                // se can safely load the save response, since we know we won't be overwriting any local changes.
+                // If the data had changed, loading the response would overwrite user input and/or other changes to the data.
                 if (this.$loadResponseFromSaves) {
-                    updateFromModel(this.$data, this.$save.result);
+                    this.$loadFromModel(this.$save.result);
                 } else {
                     // The PK *MUST* be loaded so that the PK returned by a creation save call
                     // will be used by subsequent update calls.
@@ -156,6 +163,19 @@ export abstract class ViewModel<
                 this.$isDirty = false;
             }
         })
+
+    public $loadFromModel(source: TModel) {
+        updateFromModel(
+            /* 
+                All concrete viewmodels are valid interface implementations of their TModel.
+                However, the base ViewModel class cannot explicitly declare that it implements TModel
+                since TModel has no statically known members in this generic context. 
+                So, we must soothe typescript.
+            */
+            this as unknown as TModel,
+            source
+        );
+    }
         
     /**
      * A function for invoking the `/delete` endpoint, and a set of properties about the state of the last call.
@@ -167,18 +187,23 @@ export abstract class ViewModel<
     private _autoSaveState = new AutoCallState()
 
     /**
-     * Starts auto-saving of the instance's data properties when changes occur. 
-     * Only properties which will be sent in save requests are watched - 
-     * navigation properties are not considered.
+     * Starts auto-saving of the instance when changes to its savable data properties occur. 
      * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
-     * @param wait Time in milliseconds to debounce saves for
-     * @param predicate A function that will be called before saving that can return false to prevent a save.
+     * @param options Options to control how the auto-saving is performed.
      */
-    public $startAutoSave(vue: Vue, wait: number = 1000, predicate?: (viewModel: this) => boolean) {
+    public $startAutoSave(
+        vue: Vue, 
+        options: AutoSaveOptions<this>
+    ) {
+        const { wait = 1000, predicate, deep } = options;
         this.$stopAutoSave()
 
+        if (deep) {
+            throw "'deep' option for autosaves is not yet implemented."
+        }
+
         const enqueueSave = debounce(() => {
-            if (!this._autoSaveState.on) return;
+            if (!this._autoSaveState.active) return;
             if (this.$save.isLoading) {
                 // Save already in progress. Enqueue another attempt.
                 enqueueSave()
@@ -222,32 +247,39 @@ export abstract class ViewModel<
     }
 
     /**
-     * Creates a new instance of an item for the specified child collection, adds it to that collection, and returns the item.
-     * For class collections, this will be a valid implementation of the corresponding model interface.
-     * For non-class collections, this will be null.
+     * Creates a new instance of an item for the specified child model collection, 
+     * adds it to that collection, and returns the item.
      * @param prop The name of the collection property, or the metadata representing it.
      */
-    public $addChild(prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>) {
+    public $addChild<TChild extends ViewModel>(
+        prop: CollectionProperty | PropNames<TModel["$metadata"], CollectionProperty>, 
+        childFactory: (type: ModelType) => TChild
+    ) {
         const propMeta = resolvePropMeta<CollectionProperty>(this.$metadata, prop)
-        var collection: Array<any> = this.$data[propMeta.name];
+        var collection: Array<any> | undefined = (this as any as Indexable<TModel>)[propMeta.name];
 
         if (!Array.isArray(collection)) {
-            collection = this.$data[propMeta.name] = [];
+            collection = (this as any as Indexable<TModel>)[propMeta.name] = [];
         }
 
+        var newModel: TChild;
         if (propMeta.role == "collectionNavigation") {
-            var newModel = convertToModel({}, propMeta.itemType.typeDef);
+            newModel = childFactory(propMeta.itemType.typeDef);
             const foreignKey = propMeta.foreignKey
-            if (foreignKey){
-                (newModel as Indexable<TModel>)[foreignKey.name] = this.$primaryKey
+            if (foreignKey) {
+                (newModel as Indexable<TChild>)[foreignKey.name] = this.$primaryKey
             }
-            collection.push(newModel);
-            return newModel;
-        } else {
-            // TODO: handle non-navigation collections (value collections of models/objects)
-            collection.push(null);
-            return null;
+        } else if (propMeta.itemType.type == "model") {
+            newModel = childFactory(propMeta.itemType.typeDef);
         }
+        else {
+            throw "$addChild only adds to collections of model properties."
+        }
+
+        // TODO: Set $parent, $parentCollection on `newModel`
+
+        collection.push(newModel);
+        return newModel;
     }
 
     constructor(
@@ -261,17 +293,14 @@ export abstract class ViewModel<
 
         initialData?: TModel
     ) {
-
         if (initialData) {
             if (!initialData.$metadata) {
                 throw `Initial data must have a $metadata property.`
             } else if (initialData.$metadata != $metadata) {
                 throw `Initial data must have a $metadata value for type ${$metadata.name}.`
             } else {
-                this.$data = initialData
+                this.$loadFromModel(initialData);
             }
-        } else {
-            this.$data = convertToModel({}, $metadata);
         }
 
         this.$isDirty = false;
@@ -280,10 +309,9 @@ export abstract class ViewModel<
 
 // Model<TModel["$metadata"]>
 export abstract class ListViewModel<
-    TModel extends Model<ModelType>,
-    TApi extends ModelApiClient<TModel>,
+    TModel extends Model<ModelType> = Model<ModelType>,
+    TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
 > {
-
     /** The parameters that will be passed to `/list` and `/count` calls. */
     public $params = new ListParameters();
 
@@ -330,7 +358,7 @@ export abstract class ListViewModel<
         this.$stopAutoLoad()
 
         const enqueueLoad = debounce(() => {
-            if (!this._autoLoadState.on) return;
+            if (!this._autoLoadState.active) return;
 
             // Check the predicate again incase its state has changed while we were waiting for the debouncing timer.
             if (predicate && !predicate(this)) { return  }
@@ -404,13 +432,102 @@ export abstract class ListViewModel<
 //     }
 // }
 
+export interface ViewModelTypeLookup {
+    [name: string]: {
+        viewModel: new<T extends Model<ModelType>>(initialData?: T) => ViewModel<T>,
+        listViewModel: new() => ListViewModel,
+    }
+}
 
+export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
+
+export type ViewModelFactory = (meta: ModelType) => ViewModel;
+
+
+
+/**
+ * Updates the target model with values from the source model.
+ * @param target The viewmodel to be updated.
+ * @param source The model whose values will be used to perform the update.
+ */
+export function updateFromModel<TMeta extends ModelType, TModel extends Model<TMeta>>(
+    target: Model | ViewModel<TModel>, 
+    source: TModel,
+    viewModelFactory: ViewModelFactory
+) {
+
+
+    const metadata = target.$metadata;
+
+    for (const prop of Object.values(metadata.props)) {
+        const propName = prop.name;
+        const sourceValue = (source as Indexable<TModel>)[propName];
+        const currentValue = (target as Indexable<TModel>)[propName];
+
+        switch (prop.role) {
+            case "referenceNavigation":
+            case "collectionNavigation":
+
+        }
+
+        switch (prop.type) {
+            case "collection":
+                switch (prop.role) {
+                    case "value":
+                        // something 
+                        break;
+                    case "collectionNavigation":
+                        // something 
+                        break;
+                }
+                break;
+            case "model":
+                if (currentValue == null && sourceValue) {
+                    const newValue = viewModelFactory(prop.typeDef);
+                    newValue.$loadFromModel(sourceValue);
+                    (target as Indexable<typeof target>)[propName] = newValue;
+                }
+            case "object":
+                if (currentValue == null && sourceValue) {
+                    const newValue = viewModelFactory(prop.typeDef);
+                    newValue.$loadFromModel(sourceValue);
+                    (target as Indexable<typeof target>)[propName] = newValue;
+                }
+                break;
+            default: 
+                // @ts-ignore
+                target[propName] = (source as Indexable<TModel>)[propName];
+        }
+    }
+}
+
+
+export class ViewModelMap {
+    private map = new WeakMap<Model, ViewModel>();
+
+    getOrCreate<T extends Model<ModelType>>(model: T, onCreate: (viewModel: ViewModel<T>) => void): ViewModel<T> {
+        if (!this.map.has(model)) {
+            const vm = this.factory(model)
+            this.map.set(model, vm as ViewModel);
+            if (onCreate) onCreate(vm);
+            // Vue.util.defineReactive({vm}, 'vm', vm);
+        };
+        return this.map.get(model) as ViewModel<T>;
+    }
+
+    constructor(
+        private factory: <T extends Model<ModelType>>(model: T) => ViewModel<T>
+    ) {
+        // Seal to prevent unnessecary reactivity
+        return Object.seal(this);
+    }
+}
 
 
 /* Internal members/helpers */
 
 class AutoCallState {
-    on: boolean = false
+    active: boolean = false
     cleanup: Function | null = null
 
     constructor() {
@@ -424,7 +541,7 @@ function startAutoCall(state: AutoCallState, vue: Vue, watcher: () => void, debo
 
     vue.$on('hook:beforeDestroy', destroyHook)
     state.cleanup = () => {
-        if (!state.on) return;
+        if (!state.active) return;
         // Destroy the watcher
         watcher()
         // Cancel the debouncing timer if there is one.
@@ -434,11 +551,11 @@ function startAutoCall(state: AutoCallState, vue: Vue, watcher: () => void, debo
         // even though if was later attached to a different component that is still alive.
         vue.$off('hook:beforeDestroy', destroyHook)
     }
-    state.on = true;
+    state.active = true;
 }
 
 function stopAutoCall(state: AutoCallState) {
-    if (!state.on) return;
+    if (!state.active) return;
     state.cleanup!()
-    state.on = false
+    state.active = false
 }

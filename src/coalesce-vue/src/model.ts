@@ -522,6 +522,7 @@ class DisplayVisitor extends Visitor<string | null, string | null, string | null
     protected visitDateValue(value: any, meta: DateValue): string | null {
         const parsed = parseValue(value, meta);
         if (parsed == null) return null;
+        // TODO: Make the date format configurable.
         return format(parsed, 'M/d/yyyy h:mm:ss aaa');
     }
 

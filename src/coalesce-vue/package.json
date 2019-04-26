@@ -38,6 +38,7 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
     "prepack": "tsc -p ./tsconfig.build.json",
+    "build-local": "yarn pack --filename local-latest.tgz",
     "//": "No coverage by default because it breaks line numbers in error messages. `yarn test --coverage` to run it.",
     "test": "jest"
   },

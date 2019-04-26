@@ -65,7 +65,7 @@ export type TypeDiscriminatorToType<T> =
 /** Base properties found on all pieces of metadata. */
 export interface Metadata {
 
-    /** The camel-cased, machine-readable name of the value or type. */
+    /** The machine-readable name of the value or type. Values are typically camel-cased; types are typically PascalCased. */
     readonly name: string
 
     // TODO: i18n? How does it fit into this property? Do we take a dependency on an i18n framework and compute it in a getter?
@@ -435,7 +435,7 @@ export type PropsNames<Props extends ClassType["props"], Kind extends Property =
 }[Extract<keyof Props, string>];
 
 export type PropNames<TMeta extends ClassType, Kind extends Property = Property> = 
-    PropsNames<ClassType["props"], Kind>;
+    PropsNames<TMeta["props"], Kind>;
 
 // This doesn't support restriction of property kind - typescript makes unintelligible intellisense tooltips if we do.
 export type PropertyOrName<TMeta extends ClassType>

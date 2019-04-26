@@ -56,7 +56,7 @@ describe("autoSave", () => {
 
     const waitTick = async () => await new Promise(resolve => setTimeout(resolve, tickLength))
 
-    student.$startAutoSave(vue, tickLength/2);
+    student.$startAutoSave(vue, { wait: tickLength/2 });
     expect(student.$isDirty).toBe(false);
 
     student.name = "Steve";
@@ -94,5 +94,4 @@ describe("autoSave", () => {
     // For good measure.
     student.$stopAutoSave();
   })
-
 })

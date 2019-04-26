@@ -57,14 +57,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     if (prop.Type.IsEnum)
                     {
                         b.DocComment($"Text value for enumeration {prop.Name}");
-                        b.Line($"public {prop.JsTextPropertyName}: KnockoutComputed<string | null> = ko.pureComputed(() => {{");
-                        b.Line($"    for(var i = 0; i < this.{prop.JsVariable}Values.length; i++){{");
-                        b.Line($"        if (this.{prop.JsVariable}Values[i].id == this.{prop.JsVariable}()){{");
-                        b.Line($"            return this.{prop.JsVariable}Values[i].value;");
-                        b.Line("        }");
-                        b.Line("    }");
-                        b.Line("    return null;");
-                        b.Line("});");
+                        using (b.Block($"public {prop.JsTextPropertyName}: KnockoutComputed<string | null> = ko.pureComputed(() =>", ");"))
+                        {
+                            using (b.Block($"for (var i = 0; i < this.{prop.JsVariable}Values.length; i++)"))
+                            {
+                                using (b.Block($"if (this.{prop.JsVariable}Values[i].id == this.{prop.JsVariable}())"))
+                                {
+                                    b.Line($"return this.{prop.JsVariable}Values[i].value;");
+                                }
+                            }
+                            b.Line("return null;");
+                        }
                     }
                     if (prop.IsManytoManyCollection)
                     {
@@ -91,7 +94,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     {
                         b.Line($"var newItem = new {prop.Object.ViewModelClassName}();");
                         b.Line($"if (typeof(autoSave) == 'boolean'){{");
-                        b.Line($"    newItem.coalesceConfig.autoSaveEnabled(autoSave);");
+                        b.Indented($"newItem.coalesceConfig.autoSaveEnabled(autoSave);");
                         b.Line($"}}");
                         b.Line($"newItem.parent = this;");
                         b.Line($"newItem.parentCollection = this.{prop.JsVariable};");

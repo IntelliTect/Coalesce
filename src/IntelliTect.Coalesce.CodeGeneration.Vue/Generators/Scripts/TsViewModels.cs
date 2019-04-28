@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("import * as $metadata from './metadata.g'");
             b.Line("import * as $models from './models.g'");
             b.Line("import * as $apiClients from './api-clients.g'");
-            b.Line("import { ViewModel, ListViewModel, ViewModelTypeLookup } from 'coalesce-vue/lib/viewmodel'");
+            b.Line("import { ViewModel, ListViewModel, defineProps } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
             foreach (var model in Model.ApiBackedClasses)
@@ -30,28 +30,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line();
             }
 
-            using (b.Block("const viewModelTypeLookup = ", " as ViewModelTypeLookup"))
+            using (b.Block("const viewModelTypeLookup = ViewModel.typeLookup ="))
             {
                 foreach (var model in Model.ApiBackedClasses)
                 {
-                    using (b.Block($"{model.ViewModelClassName}:", ","))
-                    {
-                        b.Line($"viewModel: {model.ViewModelClassName}ViewModel,");
-                        b.Line($"listViewModel: {model.ListViewModelClassName}ViewModel");
-                    }
+                    b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
+                }
+            }
+            using (b.Block("const listViewModelTypeLookup = ListViewModel.typeLookup ="))
+            {
+                foreach (var model in Model.ApiBackedClasses)
+                {
+                    b.Line($"{model.ViewModelClassName}: {model.ListViewModelClassName}ViewModel,");
                 }
             }
 
             b.Line();
-            b.Line("export default viewModelTypeLookup;");
-
-            //b.Line();
-            //b.Lines(
-            //    "export const viewModelMap = new ViewModelMap(model => {",
-            //    "    var ctor = (viewModelTypeLookup as ViewModelTypeLookup)[model.$metadata.name].viewModel;",
-            //    "    return new ctor(model);",
-            //    "})"
-            //);
 
             return Task.FromResult(b.ToString());
         }
@@ -62,16 +56,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             string viewModelName = $"{name}ViewModel";
             string metadataName = $"$metadata.{name}";
 
-            //b.Line($"export interface {viewModelName} extends $models.{name} {{}}");
-            using (b.Block($"export class {viewModelName} extends ViewModel<$models.{name}, $apiClients.{name}ApiClient> implements $models.{name} "))
+            using (b.Block($"export interface {viewModelName} extends $models.{name}"))
             {
                 foreach (var prop in model.ClientProperties)
                 {
                     b.DocComment(prop.Comment);
                     var typeString = new VueType(prop.Type.NullableUnderlyingType).TsType(modelPrefix: "$models", viewModel: true);
-                    b.Line($"{prop.JsVariable}: {typeString} | null = null;");
+                    b.Line($"{prop.JsVariable}: {typeString} | null;");
                 }
+            }
 
+            using (b.Block($"export class {viewModelName} extends ViewModel<$models.{name}, $apiClients.{name}ApiClient, {model.PrimaryKey.Type.TsType}> implements $models.{name} "))
+            {
                 foreach (var prop in model.ClientProperties)
                 {
                     if (prop.Type.TsTypeKind == TypeDiscriminator.Collection && prop.PureType.TsTypeKind == TypeDiscriminator.Model)
@@ -84,7 +80,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.Line();
                         using (b.Block($"public addTo{prop.Name}(): {propVmName}"))
                         {
-                            b.Line($"return this.$addChild('{prop.JsVariable}', () => new {propVmName}())");
+                            b.Line($"return this.$addChild('{prop.JsVariable}')");
                         }
                     }
                 }
@@ -95,12 +91,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
 
                 b.Line();
-                using (b.Block($"constructor(initialData?: $models.{name})"))
+                using (b.Block($"constructor(initialData?: $models.{name} | {{}})"))
                 {
                     b.Line($"super({metadataName}, new $apiClients.{name}ApiClient(), initialData)");
                 }
             }
-            // b.Line($"defineProps({viewModelName}, $metadata.{name})");
+            b.Line($"defineProps({viewModelName}, $metadata.{name})");
             b.Line();
         }
 

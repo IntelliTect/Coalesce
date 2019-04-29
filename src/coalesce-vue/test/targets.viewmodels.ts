@@ -46,16 +46,7 @@ export class AdvisorViewModel extends ViewModel<models.Advisor, apiClients.Advis
 defineProps(AdvisorViewModel, metadata.Advisor);
 
 ViewModel.typeLookup = {
-  Student: {
-    listViewModel: null as any,
-    viewModel: StudentViewModel
-  },
-  Course: {
-    listViewModel: null as any,
-    viewModel: CourseViewModel
-  },
-  Advisor: {
-    listViewModel: null as any,
-    viewModel: AdvisorViewModel
-  },
+  Student: StudentViewModel,
+  Course: CourseViewModel,
+  Advisor: AdvisorViewModel,
 }

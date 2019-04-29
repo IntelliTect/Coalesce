@@ -184,7 +184,7 @@ exports.coalesceVue = gulp.parallel(
         coalesceVueGen,
     ),
     gulp.series(
-        shell.task("yarn --cwd ../Coalesce.Web.Vue build-lib")
+        shell.task("cd ../Coalesce.Web.Vue && npm run build-lib")
     )
 );
 

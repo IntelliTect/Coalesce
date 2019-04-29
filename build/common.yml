@@ -109,6 +109,7 @@
       ArtifactName: packages
 
   - script: npm ci
+    displayName: npm ci
     workingDirectory: src/Coalesce.Web
 
   - task: DotNetCoreCLI@2
@@ -119,9 +120,11 @@
       arguments: 'coalesce-ko.json'
 
   - script: npx gulp copyAll
+    displayName: npx gulp copyAll
     workingDirectory: src/Coalesce.Web
 
   - script: npm ci
+    displayName: npm ci
     workingDirectory: src/Coalesce.Web.Vue
 
   - task: DotNetCoreCLI@2
@@ -145,15 +148,19 @@
       versionSpec: 10.x
 
   - script: npm ci
+    displayName: npm ci
     workingDirectory: $(CoalesceVueDir)
 
   - script: npm version $(COALESCE_VERSION) --no-git-tag-version
+    displayName: npm version $(COALESCE_VERSION) --no-git-tag-version
     workingDirectory: $(CoalesceVueDir)
 
   - script: npm run build
+    displayName: npm run build
     workingDirectory: $(CoalesceVueDir)
 
   - script: npm run test -- --coverage --reporters=default --reporters=jest-junit
+    displayName: npm run tgest
     workingDirectory: $(CoalesceVueDir)
 
   - task: PublishTestResults@2

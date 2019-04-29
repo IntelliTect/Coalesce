@@ -25,6 +25,7 @@ namespace Coalesce.Web.Models
         public long? ImageSize { get; set; }
         public string ImageHash { get; set; }
         public string AttachmentName { get; set; }
+        public long? InternalUseFileSize { get; set; }
         public string Severity { get; set; }
         public Coalesce.Domain.Case.Statuses? Status { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts { get; set; }
@@ -52,6 +53,7 @@ namespace Coalesce.Web.Models
             this.ImageSize = obj.ImageSize;
             this.ImageHash = obj.ImageHash;
             this.AttachmentName = obj.AttachmentName;
+            this.InternalUseFileSize = obj.InternalUseFileSize;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
@@ -100,6 +102,7 @@ namespace Coalesce.Web.Models
             entity.ImageSize = (ImageSize ?? entity.ImageSize);
             entity.ImageHash = ImageHash;
             entity.AttachmentName = AttachmentName;
+            entity.InternalUseFileSize = (InternalUseFileSize ?? entity.InternalUseFileSize);
             entity.Severity = Severity;
             entity.Status = (Status ?? entity.Status);
             entity.DevTeamAssignedId = DevTeamAssignedId;

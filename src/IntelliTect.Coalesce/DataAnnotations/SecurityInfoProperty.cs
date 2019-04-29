@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,27 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// </summary>
     public class PropertySecurityInfo
     {
+        public PropertySecurityInfo(SecurityPermission read, SecurityPermission edit,
+            SecurityPermission delete)
+        {
+            Read = read;
+            Edit = edit;
+            Delete = delete;
+
+            IsRead = !read.NoAccess;
+            ReadRoles = read.Roles;
+
+            IsEdit = !edit.NoAccess;
+            EditRoles = edit.Roles;
+        }
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;
         public string EditRoles { get; set; } = "";
         public string ReadRoles { get; set; } = "";
 
-
+        public SecurityPermission Read { get; set; }
+        public SecurityPermission Edit { get; set; }
+        public SecurityPermission Delete { get; set; }
 
         public List<string> EditRolesList
         {
@@ -80,7 +96,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
             return true;
         }
-        
+
         // If true, the user can view the property
         public bool IsReadable(ClaimsPrincipal user)
         {
@@ -94,7 +110,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                         return false;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // This happens when the trust is lost between the client and the domain.
                     if (ex.Message.Contains("trust")) return false;
@@ -103,6 +119,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
             return true;
         }
+
 
         public string ReadRolesExternal => string.Join(",", ReadRolesList);
 

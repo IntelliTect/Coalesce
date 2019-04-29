@@ -81,6 +81,22 @@
                 <div class="col-md-8 prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Restricted Upload Attachment</label>
+                <div class="col-md-8 prop-restrictedUploadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Restricted Download Attachment</label>
+                <div class="col-md-8 prop-restrictedDownloadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Restricted Meta Attachment</label>
+                <div class="col-md-8 prop-restrictedMetaAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Internal Use File Size</label>
+                <div class="col-md-8 prop-internalUseFileSize">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.InternalUseFileSize))</div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Severity</label>
                 <div class="col-md-8 prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</div>
             </div>

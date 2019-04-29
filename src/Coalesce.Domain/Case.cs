@@ -67,7 +67,10 @@ namespace Coalesce.Domain
 
         [File("image/jpeg", nameof(ImageName), nameof(ImageHash), nameof(ImageSize))]
         public byte[] Image { get; set; }
-        public string ImageName { get {
+        public string ImageName
+        {
+            get
+            {
                 return $"Case{CaseKey}.jpg";
             }
         }
@@ -78,8 +81,26 @@ namespace Coalesce.Domain
         public byte[] Attachment { get; set; }
         public string AttachmentName { get; set; }
 
+        [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
+        [Read(PermissionLevel = SecurityPermissionLevels.AllowAll)]
         [File("text/plain")]
         public byte[] PlainAttachment { get; set; }
+
+        [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized, Roles = "Admin, SuperUser")]
+        [File]
+        public byte[] RestrictedUploadAttachment { get; set; }
+
+        [Read(PermissionLevel = SecurityPermissionLevels.AllowAuthorized, Roles = "Admin")]
+        [File]
+        public byte[] RestrictedDownloadAttachment { get; set; }
+
+        [File(NameProperty = nameof(InternalUseFileName),
+            SizeProperty = nameof(InternalUseFileSize))]
+        public byte[] RestrictedMetaAttachment { get; set; }
+        [InternalUse]
+        public string InternalUseFileName { get; set; }
+        [InternalUse]
+        public long InternalUseFileSize { get; set; }
 
         public string Severity { get; set; }
 

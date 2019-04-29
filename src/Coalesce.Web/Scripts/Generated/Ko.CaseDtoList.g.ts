@@ -28,6 +28,7 @@ module ListViewModels {
             imageSize?: string;
             imageHash?: string;
             attachmentName?: string;
+            internalUseFileSize?: string;
             severity?: string;
             status?: string;
             devTeamAssignedId?: string;

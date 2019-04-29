@@ -608,19 +608,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var result = new PropertySecurityInfo();
-
-                if (HasAttribute<ReadAttribute>())
-                {
-                    result.IsRead = true;
-                    result.ReadRoles = this.GetAttributeValue<ReadAttribute>(a => a.Roles);
-                }
-
-                if (HasAttribute<EditAttribute>())
-                {
-                    result.IsEdit = true;
-                    result.EditRoles = this.GetAttributeValue<EditAttribute>(a => a.Roles);
-                }
+                var result = new PropertySecurityInfo(
+                    this.GetSecurityPermission<ReadAttribute>(),
+                    this.GetSecurityPermission<EditAttribute>(),
+                    this.GetSecurityPermission<DeleteAttribute>());
 
                 return result;
             }

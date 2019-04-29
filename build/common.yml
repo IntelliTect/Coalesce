@@ -109,7 +109,7 @@
       ArtifactName: packages
 
   - script: npm ci
-    displayName: npm ci
+    displayName: 'Coalesce.Web: npm ci'
     workingDirectory: src/Coalesce.Web
 
   - task: DotNetCoreCLI@2
@@ -120,11 +120,15 @@
       arguments: 'coalesce-ko.json'
 
   - script: npx gulp copyAll
-    displayName: npx gulp copyAll
+    displayName: 'Coalesce.Web: npx gulp copyAll'
     workingDirectory: src/Coalesce.Web
 
+  - script: npm run build-lib
+    displayName: 'Coalesce.Web.Vue: npm run build-lib'
+    workingDirectory: src/Coalesce.Web.Vue
+
   - script: npm ci
-    displayName: npm ci
+    displayName: 'Coalesce.Web.Vue: npm ci'
     workingDirectory: src/Coalesce.Web.Vue
 
   - task: DotNetCoreCLI@2

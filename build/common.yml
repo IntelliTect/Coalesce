@@ -108,10 +108,9 @@
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/packages'
       ArtifactName: packages
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Coalesce.Web: yarn install'
-    inputs:
-      ProjectDirectory: src/Coalesce.Web
+  - script: npm ci
+    displayName: 'Coalesce.Web: npm ci'
+    workingDirectory: src/Coalesce.Web
 
   - task: DotNetCoreCLI@2
     displayName: 'Coalesce.Web: dotnet dotnet-coalesce.dll '
@@ -120,16 +119,17 @@
       custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
       arguments: 'coalesce-ko.json'
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Coalesce.Web: Yarn gulp copyAll'
-    inputs:
-      ProjectDirectory: src/Coalesce.Web
-      Arguments: 'gulp copyAll'
+  - script: npx gulp copyAll
+    displayName: 'Coalesce.Web: npx gulp copyAll'
+    workingDirectory: src/Coalesce.Web
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Coalesce.Web.Vue: yarn install'
-    inputs:
-      ProjectDirectory: src/Coalesce.Web.Vue
+  - script: npm run build-lib
+    displayName: 'Coalesce.Web.Vue: npm run build-lib'
+    workingDirectory: src/Coalesce.Web.Vue
+
+  - script: npm ci
+    displayName: 'Coalesce.Web.Vue: npm ci'
+    workingDirectory: src/Coalesce.Web.Vue
 
   - task: DotNetCoreCLI@2
     displayName: 'Coalesce.Web.Vue: dotnet dotnet-coalesce.dll '
@@ -151,28 +151,21 @@
     inputs:
       versionSpec: 10.x
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Yarn install'
-    inputs:
-      ProjectDirectory: '$(CoalesceVueDir)'
+  - script: npm ci
+    displayName: npm ci
+    workingDirectory: $(CoalesceVueDir)
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Yarn version'
-    inputs:
-      ProjectDirectory: '$(CoalesceVueDir)'
-      Arguments: 'version --no-git-tag-version --new-version $(COALESCE_VERSION)'
+  - script: npm version $(COALESCE_VERSION) --no-git-tag-version
+    displayName: npm version $(COALESCE_VERSION) --no-git-tag-version
+    workingDirectory: $(CoalesceVueDir)
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Yarn build'
-    inputs:
-      ProjectDirectory: '$(CoalesceVueDir)'
-      Arguments: build
+  - script: npm run build
+    displayName: npm run build
+    workingDirectory: $(CoalesceVueDir)
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
-    displayName: 'Yarn test'
-    inputs:
-      ProjectDirectory: '$(CoalesceVueDir)'
-      Arguments: 'test --coverage --reporters=default --reporters=jest-junit'
+  - script: npm run test -- --coverage --reporters=default --reporters=jest-junit
+    displayName: npm run tgest
+    workingDirectory: $(CoalesceVueDir)
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results **/junit.xml'

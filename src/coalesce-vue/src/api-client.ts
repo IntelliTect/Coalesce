@@ -444,8 +444,6 @@ export type ParamsObject<TMethod extends Method> = {
 
 export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<TModel["$metadata"]> {
 
-    // TODO: should the standard set of endpoints be prefixed with '$'?
-
     public get(id: string | number, parameters?: DataSourceParameters, config?: AxiosRequestConfig): ItemResultPromise<TModel> {
         return AxiosClient
             .get(

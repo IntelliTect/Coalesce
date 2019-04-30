@@ -18,7 +18,7 @@ const value = (name: string = "prop") => {
 const domain: Domain = { enums: {}, types: {}, services: {} }
 
 export const Course = domain.types.Course = {
-  ...metaBase("course"),
+  ...metaBase("Course"),
   type: "model",
   behaviorFlags: 7,
   get keyProp() {
@@ -47,7 +47,7 @@ export const Course = domain.types.Course = {
 };
 
 export const Advisor = domain.types.Advisor = {
-  ...metaBase("advisor"),
+  ...metaBase("Advisor"),
   type: "model",
   behaviorFlags: 7,
   get keyProp() {
@@ -76,7 +76,7 @@ export const Advisor = domain.types.Advisor = {
 };
 
 export const Student = domain.types.Student = {
-  ...metaBase("student"),
+  ...metaBase("Student"),
   type: "model",
   behaviorFlags: 7,
   get displayProp() {
@@ -209,7 +209,7 @@ export const Student = domain.types.Student = {
 };
 
 export const DisplaysStudent = <ObjectType>{
-  ...metaBase("displaysStudent"),
+  ...metaBase("DisplaysStudent"),
   type: "object",
   get displayProp() {
     return this.props.student;

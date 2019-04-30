@@ -8,7 +8,8 @@
     "removeComments": false,
     "sourceMap": true,
     "module": "system",
-    "target": "es5"
+    "target": "es5",
+    "types": ["bootstrap", "bootstrap.v3.datetimepicker", "jquery", "knockout", "knockout.validation", "moment", "select2"]
   },
   "include": [
     "Scripts"

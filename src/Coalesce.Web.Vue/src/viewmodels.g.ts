@@ -3,8 +3,57 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, defineProps } from 'coalesce-vue/lib/viewmodel'
 
-export interface PersonViewModel extends $models.Person {}
-export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient> {
+export interface PersonViewModel extends $models.Person {
+  
+  /** ID for the person object. */
+  personId: number | null;
+  
+  /** Title of the person, Mr. Mrs, etc. */
+  title: $models.Titles | null;
+  
+  /** First name of the person. */
+  firstName: string | null;
+  
+  /** Last name of the person */
+  lastName: string | null;
+  
+  /** Email address of the person */
+  email: string | null;
+  
+  /** Genetic Gender of the person. */
+  gender: $models.Genders | null;
+  
+  /** List of cases assigned to the person */
+  casesAssigned: CaseViewModel[] | null;
+  
+  /** List of cases reported by the person. */
+  casesReported: CaseViewModel[] | null;
+  birthDate: Date | null;
+  lastBath: Date | null;
+  nextUpgrade: Date | null;
+  personStats: $models.PersonStats | null;
+  
+  /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
+  name: string | null;
+  
+  /** Company ID this person is employed by */
+  companyId: number | null;
+  
+  /** Company loaded from the Company ID */
+  company: CompanyViewModel | null;
+  arbitraryCollectionOfStrings: string[] | null;
+}
+export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
+  
+  
+  public addToCasesAssigned(): CaseViewModel {
+    return this.$addChild('casesAssigned')
+  }
+  
+  
+  public addToCasesReported(): CaseViewModel {
+    return this.$addChild('casesReported')
+  }
   
   /** Sets the FirstName to the given text. */
   public rename = this.$apiClient.$makeCaller(
@@ -38,7 +87,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
     (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
   
-  constructor(initialData?: $models.Person) {
+  constructor(initialData?: $models.Person | {}) {
     super($metadata.Person, new $apiClients.PersonApiClient(), initialData)
   }
 }
@@ -99,10 +148,36 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
 }
 
 
-export interface CaseViewModel extends $models.Case {}
-export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient> {
+export interface CaseViewModel extends $models.Case {
   
-  constructor(initialData?: $models.Case) {
+  /** The Primary key for the Case object */
+  caseKey: number | null;
+  title: string | null;
+  description: string | null;
+  openedAt: Date | null;
+  assignedToId: number | null;
+  assignedTo: PersonViewModel | null;
+  reportedById: number | null;
+  reportedBy: PersonViewModel | null;
+  imageName: string | null;
+  imageSize: number | null;
+  imageHash: string | null;
+  attachmentName: string | null;
+  severity: string | null;
+  status: $models.Statuses | null;
+  caseProducts: CaseProductViewModel[] | null;
+  devTeamAssignedId: number | null;
+  devTeamAssigned: $models.DevTeam | null;
+  duration: any | null;
+}
+export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
+  
+  
+  public addToCaseProducts(): CaseProductViewModel {
+    return this.$addChild('caseProducts')
+  }
+  
+  constructor(initialData?: $models.Case | {}) {
     super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
   }
 }
@@ -141,10 +216,26 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
 }
 
 
-export interface CompanyViewModel extends $models.Company {}
-export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient> {
+export interface CompanyViewModel extends $models.Company {
+  companyId: number | null;
+  name: string | null;
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  isDeleted: boolean | null;
+  employees: PersonViewModel[] | null;
+  altName: string | null;
+}
+export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
   
-  constructor(initialData?: $models.Company) {
+  
+  public addToEmployees(): PersonViewModel {
+    return this.$addChild('employees')
+  }
+  
+  constructor(initialData?: $models.Company | {}) {
     super($metadata.Company, new $apiClients.CompanyApiClient(), initialData)
   }
 }
@@ -164,10 +255,15 @@ export class CompanyListViewModel extends ListViewModel<$models.Company, $apiCli
 }
 
 
-export interface ProductViewModel extends $models.Product {}
-export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient> {
+export interface ProductViewModel extends $models.Product {
+  productId: number | null;
+  name: string | null;
+  details: $models.ProductDetails | null;
+  uniqueId: string | null;
+}
+export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
   
-  constructor(initialData?: $models.Product) {
+  constructor(initialData?: $models.Product | {}) {
     super($metadata.Product, new $apiClients.ProductApiClient(), initialData)
   }
 }
@@ -181,10 +277,16 @@ export class ProductListViewModel extends ListViewModel<$models.Product, $apiCli
 }
 
 
-export interface CaseProductViewModel extends $models.CaseProduct {}
-export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient> {
+export interface CaseProductViewModel extends $models.CaseProduct {
+  caseProductId: number | null;
+  caseId: number | null;
+  case: CaseViewModel | null;
+  productId: number | null;
+  product: ProductViewModel | null;
+}
+export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
   
-  constructor(initialData?: $models.CaseProduct) {
+  constructor(initialData?: $models.CaseProduct | {}) {
     super($metadata.CaseProduct, new $apiClients.CaseProductApiClient(), initialData)
   }
 }
@@ -197,4 +299,48 @@ export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct,
   }
 }
 
+
+export interface CaseDtoViewModel extends $models.CaseDto {
+  caseId: number | null;
+  title: string | null;
+  assignedToName: string | null;
+}
+export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, number> implements $models.CaseDto  {
+  
+  public asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
+    "item", 
+    (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
+    () => ({input: null as string | null, }),
+    (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
+  
+  constructor(initialData?: $models.CaseDto | {}) {
+    super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)
+  }
+}
+defineProps(CaseDtoViewModel, $metadata.CaseDto)
+
+export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient> {
+  
+  constructor() {
+    super($metadata.CaseDto, new $apiClients.CaseDtoApiClient())
+  }
+}
+
+
+const viewModelTypeLookup = ViewModel.typeLookup = {
+  Person: PersonViewModel,
+  Case: CaseViewModel,
+  Company: CompanyViewModel,
+  Product: ProductViewModel,
+  CaseProduct: CaseProductViewModel,
+  CaseDto: CaseDtoViewModel,
+}
+const listViewModelTypeLookup = ListViewModel.typeLookup = {
+  Person: PersonListViewModel,
+  Case: CaseListViewModel,
+  Company: CompanyListViewModel,
+  Product: ProductListViewModel,
+  CaseProduct: CaseProductListViewModel,
+  CaseDto: CaseDtoListViewModel,
+}
 

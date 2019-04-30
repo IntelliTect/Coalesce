@@ -217,6 +217,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         // TS Type: "ModelCollectionNavigationProperty"
                         b.StringProp("role", "collectionNavigation");
                         b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+
+                        if (prop.IsManytoManyCollection)
+                        {
+                            using (b.Block("manyToMany:", ","))
+                            {
+                                var nearNavigation = prop.Object.ClientProperties.First(f => f.Type.EqualsType(model.Type));
+                                var farNavigation = prop.ManyToManyCollectionProperty;
+
+                                b.StringProp("name", prop.ManyToManyCollectionName.ToCamelCase());
+                                b.Line($"get typeDef() {{ return {GetClassMetadataRef(farNavigation.Object)} }},");
+                                b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{farNavigation.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                                b.Line($"get navigationProp() {{ return {GetClassMetadataRef(prop.Object)}.props.{farNavigation.JsVariable} as ModelReferenceNavigationProperty }},");
+                            }
+                        }
+
                         break;
 
                     default:

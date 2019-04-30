@@ -109,9 +109,28 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       dontSerialize: true,
     },
-    attachment: {
-      name: "attachment",
-      displayName: "Attachment",
+    imageName: {
+      name: "imageName",
+      displayName: "Image Name",
+      type: "string",
+      role: "value",
+      dontSerialize: true,
+    },
+    imageSize: {
+      name: "imageSize",
+      displayName: "Image Size",
+      type: "number",
+      role: "value",
+    },
+    imageHash: {
+      name: "imageHash",
+      displayName: "Image Hash",
+      type: "string",
+      role: "value",
+    },
+    attachmentName: {
+      name: "attachmentName",
+      displayName: "Attachment Name",
       type: "string",
       role: "value",
     },
@@ -141,6 +160,12 @@ export const Case = domain.types.Case = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
+      manyToMany: {
+        name: "products",
+        get typeDef() { return (domain.types.Product as ModelType) },
+        get foreignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
+        get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
+      },
       dontSerialize: true,
     },
     devTeamAssignedId: {

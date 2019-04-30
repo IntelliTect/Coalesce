@@ -162,7 +162,7 @@ export const Case = domain.types.Case = {
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
       manyToMany: {
         name: "products",
-        get typeDef() { return (domain.types.CaseProduct as ModelType) },
+        get typeDef() { return (domain.types.Product as ModelType) },
         get foreignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
         get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
       },

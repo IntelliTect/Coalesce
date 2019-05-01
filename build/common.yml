@@ -164,7 +164,7 @@
     workingDirectory: $(CoalesceVueDir)
 
   - script: npm run test -- --coverage --reporters=default --reporters=jest-junit
-    displayName: npm run tgest
+    displayName: npm run test
     workingDirectory: $(CoalesceVueDir)
 
   - task: PublishTestResults@2

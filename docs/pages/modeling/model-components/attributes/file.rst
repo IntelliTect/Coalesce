@@ -47,9 +47,9 @@ Additionally, Coalesce can store file metadata in optional properties that are s
 			
 			//...
     
-	.. tip
-	
-	The :ref:`InternalUse` atribute can be used in conjunction with :csharp:`IntelliTect.Coalesce.DataAnnotations.File`. In the example below, Coalesce will store the uploaded filename and provide it again as the name of a file download, but the property itself won't actually get exposed on the DTOs via the API.
+
+
+The :ref:`InternalUse` atribute can be used in conjunction with :csharp:`IntelliTect.Coalesce.DataAnnotations.File`. In the example below, Coalesce will store the uploaded filename and provide it again as the name of a file download, but the property itself won't actually get exposed on the DTOs via the API.
 
 	.. code-block:: c#
 

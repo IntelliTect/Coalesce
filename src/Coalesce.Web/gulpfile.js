@@ -41,7 +41,7 @@ exports.copyImages = gulp.series(exports.cleanImages, function copyStatic() {
 });
 
 exports.watchImages = function watchImages() { 
-    return gulp.watch(paths.images + '**/*.{png,jpg,ico}', ['copy-images'], exports.copyImages) 
+    return gulp.watch(paths.images + '**/*.{png,jpg,ico}', exports.copyImages);
 };
 
 const npm = {
@@ -178,7 +178,15 @@ exports.coalesceKo = gulp.series(
 
 const coalesceVueGen = shell.task(`${dotnetCoalesce} ../../coalesce-vue.json `, { verbose: true });
 coalesceVueGen.displayName = "coalesceVueGen";
-exports.coalesceVue = gulp.series(exports.coalesceBuild, coalesceVueGen);
+exports.coalesceVue = gulp.parallel(
+    gulp.series(
+        exports.coalesceBuild,
+        coalesceVueGen,
+    ),
+    gulp.series(
+        shell.task("cd ../Coalesce.Web.Vue && npm run build-lib")
+    )
+);
 
 // gulp.task('coalesce:debug', ['coalesce:build'], shell.task(
 //     `${dotnetCoalesce} --debug --verbosity debug`,

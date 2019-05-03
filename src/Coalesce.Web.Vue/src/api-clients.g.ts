@@ -37,6 +37,20 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
 }
 
 
+export class CaseDtoApiClient extends ModelApiClient<$models.CaseDto> {
+  constructor() { super($metadata.CaseDto) }
+  public asyncMethodOnIClassDto(id: number, input: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+    const $method = this.$metadata.methods.asyncMethodOnIClassDto
+    const $params =  {
+      id,
+      input,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
 export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
   constructor() { super($metadata.CaseProduct) }
 }

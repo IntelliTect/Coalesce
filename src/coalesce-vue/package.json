@@ -1,6 +1,6 @@
 {
   "name": "coalesce-vue",
-  "version": "2.1.0-dev-002",
+  "version": "0.1.0-local",
   "description": "Coalesce core scripts for Vue.js",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -38,7 +38,8 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
     "prepack": "tsc -p ./tsconfig.build.json",
-    "//": "No coverage by default because it breaks line numbers in error messages. `yarn test --coverage` to run it.",
+    "build-local": "npm pack",
+    "//": "No coverage by default because it breaks line numbers in error messages. `npm run test --coverage` to run it.",
     "test": "jest"
   },
   "jest": {

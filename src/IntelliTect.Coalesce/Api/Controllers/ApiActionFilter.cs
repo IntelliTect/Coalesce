@@ -97,14 +97,27 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
         public void OnResultExecuting(ResultExecutingContext context)
         {
-            var response = context.HttpContext.Response;
-
             int statusCode;
             ApiResult result;
 
             switch (context.Result)
             {
-                case ForbidResult forbidResult:
+                case ChallengeResult _:
+                    // ChallengeResult is the authentication flow response for a 401
+                    // when Identity is setup such that it redirects the user
+                    // to a login page to get them to log in.
+
+                    // Redirecting to a login page makes no sense for an API call,
+                    // so we intercept to return an ApiResult so that Coalesce can understand it.
+
+                    // An IAlwaysRunResultFilter is the only way we can intercept this response
+                    // and turn it into a ProblemDetails.
+
+                    statusCode = StatusCodes.Status401Unauthorized;
+                    result = new ApiResult("Unauthorized.");
+                    break;
+
+                case ForbidResult _:
                     // ForbidResult is the authentication flow response for a 403.
                     // This happens when you return Forbid() in a controller, 
                     // or when authorization fails via the [Authorize] attribute.

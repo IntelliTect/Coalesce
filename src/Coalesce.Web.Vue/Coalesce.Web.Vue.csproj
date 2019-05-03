@@ -15,21 +15,21 @@
     <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj" />
   </ItemGroup>
 
-  <Target Name="YarnRestore" BeforeTargets="Build">
+  <Target Name="NpmRestore" BeforeTargets="Build">
     <!-- Ensure Node.js is installed -->
-    <Exec Command="yarn --version" ContinueOnError="true">
+    <Exec Command="npm --version" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
     </Exec>
-    <Error Condition="'$(ErrorCode)' != '0'" Text="yarn is required to build and run this project. Install yarn from https://yarnpkg.com/en/, use it to install the packages for this project, and restart your IDE." />
+    <Error Condition="'$(ErrorCode)' != '0'" Text="npm is required to build and run this project. Install npm, then use it to install the packages for this project, and restart your IDE." />
     
-    <!--<Exec Command="yarn" />-->
+    <!--<Exec Command="npm install" />-->
 
   </Target>
   
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-    <Exec Command="yarn install" />
-    <Exec Command="yarn build" />
+    <Exec Command="npm ci" />
+    <Exec Command="npm run build" />
 
     <!-- Include the newly-built files in the publish output -->
     <ItemGroup>

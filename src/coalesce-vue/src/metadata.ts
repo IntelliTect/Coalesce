@@ -65,7 +65,7 @@ export type TypeDiscriminatorToType<T> =
 /** Base properties found on all pieces of metadata. */
 export interface Metadata {
 
-    /** The camel-cased, machine-readable name of the value or type. */
+    /** The machine-readable name of the value or type. Values are typically camel-cased; types are typically PascalCased. */
     readonly name: string
 
     // TODO: i18n? How does it fit into this property? Do we take a dependency on an i18n framework and compute it in a getter?
@@ -370,6 +370,17 @@ export interface ModelCollectionNavigationProperty extends PropertyBase, Collect
      */
     readonly foreignKey: ForeignKeyProperty
     readonly itemType: ModelValue // & CollectionItemValue
+    
+    readonly manyToMany?: {
+        /** The name of the many-to-many collection. */
+        readonly name: string;
+        /** The type represented by the other side of the many-to-many relationship. */
+        readonly typeDef: ModelType
+        /** The foreign key on the join entity that refers to an entity on the other side of the relationship. */
+        readonly foreignKey: ForeignKeyProperty
+        /** The navigation on the join entity that refers to an entity on the other side of the relationship. */
+        readonly navigationProp: ModelReferenceNavigationProperty
+    }
 }
 
 export type CollectionProperty = 
@@ -435,7 +446,7 @@ export type PropsNames<Props extends ClassType["props"], Kind extends Property =
 }[Extract<keyof Props, string>];
 
 export type PropNames<TMeta extends ClassType, Kind extends Property = Property> = 
-    PropsNames<ClassType["props"], Kind>;
+    PropsNames<TMeta["props"], Kind>;
 
 // This doesn't support restriction of property kind - typescript makes unintelligible intellisense tooltips if we do.
 export type PropertyOrName<TMeta extends ClassType>

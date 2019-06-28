@@ -38,14 +38,13 @@ module ViewModels {
         public imageSize: KnockoutObservable<number | null> = ko.observable(null);
         public imageHash: KnockoutObservable<string | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
-        public internalUseFileSize: KnockoutObservable<number | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
         
         /** Text value for enumeration Status */
         public statusText: KnockoutComputed<string | null> = ko.pureComputed(() => {
-            for(var i = 0; i < this.statusValues.length; i++){
-                if (this.statusValues[i].id == this.status()){
+            for (var i = 0; i < this.statusValues.length; i++) {
+                if (this.statusValues[i].id == this.status()) {
                     return this.statusValues[i].value;
                 }
             }
@@ -287,7 +286,6 @@ module ViewModels {
             this.imageSize(data.imageSize);
             this.imageHash(data.imageHash);
             this.attachmentName(data.attachmentName);
-            this.internalUseFileSize(data.internalUseFileSize);
             this.severity(data.severity);
             this.status(data.status);
             this.devTeamAssignedId(data.devTeamAssignedId);
@@ -320,7 +318,6 @@ module ViewModels {
             dto.imageSize = this.imageSize();
             dto.imageHash = this.imageHash();
             dto.attachmentName = this.attachmentName();
-            dto.internalUseFileSize = this.internalUseFileSize();
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
@@ -421,7 +418,6 @@ module ViewModels {
             self.imageSize.subscribe(self.autoSave);
             self.imageHash.subscribe(self.autoSave);
             self.attachmentName.subscribe(self.autoSave);
-            self.internalUseFileSize.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);

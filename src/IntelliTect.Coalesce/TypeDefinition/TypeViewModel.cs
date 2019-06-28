@@ -27,7 +27,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsGeneric { get; }
 
-        public bool IsCollection => IsA<IEnumerable>() && !IsArray && !IsString;
+        /// <summary>
+        /// True if the type is <see cref="IEnumerable"/> and behaves like a collection.
+        /// Does not necessarily mean the type is an <see cref="ICollection"/> or <see cref="ICollection{T}"/>.
+        /// <para>
+        /// Excludes <code>String</code> and <code>byte[]</code>.
+        /// </para>
+        /// </summary>
+        public bool IsCollection => IsA<IEnumerable>() && !IsString && !IsByteArray;
 
         public abstract bool IsArray { get; }
 
@@ -208,7 +215,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if class is a Byte[]
         /// </summary>
-        public bool IsByteArray => IsArray && PureType.IsA<Byte>();
+        public bool IsByteArray => IsArray && ArrayType.IsA<Byte>();
 
         /// <summary>
         /// Returns true if the type is any integral type or a nullable version of such a type, except <see cref="char"/>

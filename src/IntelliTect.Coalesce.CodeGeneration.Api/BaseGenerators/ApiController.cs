@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
@@ -90,6 +91,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// </param>
         public void WriteMethodInvocation(CSharpCodeBuilder b, MethodViewModel method, string owningMember)
         {
+            if (method.Parameters.Any(p => !p.IsDI && p.PureType.HasClassViewModel))
+            {
+                b.Line($"var _mappingContext = new {nameof(MappingContext)}(User)");
+            }
+
             // Don't try to store the result in the variable if the method returns void.
             if (!method.TaskUnwrappedReturnType.IsVoid)
             {

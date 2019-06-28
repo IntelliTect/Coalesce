@@ -33,8 +33,8 @@ module ViewModels {
         
         /** Text value for enumeration Title */
         public titleText: KnockoutComputed<string | null> = ko.pureComputed(() => {
-            for(var i = 0; i < this.titleValues.length; i++){
-                if (this.titleValues[i].id == this.title()){
+            for (var i = 0; i < this.titleValues.length; i++) {
+                if (this.titleValues[i].id == this.title()) {
                     return this.titleValues[i].value;
                 }
             }
@@ -55,8 +55,8 @@ module ViewModels {
         
         /** Text value for enumeration Gender */
         public genderText: KnockoutComputed<string | null> = ko.pureComputed(() => {
-            for(var i = 0; i < this.genderValues.length; i++){
-                if (this.genderValues[i].id == this.gender()){
+            for (var i = 0; i < this.genderValues.length; i++) {
+                if (this.genderValues[i].id == this.gender()) {
                     return this.genderValues[i].value;
                 }
             }

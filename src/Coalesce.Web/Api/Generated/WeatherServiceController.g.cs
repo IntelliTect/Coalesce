@@ -39,7 +39,8 @@ namespace Coalesce.Web.Api
         public virtual ItemResult<WeatherDataDtoGen> GetWeather([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime)
         {
             IncludeTree includeTree = null;
-            var methodResult = Service.GetWeather(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), new MappingContext(User)), dateTime);
+            var _mappingContext = new MappingContext(User)
+            var methodResult = Service.GetWeather(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime);
             var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);
@@ -54,7 +55,8 @@ namespace Coalesce.Web.Api
         public virtual async Task<ItemResult<WeatherDataDtoGen>> GetWeatherAsync([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime)
         {
             IncludeTree includeTree = null;
-            var methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), new MappingContext(User)), dateTime);
+            var _mappingContext = new MappingContext(User)
+            var methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime);
             var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);

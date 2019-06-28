@@ -153,11 +153,11 @@ namespace Coalesce.Domain
         /// <param name="numberTwo"></param>
         /// <returns></returns>
         [Coalesce]
-        public static ItemResult<int> Add(int numberOne, int numberTwo)
+        public static ItemResult<int> Add(int numberOne, int[] numberTwo)
         {
             try
             {
-                return new ItemResult<int>(numberOne + numberTwo);
+                return new ItemResult<int>(numberOne + numberTwo.Length);
             }
             catch
             {

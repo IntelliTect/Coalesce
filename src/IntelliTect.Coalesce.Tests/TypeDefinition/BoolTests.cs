@@ -59,8 +59,10 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             })
             {
                 Assert.True(prop.Type.IsArray);
+                Assert.True(prop.Type.IsCollection);
                 Assert.False(prop.Type.IsBool);
                 Assert.True(prop.PureType.IsBool);
+                Assert.True(prop.Type.ArrayType.IsBool);
             }
 
             // Nullable Collections/Arrays
@@ -70,6 +72,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                 vm.PropertyByName(nameof(Bools.ArrayNullable)),
             })
             {
+                Assert.True(prop.Type.IsCollection);
                 Assert.True(prop.Type.PureType.IsNullable);
                 Assert.False(prop.Type.PureType.PureType.IsNullable);
             }
@@ -81,6 +84,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                 vm.PropertyByName(nameof(Bools.Array)),
             })
             {
+                Assert.True(prop.Type.IsCollection);
                 Assert.False(prop.Type.PureType.IsNullable);
             }
         }

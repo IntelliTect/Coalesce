@@ -75,7 +75,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"public readonly name = '{method.Name}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
-            if (method.ResultType.IsCollection || method.ResultType.IsArray)
+            if (method.ResultType.IsCollection)
             {
                 b.Line($"public result: {method.ResultType.TsKnockoutType()} = {method.ResultType.ObservableConstructorCall()};");
             }
@@ -87,7 +87,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
 
             string parameters = "";
-            parameters = string.Join(", ", method.ClientParameters.Select(f => f.Type.TsDeclarationPlain(f.Name) + " | null"));
+            parameters = string.Join(", ", method.ClientParameters.Select(f => $"{f.Name}: {f.Type.TsType} | null"));
             if (!string.IsNullOrWhiteSpace(parameters)) parameters = parameters + ", ";
             parameters = parameters + callbackAndReloadParam;
 
@@ -103,6 +103,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 string TsConversion(ParameterViewModel param)
                 {
                     string argument = param.JsVariable;
+                    if (param.Type.IsCollection && param.Type.PureType.HasClassViewModel)
+                        return $"{argument} ? {argument}.map($ => $.saveToDto()) : null";
                     if (param.Type.HasClassViewModel)
                         return $"{argument} ? {argument}.saveToDto() : null";
                     if (param.Type.IsDate)

@@ -132,10 +132,6 @@
                             Restricted Meta Attachment
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'RestrictedMetaAttachment', 'fa-caret-down': orderByDescending() == 'RestrictedMetaAttachment'}"></i>
                         </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('InternalUseFileSize')}">
-                            Internal Use File Size
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'InternalUseFileSize', 'fa-caret-down': orderByDescending() == 'InternalUseFileSize'}"></i>
-                        </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
                             Severity
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Severity', 'fa-caret-down': orderByDescending() == 'Severity'}"></i>
@@ -180,7 +176,6 @@
                             <td class="prop-restrictedUploadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment))</td>
                             <td class="prop-restrictedDownloadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment))</td>
                             <td class="prop-restrictedMetaAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment))</td>
-                            <td class="prop-internalUseFileSize">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.InternalUseFileSize))</td>
                             <td class="prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</td>
                             <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
                             <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
@@ -205,7 +200,6 @@
                             <td class="prop-restrictedUploadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment, true))</td>
                             <td class="prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, true))</td>
                             <td class="prop-restrictedMetaAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment, true))</td>
-                            <td class="prop-internalUseFileSize">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.InternalUseFileSize, true))</td>
                             <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, true))</td>
                             <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, true))</td>
                             <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>

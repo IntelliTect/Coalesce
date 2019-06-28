@@ -30,7 +30,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
         private string TsType(TypeViewModel type, string modelPrefix, bool viewModel)
         {
             if (type.IsByteArray) return "string";
-            if (type.IsCollection && type.IsNumber) return "number[]";
             if (type.IsCollection) return TsTypePlain(type.PureType, modelPrefix, viewModel) + "[]";
             if (type.IsGuid) return "string";
             return TsTypePlain(type, modelPrefix, viewModel);

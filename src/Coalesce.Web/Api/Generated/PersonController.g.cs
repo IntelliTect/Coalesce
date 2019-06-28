@@ -164,9 +164,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("Add")]
         [Authorize]
-        public virtual ItemResult<int> Add(int numberOne, int numberTwo)
+        public virtual ItemResult<int> Add(int numberOne, ICollection<int> numberTwo)
         {
-            var methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
+            var methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo.ToArray());
             var result = new ItemResult<int>(methodResult);
             result.Object = methodResult.Object;
             return result;
@@ -310,7 +310,8 @@ namespace Coalesce.Web.Api
         public virtual ListResult<PersonDtoGen> SearchPeople(PersonCriteriaDtoGen criteria, int page)
         {
             IncludeTree includeTree = null;
-            var methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), new MappingContext(User)), page);
+            var _mappingContext = new MappingContext(User)
+            var methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), _mappingContext), page);
             var result = new ListResult<PersonDtoGen>(methodResult);
             var mappingContext = new MappingContext(User, "");
             result.List = methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, mappingContext, includeTree)).ToList();

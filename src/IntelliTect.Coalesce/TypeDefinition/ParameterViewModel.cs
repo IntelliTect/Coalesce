@@ -87,11 +87,34 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     if (IsAUser) return "User";
                     if (IsAnIncludeTree) return "out includeTree";
                 }
-                if (!IsDI && Type.HasClassViewModel)
+
+                if (IsDI)
                 {
-                    return $"{CsParameterName}.{nameof(Mapper.MapToModel)}(new {Type.FullyQualifiedName}(), new {nameof(MappingContext)}(User))";
+                    return CsParameterName;
                 }
-                return CsParameterName;
+
+                var ret = CsParameterName;
+                if (Type.PureType.HasClassViewModel)
+                {
+                    if (Type.IsCollection)
+                    {
+                        ret = $"{CsParameterName}.Select(_m => _m.{nameof(Mapper.MapToModel)}(new {Type.PureType.FullyQualifiedName}(), _mappingContext))";
+                    }
+                    else
+                    {
+                        ret = $"{CsParameterName}.{nameof(Mapper.MapToModel)}(new {Type.FullyQualifiedName}(), _mappingContext)";
+                    }
+                }
+
+                if (Type.IsCollection)
+                {
+                    if (Type.IsArray)
+                        ret += ".ToArray()";
+                    else
+                        ret += ".ToList()";
+                }
+
+                return ret;
             }
         }
 
@@ -103,9 +126,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var typeName = !IsDI && Type.HasClassViewModel 
-                    ? Type.ClassViewModel.DtoName 
-                    : Type.FullyQualifiedName;
+                string typeName = IsDI 
+                    ? Type.FullyQualifiedName
+                    : Type.DtoFullyQualifiedName;
+
                 return $"{(ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {CsParameterName}{(HasDefaultValue ? " = " + CsDefaultValue : "")}";
             }
         }

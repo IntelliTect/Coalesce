@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         {
             if (method.Parameters.Any(p => !p.IsDI && p.PureType.HasClassViewModel))
             {
-                b.Line($"var _mappingContext = new {nameof(MappingContext)}(User)");
+                b.Line($"var _mappingContext = new {nameof(MappingContext)}(User);");
             }
 
             // Don't try to store the result in the variable if the method returns void.

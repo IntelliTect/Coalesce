@@ -723,7 +723,13 @@ export const Person = domain.types.Person = {
         numberTwo: {
           name: "numberTwo",
           displayName: "Number Two",
-          type: "number",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
           role: "value",
         },
       },

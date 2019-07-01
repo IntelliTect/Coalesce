@@ -39,7 +39,7 @@ namespace Coalesce.Web.Api
         public virtual ItemResult<WeatherDataDtoGen> GetWeather([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime)
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User)
+            var _mappingContext = new MappingContext(User);
             var methodResult = Service.GetWeather(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime);
             var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");
@@ -55,7 +55,7 @@ namespace Coalesce.Web.Api
         public virtual async Task<ItemResult<WeatherDataDtoGen>> GetWeatherAsync([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime)
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User)
+            var _mappingContext = new MappingContext(User);
             var methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime);
             var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");

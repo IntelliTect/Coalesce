@@ -310,7 +310,7 @@ namespace Coalesce.Web.Api
         public virtual ListResult<PersonDtoGen> SearchPeople(PersonCriteriaDtoGen criteria, int page)
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User)
+            var _mappingContext = new MappingContext(User);
             var methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), _mappingContext), page);
             var result = new ListResult<PersonDtoGen>(methodResult);
             var mappingContext = new MappingContext(User, "");

@@ -98,8 +98,8 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   /** Adds two numbers. */
   public add = this.$apiClient.$makeCaller(
     "item", 
-    (c, numberOne: number | null, numberTwo: number[] | null) => c.add(numberOne, numberTwo),
-    () => ({numberOne: null as number | null, numberTwo: null as number[] | null, }),
+    (c, numberOne: number | null, numberTwo: number | null) => c.add(numberOne, numberTwo),
+    () => ({numberOne: null as number | null, numberTwo: null as number | null, }),
     (c, args) => c.add(args.numberOne, args.numberTwo))
   
   /** Returns the user name */

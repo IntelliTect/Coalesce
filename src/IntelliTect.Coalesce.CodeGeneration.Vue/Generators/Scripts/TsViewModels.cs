@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
 using System.Threading.Tasks;
@@ -70,7 +71,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 foreach (var prop in model.ClientProperties)
                 {
-                    if (prop.Type.TsTypeKind == TypeDiscriminator.Collection && prop.PureType.TsTypeKind == TypeDiscriminator.Model)
+
+                    // Eventually, this should support any collection of models.
+                    // For now, though, `this.$addChild` only supports collection navigations.
+                    // if (prop.Type.TsTypeKind == TypeDiscriminator.Collection && prop.PureType.TsTypeKind == TypeDiscriminator.Model)
+
+                    if (prop.Role == PropertyRole.CollectionNavigation)
                     {
                         b.Line();
 

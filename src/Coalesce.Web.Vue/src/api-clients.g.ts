@@ -88,7 +88,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public add(numberOne: number | null, numberTwo: number[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+  public add(numberOne: number | null, numberTwo: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
     const $method = this.$metadata.methods.add
     const $params =  {
       numberOne,

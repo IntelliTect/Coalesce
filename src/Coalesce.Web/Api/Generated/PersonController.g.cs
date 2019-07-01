@@ -164,9 +164,9 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("Add")]
         [Authorize]
-        public virtual ItemResult<int> Add(int numberOne, ICollection<int> numberTwo)
+        public virtual ItemResult<int> Add(int numberOne, int numberTwo)
         {
-            var methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo.ToArray());
+            var methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
             var result = new ItemResult<int>(methodResult);
             result.Object = methodResult.Object;
             return result;

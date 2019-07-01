@@ -60,7 +60,7 @@ module ListViewModels {
             public readonly verb = 'POST';
             
             /** Calls server method (Add) with the given arguments */
-            public invoke = (numberOne: number | null, numberTwo: number[] | null, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
+            public invoke = (numberOne: number | null, numberTwo: number | null, callback?: (result: number) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invokeWithData({ numberOne: numberOne, numberTwo: numberTwo }, callback, reload);
             };
             
@@ -68,7 +68,7 @@ module ListViewModels {
             public args = new Add.Args(); 
             public static Args = class Args {
                 public numberOne: KnockoutObservable<number | null> = ko.observable(null);
-                public numberTwo: KnockoutObservableArray<number> = ko.observableArray([]);
+                public numberTwo: KnockoutObservable<number | null> = ko.observable(null);
             };
             
             /** Calls server method (Add) with an instance of Add.Args, or the value of this.args if not specified. */
@@ -82,7 +82,9 @@ module ListViewModels {
                 $promptVal = prompt('Number One');
                 if ($promptVal === null) return;
                 var numberOne: number = parseInt($promptVal);
-                var numberTwo: null = null;
+                $promptVal = prompt('Number Two');
+                if ($promptVal === null) return;
+                var numberTwo: number = parseInt($promptVal);
                 return this.invoke(numberOne, numberTwo, callback, reload);
             };
             

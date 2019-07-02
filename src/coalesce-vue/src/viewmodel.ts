@@ -396,19 +396,19 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     push(...items: T[]): number {
         return Array.prototype.push.apply(this, items.map((val) => {
             if (val == null) {
-                throw `Cannot push null to a collection of ViewModels.`
+                throw Error(`Cannot push null to a collection of ViewModels.`)
             }
 
             if (typeof val !== 'object') {
-                throw `Cannot assign a non-object to ${this.$metadata.name}`;
+                throw Error(`Cannot assign a non-object to ${this.$metadata.name}`);
             }
             else if (!('$metadata' in val)) {
-                throw `Cannot assign a non-model to ${this.$metadata.name} ($metadata prop is missing)`;
+                throw Error(`Cannot assign a non-model to ${this.$metadata.name} ($metadata prop is missing)`);
             }
 
             const incomingTypeMeta = val.$metadata;
             if (incomingTypeMeta.name != this.$metadata.itemType.typeDef.name) {
-                throw `Type mismatch - attempted to assign a ${incomingTypeMeta.name} to ${this.$metadata.name}`;
+                throw Error(`Type mismatch - attempted to assign a ${incomingTypeMeta.name} to ${this.$metadata.name} (expected a ${this.$metadata.itemType.typeDef.name})`);
             }
             
             if (val instanceof ViewModel) {
@@ -416,7 +416,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
             } else {
                 // Incoming is a Model. Make a ViewModel from it.
                 if (ViewModel.typeLookup === null) {
-                    throw "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts.";
+                    throw Error("Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts.");
                 }
                 var vmCtor = ViewModel.typeLookup[incomingTypeMeta.name];
                 val = new vmCtor(val) as unknown as T;

@@ -709,7 +709,7 @@ export abstract class ApiState<TArgs extends any[], TResult, TClient extends Api
 
             this.isLoading = false
 
-            return error
+            throw error
         } finally {
             (this.apiClient as any)._nextCancelToken = null
 

@@ -2,6 +2,7 @@
 
 import { ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
+import { AxiosError } from 'axios';
 
 describe("$makeCaller", () => {
 
@@ -22,6 +23,17 @@ describe("$makeCaller", () => {
     const arg = 42;
     caller(arg);
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
+  })
+
+  test("failed requests re-throw errors", async () => {
+    const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => { 
+      throw {
+          name: 'mock error',
+          message: 'mocked throw'
+        } as AxiosError }
+      )
+
+    await expect(caller(42)).rejects.toBeTruthy();
   })
 
   test("allows return undefined from invoker func", () => {
@@ -135,7 +147,14 @@ describe("$makeCaller", () => {
     calls.push(caller(2))
     calls.push(caller(3))
 
-    await Promise.all(calls)
+    // Wait for all the promises to reject.
+    for (let i = 0; i < calls.length; i++) {
+      try {
+        await calls[i];
+      } catch {
+        // will throw;
+      }
+    }
 
     // Should only be two calls. 
     // The first one should have completed,
@@ -145,9 +164,14 @@ describe("$makeCaller", () => {
     expect(endpointMock.mock.calls[0][0]).toBe(1);
     expect(endpointMock.mock.calls[1][0]).toBe(3);
     
-    expect(calls[0]).resolves.toBeTruthy();
+    expect(calls[0]).rejects.toBe("thrown");
+    
+    // Aborted calls don't throw/reject, since their aborting
+    // is normal, expected behavior.
+    // They resolve to nothing.
     expect(calls[1]).resolves.toBeFalsy();
-    expect(calls[2]).resolves.toBeTruthy();
+
+    expect(calls[2]).rejects.toBe("thrown");
   })
 
 })
@@ -208,8 +232,6 @@ describe("$makeCaller with args object", () => {
 
     expect(caller.wasSuccessful).toBeTruthy();
   })
-
-
   
   test("debounce ignores redundant requests when resolving", async () => {
     const caller = new StudentApiClient()

@@ -464,96 +464,115 @@ export function mapValueToDto(value: any, metadata: Value): any | null {
     return new MapToDtoVisitor().visitValue(value, metadata);
 }
 
-
-
-/** Visitor that maps its input to a string representation of its value, suitable for display. */
-class DisplayVisitor extends Visitor<string | null, string | null, string | null> {
-    public visitObject(value: any, meta: ClassType): string | null {
-        if (value == null) return value;
-
-        if (meta.displayProp) {
-            return this.visitValue(value[meta.displayProp.name], meta.displayProp);
-        } else {
-            // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
-            // With a tweak to also not serialize the $metadata prop.
-            try {
-                return JSON.stringify(value, (k, v) => k === "$metadata" ? undefined : (k ? "" + v : v));
-            } catch {
-                return value.toLocaleString();
-            }
-        }
-    }
-
-    protected visitCollection(value: any[] | null, meta: CollectionValue): string | null {
-        if (value == null) return null;
-        value = parseValue(value, meta);
-
-        // Is this what we want? I think so - its the cleanest option.
-        // Perhaps an prop that controls this would be best.
-        if (value.length == 0) return "";
-
-        // TODO: a prop that controls this number would also be good.
-        if (value.length <= 5) {
-            return (value)
-                .map<string>(childItem => 
-                    this.visitValue(childItem, meta.itemType) 
-                    || '???' // TODO: what should this be for un-displayable members of a collection?
-                )
-                .join(", ")
-        }
-
-        return value.length.toLocaleString() + " items"; // TODO: i18n
-    }
-
-    protected visitEnumValue(value: any, meta: EnumValue): string | null {
-        const parsed = parseValue(value, meta);
-        if (parsed == null) return null;
-
-        const enumData = meta.typeDef.valueLookup[value];
-
-        // If we can't find the enum value exactly,
-        // just show the numeric value.
-        // TODO: support flags enums (see metadata.ts@EnumType)
-        if (!enumData) return parsed.toLocaleString();
-
-        return enumData.displayName;
-    }
-
-    protected visitDateValue(value: any, meta: DateValue): string | null {
-        const parsed = parseValue(value, meta);
-        if (parsed == null) return null;
-        // TODO: Make the date format configurable.
-        return format(parsed, 'M/d/yyyy h:mm:ss aaa');
-    }
-
-    protected visitPrimitiveValue(value: any, meta: PrimitiveValue): string | null {
-        const parsed = parseValue(value, meta);
-        if (parsed == null) return null;
-        if (typeof parsed == "number") {
-            // Don't locale-string numbers - it puts in thousands separators.
-            // This may seem like a neat idea, until you start displaying things 
-            // like PKs, FKs, or numbers like order numbers, invoice numbers.
-            // That is to say, numbers without any useful meaning to their magnitude.
-            return parsed.toString();
-        }
-        return parsed.toLocaleString();
-    }
+export interface DisplayOptions {
+  format?: string;
 }
 
-/** Singleton instance of `GetDisplayVisitor`, since the visitor is stateless. */
+/** Visitor that maps its input to a string representation of its value, suitable for display. */
+class DisplayVisitor extends Visitor<
+  string | null,
+  string | null,
+  string | null
+> {
+  constructor(private options?: DisplayOptions) {
+    super();
+  }
+
+  public visitObject(value: any, meta: ClassType): string | null {
+    if (value == null) return value;
+
+    if (meta.displayProp) {
+      return this.visitValue(value[meta.displayProp.name], meta.displayProp);
+    } else {
+      // https://stackoverflow.com/a/46908358 - stringify only first-level properties.
+      // With a tweak to also not serialize the $metadata prop.
+      try {
+        return JSON.stringify(value, (k, v) =>
+          k === "$metadata" ? undefined : k ? "" + v : v
+        );
+      } catch {
+        return value.toLocaleString();
+      }
+    }
+  }
+
+  protected visitCollection(
+    value: any[] | null,
+    meta: CollectionValue
+  ): string | null {
+    if (value == null) return null;
+    value = parseValue(value, meta);
+
+    // Is this what we want? I think so - its the cleanest option.
+    // Perhaps an prop that controls this would be best.
+    if (value.length == 0) return "";
+
+    // TODO: a prop that controls this number would also be good.
+    if (value.length <= 5) {
+      return value
+        .map<string>(
+          childItem => this.visitValue(childItem, meta.itemType) || "???" // TODO: what should this be for un-displayable members of a collection?
+        )
+        .join(", ");
+    }
+
+    return value.length.toLocaleString() + " items"; // TODO: i18n
+  }
+
+  protected visitEnumValue(value: any, meta: EnumValue): string | null {
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+
+    const enumData = meta.typeDef.valueLookup[value];
+
+    // If we can't find the enum value exactly,
+    // just show the numeric value.
+    // TODO: support flags enums (see metadata.ts@EnumType)
+    if (!enumData) return parsed.toLocaleString();
+
+    return enumData.displayName;
+  }
+
+  protected visitDateValue(value: any, meta: DateValue): string | null {
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+    return format(parsed, this.options && this.options.format || "M/d/yyyy h:mm:ss aaa");
+  }
+
+  protected visitPrimitiveValue(
+    value: any,
+    meta: PrimitiveValue
+  ): string | null {
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+    if (typeof parsed == "number") {
+      // Don't locale-string numbers - it puts in thousands separators.
+      // This may seem like a neat idea, until you start displaying things
+      // like PKs, FKs, or numbers like order numbers, invoice numbers.
+      // That is to say, numbers without any useful meaning to their magnitude.
+      return parsed.toString();
+    }
+    return parsed.toLocaleString();
+  }
+}
+
+/** Singleton instance of `GetDisplayVisitor` to be used when no options are provided. */
 const displayVisitor = new DisplayVisitor();
 
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
  * @param item The model instance to return a string representation of
  */
-export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(item: T): string | null {
-    const modelMeta = item.$metadata
-    if (!modelMeta) {
-        throw `Object has no $metadata property`
-    }
+export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
+  item: T,
+  options?: DisplayOptions
+): string | null {
+  const modelMeta = item.$metadata;
+  if (!modelMeta) {
+    throw `Object has no $metadata property`;
+  }
 
-    return displayVisitor.visitObject(item, modelMeta);
+  return (options ? new DisplayVisitor(options) : displayVisitor).visitObject(item, modelMeta);
 }
 
 /**
@@ -562,11 +581,15 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(it
  * @param item An instance of the model that holds the property to be displayed
  * @param prop The property to be displayed - either the name of a property or a property metadata object.
  */
-export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(item: T, prop: Property | PropNames<TMeta>) {
-    const propMeta = resolvePropMeta(item.$metadata, prop);
+export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
+  item: T,
+  prop: Property | PropNames<TMeta>,
+  options?: DisplayOptions
+) {
+  const propMeta = resolvePropMeta(item.$metadata, prop);
 
-    var value = (item as Indexable<T>)[propMeta.name];
-    return displayVisitor.visitValue(value, propMeta);
+  var value = (item as Indexable<T>)[propMeta.name];
+  return (options ? new DisplayVisitor(options) : displayVisitor).visitValue(value, propMeta);
 }
 
 /**
@@ -575,6 +598,10 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(ite
  * @param value Any value which is valid for the metadata provided.
  * @param prop The metadata which describes the value given.
  */
-export function valueDisplay<T extends Model<TMeta>, TMeta extends ClassType>(value: any, meta: Value) {
-    return displayVisitor.visitValue(value, meta);
+export function valueDisplay(
+  value: any,
+  meta: Value,
+  options?: DisplayOptions
+) {
+  return (options ? new DisplayVisitor(options) : displayVisitor).visitValue(value, meta);
 }

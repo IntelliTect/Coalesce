@@ -109,7 +109,7 @@ describe("autoSave", () => {
   test("$loadFromModel won't trigger autosave on root", async () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
@@ -129,7 +129,7 @@ describe("autoSave", () => {
   test("$loadFromModel won't trigger autosave on ref nav", async () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
@@ -231,7 +231,7 @@ describe("reference navigation getter/setters", () => {
     var student = new StudentViewModel();
     var advisor = new AdvisorViewModel({advisorId: 3});
     student.advisor = advisor;
-    expect(student.advisorId).toBe(advisor.advisorId);
+    expect(student.studentAdvisorId).toBe(advisor.advisorId);
   })
 
   test("setter creates ViewModel when provided a Model", () => {
@@ -251,7 +251,7 @@ describe("$loadFromModel", () => {
   test("preserves & updates existing reference navigations when key is same", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
@@ -270,13 +270,13 @@ describe("$loadFromModel", () => {
   test("overwrites existing reference navigations when key is different", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
 
     var currentAdvisor = student.advisor;
-    studentModel.advisorId = 4;
+    studentModel.studentAdvisorId = 4;
     studentModel.advisor!.name = "Beth";
     studentModel.advisor!.advisorId = 4;
     student.$loadFromModel(studentModel);
@@ -291,7 +291,7 @@ describe("$loadFromModel", () => {
   test("preserves existing reference navigation when incoming ref is null but key is same", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
@@ -307,14 +307,14 @@ describe("$loadFromModel", () => {
   test("clears existing reference navigation when incoming ref is null but key doesn't match", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
 
     // Make the incoming reference null,
     // and make the key not match the current key.
-    studentModel.advisorId = 4;
+    studentModel.studentAdvisorId = 4;
     studentModel.advisor = null;
     student.$loadFromModel(studentModel);
 
@@ -325,25 +325,59 @@ describe("$loadFromModel", () => {
   test("clears existing reference navigation when incoming ref and key are null", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       advisor: { advisorId: 3, name: "Delphine", }
     });
     var student = new StudentViewModel(studentModel);
     expect(student.advisor).not.toBeNull();
 
-    studentModel.advisorId = null;
+    studentModel.studentAdvisorId = null;
     studentModel.advisor = null;
     student.$loadFromModel(studentModel);
 
     // Reference should have been cleared out.
     expect(student.advisor).toBeNull();
-    expect(student.advisorId).toBeNull();
+    expect(student.studentAdvisorId).toBeNull();
+  })
+
+  test("updates foreign keys from navigation props' PKs when navigation prop is iterated second", () => {
+
+    // Precondition: This tests the behavior if the navigation prop is iterated
+    // AFTER the FK prop.
+    // First, remove and re-add the nav prop so it lands at the end.
+    const navProp = metadata.Student.props.advisor;
+    delete metadata.Student.props.advisor;
+    metadata.Student.props.advisor = navProp;
+
+    // Then, assert that the precondition now holds.
+    const values = Object.values(metadata.Student.props);
+    expect(values.indexOf(metadata.Student.props.advisor))
+      .toBeGreaterThan(values.indexOf(metadata.Student.props.studentAdvisorId))
+
+    var studentModel = new Student({
+      studentId: 1,
+      studentAdvisorId: 3,
+      advisor: { advisorId: 3, name: "Delphine", }
+    });
+    var student = new StudentViewModel(studentModel);
+
+    studentModel.studentAdvisorId = 4;
+    studentModel.advisor!.advisorId = 4;
+    studentModel.advisor!.name = "Beth";
+    student.$loadFromModel(studentModel);
+
+    // FK on student should have been updated
+    // with the PK from the advisor object.
+
+    // There was a bug where the PK was being sourced from the wrong object.
+    // This only happened in rare cases where the nav prop was iterated before the FK prop.
+    expect(student.studentAdvisorId).toBe(4);
   })
 
   test("preserves existing collection navigation when incoming is null", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       courses: [
         { courseId: 7, name: "foo" },
       ]
@@ -361,7 +395,7 @@ describe("$loadFromModel", () => {
   test("clears existing collection navigation when incoming is []", () => {
     var studentModel = new Student({
       studentId: 1,
-      advisorId: 3,
+      studentAdvisorId: 3,
       courses: [
         { courseId: 7, name: "foo" },
       ]

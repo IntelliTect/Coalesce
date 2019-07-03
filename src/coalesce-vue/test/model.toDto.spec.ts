@@ -28,14 +28,14 @@ describe.each(<MappingData[]>[
       studentId: 1,
       name: "Steve",
       courses: [{$metadata: $metadata.Course, courseId: 1, name: "CS 101"}],
-      advisorId: null,
+      studentAdvisorId: null,
       advisor: {
         $metadata: $metadata.Advisor,
         advisorId: 1,
         name: "Joe",
       }
     },
-    dto: { name: "Steve", studentId: 1, advisorId: 1, }
+    dto: { name: "Steve", studentId: 1, studentAdvisorId: 1, }
   },
 
   // String
@@ -111,7 +111,7 @@ describe("mapToDto", () => {
       studentId: 1,
       name: "Steve",
       courses: [{$metadata: $metadata.Course, courseId: 1, name: "CS 101"}],
-      advisorId: null,
+      studentAdvisorId: null,
       advisor: {
         $metadata: $metadata.Advisor,
         advisorId: 1,
@@ -122,7 +122,7 @@ describe("mapToDto", () => {
     expect(mapped).toMatchObject({ 
       name: "Steve", 
       studentId: 1, 
-      advisorId: 1, 
+      studentAdvisorId: 1, 
     })
   });
 });

@@ -192,13 +192,15 @@ export const Student = domain.types.Student = {
       type: "model",
       role: "referenceNavigation",
       dontSerialize: true,
-      get foreignKey() { return domain.types.Student.props.advisorId as ForeignKeyProperty },
+      get foreignKey() { return domain.types.Student.props.studentAdvisorId as ForeignKeyProperty },
       get principalKey() { return Advisor.keyProp as PrimaryKeyProperty },
       typeDef: Advisor
     },
-    advisorId: {
-      name: "advisorId",
-      displayName: "AdvisorId",
+    // This is intentionally named weirdly as to not match the name of the PK of Advisor.
+    // This helps eek out bugs where the wrong props names are used for setting/getting props.
+    studentAdvisorId: {
+      name: "studentAdvisorId",
+      displayName: "StudentAdvisorId",
       type: "number",
       role: "foreignKey",
       get navigationProp() { return domain.types.Student.props.advisor as ModelReferenceNavigationProperty },

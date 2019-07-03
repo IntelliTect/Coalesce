@@ -11,7 +11,7 @@ export interface StudentViewModel extends models.Student {
   courses: CourseViewModel[] | null;
   grade: models.Grade | null;
   advisor: AdvisorViewModel | null;
-  advisorId: number | null;
+  studentAdvisorId: number | null;
 }
 export class StudentViewModel extends ViewModel<models.Student, apiClients.StudentApiClient, number> {
   constructor(initialData?: any) {

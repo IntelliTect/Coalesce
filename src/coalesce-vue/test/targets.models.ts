@@ -16,7 +16,7 @@ export interface Student extends Model<typeof metadata.Student> {
   courses: Course[] | null
   grade: Grade | null
   advisor: Advisor | null
-  advisorId: number | null
+  studentAdvisorId: number | null
 }
 export class Student {
   /** Mutates the input object and its descendents into a valid Student implementation. */

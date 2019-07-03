@@ -621,7 +621,7 @@ export function updateViewModelFromModel<TViewModel extends ViewModel<Model<Mode
                     // Set the foreign key using the PK of the incoming object.
                     // This may end up being redundant when our loop reaches the FK
                     // property, but it will help ensure 100% correctness.
-                    target[prop.foreignKey.name] = source[prop.principalKey.name];
+                    target[prop.foreignKey.name] = incomingValue[prop.principalKey.name];
                 } else {
                     // We allow the existing value of the navigation prop to stick around
                     // if the server didn't send it back.

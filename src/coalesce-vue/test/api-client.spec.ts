@@ -1,5 +1,7 @@
 
 
+import Vue from 'vue';
+
 import { ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
 import { AxiosError } from 'axios';
@@ -188,84 +190,115 @@ describe("$makeCaller with args object", () => {
     }})
   })
 
+  describe.each<"item" | "list">(["item", "list"])("for %s transport", (type) => {
 
-  test("uses own args if args not specified", () => {
-    const caller = new StudentApiClient().$makeCaller(
-      "item", 
-      (c, num: number) => endpointMock(num),
-      () => ({num: null as number | null}),
-      (c, args) => endpointMock(args.num),
-    )
 
-    caller.args.num = 42;
-    caller.invokeWithArgs();
-    expect(endpointMock.mock.calls[0][0]).toBe(42);
-  })
-
-  test("uses custom args if specified", () => {
-    const caller = new StudentApiClient().$makeCaller(
-      "item", 
-      (c, num: number) => endpointMock(num),
-      () => ({num: null as number | null}),
-      (c, args) => endpointMock(args.num),
-    )
-
-    caller.args.num = 42;
-    caller.invokeWithArgs({
-      num: 17
-    });
-    expect(endpointMock.mock.calls[0][0]).toBe(17);
-  })
-
-  test("sets state properties appropriately", async () => {
-    const caller = new StudentApiClient().$makeCaller(
-      "item", 
-      (c, num: number) => endpointMock(num),
-      () => ({num: null as number | null}),
-      (c, args) => endpointMock(args.num),
-    )
-
-    caller.args.num = 42;
-    const promise = caller.invokeWithArgs();
-
-    await promise;
-
-    expect(caller.wasSuccessful).toBeTruthy();
-  })
-  
-  test("debounce ignores redundant requests when resolving", async () => {
-    const caller = new StudentApiClient()
-      .$makeCaller(
-        "item", 
+    test("uses own args if args not specified", () => {
+      const caller = new StudentApiClient().$makeCaller(
+        type, 
         (c, num: number) => endpointMock(num),
         () => ({num: null as number | null}),
-        async (c, args) => {
-          await wait(20)
-          return await endpointMock(args.num) 
-        },
+        (c, args) => endpointMock(args.num),
       )
-      .setConcurrency("debounce")
 
-    const calls = []
-    caller.args.num = 1;
-    calls.push(caller.invokeWithArgs())
-    caller.args.num = 2;
-    calls.push(caller.invokeWithArgs())
-    caller.args.num = 3;
-    calls.push(caller.invokeWithArgs())
+      caller.args.num = 42;
+      caller.invokeWithArgs();
+      expect(endpointMock.mock.calls[0][0]).toBe(42);
+    })
 
-    await Promise.all(calls)
+    test("own args are reactive", async () => {
+      const caller = new StudentApiClient().$makeCaller(
+        type, 
+        (c, num: number) => endpointMock(num),
+        () => ({num: null as number | null}),
+        (c, args) => endpointMock(args.num),
+      )
 
-    // Should only be two calls. 
-    // The first one should have completed,
-    // The second should be skipped because it was overwritten by the 3rd,
-    // and the 3rd should complete.
-    expect(endpointMock.mock.calls.length).toBe(2);
-    expect(endpointMock.mock.calls[0][0]).toBe(1);
-    expect(endpointMock.mock.calls[1][0]).toBe(3);
+      const vue = new Vue({
+        data: {
+          caller
+        }
+      });
+
+      let called = false;
+      vue.$watch('caller.args.num', () => {
+        called = true;
+      });
+
+      await vue.$nextTick();
+      expect(called).toBe(false);
+      caller.args.num = 42;
+      expect(called).toBe(false);
+
+      await vue.$nextTick();
+      expect(called).toBe(true);
+    })
+
+    test("uses custom args if specified", () => {
+      const caller = new StudentApiClient().$makeCaller(
+        type, 
+        (c, num: number) => endpointMock(num),
+        () => ({num: null as number | null}),
+        (c, args) => endpointMock(args.num),
+      )
+
+      caller.args.num = 42;
+      caller.invokeWithArgs({
+        num: 17
+      });
+      expect(endpointMock.mock.calls[0][0]).toBe(17);
+    })
+
+    test("sets state properties appropriately", async () => {
+      const caller = new StudentApiClient().$makeCaller(
+        type, 
+        (c, num: number) => endpointMock(num),
+        () => ({num: null as number | null}),
+        (c, args) => endpointMock(args.num),
+      )
+
+      caller.args.num = 42;
+      const promise = caller.invokeWithArgs();
+
+      await promise;
+
+      expect(caller.wasSuccessful).toBeTruthy();
+    })
     
-    expect(calls[0]).resolves.toBeTruthy();
-    expect(calls[1]).resolves.toBeFalsy();
-    expect(calls[2]).resolves.toBeTruthy();
+    test("debounce ignores redundant requests when resolving", async () => {
+      const caller = new StudentApiClient()
+        .$makeCaller(
+          type, 
+          (c, num: number) => endpointMock(num),
+          () => ({num: null as number | null}),
+          async (c, args) => {
+            await wait(20)
+            return await endpointMock(args.num) 
+          },
+        )
+        .setConcurrency("debounce")
+
+      const calls = []
+      caller.args.num = 1;
+      calls.push(caller.invokeWithArgs())
+      caller.args.num = 2;
+      calls.push(caller.invokeWithArgs())
+      caller.args.num = 3;
+      calls.push(caller.invokeWithArgs())
+
+      await Promise.all(calls)
+
+      // Should only be two calls. 
+      // The first one should have completed,
+      // The second should be skipped because it was overwritten by the 3rd,
+      // and the 3rd should complete.
+      expect(endpointMock.mock.calls.length).toBe(2);
+      expect(endpointMock.mock.calls[0][0]).toBe(1);
+      expect(endpointMock.mock.calls[1][0]).toBe(3);
+      
+      expect(calls[0]).resolves.toBeTruthy();
+      expect(calls[1]).resolves.toBeFalsy();
+      expect(calls[2]).resolves.toBeTruthy();
+    })
   })
 })

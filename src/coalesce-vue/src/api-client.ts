@@ -814,6 +814,7 @@ export class ItemApiStateWithArgs<TArgs extends any[], TArgsObj, TResult, TClien
         private argsInvoker: TArgsInvoker<TArgsObj, ItemResultPromise<TResult>, TClient>
     ) {
         super(apiClient, invoker);
+        this._makeReactive();
     }
 }
 
@@ -876,5 +877,6 @@ export class ListApiStateWithArgs<TArgs extends any[], TArgsObj, TResult, TClien
         private argsInvoker: TArgsInvoker<TArgsObj, ListResultPromise<TResult>, TClient>
     ) {
         super(apiClient, invoker);
+        this._makeReactive();
     }
 }

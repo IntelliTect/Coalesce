@@ -315,10 +315,17 @@ export abstract class ListViewModel<
     public get $hasNextPage() { return (this.$params.page || 1) < (this.$load.pageCount || 0) }
 
     /** Decrement the page parameter by 1 if there is a previous page. */
-    public $previousPagePage() { if (this.$hasPreviousPage) this.$params.page = (this.$params.page || 1) - 1; }
+    public $previousPage() { if (this.$hasPreviousPage) this.$params.page = (this.$params.page || 1) - 1; }
     /** Increment the page parameter by 1 if there is a next page. */
     public $nextPage() { if (this.$hasNextPage) this.$params.page = (this.$params.page || 1) + 1; }
 
+    public get $page() { return this.$params.page || 1 }
+    public set $page(val) { this.$params.page = val }
+
+    public get $pageSize() { return this.$params.pageSize || 1 }
+    public set $pageSize(val) { this.$params.pageSize = val }
+
+    public get $pageCount() { return this.$load.pageCount }
 
     /**
      * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.

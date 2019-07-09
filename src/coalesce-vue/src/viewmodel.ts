@@ -178,9 +178,14 @@ export abstract class ViewModel<
      */
     public $startAutoSave(
         vue: Vue, 
-        options: AutoSaveOptions<this>
+        options: AutoSaveOptions<this> = {}
     ) {
-        const { wait = 1000, predicate, deep } = options;
+        const { 
+          wait = 1000, 
+          predicate = undefined, 
+          deep = false 
+        } = options;
+
         this.$stopAutoSave()
 
         if (deep) {

@@ -2,7 +2,7 @@ import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
 import { ObjectValue, Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
-import { format } from "date-fns";
+import { format, subYears } from "date-fns";
 
 const studentProps = $metadata.Student.props;
 
@@ -67,6 +67,7 @@ interface DisplayData {
     meta: Value;
     model?: any;
     display: string | null;
+    options?: model.DisplayOptions;
     error?: string;
 }
 
@@ -76,7 +77,7 @@ function undisplayable(meta: Value, ...values: any[]) {
   });
 }
 
-describe.each([
+describe.each(<DisplayData[]>[
   { meta: studentProps.studentId, model: null, display: null },
   { meta: studentProps.studentId, model: undefined, display: null },
   { meta: studentProps.studentId, model: 1, display: "1" },
@@ -93,6 +94,9 @@ describe.each([
   { meta: studentProps.birthDate, model: null, display: null },
   { meta: studentProps.birthDate, model: undefined, display: null },
   { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1/2/1990 3:04:05 AM" },
+  { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1990", options: {format: 'yyyy'} },
+  { meta: studentProps.birthDate, model: subYears(new Date(), 2), display: "about 2 years ago", options: {format: {distance: true}} },
+  { meta: studentProps.birthDate, model: subYears(new Date(), 2), display: "about 2 years", options: {format: {distance: true, addSuffix: false}} },
   { meta: studentProps.birthDate, 
     model: "1990-01-02T03:04:05.000-08:00", 
     // We define the expected using date-fns's format to make this test timezone-independent.
@@ -147,7 +151,7 @@ describe.each([
   { meta: studentProps.advisor, model: { advisorId: 1, name: "Steve" }, display: "Steve" },
 ])("valueDisplay", (x) => {
 
-  const { meta, model: modelValue, display, error } = x as typeof x & {error?: string};
+  const { meta, model: modelValue, display, error, options } = x as typeof x & {error?: string};
 
   describe(meta.type, () => {
 
@@ -156,7 +160,7 @@ describe.each([
       : `returns ${shortStringify(display)}`;
 
     test(`for ${shortStringify(modelValue)}, ${expectedOutcomeDesc}`, () => {
-      const doMap = () => model.valueDisplay(modelValue, meta);
+      const doMap = () => model.valueDisplay(modelValue, meta, options);
       if (error) {
         expect(doMap).toThrowError(new RegExp(error));
         return;

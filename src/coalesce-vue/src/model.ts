@@ -1,6 +1,6 @@
 
 // This will tree shake correctly as of v2.0.0-alpha.21
-import { toDate, isValid, format } from 'date-fns'
+import { toDate, isValid, format, formatDistanceToNow } from 'date-fns'
 
 import { ClassType, Property, PropNames, resolvePropMeta, Value, EnumValue, PrimitiveValue, DateValue, CollectionValue, DataSourceType, ModelValue, ObjectValue } from "./metadata"
 import { Indexable } from './util'
@@ -465,7 +465,11 @@ export function mapValueToDto(value: any, metadata: Value): any | null {
 }
 
 export interface DisplayOptions {
-  format?: string;
+  format?: string | {
+    distance: true,
+    addSuffix?: boolean,
+    includeSeconds?: boolean 
+  };
 }
 
 /** Visitor that maps its input to a string representation of its value, suitable for display. */
@@ -536,7 +540,19 @@ class DisplayVisitor extends Visitor<
   protected visitDateValue(value: any, meta: DateValue): string | null {
     const parsed = parseValue(value, meta);
     if (parsed == null) return null;
-    return format(parsed, this.options && this.options.format || "M/d/yyyy h:mm:ss aaa");
+    if (typeof this.options == 'object') {
+      if (typeof this.options.format == 'object' && this.options.format.distance) {
+        const { 
+          addSuffix = true, // Default addSuffix to true - most likely, it is desired.
+          includeSeconds = false
+         } = this.options.format;
+
+        return formatDistanceToNow(parsed, { addSuffix, includeSeconds })
+      } else if (typeof this.options.format == 'string') {
+        return format(parsed, this.options.format);
+      }
+    }
+    return format(parsed, "M/d/yyyy h:mm:ss aaa");
   }
 
   protected visitPrimitiveValue(

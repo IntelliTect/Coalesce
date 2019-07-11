@@ -71,7 +71,22 @@ export const Advisor = domain.types.Advisor = {
       displayName: 'Name',
       role: 'value',
       type: "string"
-    }
+    },
+    students: {
+      name: 'students',
+      displayName: 'Students',
+      role: "collectionNavigation",
+      type: "collection",
+      dontSerialize: true,
+      get foreignKey() { return (domain.types.Student as ModelType).props.studentAdvisorId as ForeignKeyProperty },
+      itemType: {
+        name: '$collectionValue',
+        role: 'value',
+        displayName: "",
+        type: "model",
+        get typeDef() { return (domain.types.Student as ModelType) },
+      }
+    },
   }
 };
 

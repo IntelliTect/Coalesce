@@ -37,6 +37,7 @@ defineProps(CourseViewModel, metadata.Course);
 export interface AdvisorViewModel extends models.Advisor {
   advisorId: number | null;
   name: string | null;
+  students: StudentViewModel[]
 }
 export class AdvisorViewModel extends ViewModel<models.Advisor, apiClients.AdvisorApiClient, number> {
   constructor(initialData?: models.Advisor | {}) {

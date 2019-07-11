@@ -223,6 +223,8 @@ describe("collection navigation getter/setters", () => {
 
     expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
     expect(student.courses[0].name).toBe("Seagull");
+    expect((student.courses[0] as any).$parent).toBe(student);
+    expect((student.courses[0] as any).$parentCollection).toBe(student.courses);
   })
 
   test("collection is reactive for push", async () => {
@@ -459,6 +461,26 @@ describe("$loadFromModel", () => {
     expect(student.courses![1].name).toBe("biz");
     expect(student.courses![1].$isDirty).toBe(false);
   })
+
+  test('doesnt stackoverflow on recursive object structures', () => {
+    var studentModel = new Student({
+      studentId: 1,
+      studentAdvisorId: 1,
+      advisor: {name: "Seagull", advisorId: 1},
+    });
+    studentModel.advisor!.students = [studentModel];
+
+    const student = new StudentViewModel(studentModel);
+
+    // First expectation: We made it this far without stackoverflowing.
+
+    // Second, different ways of traversing to the same VM should result in the same reference.
+    expect(student.advisor).toBe(student.advisor!.students[0].advisor);
+
+    // The root VM (`student`) should also be subject to this logic,
+    // so the root should be the same instance seen in the advisor's students array.
+    expect(student).toBe(student.advisor!.students[0]);    
+  });
 })
 
 describe("$delete", () => {

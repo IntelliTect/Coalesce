@@ -279,7 +279,7 @@ export abstract class ViewModel<
         /** Instance of an API client for the model through which direct, stateless API requests may be made. */
         public readonly $apiClient: TApi,
 
-        initialData?: {} | TModel
+        initialData?: {} | TModel | null
     ) {
         if (initialData) {
             if (!('$metadata' in initialData)) {
@@ -406,7 +406,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     private $parent!: ViewModel;
 
     push(...items: T[]): number {
-        return Array.prototype.push.apply(this, items.map((val) => {
+        return Object.getPrototypeOf(this).push.apply(this, items.map((val) => {
             if (val == null) {
                 throw Error(`Cannot push null to a collection of ViewModels.`)
             }

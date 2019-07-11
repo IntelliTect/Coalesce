@@ -224,6 +224,22 @@ describe("collection navigation getter/setters", () => {
     expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
     expect(student.courses[0].name).toBe("Seagull");
   })
+
+  test("collection is reactive for push", async () => {
+    var student = new StudentViewModel();
+    student.courses = [];
+
+    const vue = new Vue({ data: { student } });
+    const watchCallback = jest.fn();
+    vue.$watch('student.courses', watchCallback);
+
+    student.courses.push(new CourseViewModel);
+
+    await vue.$nextTick();
+
+    expect(watchCallback.mock.calls).toHaveLength(1);
+    expect(student.courses).toHaveLength(1);
+  })
 })
 
 describe("reference navigation getter/setters", () => {

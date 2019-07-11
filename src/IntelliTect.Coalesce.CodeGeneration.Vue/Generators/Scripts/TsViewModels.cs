@@ -97,7 +97,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
 
                 b.Line();
-                using (b.Block($"constructor(initialData?: $models.{name} | {{}})"))
+                using (b.Block($"constructor(initialData?: $models.{name} | {{}} | null)"))
                 {
                     b.Line($"super({metadataName}, new $apiClients.{name}ApiClient(), initialData)");
                 }

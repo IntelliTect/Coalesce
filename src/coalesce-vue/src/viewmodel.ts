@@ -185,17 +185,8 @@ export abstract class ViewModel<
       }
     });
 
-  public $loadFromModel(source: TModel) {
-    updateViewModelFromModel(
-      /* 
-                All concrete viewmodels are valid interface implementations of their TModel.
-                However, the base ViewModel class cannot explicitly declare that it implements TModel
-                since TModel has no statically known members in this generic context. 
-                So, we must soothe typescript.
-            */
-      this as any,
-      source
-    );
+  public $loadFromModel(source: {} | TModel) {
+    updateViewModelFromModel(this, source);
     this.$isDirty = false;
   }
 
@@ -321,14 +312,6 @@ export abstract class ViewModel<
     initialData?: {} | TModel | null
   ) {
     if (initialData) {
-      if (!("$metadata" in initialData)) {
-        initialData = mapToModel(initialData, $metadata);
-      } else if (initialData.$metadata != $metadata) {
-        throw `Initial data must have a $metadata value for type ${
-          $metadata.name
-        }.`;
-      }
-
       this.$loadFromModel(initialData as TModel);
       // this.$isDirty will get set by $loadFromModel()
     } else {
@@ -759,7 +742,7 @@ export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
->(target: Indexable<TViewModel>, source: Indexable<ModelOf<TViewModel>>) {
+>(target: Indexable<TViewModel>, source: Indexable<{}>) {
 
   ViewModelFactory.scope(function(factory) {
     // Add the root ViewModel to the factory
@@ -773,10 +756,20 @@ export function updateViewModelFromModel<
 
     const metadata = target.$metadata;
 
+    // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
+    if ('$metadata' in source && source.$metadata != metadata) {
+      throw Error(`Attempted to load a ${target.name} ViewModel with a ${source.$metadata.name} object.`)
+    }
+
     for (const prop of Object.values(metadata.props)) {
       const propName = prop.name;
-      const incomingValue = source[propName];
       const currentValue = target[propName];
+      let incomingValue = source[propName];
+
+      // Sanitize incomingValue to not be undefined (to not break Vue's reactivity),
+      // since `source` isn't guaranteed to be a model and thus isn't guaranteed that
+      // all properties are defined.
+      if (incomingValue === undefined) incomingValue = null;
 
       switch (prop.role) {
         case "referenceNavigation":

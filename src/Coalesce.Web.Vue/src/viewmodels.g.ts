@@ -87,7 +87,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
     (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
   
-  constructor(initialData?: $models.Person | {}) {
+  constructor(initialData?: $models.Person | {} | null) {
     super($metadata.Person, new $apiClients.PersonApiClient(), initialData)
   }
 }
@@ -177,7 +177,11 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return this.$addChild('caseProducts')
   }
   
-  constructor(initialData?: $models.Case | {}) {
+  get products(): ReadonlyArray<ProductViewModel> {
+    return (this.caseProducts || []).map($ => $.product!).filter($ => $)
+  }
+  
+  constructor(initialData?: $models.Case | {} | null) {
     super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
   }
 }
@@ -235,7 +239,7 @@ export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.Com
     return this.$addChild('employees')
   }
   
-  constructor(initialData?: $models.Company | {}) {
+  constructor(initialData?: $models.Company | {} | null) {
     super($metadata.Company, new $apiClients.CompanyApiClient(), initialData)
   }
 }
@@ -263,7 +267,7 @@ export interface ProductViewModel extends $models.Product {
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
   
-  constructor(initialData?: $models.Product | {}) {
+  constructor(initialData?: $models.Product | {} | null) {
     super($metadata.Product, new $apiClients.ProductApiClient(), initialData)
   }
 }
@@ -286,7 +290,7 @@ export interface CaseProductViewModel extends $models.CaseProduct {
 }
 export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
   
-  constructor(initialData?: $models.CaseProduct | {}) {
+  constructor(initialData?: $models.CaseProduct | {} | null) {
     super($metadata.CaseProduct, new $apiClients.CaseProductApiClient(), initialData)
   }
 }
@@ -313,7 +317,7 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
     () => ({input: null as string | null, }),
     (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
   
-  constructor(initialData?: $models.CaseDto | {}) {
+  constructor(initialData?: $models.CaseDto | {} | null) {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)
   }
 }

@@ -88,6 +88,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         {
                             b.Line($"return this.$addChild('{prop.JsVariable}')");
                         }
+
+                        if (prop.IsManytoManyCollection)
+                        {
+                            b.Line();
+                            var manyToManyType = new VueType(prop.ManyToManyCollectionProperty.Type).TsType(viewModel: true);
+                            using (b.Block($"get {prop.ManyToManyCollectionName.ToCamelCase()}(): ReadonlyArray<{manyToManyType}>"))
+                            {
+                                b.Line($"return (this.{prop.JsVariable} || []).map($ => $.{prop.ManyToManyCollectionProperty.JsVariable}!).filter($ => $)");
+                            }
+                        }
                     }
                 }
 

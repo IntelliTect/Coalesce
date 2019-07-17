@@ -485,8 +485,7 @@ describe("ViewModel", () => {
   })
 
   describe("$delete", () => {
-    test("removes deleted item from parent collection", async () => {
-
+    test("removes deleted item from parent collection if item has PK", async () => {
       var student = new StudentViewModel(new Student({
         studentId: 1,
         courses: [ { courseId: 7, name: "foo" }, ]
@@ -501,6 +500,23 @@ describe("ViewModel", () => {
 
       expect(deleteMock.mock.calls.length).toBe(1);
       expect(student.courses!.length).toBe(0);
+    })
+    
+    test("removes deleted item from parent collection if item has no PK", async () => {
+      var student = new StudentViewModel(new Student({
+        studentId: 1,
+        courses: [ { name: "foo" }, ]
+      }));
+
+      const course = student.courses![0];
+
+      const deleteMock = course.$apiClient.delete = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{ data: { wasSuccessful: true } });
+
+      await course.$delete();
+
+      expect(deleteMock.mock.calls).toHaveLength(0);
+      expect(student.courses).toHaveLength(0);
     })
   })
 

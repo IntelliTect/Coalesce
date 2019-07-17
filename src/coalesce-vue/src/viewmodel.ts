@@ -197,7 +197,9 @@ export abstract class ViewModel<
     .$makeCaller("item", c => { 
       if (this.$primaryKey) {
         return c.delete(this.$primaryKey, this.$params);
-      } 
+      } else if (this.$parentCollection) {
+        this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
+      }
     })
     .onFulfilled(() => {
       if (this.$parentCollection) {

@@ -9,7 +9,8 @@ import {
   Method,
   ClassType,
   CollectionValue,
-  ModelCollectionNavigationProperty
+  ModelCollectionNavigationProperty,
+  ModelCollectionValue
 } from "./metadata";
 import {
   ModelApiClient,
@@ -41,7 +42,7 @@ import * as axios from "axios";
 
 /*
 DESIGN NOTES
-    - ViewModel deliberately does not have TModel as a type parameter.
+    - ViewModel deliberately does not have TMeta as a type parameter.
         The type of the metadata is always accessed off of TModel as TModel["$metadata"].
         This makes the intellisense in IDEs quite nice. If TMeta is a type param,
         we end up with the type of implemented classes taking several pages of the intellisense tooltip.
@@ -129,7 +130,6 @@ export abstract class ViewModel<
     .onFulfilled(() => {
       if (this.$load.result) {
         this.$loadFromModel(this.$load.result);
-        this.$isDirty = false;
       }
     });
 
@@ -194,7 +194,11 @@ export abstract class ViewModel<
    * A function for invoking the `/delete` endpoint, and a set of properties about the state of the last call.
    */
   public $delete = this.$apiClient
-    .$makeCaller("item", c => c.delete(this.$primaryKey, this.$params))
+    .$makeCaller("item", c => { 
+      if (this.$primaryKey) {
+        return c.delete(this.$primaryKey, this.$params);
+      } 
+    })
     .onFulfilled(() => {
       if (this.$parentCollection) {
         this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
@@ -320,10 +324,11 @@ export abstract class ViewModel<
   }
 }
 
-// Model<TModel["$metadata"]>
+
 export abstract class ListViewModel<
   TModel extends Model<ModelType> = Model<ModelType>,
-  TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>
+  TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
+  TItem extends ViewModel = ViewModel<TModel, TApi>
 > {
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
@@ -334,8 +339,14 @@ export abstract class ListViewModel<
   /**
    * The current set of items that have been loaded into this ListViewModel.
    */
-  public get $items() {
-    return this.$load.result;
+  private _items = new ViewModelCollection(this.$metadata, this);
+  public get $items(): TItem[] {
+    return this._items as unknown as TItem[];
+  }
+  public set $items(val: TItem[]) {
+    const vmc = new ViewModelCollection(this.$metadata, this);
+    if (val) vmc.push(...val);
+    this._items = vmc;
   }
 
   /** True if the page set in $params.page is greater than 1 */
@@ -377,7 +388,15 @@ export abstract class ListViewModel<
   /**
    * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
    */
-  public $load = this.$apiClient.$makeCaller("list", c => c.list(this.$params));
+  public $load = this.$apiClient
+    .$makeCaller("list", c => c.list(this.$params))
+    .onFulfilled(() => {
+      if (this.$load.result) {
+        this.$items = rebuildModelCollectionForViewModelCollection(
+          this.$metadata, this.$items, this.$load.result
+        );
+      }
+    })
   // TODO: merge in the result, don't replace the existing one
   // .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
 
@@ -397,11 +416,8 @@ export abstract class ListViewModel<
    * @param wait Time in milliseconds to debounce loads for
    * @param predicate A function that will be called before loading that can return false to prevent a load.
    */
-  public $startAutoLoad(
-    vue: Vue,
-    wait: number = 1000,
-    predicate?: (viewModel: this) => boolean
-  ) {
+  public $startAutoLoad(vue: Vue, options: AutoSaveOptions<this> = {}) {
+    const { wait = 1000, predicate = undefined } = options;
     this.$stopAutoLoad();
 
     const enqueueLoad = debounce(() => {
@@ -448,12 +464,16 @@ export abstract class ListViewModel<
   ) {}
 }
 
-/** Class that provides a factory for creating new ViewModels from some initial data.
+/** Factory for creating new ViewModels from some initial data.
  *
  * For all ViewModels created recursively as a result of creating the root ViewModel,
  * the same ViewModel instance will be returned whenever the exact same `initialData` object is encountered.
  */
 class ViewModelFactory {
+  private static current: ViewModelFactory | null = null;
+
+  map = new Map<any, ViewModel>();
+
   /** Ask the factory for a ViewModel for the given type and initial data. 
    * The instance may be a brand new one, or may be already existing
    * if the same initialData has already been seen.
@@ -498,18 +518,31 @@ class ViewModelFactory {
     });
   }
 
-  private static current: ViewModelFactory | null = null;
-
-  map = new Map<any, ViewModel>();
-
   private constructor() {}
 }
 
+/** Gets a human-friendly description for ViewModelCollection error messages. */
+function viewModelCollectionName($metadata: ModelCollectionValue | ModelType) {
+  const collectedTypeMeta = $metadata.type == "model" 
+    ? $metadata 
+    : $metadata.itemType.typeDef;
+
+  const str = `a collection of ${collectedTypeMeta.name}`;
+
+  return $metadata.type == "model" 
+    ? str 
+    : `${$metadata.name} (${str})`;
+}
+
 export class ViewModelCollection<T extends ViewModel> extends Array<T> {
-  private $metadata!: ModelCollectionNavigationProperty;
-  private $parent!: ViewModel;
+  private $metadata!: ModelCollectionValue | ModelType;
+  private $parent!: any;
 
   push(...items: T[]): number {
+    const collectedTypeMeta = this.$metadata.type == "model" 
+      ? this.$metadata 
+      : this.$metadata.itemType.typeDef;
+
     return Object.getPrototypeOf(this).push.apply(
       this,
       items.map(val => {
@@ -518,23 +551,21 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
         }
 
         if (typeof val !== "object") {
-          throw Error(`Cannot assign a non-object to ${this.$metadata.name}`);
+          throw Error(`Cannot push a non-object to ${viewModelCollectionName(this.$metadata)}`);
         } else if (!("$metadata" in val)) {
           throw Error(
-            `Cannot assign a non-model to ${
-              this.$metadata.name
-            } ($metadata prop is missing)`
+            `Cannot push a non-model ($metadata prop is missing) to ${
+              viewModelCollectionName(this.$metadata)
+            }`
           );
         }
 
         const incomingTypeMeta = val.$metadata;
-        if (incomingTypeMeta.name != this.$metadata.itemType.typeDef.name) {
+        if (incomingTypeMeta.name != collectedTypeMeta.name) {
           throw Error(
             `Type mismatch - attempted to assign a ${
               incomingTypeMeta.name
-            } to ${this.$metadata.name} (expected a ${
-              this.$metadata.itemType.typeDef.name
-            })`
+            } to ${viewModelCollectionName(this.$metadata)}`
           );
         }
 
@@ -566,8 +597,8 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   }
 
   constructor(
-    $metadata: ModelCollectionNavigationProperty,
-    $parent: ViewModel
+    $metadata: ModelCollectionValue | ModelType,
+    $parent: any
   ) {
     super();
     Object.defineProperties(this, {
@@ -594,28 +625,17 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
       }
     });
   }
-
-  // static create<T extends ViewModel>(
-  //     $metadata: ModelCollectionNavigationProperty,
-  //     $parent: ViewModel
-  // ): ViewModelCollection<T> {
-  //     // https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
-  //     // TL;DR - inheriting from Array doesn't work exactly as you'd expect.
-  //     const ret = Object.create(ViewModelCollection.prototype);
-
-  //     Object.defineProperties(ret, {
-  //         // These properties need to be non-enumerable to avoid them from being looped over
-  //         // during iteration of the array if `for ... in ` is used.
-  //         // We also don't want Vue to bother making them reactive, since they are immutable anyway.
-  //         $metadata: { value: $metadata, enumerable: false, writable: false, configurable: false, },
-  //         $parent: { value: $parent, enumerable: false, writable: false, configurable: false, },
-  //     })
-
-  //     return ret;
-  // }
 }
 
-type AutoSaveOptions<TThis> = {
+
+interface AutoLoadOptions<TThis> {
+  /** Time, in milliseconds, to debounce loads for.  */
+  wait?: number;
+  /** A function that will be called before autoloading that can return false to prevent a load. */
+  predicate?: (viewModel: TThis) => boolean;
+};
+
+interface AutoSaveOptions<TThis> {
   /** Time, in milliseconds, to debounce saves for.  */
   wait?: number;
   /** A function that will be called before autosaving that can return false to prevent a save. */
@@ -735,6 +755,54 @@ export interface ListViewModelTypeLookup {
 
 export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
 
+/** Do not export. 
+ * 
+ * Doesn't strictly return collections of ViewModels,
+ * but instead expects the receiving setter of the array to be a ViewModelCollection.
+ */
+function rebuildModelCollectionForViewModelCollection (
+  type: ModelType, currentValue: any[], incomingValue: any[]
+) {
+  
+  if (!Array.isArray(currentValue) || currentValue.length == 0) {
+    // No existing items. Just take the incoming collection wholesale.
+    // Let the setters on the ViewModel handle the conversion of the contents
+    // into ViewModel instances.
+    return incomingValue;
+  } else {
+    // There are existing items. We need to surgically merge in the incoming items,
+    // keeping existing ViewModels the same based on keys.
+    const pkName = type.keyProp.name;
+    const existingItemsMap = new Map();
+    for (let i = 0; i < currentValue.length; i++) {
+      const item = currentValue[i];
+      const itemPk = item[pkName];
+      existingItemsMap.set(itemPk, item);
+    }
+
+    // Build a new array, using existing items when they exist,
+    // otherwise using the incoming items.
+    const newArray = [];
+    for (let i = 0; i < incomingValue.length; i++) {
+      const incomingItem = incomingValue[i];
+      const incomingItemPk = incomingItem[pkName];
+      const existingItem = existingItemsMap.get(incomingItemPk);
+      if (existingItem) {
+        existingItem.$loadFromModel(incomingItem);
+        newArray.push(existingItem);
+      } else {
+        // No need to $loadFromModel on the incoming item.
+        // The setter for the collection will transform its contents into ViewModels for us.
+        newArray.push(incomingItem);
+      }
+    }
+
+    // Let the receiving ViewModelCollection handle the conversion of the contents
+    // into ViewModel instances.
+    return newArray;
+  }
+}
+
 /**
  * Updates the target model with values from the source model.
  * @param target The viewmodel to be updated.
@@ -847,43 +915,9 @@ export function updateViewModelFromModel<
             }`;
           }
 
-          if (!Array.isArray(currentValue) || currentValue.length == 0) {
-            // No existing items. Just take the incoming collection wholesale.
-            // Let the setters on the ViewModel handle the conversion of the contents
-            // into ViewModel instances.
-            target[propName] = incomingValue;
-          } else {
-            // There are existing items. We need to surgically merge in the incoming items,
-            // keeping existing ViewModels the same based on keys.
-            const pkName = prop.itemType.typeDef.keyProp.name;
-            const existingItemsMap = new Map();
-            for (let i = 0; i < currentValue.length; i++) {
-              const item = currentValue[i];
-              const itemPk = item[pkName];
-              existingItemsMap.set(itemPk, item);
-            }
-
-            // Build a new array, using existing items when they exist,
-            // otherwise using the incoming items.
-            const newArray = [];
-            for (let i = 0; i < incomingValue.length; i++) {
-              const incomingItem = incomingValue[i];
-              const incomingItemPk = incomingItem[pkName];
-              const existingItem = existingItemsMap.get(incomingItemPk);
-              if (existingItem) {
-                existingItem.$loadFromModel(incomingItem);
-                newArray.push(existingItem);
-              } else {
-                // No need to $loadFromModel on the incoming item.
-                // The setter for the collection will transform its contents into ViewModels for us.
-                newArray.push(incomingItem);
-              }
-            }
-
-            // Let the setters on the ViewModel handle the conversion of the contents
-            // into ViewModel instances.
-            target[propName] = newArray;
-          }
+          target[propName] = rebuildModelCollectionForViewModelCollection(
+            prop.itemType.typeDef, currentValue, incomingValue
+          );
           break;
 
         default:

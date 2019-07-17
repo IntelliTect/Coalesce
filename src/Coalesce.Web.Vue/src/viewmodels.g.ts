@@ -93,7 +93,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
 }
 defineProps(PersonViewModel, $metadata.Person)
 
-export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient> {
+export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
   
   /** Adds two numbers. */
   public add = this.$apiClient.$makeCaller(
@@ -187,7 +187,7 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
 }
 defineProps(CaseViewModel, $metadata.Case)
 
-export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient> {
+export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
   
   public getSomeCases = this.$apiClient.$makeCaller(
     "item", 
@@ -245,7 +245,7 @@ export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.Com
 }
 defineProps(CompanyViewModel, $metadata.Company)
 
-export class CompanyListViewModel extends ListViewModel<$models.Company, $apiClients.CompanyApiClient> {
+export class CompanyListViewModel extends ListViewModel<$models.Company, $apiClients.CompanyApiClient, CompanyViewModel> {
   
   public getCertainItems = this.$apiClient.$makeCaller(
     "item", 
@@ -273,7 +273,7 @@ export class ProductViewModel extends ViewModel<$models.Product, $apiClients.Pro
 }
 defineProps(ProductViewModel, $metadata.Product)
 
-export class ProductListViewModel extends ListViewModel<$models.Product, $apiClients.ProductApiClient> {
+export class ProductListViewModel extends ListViewModel<$models.Product, $apiClients.ProductApiClient, ProductViewModel> {
   
   constructor() {
     super($metadata.Product, new $apiClients.ProductApiClient())
@@ -296,7 +296,7 @@ export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiCli
 }
 defineProps(CaseProductViewModel, $metadata.CaseProduct)
 
-export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient> {
+export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, CaseProductViewModel> {
   
   constructor() {
     super($metadata.CaseProduct, new $apiClients.CaseProductApiClient())
@@ -323,7 +323,7 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
 }
 defineProps(CaseDtoViewModel, $metadata.CaseDto)
 
-export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient> {
+export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, CaseDtoViewModel> {
   
   constructor() {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient())

@@ -1,10 +1,10 @@
 
 
 import Vue from 'vue';
-import { AxiosClient, AxiosItemResult } from '../src/api-client'
+import { AxiosClient, AxiosItemResult, AxiosListResult } from '../src/api-client'
 import { mapToDto, mapToModel } from '../src/model';
 
-import { StudentViewModel, CourseViewModel, AdvisorViewModel } from './targets.viewmodels';
+import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewModel } from './targets.viewmodels';
 import { Student, Advisor, Course } from './targets.models';
 import * as metadata from './targets.metadata';
 import { ViewModelCollection } from '../src/viewmodel';
@@ -167,7 +167,6 @@ describe("ViewModel", () => {
       expect(saveMock.mock.calls.length).toBe(0);
     })
   })
-
 
   describe("$addChild", () => {
 
@@ -522,7 +521,82 @@ describe("ViewModel", () => {
   })
 })
 
+describe("ListViewModel", () => {
+  describe("$load & $items", () => {
+
+    let list: StudentListViewModel;
+
+    beforeEach(() => {
+      list = new StudentListViewModel;
+      list.$apiClient.list = jest
+        .fn()
+        .mockImplementation((dto: any) => {
+          return Promise.resolve(<AxiosListResult<Student>> {
+            data: {
+              wasSuccessful: true,
+              list: [
+                new Student({studentId:1, name: 'Steve'}),
+                new Student({studentId:2, name: 'Bob'}),
+              ],
+              page: 1,
+              pageSize: 10,
+              pageCount: 1,
+              totalCount: 2,
+            }
+          })
+        });
+    })
+
+    test("props on objects in $items are reactive", async () => {
+      await list.$load();
+
+      const vue = new Vue({data: { list }});
+      const watchCallback = jest.fn();
+      vue.$watch('list.$items', watchCallback, {deep: true});
+
+      await vue.$nextTick();
+      list.$items[1].name = "Heidi";
+      await vue.$nextTick();
+
+      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(list.$items[1].name).toBe("Heidi");
+    })
+
+    test("$items is reactive", async () => {
+      await list.$load();
+
+      const vue = new Vue({data: { list }});
+      const watchCallback = jest.fn();
+      vue.$watch('list.$items', watchCallback);
+
+      list.$items.push(new StudentViewModel({studentId: 3, name: "Heidi"}))
+
+      await vue.$nextTick();
+
+      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(list.$items).toHaveLength(3);
+    })
+
+    test("preserves same objects for same-keyed results", async () => {
+      await list.$load();
+
+      const item0 = list.$items[0]
+      , item1 = list.$items[1];
+
+      // Modify a prop in the initial set of items to
+      // make sure that the objects are reloaded with the incoming data.
+      item0.name = "Heidi";
+
+      await list.$load();
+
+      expect(item0).toBe(list.$items[0]);
+      expect(item1).toBe(list.$items[1]);
+      expect(item0.name).toBe('Steve');
+    })
+
+  })
+})
 
 /* TODO: 
-  Handle $parent in $loadFromModel (like knockout does).
+  Handle $parent in $loadFromModel (like knockout does). Maybe?
   Deep autosave (propagate a parent's autosave state to its related models) */

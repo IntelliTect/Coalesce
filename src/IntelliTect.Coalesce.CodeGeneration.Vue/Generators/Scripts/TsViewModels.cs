@@ -123,7 +123,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             string viewModelName = $"{model.ListViewModelClassName}ViewModel";
             string metadataName = $"$metadata.{name}";
 
-            using (b.Block($"export class {viewModelName} extends ListViewModel<$models.{name}, $apiClients.{name}ApiClient>"))
+            using (b.Block($"export class {viewModelName} extends ListViewModel<$models.{name}, $apiClients.{name}ApiClient, {name}ViewModel>"))
             {
 
                 foreach (var method in model.ClientMethods.Where(m => m.IsStatic))

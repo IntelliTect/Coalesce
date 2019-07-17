@@ -274,6 +274,12 @@ export interface CollectionValue extends ValueMeta<"collection"> {
     readonly itemType: NonCollectionValue // & CollectionItemValue
 }
 
+/** Represents the usage of a collection of model values */
+export interface ModelCollectionValue extends ValueMeta<"collection"> {
+    role: "value" | "collectionNavigation"
+    readonly itemType: ModelValue
+}
+
 /** Union of all representations of the usage of types with explicit type metadata */
 export type CustomTypeValue = 
   EnumValue

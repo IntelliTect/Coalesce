@@ -566,11 +566,20 @@ describe("ListViewModel", () => {
     test("props on objects in $items are reactive", async () => {
       await list.$load();
 
-      const vue = new Vue({data: { list }});
+      const vue = new Vue({
+        data: { list },
+        computed: {
+          name() {
+            return this.list.$items[1].name
+          }
+        }
+      });
       const watchCallback = jest.fn();
-      vue.$watch('list.$items', watchCallback, {deep: true});
+      vue.$watch('name', watchCallback);
 
       await vue.$nextTick();
+      expect(watchCallback.mock.calls).toHaveLength(0);
+
       list.$items[1].name = "Heidi";
       await vue.$nextTick();
 
@@ -591,6 +600,83 @@ describe("ListViewModel", () => {
 
       expect(watchCallback.mock.calls).toHaveLength(1);
       expect(list.$items).toHaveLength(3);
+    })
+
+    test("newly loaded additional items are reactive", async () => {
+      // This test is a doozy. 
+      // There was an issue where if a list endpoint returns a new,
+      // never-before-seen item at the start of its result set
+      // when the result set also includes items that it HAS already seen,
+      // the new items wouldn't be reactive.
+
+      // This was happening because of the following process:
+      // 1) `new ViewModelCollection` is created. It is non-reactive (as expected).
+      // 2) a new ViewModel for the never-before-seen item is created
+      //    because no item with a matching PK is found in the previous list contents.
+      // 3) The first previously-seen item is handled by the .map() call.
+      //    As part of being mapped, its $parentCollection property is set to the VMC.
+      //    Because the VMC is not yet reactive, but the previously-seen item IS reactive
+      //    (since the same ViewModel instance will be reused),
+      //    upon setting the VMC to the $parentCollection property, Vue will make the VMC reactive.
+      // 4) After mapping all items to either new or updated ViewModels,
+      //    the results of the map() call are passed to the `.push()` method of the VMC.
+      //    However, this is the `.push()` method from BEFORE the VMC was made reactive.
+      //    
+      // The issue is that we were grabbing the `.push()` method before doing the mapping,
+      // not accounting for the fact that the .push() on the VMC could change as part of the mapping.
+
+      const list = new StudentListViewModel;
+      let includeAdditionalItemAtStart = false;
+      list.$apiClient.list = jest
+        .fn()
+        .mockImplementation((dto: any) => {
+          return Promise.resolve(<AxiosListResult<Student>> {
+            data: {
+              wasSuccessful: true,
+              list: [
+                ...(includeAdditionalItemAtStart 
+                  ? [new Student({studentId:3, name: 'John'})]
+                  : []),
+                new Student({studentId:1, name: 'Steve'}),
+                new Student({studentId:2, name: 'Bob'}),
+              ],
+              page: 1,
+              pageSize: 10,
+              pageCount: 1,
+              totalCount: 2,
+            }
+          })
+        });
+      
+      const vue = new Vue({
+        data: { list },
+        computed: {
+          name() {
+            return this.list.$items[0].name
+          }
+        }
+      });
+      const watchCallback = jest.fn();
+        
+      // First load. Will only include the first 2 items.
+      await list.$load();
+      expect(list.$items).toHaveLength(2);
+
+      // Next load should include a new item at the start of the list.
+      includeAdditionalItemAtStart = true;
+      await list.$load();
+      expect(list.$items).toHaveLength(3);
+
+      // Start watching the name of the first item in the list.
+      await vue.$nextTick();
+      vue.$watch('name', watchCallback);
+
+      // Change the name of the first item in the list.
+      list.$items[0].name = "Heidi"
+      await vue.$nextTick();
+
+      // The watcher should have been triggered.
+      expect(watchCallback.mock.calls).toHaveLength(1);
     })
 
     test("preserves same objects for same-keyed results", async () => {

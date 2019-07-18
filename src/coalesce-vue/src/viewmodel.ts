@@ -545,9 +545,9 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
       ? this.$metadata 
       : this.$metadata.itemType.typeDef;
 
-    return Object.getPrototypeOf(this).push.apply(
-      this,
-      items.map(val => {
+    // MUST evaluate the .map() before grabbing the .push()
+    // method from the proto. See test "newly loaded additional items are reactive".
+    const viewModelItems = items.map(val => {
         if (val == null) {
           throw Error(`Cannot push null to a collection of ViewModels.`);
         }
@@ -594,7 +594,11 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
         (val as any).$parentCollection = this;
 
         return val;
-      })
+      });
+
+    return Object.getPrototypeOf(this).push.apply(
+      this,
+      viewModelItems
     );
   }
 

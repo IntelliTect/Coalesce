@@ -155,15 +155,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
 
             b.DocComment(method.Comment, true);
-            b.Line($"public {method.JsVariable} = this.$apiClient.$makeCaller(");
-            // "item" or "list"
-            b.Indented($"\"{transportTypeSlug}\", ");
-            // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
-            b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
-            // The factory function to return a new args object. Args object lives on `caller.args`
-            b.Indented($"() => {argsConstructor},");
-            // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
-            b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => "args." + p.Name))}))");
+            using (b.Block($"public get {method.JsVariable}()"))
+            {
+                b.Line($"const {method.JsVariable} = this.$apiClient.$makeCaller(");
+                // "item" or "list"
+                b.Indented($"\"{transportTypeSlug}\", ");
+                // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
+                b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
+                // The factory function to return a new args object. Args object lives on `caller.args`
+                b.Indented($"() => {argsConstructor},");
+                // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
+                b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => "args." + p.Name))}))");
+
+                // Lazy getter technique - don't create the caller until/unless it is needed,
+                // since creation of api callers is a little expensive.
+                b.Line();
+                b.Line($"Object.defineProperty(this, '{method.JsVariable}', {{value: {method.JsVariable}}});");
+                b.Line($"return {method.JsVariable}");
+            }
         }
     }
 }

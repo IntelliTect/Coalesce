@@ -56,36 +56,61 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   }
   
   /** Sets the FirstName to the given text. */
-  public rename = this.$apiClient.$makeCaller(
-    "item", 
-    (c, name: string | null) => c.rename(this.$primaryKey, name),
-    () => ({name: null as string | null, }),
-    (c, args) => c.rename(this.$primaryKey, args.name))
+  public get rename() {
+    const rename = this.$apiClient.$makeCaller(
+      "item", 
+      (c, name: string | null) => c.rename(this.$primaryKey, name),
+      () => ({name: null as string | null, }),
+      (c, args) => c.rename(this.$primaryKey, args.name))
+    
+    Object.defineProperty(this, 'rename', {value: rename});
+    return rename
+  }
   
   /** Removes spaces from the name and puts in dashes */
-  public changeSpacesToDashesInName = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.changeSpacesToDashesInName(this.$primaryKey, ),
-    () => ({}),
-    (c, args) => c.changeSpacesToDashesInName(this.$primaryKey, ))
+  public get changeSpacesToDashesInName() {
+    const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.changeSpacesToDashesInName(this.$primaryKey, ),
+      () => ({}),
+      (c, args) => c.changeSpacesToDashesInName(this.$primaryKey, ))
+    
+    Object.defineProperty(this, 'changeSpacesToDashesInName', {value: changeSpacesToDashesInName});
+    return changeSpacesToDashesInName
+  }
   
-  public fullNameAndAge = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.fullNameAndAge(this.$primaryKey, ),
-    () => ({}),
-    (c, args) => c.fullNameAndAge(this.$primaryKey, ))
+  public get fullNameAndAge() {
+    const fullNameAndAge = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.fullNameAndAge(this.$primaryKey, ),
+      () => ({}),
+      (c, args) => c.fullNameAndAge(this.$primaryKey, ))
+    
+    Object.defineProperty(this, 'fullNameAndAge', {value: fullNameAndAge});
+    return fullNameAndAge
+  }
   
-  public obfuscateEmail = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.obfuscateEmail(this.$primaryKey, ),
-    () => ({}),
-    (c, args) => c.obfuscateEmail(this.$primaryKey, ))
+  public get obfuscateEmail() {
+    const obfuscateEmail = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.obfuscateEmail(this.$primaryKey, ),
+      () => ({}),
+      (c, args) => c.obfuscateEmail(this.$primaryKey, ))
+    
+    Object.defineProperty(this, 'obfuscateEmail', {value: obfuscateEmail});
+    return obfuscateEmail
+  }
   
-  public changeFirstName = this.$apiClient.$makeCaller(
-    "item", 
-    (c, firstName: string | null, title: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
-    () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
-    (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
+  public get changeFirstName() {
+    const changeFirstName = this.$apiClient.$makeCaller(
+      "item", 
+      (c, firstName: string | null, title: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
+      () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
+      (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
+    
+    Object.defineProperty(this, 'changeFirstName', {value: changeFirstName});
+    return changeFirstName
+  }
   
   constructor(initialData?: $models.Person | {} | null) {
     super($metadata.Person, new $apiClients.PersonApiClient(), initialData)
@@ -96,51 +121,86 @@ defineProps(PersonViewModel, $metadata.Person)
 export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
   
   /** Adds two numbers. */
-  public add = this.$apiClient.$makeCaller(
-    "item", 
-    (c, numberOne: number | null, numberTwo: number | null) => c.add(numberOne, numberTwo),
-    () => ({numberOne: null as number | null, numberTwo: null as number | null, }),
-    (c, args) => c.add(args.numberOne, args.numberTwo))
+  public get add() {
+    const add = this.$apiClient.$makeCaller(
+      "item", 
+      (c, numberOne: number | null, numberTwo: number | null) => c.add(numberOne, numberTwo),
+      () => ({numberOne: null as number | null, numberTwo: null as number | null, }),
+      (c, args) => c.add(args.numberOne, args.numberTwo))
+    
+    Object.defineProperty(this, 'add', {value: add});
+    return add
+  }
   
   /** Returns the user name */
-  public getUser = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.getUser(),
-    () => ({}),
-    (c, args) => c.getUser())
+  public get getUser() {
+    const getUser = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getUser(),
+      () => ({}),
+      (c, args) => c.getUser())
+    
+    Object.defineProperty(this, 'getUser', {value: getUser});
+    return getUser
+  }
   
-  public personCount = this.$apiClient.$makeCaller(
-    "item", 
-    (c, lastNameStartsWith: string | null) => c.personCount(lastNameStartsWith),
-    () => ({lastNameStartsWith: null as string | null, }),
-    (c, args) => c.personCount(args.lastNameStartsWith))
+  public get personCount() {
+    const personCount = this.$apiClient.$makeCaller(
+      "item", 
+      (c, lastNameStartsWith: string | null) => c.personCount(lastNameStartsWith),
+      () => ({lastNameStartsWith: null as string | null, }),
+      (c, args) => c.personCount(args.lastNameStartsWith))
+    
+    Object.defineProperty(this, 'personCount', {value: personCount});
+    return personCount
+  }
   
-  public removePersonById = this.$apiClient.$makeCaller(
-    "item", 
-    (c, id: number | null) => c.removePersonById(id),
-    () => ({id: null as number | null, }),
-    (c, args) => c.removePersonById(args.id))
+  public get removePersonById() {
+    const removePersonById = this.$apiClient.$makeCaller(
+      "item", 
+      (c, id: number | null) => c.removePersonById(id),
+      () => ({id: null as number | null, }),
+      (c, args) => c.removePersonById(args.id))
+    
+    Object.defineProperty(this, 'removePersonById', {value: removePersonById});
+    return removePersonById
+  }
   
   /** Returns the user name */
-  public getUserPublic = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.getUserPublic(),
-    () => ({}),
-    (c, args) => c.getUserPublic())
+  public get getUserPublic() {
+    const getUserPublic = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getUserPublic(),
+      () => ({}),
+      (c, args) => c.getUserPublic())
+    
+    Object.defineProperty(this, 'getUserPublic', {value: getUserPublic});
+    return getUserPublic
+  }
   
   /** Gets all the first names starting with the characters. */
-  public namesStartingWith = this.$apiClient.$makeCaller(
-    "item", 
-    (c, characters: string | null) => c.namesStartingWith(characters),
-    () => ({characters: null as string | null, }),
-    (c, args) => c.namesStartingWith(args.characters))
+  public get namesStartingWith() {
+    const namesStartingWith = this.$apiClient.$makeCaller(
+      "item", 
+      (c, characters: string | null) => c.namesStartingWith(characters),
+      () => ({characters: null as string | null, }),
+      (c, args) => c.namesStartingWith(args.characters))
+    
+    Object.defineProperty(this, 'namesStartingWith', {value: namesStartingWith});
+    return namesStartingWith
+  }
   
   /** Gets people matching the criteria, paginated by parameter 'page'. */
-  public searchPeople = this.$apiClient.$makeCaller(
-    "list", 
-    (c, criteria: $models.PersonCriteria | null, page: number | null) => c.searchPeople(criteria, page),
-    () => ({criteria: null as $models.PersonCriteria | null, page: null as number | null, }),
-    (c, args) => c.searchPeople(args.criteria, args.page))
+  public get searchPeople() {
+    const searchPeople = this.$apiClient.$makeCaller(
+      "list", 
+      (c, criteria: $models.PersonCriteria | null, page: number | null) => c.searchPeople(criteria, page),
+      () => ({criteria: null as $models.PersonCriteria | null, page: null as number | null, }),
+      (c, args) => c.searchPeople(args.criteria, args.page))
+    
+    Object.defineProperty(this, 'searchPeople', {value: searchPeople});
+    return searchPeople
+  }
   
   constructor() {
     super($metadata.Person, new $apiClients.PersonApiClient())
@@ -189,30 +249,50 @@ defineProps(CaseViewModel, $metadata.Case)
 
 export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
   
-  public getSomeCases = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.getSomeCases(),
-    () => ({}),
-    (c, args) => c.getSomeCases())
+  public get getSomeCases() {
+    const getSomeCases = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getSomeCases(),
+      () => ({}),
+      (c, args) => c.getSomeCases())
+    
+    Object.defineProperty(this, 'getSomeCases', {value: getSomeCases});
+    return getSomeCases
+  }
   
-  public getAllOpenCasesCount = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.getAllOpenCasesCount(),
-    () => ({}),
-    (c, args) => c.getAllOpenCasesCount())
+  public get getAllOpenCasesCount() {
+    const getAllOpenCasesCount = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getAllOpenCasesCount(),
+      () => ({}),
+      (c, args) => c.getAllOpenCasesCount())
+    
+    Object.defineProperty(this, 'getAllOpenCasesCount', {value: getAllOpenCasesCount});
+    return getAllOpenCasesCount
+  }
   
-  public randomizeDatesAndStatus = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.randomizeDatesAndStatus(),
-    () => ({}),
-    (c, args) => c.randomizeDatesAndStatus())
+  public get randomizeDatesAndStatus() {
+    const randomizeDatesAndStatus = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.randomizeDatesAndStatus(),
+      () => ({}),
+      (c, args) => c.randomizeDatesAndStatus())
+    
+    Object.defineProperty(this, 'randomizeDatesAndStatus', {value: randomizeDatesAndStatus});
+    return randomizeDatesAndStatus
+  }
   
   /** Returns a list of summary information about Cases */
-  public getCaseSummary = this.$apiClient.$makeCaller(
-    "item", 
-    (c) => c.getCaseSummary(),
-    () => ({}),
-    (c, args) => c.getCaseSummary())
+  public get getCaseSummary() {
+    const getCaseSummary = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getCaseSummary(),
+      () => ({}),
+      (c, args) => c.getCaseSummary())
+    
+    Object.defineProperty(this, 'getCaseSummary', {value: getCaseSummary});
+    return getCaseSummary
+  }
   
   constructor() {
     super($metadata.Case, new $apiClients.CaseApiClient())
@@ -247,11 +327,16 @@ defineProps(CompanyViewModel, $metadata.Company)
 
 export class CompanyListViewModel extends ListViewModel<$models.Company, $apiClients.CompanyApiClient, CompanyViewModel> {
   
-  public getCertainItems = this.$apiClient.$makeCaller(
-    "item", 
-    (c, isDeleted: boolean | null) => c.getCertainItems(isDeleted),
-    () => ({isDeleted: null as boolean | null, }),
-    (c, args) => c.getCertainItems(args.isDeleted))
+  public get getCertainItems() {
+    const getCertainItems = this.$apiClient.$makeCaller(
+      "item", 
+      (c, isDeleted: boolean | null) => c.getCertainItems(isDeleted),
+      () => ({isDeleted: null as boolean | null, }),
+      (c, args) => c.getCertainItems(args.isDeleted))
+    
+    Object.defineProperty(this, 'getCertainItems', {value: getCertainItems});
+    return getCertainItems
+  }
   
   constructor() {
     super($metadata.Company, new $apiClients.CompanyApiClient())
@@ -311,11 +396,16 @@ export interface CaseDtoViewModel extends $models.CaseDto {
 }
 export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, number> implements $models.CaseDto  {
   
-  public asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
-    "item", 
-    (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
-    () => ({input: null as string | null, }),
-    (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
+  public get asyncMethodOnIClassDto() {
+    const asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
+      "item", 
+      (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
+      () => ({input: null as string | null, }),
+      (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'asyncMethodOnIClassDto', {value: asyncMethodOnIClassDto});
+    return asyncMethodOnIClassDto
+  }
   
   constructor(initialData?: $models.CaseDto | {} | null) {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)

@@ -1,7 +1,7 @@
 
 
 import Vue from 'vue';
-import { AxiosClient, AxiosItemResult, AxiosListResult } from '../src/api-client'
+import { AxiosClient, AxiosItemResult, AxiosListResult, ItemApiState } from '../src/api-client'
 import { mapToDto, mapToModel } from '../src/model';
 
 import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewModel } from './targets.viewmodels';
@@ -17,6 +17,47 @@ async function waitFor(ms: number) {
 }
 
 describe("ViewModel", () => {
+
+  describe.each(
+    ['$load', '$save', '$delete',] as const
+  )("%s", (callerName) => {
+    test("caller is lazily created", async () => {
+      // This test ensures that vue doesn't create them for us
+      // as a consequence of it trying to enumerate properties
+      // on our objects in order to add reactivity.
+
+      const vue = new Vue({
+        data: {
+          student: new StudentViewModel
+        }
+      });
+
+      // ViewModel shouldn't have its own property descriptor for callerName.
+      // The descriptor will be on the prototype.
+      expect(Object.getOwnPropertyDescriptor(vue.student, callerName))
+        .toBeUndefined()
+
+      // Access the caller to cause it to be created.
+      vue.student[callerName];
+
+      // Instance should now have its own caller.
+      expect(Object.getOwnPropertyDescriptor(vue.student, callerName))
+        .not.toBeUndefined();
+      expect(vue.student[callerName]).toBeInstanceOf(ItemApiState);
+      
+      // Multiple access should yield the same instance.
+      expect(vue.student[callerName]).toBe(vue.student[callerName]);
+
+      // Instances should be reactive:
+      const callbackFn = jest.fn();
+      vue.$watch(`student.${callerName}.isLoading`, callbackFn);
+      vue.student[callerName].isLoading = true;
+      await vue.$nextTick();
+      // Watcher should have been triggered for isLoading.
+      expect(callbackFn.mock.calls).toHaveLength(1);
+
+    })
+  })
 
   describe("autoSave", () => {
 

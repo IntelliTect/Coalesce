@@ -124,67 +124,82 @@ export abstract class ViewModel<
   /**
    * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
    */
-  public $load = this.$apiClient
-    .$makeCaller("item", (c, id?: TPrimaryKey) =>
-      c.get(id != null ? id : this.$primaryKey, this.$params)
-    )
-    .onFulfilled(() => {
-      if (this.$load.result) {
-        this.$loadFromModel(this.$load.result);
-      }
-    });
+  get $load() {
+    const $load = this.$apiClient
+      .$makeCaller("item", (c, id?: TPrimaryKey) =>
+        c.get(id != null ? id : this.$primaryKey, this.$params)
+      )
+      .onFulfilled(() => {
+        if (this.$load.result) {
+          this.$loadFromModel(this.$load.result);
+        }
+      });
 
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$load", {value: $load});
+
+    return $load;
+  }
   /** Whether or not to reload the ViewModel's `$data` with the response received from the server after a call to .$save(). */
   public $loadResponseFromSaves = true;
 
   /**
    * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
    */
-  public $save = this.$apiClient
-    .$makeCaller("item", c => {
-      // Before we make the save call, set isDirty = false.
-      // This lets us detect changes that happen to the model while our save request is pending.
-      // If the model is dirty when the request completes, we'll not load the response from the server.
-      this.$isDirty = false;
-      return c.save((this as any) as TModel, this.$params);
-    })
-    .onFulfilled(() => {
-      if (!this.$save.result) {
-        // Can't do anything useful if the save returned no data.
-        return;
-      }
+  get $save() {
+    const $save = this.$apiClient
+      .$makeCaller("item", function(this: ViewModel, c) {
+        // Before we make the save call, set isDirty = false.
+        // This lets us detect changes that happen to the model while our save request is pending.
+        // If the model is dirty when the request completes, we'll not load the response from the server.
+        this.$isDirty = false;
+        return c.save((this as any) as TModel, this.$params);
+      })
+      .onFulfilled(function(this: ViewModel) {
+        if (!this.$save.result) {
+          // Can't do anything useful if the save returned no data.
+          return;
+        }
 
-      if (this.$isDirty) {
-        // If our model DID change while the save was in-flight,
-        // update the pristine version of the model with what came back from the save,
-        // and load the primary key, but don't load the data into the `$data` prop.
-        // This helps `$isDirty` to work as expected.
-        //this._pristineDto = mapToDto(this.$save.result);
+        if (this.$isDirty) {
+          // If our model DID change while the save was in-flight,
+          // update the pristine version of the model with what came back from the save,
+          // and load the primary key, but don't load the data into the `$data` prop.
+          // This helps `$isDirty` to work as expected.
+          //this._pristineDto = mapToDto(this.$save.result);
 
-        // The PK *MUST* be loaded so that the PK returned by a creation save call
-        // will be used by subsequent update calls.
-        this.$primaryKey = (this.$save.result as Indexable<TModel>)[
-          this.$metadata.keyProp.name
-        ];
-      } else {
-        // else: model isn't dirty.
-        // Since the data hasn't changed since we sent the save (since $isDirty === false),
-        // se can safely load the save response, since we know we won't be overwriting any local changes.
-        // If the data had changed, loading the response would overwrite user input and/or other changes to the data.
-        if (this.$loadResponseFromSaves) {
-          this.$loadFromModel(this.$save.result);
-        } else {
           // The PK *MUST* be loaded so that the PK returned by a creation save call
           // will be used by subsequent update calls.
           this.$primaryKey = (this.$save.result as Indexable<TModel>)[
             this.$metadata.keyProp.name
           ];
-        }
+        } else {
+          // else: model isn't dirty.
+          // Since the data hasn't changed since we sent the save (since $isDirty === false),
+          // se can safely load the save response, since we know we won't be overwriting any local changes.
+          // If the data had changed, loading the response would overwrite user input and/or other changes to the data.
+          if (this.$loadResponseFromSaves) {
+            this.$loadFromModel(this.$save.result);
+          } else {
+            // The PK *MUST* be loaded so that the PK returned by a creation save call
+            // will be used by subsequent update calls.
+            this.$primaryKey = (this.$save.result as Indexable<TModel>)[
+              this.$metadata.keyProp.name
+            ];
+          }
 
-        // Set the new state of our data as being clean (since we just made a change to it)
-        this.$isDirty = false;
-      }
-    });
+          // Set the new state of our data as being clean (since we just made a change to it)
+          this.$isDirty = false;
+        }
+      });
+
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$save", {value: $save});
+
+    return $save;
+  }
 
   public $loadFromModel(source: {} | TModel) {
     updateViewModelFromModel(this, source);
@@ -194,19 +209,27 @@ export abstract class ViewModel<
   /**
    * A function for invoking the `/delete` endpoint, and a set of properties about the state of the last call.
    */
-  public $delete = this.$apiClient
-    .$makeCaller("item", c => { 
-      if (this.$primaryKey) {
-        return c.delete(this.$primaryKey, this.$params);
-      } else if (this.$parentCollection) {
-        this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
-      }
-    })
-    .onFulfilled(() => {
-      if (this.$parentCollection) {
-        this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
-      }
-    });
+  get $delete() {
+    const $delete = this.$apiClient
+      .$makeCaller("item", function(this: ViewModel, c) { 
+        if (this.$primaryKey) {
+          return c.delete(this.$primaryKey, this.$params);
+        } else if (this.$parentCollection) {
+          this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
+        }
+      })
+      .onFulfilled(function(this: ViewModel) {
+        if (this.$parentCollection) {
+          this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
+        }
+      });
+    
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$delete", {value: $delete});
+
+    return $delete;
+  }
 
   // Internal autosave state
   private _autoSaveState = new AutoCallState();

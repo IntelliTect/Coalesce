@@ -67,7 +67,7 @@ export abstract class ViewModel<
   // Must be initialized so it will be reactive.
   // If this isn't reactive, $isDirty won't be reactive.
   // Technically this will always be initialized by the setting of `$isDirty` in the ctor.
-  private _pristineDto: any = null;
+  //private _pristineDto: any = null;
 
   protected $parent: any = null;
   protected $parentCollection: this[] | null = null;
@@ -93,13 +93,14 @@ export abstract class ViewModel<
    * Returns true if the values of the savable data properties of this ViewModel
    * have changed since the last load, save, or the last time $isDirty was set to false.
    */
-  public get $isDirty() {
-    return JSON.stringify(mapToDto(this)) != JSON.stringify(this._pristineDto);
-  }
-  public set $isDirty(val) {
-    if (val) throw "Can't set $isDirty to true manually";
-    this._pristineDto = mapToDto(this);
-  }
+  public $isDirty = false;
+  // public get $isDirty() {
+  //   return JSON.stringify(mapToDto(this)) != JSON.stringify(this._pristineDto);
+  // }
+  // public set $isDirty(val) {
+  //   if (val) throw "Can't set $isDirty to true manually";
+  //   this._pristineDto = mapToDto(this);
+  // }
 
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
   public $params = new DataSourceParameters();
@@ -158,7 +159,7 @@ export abstract class ViewModel<
         // update the pristine version of the model with what came back from the save,
         // and load the primary key, but don't load the data into the `$data` prop.
         // This helps `$isDirty` to work as expected.
-        this._pristineDto = mapToDto(this.$save.result);
+        //this._pristineDto = mapToDto(this.$save.result);
 
         // The PK *MUST* be loaded so that the PK returned by a creation save call
         // will be used by subsequent update calls.
@@ -742,7 +743,26 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               : function(this: InstanceType<T>, val: any) {
                   // TODO: Implement $emit
                   // this.$emit('valueChanged', prop, value, val);
+
+                  const old = (this as any).$data[propName];
                   (this as any).$data[propName] = val;
+
+                  // First, check strict equality. This will handle the 90% most common case.
+                  if (old !== val) {
+                    // If strict equality fails, try to use valueOf() to compare.
+                    // valueOf() helps with Date instances that represent the same time value.
+                    // If either side is null, it is ok to set $isDirty, since we 
+                    // know that if we got this var, BOTH sides aren't both null.
+                    if (
+                      old == null || val == null || 
+                      // leaving this check out for now. All objects in JS should have a .valueOf().
+                      // if we find things that don't, then that's really interesting.
+                      //typeof old.valueOf != 'function' || typeof val.valueOf != 'function' ||
+                      old.valueOf() !== val.valueOf()
+                    ) {
+                      this.$isDirty = true;
+                    }
+                  }
                 }
         };
         return descriptors;

@@ -121,6 +121,66 @@ export class ListParameters extends FilterParameters {
     }
 }
 
+/**
+ * Maps the given API parameters object into an flat object of key-value pairs
+ * that is suitable for use as a URL querystring.
+ * @param parameters The parameters to map.
+ */
+export function mapParamsToDto(parameters?: ListParameters | FilterParameters | DataSourceParameters) {
+    if (!parameters) return null
+
+    // Assume the widest type, which is ListParameters.
+    var wideParams = parameters as Partial<ListParameters>;
+
+    // The list of 'simple' params where we just pass along the exact value.
+    var simpleParams = [
+        'includes', 'search', 'page', 'pageSize', 'orderBy', 'orderByDescending'
+    ] as const;
+    
+    // Map all the simple params to `paramsObject`
+    var paramsObject = simpleParams.reduce((obj, key) => {
+        if (key in wideParams && wideParams[key] !== undefined){
+           obj[key] = wideParams[key]!;
+        }
+        return obj;
+    }, {} as {[s: string]: string | number});
+
+    // Map the 'filter' object, ensuring all values are strings.
+    const filter = wideParams.filter;
+    if (typeof filter == 'object' && filter) {
+        for (var key in filter) {
+            if (filter[key] !== undefined) {
+                paramsObject["filter." + key] = filter[key];
+            }
+        }
+    }
+
+    if (Array.isArray(wideParams.fields)) {
+        paramsObject.fields = wideParams.fields.join(',')
+    }
+
+    // Map the data source and its params
+    const dataSource = wideParams.dataSource as Indexable<typeof wideParams.dataSource>
+    if (dataSource) {
+        // Add the data source name
+        paramsObject["dataSource"] = dataSource.$metadata.name;
+        var paramsMeta = dataSource.$metadata.params;
+
+        // Add the data source parameters.
+        // Note that we use "dataSource.{paramName}", not a nested object. 
+        // This is what the model binder expects.
+        for (var paramName in paramsMeta) {
+            const paramMeta = paramsMeta[paramName];
+            if (paramName in dataSource) {
+                const paramValue = dataSource[paramName];
+                paramsObject["dataSource." + paramMeta.name] = mapValueToDto(paramValue, paramMeta)
+            }
+        }
+    }
+
+    return paramsObject;
+}
+
 
 
 export type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>
@@ -297,7 +357,7 @@ export class ApiClient<T extends ApiRoutedType> {
     
     /**
      * Invoke the specified method using the provided set of parameters.
-     * @param method The metadata of the API  method to invoke
+     * @param method The metadata of the API method to invoke
      * @param params The parameters to provide to the API method.
      * @param config A full `AxiosRequestConfig` to merge in.
      */
@@ -364,62 +424,9 @@ export class ApiClient<T extends ApiRoutedType> {
             params: { 
                 ...queryParams,
                 ...(config && config.params ? config.params : null), 
-                ...this.$serializeParams(parameters)
+                ...mapParamsToDto(parameters)
             }
         }
-    }
-
-    private $serializeParams(parameters?: ListParameters | FilterParameters | DataSourceParameters) {
-        if (!parameters) return null
-
-        // Assume the widest type, which is ListParameters.
-        var wideParams = parameters as Partial<ListParameters>;
-
-        // The list of 'simple' params where we just pass along the exact value.
-        var simpleParams = [
-            'includes', 'search', 'page', 'pageSize', 'orderBy', 'orderByDescending'
-        ] as Array<keyof typeof wideParams>;
-        
-        // Map all the simple params to `paramsObject`
-        var paramsObject = simpleParams.reduce((obj, key) => {
-            if (key in wideParams) obj[key] = wideParams[key];
-            return obj;
-        }, {} as any);
-
-        // Map the 'filter' object, ensuring all values are strings.
-        const filter = wideParams.filter;
-        if (typeof filter == 'object' && filter) {
-            for (var key in filter) {
-                if (filter[key] !== undefined) {
-                    paramsObject["filter." + key] = filter[key];
-                }
-            }
-        }
-
-        if (Array.isArray(wideParams.fields)) {
-            paramsObject.fields = wideParams.fields.join(',')
-        }
-
-        // Map the data source and its params
-        const dataSource = wideParams.dataSource as Indexable<typeof wideParams.dataSource>
-        if (dataSource) {
-            // Add the data source name
-            paramsObject["dataSource"] = dataSource.$metadata.name;
-            var paramsMeta = dataSource.$metadata.params;
-
-            // Add the data source parameters.
-            // Note that we use "dataSource.{paramName}", not a nested object. 
-            // This is what the model binder expects.
-            for (var paramName in paramsMeta) {
-                const paramMeta = paramsMeta[paramName];
-                if (paramName in dataSource) {
-                    const paramValue = dataSource[paramName];
-                    paramsObject["dataSource." + paramMeta.name] = mapValueToDto(paramValue, paramMeta)
-                }
-            }
-        }
-
-        return paramsObject;
     }
 
     protected $hydrateItemResult<TResult>(value: AxiosItemResult<TResult>, metadata: Value | VoidValue) {

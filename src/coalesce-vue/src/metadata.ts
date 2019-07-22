@@ -382,10 +382,14 @@ export interface ModelCollectionNavigationProperty extends PropertyBase, Collect
         readonly name: string;
         /** The type represented by the other side of the many-to-many relationship. */
         readonly typeDef: ModelType
+        /** The foreign key on the join entity that refers to an entity on the current property's side of the relationship. */
+        readonly nearForeignKey: ForeignKeyProperty
+        /** The navigation on the join entity that refers to an entity on the current property's side of the relationship. */
+        readonly nearNavigationProp: ModelReferenceNavigationProperty
         /** The foreign key on the join entity that refers to an entity on the other side of the relationship. */
-        readonly foreignKey: ForeignKeyProperty
+        readonly farForeignKey: ForeignKeyProperty
         /** The navigation on the join entity that refers to an entity on the other side of the relationship. */
-        readonly navigationProp: ModelReferenceNavigationProperty
+        readonly farNavigationProp: ModelReferenceNavigationProperty
     }
 }
 

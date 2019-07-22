@@ -227,8 +227,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                                 b.StringProp("name", prop.ManyToManyCollectionName.ToCamelCase());
                                 b.Line($"get typeDef() {{ return {GetClassMetadataRef(farNavigation.Object)} }},");
-                                b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{farNavigation.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
-                                b.Line($"get navigationProp() {{ return {GetClassMetadataRef(prop.Object)}.props.{farNavigation.JsVariable} as ModelReferenceNavigationProperty }},");
+                                b.Line($"get farForeignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{farNavigation.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                                b.Line($"get farNavigationProp() {{ return {GetClassMetadataRef(prop.Object)}.props.{farNavigation.JsVariable} as ModelReferenceNavigationProperty }},");
+                                b.Line($"get nearForeignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{nearNavigation.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                                b.Line($"get nearNavigationProp() {{ return {GetClassMetadataRef(prop.Object)}.props.{nearNavigation.JsVariable} as ModelReferenceNavigationProperty }},");
                             }
                         }
 

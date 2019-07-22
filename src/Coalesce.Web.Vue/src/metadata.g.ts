@@ -163,8 +163,10 @@ export const Case = domain.types.Case = {
       manyToMany: {
         name: "products",
         get typeDef() { return (domain.types.Product as ModelType) },
-        get foreignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
-        get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
+        get farForeignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
+        get farNavigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
+        get nearForeignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
+        get nearNavigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
       },
       dontSerialize: true,
     },

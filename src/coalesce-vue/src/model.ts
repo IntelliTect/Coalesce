@@ -208,18 +208,38 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
 
     let target: Indexable<Model<TMeta>>;
     if (this.mode == "convert") {
+      this.objects.set(value, value);
+      
       // If there already is metadata but it doesn't match,
       // this is bad - someone passed mismatched parameters.
-      if ("$metadata" in value && value.$metadata !== meta) {
-        throw `While trying to convert object, found metadata for ${
-          value.$metadata.name
-        } where metadata for ${meta.name} was expected.`;
+      
+      if ("$metadata" in value) {
+        if (value.$metadata !== meta) {
+          throw Error(`While trying to convert object, found metadata for ${
+            value.$metadata.name
+          } where metadata for ${meta.name} was expected.`);
+        } else {
+                
+          // Performance optimization: If the object already looks like a model,
+          // and we're converting, don't descend into its child props,
+          // because they should already be correct.
+          // If they *aren't* correct, something is messed up somewhere else
+          // and is assigining non-models to props that should only be accepting models.
+
+          // If we don't do this optimization, we can end up with horrible call stacks
+          // when creating a new model with initial data that includes references
+          // to existing models that have an extensive amount of interconnected data.
+          return value;
+        }
+      } else {
+        value.$metadata = meta;
+        target = value;
       }
 
-      value.$metadata = meta;
-      target = value;
     } else if (this.mode == "map") {
       target = { $metadata: meta };
+      this.objects.set(value, target);
+
     } else {
       throw `Unhandled mode ${this.mode}`;
     }
@@ -234,7 +254,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
         // Null is a valid type for all model properties (or at least generated models). Undefined is not.
         target[propName] = null;
       } else {
-        target[propName] = this.visitValue(value[propName], props[propName]);
+        target[propName] = this.visitValue(propVal, props[propName]);
       }
     }
 

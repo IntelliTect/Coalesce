@@ -227,7 +227,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Regex.Replace(Name, "[A-Z]", " $0").Trim();
+            Name.ToProperCase();
 
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.

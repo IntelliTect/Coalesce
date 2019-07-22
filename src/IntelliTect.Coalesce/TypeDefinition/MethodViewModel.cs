@@ -176,7 +176,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Regex.Replace(Name, "[A-Z]", " $0").Trim();
+            Name.ToProperCase();
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.

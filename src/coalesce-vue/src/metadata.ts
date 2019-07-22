@@ -380,6 +380,8 @@ export interface ModelCollectionNavigationProperty extends PropertyBase, Collect
     readonly manyToMany?: {
         /** The name of the many-to-many collection. */
         readonly name: string;
+        /** The human-readable name of the many-to-many collection. */
+        displayName: string;
         /** The type represented by the other side of the many-to-many relationship. */
         readonly typeDef: ModelType
         /** The foreign key on the join entity that refers to an entity on the current property's side of the relationship. */

@@ -495,10 +495,10 @@ export abstract class ListViewModel<
  * For all ViewModels created recursively as a result of creating the root ViewModel,
  * the same ViewModel instance will be returned whenever the exact same `initialData` object is encountered.
  */
-class ViewModelFactory {
+export class ViewModelFactory {
   private static current: ViewModelFactory | null = null;
 
-  map = new Map<any, ViewModel>();
+  private map = new Map<any, ViewModel>();
 
   /** Ask the factory for a ViewModel for the given type and initial data. 
    * The instance may be a brand new one, or may be already existing

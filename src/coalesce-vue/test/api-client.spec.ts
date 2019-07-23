@@ -53,8 +53,40 @@ describe("$makeCaller", () => {
     expect(endpointMock.mock.calls.length).toBe(0);
   })
 
+  test("onFulfilled callbacks are awaited when promises returned", async () => {
+    let awaited = false;
+    const model = {
+      caller: new StudentApiClient()
+        .$makeCaller("item", function(this: any, c) { return endpointMock(42) })
+        .onFulfilled(async () => {
+          await wait(50);
+          awaited = true;
+        })
+    }
+
+    await model.caller();
+    expect(awaited).toBeTruthy();
+    expect(model.caller.isLoading).toBeFalsy();
+  })
+
+  test("onRejected callbacks are awaited when promises returned", async () => {
+    let awaited = false;
+    const model = {
+      caller: new StudentApiClient()
+        .$makeCaller("item", function(this: any, c) { throw Error() })
+        .onRejected(async () => {
+          await wait(50);
+          awaited = true;
+        })
+    }
+
+    await expect(model.caller()).rejects.toBeTruthy()
+    expect(awaited).toBeTruthy();
+    expect(model.caller.isLoading).toBeFalsy();
+  })
+
   test("passes this to invoker func", async () => {
-    type Model = { value: number, caller: () => any }
+    type Model = { value: number, caller: () => Promise<any> }
     const fulfilledMock = jest.fn()
     const model = <Model>{
       value: 42,
@@ -63,10 +95,8 @@ describe("$makeCaller", () => {
         .onFulfilled(fulfilledMock)
     }
 
-    model.caller();
+    await model.caller();
     expect(endpointMock.mock.calls[0][0]).toBe(model.value);
-
-    await wait(1); // Wait a tick for the promise to fulfill.
     expect(fulfilledMock.mock.instances[0]).toBe(model);
     expect(fulfilledMock.mock.calls[0][0]).toBe(model.caller);
   })

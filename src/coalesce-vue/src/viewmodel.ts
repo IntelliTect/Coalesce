@@ -342,7 +342,7 @@ export abstract class ViewModel<
     initialData?: {} | TModel | null
   ) {
     if (initialData) {
-      this.$loadFromModel(initialData as TModel);
+      this.$loadFromModel(initialData);
       // this.$isDirty will get set by $loadFromModel()
     } else {
       this.$isDirty = false;
@@ -687,111 +687,130 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
   ctor: T,
   metadata: ModelType
 ) {
+  const props = Object.values(metadata.props);
+  const descriptors = {} as PropertyDescriptorMap;
+  for (let i = 0; i < props.length; i++) {
+    const prop = props[i];
+    const propName = prop.name;
+
+    descriptors[propName] = {
+      enumerable: true,
+      configurable: true,
+      get: function(this: InstanceType<T>) {
+        return (this as any).$data[propName];
+      },
+      set:
+        prop.type == "model"
+          ? function(this: InstanceType<T>, incomingValue: any) {
+              if (incomingValue != null) {
+                if (typeof incomingValue !== "object") {
+                  throw Error(`Cannot assign a non-object to ${metadata.name}.${
+                    propName
+                  }`);
+                } else if (("$metadata" in incomingValue)) {
+                  if (incomingValue.$metadata.name != prop.typeDef.name) {
+                    throw Error(`Type mismatch - attempted to assign a ${
+                      incomingValue.$metadata.name
+                    } to ${metadata.name}.${propName}`);
+                  }
+                }
+
+                if (incomingValue instanceof ViewModel) {
+                  // Already a viewmodel. Do nothing
+                } else {
+                  // Incoming is a Model. Make a ViewModel from it.
+                  // This won't technically be valid according to the types of the properties
+                  // on our generated ViewModels, but we should handle it
+                  // so that input components work really nicely if a component sets the navigation prop.
+                  incomingValue = ViewModelFactory.get(prop.typeDef.name, incomingValue);
+                }
+              }
+
+              (this as any).$data[propName] = incomingValue;
+
+              // Set the foreign key using the PK of the incoming object.
+              // This may end up being redundant if we're in the process
+              // of copying the props of an object that already has the FK,
+              // but it will help ensure 100% correctness.
+              if (prop.role == "referenceNavigation") {
+                // When setting an object, fix up the foreign key using the value pulled from the object
+                // if it has a value.
+                const incomingPk = incomingValue 
+                  ? incomingValue[prop.principalKey.name]
+                  : null;
+                  
+                // Set on `this`, not `$data`, in order to trigger $isDirty in the
+                // setter function for the FK prop.
+                (this as any)[prop.foreignKey.name] = incomingPk;
+              }
+            }
+          : prop.role == "collectionNavigation"
+          ? function(this: InstanceType<T>, incomingValue: any) {
+              // Usability niceness - make an empty array if the incoming is null.
+              // This shouldn't have any adverse effects that I can think of.
+              // This will cause the viewmodel collections to always be initialized with empty arrays
+              if (incomingValue == null) incomingValue = [];
+
+              if (!Array.isArray(incomingValue)) {
+                throw Error(`Cannot assign a non-array to ${metadata.name}.${
+                  propName
+                }`);
+              }
+              const vmc = new ViewModelCollection(prop, this);
+              vmc.push(...incomingValue);
+              (this as any).$data[propName] = vmc;
+            }
+          : function(this: InstanceType<T>, incomingValue: any) {
+              const $data = (this as any).$data;
+
+              // TODO: Implement $emit?
+              // this.$emit('valueChanged', prop, value, val);
+
+              const old = $data[propName];
+              $data[propName] = incomingValue;
+
+              // First, check strict equality. This will handle the 90% most common case.
+              if (old !== incomingValue) {
+                // If strict equality fails, try to use valueOf() to compare.
+                // valueOf() helps with Date instances that represent the same time value.
+                // If either side is null, it is ok to set $isDirty, since we 
+                // know that if we got this var, BOTH sides aren't both null.
+                if (
+                  old == null || incomingValue == null || 
+                  // leaving this check out for now. All objects in JS should have a .valueOf().
+                  // if we find things that don't, then that's really interesting.
+                  //typeof old.valueOf != 'function' || typeof val.valueOf != 'function' ||
+                  old.valueOf() !== incomingValue.valueOf()
+                ) {
+                  this.$isDirty = true;
+
+                  if (prop.role == "foreignKey" && prop.navigationProp) {
+                    /*
+                      If there's a navigation property for this FK,
+                      we need to null it out if the current value of the 
+                      navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
+                    */
+                    const currentObject = $data[prop.navigationProp.name];
+                    if (currentObject != null &&
+                      incomingValue != currentObject[prop.principalKey.name]
+                    ) {
+                      // Set on `$data`, not `this`. 
+                      // We don't want to trigger the "model" setter
+                      // since it basically does nothing when the value is null,
+                      // and it would also attempt to perform fixup of the FK prop,
+                      // but we're already doing just that.
+                      $data[prop.navigationProp.name] = null;
+                    }
+                  }
+                }
+              }
+            }
+    };
+  }
+
   Object.defineProperties(
     ctor.prototype,
-    Object.values(metadata.props).reduce(
-      function(descriptors, prop) {
-        const propName = prop.name;
-        descriptors[propName] = {
-          enumerable: true,
-          configurable: true,
-          get: function(this: InstanceType<T>) {
-            return (this as any).$data[propName];
-          },
-          set:
-            prop.type == "model"
-              ? function(this: InstanceType<T>, val: any) {
-                  if (val != null) {
-                    if (typeof val !== "object") {
-                      throw `Cannot assign a non-object to ${metadata.name}.${
-                        prop.name
-                      }`;
-                    } else if (!("$metadata" in val)) {
-                      throw `Cannot assign a non-model to ${metadata.name}.${
-                        prop.name
-                      } ($metadata prop is missing)`;
-                    }
-
-                    const incomingTypeMeta = (val as Model).$metadata;
-                    if (incomingTypeMeta.name != prop.typeDef.name) {
-                      throw `Type mismatch - attempted to assign a ${
-                        incomingTypeMeta.name
-                      } to ${metadata.name}.${prop.name}`;
-                    }
-
-                    if (val instanceof ViewModel) {
-                      // Already a viewmodel. Do nothing
-                    } else {
-                      // Incoming is a Model. Make a ViewModel from it.
-                      // This won't technically be valid according to the types of the properties
-                      // on our generated ViewModels, but we should handle it
-                      // so that input components work really nicely if a component sets the navigation prop.
-                      if (ViewModel.typeLookup === null) {
-                        throw "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts.";
-                      }
-                      val = ViewModelFactory.get(incomingTypeMeta.name, val);
-                    }
-
-                    if (prop.role == "referenceNavigation") {
-                      // When setting an object, fix up the foreign key using the value pulled from the object
-                      // if it has a value.
-                      const incomingPk = val[prop.principalKey.name];
-                      if (incomingPk) {
-                        (this as Indexable<InstanceType<T>>)[
-                          prop.foreignKey.name
-                        ] = incomingPk;
-                      }
-                    }
-                  }
-
-                  (this as any).$data[propName] = val;
-                }
-              : prop.role == "collectionNavigation"
-              ? function(this: InstanceType<T>, val: any) {
-                  // Usability niceness - make an empty array if the incoming is null.
-                  // This shouldn't have any adverse effects that I can think of.
-                  // This will cause the viewmodel collections to always be initialized with empty arrays
-                  if (val == null) val = [];
-
-                  if (!Array.isArray(val)) {
-                    throw `Cannot assign a non-array to ${metadata.name}.${
-                      prop.name
-                    }`;
-                  }
-                  const vmc = new ViewModelCollection(prop, this);
-                  vmc.push(...val);
-                  val = vmc;
-                  (this as any).$data[propName] = val;
-                }
-              : function(this: InstanceType<T>, val: any) {
-                  // TODO: Implement $emit
-                  // this.$emit('valueChanged', prop, value, val);
-
-                  const old = (this as any).$data[propName];
-                  (this as any).$data[propName] = val;
-
-                  // First, check strict equality. This will handle the 90% most common case.
-                  if (old !== val) {
-                    // If strict equality fails, try to use valueOf() to compare.
-                    // valueOf() helps with Date instances that represent the same time value.
-                    // If either side is null, it is ok to set $isDirty, since we 
-                    // know that if we got this var, BOTH sides aren't both null.
-                    if (
-                      old == null || val == null || 
-                      // leaving this check out for now. All objects in JS should have a .valueOf().
-                      // if we find things that don't, then that's really interesting.
-                      //typeof old.valueOf != 'function' || typeof val.valueOf != 'function' ||
-                      old.valueOf() !== val.valueOf()
-                    ) {
-                      this.$isDirty = true;
-                    }
-                  }
-                }
-        };
-        return descriptors;
-      },
-      {} as PropertyDescriptorMap
-    )
+    descriptors
   );
 }
 
@@ -907,50 +926,18 @@ export function updateViewModelFromModel<
               currentValue.$loadFromModel(incomingValue);
             }
 
-            // Set the foreign key using the PK of the incoming object.
-            // This may end up being redundant when our loop reaches the FK
-            // property, but it will help ensure 100% correctness.
-            target[prop.foreignKey.name] =
-              incomingValue[prop.principalKey.name];
           } else {
             // We allow the existing value of the navigation prop to stick around
             // if the server didn't send it back.
             // The setter handling for the foreign key will handle
             // clearing out the current object if it doesn't match the incoming FK.
-          }
-          break;
-        case "foreignKey":
-          if (prop.navigationProp) {
-            /*
-              If there's a navigation property for this FK,
-              we need to null it out if the following are true:
-                  - The current value of the navigation prop is non-null
-                  - and, the incoming value of the navigation prop IS null
-                  - and, tThe incoming value of the FK does not agree with
-                      the current PK on the current navigation prop.
 
-                  - OR, the incoming FK is null.
-              
-              This allows us to keep the existing navigation object 
-              even if the server didn't respond with one.
-              However, if the FK has changed to a different value that no longer 
-              agrees with the existing navigation object,
-              we should clear it out to prevent an inconsistent data model.
-          */
-            const incomingObject = source[prop.navigationProp.name];
-            const currentObject = target[prop.navigationProp.name];
-            if (
-              // Clear out the existing navigation prop if the incoming FK is null
-              incomingValue == null ||
-              // Clear out the existing navigation prop if the incoming FK disagrees with it.
-              (currentObject != null &&
-                incomingObject == null &&
-                incomingValue != currentObject[prop.principalKey.name])
-            ) {
-              target[prop.navigationProp.name] = null;
-            }
+            // This allows us to keep the existing navigation object 
+            // even if the server didn't respond with one.
+            // However, if the FK has changed to a different value that no longer 
+            // agrees with the existing navigation object,
+            // the FK setter will null the navigation to prevent an inconsistent data model.
           }
-          target[propName] = incomingValue;
           break;
         case "collectionNavigation":
           if (incomingValue == null) {

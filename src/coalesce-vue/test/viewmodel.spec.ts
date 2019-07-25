@@ -286,7 +286,7 @@ describe("ViewModel", () => {
     })
   })
 
-  describe("reference navigation getter/setters", () => {
+  describe("reference navigation & FK getter/setters", () => {
     test("setter copies foreign key", () => {
       var student = new StudentViewModel();
       var advisor = new AdvisorViewModel({advisorId: 3});
@@ -304,6 +304,75 @@ describe("ViewModel", () => {
 
       expect(advisor).not.toBeInstanceOf(AdvisorViewModel);
       expect(student.advisor).toBeInstanceOf(AdvisorViewModel);
+    })
+
+    test("clears FK when reference is nulled", () => {
+      var student = new StudentViewModel({
+        studentAdvisorId: 3,
+        advisor: { advisorId: 3, name: "Delphine", }
+      });
+
+      student.advisor = null;
+      expect(student.studentAdvisorId).toBeNull();
+    })
+
+    test("updates FK when reference is changed", () => {
+      var student = new StudentViewModel({
+        studentAdvisorId: 3,
+        advisor: { advisorId: 3, name: "Delphine", }
+      });
+
+      student.advisor = { advisorId: 4, name: "Beth", } as any;
+      expect(student.studentAdvisorId).toBe(4);
+    })
+
+    test("clears reference when FK is nulled", () => {
+      var student = new StudentViewModel({
+        studentAdvisorId: 3,
+        advisor: { advisorId: 3, name: "Delphine", }
+      });
+
+      student.studentAdvisorId = null;
+      expect(student.advisor).toBeNull();
+    })
+
+    test("maintains reference when FK is nulled if reference has null PK", () => {
+      var student = new StudentViewModel();
+
+      student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
+      student.studentAdvisorId = null;
+      expect(student.advisor!.name).toBe("Beth");
+    })
+
+    test("sets null FK when reference with null PK is set", () => {
+      var student = new StudentViewModel({
+        studentAdvisorId: 3
+      });
+
+      student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
+      expect(student.advisor!.name).toBe("Beth");
+      expect(student.studentAdvisorId).toBeNull();
+    })
+
+    test("clears reference when FK no longer matches", () => {
+      var student = new StudentViewModel({
+        studentAdvisorId: 3,
+        advisor: { advisorId: 3, name: "Delphine", }
+      });
+
+      student.studentAdvisorId = 4;
+      expect(student.advisor).toBeNull();
+    })
+
+    test("maintains reference when FK is set to same value", () => {
+      var student = new StudentViewModel({
+        studentAdvisorId: 3,
+        advisor: { advisorId: 3, name: "Delphine", }
+      });
+
+      const originalAdvisor = student.advisor;
+      student.studentAdvisorId = 3;
+      expect(student.advisor).toBe(originalAdvisor);
     })
   })
 

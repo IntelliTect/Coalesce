@@ -397,14 +397,14 @@ export abstract class ListViewModel<
     return this.$params.page || 1;
   }
   public set $page(val) {
-    this.$params.page = val;
+    this.$params.page = Number(val);
   }
 
   public get $pageSize() {
     return this.$params.pageSize || 1;
   }
   public set $pageSize(val) {
-    this.$params.pageSize = val;
+    this.$params.pageSize = Number(val);
   }
 
   public get $pageCount() {

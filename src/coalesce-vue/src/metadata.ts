@@ -70,7 +70,7 @@ export interface Metadata {
 
     // TODO: i18n? How does it fit into this property? Do we take a dependency on an i18n framework and compute it in a getter?
     /** The human-readable name of the value or type */
-    displayName: string
+    readonly displayName: string
 }
 
 /** Common properties for custom object types. */
@@ -146,7 +146,7 @@ export interface Service extends Metadata, ApiRoutedType {
 /** Represents a value of an enum */
 export interface EnumMember {
     readonly strValue: string
-    displayName: string
+    readonly displayName: string
     readonly value: number
 }
 
@@ -222,7 +222,7 @@ export interface VoidValue extends Metadata {
 
 /** Narrowing intersection interface for the 'return' value on methods.  */
 export interface MethodReturnValue {
-    name: "$return"
+    readonly name: "$return"
 }
 
 /**
@@ -249,34 +249,34 @@ export interface ValueMetaWithTypeDef<TType extends TypeDiscriminator, TTypeDef 
 }
 /** Represents the usage of a primitive value (string, number, or bool) */
 export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> { 
-    role: "value" | "foreignKey" | "primaryKey"
+    readonly role: "value" | "foreignKey" | "primaryKey"
 }
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> { 
-    role: "value"
+    readonly role: "value"
 }
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 
-    role: "value"
+    readonly role: "value"
 }
 /** Represents the usage of an 'external type', i.e. an object that is not part of a relational model */
 export interface ObjectValue extends ValueMetaWithTypeDef<"object", ObjectType> { 
-    role: "value"
+    readonly role: "value"
 }
 /** Represents the usage of an object that is part of a relational model */
 export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> { 
-    role: "value" | "referenceNavigation"
+    readonly role: "value" | "referenceNavigation"
 }
 
 /** Represents the usage of a collection of values */
 export interface CollectionValue extends ValueMeta<"collection"> {
-    role: "value" | "collectionNavigation"
+    readonly role: "value" | "collectionNavigation"
     readonly itemType: NonCollectionValue // & CollectionItemValue
 }
 
 /** Represents the usage of a collection of model values */
 export interface ModelCollectionValue extends ValueMeta<"collection"> {
-    role: "value" | "collectionNavigation"
+    readonly role: "value" | "collectionNavigation"
     readonly itemType: ModelValue
 }
 
@@ -306,7 +306,7 @@ export type Value =
 
 export interface PropertyBase {
     /** True if the property should be skipped when mapping to a DTO. */
-    dontSerialize?: boolean | undefined
+    readonly dontSerialize?: boolean | undefined
 }
 
 /** Represents a primitive property */
@@ -477,4 +477,45 @@ export function resolvePropMeta<TProp extends Property>(metadata: ClassType, pro
         throw `Property ${propMeta.name} does not belong to object of type ${metadata.name}`
     }
     return propMeta
+}
+
+/** Recursively freeze the object, and convert any getter props into props
+ * that hold the current value of the getter.
+ */
+export function solidify<T>(root: T): T {
+  const map = new Map();
+
+  function walk(o: any) {
+    if (o == null) {
+      return o;
+    }
+
+    if (Object.isFrozen(o)) return o;
+    if (map.has(o)) return map.get(o);
+
+    // Store that we've visited the object.
+    // This lets us avoid infinite recursion.
+    // We can't use the frozen status to check for recusion
+    // because we can't freeze the object until we're done changing its props.
+    map.set(o, o);
+
+    for (const prop of Object.getOwnPropertyNames(o)) {
+      const value = o[prop];
+      if (value != null && typeof value === "object") {
+        if (Object.getOwnPropertyDescriptor(o, prop)!.get) {
+          // The prop is defined as a getter; eval it and store the static value.
+          // The whole point of the getters is to make the metadata easier to generate,
+          // since we can reference other types before those types are declared,
+          // but they're not needed at runtime.
+          Object.defineProperty(o, prop, {value: walk(value)})
+        } else {
+          o[prop] = walk(value)
+        }
+      }
+    }
+
+    return Object.freeze(o);
+  }
+
+  return walk(root);
 }

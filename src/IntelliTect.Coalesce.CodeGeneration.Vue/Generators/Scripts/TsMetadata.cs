@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             using (b.Block("import", " from 'coalesce-vue/lib/metadata'"))
             {
-                b.Line("Domain, getEnumMeta, ModelType, ObjectType,");
+                b.Line("Domain, getEnumMeta, solidify, ModelType, ObjectType,");
                 b.Line("PrimitiveProperty, ModelReferenceNavigationProperty, ForeignKeyProperty, PrimaryKeyProperty");
             }
             b.Line();
@@ -79,6 +79,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
             }
             
+            b.Line();
+            b.Line("solidify(domain)");
             b.Line();
             b.Line("export default domain as AppDomain");
 

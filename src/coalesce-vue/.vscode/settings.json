@@ -4,5 +4,12 @@
         "editor.insertSpaces": true,
         "editor.tabSize": 2,
         "editor.autoIndent": false
-    }
+    },
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#a82e1f",
+        "titleBar.inactiveBackground": "#a82e1f99",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#d33a27"
 }

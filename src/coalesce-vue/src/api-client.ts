@@ -148,7 +148,7 @@ export class ListParameters extends FilterParameters {
   constructor() {
     super();
     this.page = 1;
-    this.pageSize = 25;
+    this.pageSize = 10;
     this.orderBy = null;
     this.orderByDescending = null;
     this.fields = null;

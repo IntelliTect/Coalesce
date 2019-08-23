@@ -421,6 +421,9 @@ export interface MethodBase extends Metadata {
     /** The HTTP method to use when calling the method. */
     readonly httpMethod: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
 
+    /** True if the method is static; otherwise undefined/false */
+    readonly isStatic?: boolean,
+
     /** The parameters of the method */
     readonly params: { [paramName in string]: Value } 
 }

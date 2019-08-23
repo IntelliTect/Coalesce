@@ -1,5 +1,5 @@
 import {
-  Domain, getEnumMeta, ModelType, ObjectType,
+  Domain, getEnumMeta, solidify, ModelType, ObjectType,
   PrimitiveProperty, ModelReferenceNavigationProperty, ForeignKeyProperty, PrimaryKeyProperty
 } from 'coalesce-vue/lib/metadata'
 
@@ -199,6 +199,7 @@ export const Case = domain.types.Case = {
       displayName: "Get Some Cases",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
       },
       return: {
@@ -220,6 +221,7 @@ export const Case = domain.types.Case = {
       displayName: "Get All Open Cases Count",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
       },
       return: {
@@ -234,6 +236,7 @@ export const Case = domain.types.Case = {
       displayName: "Randomize Dates And Status",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
       },
       return: {
@@ -248,6 +251,7 @@ export const Case = domain.types.Case = {
       displayName: "Get Case Summary",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
       },
       return: {
@@ -487,6 +491,7 @@ export const Company = domain.types.Company = {
       displayName: "Get Certain Items",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
         isDeleted: {
           name: "isDeleted",
@@ -716,6 +721,7 @@ export const Person = domain.types.Person = {
       displayName: "Add",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
         numberOne: {
           name: "numberOne",
@@ -742,6 +748,7 @@ export const Person = domain.types.Person = {
       displayName: "Get User",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
       },
       return: {
@@ -756,6 +763,7 @@ export const Person = domain.types.Person = {
       displayName: "Person Count",
       transportType: "item",
       httpMethod: "GET",
+      isStatic: true,
       params: {
         lastNameStartsWith: {
           name: "lastNameStartsWith",
@@ -796,6 +804,7 @@ export const Person = domain.types.Person = {
       displayName: "Remove Person By Id",
       transportType: "item",
       httpMethod: "DELETE",
+      isStatic: true,
       params: {
         id: {
           name: "id",
@@ -870,6 +879,7 @@ export const Person = domain.types.Person = {
       displayName: "Get User Public",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
       },
       return: {
@@ -884,6 +894,7 @@ export const Person = domain.types.Person = {
       displayName: "Names Starting With",
       transportType: "item",
       httpMethod: "POST",
+      isStatic: true,
       params: {
         characters: {
           name: "characters",
@@ -910,6 +921,7 @@ export const Person = domain.types.Person = {
       displayName: "Search People",
       transportType: "list",
       httpMethod: "POST",
+      isStatic: true,
       params: {
         criteria: {
           name: "criteria",
@@ -1314,5 +1326,7 @@ interface AppDomain extends Domain {
     WeatherService: typeof WeatherService
   }
 }
+
+solidify(domain)
 
 export default domain as AppDomain

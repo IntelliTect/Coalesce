@@ -1,5 +1,5 @@
 // This will tree shake correctly as of v2.0.0-alpha.21
-import { toDate, isValid, format, formatDistanceToNow } from "date-fns";
+import { toDate, isValid, format, formatDistanceToNow, lightFormat } from "date-fns";
 
 import {
   ClassType,
@@ -157,18 +157,20 @@ export function parseValue(
       return value;
 
     case "date":
-      const date =
-        value instanceof Date
-          ? value
-          : // dateFns `toDate` is way too lenient -
-          // it will parse any number as milliseconds since the epoch,
-          // and parses `true` as the epoch.
-          // So, we restrict parsing to strings only.
-          type === "string"
-          ? new Date(value)
-          : null;
+      let date: Date | undefined = undefined;
+      if (value instanceof Date) {
+        date = value;
+      } else if (type === "string") {
+        // dateFns `toDate` is way too lenient -
+        // it will parse any number as milliseconds since the epoch,
+        // and parses `true` as the epoch.
+        // So, we restrict parsing to strings only.
+        date = new Date(value)
+      }
 
-      if (!isValid(date)) {
+      // isNaN is what date-fn's `isValid` calls internally,
+      // but we can perform better if we just do it directly.
+      if (date === undefined || isNaN(date as any)) {
         throw parseError(value, meta);
       }
 
@@ -636,7 +638,7 @@ class DisplayVisitor extends Visitor<
         return format(parsed, this.options.format);
       }
     }
-    return format(parsed, "M/d/yyyy h:mm:ss aaa");
+    return lightFormat(parsed, "M/d/yyyy h:mm:ss aaa");
   }
 
   protected visitPrimitiveValue(

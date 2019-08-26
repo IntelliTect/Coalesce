@@ -34,6 +34,8 @@ import { Indexable } from "./util";
 import { debounce } from "lodash-es";
 import { Cancelable } from "lodash";
 
+export { DeepPartial } from './util';
+
 // These imports allow TypeScript to correctly name types in the generated declarations.
 // Without them, it will generate some horrible, huge relative paths that won't work on any other machine.
 // For example: import("../../../../Coalesce/src/coalesce-vue/src/api-client").ItemResult<TModel>
@@ -86,7 +88,7 @@ export abstract class ViewModel<
     ] as TPrimaryKey;
   }
   public set $primaryKey(val) {
-    ((this as any) as Indexable<TModel>)[this.$metadata.keyProp.name] = val;
+    (this as any)[this.$metadata.keyProp.name] = val;
   }
 
   /**
@@ -202,7 +204,7 @@ export abstract class ViewModel<
   }
 
   public $loadFromModel(source: {} | TModel) {
-    updateViewModelFromModel(this, source);
+    updateViewModelFromModel(this as any, source);
     this.$isDirty = false;
   }
 
@@ -878,7 +880,7 @@ function rebuildModelCollectionForViewModelCollection (
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
->(target: Indexable<TViewModel>, source: Indexable<{}>) {
+>(target: TViewModel, source: Indexable<{}>) {
 
   ViewModelFactory.scope(function(factory) {
     // Add the root ViewModel to the factory
@@ -894,13 +896,13 @@ export function updateViewModelFromModel<
 
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
     if ('$metadata' in source && source.$metadata != metadata) {
-      throw Error(`Attempted to load a ${target.name} ViewModel with a ${source.$metadata.name} object.`)
+      throw Error(`Attempted to load a ${metadata.name} ViewModel with a ${source.$metadata.name} object.`)
     }
 
     for (const prop of Object.values(metadata.props)) {
-      const propName = prop.name;
-      const currentValue = target[propName];
-      let incomingValue = source[propName];
+      const propName = prop.name as keyof typeof target;
+      const currentValue = target[propName] as any;
+      let incomingValue = (source as any)[propName];
 
       // Sanitize incomingValue to not be undefined (to not break Vue's reactivity),
       // since `source` isn't guaranteed to be a model and thus isn't guaranteed that
@@ -953,7 +955,7 @@ export function updateViewModelFromModel<
 
           target[propName] = rebuildModelCollectionForViewModelCollection(
             prop.itemType.typeDef, currentValue, incomingValue
-          );
+          ) as any;
           break;
 
         default:

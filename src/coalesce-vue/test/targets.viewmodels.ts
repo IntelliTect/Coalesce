@@ -1,7 +1,7 @@
 import * as metadata from "./targets.metadata"
 import * as models from "./targets.models"
 import * as apiClients from "./targets.apiclients"
-import { ViewModel, ListViewModel, defineProps } from '../src/viewmodel'
+import { ViewModel, ListViewModel, DeepPartial, defineProps } from '../src/viewmodel'
 
 export interface StudentViewModel extends models.Student {
   studentId: number | null;
@@ -14,7 +14,7 @@ export interface StudentViewModel extends models.Student {
   studentAdvisorId: number | null;
 }
 export class StudentViewModel extends ViewModel<models.Student, apiClients.StudentApiClient, number> {
-  constructor(initialData?: models.Student | {}) {
+  constructor(initialData?: DeepPartial<models.Student> | null) {
     super(metadata.Student, new apiClients.StudentApiClient(), initialData)
   }
 }
@@ -35,7 +35,7 @@ export interface CourseViewModel extends models.Course {
 }
 export class CourseViewModel extends ViewModel<models.Course, apiClients.CourseApiClient, number> {
 
-  constructor(initialData?: models.Course | {}) {
+  constructor(initialData?: DeepPartial<models.Course> | null) {
     super(metadata.Course, new apiClients.CourseApiClient(), initialData)
   }
 }
@@ -48,7 +48,7 @@ export interface AdvisorViewModel extends models.Advisor {
   students: StudentViewModel[]
 }
 export class AdvisorViewModel extends ViewModel<models.Advisor, apiClients.AdvisorApiClient, number> {
-  constructor(initialData?: models.Advisor | {}) {
+  constructor(initialData?: DeepPartial<models.Advisor> | null) {
     super(metadata.Advisor, new apiClients.AdvisorApiClient(), initialData)
   }
 }

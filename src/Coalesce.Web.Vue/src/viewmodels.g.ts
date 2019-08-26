@@ -1,7 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
 export interface PersonViewModel extends $models.Person {
   
@@ -112,7 +112,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     return changeFirstName
   }
   
-  constructor(initialData?: $models.Person | {} | null) {
+  constructor(initialData?: DeepPartial<$models.Person> | null) {
     super($metadata.Person, new $apiClients.PersonApiClient(), initialData)
   }
 }
@@ -241,7 +241,7 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return (this.caseProducts || []).map($ => $.product!).filter($ => $)
   }
   
-  constructor(initialData?: $models.Case | {} | null) {
+  constructor(initialData?: DeepPartial<$models.Case> | null) {
     super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
   }
 }
@@ -319,7 +319,7 @@ export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.Com
     return this.$addChild('employees')
   }
   
-  constructor(initialData?: $models.Company | {} | null) {
+  constructor(initialData?: DeepPartial<$models.Company> | null) {
     super($metadata.Company, new $apiClients.CompanyApiClient(), initialData)
   }
 }
@@ -352,7 +352,7 @@ export interface ProductViewModel extends $models.Product {
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
   
-  constructor(initialData?: $models.Product | {} | null) {
+  constructor(initialData?: DeepPartial<$models.Product> | null) {
     super($metadata.Product, new $apiClients.ProductApiClient(), initialData)
   }
 }
@@ -375,7 +375,7 @@ export interface CaseProductViewModel extends $models.CaseProduct {
 }
 export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
   
-  constructor(initialData?: $models.CaseProduct | {} | null) {
+  constructor(initialData?: DeepPartial<$models.CaseProduct> | null) {
     super($metadata.CaseProduct, new $apiClients.CaseProductApiClient(), initialData)
   }
 }
@@ -407,7 +407,7 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
     return asyncMethodOnIClassDto
   }
   
-  constructor(initialData?: $models.CaseDto | {} | null) {
+  constructor(initialData?: DeepPartial<$models.CaseDto> | null) {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)
   }
 }

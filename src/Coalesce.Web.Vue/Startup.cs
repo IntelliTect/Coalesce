@@ -46,8 +46,6 @@ namespace Coalesce.Web.Vue
 
             services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);
 
-            RoleMapping.Add("Admin", "S-1-5-4"); // Interactive user.
-            RoleMapping.Add("User", "S-1-1-0"); // Everyone who has logged on
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

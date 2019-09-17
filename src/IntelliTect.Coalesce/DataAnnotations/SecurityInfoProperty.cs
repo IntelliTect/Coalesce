@@ -43,7 +43,6 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 {
                     return EditRoles
                         .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .SelectMany(role => RoleMapping.Map(role))
                         .Distinct()
                         .ToList();
                 }
@@ -60,7 +59,6 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 {
                     return ReadRoles
                         .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .SelectMany(role => RoleMapping.Map(role))
                         .Distinct()
                         .ToList();
                 }

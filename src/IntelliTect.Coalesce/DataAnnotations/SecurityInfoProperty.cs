@@ -23,8 +23,16 @@ namespace IntelliTect.Coalesce.DataAnnotations
             IsRead = !read.NoAccess;
             ReadRoles = read.Roles;
 
-            IsEdit = !edit.NoAccess;
-            EditRoles = edit.Roles;
+            if (read.HasAttribute && !edit.HasAttribute)
+            {
+                IsEdit = false;
+                EditRoles = "";
+            }
+            else
+            {
+                IsEdit = !edit.NoAccess;
+                EditRoles = edit.Roles;
+            }
         }
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;

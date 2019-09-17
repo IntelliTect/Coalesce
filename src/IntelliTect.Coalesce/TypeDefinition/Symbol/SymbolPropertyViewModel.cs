@@ -34,6 +34,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool HasSetter => !Symbol.IsReadOnly;
 
+        public override bool HasPublicSetter => HasSetter && Symbol.SetMethod.DeclaredAccessibility == Accessibility.Public;
+
         public override bool IsStatic => Symbol.IsStatic;
 
         public override bool IsVirtual => Symbol.IsVirtual;

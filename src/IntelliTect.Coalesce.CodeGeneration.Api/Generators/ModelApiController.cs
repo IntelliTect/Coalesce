@@ -265,12 +265,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                             b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
 
-                            if (fileProperty.FileNameProperty?.HasSetter ?? false)
+                            if (fileProperty.FileNameProperty?.HasPublicSetter ?? false)
                             {
                                 b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = file.FileName;");
                             }
 
-                            if (fileProperty.FileHashProperty?.HasSetter ?? false)
+                            if (fileProperty.FileHashProperty?.HasPublicSetter ?? false)
                             {
                                 using (b.Block("using (var sha256Hash = System.Security.Cryptography.SHA256.Create())"))
                                 {
@@ -279,7 +279,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                                 }
                             }
 
-                            if (fileProperty.FileSizeProperty?.HasSetter ?? false)
+                            if (fileProperty.FileSizeProperty?.HasPublicSetter ?? false)
                             {
                                 b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = file.Length;");
                             }
@@ -300,15 +300,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
                         b.Line($"if (!itemResult.WasSuccessful) return NotFound();");
 
-                        if (fileProperty.FileNameProperty?.HasSetter ?? false)
+                        if (fileProperty.FileNameProperty?.HasPublicSetter ?? false)
                         {
                             b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = null;");
                         }
-                        if (fileProperty.FileHashProperty?.HasSetter ?? false)
+                        if (fileProperty.FileHashProperty?.HasPublicSetter ?? false)
                         {
                             b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = null;");
                         }
-                        if (fileProperty.FileSizeProperty?.HasSetter ?? false)
+                        if (fileProperty.FileSizeProperty?.HasPublicSetter ?? false)
                         {
                             b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = 0;");
                         }

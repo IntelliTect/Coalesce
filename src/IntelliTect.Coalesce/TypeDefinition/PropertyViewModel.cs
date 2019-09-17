@@ -33,6 +33,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool HasSetter { get; }
 
+        public abstract bool HasPublicSetter { get; }
+
         public abstract bool IsVirtual { get; }
 
         public abstract bool IsStatic { get; }
@@ -153,7 +155,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <para/>
         /// This includes normal, writable value properties, as well as primary keys.
         /// </summary>
-        public bool IsClientSerializable => (IsClientWritable || IsPrimaryKey) && HasSetter && !IsPOCO && !Type.IsCollection;
+        public bool IsClientSerializable => (IsClientWritable || IsPrimaryKey) && HasPublicSetter && !IsPOCO && !Type.IsCollection;
 
         /// <summary>
         /// True if the value of the property can be modified by the client in a persistable way.
@@ -166,7 +168,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsClientWritable => 
             !IsInternalUse 
-            && HasSetter 
+            && HasPublicSetter
             // Exclude object properties with setters that aren't DB mapped - 
             // these are probably Owned Types, which we don't currently support editing.
             && (!IsPOCO || Object.HasDbSet) 

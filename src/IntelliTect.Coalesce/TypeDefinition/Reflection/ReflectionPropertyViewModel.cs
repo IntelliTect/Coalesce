@@ -27,6 +27,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool HasSetter => Info.CanWrite;
 
+        public override bool HasPublicSetter => HasSetter && Info.SetMethod.IsPublic;
+
         public override PropertyInfo PropertyInfo => Info;
         
         public override bool IsVirtual => Info.GetGetMethod()?.IsVirtual ?? Info.GetSetMethod()?.IsVirtual ?? false;

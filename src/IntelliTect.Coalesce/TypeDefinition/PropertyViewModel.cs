@@ -604,18 +604,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return "Allow";
         }
 
-        public PropertySecurityInfo SecurityInfo
-        {
-            get
-            {
-                var result = new PropertySecurityInfo(
-                    this.GetSecurityPermission<ReadAttribute>(),
-                    this.GetSecurityPermission<EditAttribute>(),
-                    this.GetSecurityPermission<DeleteAttribute>());
-
-                return result;
-            }
-        }
+        public PropertySecurityInfo SecurityInfo => new PropertySecurityInfo(
+            this.GetSecurityPermission<ReadAttribute>(),
+            this.GetSecurityPermission<EditAttribute>(),
+            this.GetSecurityPermission<DeleteAttribute>()
+        );
 
         /// <summary>
         /// Has the NotMapped attribute.

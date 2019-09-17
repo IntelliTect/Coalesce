@@ -103,6 +103,7 @@ namespace Coalesce.Web.Models
             entity.LastBath = LastBath;
             entity.NextUpgrade = NextUpgrade;
             entity.CompanyId = (CompanyId ?? entity.CompanyId);
+            entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings;
         }
     }
 }

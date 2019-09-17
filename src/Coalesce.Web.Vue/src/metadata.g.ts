@@ -665,7 +665,6 @@ export const Person = domain.types.Person = {
         type: "string",
       },
       role: "value",
-      dontSerialize: true,
     },
   },
   methods: {

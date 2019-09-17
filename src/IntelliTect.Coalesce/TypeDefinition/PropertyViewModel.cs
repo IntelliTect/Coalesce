@@ -155,7 +155,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <para/>
         /// This includes normal, writable value properties, as well as primary keys.
         /// </summary>
-        public bool IsClientSerializable => (IsClientWritable || IsPrimaryKey) && HasPublicSetter && !IsPOCO && !Type.IsCollection;
+        public bool IsClientSerializable =>
+            // Include properties that are persistable by the client,
+            // as well as the primary key (which is deliberately not included by IsClientWritable).
+            (IsClientWritable || IsPrimaryKey)
+            // Don't serialize object properties, 
+            // since doing so could recurse infinitely deep.
+            && !IsPOCO
+            // Don't serialize collections of objects for the same reason
+            // (but DO include collections of non-objects)
+            && (!Type.IsCollection || !Type.PureType.IsPOCO);
 
         /// <summary>
         /// True if the value of the property can be modified by the client in a persistable way.
@@ -172,7 +181,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // Exclude object properties with setters that aren't DB mapped - 
             // these are probably Owned Types, which we don't currently support editing.
             && (!IsPOCO || Object.HasDbSet) 
-
+            // The PK is excluded here because clients don't get to choose values for the PK.
+            // All PKs in Coalesce are assumed to be database-generated.
             && !IsPrimaryKey 
             && !HasReadOnlyAttribute
             && !HasReadOnlyApiAttribute 

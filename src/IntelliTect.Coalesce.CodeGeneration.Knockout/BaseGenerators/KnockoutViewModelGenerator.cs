@@ -294,7 +294,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
                 // Objects are skipped in the loop because objects will be examined
                 // at the same time that their corresponding foreign key is examined.
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.IsClientWritable && f.Object == null))
+                // The PrimaryKey is skipped because it is handled first (above).
+                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f =>
+                    f.IsClientSerializable && f.Object == null && f != Model.PrimaryKey
+                ))
                 {
                     if (prop.Type.IsDate)
                     {

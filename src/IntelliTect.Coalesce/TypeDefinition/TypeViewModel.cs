@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if the type is <see cref="IEnumerable"/> and behaves like a collection.
         /// Does not necessarily mean the type is an <see cref="ICollection"/> or <see cref="ICollection{T}"/>.
         /// <para>
-        /// Excludes <code>String</code> and <code>byte[]</code>.
+        /// Excludes <see cref="string"/> and <see cref="T:byte[]"/>
         /// </para>
         /// </summary>
         public bool IsCollection => IsA<IEnumerable>() && !IsString && !IsByteArray;

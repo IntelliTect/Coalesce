@@ -10,7 +10,8 @@ import {
   ClassType,
   CollectionValue,
   ModelCollectionNavigationProperty,
-  ModelCollectionValue
+  ModelCollectionValue,
+  Service
 } from "./metadata";
 import {
   ModelApiClient,
@@ -20,7 +21,8 @@ import {
   ListApiState,
   ItemApiState,
   ItemResultPromise,
-  ListResultPromise
+  ListResultPromise,
+  ServiceApiClient
 } from "./api-client";
 import {
   Model,
@@ -492,6 +494,23 @@ export abstract class ListViewModel<
   ) {}
 }
 
+
+export class ServiceViewModel<
+  TMeta extends Service = Service,
+  TApi extends ServiceApiClient<TMeta> = ServiceApiClient<TMeta>
+> {
+  /** Static lookup of all generated ServiceViewModel types. */
+  public static typeLookup: ServiceViewModelTypeLookup | null = null;
+
+  constructor(
+    /** The metadata representing the type of data that this ViewModel handles. */
+    public readonly $metadata: TMeta,
+
+    /** Instance of an API client for the model through which direct, stateless API requests may be made. */
+    public readonly $apiClient: TApi
+  ) {}
+}
+
 /** Factory for creating new ViewModels from some initial data.
  *
  * For all ViewModels created recursively as a result of creating the root ViewModel,
@@ -821,6 +840,9 @@ export interface ViewModelTypeLookup {
 }
 export interface ListViewModelTypeLookup {
   [name: string]: new () => ListViewModel;
+}
+export interface ServiceViewModelTypeLookup {
+  [name: string]: new () => ServiceViewModel;
 }
 
 export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;

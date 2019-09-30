@@ -21,28 +21,41 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("import * as $metadata from './metadata.g'");
             b.Line("import * as $models from './models.g'");
             b.Line("import * as $apiClients from './api-clients.g'");
-            b.Line("import { ViewModel, ListViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'");
+            b.Line("import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
-            foreach (var model in Model.ApiBackedClasses)
+            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
             {
                 WriteViewModel(b, model);
                 WriteListViewModel(b, model);
                 b.Line();
             }
 
+            foreach (var model in Model.Services.OrderBy(e => e.ClientTypeName))
+            {
+                WriteServiceViewModel(b, model);
+                b.Line();
+            }
+
             using (b.Block("const viewModelTypeLookup = ViewModel.typeLookup ="))
             {
-                foreach (var model in Model.ApiBackedClasses)
+                foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
                 {
                     b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
                 }
             }
             using (b.Block("const listViewModelTypeLookup = ListViewModel.typeLookup ="))
             {
-                foreach (var model in Model.ApiBackedClasses)
+                foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
                 {
                     b.Line($"{model.ViewModelClassName}: {model.ListViewModelClassName}ViewModel,");
+                }
+            }
+            using (b.Block("const serviceViewModelTypeLookup = ServiceViewModel.typeLookup ="))
+            {
+                foreach (var model in Model.Services.OrderBy(e => e.ClientTypeName))
+                {
+                    b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
                 }
             }
 
@@ -140,6 +153,30 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line();
         }
 
+        private static void WriteServiceViewModel(TypeScriptCodeBuilder b, ClassViewModel model)
+        {
+            string name = model.ViewModelClassName;
+
+            string viewModelName = $"{name}ViewModel";
+            string metadataName = $"$metadata.{name}";
+
+            using (b.Block($"export class {viewModelName} extends ServiceViewModel<typeof {metadataName}, $apiClients.{name}ApiClient>"))
+            {
+                foreach (var method in model.ClientMethods)
+                {
+                    WriteMethodCaller(b, method);
+                }
+
+                b.Line();
+                using (b.Block($"constructor()"))
+                {
+                    b.Line($"super({metadataName}, new $apiClients.{name}ApiClient())");
+                }
+            }
+            b.Line();
+        }
+
+
         private static void WriteMethodCaller(TypeScriptCodeBuilder b, MethodViewModel method)
         {
             string signature =
@@ -150,7 +187,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 string.Concat(method.ClientParameters.Select(f => $"{f.Name}: null as {new VueType(f.Type).TsType("$models")} | null, ")) +
                 "})";
 
-            string pkArg = method.IsStatic ? "" : "this.$primaryKey, ";
+            string pkArg = method.IsModelInstanceMethod ? "this.$primaryKey, " : "";
             
             var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
 

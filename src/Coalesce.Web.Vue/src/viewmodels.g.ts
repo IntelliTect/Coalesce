@@ -1,7 +1,198 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+
+export interface CaseViewModel extends $models.Case {
+  
+  /** The Primary key for the Case object */
+  caseKey: number | null;
+  title: string | null;
+  description: string | null;
+  openedAt: Date | null;
+  assignedToId: number | null;
+  assignedTo: PersonViewModel | null;
+  reportedById: number | null;
+  reportedBy: PersonViewModel | null;
+  imageName: string | null;
+  imageSize: number | null;
+  imageHash: string | null;
+  attachmentName: string | null;
+  severity: string | null;
+  status: $models.Statuses | null;
+  caseProducts: CaseProductViewModel[] | null;
+  devTeamAssignedId: number | null;
+  devTeamAssigned: $models.DevTeam | null;
+  duration: any | null;
+}
+export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
+  
+  
+  public addToCaseProducts(): CaseProductViewModel {
+    return this.$addChild('caseProducts')
+  }
+  
+  get products(): ReadonlyArray<ProductViewModel> {
+    return (this.caseProducts || []).map($ => $.product!).filter($ => $)
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Case> | null) {
+    super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
+  }
+}
+defineProps(CaseViewModel, $metadata.Case)
+
+export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
+  
+  public get getSomeCases() {
+    const getSomeCases = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getSomeCases(),
+      () => ({}),
+      (c, args) => c.getSomeCases())
+    
+    Object.defineProperty(this, 'getSomeCases', {value: getSomeCases});
+    return getSomeCases
+  }
+  
+  public get getAllOpenCasesCount() {
+    const getAllOpenCasesCount = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getAllOpenCasesCount(),
+      () => ({}),
+      (c, args) => c.getAllOpenCasesCount())
+    
+    Object.defineProperty(this, 'getAllOpenCasesCount', {value: getAllOpenCasesCount});
+    return getAllOpenCasesCount
+  }
+  
+  public get randomizeDatesAndStatus() {
+    const randomizeDatesAndStatus = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.randomizeDatesAndStatus(),
+      () => ({}),
+      (c, args) => c.randomizeDatesAndStatus())
+    
+    Object.defineProperty(this, 'randomizeDatesAndStatus', {value: randomizeDatesAndStatus});
+    return randomizeDatesAndStatus
+  }
+  
+  /** Returns a list of summary information about Cases */
+  public get getCaseSummary() {
+    const getCaseSummary = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getCaseSummary(),
+      () => ({}),
+      (c, args) => c.getCaseSummary())
+    
+    Object.defineProperty(this, 'getCaseSummary', {value: getCaseSummary});
+    return getCaseSummary
+  }
+  
+  constructor() {
+    super($metadata.Case, new $apiClients.CaseApiClient())
+  }
+}
+
+
+export interface CaseDtoViewModel extends $models.CaseDto {
+  caseId: number | null;
+  title: string | null;
+  assignedToName: string | null;
+}
+export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, number> implements $models.CaseDto  {
+  
+  public get asyncMethodOnIClassDto() {
+    const asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
+      "item", 
+      (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
+      () => ({input: null as string | null, }),
+      (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'asyncMethodOnIClassDto', {value: asyncMethodOnIClassDto});
+    return asyncMethodOnIClassDto
+  }
+  
+  constructor(initialData?: DeepPartial<$models.CaseDto> | null) {
+    super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)
+  }
+}
+defineProps(CaseDtoViewModel, $metadata.CaseDto)
+
+export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, CaseDtoViewModel> {
+  
+  constructor() {
+    super($metadata.CaseDto, new $apiClients.CaseDtoApiClient())
+  }
+}
+
+
+export interface CaseProductViewModel extends $models.CaseProduct {
+  caseProductId: number | null;
+  caseId: number | null;
+  case: CaseViewModel | null;
+  productId: number | null;
+  product: ProductViewModel | null;
+}
+export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
+  
+  constructor(initialData?: DeepPartial<$models.CaseProduct> | null) {
+    super($metadata.CaseProduct, new $apiClients.CaseProductApiClient(), initialData)
+  }
+}
+defineProps(CaseProductViewModel, $metadata.CaseProduct)
+
+export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, CaseProductViewModel> {
+  
+  constructor() {
+    super($metadata.CaseProduct, new $apiClients.CaseProductApiClient())
+  }
+}
+
+
+export interface CompanyViewModel extends $models.Company {
+  companyId: number | null;
+  name: string | null;
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  isDeleted: boolean | null;
+  employees: PersonViewModel[] | null;
+  altName: string | null;
+}
+export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
+  
+  
+  public addToEmployees(): PersonViewModel {
+    return this.$addChild('employees')
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Company> | null) {
+    super($metadata.Company, new $apiClients.CompanyApiClient(), initialData)
+  }
+}
+defineProps(CompanyViewModel, $metadata.Company)
+
+export class CompanyListViewModel extends ListViewModel<$models.Company, $apiClients.CompanyApiClient, CompanyViewModel> {
+  
+  public get getCertainItems() {
+    const getCertainItems = this.$apiClient.$makeCaller(
+      "item", 
+      (c, isDeleted: boolean | null) => c.getCertainItems(isDeleted),
+      () => ({isDeleted: null as boolean | null, }),
+      (c, args) => c.getCertainItems(args.isDeleted))
+    
+    Object.defineProperty(this, 'getCertainItems', {value: getCertainItems});
+    return getCertainItems
+  }
+  
+  constructor() {
+    super($metadata.Company, new $apiClients.CompanyApiClient())
+  }
+}
+
 
 export interface PersonViewModel extends $models.Person {
   
@@ -208,142 +399,6 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
 }
 
 
-export interface CaseViewModel extends $models.Case {
-  
-  /** The Primary key for the Case object */
-  caseKey: number | null;
-  title: string | null;
-  description: string | null;
-  openedAt: Date | null;
-  assignedToId: number | null;
-  assignedTo: PersonViewModel | null;
-  reportedById: number | null;
-  reportedBy: PersonViewModel | null;
-  imageName: string | null;
-  imageSize: number | null;
-  imageHash: string | null;
-  attachmentName: string | null;
-  severity: string | null;
-  status: $models.Statuses | null;
-  caseProducts: CaseProductViewModel[] | null;
-  devTeamAssignedId: number | null;
-  devTeamAssigned: $models.DevTeam | null;
-  duration: any | null;
-}
-export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
-  
-  
-  public addToCaseProducts(): CaseProductViewModel {
-    return this.$addChild('caseProducts')
-  }
-  
-  get products(): ReadonlyArray<ProductViewModel> {
-    return (this.caseProducts || []).map($ => $.product!).filter($ => $)
-  }
-  
-  constructor(initialData?: DeepPartial<$models.Case> | null) {
-    super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
-  }
-}
-defineProps(CaseViewModel, $metadata.Case)
-
-export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
-  
-  public get getSomeCases() {
-    const getSomeCases = this.$apiClient.$makeCaller(
-      "item", 
-      (c) => c.getSomeCases(),
-      () => ({}),
-      (c, args) => c.getSomeCases())
-    
-    Object.defineProperty(this, 'getSomeCases', {value: getSomeCases});
-    return getSomeCases
-  }
-  
-  public get getAllOpenCasesCount() {
-    const getAllOpenCasesCount = this.$apiClient.$makeCaller(
-      "item", 
-      (c) => c.getAllOpenCasesCount(),
-      () => ({}),
-      (c, args) => c.getAllOpenCasesCount())
-    
-    Object.defineProperty(this, 'getAllOpenCasesCount', {value: getAllOpenCasesCount});
-    return getAllOpenCasesCount
-  }
-  
-  public get randomizeDatesAndStatus() {
-    const randomizeDatesAndStatus = this.$apiClient.$makeCaller(
-      "item", 
-      (c) => c.randomizeDatesAndStatus(),
-      () => ({}),
-      (c, args) => c.randomizeDatesAndStatus())
-    
-    Object.defineProperty(this, 'randomizeDatesAndStatus', {value: randomizeDatesAndStatus});
-    return randomizeDatesAndStatus
-  }
-  
-  /** Returns a list of summary information about Cases */
-  public get getCaseSummary() {
-    const getCaseSummary = this.$apiClient.$makeCaller(
-      "item", 
-      (c) => c.getCaseSummary(),
-      () => ({}),
-      (c, args) => c.getCaseSummary())
-    
-    Object.defineProperty(this, 'getCaseSummary', {value: getCaseSummary});
-    return getCaseSummary
-  }
-  
-  constructor() {
-    super($metadata.Case, new $apiClients.CaseApiClient())
-  }
-}
-
-
-export interface CompanyViewModel extends $models.Company {
-  companyId: number | null;
-  name: string | null;
-  address1: string | null;
-  address2: string | null;
-  city: string | null;
-  state: string | null;
-  zipCode: string | null;
-  isDeleted: boolean | null;
-  employees: PersonViewModel[] | null;
-  altName: string | null;
-}
-export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
-  
-  
-  public addToEmployees(): PersonViewModel {
-    return this.$addChild('employees')
-  }
-  
-  constructor(initialData?: DeepPartial<$models.Company> | null) {
-    super($metadata.Company, new $apiClients.CompanyApiClient(), initialData)
-  }
-}
-defineProps(CompanyViewModel, $metadata.Company)
-
-export class CompanyListViewModel extends ListViewModel<$models.Company, $apiClients.CompanyApiClient, CompanyViewModel> {
-  
-  public get getCertainItems() {
-    const getCertainItems = this.$apiClient.$makeCaller(
-      "item", 
-      (c, isDeleted: boolean | null) => c.getCertainItems(isDeleted),
-      () => ({isDeleted: null as boolean | null, }),
-      (c, args) => c.getCertainItems(args.isDeleted))
-    
-    Object.defineProperty(this, 'getCertainItems', {value: getCertainItems});
-    return getCertainItems
-  }
-  
-  constructor() {
-    super($metadata.Company, new $apiClients.CompanyApiClient())
-  }
-}
-
-
 export interface ProductViewModel extends $models.Product {
   productId: number | null;
   name: string | null;
@@ -366,75 +421,53 @@ export class ProductListViewModel extends ListViewModel<$models.Product, $apiCli
 }
 
 
-export interface CaseProductViewModel extends $models.CaseProduct {
-  caseProductId: number | null;
-  caseId: number | null;
-  case: CaseViewModel | null;
-  productId: number | null;
-  product: ProductViewModel | null;
-}
-export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
+export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.WeatherService, $apiClients.WeatherServiceApiClient> {
   
-  constructor(initialData?: DeepPartial<$models.CaseProduct> | null) {
-    super($metadata.CaseProduct, new $apiClients.CaseProductApiClient(), initialData)
-  }
-}
-defineProps(CaseProductViewModel, $metadata.CaseProduct)
-
-export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, CaseProductViewModel> {
-  
-  constructor() {
-    super($metadata.CaseProduct, new $apiClients.CaseProductApiClient())
-  }
-}
-
-
-export interface CaseDtoViewModel extends $models.CaseDto {
-  caseId: number | null;
-  title: string | null;
-  assignedToName: string | null;
-}
-export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, number> implements $models.CaseDto  {
-  
-  public get asyncMethodOnIClassDto() {
-    const asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
+  public get getWeather() {
+    const getWeather = this.$apiClient.$makeCaller(
       "item", 
-      (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
-      () => ({input: null as string | null, }),
-      (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
+      (c, location: $models.Location | null, dateTime: Date | null) => c.getWeather(location, dateTime),
+      () => ({location: null as $models.Location | null, dateTime: null as Date | null, }),
+      (c, args) => c.getWeather(args.location, args.dateTime))
     
-    Object.defineProperty(this, 'asyncMethodOnIClassDto', {value: asyncMethodOnIClassDto});
-    return asyncMethodOnIClassDto
+    Object.defineProperty(this, 'getWeather', {value: getWeather});
+    return getWeather
   }
   
-  constructor(initialData?: DeepPartial<$models.CaseDto> | null) {
-    super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)
+  public get getWeatherAsync() {
+    const getWeatherAsync = this.$apiClient.$makeCaller(
+      "item", 
+      (c, location: $models.Location | null, dateTime: Date | null) => c.getWeatherAsync(location, dateTime),
+      () => ({location: null as $models.Location | null, dateTime: null as Date | null, }),
+      (c, args) => c.getWeatherAsync(args.location, args.dateTime))
+    
+    Object.defineProperty(this, 'getWeatherAsync', {value: getWeatherAsync});
+    return getWeatherAsync
   }
-}
-defineProps(CaseDtoViewModel, $metadata.CaseDto)
-
-export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, CaseDtoViewModel> {
   
   constructor() {
-    super($metadata.CaseDto, new $apiClients.CaseDtoApiClient())
+    super($metadata.WeatherService, new $apiClients.WeatherServiceApiClient())
   }
 }
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
-  Person: PersonViewModel,
   Case: CaseViewModel,
-  Company: CompanyViewModel,
-  Product: ProductViewModel,
-  CaseProduct: CaseProductViewModel,
   CaseDto: CaseDtoViewModel,
+  CaseProduct: CaseProductViewModel,
+  Company: CompanyViewModel,
+  Person: PersonViewModel,
+  Product: ProductViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
-  Person: PersonListViewModel,
   Case: CaseListViewModel,
-  Company: CompanyListViewModel,
-  Product: ProductListViewModel,
-  CaseProduct: CaseProductListViewModel,
   CaseDto: CaseDtoListViewModel,
+  CaseProduct: CaseProductListViewModel,
+  Company: CompanyListViewModel,
+  Person: PersonListViewModel,
+  Product: ProductListViewModel,
+}
+const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
+  WeatherService: WeatherServiceViewModel,
 }
 

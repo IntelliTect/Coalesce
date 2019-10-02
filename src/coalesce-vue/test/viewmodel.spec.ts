@@ -512,12 +512,14 @@ describe("ViewModel", () => {
         ]
       });
       var student = new StudentViewModel(studentModel);
+      const existingCollection = student.courses;
 
       studentModel.courses = null;
       student.$loadFromModel(studentModel);
 
-      // Collection should have been cleared out.
+      // Collection should not have been cleared out.
       expect(student.courses).not.toBeNull();
+      expect(student.courses).toBe(existingCollection);
       expect(student.courses![0].courseId).toBe(7);
     })
 
@@ -530,13 +532,15 @@ describe("ViewModel", () => {
         ]
       });
       var student = new StudentViewModel(studentModel);
+      const existingCollection = student.courses;
 
       studentModel.courses = [];
       student.$loadFromModel(studentModel);
 
       // Collection shouldn't be null, but should be empty.
       expect(student.courses).not.toBeNull();
-      expect(student.courses!.length).toBe(0);
+      expect(student.courses).toBe(existingCollection);
+      expect(student.courses).toHaveLength(0);
     })
 
     test("preserves existing collection navigation items when keys are same", () => {
@@ -548,6 +552,7 @@ describe("ViewModel", () => {
         ]
       });
       var student = new StudentViewModel(studentModel);
+      const existingCollection = student.courses;
 
       var originalFoo = student.courses![0];
       var originalBar = student.courses![1];
@@ -557,6 +562,10 @@ describe("ViewModel", () => {
       studentModel.courses![1].name = "biz";
       student.$loadFromModel(studentModel);
 
+      // Collection instance should have been kept the same.
+      expect(student.courses).toBe(existingCollection);
+      expect(student.courses).toHaveLength(2);
+      
       // Key maintained: reference should be the same.
       expect(student.courses![0]).toBe(originalFoo);
       // Properties should be updated, and model shoudn't be marked dirty.
@@ -571,6 +580,89 @@ describe("ViewModel", () => {
       expect(student.courses![1].courseId).toBe(11);
       expect(student.courses![1].name).toBe("biz");
       expect(student.courses![1].$isDirty).toBe(false);
+    })
+
+    test.each([
+      [ "delete from start", [{ courseId: 8 }, { courseId: 9 }] ],
+      [ "delete from middle", [{ courseId: 7 }, { courseId: 9 }] ],
+      [ "delete from end", [{ courseId: 7 }, { courseId: 8 }] ],
+      [ "delete multiple", [{ courseId: 7 }] ],
+      [ "replace start", [{ courseId: 1 }, { courseId: 8 }, { courseId: 9 }] ],
+      [ "replace middle", [{ courseId: 7 }, { courseId: 1 }, { courseId: 9 }] ],
+      [ "replace end", [{ courseId: 7 }, { courseId: 8 }, { courseId: 1 }] ],
+      [ "add start", [{ courseId: 1 }, { courseId: 7 }, { courseId: 8 }, { courseId: 9 }] ],
+      [ "add middle", [{ courseId: 7 }, { courseId: 1 }, { courseId: 8 }, { courseId: 9 }] ],
+      [ "add end", [{ courseId: 7 }, { courseId: 8 }, { courseId: 9 }, { courseId: 1 }] ],
+      [ "reorder", [{ courseId: 9 }, { courseId: 8 }, { courseId: 7 }] ],
+      [ "reorder", [{ courseId: 7 }, { courseId: 9 }, { courseId: 8 }] ],
+      [ "reorder", [{ courseId: 9 }, { courseId: 7 }, { courseId: 8 }] ],
+      [ "reorder", [{ courseId: 8 }, { courseId: 7 }, { courseId: 9 }] ],
+      [ "reorder", [{ courseId: 8 }, { courseId: 9 }, { courseId: 7 }] ],
+    ])
+      ("collection navigation is reactive to %s", async (name, data) => {
+      var studentModel = new Student({
+        studentId: 1,
+        courses: [
+          { courseId: 7 },
+          { courseId: 8 },
+          { courseId: 9 }
+        ]
+      });
+      var student = new StudentViewModel(studentModel);
+      const existingCollection = student.courses;
+
+      const vue = new Vue({
+        data: { student },
+      });
+      const watchCallback = jest.fn();
+      vue.$watch('student.courses', watchCallback);
+
+      studentModel.courses = (data as any[]).map(x => new Course(x));
+      student.$loadFromModel(studentModel);
+      
+      await vue.$nextTick()
+
+      // Collection instance should have been kept the same.
+      expect(student.courses).toBe(existingCollection);
+
+      // Verify that instances look right.
+      student.courses!.forEach(c => {
+        expect(c).toBeInstanceOf(CourseViewModel);
+        expect((c as any).$parent).toBe(student);
+        expect((c as any).$parentCollection).toBe(student.courses);
+      })
+
+      // Watcher should have been triggered because its contents changed
+      // (course 9 removed, course 11 added)
+      expect(watchCallback.mock.calls).toHaveLength(1);
+    })
+
+    test("collection navigation is not reactive when nothing changes", async () => {
+      var studentModel = new Student({
+        studentId: 1,
+        courses: [
+          { courseId: 7, name: "foo" },
+          { courseId: 9, name: "bar" }
+        ]
+      });
+      var student = new StudentViewModel(studentModel);
+      const existingCollection = student.courses;
+
+      const vue = new Vue({
+        data: { student },
+      });
+      const watchCallback = jest.fn();
+      vue.$watch('student.courses', watchCallback);
+
+      student.$loadFromModel(studentModel);
+
+      await vue.$nextTick()
+
+      // Collection instance should have been kept the same.
+      expect(student.courses).toBe(existingCollection);
+
+      // Watcher should not have been triggered because its contents shouldnt have changed
+      expect(watchCallback.mock.calls).toHaveLength(0);
     })
 
     test('doesnt stackoverflow on recursive object structures', () => {
@@ -651,8 +743,10 @@ describe("ListViewModel", () => {
   describe("$load & $items", () => {
 
     let list: StudentListViewModel;
+    let includeAdditionalItemAtStart: boolean;
 
     beforeEach(() => {
+      includeAdditionalItemAtStart = false;
       list = new StudentListViewModel;
       list.$apiClient.list = jest
         .fn()
@@ -661,6 +755,9 @@ describe("ListViewModel", () => {
             data: {
               wasSuccessful: true,
               list: [
+                ...(includeAdditionalItemAtStart 
+                  ? [new Student({studentId:3, name: 'John'})]
+                  : []),
                 new Student({studentId:1, name: 'Steve'}),
                 new Student({studentId:2, name: 'Bob'}),
               ],
@@ -712,6 +809,31 @@ describe("ListViewModel", () => {
       expect(list.$items).toHaveLength(3);
     })
 
+    test("identical loads do not trigger reactivity on $items", async () => {
+      // This tests a performance scenario - avoid triggering
+      // reactivity on list.$items if absolutely nothing changed.
+
+      const vue = new Vue({
+        data: { list }
+      });
+        
+      // First load. Will only include the first 2 items.
+      await list.$load();
+
+      // Start watching the list's items collection
+      await vue.$nextTick();
+      const watchCallback = jest.fn();
+      vue.$watch('list.$items', watchCallback);
+
+      // Reload the list with the exact same response from the API.
+      await vue.$nextTick();
+      await list.$load();
+      await vue.$nextTick();
+
+      // The watcher should not have been triggered.
+      expect(watchCallback.mock.calls).toHaveLength(0);
+    })
+
     test("newly loaded additional items are reactive", async () => {
       // This test is a doozy. 
       // There was an issue where if a list endpoint returns a new,
@@ -734,29 +856,6 @@ describe("ListViewModel", () => {
       //    
       // The issue is that we were grabbing the `.push()` method before doing the mapping,
       // not accounting for the fact that the .push() on the VMC could change as part of the mapping.
-
-      const list = new StudentListViewModel;
-      let includeAdditionalItemAtStart = false;
-      list.$apiClient.list = jest
-        .fn()
-        .mockImplementation((dto: any) => {
-          return Promise.resolve(<AxiosListResult<Student>> {
-            data: {
-              wasSuccessful: true,
-              list: [
-                ...(includeAdditionalItemAtStart 
-                  ? [new Student({studentId:3, name: 'John'})]
-                  : []),
-                new Student({studentId:1, name: 'Steve'}),
-                new Student({studentId:2, name: 'Bob'}),
-              ],
-              page: 1,
-              pageSize: 10,
-              pageCount: 1,
-              totalCount: 2,
-            }
-          })
-        });
       
       const vue = new Vue({
         data: { list },

@@ -36,7 +36,7 @@ import { Indexable } from "./util";
 import { debounce } from "lodash-es";
 import { Cancelable } from "lodash";
 
-export { DeepPartial } from './util';
+export { DeepPartial } from "./util";
 
 // These imports allow TypeScript to correctly name types in the generated declarations.
 // Without them, it will generate some horrible, huge relative paths that won't work on any other machine.
@@ -141,7 +141,7 @@ export abstract class ViewModel<
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
-    Object.defineProperty(this, "$load", {value: $load});
+    Object.defineProperty(this, "$load", { value: $load });
 
     return $load;
   }
@@ -200,7 +200,7 @@ export abstract class ViewModel<
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
-    Object.defineProperty(this, "$save", {value: $save});
+    Object.defineProperty(this, "$save", { value: $save });
 
     return $save;
   }
@@ -215,22 +215,28 @@ export abstract class ViewModel<
    */
   get $delete() {
     const $delete = this.$apiClient
-      .$makeCaller("item", function(this: ViewModel, c) { 
+      .$makeCaller("item", function(this: ViewModel, c) {
         if (this.$primaryKey) {
           return c.delete(this.$primaryKey, this.$params);
         } else if (this.$parentCollection) {
-          this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
+          this.$parentCollection.splice(
+            this.$parentCollection.indexOf(this),
+            1
+          );
         }
       })
       .onFulfilled(function(this: ViewModel) {
         if (this.$parentCollection) {
-          this.$parentCollection.splice(this.$parentCollection.indexOf(this), 1);
+          this.$parentCollection.splice(
+            this.$parentCollection.indexOf(this),
+            1
+          );
         }
       });
-    
+
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
-    Object.defineProperty(this, "$delete", {value: $delete});
+    Object.defineProperty(this, "$delete", { value: $delete });
 
     return $delete;
   }
@@ -354,7 +360,6 @@ export abstract class ViewModel<
   }
 }
 
-
 export abstract class ListViewModel<
   TModel extends Model<ModelType> = Model<ModelType>,
   TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
@@ -371,9 +376,11 @@ export abstract class ListViewModel<
    */
   private _items = new ViewModelCollection(this.$metadata, this);
   public get $items(): TItem[] {
-    return this._items as unknown as TItem[];
+    return (this._items as unknown) as TItem[];
   }
   public set $items(val: TItem[]) {
+    if ((this._items as any) === val) return;
+
     const vmc = new ViewModelCollection(this.$metadata, this);
     if (val) vmc.push(...val);
     this._items = vmc;
@@ -420,13 +427,15 @@ export abstract class ListViewModel<
    */
   public $load = this.$apiClient
     .$makeCaller("list", c => c.list(this.$params))
-    .onFulfilled(() => {
-      if (this.$load.result) {
+    .onFulfilled(state => {
+      if (state.result) {
         this.$items = rebuildModelCollectionForViewModelCollection(
-          this.$metadata, this.$items, this.$load.result
+          this.$metadata,
+          this.$items,
+          state.result
         );
       }
-    })
+    });
   // TODO: merge in the result, don't replace the existing one
   // .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
 
@@ -494,7 +503,6 @@ export abstract class ListViewModel<
   ) {}
 }
 
-
 export class ServiceViewModel<
   TMeta extends Service = Service,
   TApi extends ServiceApiClient<TMeta> = ServiceApiClient<TMeta>
@@ -521,10 +529,10 @@ export class ViewModelFactory {
 
   private map = new Map<any, ViewModel>();
 
-  /** Ask the factory for a ViewModel for the given type and initial data. 
+  /** Ask the factory for a ViewModel for the given type and initial data.
    * The instance may be a brand new one, or may be already existing
    * if the same initialData has already been seen.
-  */
+   */
   get(typeName: string, initialData: any) {
     const map = this.map;
 
@@ -570,87 +578,98 @@ export class ViewModelFactory {
 
 /** Gets a human-friendly description for ViewModelCollection error messages. */
 function viewModelCollectionName($metadata: ModelCollectionValue | ModelType) {
-  const collectedTypeMeta = $metadata.type == "model" 
-    ? $metadata 
-    : $metadata.itemType.typeDef;
+  const collectedTypeMeta =
+    $metadata.type == "model" ? $metadata : $metadata.itemType.typeDef;
 
   const str = `a collection of ${collectedTypeMeta.name}`;
 
-  return $metadata.type == "model" 
-    ? str 
-    : `${$metadata.name} (${str})`;
+  return $metadata.type == "model" ? str : `${$metadata.name} (${str})`;
+}
+
+function viewModelCollectionMapItems<T extends ViewModel>(
+  items: T[],
+  vmc: ViewModelCollection<T>
+) {
+  const collectedTypeMeta =
+    vmc.$metadata.type == "model"
+      ? vmc.$metadata
+      : vmc.$metadata.itemType.typeDef;
+
+  return items.map(val => {
+    if (val == null) {
+      throw Error(`Cannot push null to a collection of ViewModels.`);
+    }
+
+    if (typeof val !== "object") {
+      throw Error(
+        `Cannot push a non-object to ${viewModelCollectionName(vmc.$metadata)}`
+      );
+    } else if (!("$metadata" in val)) {
+      throw Error(
+        `Cannot push a non-model ($metadata prop is missing) to ${viewModelCollectionName(
+          vmc.$metadata
+        )}`
+      );
+    }
+
+    const incomingTypeMeta = val.$metadata;
+    if (incomingTypeMeta.name != collectedTypeMeta.name) {
+      throw Error(
+        `Type mismatch - attempted to assign a ${
+          incomingTypeMeta.name
+        } to ${viewModelCollectionName(vmc.$metadata)}`
+      );
+    }
+
+    if (val instanceof ViewModel) {
+      // Already a viewmodel. Do nothing
+    } else {
+      // Incoming is a Model. Make a ViewModel from it.
+      if (ViewModel.typeLookup === null) {
+        throw Error(
+          "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
+        );
+      }
+      val = (ViewModelFactory.get(incomingTypeMeta.name, val) as unknown) as T;
+    }
+
+    // $parent and $parentCollection are intentionally protected -
+    // they're just for internal tracking of stuff
+    // and probably shouldn't be used in custom code.
+    // So, we'll cast to `any` so we can set them here.
+    (val as any).$parent = vmc.$parent;
+    (val as any).$parentCollection = vmc;
+
+    return val;
+  });
 }
 
 export class ViewModelCollection<T extends ViewModel> extends Array<T> {
-  private $metadata!: ModelCollectionValue | ModelType;
-  private $parent!: any;
+  readonly $metadata!: ModelCollectionValue | ModelType;
+  readonly $parent!: any;
 
   push(...items: T[]): number {
-    const collectedTypeMeta = this.$metadata.type == "model" 
-      ? this.$metadata 
-      : this.$metadata.itemType.typeDef;
-
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
-    const viewModelItems = items.map(val => {
-        if (val == null) {
-          throw Error(`Cannot push null to a collection of ViewModels.`);
-        }
+    const viewModelItems = viewModelCollectionMapItems(items, this);
 
-        if (typeof val !== "object") {
-          throw Error(`Cannot push a non-object to ${viewModelCollectionName(this.$metadata)}`);
-        } else if (!("$metadata" in val)) {
-          throw Error(
-            `Cannot push a non-model ($metadata prop is missing) to ${
-              viewModelCollectionName(this.$metadata)
-            }`
-          );
-        }
+    return Object.getPrototypeOf(this).push.apply(this, viewModelItems);
+  }
 
-        const incomingTypeMeta = val.$metadata;
-        if (incomingTypeMeta.name != collectedTypeMeta.name) {
-          throw Error(
-            `Type mismatch - attempted to assign a ${
-              incomingTypeMeta.name
-            } to ${viewModelCollectionName(this.$metadata)}`
-          );
-        }
+  splice(start: number, deleteCount?: number, ...items: T[]) {
+    // MUST evaluate the .map() before grabbing the .push()
+    // method from the proto. See test "newly loaded additional items are reactive".
+    const viewModelItems: any[] = items
+      ? viewModelCollectionMapItems(items, this)
+      : items;
 
-        if (val instanceof ViewModel) {
-          // Already a viewmodel. Do nothing
-        } else {
-          // Incoming is a Model. Make a ViewModel from it.
-          if (ViewModel.typeLookup === null) {
-            throw Error(
-              "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
-            );
-          }
-          val = (ViewModelFactory.get(
-            incomingTypeMeta.name,
-            val
-          ) as unknown) as T;
-        }
-
-        // $parent and $parentCollection are intentionally protected -
-        // they're just for internal tracking of stuff
-        // and probably shouldn't be used in custom code.
-        // So, we'll cast to `any` so we can set them here.
-        (val as any).$parent = this.$parent;
-        (val as any).$parentCollection = this;
-
-        return val;
-      });
-
-    return Object.getPrototypeOf(this).push.apply(
+    return Object.getPrototypeOf(this).splice.call(
       this,
-      viewModelItems
+      start, deleteCount, ...viewModelItems
     );
   }
 
-  constructor(
-    $metadata: ModelCollectionValue | ModelType,
-    $parent: any
-  ) {
+  constructor($metadata: ModelCollectionValue | ModelType, $parent: any) {
     super();
     Object.defineProperties(this, {
       // These properties need to be non-enumerable to avoid them from being looped over
@@ -673,18 +692,23 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
         enumerable: false,
         writable: false,
         configurable: false
+      },
+      splice: {
+        value: ViewModelCollection.prototype.splice,
+        enumerable: false,
+        writable: false,
+        configurable: false
       }
     });
   }
 }
-
 
 interface AutoLoadOptions<TThis> {
   /** Time, in milliseconds, to debounce loads for.  */
   wait?: number;
   /** A function that will be called before autoloading that can return false to prevent a load. */
   predicate?: (viewModel: TThis) => boolean;
-};
+}
 
 interface AutoSaveOptions<TThis> {
   /** Time, in milliseconds, to debounce saves for.  */
@@ -697,7 +721,7 @@ interface AutoSaveOptions<TThis> {
    * If a predicate is provided, the predicate will only affect the current view model.
    * Explicitly call `$startAutoSave` on other ViewModels if they require predicates. */
   deep?: boolean;
-};
+}
 
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
@@ -725,14 +749,14 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
           ? function(this: InstanceType<T>, incomingValue: any) {
               if (incomingValue != null) {
                 if (typeof incomingValue !== "object") {
-                  throw Error(`Cannot assign a non-object to ${metadata.name}.${
-                    propName
-                  }`);
-                } else if (("$metadata" in incomingValue)) {
+                  throw Error(
+                    `Cannot assign a non-object to ${metadata.name}.${propName}`
+                  );
+                } else if ("$metadata" in incomingValue) {
                   if (incomingValue.$metadata.name != prop.typeDef.name) {
-                    throw Error(`Type mismatch - attempted to assign a ${
-                      incomingValue.$metadata.name
-                    } to ${metadata.name}.${propName}`);
+                    throw Error(
+                      `Type mismatch - attempted to assign a ${incomingValue.$metadata.name} to ${metadata.name}.${propName}`
+                    );
                   }
                 }
 
@@ -743,7 +767,10 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                   // This won't technically be valid according to the types of the properties
                   // on our generated ViewModels, but we should handle it
                   // so that input components work really nicely if a component sets the navigation prop.
-                  incomingValue = ViewModelFactory.get(prop.typeDef.name, incomingValue);
+                  incomingValue = ViewModelFactory.get(
+                    prop.typeDef.name,
+                    incomingValue
+                  );
                 }
               }
 
@@ -756,10 +783,10 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               if (prop.role == "referenceNavigation") {
                 // When setting an object, fix up the foreign key using the value pulled from the object
                 // if it has a value.
-                const incomingPk = incomingValue 
+                const incomingPk = incomingValue
                   ? incomingValue[prop.principalKey.name]
                   : null;
-                  
+
                 // Set on `this`, not `$data`, in order to trigger $isDirty in the
                 // setter function for the FK prop.
                 (this as any)[prop.foreignKey.name] = incomingPk;
@@ -773,13 +800,22 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               if (incomingValue == null) incomingValue = [];
 
               if (!Array.isArray(incomingValue)) {
-                throw Error(`Cannot assign a non-array to ${metadata.name}.${
-                  propName
-                }`);
+                throw Error(
+                  `Cannot assign a non-array to ${metadata.name}.${propName}`
+                );
               }
+
+              const $data = (this as any).$data;
+              const old = $data[propName];
+
+              if (old === incomingValue) {
+                // Setting same value. Do nothing.
+                return;
+              }
+
               const vmc = new ViewModelCollection(prop, this);
               vmc.push(...incomingValue);
-              (this as any).$data[propName] = vmc;
+              $data[propName] = vmc;
             }
           : function(this: InstanceType<T>, incomingValue: any) {
               const $data = (this as any).$data;
@@ -791,37 +827,41 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               $data[propName] = incomingValue;
 
               // First, check strict equality. This will handle the 90% most common case.
-              if (old !== incomingValue) {
-                // If strict equality fails, try to use valueOf() to compare.
-                // valueOf() helps with Date instances that represent the same time value.
-                // If either side is null, it is ok to set $isDirty, since we 
-                // know that if we got this var, BOTH sides aren't both null.
-                if (
-                  old == null || incomingValue == null || 
-                  // leaving this check out for now. All objects in JS should have a .valueOf().
-                  // if we find things that don't, then that's really interesting.
-                  //typeof old.valueOf != 'function' || typeof val.valueOf != 'function' ||
-                  old.valueOf() !== incomingValue.valueOf()
-                ) {
-                  this.$isDirty = true;
+              if (old === incomingValue) {
+                return;
+              }
 
-                  if (prop.role == "foreignKey" && prop.navigationProp) {
-                    /*
-                      If there's a navigation property for this FK,
-                      we need to null it out if the current value of the 
-                      navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
-                    */
-                    const currentObject = $data[prop.navigationProp.name];
-                    if (currentObject != null &&
-                      incomingValue != currentObject[prop.principalKey.name]
-                    ) {
-                      // Set on `$data`, not `this`. 
-                      // We don't want to trigger the "model" setter
-                      // since it basically does nothing when the value is null,
-                      // and it would also attempt to perform fixup of the FK prop,
-                      // but we're already doing just that.
-                      $data[prop.navigationProp.name] = null;
-                    }
+              // If strict equality fails, try to use valueOf() to compare.
+              // valueOf() helps with Date instances that represent the same time value.
+              // If either side is null, it is ok to set $isDirty, since we
+              // know that if we got this var, BOTH sides aren't both null.
+              if (
+                old == null ||
+                incomingValue == null ||
+                // leaving this check out for now. All objects in JS should have a .valueOf().
+                // if we find things that don't, then that's really interesting.
+                //typeof old.valueOf != 'function' || typeof val.valueOf != 'function' ||
+                old.valueOf() !== incomingValue.valueOf()
+              ) {
+                this.$isDirty = true;
+
+                if (prop.role == "foreignKey" && prop.navigationProp) {
+                  /*
+                    If there's a navigation property for this FK,
+                    we need to null it out if the current value of the 
+                    navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
+                  */
+                  const currentObject = $data[prop.navigationProp.name];
+                  if (
+                    currentObject != null &&
+                    incomingValue != currentObject[prop.principalKey.name]
+                  ) {
+                    // Set on `$data`, not `this`.
+                    // We don't want to trigger the "model" setter
+                    // since it basically does nothing when the value is null,
+                    // and it would also attempt to perform fixup of the FK prop,
+                    // but we're already doing just that.
+                    $data[prop.navigationProp.name] = null;
                   }
                 }
               }
@@ -829,10 +869,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
     };
   }
 
-  Object.defineProperties(
-    ctor.prototype,
-    descriptors
-  );
+  Object.defineProperties(ctor.prototype, descriptors);
 }
 
 export interface ViewModelTypeLookup {
@@ -847,52 +884,71 @@ export interface ServiceViewModelTypeLookup {
 
 export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
 
-/** Do not export. 
- * 
+/** Do not export.
+ *
  * Doesn't strictly return collections of ViewModels,
  * but instead expects the receiving setter of the array to be a ViewModelCollection.
  */
-function rebuildModelCollectionForViewModelCollection (
-  type: ModelType, currentValue: any[], incomingValue: any[]
+function rebuildModelCollectionForViewModelCollection(
+  type: ModelType,
+  currentValue: any[],
+  incomingValue: any[]
 ) {
-  
-  if (!Array.isArray(currentValue) || currentValue.length == 0) {
-    // No existing items. Just take the incoming collection wholesale.
-    // Let the setters on the ViewModel handle the conversion of the contents
-    // into ViewModel instances.
-    return incomingValue;
-  } else {
-    // There are existing items. We need to surgically merge in the incoming items,
-    // keeping existing ViewModels the same based on keys.
-    const pkName = type.keyProp.name;
-    const existingItemsMap = new Map();
-    for (let i = 0; i < currentValue.length; i++) {
-      const item = currentValue[i];
-      const itemPk = item[pkName];
-      existingItemsMap.set(itemPk, item);
-    }
+  if (!Array.isArray(currentValue)) {
+    currentValue = [];
+  }
 
-    // Build a new array, using existing items when they exist,
-    // otherwise using the incoming items.
-    const newArray = [];
-    for (let i = 0; i < incomingValue.length; i++) {
-      const incomingItem = incomingValue[i];
-      const incomingItemPk = incomingItem[pkName];
-      const existingItem = existingItemsMap.get(incomingItemPk);
-      if (existingItem) {
-        existingItem.$loadFromModel(incomingItem);
-        newArray.push(existingItem);
+  let incomingLength = incomingValue.length;
+  let currentLength = currentValue.length;
+
+  // There are existing items. We need to surgically merge in the incoming items,
+  // keeping existing ViewModels the same based on keys.
+  const pkName = type.keyProp.name;
+  const existingItemsMap = new Map();
+  for (let i = 0; i < currentLength; i++) {
+    const item = currentValue[i];
+    const itemPk = item[pkName];
+    existingItemsMap.set(itemPk, item);
+  }
+
+  // Rebuild the currentValue array, using existing items when they exist,
+  // otherwise using the incoming items.
+
+  for (let i = 0; i < incomingLength; i++) {
+    const incomingItem = incomingValue[i];
+    const incomingItemPk = incomingItem[pkName];
+    const existingItem = existingItemsMap.get(incomingItemPk);
+    if (existingItem) {
+      existingItem.$loadFromModel(incomingItem);
+
+      if (currentValue[i] === existingItem) {
+        // The existing item is not moving position. Do nothing.
       } else {
-        // No need to $loadFromModel on the incoming item.
-        // The setter for the collection will transform its contents into ViewModels for us.
-        newArray.push(incomingItem);
+        currentValue.splice(i, 1, existingItem);
+      }
+    } else {
+      // No need to $loadFromModel on the incoming item.
+      // The setter for the collection will transform its contents into ViewModels for us.
+
+      if (currentValue[i]) {
+        // There is something else already in the array at this position. Replace it.
+        currentValue.splice(i, 1, incomingItem);
+      } else {
+        // Nothing in the current array at this position. Just stick it in.
+        currentValue.push(incomingItem);
       }
     }
-
-    // Let the receiving ViewModelCollection handle the conversion of the contents
-    // into ViewModel instances.
-    return newArray;
   }
+
+  // If the new collection is shorter than the existing length,
+  // remove the extra items.
+  if (currentLength > incomingLength) {
+    currentValue.splice(incomingLength, currentLength - incomingLength);
+  }
+
+  // Let the receiving ViewModelCollection handle the conversion of the contents
+  // into ViewModel instances.
+  return currentValue;
 }
 
 /**
@@ -903,7 +959,6 @@ function rebuildModelCollectionForViewModelCollection (
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
 >(target: TViewModel, source: Indexable<{}>) {
-
   ViewModelFactory.scope(function(factory) {
     // Add the root ViewModel to the factory
     // so that when existing ViewModels are being updated,
@@ -917,8 +972,10 @@ export function updateViewModelFromModel<
     const metadata = target.$metadata;
 
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
-    if ('$metadata' in source && source.$metadata != metadata) {
-      throw Error(`Attempted to load a ${metadata.name} ViewModel with a ${source.$metadata.name} object.`)
+    if ("$metadata" in source && source.$metadata != metadata) {
+      throw Error(
+        `Attempted to load a ${metadata.name} ViewModel with a ${source.$metadata.name} object.`
+      );
     }
 
     for (const prop of Object.values(metadata.props)) {
@@ -936,7 +993,8 @@ export function updateViewModelFromModel<
           if (incomingValue) {
             if (
               currentValue == null ||
-              currentValue[prop.typeDef.keyProp.name] !== incomingValue[prop.typeDef.keyProp.name]
+              currentValue[prop.typeDef.keyProp.name] !==
+                incomingValue[prop.typeDef.keyProp.name]
             ) {
               // If the current value is null,
               // or if the current value has a different PK than the incoming value,
@@ -949,16 +1007,14 @@ export function updateViewModelFromModel<
               // implementations of the setters for referenceNavigation properties on ViewModel instances.
               currentValue.$loadFromModel(incomingValue);
             }
-
           } else {
             // We allow the existing value of the navigation prop to stick around
             // if the server didn't send it back.
             // The setter handling for the foreign key will handle
             // clearing out the current object if it doesn't match the incoming FK.
-
-            // This allows us to keep the existing navigation object 
+            // This allows us to keep the existing navigation object
             // even if the server didn't respond with one.
-            // However, if the FK has changed to a different value that no longer 
+            // However, if the FK has changed to a different value that no longer
             // agrees with the existing navigation object,
             // the FK setter will null the navigation to prevent an inconsistent data model.
           }
@@ -970,13 +1026,13 @@ export function updateViewModelFromModel<
             // which should be used to explicitly clear our the existing collection.
             break;
           } else if (!Array.isArray(incomingValue)) {
-            throw `Expected array for incoming value for ${metadata.name}.${
-              prop.name
-            }`;
+            throw `Expected array for incoming value for ${metadata.name}.${prop.name}`;
           }
 
           target[propName] = rebuildModelCollectionForViewModelCollection(
-            prop.itemType.typeDef, currentValue, incomingValue
+            prop.itemType.typeDef,
+            currentValue,
+            incomingValue
           ) as any;
           break;
 

@@ -312,7 +312,7 @@ export class ApiClient<T extends ApiRoutedType> {
   constructor(public $metadata: T) {}
 
   /** Cancellation token to inject into the next request. */
-  private _nextCancelToken: CancelTokenSource | null = null;
+  private _nextCancelToken?: CancelTokenSource;
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -518,8 +518,7 @@ export class ApiClient<T extends ApiRoutedType> {
     queryParams?: any
   ): AxiosRequestConfig {
     return {
-      cancelToken:
-        (this._nextCancelToken && this._nextCancelToken!.token) || undefined,
+      cancelToken: this._nextCancelToken?.token ?? undefined,
       ...config,
 
       // Merge standard Coalesce params with general configured params if there are any.
@@ -892,7 +891,7 @@ export abstract class ApiState<
     } finally {
       this.isLoading = false;
 
-      (this.apiClient as any)._nextCancelToken = null;
+      delete (this.apiClient as any)._nextCancelToken;
 
       if (this._debounceSignal) {
         this._debounceSignal.resolve();
@@ -967,6 +966,12 @@ export class ItemApiState<
   /** Principal data returned by the previous request. */
   result: TResult | null = null;
 
+  /** Whether `.result` is null or not.
+   * Using this prop to check for a result avoids a subscription 
+   * against the whole result object, which will change each time the method is called.
+   */
+  hasResult: boolean = false;
+
   constructor(
     apiClient: TClient,
     invoker: TInvoker<
@@ -993,6 +998,7 @@ export class ItemApiState<
     } else {
       this.result = null;
     }
+    this.hasResult = this.result != null;
   }
 }
 

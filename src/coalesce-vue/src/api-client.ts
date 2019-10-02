@@ -682,6 +682,12 @@ export abstract class ApiState<
   /** Error message returned by the previous request. */
   message: string | null = null;
 
+  /** Whether `.result` is null or not.
+   * Using this prop to check for a result avoids a subscription 
+   * against the whole result object, which will change each time the method is called.
+   */
+  hasResult: boolean = false;
+
   private _concurrencyMode: ApiCallerConcurrency = "disallow";
 
   /**
@@ -966,12 +972,6 @@ export class ItemApiState<
   /** Principal data returned by the previous request. */
   result: TResult | null = null;
 
-  /** Whether `.result` is null or not.
-   * Using this prop to check for a result avoids a subscription 
-   * against the whole result object, which will change each time the method is called.
-   */
-  hasResult: boolean = false;
-
   constructor(
     apiClient: TClient,
     invoker: TInvoker<
@@ -1079,6 +1079,7 @@ export class ListApiState<
     } else {
       this.result = null;
     }
+    this.hasResult = this.result != null;
   }
 }
 

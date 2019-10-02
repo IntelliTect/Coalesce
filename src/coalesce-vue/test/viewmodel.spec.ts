@@ -54,7 +54,7 @@ describe("ViewModel", () => {
       vue.student[callerName].isLoading = true;
       await vue.$nextTick();
       // Watcher should have been triggered for isLoading.
-      expect(callbackFn.mock.calls).toHaveLength(1);
+      expect(callbackFn).toBeCalledTimes(1);
 
     })
   })
@@ -115,7 +115,7 @@ describe("ViewModel", () => {
       expect(student.$isDirty).toBe(true);
 
       await waitTick()
-      expect(saveMock.mock.calls.length).toBe(1);
+      expect(saveMock).toBeCalledTimes(1);
       // First save should have been "Steve", with no PK.
       expect((saveMock.mock.calls[0][0] as Student).name).toBe("Steve");
       expect((saveMock.mock.calls[0][0] as Student).studentId).toBe(null);
@@ -136,7 +136,7 @@ describe("ViewModel", () => {
       await savePromise!;
       await waitTick()
 
-      expect(saveMock.mock.calls.length).toBe(2);
+      expect(saveMock).toBeCalledTimes(2);
 
       // This is the crux of what we're testing here -
       // The second save should have the PK returned by the first save.
@@ -166,7 +166,7 @@ describe("ViewModel", () => {
       student.$loadFromModel(studentModel);
       await waitFor(10);
 
-      expect(saveMock.mock.calls.length).toBe(0);
+      expect(saveMock).toBeCalledTimes(0);
     })
 
     test("$loadFromModel won't trigger autosave on ref nav", async () => {
@@ -186,7 +186,7 @@ describe("ViewModel", () => {
       student.$loadFromModel(studentModel);
       await waitFor(10);
       
-      expect(saveMock.mock.calls.length).toBe(0);
+      expect(saveMock).toBeCalledTimes(0);
     })
 
     test("$loadFromModel won't trigger autosave on collection nav", async () => {
@@ -205,7 +205,7 @@ describe("ViewModel", () => {
       student.$loadFromModel(studentModel);
       await waitFor(10);
       
-      expect(saveMock.mock.calls.length).toBe(0);
+      expect(saveMock).toBeCalledTimes(0);
     })
   })
 
@@ -224,6 +224,27 @@ describe("ViewModel", () => {
 
       expect(course.$parent).toBe(student);
       expect(course.$parentCollection).toBe(student.courses);
+    })
+  })
+
+  describe("value getters/setters", () => {
+    test.each([
+      ["date", () => new Student({studentId: 1, birthDate: new Date("1990-01-02T03:04:05.000-08:00")})]
+    ])("%s setter doesn't trigger reactivity for unchanged value", async (_, factory) => {
+      // Workaround for Jest's bad typescript support.
+      const modelFactory = factory as unknown as () => Student
+
+      var student = new StudentViewModel(modelFactory());
+      
+      const vue = new Vue({ data: { student } });
+      const watchCallback = jest.fn();
+      vue.$watch('student', watchCallback, { deep: true });
+
+      student.$loadFromModel(modelFactory());
+      await vue.$nextTick();
+
+      // Exact same model was reloaded. There should be no changes.
+      expect(watchCallback).toBeCalledTimes(0);
     })
   })
 
@@ -281,7 +302,7 @@ describe("ViewModel", () => {
 
       await vue.$nextTick();
 
-      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(watchCallback).toBeCalledTimes(1);
       expect(student.courses).toHaveLength(1);
     })
   })
@@ -634,7 +655,7 @@ describe("ViewModel", () => {
 
       // Watcher should have been triggered because its contents changed
       // (course 9 removed, course 11 added)
-      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(watchCallback).toBeCalledTimes(1);
     })
 
     test("collection navigation is not reactive when nothing changes", async () => {
@@ -662,7 +683,7 @@ describe("ViewModel", () => {
       expect(student.courses).toBe(existingCollection);
 
       // Watcher should not have been triggered because its contents shouldnt have changed
-      expect(watchCallback.mock.calls).toHaveLength(0);
+      expect(watchCallback).toBeCalledTimes(0);
     })
 
     test('doesnt stackoverflow on recursive object structures', () => {
@@ -700,8 +721,8 @@ describe("ViewModel", () => {
 
       await course.$delete();
 
-      expect(deleteMock.mock.calls.length).toBe(1);
-      expect(student.courses!.length).toBe(0);
+      expect(deleteMock).toBeCalledTimes(1);
+      expect(student.courses).toHaveLength(0);
     })
     
     test("removes deleted item from parent collection if item has no PK", async () => {
@@ -717,7 +738,7 @@ describe("ViewModel", () => {
 
       await course.$delete();
 
-      expect(deleteMock.mock.calls).toHaveLength(0);
+      expect(deleteMock).toBeCalledTimes(0);
       expect(student.courses).toHaveLength(0);
     })
   })
@@ -785,12 +806,12 @@ describe("ListViewModel", () => {
       vue.$watch('name', watchCallback);
 
       await vue.$nextTick();
-      expect(watchCallback.mock.calls).toHaveLength(0);
+      expect(watchCallback).toBeCalledTimes(0);
 
       list.$items[1].name = "Heidi";
       await vue.$nextTick();
 
-      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(watchCallback).toBeCalledTimes(1);
       expect(list.$items[1].name).toBe("Heidi");
     })
 
@@ -805,7 +826,7 @@ describe("ListViewModel", () => {
 
       await vue.$nextTick();
 
-      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(watchCallback).toBeCalledTimes(1);
       expect(list.$items).toHaveLength(3);
     })
 
@@ -831,7 +852,7 @@ describe("ListViewModel", () => {
       await vue.$nextTick();
 
       // The watcher should not have been triggered.
-      expect(watchCallback.mock.calls).toHaveLength(0);
+      expect(watchCallback).toBeCalledTimes(0);
     })
 
     test("newly loaded additional items are reactive", async () => {
@@ -885,7 +906,7 @@ describe("ListViewModel", () => {
       await vue.$nextTick();
 
       // The watcher should have been triggered.
-      expect(watchCallback.mock.calls).toHaveLength(1);
+      expect(watchCallback).toBeCalledTimes(1);
     })
 
     test("preserves same objects for same-keyed results", async () => {

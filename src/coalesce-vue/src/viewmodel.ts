@@ -819,12 +819,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
             }
           : function(this: InstanceType<T>, incomingValue: any) {
               const $data = (this as any).$data;
-
-              // TODO: Implement $emit?
-              // this.$emit('valueChanged', prop, value, val);
-
               const old = $data[propName];
-              $data[propName] = incomingValue;
 
               // First, check strict equality. This will handle the 90% most common case.
               if (old === incomingValue) {
@@ -835,14 +830,12 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               // valueOf() helps with Date instances that represent the same time value.
               // If either side is null, it is ok to set $isDirty, since we
               // know that if we got this var, BOTH sides aren't both null.
-              if (
-                old == null ||
-                incomingValue == null ||
-                // leaving this check out for now. All objects in JS should have a .valueOf().
-                // if we find things that don't, then that's really interesting.
-                //typeof old.valueOf != 'function' || typeof val.valueOf != 'function' ||
-                old.valueOf() !== incomingValue.valueOf()
-              ) {
+              if (old?.valueOf() !== incomingValue?.valueOf()) {
+                $data[propName] = incomingValue;
+              
+                // TODO: Implement $emit?
+                // this.$emit('valueChanged', prop, value, val);
+
                 this.$isDirty = true;
 
                 if (prop.role == "foreignKey" && prop.navigationProp) {

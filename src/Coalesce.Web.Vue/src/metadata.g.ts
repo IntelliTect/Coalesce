@@ -68,6 +68,7 @@ export const Case = domain.types.Case = {
     openedAt: {
       name: "openedAt",
       displayName: "Opened At",
+      dateKind: "datetime",
       type: "date",
       role: "value",
     },
@@ -272,6 +273,7 @@ export const Case = domain.types.Case = {
         minDate: {
           name: "minDate",
           displayName: "Min Date",
+          dateKind: "datetime",
           type: "date",
           role: "value",
         },
@@ -605,18 +607,21 @@ export const Person = domain.types.Person = {
     birthDate: {
       name: "birthDate",
       displayName: "Birth Date",
+      dateKind: "date",
       type: "date",
       role: "value",
     },
     lastBath: {
       name: "lastBath",
       displayName: "Last Bath",
+      dateKind: "datetime",
       type: "date",
       role: "value",
     },
     nextUpgrade: {
       name: "nextUpgrade",
       displayName: "Next Upgrade",
+      dateKind: "datetime",
       type: "date",
       role: "value",
     },
@@ -1256,6 +1261,7 @@ export const WeatherService = domain.services.WeatherService = {
         dateTime: {
           name: "dateTime",
           displayName: "Date Time",
+          dateKind: "datetime",
           type: "date",
           role: "value",
         },
@@ -1284,6 +1290,7 @@ export const WeatherService = domain.services.WeatherService = {
         dateTime: {
           name: "dateTime",
           displayName: "Date Time",
+          dateKind: "datetime",
           type: "date",
           role: "value",
         },

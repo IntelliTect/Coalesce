@@ -638,7 +638,13 @@ class DisplayVisitor extends Visitor<
         return format(parsed, this.options.format);
       }
     }
-    return lightFormat(parsed, "M/d/yyyy h:mm:ss aaa");
+
+    switch (meta.dateKind) {
+      case "date":
+        return lightFormat(parsed, "M/d/yyyy");
+      default:
+        return lightFormat(parsed, "M/d/yyyy h:mm:ss aaa");
+    }
   }
 
   protected visitPrimitiveValue(

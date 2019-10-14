@@ -4,7 +4,7 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public interface IValueViewModel
+    public interface IValueViewModel : IAttributeProvider
     {
         string Name { get; }
 

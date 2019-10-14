@@ -1,10 +1,12 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 {
@@ -399,6 +401,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             b.StringProp("name", value.JsVariable);
             b.StringProp("displayName", value.DisplayName);
+
+            if (value.Type.IsDate)
+            {
+                var dateType = value.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
+                switch (dateType)
+                {
+                    case DateTypes.DateOnly:
+                        b.StringProp("dateKind", "date");
+                        break;
+                    default:
+                        b.StringProp("dateKind", "datetime");
+                        break;
+                }
+            }
 
             WriteTypeCommonMetadata(b, value.Type);
         }

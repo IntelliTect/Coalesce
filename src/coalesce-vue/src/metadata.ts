@@ -254,6 +254,7 @@ export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> {
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> { 
     readonly role: "value"
+    readonly dateKind: "date" | "datetime"
 }
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 

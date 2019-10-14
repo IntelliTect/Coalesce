@@ -1,4 +1,4 @@
-jobs:
+﻿jobs:
 - job: Meta
 
   steps:
@@ -123,20 +123,23 @@ jobs:
     displayName: 'Coalesce.Web: npx gulp copyAll'
     workingDirectory: src/Coalesce.Web
 
-  - script: npm run build-lib
-    displayName: 'Coalesce.Web.Vue: npm run build-lib'
-    workingDirectory: src/Coalesce.Web.Vue
+  # Commented these out because they're a bit slow, and because Coalesce.Web.Vue hasn't been touched in a long long time,
+  # so they really aren't providing much value.
+  
+  # - script: npm run build-lib
+  #   displayName: 'Coalesce.Web.Vue: npm run build-lib'
+  #   workingDirectory: src/Coalesce.Web.Vue
 
-  - script: npm ci
-    displayName: 'Coalesce.Web.Vue: npm ci'
-    workingDirectory: src/Coalesce.Web.Vue
+  # - script: npm ci
+  #   displayName: 'Coalesce.Web.Vue: npm ci'
+  #   workingDirectory: src/Coalesce.Web.Vue
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Coalesce.Web.Vue: dotnet dotnet-coalesce.dll '
-    inputs:
-      command: custom
-      custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
-      arguments: 'coalesce-vue.json'
+  # - task: DotNetCoreCLI@2
+  #   displayName: 'Coalesce.Web.Vue: dotnet dotnet-coalesce.dll '
+  #   inputs:
+  #     command: custom
+  #     custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
+  #     arguments: 'coalesce-vue.json'
 
 - job:
   displayName: coalesce-vue

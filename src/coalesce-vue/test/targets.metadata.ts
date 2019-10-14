@@ -166,6 +166,7 @@ export const Student = domain.types.Student = {
     birthDate: {
       name: 'birthDate',
       displayName: 'BirthDate',
+      dateKind: 'datetime',
       role: 'value',
       type: "date"
     },

@@ -284,7 +284,7 @@ export abstract class ViewModel<
 
     const watcher = vue.$watch(() => {
       return this.$isDirty;
-    }, enqueueSave);
+    }, enqueueSave, { immediate: true });
     startAutoCall(this._autoSaveState, vue, watcher, enqueueSave);
   }
 
@@ -334,7 +334,9 @@ export abstract class ViewModel<
       // The ViewModelCollection will handle create a new ViewModel,
       // and setting $parent, $parentCollection.
       // TODO: Should it also handle setting of the foreign key?
-      return collection[collection.push(newModel) - 1];
+      const newViewModel = collection[collection.push(newModel) - 1];
+      newViewModel.$isDirty = true;
+      return newViewModel;
     } else {
       throw "$addChild only adds to collections of model properties.";
     }

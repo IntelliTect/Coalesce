@@ -42,6 +42,14 @@ export const Course = domain.types.Course = {
       displayName: 'Name',
       role: 'value',
       type: "string"
+    },
+    studentId: {
+      name: "studentId",
+      displayName: "StudentId",
+      type: "number",
+      role: "foreignKey",
+      get principalType() { return domain.types.Student as ModelType },
+      get principalKey() { return (domain.types.Student as ModelType).keyProp as PrimaryKeyProperty }
     }
   }
 };
@@ -176,7 +184,7 @@ export const Student = domain.types.Student = {
       role: "collectionNavigation",
       type: "collection",
       dontSerialize: true,
-      get foreignKey() { return (domain.types.Course as ModelType).props.courseId as ForeignKeyProperty },
+      get foreignKey() { return (domain.types.Course as ModelType).props.studentId as ForeignKeyProperty },
       itemType: {
         name: '$collectionValue',
         role: 'value',

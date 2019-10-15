@@ -207,6 +207,30 @@ describe("ViewModel", () => {
       
       expect(saveMock).toBeCalledTimes(0);
     })
+
+    test("triggers save immediately if model is dirty", async () => {
+      var student = new StudentViewModel({
+        studentId: 1, name: "bob",
+      });
+      const saveMock = student.$apiClient.save = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+      const vue = new Vue({ data: { student } });
+
+      // Start auto save. Model shouldn't be dirty, so it shouldn't hit the API.
+      expect(student.$isDirty).toBe(false);
+      student.$startAutoSave(vue, {wait: 0});
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(0);
+
+      // Reset autosave, dirty the model, and restart autosave.
+      // It should trigger immediately.
+      student.$stopAutoSave();
+      student.name += "2";
+      expect(student.$isDirty).toBe(true);
+      student.$startAutoSave(vue, {wait: 0});
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(1);
+    })
   })
 
   describe("$addChild", () => {
@@ -224,6 +248,15 @@ describe("ViewModel", () => {
 
       expect(course.$parent).toBe(student);
       expect(course.$parentCollection).toBe(student.courses);
+    })
+
+    test("new model has foreign key and $isDirty set", () => {
+      var student = new StudentViewModel({studentId: 3});
+      const course: CourseViewModel = student.$addChild("courses");
+
+      expect(course).toBeInstanceOf(CourseViewModel);
+      expect(course.studentId).toBe(student.studentId);
+      expect(course.$isDirty).toBe(true);
     })
   })
 

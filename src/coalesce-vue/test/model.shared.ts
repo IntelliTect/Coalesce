@@ -56,13 +56,15 @@ export const twoWayConversions = <MappingData[]>[
       return {
         $metadata: $metadata.Course,
         name: name,
-        courseId: i
+        courseId: i,
+        studentId: null
       };
     }),
     dto: ["CSCD 210", "CSCD 211", "MATH 301"].map((name, i) => {
       return {
         name: name,
-        courseId: i
+        courseId: i,
+        studentId: null
       };
     })
   },

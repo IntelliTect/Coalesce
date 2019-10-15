@@ -31,6 +31,7 @@ apiClients.StudentApiClient, StudentViewModel> {
 
 export interface CourseViewModel extends models.Course {
   courseId: number | null;
+  studentId: number | null;
   name: string | null;
 }
 export class CourseViewModel extends ViewModel<models.Course, apiClients.CourseApiClient, number> {

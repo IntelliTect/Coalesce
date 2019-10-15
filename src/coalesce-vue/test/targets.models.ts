@@ -43,6 +43,7 @@ export interface Advisor extends Model<typeof metadata.Advisor> {
 
 export interface Course extends Model<typeof metadata.Course> {
   courseId: number | null
+  studentId: number | null
   name: string | null
 }
 export class Course {

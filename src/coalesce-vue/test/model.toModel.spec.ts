@@ -2,7 +2,7 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
 import { ModelValue, ObjectValue, Value, ObjectType, CollectionValue } from "../src/metadata";
-import { shortStringify } from "./test-utils";
+import { shortStringify, expectDeepMatch } from "./test-utils";
 import { Indexable } from "../src/util";
 import { twoWayConversions, studentValue, MappingData, displaysStudentValue } from "./model.shared";
 
@@ -133,19 +133,7 @@ dtoToModelMappings.forEach(
           if (typeof modelValue == "object" && modelValue != null) {
             // Expected model is an object, and not a value type.
             // Deep-compare the object.
-
-            // Prevent stack overflows (CTRL+F: "Maximum call stack exceeded") due to circular metadata
-            // by replacing expected $metadata objects with jest magic.
-            // Currently, this is only replacing at the top-level.
-            // If these tests get more intricate, we might need to get fancier.
-            if (modelValue.$metadata) {
-              modelValue = {
-                ...modelValue,
-                $metadata: expect.objectContaining({name: modelValue.$metadata.name}),
-              }
-            }
-
-            expect(mapped).toMatchObject(modelValue);
+            expectDeepMatch(mapped, modelValue);
           } else {
             expect(mapped).toBe(modelValue);
           }
@@ -173,7 +161,8 @@ dtoToModelMappings.forEach(
               // the date DTO value is a string - this behavior is desired and in fact required.
               expect(mapped).toBe(dtoValue);
             }
-            expect(mapped).toMatchObject(modelValue);
+
+            expectDeepMatch(mapped, modelValue);
           } else {
             expect(mapped).toBe(modelValue);
           }
@@ -182,7 +171,6 @@ dtoToModelMappings.forEach(
     });
   }
 );
-
 
 
 // Test both `map` and `convert` cases 

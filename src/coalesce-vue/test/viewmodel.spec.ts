@@ -59,6 +59,70 @@ describe("ViewModel", () => {
     })
   })
 
+  describe("save", () => {
+    const saveMock = jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+      wasSuccessful: true,
+      object: {
+        studentId: 3,
+        name: "Bob",
+        studentAdvisorId: null,
+        advisor: null,
+      }
+    }});
+
+    test("updates collection navigation entities with new PK", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+        courses: [
+          { name: "a", },
+          { name: "b", },
+        ]
+      });
+
+      student.$apiClient.save = jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+        wasSuccessful: true,
+        object: {
+          studentId: 3,
+          name: "Bob",
+          // It must still work if the server returns an empty array.
+          // The unsaved items (i.e. those without a PK) should be preserved on the client.
+          courses: [] as Course[],
+          studentAdvisorId: null,
+          advisor: null,
+        }
+      }});
+      await student.$save()
+
+      expect(student.courses).toHaveLength(2);
+      expect(student.courses![0].name).toBe("a");
+      expect(student.courses![0].studentId).toBe(3);
+      expect(student.courses![1].name).toBe("b");
+      expect(student.courses![1].studentId).toBe(3);
+    })
+
+    test("updates $parent's FK prop with new PK", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+        advisor: { name: "Phoebe" },
+      });
+
+      const advisor = student.advisor!;
+      expect((advisor as any).$parent).toBe(student);
+
+      advisor.$apiClient.save = jest.fn().mockResolvedValue(<AxiosItemResult<Advisor>>{data: {
+        wasSuccessful: true,
+        object: {
+          advisorId: 3,
+          name: "Phoebe",
+        }
+      }});
+      await advisor.$save()
+
+      expect(advisor.advisorId).toBe(3);
+      expect(student.studentAdvisorId).toBe(3);
+    })
+  })
+
   describe("autoSave", () => {
 
     test("when model is dirtied while creation save is in-flight, new PK is still set", async () => {
@@ -260,173 +324,180 @@ describe("ViewModel", () => {
     })
   })
 
-  describe("value getters/setters", () => {
-    test.each([
-      ["date", () => new Student({studentId: 1, birthDate: new Date("1990-01-02T03:04:05.000-08:00")})]
-    ])("%s setter doesn't trigger reactivity for unchanged value", async (_, factory) => {
-      // Workaround for Jest's bad typescript support.
-      const modelFactory = factory as unknown as () => Student
+  describe("getters/setters", () => {
 
-      var student = new StudentViewModel(modelFactory());
-      
-      const vue = new Vue({ data: { student } });
-      const watchCallback = jest.fn();
-      vue.$watch('student', watchCallback, { deep: true });
+    
+    describe("value getters/setters", () => {
+      test.each([
+        ["number", () => new Student({studentId: 1})],
+        ["string", () => new Student({studentId: 1, name: "bob"})],
+        ["boolean", () => new Student({studentId: 1, isEnrolled: true})],
+        ["date", () => new Student({studentId: 1, birthDate: new Date("1990-01-02T03:04:05.000-08:00")})]
+      ])("%s setter doesn't trigger reactivity for unchanged value", async (_, factory) => {
+        // Workaround for Jest's bad typescript support.
+        const modelFactory = factory as unknown as () => Student
 
-      student.$loadFromModel(modelFactory());
-      await vue.$nextTick();
+        var student = new StudentViewModel(modelFactory());
+        
+        const vue = new Vue({ data: { student } });
+        const watchCallback = jest.fn();
+        vue.$watch('student', watchCallback, { deep: true });
 
-      // Exact same model was reloaded. There should be no changes.
-      expect(watchCallback).toBeCalledTimes(0);
-    })
-  })
+        student.$loadFromModel(modelFactory());
+        await vue.$nextTick();
 
-  describe("collection navigation getter/setters", () => {
-    test("setter creates new ViewModelCollection", () => {
-      var student = new StudentViewModel();
-      student.courses = [];
-
-      expect(student.courses.push).not.toBe(Array.prototype.push);
-      expect(student.courses.push).toBe(ViewModelCollection.prototype.push);
+        // Exact same model was reloaded. There should be no changes.
+        expect(watchCallback).toBeCalledTimes(0);
+      })
     })
 
-    test("collection creates ViewModel when Model is pushed", () => {
-      var student = new StudentViewModel();
-      student.courses = [];
+    describe("collection navigation getter/setters", () => {
+      test("setter creates new ViewModelCollection", () => {
+        var student = new StudentViewModel();
+        student.courses = [];
 
-      // The typings don't explicitly allow this, so we must cast to any.
-      // The use case is an input component that provides models (instead of ViewModels).
-      student.courses.push(new Course({
-        courseId: 1,
-        name: "Seagull"
-      }) as any);
+        expect(student.courses.push).not.toBe(Array.prototype.push);
+        expect(student.courses.push).toBe(ViewModelCollection.prototype.push);
+      })
 
-      expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
-      expect(student.courses[0].name).toBe("Seagull");
-    })
+      test("collection creates ViewModel when Model is pushed", () => {
+        var student = new StudentViewModel();
+        student.courses = [];
 
-    test("collection creates ViewModel when array containing a Model is set", () => {
-      var student = new StudentViewModel();
-
-      // The typings don't explicitly allow this, so we must cast to any.
-      // The use case is an input component that provides models (instead of ViewModels).
-      student.courses = [
-        new Course({
+        // The typings don't explicitly allow this, so we must cast to any.
+        // The use case is an input component that provides models (instead of ViewModels).
+        student.courses.push(new Course({
           courseId: 1,
           name: "Seagull"
-        }) as any
-      ];
+        }) as any);
 
-      expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
-      expect(student.courses[0].name).toBe("Seagull");
-      expect((student.courses[0] as any).$parent).toBe(student);
-      expect((student.courses[0] as any).$parentCollection).toBe(student.courses);
+        expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
+        expect(student.courses[0].name).toBe("Seagull");
+      })
+
+      test("collection creates ViewModel when array containing a Model is set", () => {
+        var student = new StudentViewModel();
+
+        // The typings don't explicitly allow this, so we must cast to any.
+        // The use case is an input component that provides models (instead of ViewModels).
+        student.courses = [
+          new Course({
+            courseId: 1,
+            name: "Seagull"
+          }) as any
+        ];
+
+        expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
+        expect(student.courses[0].name).toBe("Seagull");
+        expect((student.courses[0] as any).$parent).toBe(student);
+        expect((student.courses[0] as any).$parentCollection).toBe(student.courses);
+      })
+
+      test("collection is reactive for push", async () => {
+        var student = new StudentViewModel();
+        student.courses = [];
+
+        const vue = new Vue({ data: { student } });
+        const watchCallback = jest.fn();
+        vue.$watch('student.courses', watchCallback);
+
+        student.courses.push(new CourseViewModel);
+
+        await vue.$nextTick();
+
+        expect(watchCallback).toBeCalledTimes(1);
+        expect(student.courses).toHaveLength(1);
+      })
     })
 
-    test("collection is reactive for push", async () => {
-      var student = new StudentViewModel();
-      student.courses = [];
+    describe("reference navigation & FK getter/setters", () => {
+      test("setter copies foreign key", () => {
+        var student = new StudentViewModel();
+        var advisor = new AdvisorViewModel({advisorId: 3});
+        student.advisor = advisor;
+        expect(student.studentAdvisorId).toBe(advisor.advisorId);
+      })
 
-      const vue = new Vue({ data: { student } });
-      const watchCallback = jest.fn();
-      vue.$watch('student.courses', watchCallback);
+      test("setter creates ViewModel when provided a Model", () => {
+        var student = new StudentViewModel();
+        var advisor: Advisor = mapToModel({advisorId: 3}, metadata.Advisor);
 
-      student.courses.push(new CourseViewModel);
+        // The typings don't explicitly allow this, so we must cast to any.
+        // The use case is an input component that provides models (instead of ViewModels).
+        (student as any).advisor = advisor;
 
-      await vue.$nextTick();
+        expect(advisor).not.toBeInstanceOf(AdvisorViewModel);
+        expect(student.advisor).toBeInstanceOf(AdvisorViewModel);
+      })
 
-      expect(watchCallback).toBeCalledTimes(1);
-      expect(student.courses).toHaveLength(1);
-    })
-  })
+      test("clears FK when reference is nulled", () => {
+        var student = new StudentViewModel({
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3, name: "Delphine", }
+        });
 
-  describe("reference navigation & FK getter/setters", () => {
-    test("setter copies foreign key", () => {
-      var student = new StudentViewModel();
-      var advisor = new AdvisorViewModel({advisorId: 3});
-      student.advisor = advisor;
-      expect(student.studentAdvisorId).toBe(advisor.advisorId);
-    })
+        student.advisor = null;
+        expect(student.studentAdvisorId).toBeNull();
+      })
 
-    test("setter creates ViewModel when provided a Model", () => {
-      var student = new StudentViewModel();
-      var advisor: Advisor = mapToModel({advisorId: 3}, metadata.Advisor);
+      test("updates FK when reference is changed", () => {
+        var student = new StudentViewModel({
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3, name: "Delphine", }
+        });
 
-      // The typings don't explicitly allow this, so we must cast to any.
-      // The use case is an input component that provides models (instead of ViewModels).
-      (student as any).advisor = advisor;
+        student.advisor = { advisorId: 4, name: "Beth", } as any;
+        expect(student.studentAdvisorId).toBe(4);
+      })
 
-      expect(advisor).not.toBeInstanceOf(AdvisorViewModel);
-      expect(student.advisor).toBeInstanceOf(AdvisorViewModel);
-    })
+      test("clears reference when FK is nulled", () => {
+        var student = new StudentViewModel({
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3, name: "Delphine", }
+        });
 
-    test("clears FK when reference is nulled", () => {
-      var student = new StudentViewModel({
-        studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
-      });
+        student.studentAdvisorId = null;
+        expect(student.advisor).toBeNull();
+      })
 
-      student.advisor = null;
-      expect(student.studentAdvisorId).toBeNull();
-    })
+      test("maintains reference when FK is nulled if reference has null PK", () => {
+        var student = new StudentViewModel();
 
-    test("updates FK when reference is changed", () => {
-      var student = new StudentViewModel({
-        studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
-      });
+        student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
+        student.studentAdvisorId = null;
+        expect(student.advisor!.name).toBe("Beth");
+      })
 
-      student.advisor = { advisorId: 4, name: "Beth", } as any;
-      expect(student.studentAdvisorId).toBe(4);
-    })
+      test("sets null FK when reference with null PK is set", () => {
+        var student = new StudentViewModel({
+          studentAdvisorId: 3
+        });
 
-    test("clears reference when FK is nulled", () => {
-      var student = new StudentViewModel({
-        studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
-      });
+        student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
+        expect(student.advisor!.name).toBe("Beth");
+        expect(student.studentAdvisorId).toBeNull();
+      })
 
-      student.studentAdvisorId = null;
-      expect(student.advisor).toBeNull();
-    })
+      test("clears reference when FK no longer matches", () => {
+        var student = new StudentViewModel({
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3, name: "Delphine", }
+        });
 
-    test("maintains reference when FK is nulled if reference has null PK", () => {
-      var student = new StudentViewModel();
+        student.studentAdvisorId = 4;
+        expect(student.advisor).toBeNull();
+      })
 
-      student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
-      student.studentAdvisorId = null;
-      expect(student.advisor!.name).toBe("Beth");
-    })
+      test("maintains reference when FK is set to same value", () => {
+        var student = new StudentViewModel({
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3, name: "Delphine", }
+        });
 
-    test("sets null FK when reference with null PK is set", () => {
-      var student = new StudentViewModel({
-        studentAdvisorId: 3
-      });
-
-      student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
-      expect(student.advisor!.name).toBe("Beth");
-      expect(student.studentAdvisorId).toBeNull();
-    })
-
-    test("clears reference when FK no longer matches", () => {
-      var student = new StudentViewModel({
-        studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
-      });
-
-      student.studentAdvisorId = 4;
-      expect(student.advisor).toBeNull();
-    })
-
-    test("maintains reference when FK is set to same value", () => {
-      var student = new StudentViewModel({
-        studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
-      });
-
-      const originalAdvisor = student.advisor;
-      student.studentAdvisorId = 3;
-      expect(student.advisor).toBe(originalAdvisor);
+        const originalAdvisor = student.advisor;
+        student.studentAdvisorId = 3;
+        expect(student.advisor).toBe(originalAdvisor);
+      })
     })
   })
 
@@ -471,7 +542,7 @@ describe("ViewModel", () => {
       expect(student.advisor!.$isDirty).toBe(false);
     })
 
-    test("preserves existing reference navigation when incoming ref is null but key is same", () => {
+    test("preserves existing reference navigation when incoming ref is null but key is same and non-null", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
@@ -505,7 +576,7 @@ describe("ViewModel", () => {
       expect(student.advisor).toBeNull();
     })
 
-    test("clears existing reference navigation when incoming ref and key are null", () => {
+    test("clears existing reference navigation when incoming ref and key are null, and existing object has a PK", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
@@ -521,6 +592,29 @@ describe("ViewModel", () => {
       // Reference should have been cleared out.
       expect(student.advisor).toBeNull();
       expect(student.studentAdvisorId).toBeNull();
+    })
+
+    test("preserves existing reference navigation when incoming ref and key are null, and existing object has no PK", () => {
+      /*
+        Scenario: We instantiate an object (Student), and a related reference (Advisor) at the same time.
+        We want to save both of these objects, but there's a chicken-and-egg scenario.
+        The reference (Advisor) needs to be saved before the (Student)'s FK can be set.
+
+        In a situation where both objects are being autosaved,
+        we want to ensure that there is eventual consistency
+        regardless of whether the saves are initiated in the order 
+        (Student,Advisor,Student) or (Advisor,Student).
+
+        To ensure this happens, we need to ensure that the `advisor` navigation isn't nulled out
+        when the first save against the Student finishes.
+      */
+      var student = new StudentViewModel();
+      var advisor = student.advisor = new AdvisorViewModel();
+
+      // Simulate first save against Student.
+      student.$loadFromModel({studentId: 1, studentAdvisorId: null, advisor: null});
+      // Advisor reference should have been preserved because Advisor is an unsaved model with a null PK.
+      expect(student.advisor).toBe(advisor);
     })
 
     test("updates foreign keys from navigation props' PKs when navigation prop is iterated second", () => {
@@ -687,7 +781,6 @@ describe("ViewModel", () => {
       })
 
       // Watcher should have been triggered because its contents changed
-      // (course 9 removed, course 11 added)
       expect(watchCallback).toBeCalledTimes(1);
     })
 

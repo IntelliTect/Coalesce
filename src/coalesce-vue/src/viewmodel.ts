@@ -11,7 +11,8 @@ import {
   CollectionValue,
   ModelCollectionNavigationProperty,
   ModelCollectionValue,
-  Service
+  Service,
+  Property
 } from "./metadata";
 import {
   ModelApiClient,
@@ -73,8 +74,9 @@ export abstract class ViewModel<
   // Technically this will always be initialized by the setting of `$isDirty` in the ctor.
   //private _pristineDto: any = null;
 
-  protected $parent: any = null;
-  protected $parentCollection: this[] | null = null;
+  // TODO: Do $parent and $parentCollection need to be Set<>s in order to handle objects being in multiple collections or parented to multiple parents? Could be useful.
+  private $parent: any = null;
+  private $parentCollection: this[] | null = null;
 
   // Underlying object which will hold the backing values
   // of the custom getters/setters. Not for external use.
@@ -193,6 +195,8 @@ export abstract class ViewModel<
             ];
           }
 
+          this.updatedRelatedForeignKeysWithCurrentPrimaryKey()
+
           // Set the new state of our data as being clean (since we just made a change to it)
           this.$isDirty = false;
         }
@@ -203,6 +207,39 @@ export abstract class ViewModel<
     Object.defineProperty(this, "$save", { value: $save });
 
     return $save;
+  }
+
+  private updatedRelatedForeignKeysWithCurrentPrimaryKey() {
+    const pkValue = this.$primaryKey;
+
+    // Look through collection navigations.
+    // Set the corresponding foreign key of all entities to the current PK value.
+    for (const prop of Object.values(this.$metadata.props)) {
+      if (prop.role != "collectionNavigation") continue;
+      
+      const value = (this as any)[prop.name]
+      if (value?.length) {
+        const fk = prop.foreignKey.name
+        for (const child of value) {
+          child[fk] = pkValue
+        }
+      }
+    }
+
+    if (this.$parent?.$metadata?.props) {
+      const parent = this.$parent
+      for (const prop of Object.values(parent.$metadata.props) as Property[]) {
+        if (prop.role != "referenceNavigation") continue;
+        
+        // The prop on the parent is a reference navigation. 
+        // If the value of the navigation is ourself, 
+        // update the foreign key on the $parent with our new PK.
+        const value = parent[prop.name]
+        if (value === this) {
+          parent[prop.foreignKey.name] = pkValue;
+        }
+      }
+    }
   }
 
   public $loadFromModel(source: {} | TModel) {
@@ -606,19 +643,12 @@ function viewModelCollectionMapItems<T extends ViewModel>(
       throw Error(
         `Cannot push a non-object to ${viewModelCollectionName(vmc.$metadata)}`
       );
-    } else if (!("$metadata" in val)) {
-      throw Error(
-        `Cannot push a non-model ($metadata prop is missing) to ${viewModelCollectionName(
-          vmc.$metadata
-        )}`
-      );
-    }
-
-    const incomingTypeMeta = val.$metadata;
-    if (incomingTypeMeta.name != collectedTypeMeta.name) {
+    } 
+    // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
+    else if ("$metadata" in val && val.$metadata != collectedTypeMeta) {
       throw Error(
         `Type mismatch - attempted to assign a ${
-          incomingTypeMeta.name
+          val.$metadata.name
         } to ${viewModelCollectionName(vmc.$metadata)}`
       );
     }
@@ -632,7 +662,7 @@ function viewModelCollectionMapItems<T extends ViewModel>(
           "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
         );
       }
-      val = (ViewModelFactory.get(incomingTypeMeta.name, val) as unknown) as T;
+      val = (ViewModelFactory.get(collectedTypeMeta.name, val) as unknown) as T;
     }
 
     // $parent and $parentCollection are intentionally protected -
@@ -774,6 +804,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                     incomingValue
                   );
                 }
+
+                incomingValue.$parent = this;
               }
 
               (this as any).$data[propName] = incomingValue;
@@ -794,6 +826,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 (this as any)[prop.foreignKey.name] = incomingPk;
               }
             }
+
+
           : prop.role == "collectionNavigation"
           ? function(this: InstanceType<T>, incomingValue: any) {
               // Usability niceness - make an empty array if the incoming is null.
@@ -819,7 +853,25 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               vmc.push(...incomingValue);
               $data[propName] = vmc;
             }
-          : function(this: InstanceType<T>, incomingValue: any) {
+
+
+          // : prop.role =="primaryKey"
+          // ? function(this: InstanceType<T>, incomingValue: any) {
+          //     const $data = (this as any).$data;
+
+          //     // Do nothing if the value is unchanged.
+          //     if ($data[propName] === incomingValue) {
+          //       return;
+          //     }
+
+          //     $data[propName] = incomingValue;
+            
+          //     // TODO: Implement $emit?
+          //     // this.$emit('valueChanged', prop, value, val);
+          //   }
+
+
+            : function(this: InstanceType<T>, incomingValue: any) {
               const $data = (this as any).$data;
               const old = $data[propName];
 
@@ -900,10 +952,15 @@ function rebuildModelCollectionForViewModelCollection(
   // keeping existing ViewModels the same based on keys.
   const pkName = type.keyProp.name;
   const existingItemsMap = new Map();
+  const existingItemsWithoutPk = [];
   for (let i = 0; i < currentLength; i++) {
     const item = currentValue[i];
     const itemPk = item[pkName];
-    existingItemsMap.set(itemPk, item);
+    if (itemPk) {
+      existingItemsMap.set(itemPk, item);
+    } else {
+      existingItemsWithoutPk.push(item)
+    }
   }
 
   // Rebuild the currentValue array, using existing items when they exist,
@@ -919,6 +976,7 @@ function rebuildModelCollectionForViewModelCollection(
       if (currentValue[i] === existingItem) {
         // The existing item is not moving position. Do nothing.
       } else {
+        // Replace the item currently at this position with the existing item.
         currentValue.splice(i, 1, existingItem);
       }
     } else {
@@ -933,6 +991,32 @@ function rebuildModelCollectionForViewModelCollection(
         currentValue.push(incomingItem);
       }
     }
+  }
+
+  if (existingItemsWithoutPk.length) {
+    // Add to the end of the collection any existing items that do not have primary keys.
+    // This behavior exists to prevent losing items on the client
+    // that may not yet be saved in the event that the parent of the collection
+    // get reloaded from a save.
+    // If this behavior is undesirable in a specific circumstance,
+    // it is trivial to manually remove unsaved items after a .$save() is peformed.
+
+    const existingItemsLength = existingItemsWithoutPk.length
+    for (let i = 0; i < existingItemsLength; i++) {
+      let realIndex = incomingLength + i;
+
+      const existingItem = existingItemsWithoutPk[i];
+      const currentItem = currentValue[realIndex];
+
+      if (existingItem === currentItem) {
+        // The existing item is not moving position. Do nothing.
+      } else {
+        // Replace the item currently at this position with the existing item.
+        currentValue.splice(realIndex, 1, existingItem);
+      }
+    }
+
+    incomingLength += existingItemsLength;
   }
 
   // If the new collection is shorter than the existing length,

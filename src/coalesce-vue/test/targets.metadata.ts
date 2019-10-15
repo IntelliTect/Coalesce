@@ -34,7 +34,7 @@ export const Course = domain.types.Course = {
     courseId: {
       name: 'courseId',
       displayName: 'CourseId',
-      role: 'value',
+      role: 'primaryKey',
       type: "number"
     },
     name: {
@@ -156,7 +156,7 @@ export const Student = domain.types.Student = {
     studentId: {
       name: 'studentId',
       displayName: 'StudentId',
-      role: 'value',
+      role: 'primaryKey',
       type: "number"
     },
     name: {

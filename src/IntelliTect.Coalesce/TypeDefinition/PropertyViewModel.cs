@@ -557,9 +557,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
+        /// <para>
         /// If this property is a collection navigation property (the "many"), 
         /// returns the reference navigation property on the collected type that represents the 
         /// "one" end of the one-to-many relationship.
+        /// </para>
+        /// <para>
+        /// If this property is a reference navigation property (the "one"),
+        /// returns the collection navigation property on the referenced type that represents the
+        /// "many" end of the one-to-many relationship.
+        /// </para>
         /// </summary>
         public PropertyViewModel InverseProperty
         {
@@ -570,10 +577,33 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     return Object.PropertyByName(name);
                 }
-                else if (Object != null)
+
+                if (Type.IsCollection)
                 {
-                    return Object.PropertyByName(Parent.Name);
+                    // If this prop is a collection, look for a property on the collected type
+                    // whose name is the same as the type name of this prop's owner.
+                    // This serves to pick up the standard convention of props like
+                    // public Widget Widget { get; set; }
+                    if (Object != null)
+                    {
+                        return Object.PropertyByName(Parent.Name);
+                    }
                 }
+                else if (Role == PropertyRole.ReferenceNavigation)
+                {
+                    // Try to find the inverse by looking for a collection on the
+                    // referenced type of this property whose inverse is this property.
+                    var prop = Object.ClientProperties.Where(p =>
+                        p.Role == PropertyRole.CollectionNavigation
+                        && p.InverseProperty == this
+                    ).FirstOrDefault();
+
+                    if (prop != null)
+                    {
+                        return prop;
+                    }
+                }
+
                 return null;
             }
         }

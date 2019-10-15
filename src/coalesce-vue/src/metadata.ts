@@ -355,6 +355,7 @@ export interface ModelReferenceNavigationProperty extends PropertyBase, ModelVal
     readonly role: "referenceNavigation"
     readonly foreignKey: ForeignKeyProperty
     readonly principalKey: PrimaryKeyProperty
+    readonly inverseNavigation?: ModelReferenceNavigationProperty
 }
 
 /** 
@@ -377,6 +378,7 @@ export interface ModelCollectionNavigationProperty extends PropertyBase, Collect
      */
     readonly foreignKey: ForeignKeyProperty
     readonly itemType: ModelValue // & CollectionItemValue
+    readonly inverseNavigation?: ModelReferenceNavigationProperty
     
     readonly manyToMany?: {
         /** The name of the many-to-many collection. */

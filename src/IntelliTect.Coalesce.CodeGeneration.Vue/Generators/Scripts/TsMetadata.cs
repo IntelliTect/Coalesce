@@ -215,12 +215,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.StringProp("role", "referenceNavigation");
                         b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
                         b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+
+                        if (prop.InverseProperty != null)
+                        {
+                            b.Line($"get inverseNavigation() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.JsVariable} as ModelCollectionNavigationProperty }},");
+                        }
+
                         break;
 
                     case PropertyRole.CollectionNavigation:
                         // TS Type: "ModelCollectionNavigationProperty"
                         b.StringProp("role", "collectionNavigation");
                         b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                        
+                        if (prop.InverseProperty != null)
+                        {
+                            b.Line($"get inverseNavigation() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.JsVariable} as ModelReferenceNavigationProperty }},");
+                        }
 
                         if (prop.IsManytoManyCollection)
                         {

@@ -89,6 +89,7 @@ export const Case = domain.types.Case = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType).props.casesAssigned as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     reportedById: {
@@ -108,6 +109,7 @@ export const Case = domain.types.Case = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as ForeignKeyProperty },
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType).props.casesReported as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     imageName: {
@@ -161,6 +163,7 @@ export const Case = domain.types.Case = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
       manyToMany: {
         name: "products",
         displayName: "Products",
@@ -380,6 +383,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Case as ModelType).props.caseProducts as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     productId: {
@@ -477,6 +481,7 @@ export const Company = domain.types.Company = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
     altName: {
@@ -587,6 +592,7 @@ export const Person = domain.types.Person = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
     casesReported: {
@@ -602,6 +608,7 @@ export const Person = domain.types.Person = {
       },
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
     birthDate: {
@@ -657,6 +664,7 @@ export const Person = domain.types.Person = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Company as ModelType).props.employees as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     arbitraryCollectionOfStrings: {

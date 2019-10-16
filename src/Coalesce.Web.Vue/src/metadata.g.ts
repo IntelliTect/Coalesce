@@ -58,6 +58,9 @@ export const Case = domain.types.Case = {
       displayName: "Title",
       type: "string",
       role: "value",
+      rules: {
+        required: val => !val || "You must enter a title for the case.",
+      }
     },
     description: {
       name: "description",
@@ -374,6 +377,9 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
       get principalType() { return (domain.types.Case as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
+      rules: {
+        required: val => !val || "Case is required.",
+      }
     },
     case: {
       name: "case",
@@ -394,6 +400,9 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Product as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
+      rules: {
+        required: val => !val || "Product is required.",
+      }
     },
     product: {
       name: "product",
@@ -655,6 +664,9 @@ export const Person = domain.types.Person = {
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Company as ModelType) },
       get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
+      rules: {
+        required: val => !val || "Company is required.",
+      }
     },
     company: {
       name: "company",

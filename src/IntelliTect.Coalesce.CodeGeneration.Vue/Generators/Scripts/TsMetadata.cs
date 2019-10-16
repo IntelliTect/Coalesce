@@ -4,6 +4,8 @@ using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
@@ -262,6 +264,52 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 if (!prop.IsClientSerializable)
                 {
                     b.Line("dontSerialize: true,");
+                }
+
+
+                if (prop.IsClientWritable)
+                {
+                    // TODO: Handle all the rest (where it makes sense, anyway) of ClientValidationAttribute
+
+                    // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
+                    // validator function that contains the value of this flag.
+
+                    var isRequired = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired);
+                    var errorMessage = prop.GetAttributeValue<ClientValidationAttribute>(a => a.ErrorMessage);
+
+                    var rules = new List<string>();
+
+                    if (isRequired.HasValue && isRequired.Value)
+                    {
+                        rules.Add($"required: val => !val || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
+                    }
+                    else if (prop.IsRequired)
+                    {
+                        string message = null;
+                        if (prop.HasAttribute<RequiredAttribute>())
+                        {
+                            message = prop.GetAttributeValue<RequiredAttribute>(a => a.ErrorMessage);
+                        }
+                        if (string.IsNullOrWhiteSpace(message))
+                        {
+                            var name = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
+                            message = $"{name} is required.";
+                        }
+
+                        rules.Add($"required: val => !val || \"{message.EscapeStringLiteralForTypeScript()}\"");
+                    }
+
+                    if (rules.Any())
+                    {
+                        using (b.Block("rules:"))
+                        {
+                            foreach (var rule in rules)
+                            {
+                                b.Append(rule);
+                                b.Line(",");
+                            }
+                        }
+                    }
                 }
             }
         }

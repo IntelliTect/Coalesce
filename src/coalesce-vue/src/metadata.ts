@@ -225,6 +225,11 @@ export interface MethodReturnValue {
     readonly name: "$return"
 }
 
+export interface Rules {
+  required?: (val: any) => true | string
+  // TODO: Add all the other [ClientValidation] rules
+}
+
 /**
  * Base interface for all normal value metadata representations.
  * For our purposes, a value is defined as the usage of a type.
@@ -250,15 +255,18 @@ export interface ValueMetaWithTypeDef<TType extends TypeDiscriminator, TTypeDef 
 /** Represents the usage of a primitive value (string, number, or bool) */
 export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> { 
     readonly role: "value" | "foreignKey" | "primaryKey"
+    readonly rules?: Rules
 }
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> { 
     readonly role: "value"
     readonly dateKind: "date" | "datetime"
+    readonly rules?: Rules
 }
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 
     readonly role: "value"
+    readonly rules?: Rules
 }
 /** Represents the usage of an 'external type', i.e. an object that is not part of a relational model */
 export interface ObjectValue extends ValueMetaWithTypeDef<"object", ObjectType> { 

@@ -328,6 +328,44 @@ describe("ViewModel", () => {
       expect(saveMock).toBeCalledTimes(1);
     })
 
+
+    const loadMock = 
+      jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+        wasSuccessful: true,
+        object: {
+          studentId: 1,
+          name: 'bob'
+        }
+      }});
+
+    test("does not trigger if enabled while model load is pending", async () => {
+      var student = new StudentViewModel();
+      const saveMock = student.$apiClient.save = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {wasSuccessful: true}});
+      student.$apiClient.get = loadMock;
+
+      const vue = new Vue({ data: { student } });
+
+      student.$load(1);
+      student.$startAutoSave(vue, {wait: 0});
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(0);
+    })
+
+    test("does not trigger if enabled just before loading model", async () => {
+      var student = new StudentViewModel();
+      const saveMock = student.$apiClient.save = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {wasSuccessful: true}});
+      student.$apiClient.get = loadMock;
+
+      const vue = new Vue({ data: { student } });
+
+      student.$startAutoSave(vue, {wait: 0});
+      student.$load(1);
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(0);
+    })
+
     describe("deep", () => {
       test("propagates to existing related objects", async () => {
       
@@ -391,10 +429,12 @@ describe("ViewModel", () => {
         const newModel = student.advisor = new AdvisorViewModel();
         const saveMock = 
           newModel.$apiClient.save = 
-          jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+          jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+            wasSuccessful: true,
+          }});
 
-        // The new model won't actually be dirty initially, but it DOES lack a PK,
-        // so autosave SHOULD be triggered (see "triggers save immediately if model lacks a PK" above)
+        // Dirty the model to ensure that it has a reason to trigger.
+        newModel.name = "bob";
         await waitFor(10);
         
         // Autosave should have triggered for the new object.

@@ -278,13 +278,12 @@ export abstract class ViewModel<
 
     this._autoSaveState.options = options;
 
+    let isPending = false;
     let ranOnce = false
     const enqueueSave = debounce(() => {
+      isPending = false;
       if (!this._autoSaveState.active) return;
-      if (this.$save.isLoading) {
-        // Save already in progress. Enqueue another attempt.
-        enqueueSave();
-      } else if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
+      if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
         /*
           Try and save if:
             1) The model is dirty
@@ -294,6 +293,13 @@ export abstract class ViewModel<
               to return responses from saves.
         */
 
+        if (this.$save.isLoading || this.$load.isLoading) {
+          // Save already in progress, or model is currently loading. 
+          // Enqueue another attempt.
+          enqueueSave();
+          return;
+        } 
+
         // Check the predicate to see if the save is permitted.
         if (predicate && !predicate(this)) {
           // If not, try again after the timer.
@@ -302,20 +308,20 @@ export abstract class ViewModel<
         }
 
         // No saves in progress - go ahead and save now.
+        ranOnce = true;
         this.$save()
           // After the save finishes, attempt another autosave.
           // If the model has become dirty since the last save,
           // we need to save again.
           // This will happen if the state of the model changes while the save
           // is in-flight.
-          .then(() => {
-            ranOnce = true;
-            enqueueSave();
-          }, enqueueSave);
+          .then(enqueueSave);
       }
     }, Math.max(1, wait));
 
     this._autoSaveState.trigger = function() {
+      if (isPending) return;
+      isPending = true;
       // This MUST happen on next tick in case $isDirty was set to true automatically
       // and is about to be manually (or by $loadFromModel) set to false.
       vue.$nextTick(enqueueSave)

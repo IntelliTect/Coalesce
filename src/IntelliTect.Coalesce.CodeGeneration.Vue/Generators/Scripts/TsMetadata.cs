@@ -281,7 +281,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     if (isRequired.HasValue && isRequired.Value)
                     {
-                        rules.Add($"required: val => !val || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
+                        rules.Add($"required: val => !!val || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
                     }
                     else if (prop.IsRequired)
                     {
@@ -296,7 +296,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             message = $"{name} is required.";
                         }
 
-                        rules.Add($"required: val => !val || \"{message.EscapeStringLiteralForTypeScript()}\"");
+                        rules.Add($"required: val => !!val || \"{message.EscapeStringLiteralForTypeScript()}\"");
                     }
 
                     if (rules.Any())

@@ -78,7 +78,10 @@ export const Advisor = domain.types.Advisor = {
       name: 'name',
       displayName: 'Name',
       role: 'value',
-      type: "string"
+      type: "string",
+      rules: {
+        required: val => !!val || "Name is required."
+      }
     },
     students: {
       name: 'students',

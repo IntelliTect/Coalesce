@@ -366,6 +366,26 @@ describe("ViewModel", () => {
       expect(saveMock).toBeCalledTimes(0);
     })
 
+    test("does not trigger if model has errors", async () => {
+      var viewModel = new AdvisorViewModel({
+        advisorId: 1, name: null
+      });
+      const saveMock = viewModel.$apiClient.save = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<Advisor>>{data: {wasSuccessful: true}});
+
+      const vue = new Vue({ data: { viewModel } });
+
+      viewModel.$startAutoSave(vue, {wait: 0});
+      expect([...viewModel.$getErrors()]).toHaveLength(1)
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(0);
+
+      viewModel.name = "Bob";
+      expect([...viewModel.$getErrors()]).toHaveLength(0)
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(1);
+    })
+
     describe("deep", () => {
       test("propagates to existing related objects", async () => {
       

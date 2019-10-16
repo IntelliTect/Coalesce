@@ -70,7 +70,7 @@ export abstract class ViewModel<
   // Underlying object which will hold the backing values
   // of the custom getters/setters. Not for external use.
   // Must exist in order to for Vue to pick it up and add reactivity.
-  private $data: TModel = convertToModel({}, this.$metadata);
+  private $data: TModel & {[propName: string]: any} = convertToModel({}, this.$metadata);
 
   /**
    * Gets or sets the primary key of the ViewModel's data.
@@ -120,6 +120,46 @@ export abstract class ViewModel<
     this.$params.includes = val;
   }
 
+  /** An object whose values are booleans that specify whether a given validation rule should be ignored,
+   * and whose keys are one of the following formats:
+   *  - `"propName.ruleName"` - ignores the given rule on the given property.
+   *  - `"propName.*"` - ignores rules of the given propName on all properties
+   *  - `"*.ruleName"` - ignores rules of the given ruleName on all properties
+   */
+  public $ignoredRules: { [identifier: string]: boolean } | null = null;
+
+  /** Returns a generator that provides all error messages for the current model
+    in accordance with the rules defined for the model's properties' metadata and
+    the rules (if any) that are ignored by `this.$ignoredRules` */
+  public *$getErrors() {
+    const ignored = this.$ignoredRules;
+    const props = this.$metadata.props;
+    for (const propName in props) {
+      const prop = props[propName]
+      if ("rules" in prop) {
+        const rules: any = prop.rules!;
+        const value = this.$data[propName];
+        for (const ruleName in rules!) {
+          if (ignored) {
+            if (ignored[`${propName}.${ruleName}`]
+             || ignored[`*.${ruleName}`]
+             || ignored[`${propName}.*`]
+            ) {
+              continue;
+            }
+          }
+          const result: true | string = rules[ruleName](value);
+          if (result !== true) yield result;
+        }
+      }
+    }
+  }
+
+  /** True if `this.$getErrors()` is returning at least one error. */
+  public get $hasError() {
+    return !!this.$getErrors().next().value
+  }
+
   /**
    * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
    */
@@ -150,6 +190,11 @@ export abstract class ViewModel<
   get $save() {
     const $save = this.$apiClient
       .$makeCaller("item", function(this: ViewModel, c) {
+
+        if (this.$hasError) {
+          throw Error("Cannot save - validation failed: " + [...this.$getErrors()].join(", "))
+        }
+
         // Before we make the save call, set isDirty = false.
         // This lets us detect changes that happen to the model while our save request is pending.
         // If the model is dirty when the request completes, we'll not load the response from the server.
@@ -283,31 +328,31 @@ export abstract class ViewModel<
     const enqueueSave = debounce(() => {
       isPending = false;
       if (!this._autoSaveState.active) return;
+
+      /*
+        Try and save if:
+          1) The model is dirty
+          2) The model lacks a primary key, and we haven't yet tried to save it
+            since autosave was enabled. We should only ever try to do this once
+            in case the Behaviors on the server are for some reason not configured
+            to return responses from saves.
+      */
       if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
-        /*
-          Try and save if:
-            1) The model is dirty
-            2) The model lacks a primary key, and we haven't yet tried to save it
-              since autosave was enabled. We should only ever try to do this once
-              in case the Behaviors on the server are for some reason not configured
-              to return responses from saves.
-        */
+        if (this.$hasError || (predicate && !predicate(this))) {
+          // There are validation errors, or a user-defined predicate failed. 
+          // Do nothing, and don't enqueue another attempt.
+          // The next attempt will be enqueued the next time a change is made to the data.
+          return;
+        }
 
         if (this.$save.isLoading || this.$load.isLoading) {
           // Save already in progress, or model is currently loading. 
           // Enqueue another attempt.
           enqueueSave();
           return;
-        } 
-
-        // Check the predicate to see if the save is permitted.
-        if (predicate && !predicate(this)) {
-          // If not, try again after the timer.
-          enqueueSave();
-          return;
         }
 
-        // No saves in progress - go ahead and save now.
+        // Everything should be good to go. Go forth and save!
         ranOnce = true;
         this.$save()
           // After the save finishes, attempt another autosave.

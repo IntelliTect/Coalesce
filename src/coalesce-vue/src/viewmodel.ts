@@ -63,17 +63,6 @@ export abstract class ViewModel<
   /** Static lookup of all generated ViewModel types. */
   public static typeLookup: ViewModelTypeLookup | null = null;
 
-  /**
-   * Object which holds all of the data represented by this ViewModel.
-   */
-  // Will always be reactive - is definitely assigned in the ctor.
-  // public $data: Indexable<TModel>
-
-  // Must be initialized so it will be reactive.
-  // If this isn't reactive, $isDirty won't be reactive.
-  // Technically this will always be initialized by the setting of `$isDirty` in the ctor.
-  //private _pristineDto: any = null;
-
   // TODO: Do $parent and $parentCollection need to be Set<>s in order to handle objects being in multiple collections or parented to multiple parents? Could be useful.
   private $parent: any = null;
   private $parentCollection: this[] | null = null;
@@ -95,18 +84,22 @@ export abstract class ViewModel<
     (this as any)[this.$metadata.keyProp.name] = val;
   }
 
+  private _isDirty = false;
   /**
    * Returns true if the values of the savable data properties of this ViewModel
    * have changed since the last load, save, or the last time $isDirty was set to false.
    */
-  public $isDirty = false;
-  // public get $isDirty() {
-  //   return JSON.stringify(mapToDto(this)) != JSON.stringify(this._pristineDto);
-  // }
-  // public set $isDirty(val) {
-  //   if (val) throw "Can't set $isDirty to true manually";
-  //   this._pristineDto = mapToDto(this);
-  // }
+  public get $isDirty() {
+    return this._isDirty
+  }
+  public set $isDirty(val) {
+    this._isDirty = val
+
+    // If dirty, and autosave is enabled, queue an evaluation of autosave.
+    if (val && this._autoSaveState?.active) {
+      this._autoSaveState.trigger?.();
+    }
+  }
 
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
   public $params = new DataSourceParameters();
@@ -147,6 +140,7 @@ export abstract class ViewModel<
 
     return $load;
   }
+
   /** Whether or not to reload the ViewModel's `$data` with the response received from the server after a call to .$save(). */
   public $loadResponseFromSaves = true;
 
@@ -168,37 +162,15 @@ export abstract class ViewModel<
           return;
         }
 
-        if (this.$isDirty) {
-          // If our model DID change while the save was in-flight,
-          // update the pristine version of the model with what came back from the save,
-          // and load the primary key, but don't load the data into the `$data` prop.
-          // This helps `$isDirty` to work as expected.
-          //this._pristineDto = mapToDto(this.$save.result);
-
+        if (this.$isDirty || !this.$loadResponseFromSaves) {
           // The PK *MUST* be loaded so that the PK returned by a creation save call
           // will be used by subsequent update calls.
           this.$primaryKey = (this.$save.result as Indexable<TModel>)[
             this.$metadata.keyProp.name
           ];
         } else {
-          // else: model isn't dirty.
-          // Since the data hasn't changed since we sent the save (since $isDirty === false),
-          // se can safely load the save response, since we know we won't be overwriting any local changes.
-          // If the data had changed, loading the response would overwrite user input and/or other changes to the data.
-          if (this.$loadResponseFromSaves) {
-            this.$loadFromModel(this.$save.result);
-          } else {
-            // The PK *MUST* be loaded so that the PK returned by a creation save call
-            // will be used by subsequent update calls.
-            this.$primaryKey = (this.$save.result as Indexable<TModel>)[
-              this.$metadata.keyProp.name
-            ];
-          }
-
-          this.updatedRelatedForeignKeysWithCurrentPrimaryKey()
-
-          // Set the new state of our data as being clean (since we just made a change to it)
-          this.$isDirty = false;
+          this.$loadFromModel(this.$save.result);
+          this.updatedRelatedForeignKeysWithCurrentPrimaryKey();
         }
       });
 
@@ -242,6 +214,12 @@ export abstract class ViewModel<
     }
   }
 
+  /** 
+   * Loads data from the provided model into the current ViewModel, and then clears the $isDirty flag.
+   * 
+   * Data is loaded in a surgical fashion that will preserve existing instances
+   * of objects and arrays found on navigation properties.
+   */
   public $loadFromModel(source: {} | TModel) {
     updateViewModelFromModel(this as any, source);
     this.$isDirty = false;
@@ -278,8 +256,8 @@ export abstract class ViewModel<
     return $delete;
   }
 
-  // Internal autosave state
-  private _autoSaveState = new AutoCallState();
+  // Internal autosave state. We must use <any> instead of <this> here because reasons.
+  private _autoSaveState = new AutoCallState<AutoSaveOptions<any>>();
 
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
@@ -287,21 +265,36 @@ export abstract class ViewModel<
    * @param options Options to control how the auto-saving is performed.
    */
   public $startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {}) {
+    
+    if (this._autoSaveState.active && this._autoSaveState.options === options) {
+      // If already active using the exact same options object, don't restart.
+      // This prevents infinite recursion when setting up deep autosaves.
+      return;
+    }
+
     const { wait = 1000, predicate = undefined, deep = false } = options;
 
     this.$stopAutoSave();
 
-    if (deep) {
-      throw "'deep' option for autosaves is not yet implemented.";
-    }
+    this._autoSaveState.options = options;
 
+    let ranOnce = false
     const enqueueSave = debounce(() => {
       if (!this._autoSaveState.active) return;
       if (this.$save.isLoading) {
         // Save already in progress. Enqueue another attempt.
         enqueueSave();
-      } else if (this.$isDirty) {
-        // Check if we should save.
+      } else if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
+        /*
+          Try and save if:
+            1) The model is dirty
+            2) The model lacks a primary key, and we haven't yet tried to save it
+              since autosave was enabled. We should only ever try to do this once
+              in case the Behaviors on the server are for some reason not configured
+              to return responses from saves.
+        */
+
+        // Check the predicate to see if the save is permitted.
         if (predicate && !predicate(this)) {
           // If not, try again after the timer.
           enqueueSave();
@@ -315,14 +308,36 @@ export abstract class ViewModel<
           // we need to save again.
           // This will happen if the state of the model changes while the save
           // is in-flight.
-          .then(enqueueSave);
+          .then(() => {
+            ranOnce = true;
+            enqueueSave();
+          }, enqueueSave);
       }
-    }, wait);
+    }, Math.max(1, wait));
 
-    const watcher = vue.$watch(() => {
-      return this.$isDirty;
-    }, enqueueSave, { immediate: true });
-    startAutoCall(this._autoSaveState, vue, watcher, enqueueSave);
+    this._autoSaveState.trigger = function() {
+      // This MUST happen on next tick in case $isDirty was set to true automatically
+      // and is about to be manually (or by $loadFromModel) set to false.
+      vue.$nextTick(enqueueSave)
+    }
+
+    startAutoCall(this._autoSaveState, vue, undefined, enqueueSave);
+    this._autoSaveState.trigger();
+
+    if (options.deep) {
+      for (const propName in this.$metadata.props) {
+        const prop = this.$metadata.props[propName];
+        if (prop.role == "collectionNavigation") {
+          if ((this as any)[propName]) {
+            for (const child of ((this as any)[propName] as ViewModel[])) {
+              child.$startAutoSave(vue, options)
+            }
+          }
+        } else if (prop.role == "referenceNavigation") {
+          ((this as any)[propName] as ViewModel)?.$startAutoSave(vue, options)
+        }
+      }
+    }
   }
 
   /** Stops auto-saving if it is currently enabled. */
@@ -491,10 +506,9 @@ export abstract class ListViewModel<
   /**
    * Starts auto-loading of the list as changes to its parameters occur.
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
-   * @param wait Time in milliseconds to debounce loads for
-   * @param predicate A function that will be called before loading that can return false to prevent a load.
+   * @param options Options that control the auto-load behavior.
    */
-  public $startAutoLoad(vue: Vue, options: AutoSaveOptions<this> = {}) {
+  public $startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {}) {
     const { wait = 1000, predicate = undefined } = options;
     this.$stopAutoLoad();
 
@@ -672,6 +686,12 @@ function viewModelCollectionMapItems<T extends ViewModel>(
     (val as any).$parent = vmc.$parent;
     (val as any).$parentCollection = vmc;
 
+    // If deep autosave is active, propagate it to the ViewModel instance being attached to the object graph.
+    const autoSaveState: AutoCallState<AutoSaveOptions<any>> = vmc.$parent._autoSaveState;
+    if (autoSaveState?.active && autoSaveState.options?.deep) {
+      val.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
+    }
+    
     return val;
   });
 }
@@ -742,18 +762,24 @@ interface AutoLoadOptions<TThis> {
   predicate?: (viewModel: TThis) => boolean;
 }
 
-interface AutoSaveOptions<TThis> {
+type AutoSaveOptions<TThis> = {
   /** Time, in milliseconds, to debounce saves for.  */
   wait?: number;
+} & ({
   /** A function that will be called before autosaving that can return false to prevent a save. */
   predicate?: (viewModel: TThis) => boolean;
+
   /** If true, auto-saving will also be enabled for all view models that are
-   * reachable from the navigation properties & collections of the current view model.
-   *
-   * If a predicate is provided, the predicate will only affect the current view model.
-   * Explicitly call `$startAutoSave` on other ViewModels if they require predicates. */
-  deep?: boolean;
-}
+   * reachable from the navigation properties & collections of the current view model. */
+  deep?: false;
+} | {
+  /** A function that will be called before autosaving that can return false to prevent a save. */
+  predicate?: (viewModel: ViewModel) => boolean;
+
+  /** If true, auto-saving will also be enabled for all view models that are
+   * reachable from the navigation properties & collections of the current view model. */
+  deep: true;
+})
 
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
@@ -803,6 +829,12 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                     prop.typeDef.name,
                     incomingValue
                   );
+                }
+
+                // If deep autosave is active, propagate it to the new ViewModel instance.
+                const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (this as any)._autoSaveState;
+                if (autoSaveState?.active && autoSaveState.options?.deep) {
+                  incomingValue.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
                 }
 
                 incomingValue.$parent = this;
@@ -1125,9 +1157,12 @@ export function updateViewModelFromModel<
 
 /* Internal members/helpers */
 
-class AutoCallState {
+class AutoCallState<TOptions = any> {
   active: boolean = false;
   cleanup: Function | null = null;
+  vue: Vue | null = null;
+  options: TOptions | null = null;
+  trigger: (() => void) | null = null;
 
   constructor() {
     // Seal to prevent unnessecary reactivity
@@ -1138,16 +1173,17 @@ class AutoCallState {
 function startAutoCall(
   state: AutoCallState,
   vue: Vue,
-  watcher: () => void,
+  watcher?: () => void,
   debouncer?: Cancelable
 ) {
   const destroyHook = () => stopAutoCall(state);
 
   vue.$on("hook:beforeDestroy", destroyHook);
+  state.vue = vue;
   state.cleanup = () => {
     if (!state.active) return;
     // Destroy the watcher
-    watcher();
+    watcher?.();
     // Cancel the debouncing timer if there is one.
     if (debouncer) debouncer.cancel();
     // Cleanup the hook, in case we're not responding to beforeDestroy but instead to a direct call to stopAutoCall.

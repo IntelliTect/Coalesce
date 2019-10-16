@@ -295,6 +295,112 @@ describe("ViewModel", () => {
       await waitFor(10);
       expect(saveMock).toBeCalledTimes(1);
     })
+
+    test("triggers save immediately if model lacks a PK", async () => {
+      /*
+        Rationale: In coalesce-vue, autosave is always an explicit choice that is made.
+        This is in contrast to Knockout, where autosave is always on by default for all ViewModel instances.
+
+        In Knockout, you wouldn't want to have a new record created in your DB 
+        just because instantiated some ViewModel, especially if that ViewModel isn't attached
+        to any other objects.
+
+        In coalesce-vue, because autosave is an explicit choice, you're either
+          1) Explicitly enabling autosave on a single VM instance,
+              in which case you've declared intent that you want that instance to be saved
+          2) Attaching a ViewModel to an object graph that has deep autosaves enabled,
+              in which case you're already declared intent that you want that entire object graph saved.
+              In this scenario, you could always use a predicate when setting up deep autosaves
+              in order to prevent this behavior - just add an explicit check for $isDirty.
+      */
+      var student = new StudentViewModel({
+        name: "bob",
+      });
+      const saveMock = student.$apiClient.save = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+      const vue = new Vue({ data: { student } });
+
+      // Start auto save. Model shouldn't be dirty, but does lack a PK, so autosave should trigger.
+      expect(student.$isDirty).toBe(false);
+      expect(student.$primaryKey).toBeFalsy();
+      student.$startAutoSave(vue, {wait: 0});
+      await waitFor(10);
+      expect(saveMock).toBeCalledTimes(1);
+    })
+
+    describe("deep", () => {
+      test("propagates to existing related objects", async () => {
+      
+        var studentModel = new Student({
+          studentId: 1,
+          courses: [ { studentId: 1, courseId: 7, name: "foo" }, ],
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3, name: "Bob" }
+        });
+        var student = new StudentViewModel(studentModel);
+        const saveMock = 
+          student.courses![0].$apiClient.save = 
+          student.advisor!.$apiClient.save = 
+          student.$apiClient.save = 
+          jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+        const vue = new Vue({ data: { student } });
+
+        student.$startAutoSave(vue, { wait: 0, deep: true });
+
+        student.courses![0].name = "NewName";
+        student.advisor!.name = "NewName";
+        student.name = "NewName";
+
+        await waitFor(10);
+        
+        // One save expected for each model that changed.
+        expect(saveMock).toBeCalledTimes(3);
+      })
+
+      test("propagates to new collection navigation items", async () => {
+      
+        var studentModel = new Student({
+          studentId: 1,
+        });
+        var student = new StudentViewModel(studentModel);
+        const vue = new Vue({ data: { student } });
+
+        student.$startAutoSave(vue, { wait: 0, deep: true });
+
+        const newModel = student.$addChild("courses");
+        const saveMock = 
+          newModel.$apiClient.save = 
+          jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+
+        await waitFor(10);
+        
+        // Autosave should have triggered for the new object.
+        expect(saveMock).toBeCalledTimes(1);
+      })
+
+      test("propagates to new reference navigation items", async () => {
+      
+        var studentModel = new Student({
+          studentId: 1,
+        });
+        var student = new StudentViewModel(studentModel);
+        const vue = new Vue({ data: { student } });
+
+        student.$startAutoSave(vue, { wait: 0, deep: true });
+
+        const newModel = student.advisor = new AdvisorViewModel();
+        const saveMock = 
+          newModel.$apiClient.save = 
+          jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+
+        // The new model won't actually be dirty initially, but it DOES lack a PK,
+        // so autosave SHOULD be triggered (see "triggers save immediately if model lacks a PK" above)
+        await waitFor(10);
+        
+        // Autosave should have triggered for the new object.
+        expect(saveMock).toBeCalledTimes(1);
+      })
+    })
   })
 
   describe("$addChild", () => {
@@ -1056,5 +1162,4 @@ describe("ListViewModel", () => {
 })
 
 /* TODO: 
-  Handle $parent in $loadFromModel (like knockout does). Maybe?
   Deep autosave (propagate a parent's autosave state to its related models) */

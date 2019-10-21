@@ -363,7 +363,7 @@ export interface ModelReferenceNavigationProperty extends PropertyBase, ModelVal
     readonly role: "referenceNavigation"
     readonly foreignKey: ForeignKeyProperty
     readonly principalKey: PrimaryKeyProperty
-    readonly inverseNavigation?: ModelReferenceNavigationProperty
+    readonly inverseNavigation?: ModelCollectionNavigationProperty
 }
 
 /** 

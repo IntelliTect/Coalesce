@@ -25,7 +25,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             using (b.Block("import", " from 'coalesce-vue/lib/metadata'"))
             {
                 b.Line("Domain, getEnumMeta, solidify, ModelType, ObjectType,");
-                b.Line("PrimitiveProperty, ModelReferenceNavigationProperty, ForeignKeyProperty, PrimaryKeyProperty");
+                b.Line("PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,");
+                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty");
             }
             b.Line();
             b.Line();

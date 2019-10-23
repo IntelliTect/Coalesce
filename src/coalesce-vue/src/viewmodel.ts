@@ -124,33 +124,152 @@ export abstract class ViewModel<
    * and whose keys are one of the following formats:
    *  - `"propName.ruleName"` - ignores the given rule on the given property.
    *  - `"propName.*"` - ignores rules of the given propName on all properties
-   *  - `"*.ruleName"` - ignores rules of the given ruleName on all properties
    */
-  public $ignoredRules: { [identifier: string]: boolean } | null = null;
+  private $ignoredRules: { [identifier: string]: boolean } | null = null;
 
-  /** Returns a generator that provides all error messages for the current model
-    in accordance with the rules defined for the model's properties' metadata and
-    the rules (if any) that are ignored by `this.$ignoredRules` */
-  public *$getErrors() {
-    const ignored = this.$ignoredRules;
-    const props = this.$metadata.props;
-    for (const propName in props) {
-      const prop = props[propName]
+  /** 
+   * A two-layer map, the first layer being property names and the second layer being rule identifiers,
+   * of custom validation rules that should be applied to this viewmodel instance.
+   */
+  private $customRules: { [propName: string]: {
+    [identifier: string]: (val: any) => true | string
+  } } | null = null;
+
+  /**
+   * Cached set of the effective rules for each property on the model.
+   * Will be invalidated when custom rules and/or ignores are changed.
+   */
+  private _effectiveRules: { [propName: string]: undefined | Array<(val: any) => true | string> } | null = null;
+  private get effectiveRules() {
+    let effectiveRules = this._effectiveRules;
+    if (effectiveRules) return effectiveRules;
+
+    effectiveRules = {};
+
+    for (const propName in this.$metadata.props) {
+      const prop = this.$metadata.props[propName];
+      const custom = this.$customRules?.[propName];
+      const propRules = [];
+
       if ("rules" in prop) {
+        const ignored = this.$ignoredRules;
         const rules: any = prop.rules!;
-        const value = this.$data[propName];
+
+        // Process metadata-provided rules
         for (const ruleName in rules!) {
+
+          // Process ignores
           if (ignored) {
             if (ignored[`${propName}.${ruleName}`]
-             || ignored[`*.${ruleName}`]
-             || ignored[`${propName}.*`]
+            || ignored[`${propName}.*`]
             ) {
               continue;
             }
           }
-          const result: true | string = rules[ruleName](value);
-          if (result !== true) yield result;
+
+          // If the prop has custom rules, and there is a custom rule
+          // with the same identifier as a metadata-provided rule,
+          // do not process the metadata-provided rule.
+          if (custom && custom[ruleName]) {
+            continue;
+          }
+
+          propRules.push(rules[ruleName]);
         }
+      }
+
+      // Process custom rules.
+      if (custom) {
+        for (const ruleName in custom) {
+          propRules.push(custom[ruleName]);
+        }
+      }
+
+      if (propRules.length) {
+        effectiveRules[propName] = propRules;
+      }
+    }
+
+    return this._effectiveRules = effectiveRules;
+  }
+
+  public $addRule(prop: string | Property, identifier: string, rule: (val: any) => true | string) {
+    const propName = typeof prop == 'string' ? prop : prop.name;
+
+    // Add this as a custom rule. 
+    // Because rules are keyed by propName and identifier,
+    // the rule will not be duplicated.
+    this.$customRules = {
+      ...this.$customRules,
+      [propName]: {
+        ...this.$customRules?.[propName],
+        [identifier]: rule
+      }
+    }
+
+    // Remove any ignore for this rule, if there is one:
+    const ignoreSpec = `${propName}.${identifier}`;
+    if (this.$ignoredRules && ignoreSpec in this.$ignoredRules) {
+      let { [ignoreSpec]: removed, ...remainder } = this.$ignoredRules as any;
+      this.$ignoredRules = remainder
+    }
+
+    // Force recompute of effetive rules.
+    this._effectiveRules = null;
+  }
+  
+  public $removeRule(prop: string | Property, identifier: string) {
+    const propName = typeof prop == 'string' ? prop : prop.name;
+
+    // Remove any custom rule that may match this spec.
+    const propRules = this.$customRules?.[propName] as any;
+    if (propRules) {
+      let { [identifier]: removed, ...remainder } = propRules;
+      this.$customRules = {
+        ...this.$customRules,
+        [propName]: remainder
+      }
+    }
+
+    // Add an ignore to override any rules that are coming from metadata.
+    this.$ignoredRules = {
+      ...this.$ignoredRules,
+      [`${propName}.${identifier}`]: true
+    }
+
+    // Force recompute of effetive rules.
+    this._effectiveRules = null;
+  }
+
+  /** Returns an array of all applicable rules for the given property
+    in accordance with:
+    - The rules defined for the model's properties' metadata, 
+    - Custom rules added by calling `$addRule`
+    - Any rules that where ignored by calling `this.$removeRule`,*/
+  public $getRules(prop: string | Property) {
+    return this.effectiveRules[typeof prop == 'string' ? prop : prop.name]
+  }
+
+  /** Returns a generator that provides all error messages for the current model
+    in accordance with:
+    - The rules defined for the model's properties' metadata, 
+    - Custom rules added by calling `$addRule`
+    - Any rules that where ignored by calling `this.$removeRule`,
+  */
+  public *$getErrors(prop?: string | Property): Generator<string, void, unknown> {
+    if (prop) {
+      const propName = typeof prop == 'string' ? prop : prop.name
+
+      const effectiveRules = this.effectiveRules[propName]
+      if (!effectiveRules) return;
+
+      for (const rule of effectiveRules){
+        const result = rule(this.$data[propName]);
+        if (result !== true) yield result;
+      }
+    } else {
+      for (const propName in this.effectiveRules) {
+        yield* this.$getErrors(propName);
       }
     }
   }

@@ -490,8 +490,83 @@ describe("ViewModel", () => {
     })
   })
 
-  describe("getters/setters", () => {
+  describe("validation", () => {
+    test("$removeRule adds ignore for metadata-provided rule", () => {
+      var viewModel = new AdvisorViewModel();
+      expect([...viewModel.$getErrors()]).toHaveLength(1)
 
+      viewModel.$removeRule('name', 'required');
+      expect([...viewModel.$getErrors()]).toHaveLength(0)
+    })
+
+    test("$removeRule removes custom rule", () => {
+      var viewModel = new AdvisorViewModel();
+      viewModel.$addRule('name', 'required2', v => !!v || 'custom');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.',
+        'custom'
+      ])
+
+      viewModel.$removeRule('name', 'required2');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.'
+      ])
+    })
+
+    test("$removeRule removes metadata rule and leaves custom rule", () => {
+      var viewModel = new AdvisorViewModel();
+      viewModel.$addRule('name', 'required2', v => !!v || 'custom');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.',
+        'custom'
+      ])
+
+      viewModel.$removeRule('name', 'required');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'custom'
+      ])
+    })
+
+    test("$addRule overrides metadata-provided rule", () => {
+      var viewModel = new AdvisorViewModel();
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.'
+      ])
+
+      viewModel.$addRule('name', 'required', v => !!v || 'custom');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'custom'
+      ])
+    })
+
+    test("$addRule adds additional rules when prop has metadata-provided rules", () => {
+      var viewModel = new AdvisorViewModel();
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.'
+      ])
+
+      viewModel.$addRule('name', 'required2', v => !!v || 'custom');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.',
+        'custom'
+      ])
+    })
+
+    test("$addRule adds rules when prop has no metadata-provided rules", () => {
+      var viewModel = new AdvisorViewModel();
+      expect([...viewModel.$getErrors()]).toEqual([
+        'Name is required.'
+      ])
+
+      viewModel.$addRule('advisorId', 'required', v => !!v || 'custom');
+      expect([...viewModel.$getErrors()]).toEqual([
+        'custom',
+        'Name is required.',
+      ])
+    })
+  })
+
+  describe("getters/setters", () => {
     
     describe("value getters/setters", () => {
       test.each([

@@ -55,6 +55,9 @@ DESIGN NOTES
         but without cluttering up tooltips with the entire type structure of the metadata.
 */
 
+
+let nextStableId = 1;
+
 export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = any,
@@ -71,6 +74,15 @@ export abstract class ViewModel<
   // of the custom getters/setters. Not for external use.
   // Must exist in order to for Vue to pick it up and add reactivity.
   private $data: TModel & {[propName: string]: any} = convertToModel({}, this.$metadata);
+
+  /** 
+   * A number unique among all ViewModel instances that will be unchanged for the instance's lifetime. 
+   * Can be used to uniquely identify objects with `:key` in Vue components.
+   * 
+   * Especially useful with `transition-group` where some elements of iteration may be unsaved 
+   * and therefore not yet have a `$primaryKey`.
+  */
+  public readonly $stableId!: number;
 
   /**
    * Gets or sets the primary key of the ViewModel's data.
@@ -575,6 +587,13 @@ export abstract class ViewModel<
 
     initialData?: {} | TModel | null
   ) {
+    Object.defineProperty(this, '$stableId', {
+      enumerable: false,
+      configurable: false,
+      value: nextStableId++,
+      writable: false
+    })
+
     if (initialData) {
       this.$loadFromModel(initialData);
       // this.$isDirty will get set by $loadFromModel()

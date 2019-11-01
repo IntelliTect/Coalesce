@@ -324,7 +324,7 @@ export class ApiClient<T extends ApiRoutedType> {
   protected _simultaneousGetCaching = false;
 
   /** Enable simultaneous request caching, causing identical GET requests made 
-   * at the same time to be handled with the same AJAX request.
+   * at the same time across all ApiClient instances to be handled with the same AJAX request.
    */
   public $withSimultaneousRequestCaching(): this {
     this._simultaneousGetCaching = true;
@@ -495,7 +495,7 @@ export class ApiClient<T extends ApiRoutedType> {
     const hasBody = method.httpMethod != "GET" && method.httpMethod != "DELETE";
     const url = `/${this.$metadata.controllerRoute}/${method.name}`;
 
-    return this.$possiblyCachedRequest(
+    return this._possiblyCachedRequest(
       method.httpMethod,
       url,
       params,
@@ -517,7 +517,7 @@ export class ApiClient<T extends ApiRoutedType> {
   }
 
   /** Wraps a request, performing caching as needed according to _simultaneousGetCaching  */
-  protected $possiblyCachedRequest(
+  protected _possiblyCachedRequest(
     method: string,
     url: string, 
     parameters: any, 
@@ -528,7 +528,7 @@ export class ApiClient<T extends ApiRoutedType> {
     let cacheKey: string;
     
     if (method === "GET" && this._simultaneousGetCaching && !config) {
-      cacheKey = url + qs.stringify(parameters)
+      cacheKey = url + "?" + qs.stringify(parameters)
       if (simultaneousGetCache.has(cacheKey)) {
         return simultaneousGetCache.get(cacheKey)!
       } else {
@@ -635,7 +635,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ItemResultPromise<TModel> {
     let url = `/${this.$metadata.controllerRoute}/get/${id}`;
     
-    return this.$possiblyCachedRequest(
+    return this._possiblyCachedRequest(
       "GET",
       url,
       parameters,
@@ -655,7 +655,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ListResultPromise<TModel> {
     let url = `/${this.$metadata.controllerRoute}/list`;
     
-    return this.$possiblyCachedRequest(
+    return this._possiblyCachedRequest(
       "GET",
       url,
       parameters,

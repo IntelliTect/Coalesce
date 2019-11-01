@@ -308,11 +308,28 @@ type ApiStateTypeWithArgs<
   ? ListApiStateWithArgs<TArgs, TArgsObj, TResult, TClient>
   : never;
 
+
+const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map;
+
+
 export class ApiClient<T extends ApiRoutedType> {
   constructor(public $metadata: T) {}
 
   /** Cancellation token to inject into the next request. */
   private _nextCancelToken?: CancelTokenSource;
+
+  /** Flag to enable global caching of identical GET requests
+   * that have been made simultaneously.
+   */
+  protected _simultaneousGetCaching = false;
+
+  /** Enable simultaneous request caching, causing identical GET requests made 
+   * at the same time to be handled with the same AJAX request.
+   */
+  public $withSimultaneousRequestCaching(): this {
+    this._simultaneousGetCaching = true;
+    return this;
+  }
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -476,20 +493,68 @@ export class ApiClient<T extends ApiRoutedType> {
   ) {
     const mappedParams = this.$mapParams(method, params);
     const hasBody = method.httpMethod != "GET" && method.httpMethod != "DELETE";
+    const url = `/${this.$metadata.controllerRoute}/${method.name}`;
 
-    return AxiosClient.request({
-      method: method.httpMethod,
-      url: `/${this.$metadata.controllerRoute}/${method.name}`,
-      data: hasBody ? qs.stringify(mappedParams) : undefined,
-      ...this.$options(undefined, config, !hasBody ? mappedParams : undefined)
-    }).then(r => {
-      switch (method.transportType) {
-        case "item":
-          return this.$hydrateItemResult(r, (method as ItemMethod).return);
-        case "list":
-          return this.$hydrateListResult(r, (method as ListMethod).return);
+    return this.$possiblyCachedRequest(
+      method.httpMethod,
+      url,
+      params,
+      config,
+      () => AxiosClient.request({
+          method: method.httpMethod,
+          url: url,
+          data: hasBody ? qs.stringify(mappedParams) : undefined,
+          ...this.$options(undefined, config, !hasBody ? mappedParams : undefined)
+        }).then(r => {
+          switch (method.transportType) {
+            case "item":
+              return this.$hydrateItemResult(r, (method as ItemMethod).return);
+            case "list":
+              return this.$hydrateListResult(r, (method as ListMethod).return);
+          }
+        })
+    );
+  }
+
+  /** Wraps a request, performing caching as needed according to _simultaneousGetCaching  */
+  protected $possiblyCachedRequest(
+    method: string,
+    url: string, 
+    parameters: any, 
+    config: AxiosRequestConfig | undefined, 
+    promiseFactory: () => AxiosPromise<any>
+  ){
+    let doCache = false;
+    let cacheKey: string;
+    
+    if (method === "GET" && this._simultaneousGetCaching && !config) {
+      cacheKey = url + qs.stringify(parameters)
+      if (simultaneousGetCache.has(cacheKey)) {
+        return simultaneousGetCache.get(cacheKey)!
+      } else {
+        doCache = true;
       }
-    });
+    }
+      
+    let promise = promiseFactory()
+
+    if (doCache) {
+      // Add the promise to the cache.
+      simultaneousGetCache.set(cacheKey!, promise);
+
+      // Remove the promise from the cache when it completes.
+      promise = promise.then(x => {
+        // Remove the request from the cache, because its done now.
+        simultaneousGetCache.delete(cacheKey);
+        return x;
+      }, e => {
+        simultaneousGetCache.delete(cacheKey);
+        // Re-throw the error so callers down the line can handle it.
+        throw e;
+      })
+    }
+
+    return promise;
   }
 
   /**
@@ -559,6 +624,7 @@ export type ParamsObject<TMethod extends Method> = {
   > | null
 };
 
+
 export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   TModel["$metadata"]
 > {
@@ -567,11 +633,19 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     parameters?: DataSourceParameters,
     config?: AxiosRequestConfig
   ): ItemResultPromise<TModel> {
-    return AxiosClient.get(
-      `/${this.$metadata.controllerRoute}/get/${id}`,
-      this.$options(parameters, config)
-    ).then<AxiosItemResult<TModel>>(r =>
-      this.$hydrateItemResult(r, this.$itemValueMeta)
+    let url = `/${this.$metadata.controllerRoute}/get/${id}`;
+    
+    return this.$possiblyCachedRequest(
+      "GET",
+      url,
+      parameters,
+      config,
+      () => AxiosClient.get(
+          url,
+          this.$options(parameters, config)
+        ).then<AxiosItemResult<TModel>>(r =>
+          this.$hydrateItemResult(r, this.$itemValueMeta)
+        )
     );
   }
 
@@ -579,11 +653,19 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     parameters?: ListParameters,
     config?: AxiosRequestConfig
   ): ListResultPromise<TModel> {
-    return AxiosClient.get(
-      `/${this.$metadata.controllerRoute}/list`,
-      this.$options(parameters, config)
-    ).then<AxiosListResult<TModel>>(r =>
-      this.$hydrateListResult(r, this.$collectionValueMeta)
+    let url = `/${this.$metadata.controllerRoute}/list`;
+    
+    return this.$possiblyCachedRequest(
+      "GET",
+      url,
+      parameters,
+      config,
+      () => AxiosClient.get(
+          url,
+          this.$options(parameters, config)
+        ).then<AxiosListResult<TModel>>(r =>
+          this.$hydrateListResult(r, this.$collectionValueMeta)
+        )
     );
   }
 

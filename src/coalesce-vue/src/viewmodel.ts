@@ -152,7 +152,7 @@ export abstract class ViewModel<
    * Will be invalidated when custom rules and/or ignores are changed.
    */
   private _effectiveRules: { [propName: string]: undefined | Array<(val: any) => true | string> } | null = null;
-  private get effectiveRules() {
+  private get $effectiveRules() {
     let effectiveRules = this._effectiveRules;
     if (effectiveRules) return effectiveRules;
 
@@ -259,7 +259,7 @@ export abstract class ViewModel<
     - Custom rules added by calling `$addRule`
     - Any rules that where ignored by calling `this.$removeRule`,*/
   public $getRules(prop: string | Property) {
-    return this.effectiveRules[typeof prop == 'string' ? prop : prop.name]
+    return this.$effectiveRules[typeof prop == 'string' ? prop : prop.name]
   }
 
   /** Returns a generator that provides all error messages for the current model
@@ -272,7 +272,7 @@ export abstract class ViewModel<
     if (prop) {
       const propName = typeof prop == 'string' ? prop : prop.name
 
-      const effectiveRules = this.effectiveRules[propName]
+      const effectiveRules = this.$effectiveRules[propName]
       if (!effectiveRules) return;
 
       for (const rule of effectiveRules){
@@ -280,7 +280,7 @@ export abstract class ViewModel<
         if (result !== true) yield result;
       }
     } else {
-      for (const propName in this.effectiveRules) {
+      for (const propName in this.$effectiveRules) {
         yield* this.$getErrors(propName);
       }
     }

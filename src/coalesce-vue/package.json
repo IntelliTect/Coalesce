@@ -33,7 +33,7 @@
     "jest-junit": "^6.3.0",
     "lodash": "^4.17.10",
     "ts-jest": "^24.0.2",
-    "typescript": "3.7.0-dev.20191016",
+    "typescript": "3.7.1-rc",
     "vue": "^2.6.10"
   },
   "scripts": {

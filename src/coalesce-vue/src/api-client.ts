@@ -241,8 +241,6 @@ export function getMessageForError(error: AxiosError | ApiResult | Error | strin
     if (result && typeof result.data === "object") {
       return result.data.message || "Unknown Error"
     }
-
-    return "Unknown Error"
   }
 
   return typeof error.message === "string"
@@ -643,7 +641,7 @@ export class ApiClient<T extends ApiRoutedType> {
       // causing the server to return a SPA fallback route (as HTML) with a 200 status.
       throw new Error(`Unexpected raw ${typeof value.data} response from server.`)
     }
-    
+
     // This function is NOT PURE - we mutate the result object on the response.
     value.data.list = convertValueToModel(value.data.list, metadata);
     return value;

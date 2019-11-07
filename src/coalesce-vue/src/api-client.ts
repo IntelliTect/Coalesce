@@ -865,7 +865,9 @@ export abstract class ApiState<
    * @param callback A callback to be called when a request to this endpoint succeeds.
    */
   onFulfilled(callback: ApiStateHook<this>): this {
-    this._callbacks.onFulfilled.push(callback);
+    if (!this._callbacks.onFulfilled.includes(callback)) {
+      this._callbacks.onFulfilled.push(callback);
+    }
     return this;
   }
 
@@ -874,7 +876,9 @@ export abstract class ApiState<
    * @param callback A callback to be called when a request to this endpoint fails.
    */
   onRejected(callback: ApiStateHook<this>): this {
-    this._callbacks.onRejected.push(callback);
+    if (!this._callbacks.onRejected.includes(callback)) {
+      this._callbacks.onRejected.push(callback);
+    }
     return this;
   }
 

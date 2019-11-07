@@ -620,6 +620,12 @@ export class ApiClient<T extends ApiRoutedType> {
     value: AxiosItemResult<TResult>,
     metadata: Value | VoidValue
   ) {
+    if (typeof value.data !== "object") {
+      // This case usually only happens if the endpoint doesn't exist on the server,
+      // causing the server to return a SPA fallback route (as HTML) with a 200 status.
+      throw new Error(`Unexpected raw ${typeof value.data} response from server.`)
+    }
+
     // Do nothing for void returns - there will be no object.
     if (metadata.type !== "void") {
       // This function is NOT PURE - we mutate the result object on the response.
@@ -632,6 +638,12 @@ export class ApiClient<T extends ApiRoutedType> {
     value: AxiosListResult<TResult>,
     metadata: CollectionValue
   ) {
+    if (typeof value.data !== "object") {
+      // This case usually only happens if the endpoint doesn't exist on the server,
+      // causing the server to return a SPA fallback route (as HTML) with a 200 status.
+      throw new Error(`Unexpected raw ${typeof value.data} response from server.`)
+    }
+    
     // This function is NOT PURE - we mutate the result object on the response.
     value.data.list = convertValueToModel(value.data.list, metadata);
     return value;
@@ -940,13 +952,7 @@ export abstract class ApiState<
       const data = resp.data;
       delete this._cancelToken;
 
-      if (typeof data === "object") {
-        this.setResponseProps(data);
-      } else {
-        // This case usually only happens if the endpoint doesn't exist on the server,
-        // causing the server to return a SPA fallback route (as HTML) with a 200 status.
-        throw new Error(`Unexpected raw ${typeof data} response from server.`)
-      }
+      this.setResponseProps(data);
 
       const onFulfilled = this._callbacks.onFulfilled;
       for (let i = 0; i < onFulfilled.length; i++) {

@@ -2,9 +2,23 @@
 
 import Vue from 'vue';
 
-import { ItemResult, ItemResultPromise } from '../src/api-client'
+import { AxiosClient, ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
+
+
+describe("error handling", () => {
+  test("throws error when server returns raw string instead of object", async () => {
+    AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: "<!doctype html><html><body></body></html>",
+        status: 200
+      })
+
+    await expect(new StudentApiClient().get(1))
+      .rejects.toThrow("Unexpected raw string response from server.")
+  })
+})
 
 describe("$makeCaller", () => {
 

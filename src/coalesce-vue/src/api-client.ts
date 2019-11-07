@@ -230,6 +230,26 @@ export function mapParamsToDto(
   return paramsObject;
 }
 
+export function getMessageForError(error: AxiosError | ApiResult | Error | string) {
+  if (typeof error === "string") return error;
+
+  if ("response" in error) {
+    const result = error.response as
+      | AxiosResponse<ListResult<any> | ItemResult<any>>
+      | undefined;
+
+    if (result && typeof result.data === "object") {
+      return result.data.message || "Unknown Error"
+    }
+
+    return "Unknown Error"
+  }
+
+  return typeof error.message === "string"
+    ? error.message
+    : "A network error occurred"; // TODO: i18n
+}
+
 export type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>;
 export type AxiosListResult<T> = AxiosResponse<ListResult<T>>;
 export type ItemResultPromise<T> = Promise<AxiosResponse<ItemResult<T>>>;
@@ -747,6 +767,8 @@ export type TCall<TArgs extends any[], TReturn> = (
   ...args: TArgs
 ) => TReturn;
 
+type ApiStateHook<TThis> = (this: any, state: TThis) => void | Promise<any>
+
 export abstract class ApiState<
   TArgs extends any[],
   TResult,
@@ -823,16 +845,16 @@ export abstract class ApiState<
   private _cancelToken: CancelTokenSource | undefined;
 
   // Frozen to prevent unneeded reactivity.
-  private _callbacks = Object.freeze<{
-    onFulfilled: Array<Function>;
-    onRejected: Array<Function>;
-  }>({ onFulfilled: [], onRejected: [] });
+  private _callbacks: {
+    onFulfilled: Array<ApiStateHook<any>>;
+    onRejected: Array<ApiStateHook<any>>;
+  } = Object.freeze({ onFulfilled: [], onRejected: [] });
 
   /**
    * Attach a callback to be invoked when the request to this endpoint succeeds.
    * @param callback A callback to be called when a request to this endpoint succeeds.
    */
-  onFulfilled(callback: (this: any, state: this) => void): this {
+  onFulfilled(callback: ApiStateHook<this>): this {
     this._callbacks.onFulfilled.push(callback);
     return this;
   }
@@ -841,7 +863,7 @@ export abstract class ApiState<
    * Attach a callback to be invoked when the request to this endpoint fails.
    * @param callback A callback to be called when a request to this endpoint fails.
    */
-  onRejected(callback: (this: any, state: this) => void): this {
+  onRejected(callback: ApiStateHook<this>): this {
     this._callbacks.onRejected.push(callback);
     return this;
   }
@@ -917,7 +939,14 @@ export abstract class ApiState<
 
       const data = resp.data;
       delete this._cancelToken;
-      this.setResponseProps(data);
+
+      if (typeof data === "object") {
+        this.setResponseProps(data);
+      } else {
+        // This case usually only happens if the endpoint doesn't exist on the server,
+        // causing the server to return a SPA fallback route (as HTML) with a 200 status.
+        throw new Error(`Unexpected raw ${typeof data} response from server.`)
+      }
 
       const onFulfilled = this._callbacks.onFulfilled;
       for (let i = 0; i < onFulfilled.length; i++) {
@@ -946,24 +975,21 @@ export abstract class ApiState<
         // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
         return;
       } else {
-        var error = thrown as AxiosError;
+        var error = thrown as AxiosError | ApiResult | Error | string;
       }
 
       delete this._cancelToken;
       this.wasSuccessful = false;
-      const result = error.response as
-        | AxiosResponse<ListResult<TResult> 
-        | ItemResult<TResult>>
-        | undefined;
+      const result = typeof error === "object" && "response" in error 
+        ? error.response as
+          | AxiosResponse<ListResult<TResult> 
+          | ItemResult<TResult>>
+          | undefined
+        : undefined;
       if (result && typeof result.data === "object") {
         this.setResponseProps(result.data);
       } else {
-        this.message =
-          typeof error.message === "string"
-            ? error.message
-            : typeof error === "string"
-            ? error
-            : "A network error occurred"; // TODO: i18n
+        this.message = getMessageForError(error)
       }
 
       const onRejected = this._callbacks.onRejected;

@@ -338,7 +338,7 @@ export abstract class ViewModel<
           return;
         }
 
-        if (this.$isDirty || !this.$loadResponseFromSaves) {
+        if (!this.$loadResponseFromSaves) {
           // The PK *MUST* be loaded so that the PK returned by a creation save call
           // will be used by subsequent update calls.
           this.$primaryKey = (this.$save.result as Indexable<TModel>)[
@@ -348,6 +348,7 @@ export abstract class ViewModel<
           this.$loadFromModel(this.$save.result);
           this.updatedRelatedForeignKeysWithCurrentPrimaryKey();
         }
+
       });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
@@ -397,8 +398,12 @@ export abstract class ViewModel<
    * of objects and arrays found on navigation properties.
    */
   public $loadFromModel(source: {} | TModel) {
-    updateViewModelFromModel(this as any, source);
-    this.$isDirty = false;
+    if (this.$isDirty && this._autoSaveState?.active) {
+      updateViewModelFromModel(this as any, source, true);
+    } else {
+      updateViewModelFromModel(this as any, source);
+      this.$isDirty = false;
+    }
   }
 
   /**
@@ -433,7 +438,7 @@ export abstract class ViewModel<
   }
 
   // Internal autosave state. We must use <any> instead of <this> here because reasons.
-  private _autoSaveState = new AutoCallState<AutoSaveOptions<any>>();
+  private _autoSaveState?: AutoCallState<AutoSaveOptions<any>>;
 
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
@@ -442,7 +447,9 @@ export abstract class ViewModel<
    */
   public $startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {}) {
     
-    if (this._autoSaveState.active && this._autoSaveState.options === options) {
+    let state = this._autoSaveState;
+
+    if (state?.active && state.options === options) {
       // If already active using the exact same options object, don't restart.
       // This prevents infinite recursion when setting up deep autosaves.
       return;
@@ -452,13 +459,14 @@ export abstract class ViewModel<
 
     this.$stopAutoSave();
 
-    this._autoSaveState.options = options;
+    state = this._autoSaveState = new AutoCallState<AutoSaveOptions<any>>()
+    state.options = options;
 
     let isPending = false;
     let ranOnce = false
     const enqueueSave = debounce(() => {
       isPending = false;
-      if (!this._autoSaveState.active) return;
+      if (!state?.active) return;
 
       /*
         Try and save if:
@@ -495,7 +503,7 @@ export abstract class ViewModel<
       }
     }, Math.max(1, wait));
 
-    this._autoSaveState.trigger = function() {
+    state.trigger = function() {
       if (isPending) return;
       isPending = true;
       // This MUST happen on next tick in case $isDirty was set to true automatically
@@ -503,8 +511,8 @@ export abstract class ViewModel<
       vue.$nextTick(enqueueSave)
     }
 
-    startAutoCall(this._autoSaveState, vue, undefined, enqueueSave);
-    this._autoSaveState.trigger();
+    startAutoCall(state, vue, undefined, enqueueSave);
+    state.trigger();
 
     if (options.deep) {
       for (const propName in this.$metadata.props) {
@@ -524,7 +532,10 @@ export abstract class ViewModel<
 
   /** Stops auto-saving if it is currently enabled. */
   public $stopAutoSave() {
-    stopAutoCall(this._autoSaveState);
+    if (this._autoSaveState) {
+      stopAutoCall(this._autoSaveState);
+      this._autoSaveState = undefined;
+    }
   }
 
   /**
@@ -1255,10 +1266,11 @@ function rebuildModelCollectionForViewModelCollection(
  * Updates the target model with values from the source model.
  * @param target The viewmodel to be updated.
  * @param source The model whose values will be used to perform the update.
+ * @param skipSelf If true, only related objects will be updated. Basic properties on target will be skipped.
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
->(target: TViewModel, source: Indexable<{}>) {
+>(target: TViewModel, source: Indexable<{}>, skipSelf = false) {
   ViewModelFactory.scope(function(factory) {
     // Add the root ViewModel to the factory
     // so that when existing ViewModels are being updated,
@@ -1336,8 +1348,15 @@ export function updateViewModelFromModel<
           ) as any;
           break;
 
-        default:
+        case "primaryKey":
+          // Always update the PK, even if skipSelf is true.
           target[propName] = incomingValue;
+          break;
+
+        default:
+          if (!skipSelf) {
+            target[propName] = incomingValue;
+          }
           break;
       }
     }

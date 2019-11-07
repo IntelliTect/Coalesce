@@ -212,6 +212,57 @@ describe("ViewModel", () => {
     })
 
     
+    test("when nested model is autosaving and dirty when parent model is reloaded, nested model is not updated", async () => {
+      // If hierarchy of models is reloaded by virtue of some root model being reloaded,
+      // but a child model has been editing and its changes are still pending a save,
+      // we don't want to overwrite those local changes.
+
+      // However, if there is a grandchild model (child of the child),
+      // and that grandchild is not dirty, it SHOULD be updated.
+      // Only the basic properties of the dirty model (child, in this case) should be skipped.
+
+      const studentData = {
+        studentId: 1,
+        name: "root",
+        studentAdvisorId: 1,
+        advisor: {
+          advisorId: 1,
+          name: "child",
+          students: [
+            {studentId: 2, name: "grandchild"}
+          ]
+        }
+      }
+      const student = new StudentViewModel(studentData);
+      const vue = new Vue({
+        data: {
+          student
+        }
+      });
+
+      // Start autosave on the whole tree (could have just as well done it on the advisor only)
+      student.$startAutoSave(vue, { deep: true, wait: 0 })
+
+      // Arbitrarily set the advisor as dirty. We don't actually need to modify a property.
+      student.advisor!.$isDirty = true;
+
+      // Update our incoming data with new values coming from the server.
+      studentData.name = "root-updated";
+      studentData.advisor.name = "child-updated";
+      studentData.advisor.students[0].name = "grandchild-updated";
+      student.$loadFromModel(studentData)
+
+      // The two non-dirty models should have been updated with the new data.
+      expect(student.name).toBe("root-updated");
+      expect(student.$isDirty).toBeFalsy();
+      expect(student.advisor!.students[0].name).toBe("grandchild-updated");
+      expect(student.advisor!.students[0].$isDirty).toBeFalsy();
+
+      // The dirty model should NOT have been updated,
+      // and it should still be marked dirty.
+      expect(student.advisor!.name).toBe("child");
+      expect(student.advisor!.$isDirty).toBeTruthy();
+    })
 
     test("$loadFromModel won't trigger autosave on root", async () => {
       var studentModel = new Student({

@@ -1292,7 +1292,9 @@ export function updateViewModelFromModel<
 
     for (const prop of Object.values(metadata.props)) {
       const propName = prop.name as keyof typeof target;
-      const currentValue = target[propName] as any;
+      // Hit $data directly since this is internal code.
+      // Avoids a redundant function call against the ViewModel's prop getter.
+      const currentValue = (target as any).$data[propName] as any;
       let incomingValue = (source as any)[propName];
 
       // Sanitize incomingValue to not be undefined (to not break Vue's reactivity),
@@ -1350,11 +1352,17 @@ export function updateViewModelFromModel<
 
         case "primaryKey":
           // Always update the PK, even if skipSelf is true.
-          target[propName] = incomingValue;
+          if (currentValue !== incomingValue) {
+            target[propName] = incomingValue;
+          }
           break;
 
         default:
-          if (!skipSelf) {
+          // We check against currentValue here for a minor perf increase - 
+          // Even though this is redundant with the ViewModel's setters,
+          // it avoids calling into the setter if we don't have to,
+          // and handles the vast majority of cases.
+          if (!skipSelf && currentValue !== incomingValue) {
             target[propName] = incomingValue;
           }
           break;

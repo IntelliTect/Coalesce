@@ -627,6 +627,7 @@ module Coalesce {
 
         /** Deletes the object without any prompt for confirmation. */
         public deleteItem = (callback?: (self: this) => void): JQueryPromise<any> | undefined => {
+            this.cancelAutoSave();
             var currentId = ((this as any)[this.primaryKeyName])();
             if (currentId) {
                 return $.ajax({ method: "POST", url: this.coalesceConfig.baseApiUrl() + this.apiController + "/Delete/" + currentId, xhrFields: { withCredentials: true } })

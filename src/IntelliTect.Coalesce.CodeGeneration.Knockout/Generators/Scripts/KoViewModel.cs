@@ -400,7 +400,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         if (prop.Object?.PrimaryKey != null)
                         {
                             b.Line("// Merge the incoming array");
-                            b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.JsVariable}, data.{prop.JsonName}, '{prop.Object.PrimaryKey.JsonName}', {prop.Object.ViewModelClassName}, this, allowCollectionDeletes);");
+                            b.Line($"Coalesce.KnockoutUtilities.RebuildArray(" +
+                                $"this.{prop.JsVariable}, " +
+                                $"data.{prop.JsonName}, " +
+                                $"'{prop.Object.PrimaryKey.JsonName}', " +
+                                $"{prop.Object.ViewModelClassName}, " +
+                                $"this, " +
+                                $"allowCollectionDeletes);");
                             if (prop.IsManytoManyCollection)
                             {
                                 b.Line("// Add many-to-many collection");
@@ -411,7 +417,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                     b.Indented($"objs.push(item.{prop.ManyToManyCollectionProperty.JsonName});");
                                     b.Line($"}}");
                                 }
-                                b.Line($"Coalesce.KnockoutUtilities.RebuildArray(this.{prop.ManyToManyCollectionName.ToCamelCase()}, objs, '{prop.ManyToManyCollectionProperty.ForeignKeyProperty.JsVariable}', {prop.ManyToManyCollectionProperty.Object.ViewModelClassName}, this, allowCollectionDeletes);");
+                                b.Line($"Coalesce.KnockoutUtilities.RebuildArray(" +
+                                    $"this.{prop.ManyToManyCollectionName.ToCamelCase()}, " +
+                                    $"objs, " +
+                                    $"'{prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable}', " +
+                                    $"{prop.ManyToManyCollectionProperty.Object.ViewModelClassName}, " +
+                                    $"this, " +
+                                    $"allowCollectionDeletes);");
                             }
                         }
                         else if (prop.PureType.IsPrimitive)

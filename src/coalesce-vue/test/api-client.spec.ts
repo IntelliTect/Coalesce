@@ -4,6 +4,7 @@ import Vue from 'vue';
 
 import { AxiosClient, ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
+import { Student as StudentMeta } from './targets.metadata'
 import { AxiosError, AxiosResponse } from 'axios';
 
 
@@ -17,6 +18,52 @@ describe("error handling", () => {
 
     await expect(new StudentApiClient().get(1))
       .rejects.toThrow("Unexpected raw string response from server.")
+  })
+})
+
+
+describe("$invoke", () => {
+  test("doesn't error when params are missing", async () => {
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: {wasSuccessful: true, object: ''},
+        status: 200
+      })
+
+    // The use case here is to allow optional params to be missing.
+    // Technically the one we're omitting ('id') would be a required param,
+    // but the client code doesn't make that distinction - the server does, 
+    // and we're mocking the server.
+    await expect(new StudentApiClient().$invoke(
+        StudentMeta.methods.fullNameAndAge,
+        { } as any
+      ))
+      .resolves.toBeTruthy()
+
+      expect(mock.mock.calls[0][0]).toMatchObject({
+        params: {
+          id: undefined
+        }
+      });
+  })
+
+  test("doesn't error when unexpected params are provided", async () => {
+    // The use case here is to allow, for e.g., a component that always provides a "search"
+    // param to an API to still function even if that API doesn't use or care about a "search" param.
+    // This might seem like a dumb case to test, but it was actually broken because we were iterating
+    // over the actual provided params when mapping the params, instead of over the method's metadata.
+    AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: {wasSuccessful: true, object: ''},
+        status: 200
+      })
+
+    await expect(new StudentApiClient().$invoke(
+        StudentMeta.methods.fullNameAndAge,
+        // Our types are actually so good that they will catch this as an error, so we cast to any.
+        { id: 1, extraParam: '' } as any 
+      ))
+      .resolves.toBeTruthy()
   })
 })
 

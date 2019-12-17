@@ -582,7 +582,7 @@ export class ApiClient<T extends ApiRoutedType> {
    */
   protected $mapParams(method: Method, params: { [paramName: string]: any }) {
     const formatted: { [paramName: string]: any } = {};
-    for (var paramName in params) {
+    for (var paramName in method.params) {
       const paramMeta = method.params[paramName];
       formatted[paramName] = mapValueToDto(params[paramName], paramMeta);
     }

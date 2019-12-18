@@ -40,11 +40,7 @@ describe("$invoke", () => {
       ))
       .resolves.toBeTruthy()
 
-      expect(mock.mock.calls[0][0]).toMatchObject({
-        params: {
-          id: undefined
-        }
-      });
+      expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: undefined } });
   })
 
   test("doesn't error when unexpected params are provided", async () => {
@@ -52,7 +48,7 @@ describe("$invoke", () => {
     // param to an API to still function even if that API doesn't use or care about a "search" param.
     // This might seem like a dumb case to test, but it was actually broken because we were iterating
     // over the actual provided params when mapping the params, instead of over the method's metadata.
-    AxiosClient.defaults.adapter = 
+    const mock = AxiosClient.defaults.adapter = 
       jest.fn().mockResolvedValue(<AxiosResponse<any>>{
         data: {wasSuccessful: true, object: ''},
         status: 200
@@ -64,6 +60,8 @@ describe("$invoke", () => {
         { id: 1, extraParam: '' } as any 
       ))
       .resolves.toBeTruthy()
+
+    expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: 1 } });
   })
 })
 

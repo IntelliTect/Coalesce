@@ -1059,15 +1059,14 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               }
             }
 
-
           : prop.role == "collectionNavigation"
           ? function(this: InstanceType<T>, incomingValue: any) {
-              // Usability niceness - make an empty array if the incoming is null.
-              // This shouldn't have any adverse effects that I can think of.
-              // This will cause the viewmodel collections to always be initialized with empty arrays
-              if (incomingValue == null) incomingValue = [];
-
-              if (!Array.isArray(incomingValue)) {
+              if (incomingValue == null) {
+                // Usability niceness - make an empty array if the incoming is null.
+                // This shouldn't have any adverse effects that I can think of.
+                // This will cause the viewmodel collections to always be initialized with empty arrays
+                incomingValue = [];
+              } else if (!Array.isArray(incomingValue)) {
                 throw Error(
                   `Cannot assign a non-array to ${metadata.name}.${propName}`
                 );
@@ -1335,11 +1334,19 @@ export function updateViewModelFromModel<
           break;
         case "collectionNavigation":
           if (incomingValue == null) {
-            // No incoming collection was provided. Allow the existing collection to stick around.
-            // Note that this case is different from the incoming value being an empty array,
-            // which should be used to explicitly clear our the existing collection.
+            if (currentValue) {
+              // No incoming collection was provided. Allow the existing collection to stick around.
+              // Note that this case is different from the incoming value being an empty array,
+              // which should be used to explicitly clear our the existing collection.
+            } else {
+              // Pass null directly through to the VM's setter. 
+              // The VM's setter will then populate the VM's data with an empty array rather than null.
+              target[propName] = null as any;
+            }
             break;
-          } else if (!Array.isArray(incomingValue)) {
+          }
+          
+          if (!Array.isArray(incomingValue)) {
             throw `Expected array for incoming value for ${metadata.name}.${prop.name}`;
           }
 

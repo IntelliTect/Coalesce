@@ -539,6 +539,14 @@ describe("ViewModel", () => {
       expect(course.studentId).toBe(student.studentId);
       expect(course.$isDirty).toBe(true);
     })
+
+    test("new model has collections initialized to empty arrays", () => {
+      var advisor = new AdvisorViewModel({advisorId: 3});
+      const student: StudentViewModel = advisor.$addChild("students");
+      
+      expect(student.courses).not.toBeNull();
+      expect(student.courses).toHaveLength(0);
+    })
   })
 
   describe("validation", () => {

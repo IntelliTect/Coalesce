@@ -12,11 +12,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.*" />
     
-    <!-- 1.0.9 of Linq Dynamic has horrendous performance characteristics -
-    its doing a full scan of every type loaded into the process,
-    and grabbing attributes from every single type.
-    Do not upgrade this past 1.0.8.18.
-    See https://github.com/StefH/System.Linq.Dynamic.Core/issues/236 -->
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.18" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19.0" />
   </ItemGroup>
 </Project>

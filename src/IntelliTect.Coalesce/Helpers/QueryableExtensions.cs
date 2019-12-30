@@ -39,6 +39,16 @@ namespace IntelliTect.Coalesce
             return query;
         }
 
+        /// <summary>
+        /// Filters a query by a given primary key value.
+        /// </summary>
+        /// <returns>The filtered query.</returns>
+        public static IQueryable<T> WherePrimaryKeyIs<T>(this IQueryable<T> query, object id)
+        {
+            var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
+            var pkProp = classViewModel.PrimaryKey.PropertyInfo;
+            return query.Where($"{pkProp.Name} == @0", id);
+        }
 
         /// <summary>
         /// Asynchronously finds an object based on a specific primary key value.
@@ -49,9 +59,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The desired item, or null if it was not found.</returns>
         public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id)
         {
-
-            var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
-            return query.Where($"{classViewModel.PrimaryKey.Name} == @0", id).FirstOrDefaultAsync();
+            return query.WherePrimaryKeyIs(id).FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -63,8 +71,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The desired item, or null if it was not found.</returns>
         public static T FindItem<T>(this IQueryable<T> query, object id)
         {
-            var classViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
-            return query.Where($"{classViewModel.PrimaryKey.Name} == @0", id).FirstOrDefault();
+            return query.WherePrimaryKeyIs(id).FirstOrDefault();
         }
     }
 }

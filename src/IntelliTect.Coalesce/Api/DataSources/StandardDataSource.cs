@@ -44,6 +44,13 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public int MaxPageSize { get; set; } = 10_000;
 
+        static StandardDataSource()
+        {
+            // Fixes EF Core query caching issues: https://dzone.com/articles/investigating-a-memory-leak-in-entity-framework-co
+            ParsingConfig.Default.UseParameterizedNamesInDynamicQuery = true;
+            ParsingConfig.DefaultEFCore21.UseParameterizedNamesInDynamicQuery = true;
+        }
+
         public StandardDataSource(CrudContext<TContext> context) : base(context)
         {
         }

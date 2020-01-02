@@ -57,7 +57,7 @@ namespace Coalesce.Web.Vue.Api
         [Authorize]
         public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Save(
             Coalesce.Domain.CaseDto dto,
-            [FromQuery] DataSourceParameters parameters,
+            [FromQuery] SaveParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);

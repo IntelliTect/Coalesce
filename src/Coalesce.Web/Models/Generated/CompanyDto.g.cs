@@ -13,16 +13,67 @@ namespace Coalesce.Web.Models
     {
         public CompanyDtoGen() { }
 
-        public int? CompanyId { get; set; }
-        public string Name { get; set; }
-        public string Address1 { get; set; }
-        public string Address2 { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string ZipCode { get; set; }
-        public bool? IsDeleted { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Models.PersonDtoGen> Employees { get; set; }
-        public string AltName { get; set; }
+        private int? _CompanyId;
+        private string _Name;
+        private string _Address1;
+        private string _Address2;
+        private string _City;
+        private string _State;
+        private string _ZipCode;
+        private bool? _IsDeleted;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Models.PersonDtoGen> _Employees;
+        private string _AltName;
+
+        public int? CompanyId
+        {
+            get => _CompanyId;
+            set { _CompanyId = value; Changed(nameof(CompanyId)); }
+        }
+        public string Name
+        {
+            get => _Name;
+            set { _Name = value; Changed(nameof(Name)); }
+        }
+        public string Address1
+        {
+            get => _Address1;
+            set { _Address1 = value; Changed(nameof(Address1)); }
+        }
+        public string Address2
+        {
+            get => _Address2;
+            set { _Address2 = value; Changed(nameof(Address2)); }
+        }
+        public string City
+        {
+            get => _City;
+            set { _City = value; Changed(nameof(City)); }
+        }
+        public string State
+        {
+            get => _State;
+            set { _State = value; Changed(nameof(State)); }
+        }
+        public string ZipCode
+        {
+            get => _ZipCode;
+            set { _ZipCode = value; Changed(nameof(ZipCode)); }
+        }
+        public bool? IsDeleted
+        {
+            get => _IsDeleted;
+            set { _IsDeleted = value; Changed(nameof(IsDeleted)); }
+        }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Models.PersonDtoGen> Employees
+        {
+            get => _Employees;
+            set { _Employees = value; Changed(nameof(Employees)); }
+        }
+        public string AltName
+        {
+            get => _AltName;
+            set { _AltName = value; Changed(nameof(AltName)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -66,14 +117,14 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.CompanyId = (CompanyId ?? entity.CompanyId);
-            entity.Name = Name;
-            entity.Address1 = Address1;
-            entity.Address2 = Address2;
-            entity.City = City;
-            entity.State = State;
-            entity.ZipCode = ZipCode;
-            entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
+            if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
+            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+            if (ShouldMapTo(nameof(Address1))) entity.Address1 = Address1;
+            if (ShouldMapTo(nameof(Address2))) entity.Address2 = Address2;
+            if (ShouldMapTo(nameof(City))) entity.City = City;
+            if (ShouldMapTo(nameof(State))) entity.State = State;
+            if (ShouldMapTo(nameof(ZipCode))) entity.ZipCode = ZipCode;
+            if (ShouldMapTo(nameof(IsDeleted))) entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
         }
     }
 }

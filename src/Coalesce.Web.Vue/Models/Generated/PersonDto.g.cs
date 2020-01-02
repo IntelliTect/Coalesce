@@ -13,22 +13,103 @@ namespace Coalesce.Web.Vue.Models
     {
         public PersonDtoGen() { }
 
-        public int? PersonId { get; set; }
-        public Coalesce.Domain.Person.Titles? Title { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public Coalesce.Domain.Person.Genders? Gender { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseDtoGen> CasesAssigned { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseDtoGen> CasesReported { get; set; }
-        public System.DateTime? BirthDate { get; set; }
-        public System.DateTime? LastBath { get; set; }
-        public System.DateTimeOffset? NextUpgrade { get; set; }
-        public Coalesce.Web.Vue.Models.PersonStatsDtoGen PersonStats { get; set; }
-        public string Name { get; set; }
-        public int? CompanyId { get; set; }
-        public Coalesce.Web.Vue.Models.CompanyDtoGen Company { get; set; }
-        public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings { get; set; }
+        private int? _PersonId;
+        private Coalesce.Domain.Person.Titles? _Title;
+        private string _FirstName;
+        private string _LastName;
+        private string _Email;
+        private Coalesce.Domain.Person.Genders? _Gender;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseDtoGen> _CasesAssigned;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseDtoGen> _CasesReported;
+        private System.DateTime? _BirthDate;
+        private System.DateTime? _LastBath;
+        private System.DateTimeOffset? _NextUpgrade;
+        private Coalesce.Web.Vue.Models.PersonStatsDtoGen _PersonStats;
+        private string _Name;
+        private int? _CompanyId;
+        private Coalesce.Web.Vue.Models.CompanyDtoGen _Company;
+        private System.Collections.Generic.ICollection<string> _ArbitraryCollectionOfStrings;
+
+        public int? PersonId
+        {
+            get => _PersonId;
+            set { _PersonId = value; Changed(nameof(PersonId)); }
+        }
+        public Coalesce.Domain.Person.Titles? Title
+        {
+            get => _Title;
+            set { _Title = value; Changed(nameof(Title)); }
+        }
+        public string FirstName
+        {
+            get => _FirstName;
+            set { _FirstName = value; Changed(nameof(FirstName)); }
+        }
+        public string LastName
+        {
+            get => _LastName;
+            set { _LastName = value; Changed(nameof(LastName)); }
+        }
+        public string Email
+        {
+            get => _Email;
+            set { _Email = value; Changed(nameof(Email)); }
+        }
+        public Coalesce.Domain.Person.Genders? Gender
+        {
+            get => _Gender;
+            set { _Gender = value; Changed(nameof(Gender)); }
+        }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseDtoGen> CasesAssigned
+        {
+            get => _CasesAssigned;
+            set { _CasesAssigned = value; Changed(nameof(CasesAssigned)); }
+        }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.CaseDtoGen> CasesReported
+        {
+            get => _CasesReported;
+            set { _CasesReported = value; Changed(nameof(CasesReported)); }
+        }
+        public System.DateTime? BirthDate
+        {
+            get => _BirthDate;
+            set { _BirthDate = value; Changed(nameof(BirthDate)); }
+        }
+        public System.DateTime? LastBath
+        {
+            get => _LastBath;
+            set { _LastBath = value; Changed(nameof(LastBath)); }
+        }
+        public System.DateTimeOffset? NextUpgrade
+        {
+            get => _NextUpgrade;
+            set { _NextUpgrade = value; Changed(nameof(NextUpgrade)); }
+        }
+        public Coalesce.Web.Vue.Models.PersonStatsDtoGen PersonStats
+        {
+            get => _PersonStats;
+            set { _PersonStats = value; Changed(nameof(PersonStats)); }
+        }
+        public string Name
+        {
+            get => _Name;
+            set { _Name = value; Changed(nameof(Name)); }
+        }
+        public int? CompanyId
+        {
+            get => _CompanyId;
+            set { _CompanyId = value; Changed(nameof(CompanyId)); }
+        }
+        public Coalesce.Web.Vue.Models.CompanyDtoGen Company
+        {
+            get => _Company;
+            set { _Company = value; Changed(nameof(Company)); }
+        }
+        public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings
+        {
+            get => _ArbitraryCollectionOfStrings;
+            set { _ArbitraryCollectionOfStrings = value; Changed(nameof(ArbitraryCollectionOfStrings)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -93,17 +174,17 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.PersonId = (PersonId ?? entity.PersonId);
-            entity.Title = Title;
-            entity.FirstName = FirstName;
-            entity.LastName = LastName;
-            entity.Email = Email;
-            entity.Gender = (Gender ?? entity.Gender);
-            entity.BirthDate = BirthDate;
-            entity.LastBath = LastBath;
-            entity.NextUpgrade = NextUpgrade;
-            entity.CompanyId = (CompanyId ?? entity.CompanyId);
-            entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings;
+            if (ShouldMapTo(nameof(PersonId))) entity.PersonId = (PersonId ?? entity.PersonId);
+            if (ShouldMapTo(nameof(Title))) entity.Title = Title;
+            if (ShouldMapTo(nameof(FirstName))) entity.FirstName = FirstName;
+            if (ShouldMapTo(nameof(LastName))) entity.LastName = LastName;
+            if (ShouldMapTo(nameof(Email))) entity.Email = Email;
+            if (ShouldMapTo(nameof(Gender))) entity.Gender = (Gender ?? entity.Gender);
+            if (ShouldMapTo(nameof(BirthDate))) entity.BirthDate = BirthDate;
+            if (ShouldMapTo(nameof(LastBath))) entity.LastBath = LastBath;
+            if (ShouldMapTo(nameof(NextUpgrade))) entity.NextUpgrade = NextUpgrade;
+            if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
+            if (ShouldMapTo(nameof(ArbitraryCollectionOfStrings))) entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings;
         }
     }
 }

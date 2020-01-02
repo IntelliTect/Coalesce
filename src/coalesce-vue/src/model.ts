@@ -519,9 +519,12 @@ class MapToDtoVisitor extends Visitor<
  * Maps the given object to a POJO suitable for JSON serialization.
  * Will not serialize child objects or collections.
  * @param object The object to map.
+ * @param props A whitelisted set of props to include from the mapped object. 
+ * Unspecified props will be ignored. If null or undefined, all props will be included.
  */
 export function mapToDto<T extends Model<ClassType>>(
-  object: T | null | undefined
+  object: T | null | undefined,
+  props?: PropNames<T["$metadata"]>[] | null
 ): {} | null {
   if (object == null) return null;
 
@@ -530,6 +533,16 @@ export function mapToDto<T extends Model<ClassType>>(
   }
 
   var dto = new MapToDtoVisitor().visitObject(object, object.$metadata);
+
+  if (props) {
+    const filteredDto: any = {}
+    for (const field of props) {
+      if (field in dto) {
+        filteredDto[field] = dto[field]
+      }
+    }
+    return filteredDto;
+  }
 
   return dto;
 }

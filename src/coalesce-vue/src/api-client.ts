@@ -36,7 +36,8 @@ import {
   VoidValue,
   ItemMethod,
   ListMethod,
-  TypeDiscriminatorToType
+  TypeDiscriminatorToType,
+  PropNames
 } from "./metadata";
 import {
   Model,
@@ -105,6 +106,21 @@ export class DataSourceParameters {
   }
 }
 
+export interface SaveParameters<T extends Model<ModelType> = any> {
+  /**
+   * A list of field names to save. 
+   * If set, only the specified fields as well as any primary key
+   * will be sent to the server. The server will ignore fields that are not set.
+   */
+  fields?: PropNames<T["$metadata"]>[] | null;
+}
+export class SaveParameters<T extends Model<ModelType>> extends DataSourceParameters {
+  constructor() {
+    super();
+    this.fields = null;
+  }
+}
+
 export interface FilterParameters extends DataSourceParameters {
   /** A search term to search by. Searching behavior is determined by the server. */
   search?: string | null;
@@ -161,7 +177,7 @@ export class ListParameters extends FilterParameters {
  * @param parameters The parameters to map.
  */
 export function mapParamsToDto(
-  parameters?: ListParameters | FilterParameters | DataSourceParameters
+  parameters?: ListParameters | FilterParameters | DataSourceParameters | SaveParameters
 ) {
   if (!parameters) return null;
 
@@ -711,13 +727,15 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
 
   public save(
     item: TModel,
-    parameters?: DataSourceParameters,
+    parameters?: SaveParameters<TModel>,
     config?: AxiosRequestConfig
   ): ItemResultPromise<TModel> {
+    const { fields, ...params } = parameters ?? new SaveParameters<TModel>();
+
     return AxiosClient.post(
       `/${this.$metadata.controllerRoute}/save`,
-      qs.stringify(mapToDto(item)),
-      this.$options(parameters, config)
+      qs.stringify(mapToDto(item, fields)),
+      this.$options(params, config)
     ).then<AxiosItemResult<TModel>>(r =>
       this.$hydrateItemResult(r, this.$itemValueMeta)
     );

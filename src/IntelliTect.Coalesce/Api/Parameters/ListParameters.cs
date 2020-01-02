@@ -22,14 +22,22 @@ namespace IntelliTect.Coalesce.Api
         
         /// <inheritdoc />
         public string Fields { get; set; }
-        
+
+        private IReadOnlyCollection<string> _fieldList;
         /// <inheritdoc cref="IListParameters.Fields" />
-        public List<string> FieldList
+        public IReadOnlyCollection<string> FieldList
         {
             get
             {
-                if (Fields == null) return new List<string>();
-                return Fields.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (_fieldList != null)
+                {
+                    return _fieldList;
+                }
+                if (Fields == null)
+                {
+                    return _fieldList = new List<string>();
+                }
+                return _fieldList = Fields.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
         

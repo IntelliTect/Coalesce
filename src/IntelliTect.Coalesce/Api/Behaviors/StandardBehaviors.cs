@@ -107,8 +107,8 @@ namespace IntelliTect.Coalesce
             (SaveKind kind, object idValue) = DetermineSaveKind(incomingDto);
 
             T originalItem = null;
-            T item = null;
-            IncludeTree includeTree = null;
+            T item;
+            IncludeTree includeTree;
 
             var includes = parameters.Includes;
             var dbSet = GetDbSet();
@@ -191,11 +191,11 @@ namespace IntelliTect.Coalesce
         /// <param name="kind">Descriminator between a create and a update operation.</param>
         /// <param name="item">The item that will be saved to the database.</param>
         /// <param name="dto">The incoming item from the client.</param>
-        /// <param name="parameters">The </param>
+        /// <param name="parameters">The additional parameters sent by the client.</param>
         protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters) 
             where TDto : IClassDto<T>, new()
         {
-            dto.MapToModel(item, new MappingContext(User, parameters.Includes));
+            dto.MapToModel(item, new MappingContext(User, parameters));
         }
 
         /// <summary>

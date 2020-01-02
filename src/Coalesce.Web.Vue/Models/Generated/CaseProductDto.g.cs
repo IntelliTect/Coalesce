@@ -13,11 +13,37 @@ namespace Coalesce.Web.Vue.Models
     {
         public CaseProductDtoGen() { }
 
-        public int? CaseProductId { get; set; }
-        public int? CaseId { get; set; }
-        public Coalesce.Web.Vue.Models.CaseDtoGen Case { get; set; }
-        public int? ProductId { get; set; }
-        public Coalesce.Web.Vue.Models.ProductDtoGen Product { get; set; }
+        private int? _CaseProductId;
+        private int? _CaseId;
+        private Coalesce.Web.Vue.Models.CaseDtoGen _Case;
+        private int? _ProductId;
+        private Coalesce.Web.Vue.Models.ProductDtoGen _Product;
+
+        public int? CaseProductId
+        {
+            get => _CaseProductId;
+            set { _CaseProductId = value; Changed(nameof(CaseProductId)); }
+        }
+        public int? CaseId
+        {
+            get => _CaseId;
+            set { _CaseId = value; Changed(nameof(CaseId)); }
+        }
+        public Coalesce.Web.Vue.Models.CaseDtoGen Case
+        {
+            get => _Case;
+            set { _Case = value; Changed(nameof(Case)); }
+        }
+        public int? ProductId
+        {
+            get => _ProductId;
+            set { _ProductId = value; Changed(nameof(ProductId)); }
+        }
+        public Coalesce.Web.Vue.Models.ProductDtoGen Product
+        {
+            get => _Product;
+            set { _Product = value; Changed(nameof(Product)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -49,9 +75,9 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.CaseProductId = (CaseProductId ?? entity.CaseProductId);
-            entity.CaseId = (CaseId ?? entity.CaseId);
-            entity.ProductId = (ProductId ?? entity.ProductId);
+            if (ShouldMapTo(nameof(CaseProductId))) entity.CaseProductId = (CaseProductId ?? entity.CaseProductId);
+            if (ShouldMapTo(nameof(CaseId))) entity.CaseId = (CaseId ?? entity.CaseId);
+            if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
         }
     }
 }

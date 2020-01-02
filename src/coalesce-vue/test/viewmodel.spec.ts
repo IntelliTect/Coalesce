@@ -121,6 +121,51 @@ describe("ViewModel", () => {
       expect(advisor.advisorId).toBe(3);
       expect(student.studentAdvisorId).toBe(3);
     })
+
+    test("when save mode is 'surgical', saves only dirty props", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+      });
+
+      const saveMock 
+        = student.$apiClient.save 
+        = jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+        wasSuccessful: true,
+        object: {
+          studentId: 1,
+          name: "Bob",
+        }
+      }});
+
+      student.$saveMode = "surgical";
+      student.$setPropDirty("name");
+      await student.$save()
+
+      expect(saveMock.mock.calls[0][0]).toBe(student);
+      expect(saveMock.mock.calls[0][1].fields).toMatchObject(["studentId", "name"]);
+    })
+
+    test("when save mode is 'whole', saves all props", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+      });
+
+      const saveMock 
+        = student.$apiClient.save 
+        = jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+        wasSuccessful: true,
+        object: {
+          studentId: 1,
+          name: "Bob",
+        }
+      }});
+
+      student.$saveMode = "whole";
+      await student.$save()
+
+      expect(saveMock.mock.calls[0][0]).toBe(student);
+      expect(saveMock.mock.calls[0][1].fields).toBeFalsy();
+    })
   })
 
   describe("autoSave", () => {
@@ -177,6 +222,7 @@ describe("ViewModel", () => {
 
       student.name = "Steve";
       expect(student.$isDirty).toBe(true);
+      expect(student.$getPropDirty("name")).toBe(true);
 
       await waitTick()
       expect(saveMock).toBeCalledTimes(1);
@@ -527,22 +573,25 @@ describe("ViewModel", () => {
       var student = new StudentViewModel();
       const course = student.$addChild("courses");
 
+      // @ts-ignore testing private field
       expect(course.$parent).toBe(student);
+      // @ts-ignore testing private field
       expect(course.$parentCollection).toBe(student.courses);
     })
 
     test("new model has foreign key and $isDirty set", () => {
       var student = new StudentViewModel({studentId: 3});
-      const course: CourseViewModel = student.$addChild("courses");
+      const course = student.$addChild("courses") as CourseViewModel;
 
       expect(course).toBeInstanceOf(CourseViewModel);
       expect(course.studentId).toBe(student.studentId);
       expect(course.$isDirty).toBe(true);
+      expect(course.$getPropDirty("studentId")).toBe(true);
     })
 
     test("new model has collections initialized to empty arrays", () => {
       var advisor = new AdvisorViewModel({advisorId: 3});
-      const student: StudentViewModel = advisor.$addChild("students");
+      const student = advisor.$addChild("students") as StudentViewModel;
       
       expect(student.courses).not.toBeNull();
       expect(student.courses).toHaveLength(0);

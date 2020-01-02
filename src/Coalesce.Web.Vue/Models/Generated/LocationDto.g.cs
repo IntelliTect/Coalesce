@@ -13,9 +13,25 @@ namespace Coalesce.Web.Vue.Models
     {
         public LocationDtoGen() { }
 
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Zip { get; set; }
+        private string _City;
+        private string _State;
+        private string _Zip;
+
+        public string City
+        {
+            get => _City;
+            set { _City = value; Changed(nameof(City)); }
+        }
+        public string State
+        {
+            get => _State;
+            set { _State = value; Changed(nameof(State)); }
+        }
+        public string Zip
+        {
+            get => _Zip;
+            set { _Zip = value; Changed(nameof(Zip)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -41,9 +57,9 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.City = City;
-            entity.State = State;
-            entity.Zip = Zip;
+            if (ShouldMapTo(nameof(City))) entity.City = City;
+            if (ShouldMapTo(nameof(State))) entity.State = State;
+            if (ShouldMapTo(nameof(Zip))) entity.Zip = Zip;
         }
     }
 }

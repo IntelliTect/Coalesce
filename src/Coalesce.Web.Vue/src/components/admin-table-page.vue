@@ -137,22 +137,15 @@ export default class extends Vue {
       })
   }
 
-    mounted() {
-        this.company.$load(1);
+    async mounted() {
+        await this.company.$load(1);
 
-        this.person.$load(1)
-          .then(r => {
-            //this.person!.$apiClient.removePersonById(200)
-            //this.person!.$apiClient.fullNameAndAge(1)
-            //this.person!.$apiClient.personCount("Roberts")
-            //this.person!.$apiClient.getUser()
-            //this.person!.$apiClient.changeFirstName(1, "Bob") 
-          })
+        await this.person.$load(1)
 
-      var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
-      caller.result
+          //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
+          //caller.result
     
-      //this.person.$startAutoSave(this)
+          this.person.$startAutoSave(this)
     
   }
 

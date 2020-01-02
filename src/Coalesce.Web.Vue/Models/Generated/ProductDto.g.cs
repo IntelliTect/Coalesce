@@ -13,10 +13,31 @@ namespace Coalesce.Web.Vue.Models
     {
         public ProductDtoGen() { }
 
-        public int? ProductId { get; set; }
-        public string Name { get; set; }
-        public Coalesce.Web.Vue.Models.ProductDetailsDtoGen Details { get; set; }
-        public System.Guid? UniqueId { get; set; }
+        private int? _ProductId;
+        private string _Name;
+        private Coalesce.Web.Vue.Models.ProductDetailsDtoGen _Details;
+        private System.Guid? _UniqueId;
+
+        public int? ProductId
+        {
+            get => _ProductId;
+            set { _ProductId = value; Changed(nameof(ProductId)); }
+        }
+        public string Name
+        {
+            get => _Name;
+            set { _Name = value; Changed(nameof(Name)); }
+        }
+        public Coalesce.Web.Vue.Models.ProductDetailsDtoGen Details
+        {
+            get => _Details;
+            set { _Details = value; Changed(nameof(Details)); }
+        }
+        public System.Guid? UniqueId
+        {
+            get => _UniqueId;
+            set { _UniqueId = value; Changed(nameof(UniqueId)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -45,9 +66,9 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.ProductId = (ProductId ?? entity.ProductId);
-            entity.Name = Name;
-            entity.UniqueId = (UniqueId ?? entity.UniqueId);
+            if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
+            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+            if (ShouldMapTo(nameof(UniqueId))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
         }
     }
 }

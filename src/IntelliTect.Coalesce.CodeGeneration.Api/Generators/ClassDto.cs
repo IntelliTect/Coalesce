@@ -55,7 +55,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 foreach (PropertyViewModel prop in Model.ClientProperties)
                 {
-                    b.Line($"public {prop.Type.NullableTypeForDto(namespaceName)} {prop.Name} {{ get; set; }}");
+                    b.Line($"private {prop.Type.NullableTypeForDto(namespaceName)} _{prop.Name};");
+                }
+
+                b.Line();
+                foreach (PropertyViewModel prop in Model.ClientProperties)
+                {
+                    using (b.Block($"public {prop.Type.NullableTypeForDto(namespaceName)} {prop.Name}"))
+                    {
+                        b.Line($"get => _{prop.Name};");
+                        b.Line($"set {{ _{prop.Name} = value; Changed(nameof({prop.Name})); }}");
+                    }
                 }
 
                 void WriteSetters(IEnumerable<(string conditional, string setter)> settersAndConditionals)
@@ -94,7 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     WriteSetters(Model
                         .ClientProperties
                         .OrderBy(p => p.PureType.HasClassViewModel)
-                        .Select(ObjToDtoPropertySetter));
+                        .Select(ModelToDtoPropertySetter));
                 }
 
                 b.DocComment("Map from the current DTO instance to the domain object.");
@@ -108,7 +118,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     WriteSetters(Model
                         .ClientProperties
                         .Where(p => p.IsClientSerializable)
-                        .Select(DtoToObjPropertySetter));
+                        .Select(DtoToModelPropertySetter));
                 }
             }
         }
@@ -152,14 +162,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// Get the conditional and a C# expression that will map the property from a DTO to a local model object.
         /// </summary>
         /// <param name="property">The property to map</param>
-        private (string conditional, string setter) DtoToObjPropertySetter(PropertyViewModel property)
+        private (string conditional, string setter) DtoToModelPropertySetter(PropertyViewModel property)
         {
-            var newValue = property.Name;
+            var name = property.Name;
+            var newValue = name;
             if (!property.Type.IsNullable && property.Type.CsDefaultValue != "null")
             {
-                newValue = $"({newValue} ?? entity.{property.Name})";
+                newValue = $"({newValue} ?? entity.{name})";
             }
-            var setter = $"entity.{property.Name} = {newValue};";
+            var setter = $"if (ShouldMapTo(nameof({name}))) entity.{name} = {newValue};";
 
             var statement = GetPropertySetterConditional(property, true);
             if (!string.IsNullOrWhiteSpace(statement))
@@ -176,7 +187,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// Get the conditional and a C# expression that will map the property from a local object to a DTO.
         /// </summary>
         /// <param name="property">The property to map</param>
-        private (string conditional, string setter) ObjToDtoPropertySetter(PropertyViewModel property)
+        private (string conditional, string setter) ModelToDtoPropertySetter(PropertyViewModel property)
         {
             string name = property.Name;
             string objectName = "this";

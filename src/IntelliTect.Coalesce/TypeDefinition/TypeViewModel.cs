@@ -303,7 +303,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var model = this.PureType.ClassViewModel;
             if (model != null)
             {
-                string typeName = "";
+                string typeName;
 
                 if (IsNullable || IsArray || IsCollection)
                     typeName = FullyQualifiedName;
@@ -312,7 +312,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
                 typeName = regex.Replace(typeName, $@"{model.Name}DtoGen$2");
-                typeName = typeName.Replace(model.Type.FullNamespace, dtoNamespace);
+                typeName = typeName.Replace(model.Type.FullNamespace + ".", string.IsNullOrWhiteSpace(dtoNamespace) ? "" : dtoNamespace + ".");
 
                 return typeName;
             }

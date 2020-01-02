@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -10,12 +11,19 @@ namespace IntelliTect.Coalesce.Mapping
         public ClaimsPrincipal User { get; }
 
         public string Includes { get; }
-
         public Dictionary<object, object> MappedObjects { get; }
             = new Dictionary<object, object>();
 
-
         private Dictionary<string, bool> _roleCache = new Dictionary<string, bool>();
+
+        public MappingContext(ClaimsPrincipal user = null, string includes = null)
+        {
+            User = user;
+            Includes = includes;
+        }
+
+        public MappingContext(ClaimsPrincipal user, IDataSourceParameters parameters)
+            : this(user, parameters.Includes) { }
 
         public bool IsInRoleCached(string role)
         {
@@ -38,12 +46,6 @@ namespace IntelliTect.Coalesce.Mapping
             }
             mappedObject = (TDto)existingMapped;
             return true;
-        }
-
-        public MappingContext(ClaimsPrincipal user = null, string includes = null)
-        {
-            User = user;
-            Includes = includes;
         }
     }
 }

@@ -13,11 +13,37 @@ namespace Coalesce.Web.Vue.Models
     {
         public CaseSummaryDtoGen() { }
 
-        public int? CaseSummaryId { get; set; }
-        public int? OpenCases { get; set; }
-        public int? CaseCount { get; set; }
-        public int? CloseCases { get; set; }
-        public string Description { get; set; }
+        private int? _CaseSummaryId;
+        private int? _OpenCases;
+        private int? _CaseCount;
+        private int? _CloseCases;
+        private string _Description;
+
+        public int? CaseSummaryId
+        {
+            get => _CaseSummaryId;
+            set { _CaseSummaryId = value; Changed(nameof(CaseSummaryId)); }
+        }
+        public int? OpenCases
+        {
+            get => _OpenCases;
+            set { _OpenCases = value; Changed(nameof(OpenCases)); }
+        }
+        public int? CaseCount
+        {
+            get => _CaseCount;
+            set { _CaseCount = value; Changed(nameof(CaseCount)); }
+        }
+        public int? CloseCases
+        {
+            get => _CloseCases;
+            set { _CloseCases = value; Changed(nameof(CloseCases)); }
+        }
+        public string Description
+        {
+            get => _Description;
+            set { _Description = value; Changed(nameof(Description)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -45,11 +71,11 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.CaseSummaryId = (CaseSummaryId ?? entity.CaseSummaryId);
-            entity.OpenCases = (OpenCases ?? entity.OpenCases);
-            entity.CaseCount = (CaseCount ?? entity.CaseCount);
-            entity.CloseCases = (CloseCases ?? entity.CloseCases);
-            entity.Description = Description;
+            if (ShouldMapTo(nameof(CaseSummaryId))) entity.CaseSummaryId = (CaseSummaryId ?? entity.CaseSummaryId);
+            if (ShouldMapTo(nameof(OpenCases))) entity.OpenCases = (OpenCases ?? entity.OpenCases);
+            if (ShouldMapTo(nameof(CaseCount))) entity.CaseCount = (CaseCount ?? entity.CaseCount);
+            if (ShouldMapTo(nameof(CloseCases))) entity.CloseCases = (CloseCases ?? entity.CloseCases);
+            if (ShouldMapTo(nameof(Description))) entity.Description = Description;
         }
     }
 }

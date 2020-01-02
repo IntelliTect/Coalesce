@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"{securityInfo.SaveAnnotation}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Save(");
                 b.Indented($"{Model.DtoName} dto,");
-                b.Indented($"[FromQuery] DataSourceParameters parameters,");
+                b.Indented($"[FromQuery] SaveParameters parameters,");
                 b.Indented($"{dataSourceParameter},");
                 b.Indented($"{behaviorsParameter})");
                 b.Indented($"=> SaveImplementation(dto, parameters, dataSource, behaviors);");
@@ -287,7 +287,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             b.Line("await Db.SaveChangesAsync();");
                         }
                         b.Line($"var result = new ItemResult<{Model.DtoName}>();");
-                        b.Line("var mappingContext = new MappingContext(User, \"\");");
+                        b.Line("var mappingContext = new MappingContext(User);");
                         b.Line($"result.Object = Mapper.MapToDto<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>(itemResult.Object, mappingContext, null);");
                         b.Line("return result;");
                     }

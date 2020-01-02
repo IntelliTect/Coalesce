@@ -13,24 +13,115 @@ namespace Coalesce.Web.Models
     {
         public CaseDtoGen() { }
 
-        public int? CaseKey { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public System.DateTimeOffset? OpenedAt { get; set; }
-        public int? AssignedToId { get; set; }
-        public Coalesce.Web.Models.PersonDtoGen AssignedTo { get; set; }
-        public int? ReportedById { get; set; }
-        public Coalesce.Web.Models.PersonDtoGen ReportedBy { get; set; }
-        public string ImageName { get; set; }
-        public long? ImageSize { get; set; }
-        public string ImageHash { get; set; }
-        public string AttachmentName { get; set; }
-        public string Severity { get; set; }
-        public Coalesce.Domain.Case.Statuses? Status { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts { get; set; }
-        public int? DevTeamAssignedId { get; set; }
-        public Coalesce.Web.Models.DevTeamDtoGen DevTeamAssigned { get; set; }
-        public System.TimeSpan? Duration { get; set; }
+        private int? _CaseKey;
+        private string _Title;
+        private string _Description;
+        private System.DateTimeOffset? _OpenedAt;
+        private int? _AssignedToId;
+        private Coalesce.Web.Models.PersonDtoGen _AssignedTo;
+        private int? _ReportedById;
+        private Coalesce.Web.Models.PersonDtoGen _ReportedBy;
+        private string _ImageName;
+        private long? _ImageSize;
+        private string _ImageHash;
+        private string _AttachmentName;
+        private string _Severity;
+        private Coalesce.Domain.Case.Statuses? _Status;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> _CaseProducts;
+        private int? _DevTeamAssignedId;
+        private Coalesce.Web.Models.DevTeamDtoGen _DevTeamAssigned;
+        private System.TimeSpan? _Duration;
+
+        public int? CaseKey
+        {
+            get => _CaseKey;
+            set { _CaseKey = value; Changed(nameof(CaseKey)); }
+        }
+        public string Title
+        {
+            get => _Title;
+            set { _Title = value; Changed(nameof(Title)); }
+        }
+        public string Description
+        {
+            get => _Description;
+            set { _Description = value; Changed(nameof(Description)); }
+        }
+        public System.DateTimeOffset? OpenedAt
+        {
+            get => _OpenedAt;
+            set { _OpenedAt = value; Changed(nameof(OpenedAt)); }
+        }
+        public int? AssignedToId
+        {
+            get => _AssignedToId;
+            set { _AssignedToId = value; Changed(nameof(AssignedToId)); }
+        }
+        public Coalesce.Web.Models.PersonDtoGen AssignedTo
+        {
+            get => _AssignedTo;
+            set { _AssignedTo = value; Changed(nameof(AssignedTo)); }
+        }
+        public int? ReportedById
+        {
+            get => _ReportedById;
+            set { _ReportedById = value; Changed(nameof(ReportedById)); }
+        }
+        public Coalesce.Web.Models.PersonDtoGen ReportedBy
+        {
+            get => _ReportedBy;
+            set { _ReportedBy = value; Changed(nameof(ReportedBy)); }
+        }
+        public string ImageName
+        {
+            get => _ImageName;
+            set { _ImageName = value; Changed(nameof(ImageName)); }
+        }
+        public long? ImageSize
+        {
+            get => _ImageSize;
+            set { _ImageSize = value; Changed(nameof(ImageSize)); }
+        }
+        public string ImageHash
+        {
+            get => _ImageHash;
+            set { _ImageHash = value; Changed(nameof(ImageHash)); }
+        }
+        public string AttachmentName
+        {
+            get => _AttachmentName;
+            set { _AttachmentName = value; Changed(nameof(AttachmentName)); }
+        }
+        public string Severity
+        {
+            get => _Severity;
+            set { _Severity = value; Changed(nameof(Severity)); }
+        }
+        public Coalesce.Domain.Case.Statuses? Status
+        {
+            get => _Status;
+            set { _Status = value; Changed(nameof(Status)); }
+        }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts
+        {
+            get => _CaseProducts;
+            set { _CaseProducts = value; Changed(nameof(CaseProducts)); }
+        }
+        public int? DevTeamAssignedId
+        {
+            get => _DevTeamAssignedId;
+            set { _DevTeamAssignedId = value; Changed(nameof(DevTeamAssignedId)); }
+        }
+        public Coalesce.Web.Models.DevTeamDtoGen DevTeamAssigned
+        {
+            get => _DevTeamAssigned;
+            set { _DevTeamAssigned = value; Changed(nameof(DevTeamAssigned)); }
+        }
+        public System.TimeSpan? Duration
+        {
+            get => _Duration;
+            set { _Duration = value; Changed(nameof(Duration)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -91,19 +182,19 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.CaseKey = (CaseKey ?? entity.CaseKey);
-            entity.Title = Title;
-            entity.Description = Description;
-            entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
-            entity.AssignedToId = AssignedToId;
-            entity.ReportedById = ReportedById;
-            entity.ImageSize = (ImageSize ?? entity.ImageSize);
-            entity.ImageHash = ImageHash;
-            entity.AttachmentName = AttachmentName;
-            entity.Severity = Severity;
-            entity.Status = (Status ?? entity.Status);
-            entity.DevTeamAssignedId = DevTeamAssignedId;
-            entity.Duration = (Duration ?? entity.Duration);
+            if (ShouldMapTo(nameof(CaseKey))) entity.CaseKey = (CaseKey ?? entity.CaseKey);
+            if (ShouldMapTo(nameof(Title))) entity.Title = Title;
+            if (ShouldMapTo(nameof(Description))) entity.Description = Description;
+            if (ShouldMapTo(nameof(OpenedAt))) entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
+            if (ShouldMapTo(nameof(AssignedToId))) entity.AssignedToId = AssignedToId;
+            if (ShouldMapTo(nameof(ReportedById))) entity.ReportedById = ReportedById;
+            if (ShouldMapTo(nameof(ImageSize))) entity.ImageSize = (ImageSize ?? entity.ImageSize);
+            if (ShouldMapTo(nameof(ImageHash))) entity.ImageHash = ImageHash;
+            if (ShouldMapTo(nameof(AttachmentName))) entity.AttachmentName = AttachmentName;
+            if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
+            if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);
+            if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;
+            if (ShouldMapTo(nameof(Duration))) entity.Duration = (Duration ?? entity.Duration);
         }
     }
 }

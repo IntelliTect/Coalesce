@@ -13,9 +13,25 @@ namespace Coalesce.Web.Vue.Models
     {
         public PersonCriteriaDtoGen() { }
 
-        public string Name { get; set; }
-        public int? BirthdayMonth { get; set; }
-        public string EmailDomain { get; set; }
+        private string _Name;
+        private int? _BirthdayMonth;
+        private string _EmailDomain;
+
+        public string Name
+        {
+            get => _Name;
+            set { _Name = value; Changed(nameof(Name)); }
+        }
+        public int? BirthdayMonth
+        {
+            get => _BirthdayMonth;
+            set { _BirthdayMonth = value; Changed(nameof(BirthdayMonth)); }
+        }
+        public string EmailDomain
+        {
+            get => _EmailDomain;
+            set { _EmailDomain = value; Changed(nameof(EmailDomain)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -41,9 +57,9 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.Name = Name;
-            entity.BirthdayMonth = BirthdayMonth;
-            entity.EmailDomain = EmailDomain;
+            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+            if (ShouldMapTo(nameof(BirthdayMonth))) entity.BirthdayMonth = BirthdayMonth;
+            if (ShouldMapTo(nameof(EmailDomain))) entity.EmailDomain = EmailDomain;
         }
     }
 }

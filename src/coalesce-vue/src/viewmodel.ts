@@ -97,6 +97,7 @@ export abstract class ViewModel<
   }
 
   private _isDirty = false;
+  private _dirtyProps = new Set<string>();
   /**
    * Returns true if the values of the savable data properties of this ViewModel
    * have changed since the last load, save, or the last time $isDirty was set to false.
@@ -107,10 +108,20 @@ export abstract class ViewModel<
   public set $isDirty(val) {
     this._isDirty = val
 
-    // If dirty, and autosave is enabled, queue an evaluation of autosave.
-    if (val && this._autoSaveState?.active) {
+    if (!val) {
+      this._dirtyProps.clear();
+    } else if (this._autoSaveState?.active) {
+      // If dirty, and autosave is enabled, queue an evaluation of autosave.
       this._autoSaveState.trigger?.();
     }
+  }
+
+  public $setPropDirty(propName: PropNames<TModel["$metadata"]>) {
+    this._dirtyProps.add(propName);
+    this.$isDirty = true;
+  }
+  public $getPropDirty(propName: PropNames<TModel["$metadata"]>) {
+    return this._dirtyProps.has(propName);
   }
 
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
@@ -315,6 +326,12 @@ export abstract class ViewModel<
   /** Whether or not to reload the ViewModel's `$data` with the response received from the server after a call to .$save(). */
   public $loadResponseFromSaves = true;
 
+  /** Whether to save the whole object, or only properties which are dirty.
+   * - `surgical` - save only properties that are flagged as dirty (default).
+   * - `whole` - save all properties on the object.
+   */
+  public $saveMode: "surgical" | "whole" = "surgical";
+
   /**
    * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
    */
@@ -326,11 +343,16 @@ export abstract class ViewModel<
           throw Error("Cannot save - validation failed: " + [...this.$getErrors()].join(", "))
         }
 
+        // Capture the dirty props before we set $isDirty = false;
+        const propsToSave = this.$saveMode == "surgical"
+          ? [this.$metadata.keyProp.name, ...this._dirtyProps]
+          : null;
+
         // Before we make the save call, set isDirty = false.
         // This lets us detect changes that happen to the model while our save request is pending.
         // If the model is dirty when the request completes, we'll not load the response from the server.
         this.$isDirty = false;
-        return c.save((this as any) as TModel, this.$params);
+        return c.save((this as any) as TModel, { fields: propsToSave, ...this.$params });
       })
       .onFulfilled(function(this: ViewModel) {
         if (!this.$save.result) {
@@ -579,8 +601,8 @@ export abstract class ViewModel<
       // The ViewModelCollection will handle create a new ViewModel,
       // and setting $parent, $parentCollection.
       // TODO: Should it also handle setting of the foreign key?
-      const newViewModel = collection[collection.push(newModel) - 1];
-      newViewModel.$isDirty = true;
+      const newViewModel = collection[collection.push(newModel) - 1] as ViewModel;
+      newViewModel.$setPropDirty(foreignKey.name);
       return newViewModel;
     } else {
       throw "$addChild only adds to collections of model properties.";
@@ -1121,7 +1143,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 // TODO: Implement $emit?
                 // this.$emit('valueChanged', prop, value, val);
 
-                this.$isDirty = true;
+                this.$setPropDirty(propName);
 
                 if (prop.role == "foreignKey" && prop.navigationProp) {
                   /*

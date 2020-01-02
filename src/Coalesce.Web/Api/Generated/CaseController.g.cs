@@ -57,7 +57,7 @@ namespace Coalesce.Web.Api
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseDtoGen>> Save(
             CaseDtoGen dto,
-            [FromQuery] DataSourceParameters parameters,
+            [FromQuery] SaveParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource,
             IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
@@ -210,7 +210,7 @@ namespace Coalesce.Web.Api
                 await Db.SaveChangesAsync();
             }
             var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User, "");
+            var mappingContext = new MappingContext(User);
             result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
             return result;
         }
@@ -265,7 +265,7 @@ namespace Coalesce.Web.Api
                 await Db.SaveChangesAsync();
             }
             var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User, "");
+            var mappingContext = new MappingContext(User);
             result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
             return result;
         }
@@ -314,7 +314,7 @@ namespace Coalesce.Web.Api
                 await Db.SaveChangesAsync();
             }
             var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User, "");
+            var mappingContext = new MappingContext(User);
             result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
             return result;
         }
@@ -362,7 +362,7 @@ namespace Coalesce.Web.Api
                 await Db.SaveChangesAsync();
             }
             var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User, "");
+            var mappingContext = new MappingContext(User);
             result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
             return result;
         }
@@ -410,7 +410,7 @@ namespace Coalesce.Web.Api
                 await Db.SaveChangesAsync();
             }
             var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User, "");
+            var mappingContext = new MappingContext(User);
             result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
             return result;
         }
@@ -464,7 +464,7 @@ namespace Coalesce.Web.Api
                 await Db.SaveChangesAsync();
             }
             var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User, "");
+            var mappingContext = new MappingContext(User);
             result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
             return result;
         }

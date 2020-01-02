@@ -125,4 +125,18 @@ describe("mapToDto", () => {
       studentAdvisorId: 1, 
     })
   });
+
+  test("for object with specific props, drops extra props", () => {
+    const mapped = model.mapToDto({
+      $metadata: $metadata.Student,
+      studentId: 1,
+      name: "Steve",
+      studentAdvisorId: 3,
+    }, ["name", "studentId"]);
+
+    expect(mapped).toMatchObject({ 
+      name: "Steve", 
+      studentId: 1, 
+    })
+  });
 });

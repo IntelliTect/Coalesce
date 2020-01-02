@@ -13,10 +13,31 @@ namespace Coalesce.Web.Models
     {
         public StreetAddressDtoGen() { }
 
-        public string Address { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string PostalCode { get; set; }
+        private string _Address;
+        private string _City;
+        private string _State;
+        private string _PostalCode;
+
+        public string Address
+        {
+            get => _Address;
+            set { _Address = value; Changed(nameof(Address)); }
+        }
+        public string City
+        {
+            get => _City;
+            set { _City = value; Changed(nameof(City)); }
+        }
+        public string State
+        {
+            get => _State;
+            set { _State = value; Changed(nameof(State)); }
+        }
+        public string PostalCode
+        {
+            get => _PostalCode;
+            set { _PostalCode = value; Changed(nameof(PostalCode)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -43,10 +64,10 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.Address = Address;
-            entity.City = City;
-            entity.State = State;
-            entity.PostalCode = PostalCode;
+            if (ShouldMapTo(nameof(Address))) entity.Address = Address;
+            if (ShouldMapTo(nameof(City))) entity.City = City;
+            if (ShouldMapTo(nameof(State))) entity.State = State;
+            if (ShouldMapTo(nameof(PostalCode))) entity.PostalCode = PostalCode;
         }
     }
 }

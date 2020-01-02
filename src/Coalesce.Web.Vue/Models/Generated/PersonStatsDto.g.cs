@@ -13,9 +13,25 @@ namespace Coalesce.Web.Vue.Models
     {
         public PersonStatsDtoGen() { }
 
-        public double? Height { get; set; }
-        public double? Weight { get; set; }
-        public string Name { get; set; }
+        private double? _Height;
+        private double? _Weight;
+        private string _Name;
+
+        public double? Height
+        {
+            get => _Height;
+            set { _Height = value; Changed(nameof(Height)); }
+        }
+        public double? Weight
+        {
+            get => _Weight;
+            set { _Weight = value; Changed(nameof(Weight)); }
+        }
+        public string Name
+        {
+            get => _Name;
+            set { _Name = value; Changed(nameof(Name)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -41,9 +57,9 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.Height = (Height ?? entity.Height);
-            entity.Weight = (Weight ?? entity.Weight);
-            entity.Name = Name;
+            if (ShouldMapTo(nameof(Height))) entity.Height = (Height ?? entity.Height);
+            if (ShouldMapTo(nameof(Weight))) entity.Weight = (Weight ?? entity.Weight);
+            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
         }
     }
 }

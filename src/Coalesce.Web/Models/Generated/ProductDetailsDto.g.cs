@@ -13,8 +13,19 @@ namespace Coalesce.Web.Models
     {
         public ProductDetailsDtoGen() { }
 
-        public Coalesce.Web.Models.StreetAddressDtoGen ManufacturingAddress { get; set; }
-        public Coalesce.Web.Models.StreetAddressDtoGen CompanyHqAddress { get; set; }
+        private Coalesce.Web.Models.StreetAddressDtoGen _ManufacturingAddress;
+        private Coalesce.Web.Models.StreetAddressDtoGen _CompanyHqAddress;
+
+        public Coalesce.Web.Models.StreetAddressDtoGen ManufacturingAddress
+        {
+            get => _ManufacturingAddress;
+            set { _ManufacturingAddress = value; Changed(nameof(ManufacturingAddress)); }
+        }
+        public Coalesce.Web.Models.StreetAddressDtoGen CompanyHqAddress
+        {
+            get => _CompanyHqAddress;
+            set { _CompanyHqAddress = value; Changed(nameof(CompanyHqAddress)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

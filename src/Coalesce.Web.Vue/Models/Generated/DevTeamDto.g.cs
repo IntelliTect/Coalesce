@@ -13,8 +13,19 @@ namespace Coalesce.Web.Vue.Models
     {
         public DevTeamDtoGen() { }
 
-        public int? DevTeamId { get; set; }
-        public string Name { get; set; }
+        private int? _DevTeamId;
+        private string _Name;
+
+        public int? DevTeamId
+        {
+            get => _DevTeamId;
+            set { _DevTeamId = value; Changed(nameof(DevTeamId)); }
+        }
+        public string Name
+        {
+            get => _Name;
+            set { _Name = value; Changed(nameof(Name)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -39,8 +50,8 @@ namespace Coalesce.Web.Vue.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.DevTeamId = (DevTeamId ?? entity.DevTeamId);
-            entity.Name = Name;
+            if (ShouldMapTo(nameof(DevTeamId))) entity.DevTeamId = (DevTeamId ?? entity.DevTeamId);
+            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
         }
     }
 }

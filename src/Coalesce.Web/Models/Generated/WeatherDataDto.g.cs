@@ -13,9 +13,25 @@ namespace Coalesce.Web.Models
     {
         public WeatherDataDtoGen() { }
 
-        public double? TempFahrenheit { get; set; }
-        public double? Humidity { get; set; }
-        public Coalesce.Web.Models.LocationDtoGen Location { get; set; }
+        private double? _TempFahrenheit;
+        private double? _Humidity;
+        private Coalesce.Web.Models.LocationDtoGen _Location;
+
+        public double? TempFahrenheit
+        {
+            get => _TempFahrenheit;
+            set { _TempFahrenheit = value; Changed(nameof(TempFahrenheit)); }
+        }
+        public double? Humidity
+        {
+            get => _Humidity;
+            set { _Humidity = value; Changed(nameof(Humidity)); }
+        }
+        public Coalesce.Web.Models.LocationDtoGen Location
+        {
+            get => _Location;
+            set { _Location = value; Changed(nameof(Location)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -43,8 +59,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
-            entity.Humidity = (Humidity ?? entity.Humidity);
+            if (ShouldMapTo(nameof(TempFahrenheit))) entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
+            if (ShouldMapTo(nameof(Humidity))) entity.Humidity = (Humidity ?? entity.Humidity);
         }
     }
 }

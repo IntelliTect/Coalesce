@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"{securityInfo.SaveAnnotation}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Save(");
                 b.Indented($"{Model.DtoName} dto,");
-                b.Indented($"[FromQuery] SaveParameters parameters,");
+                b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter},");
                 b.Indented($"{behaviorsParameter})");
                 b.Indented($"=> SaveImplementation(dto, parameters, dataSource, behaviors);");

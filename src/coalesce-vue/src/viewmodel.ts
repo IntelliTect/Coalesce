@@ -1242,7 +1242,7 @@ export interface ViewModelTypeLookup {
   [name: string]: new (initialData?: any) => ViewModel;
 }
 export interface ListViewModelTypeLookup {
-  [name: string]: new () => ListViewModel;
+  [name: string]: new () => ListViewModel<any, any, any>;
 }
 export interface ServiceViewModelTypeLookup {
   [name: string]: new () => ServiceViewModel;

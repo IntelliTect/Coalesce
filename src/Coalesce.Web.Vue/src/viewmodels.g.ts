@@ -28,8 +28,8 @@ export interface CaseViewModel extends $models.Case {
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   
   
-  public addToCaseProducts(): CaseProductViewModel {
-    return this.$addChild('caseProducts')
+  public addToCaseProducts() {
+    return this.$addChild('caseProducts') as CaseProductViewModel
   }
   
   get products(): ReadonlyArray<ProductViewModel> {
@@ -165,8 +165,8 @@ export interface CompanyViewModel extends $models.Company {
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
   
   
-  public addToEmployees(): PersonViewModel {
-    return this.$addChild('employees')
+  public addToEmployees() {
+    return this.$addChild('employees') as PersonViewModel
   }
   
   constructor(initialData?: DeepPartial<$models.Company> | null) {
@@ -237,13 +237,13 @@ export interface PersonViewModel extends $models.Person {
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   
   
-  public addToCasesAssigned(): CaseViewModel {
-    return this.$addChild('casesAssigned')
+  public addToCasesAssigned() {
+    return this.$addChild('casesAssigned') as CaseViewModel
   }
   
   
-  public addToCasesReported(): CaseViewModel {
-    return this.$addChild('casesReported')
+  public addToCasesReported() {
+    return this.$addChild('casesReported') as CaseViewModel
   }
   
   /** Sets the FirstName to the given text. */

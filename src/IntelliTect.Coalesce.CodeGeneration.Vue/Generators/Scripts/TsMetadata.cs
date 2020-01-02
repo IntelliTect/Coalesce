@@ -474,6 +474,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.StringProp("dateKind", "datetime");
                         break;
                 }
+
+                if (value.Type.IsDateTime)
+                {
+                    b.Prop("noOffset", "true");
+                }
             }
 
             WriteTypeCommonMetadata(b, value.Type);

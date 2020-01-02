@@ -181,6 +181,14 @@ export const Student = domain.types.Student = {
       role: 'value',
       type: "date"
     },
+    dateNoOffset: {
+      name: 'dateNoOffset',
+      displayName: 'Date No Offset',
+      dateKind: 'datetime',
+      noOffset: true,
+      role: 'value',
+      type: "date"
+    },
     courses: {
       name: 'courses',
       displayName: "Courses",

@@ -37,6 +37,12 @@ export const twoWayConversions = <MappingData[]>[
     // We define the expected using date-fns's format to make this test timezone-independent.
     dto: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
   },
+  {
+    meta: studentProps.dateNoOffset,
+    model: new Date("1990-01-02T03:04:05.000-08:00"),
+    // We define the expected using date-fns's format to make this test timezone-independent.
+    dto: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+  },
   { meta: studentProps.name, model: null, dto: null },
   { meta: studentProps.name, model: "Bob", dto: "Bob" },
   { meta: studentProps.studentId, model: null, dto: null },

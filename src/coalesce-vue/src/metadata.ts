@@ -261,6 +261,11 @@ export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> {
 export interface DateValue extends ValueMeta<"date"> { 
     readonly role: "value"
     readonly dateKind: "date" | "datetime"
+
+    /** True if the date value is insensitive to timezone offsets 
+     * (i.e. the C# type is `DateTime`, not `DateTimeOffset`) */
+    readonly noOffset?: boolean
+
     readonly rules?: Rules
 }
 /** Represents the usage of an enum */

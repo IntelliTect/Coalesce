@@ -488,10 +488,14 @@ class MapToDtoVisitor extends Visitor<
     const parsed = parseValue(value, meta);
     if (parsed == null) return null;
 
-    // TODO: exclude timezone (XXX) for DateTime, keep it for DateTimeOffset.
+    // We must exclude timezone (XXX) for DateTime, but keep it for DateTimeOffset.
     // This is needed to keep a timezone-agnostic DateTime from being translated
     // into a different timezone when we serialize it.
-    return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+    if (meta.noOffset) {
+      return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSS");
+    } else {
+      return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+    }
   }
 
   protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {

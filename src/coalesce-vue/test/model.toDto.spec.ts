@@ -57,12 +57,6 @@ describe.each(<MappingData[]>[
   ...unmappable(studentProps.isEnrolled, new Date(), [], {}, "abc", 123 ),
 
   // Date
-  {
-    meta: studentProps.birthDate,
-    model: "1990-01-02T03:04:05.000-08:00",
-    // We define the expected using date-fns's format to make this test timezone-independent.
-    dto: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-  },
   ...unmappable(studentProps.birthDate, new Date("!!Invalid"), 123, "abc", [], {} ),
 
 ])(

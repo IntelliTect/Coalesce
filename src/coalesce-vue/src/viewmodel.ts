@@ -96,6 +96,9 @@ export abstract class ViewModel<
     (this as any)[this.$metadata.keyProp.name] = val;
   }
 
+  // This bool could be computed from the size of the set,
+  // but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
+  // for types like Set and Map.
   private _isDirty = false;
   private _dirtyProps = new Set<string>();
   /**
@@ -106,19 +109,34 @@ export abstract class ViewModel<
     return this._isDirty
   }
   public set $isDirty(val) {
-    this._isDirty = val
-
     if (!val) {
       this._dirtyProps.clear();
-    } else if (this._autoSaveState?.active) {
-      // If dirty, and autosave is enabled, queue an evaluation of autosave.
-      this._autoSaveState.trigger?.();
+      this._isDirty = false;
+    } else {
+      // When explicitly setting the whole model dirty, 
+      // we don't know which specific prop might be dirty,
+      // so just set them all.
+      for (const propName in this.$metadata.props) {
+        this.$setPropDirty(propName as any)
+      }
     }
   }
 
-  public $setPropDirty(propName: PropNames<TModel["$metadata"]>) {
-    this._dirtyProps.add(propName);
-    this.$isDirty = true;
+  public $setPropDirty(propName: PropNames<TModel["$metadata"]>, dirty = true, triggerAutosave = true) {
+    if (dirty) {
+      this._dirtyProps.add(propName);
+      this._isDirty = true;
+      
+      if (triggerAutosave && this._autoSaveState?.active) {
+        // If dirty, and autosave is enabled, queue an evaluation of autosave.
+        this._autoSaveState.trigger?.();
+      }
+    } else {
+      this._dirtyProps.delete(propName);
+      if (!this._dirtyProps.size) {
+        this._isDirty = false;
+      }
+    }
   }
   public $getPropDirty(propName: PropNames<TModel["$metadata"]>) {
     return this._dirtyProps.has(propName);
@@ -312,7 +330,7 @@ export abstract class ViewModel<
       )
       .onFulfilled(() => {
         if (this.$load.result) {
-          this.$loadFromModel(this.$load.result);
+          this.$loadCleanData(this.$load.result);
         }
       });
 
@@ -337,22 +355,40 @@ export abstract class ViewModel<
    */
   get $save() {
     const $save = this.$apiClient
-      .$makeCaller("item", function(this: ViewModel, c) {
+      .$makeCaller("item", async function(this: ViewModel, c) {
 
         if (this.$hasError) {
           throw Error("Cannot save - validation failed: " + [...this.$getErrors()].join(", "))
         }
 
         // Capture the dirty props before we set $isDirty = false;
+        const dirtyProps = [...this._dirtyProps];
         const propsToSave = this.$saveMode == "surgical"
-          ? [this.$metadata.keyProp.name, ...this._dirtyProps]
+          ? [this.$metadata.keyProp.name, ...dirtyProps]
           : null;
 
         // Before we make the save call, set isDirty = false.
         // This lets us detect changes that happen to the model while our save request is pending.
         // If the model is dirty when the request completes, we'll not load the response from the server.
         this.$isDirty = false;
-        return c.save((this as any) as TModel, { fields: propsToSave, ...this.$params });
+        try {
+          return await c.save((this as any) as TModel, { fields: propsToSave, ...this.$params });
+        } catch (e) {
+          for (const prop of dirtyProps) {
+            this.$setPropDirty(
+              prop, 
+              true, 
+              // Don't re-trigger autosave on save failure. 
+              // Wait for next prop change to trigger it again.
+              // Otherwise, if the wait timeout is zero,
+              // the save will keep triggering as fast as possible.
+              // Note that this could be a candidate for a user-customizable option
+              // in the future.
+              false
+            );
+          }
+          throw e;
+        }
       })
       .onFulfilled(function(this: ViewModel) {
         if (!this.$save.result) {
@@ -367,7 +403,7 @@ export abstract class ViewModel<
             this.$metadata.keyProp.name
           ];
         } else {
-          this.$loadFromModel(this.$save.result);
+          this.$loadCleanData(this.$save.result);
           this.updatedRelatedForeignKeysWithCurrentPrimaryKey();
         }
 
@@ -414,18 +450,42 @@ export abstract class ViewModel<
   }
 
   /** 
-   * Loads data from the provided model into the current ViewModel, and then clears the $isDirty flag.
+   * Loads data from the provided model into the current ViewModel, 
+   * and then clears the $isDirty flag if `clearDirty` is not given as `false`.
    * 
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  public $loadFromModel(source: {} | TModel) {
+  private $loadFromModel(source: {} | TModel, isCleanData: boolean = true) {
     if (this.$isDirty && this._autoSaveState?.active) {
-      updateViewModelFromModel(this as any, source, true);
+      updateViewModelFromModel(this as any, source, true, isCleanData);
     } else {
-      updateViewModelFromModel(this as any, source);
-      this.$isDirty = false;
+      updateViewModelFromModel(this as any, source, false, isCleanData);
+      if (isCleanData) {
+        this.$isDirty = false;
+      }
     }
+  }
+
+  /** 
+   * Loads data from the provided model into the current ViewModel, and then clears $isDirty flags.
+   * 
+   * Data is loaded in a surgical fashion that will preserve existing instances
+   * of objects and arrays found on navigation properties.
+   */
+  public $loadCleanData(source: {} | TModel) {
+    return this.$loadFromModel(source, true);
+  }
+
+  /** 
+   * Loads data from the provided model into the current ViewModel.
+   * Does not clear $isDirty flags.
+   * 
+   * Data is loaded in a surgical fashion that will preserve existing instances
+   * of objects and arrays found on navigation properties.
+   */
+  public $loadDirtyData(source: {} | TModel) {
+    return this.$loadFromModel(source, false);
   }
 
   /**
@@ -521,7 +581,10 @@ export abstract class ViewModel<
           // we need to save again.
           // This will happen if the state of the model changes while the save
           // is in-flight.
-          .then(enqueueSave);
+          .then(enqueueSave)
+          // We need a catch block so all of this is testable.
+          // Otherwise, jest will fail tests as soon as it sees an unhandled promise rejection.
+          .catch(() => {  });
       }
     }, Math.max(1, wait));
 
@@ -618,7 +681,7 @@ export abstract class ViewModel<
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     public readonly $apiClient: TApi,
 
-    initialData?: {} | TModel | null
+    initialDirtyData?: {} | TModel | null
   ) {
     Object.defineProperty(this, '$stableId', {
       enumerable: false,
@@ -627,11 +690,8 @@ export abstract class ViewModel<
       writable: false
     })
 
-    if (initialData) {
-      this.$loadFromModel(initialData);
-      // this.$isDirty will get set by $loadFromModel()
-    } else {
-      this.$isDirty = false;
+    if (initialDirtyData) {
+      this.$loadDirtyData(initialDirtyData);
     }
   }
 }
@@ -708,7 +768,8 @@ export abstract class ListViewModel<
         this.$items = rebuildModelCollectionForViewModelCollection(
           this.$metadata,
           this.$items,
-          state.result
+          state.result,
+          true
         );
       }
     });
@@ -817,7 +878,10 @@ export class ViewModelFactory {
     const vmCtor = ViewModel.typeLookup![typeName];
     const vm = (new vmCtor() as unknown) as ViewModel;
     map.set(initialData, vm);
-    vm.$loadFromModel(initialData);
+
+    // @ts-ignore
+    vm.$loadFromModel(initialData, this.isCleanData);
+
     return vm;
   }
 
@@ -826,10 +890,10 @@ export class ViewModelFactory {
     this.map.set(initialData, vm);
   }
 
-  public static scope<TRet>(action: (factory: ViewModelFactory) => TRet) {
+  public static scope<TRet>(action: (factory: ViewModelFactory) => TRet, isCleanData: boolean) {
     if (!ViewModelFactory.current) {
       // There is no current factory. Make a new one.
-      ViewModelFactory.current = new ViewModelFactory();
+      ViewModelFactory.current = new ViewModelFactory(isCleanData);
       try {
         // Perform the action, and when we're done, destory the factory.
         return action(ViewModelFactory.current);
@@ -842,13 +906,13 @@ export class ViewModelFactory {
     }
   }
 
-  public static get(typeName: string, initialData: any) {
+  public static get(typeName: string, initialData: any, isCleanData: boolean) {
     return ViewModelFactory.scope(function(factory) {
       return factory.get(typeName, initialData);
-    });
+    }, isCleanData);
   }
 
-  private constructor() {}
+  private constructor(private isCleanData = true) {}
 }
 
 /** Gets a human-friendly description for ViewModelCollection error messages. */
@@ -863,7 +927,8 @@ function viewModelCollectionName($metadata: ModelCollectionValue | ModelType) {
 
 function viewModelCollectionMapItems<T extends ViewModel>(
   items: T[],
-  vmc: ViewModelCollection<T>
+  vmc: ViewModelCollection<T>,
+  isCleanData: boolean
 ) {
   const collectedTypeMeta =
     vmc.$metadata.type == "model"
@@ -898,7 +963,7 @@ function viewModelCollectionMapItems<T extends ViewModel>(
           "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
         );
       }
-      val = (ViewModelFactory.get(collectedTypeMeta.name, val) as unknown) as T;
+      val = (ViewModelFactory.get(collectedTypeMeta.name, val, isCleanData) as unknown) as T;
     }
 
     // $parent and $parentCollection are intentionally protected -
@@ -925,7 +990,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   push(...items: T[]): number {
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
-    const viewModelItems = viewModelCollectionMapItems(items, this);
+    const viewModelItems = viewModelCollectionMapItems(items, this, true);
 
     return Object.getPrototypeOf(this).push.apply(this, viewModelItems);
   }
@@ -934,7 +999,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems: any[] = items
-      ? viewModelCollectionMapItems(items, this)
+      ? viewModelCollectionMapItems(items, this, true)
       : items;
 
     return Object.getPrototypeOf(this).splice.call(
@@ -1049,7 +1114,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                   // so that input components work really nicely if a component sets the navigation prop.
                   incomingValue = ViewModelFactory.get(
                     prop.typeDef.name,
-                    incomingValue
+                    incomingValue,
+                    true // Assume the data is clean.
                   );
                 }
 
@@ -1192,7 +1258,8 @@ export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
 function rebuildModelCollectionForViewModelCollection(
   type: ModelType,
   currentValue: any[],
-  incomingValue: any[]
+  incomingValue: any[],
+  clearDirty: boolean
 ) {
   if (!Array.isArray(currentValue)) {
     currentValue = [];
@@ -1224,7 +1291,7 @@ function rebuildModelCollectionForViewModelCollection(
     const incomingItemPk = incomingItem[pkName];
     const existingItem = existingItemsMap.get(incomingItemPk);
     if (existingItem) {
-      existingItem.$loadFromModel(incomingItem);
+      existingItem.$loadFromModel(incomingItem, clearDirty);
 
       if (currentValue[i] === existingItem) {
         // The existing item is not moving position. Do nothing.
@@ -1291,7 +1358,12 @@ function rebuildModelCollectionForViewModelCollection(
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
->(target: TViewModel, source: Indexable<{}>, skipSelf = false) {
+>(
+  target: TViewModel, 
+  source: Indexable<{}>, 
+  skipSelf = false,
+  isCleanData = true
+) {
   ViewModelFactory.scope(function(factory) {
     // Add the root ViewModel to the factory
     // so that when existing ViewModels are being updated,
@@ -1337,10 +1409,15 @@ export function updateViewModelFromModel<
 
               // The setter on the viewmodel will handle the conversion to a ViewModel.
               target[propName] = incomingValue;
+              if (!isCleanData) {
+                // The setter on the viewmodel will assume clean by default.
+                // If the data isn't clean, explicitly dirty the model.
+                (target[propName] as any as ViewModel).$isDirty = true;
+              }
             } else {
               // `currentValue` is guaranteed to be a ViewModel by virtue of the
               // implementations of the setters for referenceNavigation properties on ViewModel instances.
-              currentValue.$loadFromModel(incomingValue);
+              currentValue.$loadFromModel(incomingValue, isCleanData);
             }
           } else {
             // We allow the existing value of the navigation prop to stick around
@@ -1375,7 +1452,8 @@ export function updateViewModelFromModel<
           target[propName] = rebuildModelCollectionForViewModelCollection(
             prop.itemType.typeDef,
             currentValue,
-            incomingValue
+            incomingValue,
+            isCleanData
           ) as any;
           break;
 
@@ -1397,7 +1475,7 @@ export function updateViewModelFromModel<
           break;
       }
     }
-  });
+  }, isCleanData);
 }
 
 /* Internal members/helpers */

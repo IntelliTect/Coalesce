@@ -528,7 +528,9 @@ describe("ViewModel", () => {
     })
 
     test("does not infinitely trigger if API call fails", async () => {
-      var student = new StudentViewModel();
+      var student = new StudentViewModel({
+        name: "bob"
+      });
       const saveMock = student.$apiClient.save = 
         jest.fn().mockRejectedValue(new Error);
 

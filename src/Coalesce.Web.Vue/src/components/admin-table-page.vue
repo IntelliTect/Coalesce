@@ -145,7 +145,7 @@ export default class extends Vue {
           //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
           //caller.result
     
-          this.person.$startAutoSave(this)
+        this.person.$startAutoSave(this, { wait: 0 })
     
   }
 

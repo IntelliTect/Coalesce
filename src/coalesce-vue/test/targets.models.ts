@@ -40,6 +40,22 @@ export interface Advisor extends Model<typeof metadata.Advisor> {
   name: string | null
   students: Student[]
 }
+export class Advisor {
+  /** Mutates the input object and its descendents into a valid Advisor implementation. */
+  static convert(data?: Partial<Advisor>): Advisor {
+    return convertToModel(data || {}, metadata.Advisor) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Advisor implementation. */
+  static map(data?: Partial<Advisor>): Advisor {
+    return mapToModel(data || {}, metadata.Advisor) 
+  }
+
+  /** Instantiate a new Advisor, optionally basing it on the given data. */
+  constructor(data?: Partial<Advisor> | {[k: string]: any}) {
+    Object.assign(this, Advisor.map(data || {}));
+  }
+}
 
 export interface Course extends Model<typeof metadata.Course> {
   courseId: number | null

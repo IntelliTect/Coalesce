@@ -451,7 +451,7 @@ export abstract class ViewModel<
 
   /** 
    * Loads data from the provided model into the current ViewModel, 
-   * and then clears the $isDirty flag if `clearDirty` is not given as `false`.
+   * and then clears the $isDirty flag if `isCleanData` is not given as `false`.
    * 
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
@@ -1259,7 +1259,7 @@ function rebuildModelCollectionForViewModelCollection(
   type: ModelType,
   currentValue: any[],
   incomingValue: any[],
-  clearDirty: boolean
+  isCleanData: boolean
 ) {
   if (!Array.isArray(currentValue)) {
     currentValue = [];
@@ -1291,7 +1291,7 @@ function rebuildModelCollectionForViewModelCollection(
     const incomingItemPk = incomingItem[pkName];
     const existingItem = existingItemsMap.get(incomingItemPk);
     if (existingItem) {
-      existingItem.$loadFromModel(incomingItem, clearDirty);
+      existingItem.$loadFromModel(incomingItem, isCleanData);
 
       if (currentValue[i] === existingItem) {
         // The existing item is not moving position. Do nothing.
@@ -1354,14 +1354,15 @@ function rebuildModelCollectionForViewModelCollection(
  * Updates the target model with values from the source model.
  * @param target The viewmodel to be updated.
  * @param source The model whose values will be used to perform the update.
- * @param skipSelf If true, only related objects will be updated. Basic properties on target will be skipped.
+ * @param skipDirty If true, only non-dirty props, and related objects, will be updated. 
+ * Basic properties on target that are dirty will be skipped.
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
 >(
   target: TViewModel, 
   source: Indexable<{}>, 
-  skipSelf = false,
+  skipDirty = false,
   isCleanData = true
 ) {
   ViewModelFactory.scope(function(factory) {
@@ -1384,7 +1385,7 @@ export function updateViewModelFromModel<
     }
 
     for (const prop of Object.values(metadata.props)) {
-      const propName = prop.name as keyof typeof target;
+      const propName = prop.name as keyof typeof target & string;
       // Hit $data directly since this is internal code.
       // Avoids a redundant function call against the ViewModel's prop getter.
       const currentValue = (target as any).$data[propName] as any;
@@ -1469,7 +1470,7 @@ export function updateViewModelFromModel<
           // Even though this is redundant with the ViewModel's setters,
           // it avoids calling into the setter if we don't have to,
           // and handles the vast majority of cases.
-          if (!skipSelf && currentValue !== incomingValue) {
+          if ((!skipDirty || !target.$getPropDirty(propName)) && currentValue !== incomingValue) {
             target[propName] = incomingValue;
           }
           break;

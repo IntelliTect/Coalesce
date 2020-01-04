@@ -122,6 +122,7 @@ describe("ViewModel", () => {
 
     test("saves initialData by default", async () => {
       const student = new StudentViewModel({
+        studentId: 1,
         name: "Bob",
       });
 
@@ -141,22 +142,41 @@ describe("ViewModel", () => {
 
     test("when save mode is 'surgical', saves only dirty props", async () => {
       const student = new StudentViewModel({
+        studentId: 1,
         name: "Bob",
       });
 
-      const saveMock 
-        = student.$apiClient.save 
-        = mockItemResult(true, <Student>{
-          studentId: 1,
-          name: "Bob",
-        });
+      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+        studentId: 1,
+        name: "Bob",
+      });
 
       student.$saveMode = "surgical";
       student.$setPropDirty("name");
       await student.$save()
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
+      // Fields should contain only dirty props.
       expect(saveMock.mock.calls[0][1].fields).toMatchObject(["studentId", "name"]);
+    })
+
+    test("when save mode is 'surgical' and model lacks PK, saves all props", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+      });
+
+      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+        studentId: 1,
+        name: "Bob",
+      });
+
+      student.$saveMode = "surgical";
+      student.$setPropDirty("name");
+      await student.$save()
+
+      expect(saveMock.mock.calls[0][0]).toBe(student);
+      // Fields should be null, causing all props to be saved.
+      expect(saveMock.mock.calls[0][1].fields).toBeNull();
     })
 
     test("when save mode is 'whole', saves all props", async () => {
@@ -164,12 +184,10 @@ describe("ViewModel", () => {
         name: "Bob",
       });
 
-      const saveMock 
-        = student.$apiClient.save 
-        = mockItemResult(true, <Student>{
-          studentId: 1,
-          name: "Bob",
-        });
+      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+        studentId: 1,
+        name: "Bob",
+      });
 
       student.$saveMode = "whole";
       await student.$save()
@@ -188,9 +206,7 @@ describe("ViewModel", () => {
       });
 
       try {
-        const saveMock 
-          = student.$apiClient.save 
-          = jest.fn().mockRejectedValue(new Error("reject"));
+        student.$apiClient.save = jest.fn().mockRejectedValue(new Error("reject"));
           
         student.$saveMode = "surgical";
         expect(student.$getPropDirty("name")).toBe(true);

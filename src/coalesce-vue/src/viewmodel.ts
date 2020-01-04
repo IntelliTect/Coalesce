@@ -363,8 +363,18 @@ export abstract class ViewModel<
 
         // Capture the dirty props before we set $isDirty = false;
         const dirtyProps = [...this._dirtyProps];
-        const propsToSave = this.$saveMode == "surgical"
-          ? [this.$metadata.keyProp.name, ...dirtyProps]
+
+        // Save only the dirty props if we're doing surgical saves
+        // and the item already has a PK.
+        const propsToSave = this.$saveMode == "surgical" && !!this.$primaryKey
+          ? [
+              // Add the PK if it isn't already marked dirty.
+              ...(this.$getPropDirty(this.$metadata.keyProp.name) 
+                ? [] 
+                : [this.$metadata.keyProp.name]
+              ), 
+              ...dirtyProps
+            ]
           : null;
 
         // Before we make the save call, set isDirty = false.
@@ -1410,9 +1420,16 @@ export function updateViewModelFromModel<
 
               // The setter on the viewmodel will handle the conversion to a ViewModel.
               target[propName] = incomingValue;
-              if (!isCleanData) {
+              if (!isCleanData && !(incomingValue instanceof ViewModel)) {
                 // The setter on the viewmodel will assume clean by default.
-                // If the data isn't clean, explicitly dirty the model.
+                // If the data isn't clean, and the incoming value wasn't already
+                // a ViewModel that is capable of tracking its own dirty state,
+                // explicitly dirty the model.
+
+                // This might be redundant with the fact that the newly created
+                // ViewModel would have been created in our current ViewModelFactory scope,
+                // which itself will flag the incoming data as dirty.
+                // TODO: Test if this is redundant, and remove it if it is.
                 (target[propName] as any as ViewModel).$isDirty = true;
               }
             } else {

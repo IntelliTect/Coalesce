@@ -45,6 +45,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<TypeViewModel> ClientEnums => this.ClientClasses
             .SelectMany(c => c.ClientProperties.Select(p => p.Type.NullableUnderlyingType))
             .Concat(ApiBackedClasses.SelectMany(c => c.ClientMethods).SelectMany(m => m.ClientParameters).Select(p => p.Type.NullableUnderlyingType))
+            .Concat(DataSources.SelectMany(c => c.StrategyClass.DataSourceParameters).Select(p => p.Type.NullableUnderlyingType))
             .Where(t => t.IsEnum)
             .Distinct();
 

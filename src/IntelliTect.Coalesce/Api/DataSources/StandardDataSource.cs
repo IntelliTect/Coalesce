@@ -673,6 +673,15 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
+        /// Generate the message to be sent to the client when a specific item is not found.
+        /// </summary>
+        /// <param name="id">The key of the item that was requested.</param>
+        public virtual string GetNotFoundMessage(object id)
+        {
+            return $"{ClassViewModel.DisplayName} item with ID {id} was not found.";
+        }
+
+        /// <summary>
         /// Get an unmapped single object corresponding to the given primary key.
         /// </summary>
         /// <param name="id">The primary key to find the desired item by.</param>
@@ -688,7 +697,7 @@ namespace IntelliTect.Coalesce
 
             if (result == null)
             {
-                return ($"{ClassViewModel.DisplayName} item with ID {id} was not found.", null);
+                return (GetNotFoundMessage(id), null);
             }
 
             var tree = GetIncludeTree(query, parameters);

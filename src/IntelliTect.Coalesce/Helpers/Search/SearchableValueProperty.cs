@@ -51,6 +51,8 @@ namespace IntelliTect.Coalesce.Helpers.Search
             { "M/yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "MM-yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
             { "M-yyyy", ParseFlags.HaveYear | ParseFlags.HaveMonth },
+            { "yyyy", ParseFlags.HaveYear },
+            { "yy", ParseFlags.HaveYear },
 
             //{ DateTimeFormatInfo.CurrentInfo.MonthDayPattern, ParseFlags.HaveDate },
             //{ DateTimeFormatInfo.CurrentInfo.FullDateTimePattern, ParseFlags.HaveDateTime },
@@ -110,6 +112,13 @@ namespace IntelliTect.Coalesce.Helpers.Search
                             yield return (
                                 Property,
                                 $"({propertyAccessor} >= {DateLiteral(dt)} && {propertyAccessor} < {DateLiteral(dt.AddMonths(1))})"
+                            );
+                        }
+                        else if (formatInfo.Value == (ParseFlags.HaveYear))
+                        {
+                            yield return (
+                                Property,
+                                $"({propertyAccessor} >= {DateLiteral(dt)} && {propertyAccessor} < {DateLiteral(dt.AddYears(1))})"
                             );
                         }
                         yield break;

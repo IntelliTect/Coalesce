@@ -17,6 +17,9 @@ namespace IntelliTect.Coalesce.Tests.Api
     {
         public static IEnumerable<object[]> Search_DateTimeOffsetsData = new[]
         {
+            // Year only
+            new object[] { true, "2017", -8, new DateTimeOffset(2017, 08, 01, 0, 0, 0, TimeSpan.FromHours(-8)) },
+            new object[] { false, "2018", -8, new DateTimeOffset(2017, 08, 01, 0, 0, 0, TimeSpan.FromHours(-8)) },
             // Same timezone.
             new object[] { true, "2017-08", -8, new DateTimeOffset(2017, 08, 01, 0, 0, 0, TimeSpan.FromHours(-8)) },
             // For a person at UTC-8, a time that was at midnight in UTC-9 was 1:00 AM to them, so this matches.
@@ -66,10 +69,13 @@ namespace IntelliTect.Coalesce.Tests.Api
 
         public static IEnumerable<object[]> Search_MatchesDateTimesData = new[]
         {
+            new object[] { true, "2017", new DateTime(2017, 08, 15, 0, 0, 0) },
+            new object[] { false, "2018", new DateTime(2017, 08, 15, 0, 0, 0) },
             new object[] { true, "2017-08", new DateTime(2017, 08, 01, 0, 0, 0) },
             new object[] { true, "2017-08", new DateTime(2017, 08, 15, 0, 0, 0) },
             new object[] { false, "2017-08", new DateTime(2017, 07, 31, 23, 59, 59) },
             new object[] { false, "2017-08", new DateTime(2017, 09, 01, 0, 0, 0) },
+            new object[] { false, "2018-08", new DateTime(2017, 08, 15, 0, 0, 0) },
 
             new object[] { true, "Nov 6 17 11:35 AM", new DateTime(2017, 11, 06, 11, 35, 0) },
             new object[] { true, "Nov 6, 2017 11:35 AM", new DateTime(2017, 11, 06, 11, 35, 59) },

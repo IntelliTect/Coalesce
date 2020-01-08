@@ -983,6 +983,8 @@ export abstract class ApiState<
         }
       }
 
+      this.isLoading = false;
+
       // We have to maintain the shape of the promise of the stateless invoke method.
       // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
       // The reason for this is that we can't change the return type of TCall while maintaining
@@ -1003,34 +1005,36 @@ export abstract class ApiState<
       } else {
         var error = thrown as AxiosError | ApiResult | Error | string;
       }
-
-      delete this._cancelToken;
-      this.wasSuccessful = false;
-      const result = typeof error === "object" && "response" in error 
-        ? error.response as
-          | AxiosResponse<ListResult<TResult> 
-          | ItemResult<TResult>>
-          | undefined
-        : undefined;
-      if (result && typeof result.data === "object") {
-        this.setResponseProps(result.data);
-      } else {
-        this.message = getMessageForError(error)
-      }
-
-      const onRejected = this._callbacks.onRejected;
-      for (let i = 0; i < onRejected.length; i++) {
-        const cb = onRejected[i];
-        const cbResult = cb.apply(thisArg, [this]);
-        if (cbResult instanceof Promise) {
-          await cbResult;
+      
+      try {
+        delete this._cancelToken;
+        this.wasSuccessful = false;
+        const result = typeof error === "object" && "response" in error 
+          ? error.response as
+            | AxiosResponse<ListResult<TResult> 
+            | ItemResult<TResult>>
+            | undefined
+          : undefined;
+        if (result && typeof result.data === "object") {
+          this.setResponseProps(result.data);
+        } else {
+          this.message = getMessageForError(error)
         }
+
+        const onRejected = this._callbacks.onRejected;
+        for (let i = 0; i < onRejected.length; i++) {
+          const cb = onRejected[i];
+          const cbResult = cb.apply(thisArg, [this]);
+          if (cbResult instanceof Promise) {
+            await cbResult;
+          }
+        }
+      } finally {
+        this.isLoading = false;
       }
 
       throw error;
     } finally {
-      this.isLoading = false;
-
       delete (this.apiClient as any)._nextCancelToken;
 
       if (this._debounceSignal) {

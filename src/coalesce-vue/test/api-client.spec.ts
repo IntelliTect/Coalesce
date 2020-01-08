@@ -8,6 +8,13 @@ import { Student as StudentMeta } from './targets.metadata'
 import { AxiosError, AxiosResponse } from 'axios';
 
 
+function makeEndpointMock() {
+  return jest.fn().mockResolvedValue({ data: <ItemResult>{
+    wasSuccessful: true, object: "foo"
+  }});
+}
+
+
 describe("error handling", () => {
   test("throws error when server returns raw string instead of object", async () => {
     AxiosClient.defaults.adapter = 
@@ -69,14 +76,8 @@ describe("$makeCaller", () => {
 
   const wait = async (wait: number) => await new Promise(resolve => setTimeout(resolve, wait))
 
-  let endpointMock: jest.Mock<any>;
-  beforeEach(() => {
-    endpointMock = jest.fn().mockResolvedValue({ data: <ItemResult>{
-      wasSuccessful: true, object: "foo"
-    }})
-  })
-
   test("passes parameters to invoker func", () => {
+    const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => {
       endpointMock(num)
     })
@@ -98,6 +99,7 @@ describe("$makeCaller", () => {
   })
 
   test("allows return undefined from invoker func", () => {
+    const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => {
       if (num == 42) {
         return;
@@ -113,6 +115,7 @@ describe("$makeCaller", () => {
   })
 
   test("onFulfilled callbacks are awaited when promises returned", async () => {
+    const endpointMock = makeEndpointMock();
     let awaited = false;
     const model = {
       caller: new StudentApiClient()
@@ -145,6 +148,7 @@ describe("$makeCaller", () => {
   })
 
   test("passes this to invoker func", async () => {
+    const endpointMock = makeEndpointMock();
     type Model = { value: number, caller: () => Promise<any> }
     const fulfilledMock = jest.fn()
     const model = <Model>{
@@ -162,6 +166,7 @@ describe("$makeCaller", () => {
 
 
   test("preserves getter/setter behavior on ApiState after _makeReactive()", () => {
+    const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => endpointMock(num))
 
     // Precondition: Ensures that our test doesn't accidentally set the property with the same value
@@ -194,7 +199,8 @@ describe("$makeCaller", () => {
 
   })
 
-  test("debounce ignores redundant requests when resolving", async () => {
+  test("concurrencyMode 'debounce' ignores redundant requests when resolving", async () => {
+    const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient()
       .$makeCaller("item", async (c, param: number) => { 
         await wait(20)
@@ -222,12 +228,13 @@ describe("$makeCaller", () => {
     expect(calls[2]).resolves.toBeTruthy();
   })
 
-  test("debounce ignores redundant requests when throwing", async () => {
+  test("concurrencyMode 'debounce' ignores redundant requests when throwing", async () => {
+    const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient()
       .$makeCaller("item", async (c, param: number) => { 
         await wait(20)
-         // endpointMock in this case is just being used to record our parameter's value.
-         // In a real world case, the endpoint itself would throw.
+        // endpointMock in this case is just being used to record our parameter's value.
+        // In a real world case, the endpoint itself would throw.
         await endpointMock(param)
         throw "thrown"
       })
@@ -265,6 +272,45 @@ describe("$makeCaller", () => {
     expect(calls[2]).rejects.toBe("thrown");
   })
 
+
+  test("concurrencyMode 'cancel' cancels all previous requests", async () => {
+    
+    AxiosClient.defaults.adapter = 
+      jest.fn().mockImplementation(async () => {
+        await wait(20);
+        return <AxiosResponse<any>>{
+          data: { wasSuccessful: true, object: { personId: 1 }},
+          status: 200
+        }
+      })
+
+    const caller = new StudentApiClient()
+      .$makeCaller("item", (c, param: number) => c.get(1) )
+      .setConcurrency("cancel")
+
+    expect(caller.isLoading).toBeFalsy();
+    const prom1 = caller(1);
+    expect(caller.isLoading).toBeTruthy();
+    const prom2 = caller(2);
+    expect(caller.isLoading).toBeTruthy();
+    const prom3 = caller(3);
+    expect(caller.isLoading).toBeTruthy();
+
+    const res1 = await prom1;
+    expect(caller.isLoading).toBeTruthy();
+    const res2 = await prom2;
+    expect(caller.isLoading).toBeTruthy();
+    const res3 = await prom3;
+    // isLoading should not become false until the last request (the not-cancelled one)
+    // has finished.
+    expect(caller.isLoading).toBeFalsy();
+    
+    expect(res1).toBeUndefined();
+    expect(res2).toBeUndefined();
+    expect(res3).toBeTruthy();
+  })
+
+
 })
 
 
@@ -272,17 +318,12 @@ describe("$makeCaller with args object", () => {
   
   const wait = async (wait: number) => await new Promise(resolve => setTimeout(resolve, wait))
 
-  let endpointMock: jest.Mock<any>;
-  beforeEach(() => {
-    endpointMock = jest.fn().mockResolvedValue({ data: <ItemResult>{
-      wasSuccessful: true, object: "foo"
-    }})
-  })
 
   describe.each<"item" | "list">(["item", "list"])("for %s transport", (type) => {
 
 
     test("uses own args if args not specified", () => {
+      const endpointMock = makeEndpointMock();
       const caller = new StudentApiClient().$makeCaller(
         type, 
         (c, num: number) => endpointMock(num),
@@ -296,6 +337,7 @@ describe("$makeCaller with args object", () => {
     })
 
     test("own args are reactive", async () => {
+      const endpointMock = makeEndpointMock();
       const caller = new StudentApiClient().$makeCaller(
         type, 
         (c, num: number) => endpointMock(num),
@@ -324,6 +366,7 @@ describe("$makeCaller with args object", () => {
     })
 
     test("uses custom args if specified", () => {
+      const endpointMock = makeEndpointMock();
       const caller = new StudentApiClient().$makeCaller(
         type, 
         (c, num: number) => endpointMock(num),
@@ -339,6 +382,7 @@ describe("$makeCaller with args object", () => {
     })
 
     test("sets state properties appropriately", async () => {
+      const endpointMock = makeEndpointMock();
       const caller = new StudentApiClient().$makeCaller(
         type, 
         (c, num: number) => endpointMock(num),
@@ -355,6 +399,7 @@ describe("$makeCaller with args object", () => {
     })
     
     test("debounce ignores redundant requests when resolving", async () => {
+      const endpointMock = makeEndpointMock();
       const caller = new StudentApiClient()
         .$makeCaller(
           type, 

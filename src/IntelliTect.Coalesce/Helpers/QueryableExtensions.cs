@@ -51,9 +51,9 @@ namespace IntelliTect.Coalesce
         /// Asynchronously finds an object based on a specific primary key value.
         /// </summary>
         /// <returns>The desired item, or null if it was not found.</returns>
-        public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
+        public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null, CancellationToken cancellationToken = default)
         {
-            return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefaultAsync();
+            return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>

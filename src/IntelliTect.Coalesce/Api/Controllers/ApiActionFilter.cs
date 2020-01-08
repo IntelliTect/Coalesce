@@ -59,7 +59,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     // The response we send back also doesn't matter because
                     // the client will never see it.
                     context.ExceptionHandled = true;
-                    context.Result = new StatusCodeResult(400);
+                    // 499 is a non-standard code "Client Closed Request" introduced by nginx .
+                    context.Result = new StatusCodeResult(499);
                     return;
                 }
 

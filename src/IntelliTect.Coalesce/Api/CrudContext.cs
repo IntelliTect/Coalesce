@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Security.Claims;
+using System.Threading;
 
 namespace IntelliTect.Coalesce
 {
@@ -19,10 +20,15 @@ namespace IntelliTect.Coalesce
             lazyUser = new Lazy<ClaimsPrincipal?>(userAccessor, true);
         }
 
-        public CrudContext(Func<ClaimsPrincipal?> userAccessor, TimeZoneInfo timeZone)
+        public CrudContext(
+            Func<ClaimsPrincipal?> userAccessor, 
+            TimeZoneInfo timeZone,
+            CancellationToken cancellationToken = default
+        )
             : this(userAccessor)
         {
             TimeZone = timeZone ?? throw new ArgumentNullException(nameof(timeZone));
+            CancellationToken = cancellationToken;
         }
 
         /// <summary>
@@ -39,6 +45,11 @@ namespace IntelliTect.Coalesce
         /// The ReflectionRepository that will be used to resolve a ClassViewModel for the type handled by the CRUD strategy.
         /// </summary>
         public ReflectionRepository ReflectionRepository { get; set; } = ReflectionRepository.Global;
+
+        /// <summary>
+        /// A <see cref="CancellationToken"/> that can be observed to see if the underlying request has been canceled.
+        /// </summary>
+        public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
     }
 
     public class CrudContext<TContext> : CrudContext
@@ -50,8 +61,13 @@ namespace IntelliTect.Coalesce
             DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public CrudContext(TContext dbContext, Func<ClaimsPrincipal?> userAccessor, TimeZoneInfo timeZone)
-            : base(userAccessor, timeZone)
+        public CrudContext(
+            TContext dbContext, 
+            Func<ClaimsPrincipal?> userAccessor, 
+            TimeZoneInfo timeZone,
+            CancellationToken cancellationToken = default
+        )
+            : base(userAccessor, timeZone, cancellationToken)
         {
             DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }

@@ -7,7 +7,7 @@ $.ajaxSetup({ cache: false });
 module Coalesce {
     // Create a sub namespace.
     export module Utilities {
-        var busyOverlayTimeout = 0;
+        var busyOverlayTimeout: any = 0;
         var busyDepth = 0;
         var _isBusyEnabled = true;
 

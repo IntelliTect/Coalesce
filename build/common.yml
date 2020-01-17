@@ -8,7 +8,7 @@ jobs:
     displayName: "Add Build Tag"
 
   - pwsh: >
-      $path = "$(Build.Repository.LocalPath)\build\version.txt";
+      $path = "$(Build.Repository.LocalPath)/build/version.txt";
       Write-Host "Grabbing version from: $path";
 
       if(![System.IO.File]::Exists($path)){

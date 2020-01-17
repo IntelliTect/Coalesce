@@ -6,7 +6,7 @@ Click here to learn more. http://go.microsoft.com/fwlink/?LinkId=518007
 
 var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
-    sassCompiler = require('gulp-sass'),
+    sassCompiler = require('gulp-dart-sass'),
     typescriptCompiler = require('gulp-typescript'),
     del = require('del'),
     shell = require('gulp-shell'),
@@ -182,9 +182,9 @@ exports.coalesceVue = gulp.parallel(
     gulp.series(
         exports.coalesceBuild,
         coalesceVueGen,
-    ),
-    gulp.series(
-        shell.task("cd ../Coalesce.Web.Vue && npm run build-lib")
+    )
+    ,gulp.series(
+       shell.task("cd ../Coalesce.Web.Vue && npm run build-local-deps")
     )
 );
 

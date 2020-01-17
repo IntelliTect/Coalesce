@@ -4,7 +4,6 @@ trigger:
 variables:
   BuildConfiguration: Release
   BuildTag: alpha
-  CoalesceVueDir: src/coalesce-vue
   VersionSuffix: -alpha.$(Build.BuildNumber)
 
 jobs:

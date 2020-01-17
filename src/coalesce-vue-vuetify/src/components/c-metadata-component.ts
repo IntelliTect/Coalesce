@@ -1,0 +1,250 @@
+
+import { Vue, Component, Prop } from 'vue-property-decorator';
+import { 
+  Model, 
+  Property, 
+  Value, 
+  Method, 
+
+  EnumType, 
+  ClassType, 
+  ModelType, 
+  ObjectType, 
+  DataSourceType, 
+
+  ViewModel, 
+  Domain 
+} from 'coalesce-vue';
+
+export function getValueMeta(
+  forVal: undefined | null | string | Property | Value | Method, 
+  modelMeta: ObjectType | ModelType | DataSourceType | null,
+  $metadata?: Domain
+): Property | Value | Method | null {
+
+  if (!forVal) {
+    return null;
+  }
+
+  if (typeof forVal != "string") {
+    return forVal;
+  }
+
+  if (forVal.length === 0) {
+    throw `prop 'for' must not be an empty string`
+  }
+
+  if (modelMeta && "props" in modelMeta) {
+    // Handle the 90% case: check if 'for' is a prop on 'model'
+    const matchedProp = modelMeta.props[forVal];
+    if (matchedProp) {
+      return matchedProp;
+    }
+  }
+
+  const forParts = forVal.split('.');
+
+  let tail: ClassType | Method | Property | Value | DataSourceType | undefined = undefined;
+  let tailKind: "type" | "method" | "property" | "value" | "dataSource" | undefined = undefined;
+
+  if (modelMeta) {
+    if (modelMeta.type == "object" || modelMeta.type == "model") {
+      tail = modelMeta
+      tailKind = "type"
+    } else if (modelMeta.type == "dataSource") {
+      tail = modelMeta
+      tailKind = "dataSource"
+    }
+  }
+
+  for (let i = 0; i < forParts.length; i++) {
+    const forPart = forParts[i];
+    const forPartNext = forParts[i+1];
+
+    // Check if 'for' is a type name. Type name is only valid in the first position.
+    if (i == 0 && $metadata) {
+      if (forPart in $metadata.types){
+        tail = ($metadata.types as any)[forPart];
+        tailKind = "type";
+        continue;
+      }
+      if (forPart in $metadata.enums){
+        const type: EnumType = ($metadata.enums as any)[forPart];
+        tail = <Value>{
+          type: type.type,
+          displayName: type.displayName,
+          name: '',
+          role: "value",
+          typeDef: type
+        }
+        tailKind = "value";
+        continue;
+      }
+    }
+
+    if (tailKind == "type") {
+      // See if the part is a prop name.
+      const type = tail as ClassType;
+      if (type.props[forPart]) {
+        tail = type.props[forPart];
+        tailKind = "property";
+        continue;
+      }
+      
+      // See if the part is a method name.
+      if (type.type == "model" && type.methods[forPart]) {
+        tail = type.methods[forPart];
+        tailKind = "method";
+        continue;
+      }
+
+      // forPart wasn't itself a method or prop.
+      // Check if forPart is the literal string "props" or "method"
+      // and the actual name is the following token.
+      if (forPart == "props" && type.props[forPartNext]) {
+        i++;
+        tail = type.props[forPartNext];
+        tailKind = "property";
+        continue;
+      }
+      
+      if (forPart == "methods" && type.type == "model" && type.methods[forPartNext]) {
+        i++;
+        tail = type.methods[forPartNext];
+        tailKind = "method";
+        continue;
+      }
+    } else if (tailKind == "method") {
+
+      const method = tail as Method;
+      if (method.params[forPart]) {
+        tail = method.params[forPart];
+        tailKind = "value";
+        continue;
+      }
+
+      // Check if forPart is the literal string "params"
+      // and the actual name is the following token.
+      if (forPart == "params" && method.params[forPartNext]) {
+        i++;
+        tail = method.params[forPartNext];
+        tailKind = "value";
+        continue;
+      }
+    } else if (tailKind == "dataSource") {
+
+      const dataSource = tail as DataSourceType;
+      if (dataSource.params[forPart]) {
+        tail = dataSource.params[forPart];
+        tailKind = "value";
+        continue;
+      }
+
+      // Check if forPart is the literal string "params"
+      // and the actual name is the following token.
+      if (forPart == "params" && dataSource.params[forPartNext]) {
+        i++;
+        tail = dataSource.params[forPartNext];
+        tailKind = "value";
+        continue;
+      }
+    }
+
+    throw Error(`Could not resolve token '${forPart}'${forVal != forPart ? ` in '${forVal}'` : ''} from ${tailKind} '${tail?.name}'`)
+  }
+
+  if (!tail) {
+    throw Error(`Could not find any metadata with for specifier '${forVal}'`)
+  }
+
+  switch (tailKind) {
+    case "method":
+      return tail as Method
+    case "type":
+      const type = tail as ClassType;
+      switch (type.type){
+        // Create a fake `Value` implementation to represent a usage of the type.
+        case "model":
+          return {
+            type: type.type,
+            displayName: type.displayName,
+            name: '',
+            role: "referenceNavigation",
+            typeDef: type
+          }
+        case "object":
+          return {
+            type: type.type,
+            displayName: type.displayName,
+            name: '',
+            role: "value",
+            typeDef: type
+          }
+      }
+    default:
+      return tail as Property | Value;
+  }
+}
+
+@Component({
+  inject: {
+    'c-input-props': { default: {} }
+  },
+})
+export default class extends Vue {
+
+  // NOTE: these props are intentionally don't have types specified. 
+  // Vue's type checking is slow because of some nonsense about 
+  // compatibility with iframes - it tostrings the ctor function and then 
+  // runs a regex against the string to determine the type.
+
+  /**
+   * A 'parent' object that owns the property which we are binding.
+   * The corresponding property is specified via prop `for`,
+   * and should be accessed via `valueMeta`
+   */
+  @Prop({required: false, /*type: Object*/})
+  public model!: Model<ClassType>;
+
+  @Prop({required: false, /*type: [String, Object]*/})
+  public for?: string | Property | Value;
+
+  get inputBindAttrs() {
+    const model = this.model;
+    const modelMeta = model ? model.$metadata : null;
+    const valueMeta = this.valueMeta;
+
+    if (!valueMeta) {
+      return {
+        ...(this as any)['c-input-props'],
+        ...this.$attrs,
+      }
+    }
+
+    return {
+      // If a label is not provided to the component, default to the displayName of the value. 
+      label: valueMeta?.displayName,
+
+      rules: model && model instanceof ViewModel && valueMeta.name in modelMeta!.props
+        ? model.$getRules(valueMeta.name)
+        : 'rules' in valueMeta && valueMeta.rules
+          ? Object.values(valueMeta.rules)
+          : undefined,
+
+      ...(this as any)['c-input-props'],
+      ...this.$attrs,
+    }
+  }
+
+  get modelMeta(): ClassType | null {
+    return this.model ? this.model.$metadata : null;
+  }
+
+  get valueMeta(): Property | Value | null {
+    const valueMeta = getValueMeta(this.for, this.modelMeta);
+    if (valueMeta && "role" in valueMeta) {
+      return valueMeta;
+    }
+    return null;
+  }
+}

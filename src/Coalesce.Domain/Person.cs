@@ -282,6 +282,9 @@ namespace Coalesce.Domain
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
                 //=> Db.People.Include(p => p.Company);
                 => Db.People.IncludeChildren();
+
+                // https://stackoverflow.com/questions/11276964/how-to-slow-down-a-sql-query
+                //=> Db.People.FromSql("SELECT top 1000000 T1.* FROM Person T1,Person T2, Person T3, Person T4 ORDER BY RAND(T1.PersonId)");
         }
 
         public class Behaviors : StandardBehaviors<Person, AppDbContext>

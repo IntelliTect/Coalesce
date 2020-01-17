@@ -1,0 +1,57 @@
+{
+  "name": "coalesce-vue-vuetify",
+  "version": "0.2.0",
+  "main": "./dist/coalesce-vue-vuetify.common.js",
+  "typings": "./src/main.ts",
+  "files": [
+    "dist",
+    "src",
+    "test"
+  ],
+  "scripts": {
+    "build-local-deps": "cd ../coalesce-vue && npm run pack-dev && cd ../coalesce-vue-vuetify && npm install ../coalesce-vue/coalesce-vue-0.1.0-local.tgz",
+    "pack-dev": "npm run build-local-deps && npm ci && npm pack",
+    "build": "vue-cli-service build --target lib --name coalesce-vue-vuetify ./src/main.ts",
+    "prepack": "npm run build",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "coalesce-vue": "test",
+    "core-js": "^3.4.4",
+    "date-fns": "^2.9.0",
+    "vue-class-component": "^7.0.2",
+    "vue-property-decorator": "^8.3.0"
+  },
+  "peerDependencies": {
+    "vue": "^2.6.11",
+    "vuetify": "^2.2.4"
+  },
+  "optionalDependencies": {
+    "fsevents": "1.2.9",
+    "vue-router": "^3.1.5"
+  },
+  "_comment": "fsevent@1.2.9 is locked in to prevent broken builds on windows for v1.2.11",
+  "devDependencies": {
+    "@types/jest": "^24.9.0",
+    "@vue/cli-plugin-babel": "^4.1.0",
+    "@vue/cli-plugin-eslint": "^4.1.0",
+    "@vue/cli-plugin-typescript": "^4.1.0",
+    "@vue/cli-plugin-unit-jest": "^4.1.0",
+    "@vue/cli-service": "^4.1.0",
+    "@vue/eslint-config-typescript": "^4.0.0",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "eslint": "^5.16.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "sass": "^1.24.4",
+    "sass-loader": "^8.0.0",
+    "ts-jest": "^24.3.0",
+    "typescript": "3.7.5",
+    "vue": "^2.6.11",
+    "vue-cli-plugin-vuetify": "^2.0.3",
+    "vue-router": "^3.1.5",
+    "vue-template-compiler": "^2.6.11",
+    "vuetify": "^2.2.4",
+    "vuetify-loader": "^1.4.3",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

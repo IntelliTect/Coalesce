@@ -1,3 +1,6 @@
+import Vue from "vue";
+
+
 // This will tree shake correctly as of v2.0.0-alpha.21
 import { toDate, isValid, format, formatDistanceToNow, lightFormat } from "date-fns";
 
@@ -738,4 +741,59 @@ export function valueDisplay(
     value,
     meta
   );
+}
+
+import type { Route } from 'vue-router';
+
+export function bindToQueryString(
+  vue: Vue,
+  obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
+  key: string, 
+  queryKey: string = key, 
+  parse?: (v: any) => any,
+) {
+  const defaultValue = obj[key];
+
+  // When the value changes, persist it to the query.
+  vue.$watch(
+    () => obj[key], 
+    (v: any) => {
+      vue.$router
+        .replace({query: {
+          ...vue.$route.query, 
+          [queryKey]: 
+            v == null || v === ""
+            ? undefined 
+            // Use metadata to format the value if the obj is a DataSource.
+            : obj?.$metadata?.params?.[key]
+            ? mapValueToDto(v, obj.$metadata.params[key])
+            // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+            // Fallback to .tostring()
+            : (String(v) ?? undefined)
+        }})
+        .catch((err: any) => {})
+    }
+  );
+
+  // When the query changes, grab the new value.
+  vue.$watch(
+    () => vue.$route.query[queryKey], 
+    (v: any) => {
+      obj[key] = 
+        // Use the default value if null or undefined
+        v == null
+        ? defaultValue
+        // Use provided parse function, if provided.
+        : parse 
+        ? parse(v) 
+        // Use metadata to parse the value if the obj is a DataSource.
+        : obj?.$metadata?.params?.[key]
+        ? mapValueToModel(v, obj.$metadata.params[key])
+        // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+        // Fallback to the raw value
+        : v
+    },
+    { immediate: true }
+  );
+
 }

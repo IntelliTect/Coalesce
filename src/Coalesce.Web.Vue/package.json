@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build-lib": "cd ../coalesce-vue && npm install && npm run build-local && cd ../Coalesce.Web.Vue && npm install ../coalesce-vue/coalesce-vue-0.1.0-local.tgz",
-    "build": "build-lib && vue-cli-service build",
-    "test": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "build-local-deps": "cd ../coalesce-vue-vuetify && npm run pack-dev && cd ../Coalesce.Web.Vue && npm install ../coalesce-vue-vuetify/coalesce-vue-vuetify-0.1.0-local.tgz",
+    
+    "build": "build-local-deps && vue-cli-service build",
+    "test": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "coalesce-vue": "file:../coalesce-vue/coalesce-vue-0.1.0-local.tgz",
+    "coalesce-vue-vuetify": "0.1.0-local",
     "vue": "2.6.10",
     "vue-class-component": "7.0.2",
     "vue-property-decorator": "8.1.0",
@@ -25,8 +25,8 @@
     "@vue/test-utils": "1.0.0-beta.29",
     "aspnet-webpack": "^3.0.0",
     "babel-core": "^7.0.0-0",
-    "node-sass": "^4.11.0",
-    "sass-loader": "^7.0.3",
+    "sass": "^1.24.5",
+    "sass-loader": "^8.0.2",
     "ts-jest": "24.0.2",
     "typescript": "3.4.5",
     "vue-template-compiler": "2.6.10",

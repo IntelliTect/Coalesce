@@ -19,27 +19,33 @@
     "@types/lodash-es": "^4.17.3",
     "@types/qs": "^6.5.3",
     "axios": "^0.19.1",
-    "date-fns": ">=2.0.0-beta.2",
+    "date-fns": "^2.9.0",
     "lodash-es": "^4.17.15",
     "qs": "^6.9.1",
     "tslib": "^1.10.0"
   },
   "peerDependencies": {
-    "vue": "^2.5.16"
+    "vue": "^2.6.11"
   },
+  "optionalDependencies": {
+    "fsevents": "1.2.9",
+    "vue-router": ">=3.0.0"
+  },
+  "_comment": "fsevent@1.2.9 is locked in to prevent broken builds on windows for v1.2.11",
   "devDependencies": {
     "@types/jest": "^24.0.25",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",
     "lodash": "^4.17.15",
     "ts-jest": "^24.3.0",
-    "typescript": "3.7.1-rc",
-    "vue": "^2.6.10"
+    "typescript": "3.8.0-beta",
+    "vue": "^2.6.11",
+    "vue-router": "^3.1.5"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
-    "prepack": "tsc -p ./tsconfig.build.json",
-    "build-local": "npm pack",
+    "prepack": "npm run build",
+    "pack-dev": "npm ci && npm pack",
     "//": "No coverage by default because it breaks line numbers in error messages. `npm run test --coverage` to run it.",
     "test": "jest"
   },

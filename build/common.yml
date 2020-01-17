@@ -147,6 +147,8 @@ jobs:
 
   variables:
     COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
+    PACKAGE_NAME: coalesce-vue
+    PACKAGE_DIR: src/$(PACKAGE_NAME)
 
   steps:
   - task: NodeTool@0
@@ -156,19 +158,15 @@ jobs:
 
   - script: npm ci
     displayName: npm ci
-    workingDirectory: $(CoalesceVueDir)
+    workingDirectory: $(PACKAGE_DIR)
 
   - script: npm version $(COALESCE_VERSION) --no-git-tag-version
     displayName: npm version $(COALESCE_VERSION) --no-git-tag-version
-    workingDirectory: $(CoalesceVueDir)
-
-  - script: npm run build
-    displayName: npm run build
-    workingDirectory: $(CoalesceVueDir)
+    workingDirectory: $(PACKAGE_DIR)
 
   - script: npm run test -- --coverage --reporters=default --reporters=jest-junit
     displayName: npm run test
-    workingDirectory: $(CoalesceVueDir)
+    workingDirectory: $(PACKAGE_DIR)
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results **/junit.xml'
@@ -179,10 +177,71 @@ jobs:
   - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
     displayName: 'Yarn pack'
     inputs:
-      ProjectDirectory: '$(CoalesceVueDir)'
+      ProjectDirectory: '$(PACKAGE_DIR)'
       Arguments: 'pack -f $(Build.ArtifactStagingDirectory)/coalesce-vue.tgz'
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: coalesce-vue'
+    displayName: 'Publish Artifact: $(PACKAGE_NAME)'
     inputs:
-      ArtifactName: 'coalesce-vue'
+      ArtifactName: '$(PACKAGE_NAME)'
+
+
+
+- job:
+  displayName: coalesce-vue-vuetify
+  dependsOn: Meta
+
+  variables:
+    COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
+    PACKAGE_NAME: coalesce-vue-vuetify
+    PACKAGE_DIR: src/$(PACKAGE_NAME)
+
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 10.x'
+    inputs:
+      versionSpec: 10.x
+
+  # build coalesce-vue and install it so we can run tests against it
+  - script: npm run build-local-deps
+    displayName: npm run build-local-deps
+    workingDirectory: $(PACKAGE_DIR)
+
+  - script: npm ci
+    displayName: npm ci
+    workingDirectory: $(PACKAGE_DIR)
+
+  # coalesce-vue-vuetify currently has no tests. Uncomment when the first ones are added:
+
+  # - script: npm run test -- --coverage --reporters=default --reporters=jest-junit
+  #   displayName: npm run test
+  #   workingDirectory: $(PACKAGE_DIR)
+
+  # - task: PublishTestResults@2
+  #   displayName: 'Publish Test Results **/junit.xml'
+  #   inputs:
+  #     testResultsFiles: '**/junit.xml'
+  #     testRunTitle: '$(PACKAGE_NAME)'
+
+  # now we'll setup the real versions of things.
+  # Change the package.json with the correct version of coalesce-vue, 
+  # but do not use any npm commands to do so as they'll freak out that the version isn't published.
+  - script: update dependencies["coalesce-vue"] version
+    displayName: cat <<< "$(cat package.json | jq '.dependencies["coalesce-vue"] = "$(COALESCE_VERSION)"')" > package.json
+    workingDirectory: $(PACKAGE_DIR)
+
+  - script: npm version $(COALESCE_VERSION) --no-git-tag-version
+    displayName: npm version $(COALESCE_VERSION) --no-git-tag-version
+    workingDirectory: $(PACKAGE_DIR)
+
+  # yarn pack is used because it allows specifying an output location. npm pack doesn't.
+  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-task.Yarn@2
+    displayName: 'Yarn pack'
+    inputs:
+      ProjectDirectory: '$(PACKAGE_DIR)'
+      Arguments: 'pack -f $(Build.ArtifactStagingDirectory)/$(PACKAGE_NAME).tgz'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: $(PACKAGE_NAME)'
+    inputs:
+      ArtifactName: '$(PACKAGE_NAME)'

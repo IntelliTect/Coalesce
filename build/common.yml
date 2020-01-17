@@ -190,6 +190,8 @@ jobs:
 - job:
   displayName: coalesce-vue-vuetify
   dependsOn: Meta
+  pool:
+    vmImage: 'ubuntu-latest'
 
   variables:
     COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
@@ -226,8 +228,8 @@ jobs:
   # now we'll setup the real versions of things.
   # Change the package.json with the correct version of coalesce-vue, 
   # but do not use any npm commands to do so as they'll freak out that the version isn't published.
-  - script: update dependencies["coalesce-vue"] version
-    displayName: cat <<< "$(cat package.json | jq '.dependencies["coalesce-vue"] = "$(COALESCE_VERSION)"')" > package.json
+  - script: cat <<< "$(cat package.json | jq '.dependencies["coalesce-vue"] = "$(COALESCE_VERSION)"')" > package.json
+    displayName: update dependencies["coalesce-vue"] version
     workingDirectory: $(PACKAGE_DIR)
 
   - script: npm version $(COALESCE_VERSION) --no-git-tag-version

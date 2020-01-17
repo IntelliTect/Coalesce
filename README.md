@@ -30,7 +30,7 @@ After you create your project, you should start reading through [the Documentati
 |channel|build|IntelliTect.Coalesce|coalesce-vue
 |:--:|:--:|:--:|:--:
 |master|[![Build status](https://intellitect.visualstudio.com/Coalesce/_apis/build/status/Production)](https://intellitect.visualstudio.com/Coalesce/_build/latest?definitionId=64)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg)](https://www.nuget.org/packages/IntelliTect.Coalesce)
-|dev|[![Build Status](https://intellitect.visualstudio.com/Coalesce/_apis/build/status/Alpha)](https://intellitect.visualstudio.com/Coalesce/_build/latest?definitionId=62)|[![MyGet](https://img.shields.io/myget/intellitect-coalesce/v/IntelliTect.Coalesce.svg?label=myget)](https://www.myget.org/feed/intellitect-coalesce/package/nuget/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/dev.svg)](http://google.com)
+|dev|[![Build Status](https://intellitect.visualstudio.com/Coalesce/_apis/build/status/Alpha)](https://intellitect.visualstudio.com/Coalesce/_build/latest?definitionId=62)|[![MyGet](https://img.shields.io/myget/intellitect-coalesce/v/IntelliTect.Coalesce.svg?label=myget)](https://www.myget.org/feed/intellitect-coalesce/package/nuget/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/dev.svg)](https://www.npmjs.com/package/coalesce-vue)
 
 
 ## Contributing

@@ -1,15 +1,13 @@
 
 
 import Vue from 'vue';
-import { AxiosClient, AxiosItemResult, AxiosListResult, ItemApiState } from '../src/api-client'
-import { mapToDto, mapToModel } from '../src/model';
+import { AxiosItemResult, AxiosListResult, ItemApiState } from '../src/api-client'
+import { mapToModel } from '../src/model';
+import { ViewModelCollection } from '../src/viewmodel';
 
 import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewModel } from './targets.viewmodels';
 import { Student, Advisor, Course } from './targets.models';
 import * as metadata from './targets.metadata';
-import { ViewModelCollection } from '../src/viewmodel';
-import { ItemResult } from '../lib/api-client';
-import { AxiosResponse } from 'axios';
 
 
 async function waitFor(ms: number) {

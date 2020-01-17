@@ -1,5 +1,7 @@
 jobs:
 - job: Meta
+  pool:
+    vmImage: 'ubuntu-latest'
 
   steps:
   - pwsh: Write-Host "##vso[build.addbuildtag]$(BuildTag)"
@@ -43,6 +45,8 @@ jobs:
 - job: 
   displayName: IntelliTect.Coalesce.*
   dependsOn: Meta
+  pool:
+    vmImage: 'ubuntu-latest'
 
   variables:
     COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
@@ -62,6 +66,7 @@ jobs:
     displayName: 'dotnet restore'
     inputs:
       command: restore
+      verbosityRestore: normal
       projects: '**/*.csproj'
 
   - task: DotNetCoreCLI@2
@@ -144,6 +149,8 @@ jobs:
 - job:
   displayName: coalesce-vue
   dependsOn: Meta
+  pool:
+    vmImage: 'ubuntu-latest'
 
   variables:
     COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]

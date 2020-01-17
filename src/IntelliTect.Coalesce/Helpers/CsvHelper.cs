@@ -41,6 +41,8 @@ namespace IntelliTect.Coalesce.Helpers
             var textWriter = new StringWriter();
             var csv = new CsvWriter(textWriter);
             csv.Configuration.RegisterClassMap(CreateMap<T>());
+            csv.Configuration.TypeConverterOptionsCache.GetOptions<DateTime>().Formats = new[] { "M/d/yyyy hh:mm:ss tt zzz" };
+            csv.Configuration.TypeConverterOptionsCache.GetOptions<DateTimeOffset>().Formats = new[] { "M/d/yyyy hh:mm:ss tt zzz" };
             csv.WriteRecords(list);
             return textWriter.ToString();
         }
@@ -50,6 +52,8 @@ namespace IntelliTect.Coalesce.Helpers
             var textReader = new StringReader(text);
             var csv = new CsvReader(textReader);
             csv.Configuration.RegisterClassMap(CreateMap<T>());
+            csv.Configuration.TypeConverterOptionsCache.GetOptions<DateTime>().Formats = new[] { "M/d/yyyy hh:mm:ss tt zzz" };
+            csv.Configuration.TypeConverterOptionsCache.GetOptions<DateTimeOffset>().Formats = new[] { "M/d/yyyy hh:mm:ss tt zzz" };
             csv.Configuration.HasHeaderRecord = hasHeader;
             return csv.GetRecords<T>().ToList();
         }

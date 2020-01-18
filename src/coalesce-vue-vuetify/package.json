@@ -2,21 +2,19 @@
   "name": "coalesce-vue-vuetify",
   "version": "0.2.0",
   "main": "./dist/coalesce-vue-vuetify.common.js",
-  "typings": "./src/main.ts",
+  "typings": "./src/index.ts",
   "files": [
     "dist",
     "src",
     "test"
   ],
   "scripts": {
-    "build-local-deps": "cd ../coalesce-vue && npm run pack-dev && cd ../coalesce-vue-vuetify && npm install ../coalesce-vue/coalesce-vue-0.1.0-local.tgz",
-    "pack-dev": "npm run build-local-deps && npm ci && npm pack",
-    "build": "vue-cli-service build --target lib --name coalesce-vue-vuetify ./src/main.ts",
+    "build": "vue-cli-service build --target lib --name coalesce-vue-vuetify ./src/index.ts",
     "prepack": "npm run build",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "coalesce-vue": "test",
+    "coalesce-vue": "../coalesce-vue",
     "core-js": "^3.4.4",
     "date-fns": "^2.9.0",
     "vue-class-component": "^7.0.2",
@@ -53,5 +51,10 @@
     "vuetify": "^2.2.4",
     "vuetify-loader": "^1.4.3",
     "webpack-node-externals": "^1.7.2"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
   }
 }

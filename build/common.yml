@@ -211,11 +211,6 @@ jobs:
     inputs:
       versionSpec: 10.x
 
-  # build coalesce-vue and install it so we can run tests against it
-  - script: npm run build-local-deps
-    displayName: npm run build-local-deps
-    workingDirectory: $(PACKAGE_DIR)
-
   - script: npm ci
     displayName: npm ci
     workingDirectory: $(PACKAGE_DIR)

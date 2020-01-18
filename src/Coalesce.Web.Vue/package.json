@@ -3,21 +3,25 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build-local-deps": "cd ../coalesce-vue-vuetify && npm run pack-dev && cd ../Coalesce.Web.Vue && npm install ../coalesce-vue-vuetify/coalesce-vue-vuetify-0.1.0-local.tgz",
-    
-    "build": "build-local-deps && vue-cli-service build",
+    "build": "vue-cli-service build",
     "test": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "coalesce-vue-vuetify": "0.1.0-local",
-    "vue": "2.6.10",
+    "coalesce-vue-vuetify": "../coalesce-vue-vuetify",
+    "coalesce-vue": "../coalesce-vue",
+    "vue": "2.6.11",
     "vue-class-component": "7.0.2",
     "vue-property-decorator": "8.1.0",
     "vue-router": "3.0.6",
-    "vuetify": "1.5.13"
+    "vuetify": "^2.2.4",
+    "axios": "0.19.1"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.4.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.6.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.7.4",
     "@types/jest": "24.0.11",
+    "@types/qs": "6.5.1",
     "@vue/cli-plugin-babel": "3.7.0",
     "@vue/cli-plugin-typescript": "3.7.0",
     "@vue/cli-plugin-unit-jest": "3.7.0",
@@ -26,17 +30,12 @@
     "aspnet-webpack": "^3.0.0",
     "babel-core": "^7.0.0-0",
     "sass": "^1.24.5",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^7.3.1",
     "ts-jest": "24.0.2",
-    "typescript": "3.4.5",
-    "vue-template-compiler": "2.6.10",
+    "typescript": "3.8.0-beta",
+    "vue-template-compiler": "2.6.11",
     "webpack-hot-middleware": "^2.22.3",
     "rimraf": "2.6.3"
-  },
-  "babel": {
-    "presets": [
-      "@vue/app"
-    ]
   },
   "postcss": {
     "plugins": {

@@ -70,7 +70,6 @@
 <script lang="ts">
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import { CDisplay, CInput } from '../coalesce/components';
 import { ApiClient, convertToModel, ModelType, ModelApiClient } from 'coalesce-vue'
 import { Person } from '../metadata.g';
 import * as metadata from '../metadata.g';
@@ -82,9 +81,7 @@ import { PersonApiClient } from '../api-clients.g';
 
 @Component({
   name: 'admin-table-page',
-  components: {
-    CDisplay, CInput
-  }
+  components: { }
 })
 export default class extends Vue {
     metadata = metadata.Person

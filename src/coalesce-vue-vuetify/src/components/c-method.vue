@@ -47,7 +47,7 @@
         v-if="caller.result"
       ><c-display 
         v-model="caller.result" 
-        :for="meta.return" /></pre>
+        :for="methodMeta.return" /></pre>
     </div>
   </div>
 </template>

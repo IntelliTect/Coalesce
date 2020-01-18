@@ -10,15 +10,20 @@
     "allowSyntheticDefaultImports": true,
     "noEmitOnError": false,
     "sourceMap": true,
+    "preserveSymlinks": true,
     "baseUrl": ".",
     "types": [
       "webpack-env",
       "jest"
     ],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": [ "src/*" ],
+      // Add modules here that are getting duplicated due to the fact that we symlink in coalesce-vue and coalesce-vue-vuetifiy.
+      "vue": [ "node_modules/vue" ],
+      "vue/types/vue": [ "node_modules/vue/types/vue" ],
+      "axios": [ "node_modules/axios" ],
+      "coalesce-vue": [ "node_modules/coalesce-vue" ],
+      "coalesce-vue/*": [ "node_modules/coalesce-vue/*" ],
     }
   },
   "include": [
@@ -29,6 +34,6 @@
     "tests/**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
   ]
 }

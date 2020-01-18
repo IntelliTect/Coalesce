@@ -1,130 +1,112 @@
 <template>
 
-    <v-app class="grey lighten-2">
-      <v-navigation-drawer
-        clipped
-        fixed
-        v-model="drawer"
-        app
-      >
-      <v-list dense>
-        <v-list-tile >
-          <v-list-tile-action>
-            <v-icon>dashboard</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Dashboard</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile >
-          <v-list-tile-action>
-            <v-icon>settings</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Settings</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-navigation-drawer>
-    <v-toolbar app fixed clipped-left>
-      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>Application</v-toolbar-title>
-    </v-toolbar>
+  <v-app id="vue-app">
+    <v-app-bar
+      app
+      color="primary"
+      dark dense
+      clipped-left
+    >
+
+      <v-toolbar-title style="line-height: 1">
+        <router-link to="/" class="white--text" >
+          Coalesce Vue Demo
+        </router-link>
+      </v-toolbar-title>
+
+      <div class="nav-items">
+
+        <v-btn text to="/">Home</v-btn>
+
+        <v-menu offset-y>
+          <template #activator="{on}">
+            <v-btn text v-on="on">
+              Dropdown Menu
+              <i class="fa fa-caret-down pl-1"></i>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item to="/"><v-list-item-title>Home</v-list-item-title></v-list-item>
+          </v-list>
+        </v-menu>
+      </div>
+    </v-app-bar>
+
     <v-content>
-      <router-view>
-        <v-container fluid></v-container>
-      </router-view>
+      <c-input-props-provider outlined dense>
+        <transition name="router-transition" mode="out-in" @enter="routerViewOnEnter" appear>
+          <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
+          <router-view ref="routerView" :key="$route.path" />
+        </transition>
+      </c-input-props-provider>
     </v-content>
-    <!-- <v-footer app fixed>
-      <span>&copy; 2017</span>
-    </v-footer> -->
-    </v-app>
+  </v-app>
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
-  import { Component } from 'vue-property-decorator';
+import Vue from 'vue';
+import { Component } from 'vue-property-decorator';
 
-  @Component({
-    components: {
-      
-    }
-  })
-  export default class AppComponent extends Vue {
-    drawer: boolean = false;
+@Component({
+  components: { }
+})
+export default class App extends Vue {
+  routeComponent: Vue | null = null;
+
+  get routeMeta() {
+    if (!this.$route || this.$route.name === null) return null;
+
+    return this.$route.meta;
   }
+  routerViewOnEnter() {
+    this.routeComponent = this.$refs.routerView as Vue
+  }
+
+  created() {
+    this.$watch(
+      () => (this.routeComponent as any)?.pageTitle,
+      (n: string | null | undefined) => {
+        if (n) {
+          document.title = n + " - ICMS"
+        } else {
+          document.title = "ICMS"
+        }
+      },
+      { immediate: true }
+    )
+  }
+}
 
 </script>
 
-<style>
-/*
- * Base structure
- */
+<style lang="scss">
+  #vue-app {
+  }
 
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-  padding-top: 50px;
-}
+  .v-app-bar {
+    padding-top: 0;
+    padding-bottom: 0;
 
-/*
- * Typography
- */
+    .nav-items {
+      flex-grow: 1;
+      display: flex;
+      overflow-x: auto;
+    }
+  }
 
-h1 {
-  margin-bottom: 20px;
-  padding-bottom: 9px;
-  border-bottom: 1px solid #eee;
-}
 
-/*
- * Sidebar
- */
+  .router-transition-enter-active,
+  .router-transition-leave-active {
+    // transition: 0.2s cubic-bezier(0.25, 0.8, 0.5, 1);
+    transition: 0.2s ease-out;
+  }
+  .router-transition-move {
+    transition: transform 0.4s;
+  }
+  .router-transition-enter,
+  .router-transition-leave-to {
+    opacity: 0;
+    // transform: translateY(5px);
+  }
 
-.sidebar {
-  position: fixed;
-  top: 51px;
-  bottom: 0;
-  left: 0;
-  z-index: 1000;
-  padding: 20px;
-  overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-  border-right: 1px solid #eee;
-}
-
-/* Sidebar navigation */
-.sidebar {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.sidebar .nav {
-  margin-bottom: 20px;
-}
-
-.sidebar .nav-item {
-  width: 100%;
-}
-
-.sidebar .nav-item + .nav-item {
-  margin-left: 0;
-}
-
-.sidebar .nav-link {
-  border-radius: 0;
-}
-
-/*
- * Dashboard
- */
-
- /* Placeholders */
-.placeholders {
-  padding-bottom: 3rem;
-}
-
-.placeholder img {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
 </style>

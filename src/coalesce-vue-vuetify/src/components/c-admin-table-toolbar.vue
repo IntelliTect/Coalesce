@@ -22,30 +22,10 @@
 
     <v-divider class="ml-4 my-0" vertical></v-divider>
 
-    <div
-      class="c-admin-table-toolbar--pagination"> 
-      
-
-      <v-btn text icon @click="list.$previousPage()" :disabled="!list.$hasPreviousPage">
-        <v-icon>mdi-chevron-left</v-icon>
-      </v-btn>
-      
-      <v-text-field outlined
-        label="Page"
-        class="d-inline-block c-admin-table-toolbar--page"
-        type="number"
-        min="1"
-        :max="list.$pageCount"
-        v-model="list.$page"
-        hide-details 
-        :suffix="list.$pageCount ? ('of ' + list.$pageCount) : ''"
-        :style="{width: pageInputWidth}"
-      ></v-text-field>
-
-      <v-btn text icon @click="list.$nextPage()" :disabled="!list.$hasNextPage">
-        <v-icon>mdi-chevron-right</v-icon>
-      </v-btn>
-    </div>
+    <c-pagination-page
+      :list="list"
+      class="c-admin-table-toolbar--pagination"
+    />
 
     <v-divider class="mr-4 my-0" vertical></v-divider>
 

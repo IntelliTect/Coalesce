@@ -1,5 +1,7 @@
 import { PluginObject } from 'vue';
 import ComponentsInstaller from './components';
+export * from './components';
+
 import { Domain } from 'coalesce-vue';
 
 export interface CoalesceVuetifyOptions {

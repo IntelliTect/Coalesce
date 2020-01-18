@@ -10,8 +10,7 @@
   ],
   "scripts": {
     "build": "vue-cli-service build --target lib --name coalesce-vue-vuetify ./src/index.ts",
-    "build-deps": "cd ../coalesce-vue && npm ci && npm run build",
-    "prepack": "npm run build-deps && npm run build",
+    "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {

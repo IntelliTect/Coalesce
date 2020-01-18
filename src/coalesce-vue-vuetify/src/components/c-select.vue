@@ -69,8 +69,7 @@
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-//@ts-ignore
-// import { VSelect } from 'vuetify/es5/components/VSelect';
+
 import CDisplay from './c-display';
 import MetadataComponent from './c-metadata-component'
 import { 
@@ -80,7 +79,6 @@ import {
   ViewModel, 
   mapValueToModel
 } from 'coalesce-vue'
-import debounce from 'lodash-es/debounce';
 
 @Component({
   name: 'c-select',

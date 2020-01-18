@@ -211,6 +211,11 @@ jobs:
     inputs:
       versionSpec: 10.x
 
+  # build coalesce-vue
+  - script: npm run build-local-deps
+    displayName: npm run build-local-deps
+    workingDirectory: $(PACKAGE_DIR)
+
   - script: npm ci
     displayName: npm ci
     workingDirectory: $(PACKAGE_DIR)
@@ -226,6 +231,10 @@ jobs:
   #   inputs:
   #     testResultsFiles: '**/junit.xml'
   #     testRunTitle: '$(PACKAGE_NAME)'
+
+  - script: npm run build
+    displayName: npm run build
+    workingDirectory: $(PACKAGE_DIR)
 
   # now we'll setup the real versions of things.
   # Change the package.json with the correct version of coalesce-vue, 

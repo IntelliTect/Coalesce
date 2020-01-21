@@ -44,16 +44,13 @@ export function getValueMeta(
 
   const forParts = forVal.split('.');
 
-  let tail: ClassType | Method | Property | Value | DataSourceType | undefined = undefined;
-  let tailKind: "type" | "method" | "property" | "value" | "dataSource" | undefined = undefined;
+  let tail: ClassType | Method | Property | Value | undefined = undefined;
+  let tailKind: "type" | "method" | "property" | "value" | undefined = undefined;
 
   if (modelMeta) {
-    if (modelMeta.type == "object" || modelMeta.type == "model") {
+    if (modelMeta.type == "object" || modelMeta.type == "model" || modelMeta.type == "dataSource") {
       tail = modelMeta
       tailKind = "type"
-    } else if (modelMeta.type == "dataSource") {
-      tail = modelMeta
-      tailKind = "dataSource"
     }
   }
 
@@ -128,23 +125,6 @@ export function getValueMeta(
       if (forPart == "params" && method.params[forPartNext]) {
         i++;
         tail = method.params[forPartNext];
-        tailKind = "value";
-        continue;
-      }
-    } else if (tailKind == "dataSource") {
-
-      const dataSource = tail as DataSourceType;
-      if (dataSource.params[forPart]) {
-        tail = dataSource.params[forPart];
-        tailKind = "value";
-        continue;
-      }
-
-      // Check if forPart is the literal string "params"
-      // and the actual name is the following token.
-      if (forPart == "params" && dataSource.params[forPartNext]) {
-        i++;
-        tail = dataSource.params[forPartNext];
         tailKind = "value";
         continue;
       }

@@ -15,10 +15,10 @@
             >
               {{header.text}}
               <v-icon v-if="list.$params.orderBy == header.value">
-                mdi-arrow-up
+                fa fa-sort-up
               </v-icon>
               <v-icon v-else-if="list.$params.orderByDescending == header.value">
-                mdi-arrow-down
+                fa fa-sort-down
               </v-icon>
             </th>
           </tr>
@@ -26,13 +26,18 @@
         <thead class="c-table--header-loader">
           <tr>
             <th colspan="99" class="pa-0"> 
-              <transition name="fade-transition">
+              
+              <c-loader-status
+                height=6
+                :loaders="{'no-initial-content no-error-content': [list.$load]}"
+              />
+              <!-- <transition name="fade-transition">
                 <v-progress-linear 
                   indeterminate 
                   height="4"
                   v-if="list.$load.isLoading"
                   ></v-progress-linear>
-              </transition>
+              </transition> -->
             </th>
           </tr>
         </thead>

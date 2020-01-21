@@ -276,7 +276,7 @@ export const Case = domain.types.Case = {
       type: "dataSource",
       name: "AllOpenCases",
       displayName: "All Open Cases",
-      params: {
+      props: {
         minDate: {
           name: "minDate",
           displayName: "Min Date",
@@ -350,7 +350,7 @@ export const CaseDto = domain.types.CaseDto = {
       type: "dataSource",
       name: "CaseDtoSource",
       displayName: "Case Dto Source",
-      params: {
+      props: {
       },
     },
   },
@@ -537,7 +537,7 @@ export const Company = domain.types.Company = {
       type: "dataSource",
       name: "DefaultSource",
       displayName: "Default Source",
-      params: {
+      props: {
       },
     },
   },
@@ -984,14 +984,14 @@ export const Person = domain.types.Person = {
       type: "dataSource",
       name: "BOrCPeople",
       displayName: "B Or C People",
-      params: {
+      props: {
       },
     },
     namesStartingWithAWithCases: {
       type: "dataSource",
       name: "NamesStartingWithAWithCases",
       displayName: "Names Starting With A With Cases",
-      params: {
+      props: {
       },
     },
     withoutCases: {
@@ -999,7 +999,7 @@ export const Person = domain.types.Person = {
       name: "WithoutCases",
       displayName: "Without Cases",
       isDefault: true,
-      params: {
+      props: {
       },
     },
   },

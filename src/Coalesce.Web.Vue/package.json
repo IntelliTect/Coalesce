@@ -7,14 +7,17 @@
     "test": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "coalesce-vue-vuetify": "../coalesce-vue-vuetify",
+    "@fortawesome/fontawesome-free": "^5.12.0",
+    "axios": "0.19.1",
     "coalesce-vue": "../coalesce-vue",
+    "coalesce-vue-vuetify": "../coalesce-vue-vuetify",
+    "typeface-roboto": "0.0.75",
+    "typeface-roboto-mono": "0.0.75",
     "vue": "2.6.11",
     "vue-class-component": "7.0.2",
     "vue-property-decorator": "8.1.0",
-    "vue-router": "3.0.6",
-    "vuetify": "^2.2.4",
-    "axios": "0.19.1"
+    "vue-router": "^3.1.5",
+    "vuetify": "^2.2.4"
   },
   "devDependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.4.4",

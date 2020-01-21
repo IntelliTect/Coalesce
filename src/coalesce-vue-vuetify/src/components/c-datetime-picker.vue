@@ -17,7 +17,9 @@
         :readonly="readonly"
         :disabled="disabled"
         autocomplete="off"
-        :append-icon="internalDateKind == 'time' ? 'mdi-clock-outline' : 'mdi-calendar-range'"
+        :append-icon="internalDateKind == 'time' 
+          ? 'fa fa-clock' 
+          : 'fa fa-calendar-alt'"
         @change="textInputChanged"
         @click:append="menu = !menu"
       ></v-text-field>
@@ -29,10 +31,10 @@
         v-show="showDate && showTime"
       >
         <v-tab key="date" v-if="showDate">
-          <v-icon left>mdi-calendar-range</v-icon> Date
+          <v-icon left>fa fa-calendar-alt</v-icon> Date
         </v-tab>
         <v-tab key="time" v-if="showTime">
-          <v-icon left>mdi-clock-outline</v-icon> Time
+          <v-icon left>fa fa-clock</v-icon> Time
         </v-tab>
       </v-tabs>
 

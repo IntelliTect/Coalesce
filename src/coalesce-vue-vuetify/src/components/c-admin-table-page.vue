@@ -2,8 +2,9 @@
   <div class="c-admin-table-page">
     <c-admin-table 
       class="c-admin-table-page--table"
-      :model="listVM">
+      :list="listVM">
     </c-admin-table>
+    <h1 class="c-admin-table-page--methods-header">Methods</h1>
     <c-methods 
       class="c-admin-table-page--methods" 
       :model="listVM"
@@ -14,7 +15,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from './c-metadata-component'
-import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
+import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags, mapParamsToDto, mapQueryToParams, ListParameters } from 'coalesce-vue';
 
 import CMethodsDialog from './c-methods-dialog.vue';
 import CAdminTable from './c-admin-table.vue';
@@ -28,6 +29,8 @@ const simpleParams = {
   orderByDescending: String,
 } as const
     
+import type { Route } from 'vue-router';
+
 @Component({
   name: 'c-admin-table-page',
   components: {
@@ -67,7 +70,29 @@ export default class extends MetadataComponent {
       this.listVM = new ListViewModel.typeLookup![this.modelName]
     }
 
-    // TODO: Bind parameters to the querystring with coalesce-vue's `bindToQueryString`.
+    // Pull initial parameters from the querystring before we setup watchers.
+    this.listVM.$params = mapQueryToParams(this.$route.query, ListParameters, this.listVM.$metadata)
+
+    this.$watch(
+      () => mapParamsToDto(this.listVM.$params),
+      (mappedParams) => {
+        this.$router.replace({query: {
+          ...this.$route.query,
+          // mappedParams contains numbers and strings. 
+          // Vue-router only claims to accept strings. Vue-router can just deal with it.
+          ...(mappedParams as any)
+        }})
+      },
+      { deep: true }
+    )
+
+    // When the query changes, grab the new value.
+    this.$watch(
+      () => this.$route.query, 
+      (v: any) => {
+        this.listVM.$params = mapQueryToParams(v, ListParameters, this.listVM.$metadata)
+      }
+    );
   }
 
 }
@@ -76,10 +101,12 @@ export default class extends MetadataComponent {
 
 <style lang="scss">
   .c-admin-table-page {
-    margin-top: 16px;
-    > * {
+    padding: 16px;
+    // margin-top: 16px;
+    > *:not(h1) {
       margin-bottom: 30px;
     }
+
   }
 
 </style>

@@ -993,28 +993,42 @@ function viewModelCollectionMapItems<T extends ViewModel>(
   });
 }
 
+function resolveProto(obj: ViewModelCollection<any>): Array<any> {
+  // Babel does some stupid nonsense where it will wrap our proto
+  // in another proto. This breaks things if coalesce-vue is imported from source,
+  // or if we were to at some point in the future emit a esnext version of coalesce-vue.
+  const proto = Object.getPrototypeOf(obj);
+  if (obj.push == proto.push) {
+    // `proto` is the wrapper because it contains our own `push` (and other methods).
+    // Go up one more level.
+    return Object.getPrototypeOf(proto);
+  }
+  return proto;
+}
+
 export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   readonly $metadata!: ModelCollectionValue | ModelType;
   readonly $parent!: any;
+
 
   push(...items: T[]): number {
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems = viewModelCollectionMapItems(items, this, true);
 
-    return Object.getPrototypeOf(this).push.apply(this, viewModelItems);
+    return resolveProto(this).push.apply(this, viewModelItems);
   }
 
-  splice(start: number, deleteCount?: number, ...items: T[]) {
+  splice(start: number, deleteCount?: number, ...items: T[]): T[] {
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems: any[] = items
       ? viewModelCollectionMapItems(items, this, true)
       : items;
 
-    return Object.getPrototypeOf(this).splice.call(
+    return resolveProto(this).splice.call(
       this,
-      start, deleteCount, ...viewModelItems
+      start, deleteCount as any, ...viewModelItems
     );
   }
 

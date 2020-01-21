@@ -11,6 +11,7 @@ import CEditorDialog from './c-editor-dialog.vue';
 import CEditor from './c-editor.vue';
 import CInputPropsProvider from './c-input-props-provider.vue';
 import CInput from './c-input';
+import CLoaderStatus from './c-loader-status.vue';
 import CMetadataComponent from './c-metadata-component'
 import CMethod from './c-method.vue';
 import CMethods from './c-methods.vue';
@@ -25,9 +26,6 @@ import CTable from './c-table.vue';
 // import CTable from './c-table-body.vue';
 // import CTable from './c-table-row.vue';
 
-
-// TODO: What to do with loader-status-2? Drop the 2, at the very least.
-
 export {
   CAdminTablePage,
   CAdminTableToolbar,
@@ -38,6 +36,7 @@ export {
   CEditor,
   CInputPropsProvider,
   CInput,
+  CLoaderStatus,
   CMetadataComponent,
   CMethod,
   CMethods,
@@ -61,6 +60,7 @@ export default function install(Vue: typeof _Vue) {
   Vue.component('c-editor', CEditor);
   Vue.component('c-input-props-provider', CInputPropsProvider);
   Vue.component('c-input', CInput);
+  Vue.component('c-loader-status', CLoaderStatus);
   Vue.component('c-metadata-component', CMetadataComponent);
   Vue.component('c-method', CMethod);
   Vue.component('c-methods', CMethods);

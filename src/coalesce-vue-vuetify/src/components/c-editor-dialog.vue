@@ -23,8 +23,13 @@
         </slot>
       </v-card-title>
       <v-card-text>
-        <c-editor :model="viewModel">
+        <c-editor :model="viewModel" v-if="canEdit">
         </c-editor>
+
+        <template v-if="hasInstanceMethods">
+          <h1 class="pb-1 pt-4">Methods</h1>
+          <c-methods :model="viewModel" />
+        </template>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -38,7 +43,7 @@
           @click.native="save()"
           :loading="this.viewModel.$save.isLoading"
           >
-          <v-icon left>mdi-content-save</v-icon>
+          <v-icon left>fa fa-save</v-icon>
           Save
         </v-btn>
       </v-card-actions>
@@ -50,7 +55,7 @@
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import { Model, ClassType, ViewModel, Property, ModelType } from 'coalesce-vue';
+import { Model, ClassType, ViewModel, Property, ModelType, BehaviorFlags } from 'coalesce-vue';
 
 import CEditor from './c-editor.vue'
     
@@ -80,6 +85,21 @@ export default class extends Vue {
   edit(viewModel: ViewModel) {
     this.viewModel = viewModel;
     this.dialogOpen = true;
+  }
+
+  get metadata() {
+    return this.viewModel?.$metadata;
+  }
+
+  get canEdit() {
+    if (!this.viewModel) return false;
+
+    return this.metadata && (this.metadata.behaviorFlags & 
+      this.viewModel.$primaryKey ? BehaviorFlags.Edit : BehaviorFlags.Create
+    ) != 0
+  }
+  get hasInstanceMethods() {
+    return !this.isCreate && this.metadata && Object.values(this.metadata.methods).some(m => !m.isStatic)
   }
 
   get isCreate() {

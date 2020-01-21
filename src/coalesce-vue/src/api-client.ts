@@ -45,7 +45,9 @@ import {
   mapToDto,
   mapValueToDto,
   DataSource,
-  convertValueToModel
+  convertValueToModel,
+  mapValueToModel,
+  mapToModel
 } from "./model";
 import { OwnProps, Indexable } from "./util";
 
@@ -90,7 +92,7 @@ export interface ListResult<T = any> extends ApiResult {
 /* Api Parameter Objects */
 
 export interface DataSourceParameters {
-  /** An string that the server may use to include/exclude certain data from the results. See Coalesce's full documentation for details. */
+  /** A string that the server may use to include/exclude certain data from the results. See Coalesce's full documentation for details. */
   includes?: string | null;
 
   /**
@@ -106,7 +108,7 @@ export class DataSourceParameters {
   }
 }
 
-export interface SaveParameters<T extends Model<ModelType> = any> {
+export interface SaveParameters<T extends Model<ModelType> = any> extends DataSourceParameters {
   /**
    * A list of field names to save. 
    * If set, only the specified fields as well as any primary key
@@ -135,7 +137,7 @@ export class FilterParameters extends DataSourceParameters {
     this.filter = null;
   }
 }
-
+ 
 export interface ListParameters extends FilterParameters {
   /** The page of data to request, starting at 1. */
   page?: number | null;
@@ -197,7 +199,7 @@ export function mapParamsToDto(
   // Map all the simple params to `paramsObject`
   var paramsObject = simpleParams.reduce(
     (obj, key) => {
-      if (key in wideParams && wideParams[key] !== undefined) {
+      if (key in wideParams && wideParams[key] != null) {
         obj[key] = wideParams[key]!;
       }
       return obj;
@@ -226,7 +228,7 @@ export function mapParamsToDto(
   if (dataSource) {
     // Add the data source name
     paramsObject["dataSource"] = dataSource.$metadata.name;
-    var paramsMeta = dataSource.$metadata.params;
+    var paramsMeta = dataSource.$metadata.props;
 
     // Add the data source parameters.
     // Note that we use "dataSource.{paramName}", not a nested object.
@@ -245,6 +247,63 @@ export function mapParamsToDto(
 
   return paramsObject;
 }
+
+
+/**
+ * Maps the given flat object of key-value pairs into an API parameters object.
+ * @param dto The flat object to map.
+ * @param parametersType The constructor of the parameters object to create.
+ * @param modelClass The generated model class (containing a `DataSources` namespace) 1
+ */
+export function mapQueryToParams<T extends DataSourceParameters>(
+  flatQuery: any,
+  parametersType: new() => T,
+  modelMeta: ModelType,
+): T {
+  const dto = flatQuery; // alias for brevity
+  
+  const parameters: DataSourceParameters | FilterParameters | ListParameters
+    = new parametersType;
+
+  if (parameters instanceof ListParameters) {
+    if ('page' in dto) parameters.page = +dto.page;
+    if ('pageSize' in dto) parameters.pageSize = +dto.pageSize;
+    if ('orderBy' in dto) parameters.orderBy = dto.orderBy;
+    if ('orderByDescending' in dto) parameters.orderByDescending = dto.orderByDescending;
+    if ('fields' in dto) parameters.fields = String(dto.fields).split(",")
+  }
+
+  if (parameters instanceof FilterParameters) {
+    if ('search' in dto) parameters.search = dto.search;
+    for (const key in dto) {
+      if (key.startsWith("filter.")) {
+        parameters.filter = parameters.filter ?? {}
+        parameters.filter[key.replace("filter.", "")] = dto[key]
+      }
+    }
+  }
+
+  if (parameters instanceof DataSourceParameters) {
+    if ('includes' in dto) parameters.includes = dto.includes;
+
+    if ('dataSource' in dto && dto.dataSource in modelMeta.dataSources) {
+      const dataSource = mapToModel({}, modelMeta.dataSources[dto.dataSource])
+      
+      for (const key in dto) {
+        if (key.startsWith("dataSource.")) {
+          var paramName = key.replace("dataSource.", "");
+          if (paramName in dataSource.$metadata.props) {
+            (dataSource as any)[paramName] = mapValueToModel(dto[key], dataSource.$metadata.props[paramName])
+          }
+        }
+      }
+    }
+  }
+
+  return parameters as T;
+}
+
+
 
 export function getMessageForError(error: AxiosError | ApiResult | Error | string) {
   if (typeof error === "string") return error;
@@ -322,24 +381,26 @@ type ResultPromiseType<
 type ApiStateType<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
-  TResult,
-  TClient extends ApiClient<any>
+  TResult
 > = T extends ItemTransportTypeSpecifier<any>
-  ? ItemApiState<TArgs, TResult, TClient>
+  ? ItemApiState<TArgs, TResult> &
+    TCall<TArgs, ItemResultPromise<TResult>>
   : T extends ListTransportTypeSpecifier<any>
-  ? ListApiState<TArgs, TResult, TClient>
+  ? ListApiState<TArgs, TResult> &
+    TCall<TArgs, ListResultPromise<TResult>>
   : never;
 
 type ApiStateTypeWithArgs<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
   TArgsObj,
-  TResult,
-  TClient extends ApiClient<any>
+  TResult
 > = T extends ItemTransportTypeSpecifier<any>
-  ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult, TClient>
+  ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult> &
+    TCall<TArgs, ItemResultPromise<TResult>>
   : T extends ListTransportTypeSpecifier<any>
-  ? ListApiStateWithArgs<TArgs, TArgsObj, TResult, TClient>
+  ? ListApiStateWithArgs<TArgs, TArgsObj, TResult> &
+    TCall<TArgs, ListResultPromise<TResult>>
   : never;
 
 
@@ -377,8 +438,7 @@ export class ApiClient<T extends ApiRoutedType> {
   >(
     resultType: TTransportType,
     invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult>, this>
-  ): ApiStateType<TTransportType, TArgs, TResult, this> &
-    TCall<TArgs, ResultPromiseType<TTransportType, TResult>>;
+  ): ApiStateType<TTransportType, TArgs, TResult>;
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -396,8 +456,7 @@ export class ApiClient<T extends ApiRoutedType> {
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >
-  ): ApiStateType<TTransportType, TArgs, TResult, this> &
-    TCall<TArgs, ResultPromiseType<TTransportType, TResult | undefined>>;
+  ): ApiStateType<TTransportType, TArgs, TResult | undefined>;
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -419,8 +478,8 @@ export class ApiClient<T extends ApiRoutedType> {
       ResultPromiseType<TTransportType, TResult>,
       this
     >
-  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult, this> &
-    TCall<TArgs, ResultPromiseType<TTransportType, TResult>>;
+  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
+
 
   $makeCaller<
     TArgs extends any[],
@@ -440,8 +499,7 @@ export class ApiClient<T extends ApiRoutedType> {
       ResultPromiseType<TTransportType, TResult>,
       this
     >
-  ): ApiState<TArgs, TResult, this> &
-    TCall<TArgs, ResultPromiseType<TTransportType, TResult>> {
+  ): any {
     let localResultType: TransportTypeSpecifier<T> = resultType;
     let meta: Method | undefined = undefined;
     if (typeof localResultType === "function") {
@@ -459,7 +517,7 @@ export class ApiClient<T extends ApiRoutedType> {
     if (argsFactory && argsInvoker) {
       switch (localResultType) {
         case "item":
-          instance = new ItemApiStateWithArgs<TArgs, TArgsObj, TResult, this>(
+          instance = new ItemApiStateWithArgs<TArgs, TArgsObj, TResult>(
             this,
             invoker as any,
             argsFactory,
@@ -467,7 +525,7 @@ export class ApiClient<T extends ApiRoutedType> {
           );
           break;
         case "list":
-          instance = new ListApiStateWithArgs<TArgs, TArgsObj, TResult, this>(
+          instance = new ListApiStateWithArgs<TArgs, TArgsObj, TResult>(
             this,
             invoker as any,
             argsFactory,
@@ -480,13 +538,13 @@ export class ApiClient<T extends ApiRoutedType> {
     } else {
       switch (localResultType) {
         case "item":
-          instance = new ItemApiState<TArgs, TResult, this>(
+          instance = new ItemApiState<TArgs, TResult>(
             this,
             invoker as any
           );
           break;
         case "list":
-          instance = new ListApiState<TArgs, TResult, this>(
+          instance = new ListApiState<TArgs, TResult>(
             this,
             invoker as any
           );
@@ -799,8 +857,7 @@ type ApiStateHook<TThis> = (this: any, state: TThis) => void | Promise<any>
 
 export abstract class ApiState<
   TArgs extends any[],
-  TResult,
-  TClient extends ApiClient<any>
+  TResult
 > extends Function {
   /** The metadata of the method being called, if it was provided. */
   metadata?: Method;
@@ -1068,12 +1125,13 @@ export abstract class ApiState<
   }
 
   constructor(
-    protected readonly apiClient: TClient,
-    private readonly invoker: TInvoker<
-      TArgs,
-      ApiResultPromise<TResult> | undefined | void,
-      TClient
-    >
+    protected readonly apiClient: ApiClient<any>,
+    private readonly invoker: any
+    // TInvoker<
+    //   TArgs,
+    //   ApiResultPromise<TResult> | undefined | void,
+    //   TClient
+    // >
   ) {
     super();
 
@@ -1098,9 +1156,8 @@ export abstract class ApiState<
 
 export class ItemApiState<
   TArgs extends any[],
-  TResult,
-  TClient extends ApiClient<any>
-> extends ApiState<TArgs, TResult, TClient> {
+  TResult
+> extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   metadata?: ItemMethod;
 
@@ -1111,11 +1168,11 @@ export class ItemApiState<
   result: TResult | null = null;
 
   constructor(
-    apiClient: TClient,
+    apiClient: ApiClient<any>,
     invoker: TInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
-      TClient
+      ApiClient<any>
     >
   ) {
     super(apiClient, invoker);
@@ -1132,7 +1189,7 @@ export class ItemApiState<
       this.validationIssues = null;
     }
     if ("object" in data) {
-      this.result = data.object || null;
+      this.result = data.object ?? null;
     } else {
       this.result = null;
     }
@@ -1143,9 +1200,8 @@ export class ItemApiState<
 export class ItemApiStateWithArgs<
   TArgs extends any[],
   TArgsObj,
-  TResult,
-  TClient extends ApiClient<any>
-> extends ItemApiState<TArgs, TResult, TClient> {
+  TResult
+> extends ItemApiState<TArgs, TResult> {
   public args: TArgsObj = this.argsFactory();
   public invokeWithArgs(args: TArgsObj = this.args) {
     args = { ...args }; // Copy args so that if we're debouncing,
@@ -1157,14 +1213,15 @@ export class ItemApiStateWithArgs<
   }
 
   constructor(
-    apiClient: TClient,
-    invoker: TInvoker<TArgs, ItemResultPromise<TResult>, TClient>,
+    apiClient: ApiClient<any>,
+    invoker: TInvoker<TArgs, ItemResultPromise<TResult>, ApiClient<any>>,
     private argsFactory: () => TArgsObj,
-    private argsInvoker: TArgsInvoker<
-      TArgsObj,
-      ItemResultPromise<TResult>,
-      TClient
-    >
+    private argsInvoker: any
+    // TArgsInvoker<
+    //   TArgsObj,
+    //   ItemResultPromise<TResult>,
+    //   TClient
+    // >
   ) {
     super(apiClient, invoker);
     this._makeReactive();
@@ -1173,9 +1230,8 @@ export class ItemApiStateWithArgs<
 
 export class ListApiState<
   TArgs extends any[],
-  TResult,
-  TClient extends ApiClient<any>
-> extends ApiState<TArgs, TResult, TClient> {
+  TResult
+> extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   metadata?: ListMethod;
 
@@ -1192,11 +1248,11 @@ export class ListApiState<
   result: TResult[] | null = null;
 
   constructor(
-    apiClient: TClient,
+    apiClient: ApiClient<any>,
     invoker: TInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
-      TClient
+      ApiClient<any>
     >
   ) {
     super(apiClient, invoker);
@@ -1224,9 +1280,8 @@ export class ListApiState<
 export class ListApiStateWithArgs<
   TArgs extends any[],
   TArgsObj,
-  TResult,
-  TClient extends ApiClient<any>
-> extends ListApiState<TArgs, TResult, TClient> {
+  TResult
+> extends ListApiState<TArgs, TResult> {
   public args: TArgsObj = this.argsFactory();
   public invokeWithArgs(args: TArgsObj = this.args) {
     args = { ...args }; // Copy args so that if we're debouncing,
@@ -1238,13 +1293,13 @@ export class ListApiStateWithArgs<
   }
 
   constructor(
-    apiClient: TClient,
-    invoker: TInvoker<TArgs, ListResultPromise<TResult>, TClient>,
+    apiClient: ApiClient<any>,
+    invoker: TInvoker<TArgs, ListResultPromise<TResult>, ApiClient<any>>,
     private argsFactory: () => TArgsObj,
     private argsInvoker: TArgsInvoker<
       TArgsObj,
       ListResultPromise<TResult>,
-      TClient
+      ApiClient<any>
     >
   ) {
     super(apiClient, invoker);

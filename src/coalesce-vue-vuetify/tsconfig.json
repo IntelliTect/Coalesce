@@ -16,9 +16,9 @@
       "jest"
     ],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": [ "src/*" ],
+      "coalesce-vue": [ "../coalesce-vue/src" ],
+      "coalesce-vue/*": [ "../coalesce-vue/src/*" ],
     },
     "lib": [
       "esnext",

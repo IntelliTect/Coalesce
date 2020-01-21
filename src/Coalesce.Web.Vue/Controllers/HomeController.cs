@@ -19,6 +19,10 @@ namespace Coalesce.Web.Vue.Controllers
 
             IFileProvider provider = new PhysicalFileProvider(hostingEnvironment.WebRootPath);
             IFileInfo fileInfo = provider.GetFileInfo("index.html");
+            if (!fileInfo.Exists)
+            {
+                return Ok("index.html not found. HMR build is probably still running for the first time. Keep refreshing...");
+            }
             var readStream = fileInfo.CreateReadStream();
 
             return File(readStream, "text/html");

@@ -1,10 +1,11 @@
 <template>
   <transition-group 
-    class="loader2 loader2-transition-group" 
-    name="loader2-fade" mode="out-in" tag="div" 
+    class="c-loader-status c-loader-status--transition-group" 
+    name="c-loader-status-fade" mode="out-in" tag="div" 
     :class="{
       'has-progress-placeholder': usePlaceholder
-    }">
+    }"
+  >
     <div
       v-if="errorMessages.length" 
       key="error"
@@ -22,10 +23,10 @@
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
     <transition-group 
-      class="loader2-transition-group"
+      class="c-loader-status--transition-group"
       key="loading"
       v-if="showLoading || usePlaceholder"
-      name="loader2-fade" mode="out-in" tag="div"
+      name="c-loader-status-fade" mode="out-in" tag="div"
     >
       <v-progress-linear 
         key="progress"
@@ -42,7 +43,7 @@
     <div 
       v-if="showContent"  
       key="normal"
-      class="loader2-content"
+      class="c-loader-status--content"
     >
       <slot></slot>
     </div>
@@ -54,7 +55,7 @@ import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
 import { ApiState, ItemApiState, ListApiState } from 'coalesce-vue';
 
-type AnyLoader = ItemApiState<any, any, any> | ListApiState<any, any, any>
+type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>
 class Flags {
   progress: boolean | null = null;
   initialProgress = true;
@@ -64,16 +65,14 @@ class Flags {
   initialContent = true;
 }
 
-// Playing around with a more flexible version of loader-status to see how it feels.
-
-@Component({name: 'loader-status-2'})
+@Component({name: 'c-loader-status'})
 export default class extends Vue {
 
   /**
    * Loaders (docs forthcoming)
    */
   @Prop({required: true, type: Object })
-  loaders!: { [flags: string]: AnyLoader[] };
+  loaders!: { [flags: string]: AnyLoader | AnyLoader[] };
 
   /**
    * If the loader is loading when it already has a result,
@@ -93,7 +92,8 @@ export default class extends Vue {
       for (const flagName in flags) {
         const kebabFlag = flagName.replace(
           /([A-Z])/g, 
-          m => '-' + m.toLowerCase());
+          m => '-' + m.toLowerCase()
+        );
 
         if (flagsArr.includes(kebabFlag)) {
           flags[flagName] = true;
@@ -102,7 +102,10 @@ export default class extends Vue {
         }
       }
 
-      const loaders = this.loaders[flagsStr];
+      let loaders = this.loaders[flagsStr];
+      if (!Array.isArray(loaders)) {
+        loaders = [ loaders ]
+      }
       for (const loader of loaders) {
         ret.push([loader, flags as Flags] as const)
       }
@@ -162,27 +165,28 @@ export default class extends Vue {
 </script>
 
 <style lang="scss">
-  .loader2-transition-group {
+  .c-loader-status--transition-group {
     > * {
       flex-shrink: 0;
       transition: all .2s, opacity .2s ease-in .2s;
     }
   }
 
-  .loader2-fade-enter, .loader2-fade-leave-to {
+  .c-loader-status-fade-enter, .c-loader-status-fade-leave-to {
     opacity: 0;
   }
-  .loader2-fade-leave-active {
+  .c-loader-status-fade-leave-active {
     position: absolute;
     transition-delay: 0s !important;
   }
 
-  .loader2 {
+  .c-loader-status {
     position: relative;
     display: flex;
     flex-direction: column;
+    font-weight: 400;
     
-    .loader2-content {
+    .c-loader-status--content {
       flex-grow: 1;
       flex-shrink: 1;
 

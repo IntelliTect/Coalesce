@@ -8,50 +8,37 @@
     <v-card-text>
       
       <c-editor-dialog 
-        v-if="canEdit"
+        v-if="canEdit || hasInstanceMethods"
         ref="editor"
         :model-name="metadata.name"
         @saved="viewModel.$load()"
       >
       </c-editor-dialog>
 
-      <c-methods-dialog
-        v-if="hasInstanceMethods"
-        ref="methods"
-      >
-      </c-methods-dialog>
-
-
       <c-table
         :list="viewModel"
         :extra-headers="canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []"
-        >
+      >
         <template #item.append="{item}">
           <td>
             <v-layout>
               <v-btn
-                v-if="canEdit"
+                v-if="canEdit || hasInstanceMethods"
+                class="mx-1"
                 title="Edit"
                 text icon
                 @click="$refs.editor.edit(item)">
                 <!-- Using an <i> directly is much more performant than v-icon. -->
-                <i aria-hidden="true" class="v-icon notranslate mdi mdi-pencil"></i>
-              </v-btn>
-
-              <v-btn
-                v-if="hasInstanceMethods"
-                @click="$refs.methods.open(item)"
-                title="Methods"
-                text icon>
-                <i aria-hidden="true" class="v-icon notranslate mdi mdi-console-line"></i>
+                <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
               </v-btn>
             
               <v-btn
                 v-if="canDelete"
+                class="mx-1"
                 title="Delete"
                 text icon
                 @click="deleteItemWithConfirmation(item)">
-                <i aria-hidden="true" class="v-icon notranslate mdi mdi-delete"></i>
+                <i aria-hidden="true" class="v-icon notranslate fa fa-trash-alt"></i>
               </v-btn>
               
             </v-layout>
@@ -64,7 +51,6 @@
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from './c-metadata-component'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
 
 import CDisplay from './c-display'
@@ -79,13 +65,13 @@ import CAdminTableToolbar from './c-admin-table-toolbar.vue';
     CDisplay, CEditorDialog, CTable, CMethodsDialog, CAdminTableToolbar
   }
 })
-export default class extends MetadataComponent {
+export default class extends Vue {
   @Prop({required: true, type: Object})
-  public model!: ListViewModel;
+  public list!: any;
 
   get viewModel(): ListViewModel {
-    if (this.model instanceof ListViewModel) return this.model;
-    throw Error("c-admin-table: prop `model` is required, and must be a ListViewModel.");
+    if (this.list instanceof ListViewModel) return this.list;
+    throw Error("c-admin-table: prop `viewModel` is required, and must be a ListViewModel.");
   }
   
   async deleteItemWithConfirmation(item: ViewModel<any, any>){

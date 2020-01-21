@@ -1,54 +1,79 @@
 
 <template>
   <div class="c-method">
-    <v-container fluid  grid-list-lg class="c-method--params">
-      <v-layout wrap >
-        <v-flex 
-          v-for="param in filteredParams"
-          :key="param.name"
-          xs6 md4 lg3>
-          <c-input v-model="caller.args[param.name]" :for="param" />
-        </v-flex>
-      </v-layout>
-    </v-container>
-    <div class="c-method--execute">
-      <v-btn  
-        class="mr-3"
-        color="primary" 
-        @click="caller.invokeWithArgs()"
-        :loading="caller.isLoading">
+    <v-row class="c-method--section c-method--params" v-if="filteredParams.length">
+      <v-col>
+        Parameters
+      </v-col>
+      <v-col class="py-0">
+        <v-row >
+          <v-col
+            v-for="param in filteredParams"
+            :key="param.name"
+            cols=12 sm=6 md=4 lg=3
+          >
+            <c-input 
+              v-model="caller.args[param.name]" 
+              :for="param" 
+              hide-details
+            />
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+<!-- 
+    <v-row class="c-method--section c-method--execute">
+      <v-col>
         Execute
-      </v-btn>
-      
-      <span class="c-methods--state">
-        <v-chip v-if="caller.isLoading" color="cyan" dark>
-          Loading
-        </v-chip>
-        <v-chip v-else-if="caller.wasSuccessful === null" color="gray" dark>
-          Not Called
-        </v-chip>
-        <v-chip v-else-if="caller.wasSuccessful === true" color="success" dark>
-          Success
-        </v-chip>
-        <v-chip v-else-if="caller.wasSuccessful === false" color="error" dark>
-          Error
-        </v-chip>
-      </span>
-    </div>
-    
-    <div class="c-method--result">
-      <pre
-        class="c-method--result-error error--text"
-        v-if="caller.message"
-      >{{caller.message}}</pre>
-      
-      <pre
-        class="c-method--result-value"
-        v-if="caller.result"
-      ><c-display 
-        v-model="caller.result" 
-        :for="methodMeta.return" /></pre>
-    </div>
+      </v-col>
+      <v-col>
+        <v-btn  
+          class="mr-3"
+          color="primary" 
+          @click="caller.invokeWithArgs()"
+          :loading="caller.isLoading">
+          Execute
+        </v-btn>
+        
+      </v-col>
+    </v-row> -->
+
+
+    <v-row class="c-method--section c-method--results">
+      <v-col>
+        <v-btn  
+          color="primary" 
+          @click="caller.invokeWithArgs()"
+          :loading="caller.isLoading"
+          sm
+        >
+          Execute
+        </v-btn>
+      </v-col>
+      <v-col>
+        <c-loader-status 
+          :progress-placeholder="false"
+          :loaders="{'no-initial-content no-error-content no-loading-content': [caller]}"
+          style="min-height: 55px"
+        >
+          <h3>Result:</h3>
+          <c-display 
+            v-if="caller.result != null"
+            element="pre"
+            class="c-method--result-value"
+            v-model="caller.result" 
+            :for="methodMeta.return"
+          />
+          <span
+            v-else-if="caller.wasSuccessful != null && caller.result == null"
+            class="c-method--result-null"
+          >
+            <pre>{{"" + caller.result}}</pre>
+          </span>
+        </c-loader-status>
+      </v-col>
+    </v-row>
+
   </div>
 </template>
 
@@ -99,11 +124,23 @@ export default class CMethod extends MetadataComponent {
 </script>
 
 <style lang="scss">
+.c-method--section {
+  > .col:first-child {
+    font-size: 18px;
+    flex-grow: 0;
+    min-width: 150px;
+    text-align: right;
+  }
+}
 .c-method--result {
   margin-top: 10px;
+
 }
 .c-method--result-error {
   white-space: pre-wrap;
   word-break: break-word;
+}
+.c-method--result-null {
+  color: #999;
 }
 </style>

@@ -495,7 +495,7 @@
         });
         
         personList.isSavingAutomatically = false;
-        ko.applyBindings(personList);
+        ko.applyBindings(personList, document.body);
         personList.isSavingAutomatically = true;
         
         personList.includes = "PersonListGen";

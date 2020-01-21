@@ -444,7 +444,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Line("isDefault: true,");
                 }
 
-                using (b.Block("params:", ','))
+                using (b.Block("props:", ','))
                 {
                     foreach (var prop in source.DataSourceParameters)
                     {

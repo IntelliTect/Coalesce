@@ -63,13 +63,14 @@ export default class App extends Vue {
   }
 
   created() {
+    const baseTitle = document.title
     this.$watch(
       () => (this.routeComponent as any)?.pageTitle,
       (n: string | null | undefined) => {
         if (n) {
-          document.title = n + " - ICMS"
+          document.title = n + " - " + baseTitle
         } else {
-          document.title = "ICMS"
+          document.title = baseTitle
         }
       },
       { immediate: true }

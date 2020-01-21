@@ -3,6 +3,9 @@
   "version": "0.1.0-local",
   "description": "Coalesce core scripts for Vue.js",
   "main": "./lib/index.js",
+  "exports": {
+    "./": "./lib/"
+  },
   "types": "./lib/index.d.ts",
   "repository": "https://github.com/IntelliTect/Coalesce",
   "author": "IntelliTect",

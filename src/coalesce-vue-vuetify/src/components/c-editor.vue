@@ -1,15 +1,15 @@
 
 <template>
-  <v-container grid-list-lg >
-    <v-layout wrap >
-      <v-flex 
-        sm6 md6 xsl2
+  <v-container>
+    <v-row >
+      <v-col
+        cols=12
         v-for="prop in showProps" 
         :key="prop.name" 
         class="py-0">
         <c-input :model="model" :for="prop"/>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

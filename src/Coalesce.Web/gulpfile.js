@@ -184,9 +184,9 @@ exports.coalesceVue = gulp.parallel(
         coalesceVueGen,
     )
     // TODO: This may not be needed anymore?
-    ,gulp.series(
-       shell.task("cd ../Coalesce.Web.Vue && npm i")
-    )
+    //,gulp.series(
+    //   shell.task("cd ../Coalesce.Web.Vue && npm i")
+    //)
 );
 
 // gulp.task('coalesce:debug', ['coalesce:build'], shell.task(

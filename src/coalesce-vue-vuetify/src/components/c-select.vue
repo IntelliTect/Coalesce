@@ -357,13 +357,13 @@ export default class CSelect extends MetadataComponent {
     }
   }
 
-  listCaller: ListApiState<[], Model<ModelType>, ModelApiClient<Model<ModelType>>> & (() => ListResultPromise<Model<ModelType>>) = null as any
+  listCaller: ListApiState<[], Model<ModelType>> & (() => ListResultPromise<Model<ModelType>>) = null as any
 
   /**
    * A caller that will be used to resolve the full object when the only thing
    * that has been provided to c-select is a primary key value.
    */
-  getCaller: ItemApiState<[], Model<ModelType>, ModelApiClient<Model<ModelType>>> & (() => ItemResultPromise<Model<ModelType>>) = null as any
+  getCaller: ItemApiState<[], Model<ModelType>> & (() => ItemResultPromise<Model<ModelType>>) = null as any
 
   get createItemLabel() {
     if (!this.create || !this.search) return null;

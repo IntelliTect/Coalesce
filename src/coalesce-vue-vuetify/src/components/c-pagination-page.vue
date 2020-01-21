@@ -5,7 +5,7 @@
       outlined small icon
       @click="list.$previousPage()" 
       :disabled="!list.$hasPreviousPage">
-      <v-icon>mdi-chevron-left</v-icon>
+      <v-icon>fa fa-angle-left</v-icon>
     </v-btn>
     
     Page 
@@ -24,7 +24,7 @@
       outlined small icon
       @click="list.$nextPage()" 
       :disabled="!list.$hasNextPage">
-      <v-icon>mdi-chevron-right</v-icon>
+      <v-icon>fa fa-angle-right</v-icon>
     </v-btn>
   </div>
 </template>

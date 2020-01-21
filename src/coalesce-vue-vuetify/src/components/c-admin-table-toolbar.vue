@@ -47,7 +47,7 @@
       flat
       solo-inverted
       hide-details
-      prepend-inner-icon="mdi-magnify"
+      prepend-inner-icon="fa fa-search"
       label="Search"
       v-model="list.$params.search"
       single-line
@@ -66,7 +66,7 @@
             v-on="on"
             text
             @click="create()">
-            <v-icon :left="$vuetify.breakpoint.mdAndUp">mdi-plus</v-icon>
+            <v-icon :left="$vuetify.breakpoint.mdAndUp">fa fa-plus</v-icon>
             <span class="hidden-sm-and-down">Create</span>
           </v-btn>
         </template>
@@ -81,7 +81,7 @@
 
       <v-spacer></v-spacer>
       <v-btn @click="list.$load()" text>
-        <v-icon left>mdi-reload</v-icon> 
+        <v-icon left>fa fa-sync-alt</v-icon> 
         <span class="hidden-sm-and-down">Reload</span>
       </v-btn>
     </template>
@@ -145,10 +145,10 @@ export default class extends MetadataComponent {
 
     .v-text-field--outlined .v-input__slot {
       height: 34px;
-      min-height: 34px;
+      min-height: 34px !important;
 
       .v-input__append-inner {
-        margin-top: 4px;
+        margin-top: 4px !important;
       }
 
       // https://css-tricks.com/snippets/css/turn-off-number-input-spinners/

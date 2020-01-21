@@ -133,8 +133,10 @@ export interface DataSourceType extends Metadata {
     readonly type: "dataSource"
     readonly isDefault?: true;
     
-    /** The parameters of the data source */
-    readonly params: { [paramName in string]: PrimitiveValue | DateValue | EnumValue }
+    /** The parameters of the data source.
+     * Stored as `props` so it can be treated like a ModelType/ObjectType in many cases.
+     */
+    readonly props: { [paramName in string]: PrimitiveProperty | DateProperty | EnumProperty }
     // NOTE: this union is the currently supported set of data source parameters.
     // When we support more types in the future (e.g. objects), adjust accordingly. 
 }
@@ -188,7 +190,7 @@ export interface EnumType<K extends string = string> extends Metadata {
 }
 
 /** Union of all metadata descriptions of object-based types. */
-export type ClassType = ObjectType | ModelType 
+export type ClassType = ObjectType | ModelType | DataSourceType
 
 /** Union of all metadata descriptions of custom types, including enums. */
 export type CustomType = ClassType | EnumType

@@ -125,9 +125,10 @@ namespace Coalesce.Domain
         /// Sets the FirstName to the given text.
         /// </summary>
         [Coalesce]
-        public Person Rename(string name)
+        public Person Rename(string name, out IncludeTree includeTree)
         {
             FirstName = name;
+            includeTree = IncludeTree.For<Person>(p => p.IncludedSeparately(x => x.Company));
             return this;
         }
 

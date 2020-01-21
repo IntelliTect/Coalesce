@@ -26,7 +26,7 @@ export default Vue.extend({
 
     const modelMeta = model ? model.$metadata : null;
     let meta = getValueMeta(props.for, modelMeta, ctx.parent.$coalesce.metadata);
-    if (!meta && modelMeta) {
+    if (!meta && modelMeta && "displayProp" in modelMeta) {
       meta = modelMeta.displayProp || null;
     }
 

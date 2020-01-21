@@ -72,7 +72,7 @@ export default class CSelectManyToMany extends MetadataComponent {
     return [...this.internalValue, ...this.items];
   }
 
-  listCaller: (ListApiState<[], Model<ModelType>, ModelApiClient<Model<ModelType>>> 
+  listCaller: (ListApiState<[], Model<ModelType>> 
     & (() => ListResultPromise<Model<ModelType>>)) = null as any
 
   get listParams() {

@@ -8,8 +8,11 @@ module.exports = {
     resolve: {
       symlinks: false,
       alias: { 
-        'coalesce-vue': path.resolve(__dirname, 'node_modules/coalesce-vue'),
+        'coalesce-vue/lib': path.resolve(__dirname, '../coalesce-vue/src'),
+        'coalesce-vue': path.resolve(__dirname, '../coalesce-vue/src'),
+        'coalesce-vue-vuetify': path.resolve(__dirname, '../coalesce-vue-vuetify/src'),
         'vue': path.resolve(__dirname, 'node_modules/vue'),
+        'vue-router': path.resolve(__dirname, 'node_modules/vue-router'),
       }
     }
   },

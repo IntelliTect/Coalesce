@@ -588,7 +588,7 @@ class DisplayVisitor extends Visitor<
   public visitObject(value: any, meta: ClassType): string | null {
     if (value == null) return value;
 
-    if (meta.displayProp) {
+    if ("displayProp" in meta && meta.displayProp) {
       return this.visitValue(value[meta.displayProp.name], meta.displayProp);
     } else {
       // https://stackoverflow.com/a/46908358 - stringify only first-level properties.

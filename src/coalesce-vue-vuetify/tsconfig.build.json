@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "coalesce-vue": ["../coalesce-vue/dist"],
+      "coalesce-vue/*": ["../coalesce-vue/dist/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

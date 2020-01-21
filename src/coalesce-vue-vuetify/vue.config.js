@@ -7,5 +7,14 @@ module.exports = {
   
   configureWebpack: {
     externals: [ nodeExternals() ]
+  },
+
+  chainWebpack: config => {
+    config
+      .plugin('fork-ts-checker')
+      .tap(args => {
+        args[0].tsconfig = './tsconfig.build.json';
+        return args;
+      });
   }
 }

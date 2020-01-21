@@ -4,6 +4,8 @@ export * from './components';
 
 import { Domain } from 'coalesce-vue';
 
+import type { Route } from 'vue-router';
+
 export interface CoalesceVuetifyOptions {
   /** A reference to the whole set of Coalesce-generated metadata for the application,
    * as exported from `metadata.g.ts`, e.g. `import metadata from '@/metadata.g'`. */

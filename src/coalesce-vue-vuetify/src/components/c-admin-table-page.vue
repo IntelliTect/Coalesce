@@ -29,7 +29,6 @@ const simpleParams = {
   orderByDescending: String,
 } as const
     
-import type { Route } from 'vue-router';
 
 @Component({
   name: 'c-admin-table-page',

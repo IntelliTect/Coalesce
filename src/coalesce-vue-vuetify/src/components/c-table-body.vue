@@ -1,15 +1,19 @@
 <template>
   <tbody>
-    <c-table-row  
+    <tr
       v-for="(item, index) in items"
       :key="index"
-      :item="item" 
-      :props="props"
     >
-      <template #item.append="{item}">
-        <slot name="item.append" :item="item" />
-      </template>
-    </c-table-row>
+      <td 
+        v-for="prop in props" 
+        :key="prop.name" 
+        :class="['prop-' + prop.name,]"
+        class="text-xs-left" 
+      >
+        <c-admin-display :model="item" :for="prop" />
+      </td>
+      <slot name="item.append" :item="item" />
+    </tr>
   </tbody>
 </template>
 
@@ -18,13 +22,11 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel } from 'coalesce-vue';
 
-import CTableRow from './c-table-row.vue';
+import CAdminDisplay from './c-admin-display';
     
 @Component({
   name: 'c-table-body',
-  components: {
-    CTableRow
-  }
+  components: { CAdminDisplay }
 })
 export default class extends Vue {
   @Prop({required: false, type: Array})

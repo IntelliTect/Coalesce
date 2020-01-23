@@ -29,13 +29,30 @@
               </tr>
             </thead>
             
-            <c-table-body
+            <!-- <c-table-body
               :items="list.$items"
               :props="effectiveProps">
               <template #item.append="{item}">
                 <slot name="item.append" :item="item" />
               </template>
-            </c-table-body>
+            </c-table-body> -->
+            <tbody>
+              <tr
+                v-for="(item, index) in list.$items"
+                :key="index"
+              >
+                <td 
+                  v-for="prop in effectiveProps" 
+                  :key="prop.name" 
+                  :class="['prop-' + prop.name,]"
+                  class="text-xs-left" 
+                >
+                  <c-admin-display :model="item" :for="prop" />
+                </td>
+                <slot name="item.append" :item="item" />
+              </tr>
+            </tbody>
+            
           </table>
       </div>
     </div>
@@ -72,11 +89,12 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ListViewModel, Property, ModelType } from 'coalesce-vue';
 
 import CTableBody from './c-table-body.vue';
+import CAdminDisplay from './c-admin-display';
     
 @Component({
   name: 'c-table',
   components: {
-    CTableBody
+    CTableBody, CAdminDisplay
   }
 })
 export default class extends Vue {

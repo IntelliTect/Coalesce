@@ -99,7 +99,7 @@ export default class App extends Vue {
   .router-transition-enter-active,
   .router-transition-leave-active {
     // transition: 0.2s cubic-bezier(0.25, 0.8, 0.5, 1);
-    transition: 0.2s ease-out;
+    transition: 0.1s ease-out;
   }
   .router-transition-move {
     transition: transform 0.4s;

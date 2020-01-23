@@ -72,7 +72,7 @@
     }
     model.coalesceConfig.autoSaveEnabled(false);
     model.loadChildren(function() {
-        ko.applyBindings(model);
+        ko.applyBindings(model, document.body);
         model.coalesceConfig.autoSaveEnabled(true);
     });
 </script>

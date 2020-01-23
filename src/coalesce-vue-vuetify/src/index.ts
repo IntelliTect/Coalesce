@@ -1,8 +1,7 @@
 import { PluginObject } from 'vue';
-import ComponentsInstaller from './components';
-export * from './components';
-
 import { Domain } from 'coalesce-vue';
+import ComponentsInstaller from './components';
+
 
 import type { Route } from 'vue-router';
 
@@ -25,4 +24,6 @@ const Plugin = <PluginObject<CoalesceVuetifyOptions>>{
   }
 }
 
+import './shared.scss'
+export * from './components';
 export default Plugin;

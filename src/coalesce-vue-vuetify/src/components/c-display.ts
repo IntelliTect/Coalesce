@@ -9,7 +9,11 @@ export default Vue.extend({
     element: { type: String, default: "span" },
     for: <PropOptions<any>>{ required: false },
     model: <PropOptions<Model<ClassType>>>{ type: Object },
+
+    options: <PropOptions<DisplayOptions>>{ required: false, type: Object, default: null },
+    // Shorthand for { options: format }
     format: { required: false },
+
     value: <PropOptions<any>>{ required: false }
   },
 
@@ -38,9 +42,9 @@ export default Vue.extend({
       throw Error("Cannot display a method");
     }
 
-    let options: undefined | DisplayOptions;
+    let options: null | DisplayOptions = props.options;
     if (props.format) {
-      options = {format: props.format as any};
+      options = {...options, format: props.format as any};
     }
 
     let value = model && "role" in meta

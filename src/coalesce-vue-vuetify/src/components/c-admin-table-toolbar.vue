@@ -2,88 +2,81 @@
   <v-toolbar
     extended
     class="c-admin-table-toolbar"
-    dense :color="color" dark>
+    dense :color="color" dark
+  >
 
-    <v-toolbar-title class="white--text">
+    <v-toolbar-title class="c-admin-table-toolbar--model-name hidden-xs-only">
       {{metadata.displayName}}
     </v-toolbar-title>
 
-    <v-divider class="mx-4 my-0" vertical></v-divider>
+    <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
     
-    <v-select
-      label="Page Size"
-      outlined
-      class="d-inline-block c-admin-table-toolbar--page-size"
-      :items="[10,25,100]"
-      v-model="list.$params.pageSize"
-      hide-details
-      dense
-    ></v-select>
+    <v-btn
+      class="c-admin-table-toolbar--button-create"
+      text
+      :to="{name: 'coalesce-admin-item', params: {type: metadata.name}}"
+    >
+      <v-icon :left="$vuetify.breakpoint.mdAndUp">fa fa-plus</v-icon>
+      <span class="hidden-sm-and-down">Create</span>
+    </v-btn>
 
-    <v-divider class="ml-4 my-0" vertical></v-divider>
+    <v-btn 
+      class="c-admin-table-toolbar--button-reload"
+      text
+      @click="list.$load()"
+    >
+      <v-icon left>fa fa-sync-alt</v-icon> 
+      <span class="hidden-sm-and-down">Reload</span>
+    </v-btn>
 
-    <c-pagination-page
-      :list="list"
-      class="c-admin-table-toolbar--pagination"
-    />
-
-    <v-divider class="mr-4 my-0" vertical></v-divider>
-
-    <span v-if="list" class="c-admin-table-toolbar--range">
+    <v-spacer></v-spacer>
+      
+    <span 
+      v-if="list" 
+      class="c-admin-table-toolbar--range hidden-sm-and-down"
+    >
       <!-- These use list.$load explicitly so that the numbers match
       the actual currently displayed data, rather than the state of the parameters. -->
-      {{(list.$load.page-1) * list.$load.pageSize + 1}}
+      Showing {{(list.$load.page-1) * list.$load.pageSize + 1}}
       - 
       {{list.$load.page == list.$load.pageCount ? list.$load.totalCount : list.$load.page * list.$load.pageSize}}
       of
       {{list.$load.totalCount}}
     </span>
 
-
     <v-spacer></v-spacer>
-    <!-- <v-divider class="mx-3 my-0" vertical></v-divider> -->
-
-    <v-text-field
-      flat
-      solo-inverted
-      hide-details
-      prepend-inner-icon="fa fa-search"
-      label="Search"
-      v-model="list.$params.search"
-      single-line
-      clearable
-    ></v-text-field>
+    
+    <c-pagination-page
+      class="c-admin-table-toolbar--page"
+      :list="list"
+    />
         
     <template v-slot:extension>
-      <c-editor-dialog 
-        v-if="canCreate"
-        :model-name="metadata.name"
-        @saved="list.$load()"
-        >
         
-        <template #activator="{ on, create, edit }">
-          <v-btn
-            v-on="on"
-            text
-            @click="create()">
-            <v-icon :left="$vuetify.breakpoint.mdAndUp">fa fa-plus</v-icon>
-            <span class="hidden-sm-and-down">Create</span>
-          </v-btn>
-        </template>
-
-      </c-editor-dialog>
-<!-- 
-      <v-divider
-        v-if="canCreate"
-        class="mx-2"
-        vertical
-      ></v-divider> -->
+      <v-text-field
+        class="c-admin-table-toolbar--search"
+        flat
+        solo-inverted
+        hide-details
+        prepend-inner-icon="fa fa-search"
+        label="Search"
+        v-model="list.$params.search"
+        single-line
+        clearable
+      ></v-text-field>
 
       <v-spacer></v-spacer>
-      <v-btn @click="list.$load()" text>
-        <v-icon left>fa fa-sync-alt</v-icon> 
-        <span class="hidden-sm-and-down">Reload</span>
-      </v-btn>
+    
+      <v-select
+        class="d-inline-block c-admin-table-toolbar--page-size ml-1"
+        label="Page Size"
+        outlined
+        :items="[10,25,100]"
+        v-model="list.$params.pageSize"
+        hide-details
+        dense
+      ></v-select>
+
     </template>
   </v-toolbar>
 </template>
@@ -93,20 +86,16 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from './c-metadata-component'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
 
-import CDisplay from './c-display'
-import CEditorDialog from './c-editor-dialog.vue';
     
 @Component({
   name: 'c-admin-table-toolbar',
-  components: {
-    CDisplay, CEditorDialog
-  }
+  components: { }
 })
 export default class extends MetadataComponent {
   @Prop({required: true, type: Object})
   public list!: ListViewModel<any,any>;
 
-  @Prop({type: String, default: "primary"})
+  @Prop({type: String, default: "primary darken-1"})
   public color!: string;
 
   get metadata(): ModelType {

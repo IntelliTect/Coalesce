@@ -1,56 +1,45 @@
 <template>
-  <div class="c-table theme--light v-data-table">
-    <div class="v-data-table__wrapper">
-      <table>
-        <thead class="v-data-table-header">
-          <tr>
-            <th 
-              v-for="header in headers" 
-              :key="'header-' + header.value"
-              class="text-left"
-              :class="{
-                sortable: header.sortable, 
-              }"
-              @click="header.sortable ? orderByToggle(header.value) : void 0"
-            >
-              {{header.text}}
-              <v-icon v-if="list.$params.orderBy == header.value">
-                fa fa-sort-up
-              </v-icon>
-              <v-icon v-else-if="list.$params.orderByDescending == header.value">
-                fa fa-sort-down
-              </v-icon>
-            </th>
-          </tr>
-        </thead>
-        <thead class="c-table--header-loader">
-          <tr>
-            <th colspan="99" class="pa-0"> 
-              
-              <c-loader-status
-                height=6
-                :loaders="{'no-initial-content no-error-content': [list.$load]}"
-              />
-              <!-- <transition name="fade-transition">
-                <v-progress-linear 
-                  indeterminate 
-                  height="4"
-                  v-if="list.$load.isLoading"
-                  ></v-progress-linear>
-              </transition> -->
-            </th>
-          </tr>
-        </thead>
-        <c-table-body
-          :items="list.$items"
-          :props="effectiveProps">
-          <template #item.append="{item}">
-            <slot name="item.append" :item="item" />
-          </template>
-        </c-table-body>
-      </table>
+  <c-loader-status
+    :loaders="{'no-initial-content': [list.$load]}"
+    #default
+  >
+    <div class="c-table theme--light v-data-table">
+      <div class="v-data-table__wrapper">
+        
+          <table>
+            <thead class="v-data-table-header">
+              <tr>
+                <th 
+                  v-for="header in headers" 
+                  :key="'header-' + header.value"
+                  class="text-left"
+                  :class="{
+                    sortable: header.sortable, 
+                  }"
+                  @click="header.sortable ? orderByToggle(header.value) : void 0"
+                >
+                  {{header.text}}
+                  <v-icon v-if="list.$params.orderBy == header.value">
+                    fa fa-sort-up
+                  </v-icon>
+                  <v-icon v-else-if="list.$params.orderByDescending == header.value">
+                    fa fa-sort-down
+                  </v-icon>
+                </th>
+              </tr>
+            </thead>
+            
+            <c-table-body
+              :items="list.$items"
+              :props="effectiveProps">
+              <template #item.append="{item}">
+                <slot name="item.append" :item="item" />
+              </template>
+            </c-table-body>
+          </table>
+      </div>
     </div>
-  </div>
+  </c-loader-status>
 
   <!-- <v-data-table
     class="c-table"

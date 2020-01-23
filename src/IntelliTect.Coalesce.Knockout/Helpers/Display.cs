@@ -97,7 +97,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName() + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 }
 
-                return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: " + prop.JsVariableForBinding() + @"().length + "" Items""' ></div>";
+                return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (" + prop.JsVariableForBinding() + @"() || []).length + "" Items""' ></div>";
             }
             else
             {

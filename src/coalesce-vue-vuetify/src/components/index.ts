@@ -2,13 +2,14 @@
 import _Vue from "vue";
 
 // In alphabetical order:
+import CAdminEditorPage from './c-admin-editor-page.vue';
+import CAdminEditor from './c-admin-editor.vue';
 import CAdminTablePage from './c-admin-table-page.vue';
 import CAdminTableToolbar from './c-admin-table-toolbar.vue';
 import CAdminTable from './c-admin-table.vue';
 import CDatetimePicker from './c-datetime-picker.vue';
 import CDisplay from './c-display'
 import CEditorDialog from './c-editor-dialog.vue';
-import CEditor from './c-editor.vue';
 import CInputPropsProvider from './c-input-props-provider.vue';
 import CInput from './c-input';
 import CLoaderStatus from './c-loader-status.vue';
@@ -27,13 +28,14 @@ import CTable from './c-table.vue';
 // import CTable from './c-table-row.vue';
 
 export {
+  CAdminEditorPage,
+  CAdminEditor,
   CAdminTablePage,
   CAdminTableToolbar,
   CAdminTable,
   CDatetimePicker,
   CDisplay,
   CEditorDialog,
-  CEditor,
   CInputPropsProvider,
   CInput,
   CLoaderStatus,
@@ -51,13 +53,14 @@ export {
 
 export default function install(Vue: typeof _Vue) {
   // In alphabetical order:
+  Vue.component('c-admin-editor-page', CAdminEditorPage);
+  Vue.component('c-admin-editor', CAdminEditor);
   Vue.component('c-admin-table-page', CAdminTablePage);
   Vue.component('c-admin-table-toolbar', CAdminTableToolbar);
   Vue.component('c-admin-table', CAdminTable);
   Vue.component('c-datetime-picker', CDatetimePicker);
   Vue.component('c-display', CDisplay);
   Vue.component('c-editor-dialog', CEditorDialog);
-  Vue.component('c-editor', CEditor);
   Vue.component('c-input-props-provider', CInputPropsProvider);
   Vue.component('c-input', CInput);
   Vue.component('c-loader-status', CLoaderStatus);

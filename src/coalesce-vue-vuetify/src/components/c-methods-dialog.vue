@@ -2,7 +2,7 @@
 <template>
   <v-dialog v-model="dialogOpen">
     
-    <!-- Trick: Passes the 'activator' slot to the dialog only if it was provided to c-editor-dialog.
+    <!-- Trick: Passes the 'activator' slot to the dialog only if it was provided to c-methods-dialog.
       Otherwise, won't provide the slot at all so that vuetify won't freak about being given an empty activator. -->
     <template 
       v-for="(_, slot) of ($scopedSlots['activator'] ? {activator: $scopedSlots['activator']} : {})" 

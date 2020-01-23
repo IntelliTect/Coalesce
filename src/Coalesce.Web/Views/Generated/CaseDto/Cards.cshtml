@@ -131,7 +131,7 @@
         });
         
         caseDtoList.isSavingAutomatically = false;
-        ko.applyBindings(caseDtoList);
+        ko.applyBindings(caseDtoList, document.body);
         caseDtoList.isSavingAutomatically = true;
         
         caseDtoList.includes = "CaseDtoListGen";

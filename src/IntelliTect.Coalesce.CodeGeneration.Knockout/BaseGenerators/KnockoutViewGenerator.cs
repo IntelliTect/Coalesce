@@ -257,7 +257,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
                     b.Line();
                     b.Line($"{Model.ListViewModelObjectName}.isSavingAutomatically = false;");
-                    b.Line($"ko.applyBindings({Model.ListViewModelObjectName});");
+                    b.Line($"ko.applyBindings({Model.ListViewModelObjectName}, document.body);");
                     b.Line($"{Model.ListViewModelObjectName}.isSavingAutomatically = true;");
 
                     b.Line();

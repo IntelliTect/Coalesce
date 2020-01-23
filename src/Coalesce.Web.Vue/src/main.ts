@@ -23,7 +23,7 @@ import $metadata from '@/metadata.g';
 // viewmodels.g has sideeffects - it populates the global lookup on ViewModel and ListViewModel.
 import '@/viewmodels.g';
 
-import CoalesceVuetify, { CAdminTablePage } from 'coalesce-vue-vuetify';
+import CoalesceVuetify, { CAdminTablePage, CAdminEditorPage } from 'coalesce-vue-vuetify';
 Vue.use(CoalesceVuetify, {
   metadata: $metadata
 });
@@ -39,7 +39,24 @@ AxiosClient.defaults.baseURL = '/api'
 AxiosClient.defaults.withCredentials = true
 
 const router = new VueRouter({ mode: 'history', routes: [
-    { path: '/', name: 'home', component: CAdminTablePage, props: { modelName: 'Company', } },
+  
+  { path: '/', redirect: '/admin/Person' },
+
+  { path: '/admin/:type', 
+    name: 'coalesce-admin-list', 
+    component: CAdminTablePage, 
+    props: r => ({
+      type: r.params.type
+    }) 
+  },
+  { path: '/admin/:type/edit/:id?', 
+    name: 'coalesce-admin-item', 
+    component: CAdminEditorPage, 
+    props: r => ({
+      type: r.params.type, 
+      id: r.params.id
+    }) 
+  },
 ]});
 
 new Vue({

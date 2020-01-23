@@ -154,7 +154,7 @@
         });
         
         productList.isSavingAutomatically = false;
-        ko.applyBindings(productList);
+        ko.applyBindings(productList, document.body);
         productList.isSavingAutomatically = true;
         
         productList.includes = "ProductListGen";

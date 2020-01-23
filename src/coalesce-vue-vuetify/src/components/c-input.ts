@@ -81,7 +81,7 @@ export default Vue.extend({
         } else if (valueMeta.itemType.type != 'model' && valueMeta.itemType.type != 'object') {
           return h(CSelectValues, data);
         } else {
-          console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
+          // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
         }
     }
 
@@ -146,6 +146,9 @@ export default Vue.extend({
     // Note that this probably looks bad on Vuetify 2+ because we're
     // abusing its internal classes to try to emulate the look of a text field,
     // but this hasn't been updated for 2.0.
+    if (ctx.children) {
+      return h("div", {}, ctx.children)
+    }
     return h('div', {
         staticClass:"input-group input-group--dirty input-group--text-field"
       },[

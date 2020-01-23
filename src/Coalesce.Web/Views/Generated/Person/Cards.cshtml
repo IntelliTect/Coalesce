@@ -104,7 +104,7 @@
                     </dd>
                     <dt>Arbitrary Collection Of Strings</dt>
                     <dd>
-                        <div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: arbitraryCollectionOfStrings().length + " Items"' ></div>
+                        <div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (arbitraryCollectionOfStrings() || []).length + " Items"' ></div>
                     </dd>
                 </dl>
                 
@@ -460,7 +460,7 @@
         });
         
         personList.isSavingAutomatically = false;
-        ko.applyBindings(personList);
+        ko.applyBindings(personList, document.body);
         personList.isSavingAutomatically = true;
         
         personList.includes = "PersonListGen";

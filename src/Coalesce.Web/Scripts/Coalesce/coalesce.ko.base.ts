@@ -378,7 +378,7 @@ module Coalesce {
         /** Stack for number of times loading has been called. */
         protected loadingCount: number = 0;
         /** Stores the return value of setInterval for automatic save delays. */
-        protected saveTimeout: number = 0;
+        protected saveTimeout: any = 0;
 
 
         /** Callbacks to call after a save. */
@@ -1142,7 +1142,7 @@ module Coalesce {
             $('#csv-upload input[type=file]').click();
         };
 
-        private loadTimeout: number = 0;
+        private loadTimeout: any = 0;
 
         /** reloads the list after a slight delay (100ms default) to ensure that all changes are made. */
         public delayedLoad = (milliseconds?: number): void => {

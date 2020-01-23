@@ -213,7 +213,7 @@
         });
         
         companyList.isSavingAutomatically = false;
-        ko.applyBindings(companyList);
+        ko.applyBindings(companyList, document.body);
         companyList.isSavingAutomatically = true;
         
         companyList.includes = "CompanyListGen";

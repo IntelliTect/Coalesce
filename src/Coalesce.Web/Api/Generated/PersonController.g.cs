@@ -131,7 +131,7 @@ namespace Coalesce.Web.Api
                 return new ItemResult<PersonDtoGen>(itemResult);
             }
             var item = itemResult.Object;
-            var methodResult = item.Rename(name);
+            var methodResult = item.Rename(name, out includeTree);
             await Db.SaveChangesAsync();
             var result = new ItemResult<PersonDtoGen>();
             var mappingContext = new MappingContext(User, "");

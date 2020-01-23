@@ -6,7 +6,7 @@ module Cases {
 
     $(function () {
         viewModel = new CaseDetailModel();
-        ko.applyBindings(viewModel);
+        ko.applyBindings(viewModel, document.body);
 
         viewModel.load();
     });

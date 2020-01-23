@@ -12,6 +12,7 @@
     :item-text="$attrs['item-text'] || itemText" 
     :item-value="itemValue"
     :return-object="true"
+    :disabled="!modelPkValue"
     no-filter
     v-bind="inputBindAttrs"
   >
@@ -48,6 +49,13 @@ export default class CSelectManyToMany extends MetadataComponent {
     return this.listCaller && this.listCaller.isLoading
   }
 
+  get modelPkValue() {
+    const model = this.model as Model<ModelType>
+    return (model 
+      ? (model as any)[model.$metadata.keyProp.name]
+      : null )
+  }
+
   get items() {
     const items = this.listCaller.result || [];
     const manyToManyMeta = this.manyToManyMeta;
@@ -58,9 +66,7 @@ export default class CSelectManyToMany extends MetadataComponent {
     return items.map(i => convertToModel({
         [manyToManyMeta.farForeignKey.name]: (i as any)[this.foreignItemKeyPropName!],
         [manyToManyMeta.farNavigationProp.name]: i,
-        [manyToManyMeta.nearForeignKey.name]: (model 
-          ? (model as any)[model.$metadata.keyProp.name]
-          : null ),
+        [manyToManyMeta.nearForeignKey.name]: this.modelPkValue,
         [manyToManyMeta.nearNavigationProp.name]: model,
       }, 
       (this.collectionMeta.itemType as ModelValue).typeDef
@@ -119,6 +125,7 @@ export default class CSelectManyToMany extends MetadataComponent {
     return item[this.foreignItemKeyPropName];
   }
 
+
   onInput(value: any[]) {
     const existingItems = new Set(this.internalValue)
     const newItems = new Set(value)
@@ -128,6 +135,8 @@ export default class CSelectManyToMany extends MetadataComponent {
     this.internalValue.forEach(i => {
       if (!newItems.has(i)) {
         if (i instanceof ViewModel && this.canDelete) {
+          // TODO: Display the status of this somewhere.
+          // TODO: Add it back into the selected items if the delete fails?
           i.$delete();
         }
       } else {
@@ -150,6 +159,8 @@ export default class CSelectManyToMany extends MetadataComponent {
         );
         vm.$isDirty = true;
         items.push(vm);
+        // TODO: Display the status of this somewhere.
+        // TODO: Remove it from the selected items if the save fails?
         vm.$save();
       }
     })

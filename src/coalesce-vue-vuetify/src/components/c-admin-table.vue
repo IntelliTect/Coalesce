@@ -2,19 +2,9 @@
   <v-card class="c-admin-table">
     <c-admin-table-toolbar
       :list="viewModel"
-    >
-    </c-admin-table-toolbar>
+    />
 
-    <v-card-text>
-      
-      <c-editor-dialog 
-        v-if="canEdit || hasInstanceMethods"
-        ref="editor"
-        :model-name="metadata.name"
-        @saved="viewModel.$load()"
-      >
-      </c-editor-dialog>
-
+    <v-card-text class="pt-3">
       <c-table
         :list="viewModel"
         :extra-headers="canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []"
@@ -27,7 +17,8 @@
                 class="mx-1"
                 title="Edit"
                 text icon
-                @click="$refs.editor.edit(item)">
+                :to="{name: 'coalesce-admin-item', params: { type: metadata.name, id: item.$primaryKey }}"
+              >
                 <!-- Using an <i> directly is much more performant than v-icon. -->
                 <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
               </v-btn>
@@ -53,16 +44,13 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
 
-import CDisplay from './c-display'
 import CTable from './c-table.vue';
-import CEditorDialog from './c-editor-dialog.vue';
-import CMethodsDialog from './c-methods-dialog.vue';
 import CAdminTableToolbar from './c-admin-table-toolbar.vue';
     
 @Component({
   name: 'c-admin-table',
   components: {
-    CDisplay, CEditorDialog, CTable, CMethodsDialog, CAdminTableToolbar
+    CTable, CAdminTableToolbar
   }
 })
 export default class extends Vue {
@@ -103,3 +91,10 @@ export default class extends Vue {
 }
 </script>
 
+<style lang="scss">
+  .c-admin-table {
+    a {
+      text-decoration: none;
+    }
+  }
+</style>

@@ -1,15 +1,16 @@
 <template>
-  <div class="c-admin-table-page">
+  <v-container fluid class="c-admin-table-page">
     <c-admin-table 
       class="c-admin-table-page--table"
       :list="listVM">
     </c-admin-table>
-    <h1 class="c-admin-table-page--methods-header">Methods</h1>
+    
     <c-methods 
       class="c-admin-table-page--methods" 
       :model="listVM"
+      auto-reload-model
     ></c-methods>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -20,16 +21,6 @@ import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, Behavi
 import CMethodsDialog from './c-methods-dialog.vue';
 import CAdminTable from './c-admin-table.vue';
 
-const simpleParams = {
-  includes: String,
-  search: String,
-  page: Number,
-  pageSize: Number,
-  orderBy: String,
-  orderByDescending: String,
-} as const
-    
-
 @Component({
   name: 'c-admin-table-page',
   components: {
@@ -38,9 +29,8 @@ const simpleParams = {
 })
 export default class extends MetadataComponent {
 
-  // TODO: Replace with the `for` prop.
   @Prop({required: false, type: String, default: null})
-  public modelName!: string | null;
+  public type!: string | null;
 
   @Prop({required: false, type: Object})
   public list!: ListViewModel<any,any> | null;
@@ -60,13 +50,13 @@ export default class extends MetadataComponent {
     if (this.list) {
       this.listVM = this.list;
     } else {
-      if (!this.modelName) {
+      if (!this.type) {
         throw Error("c-admin-table-page: If prop `list` is not provided, `model-name` is required.")
-      } else if (!ListViewModel.typeLookup![this.modelName]) {
+      } else if (!ListViewModel.typeLookup![this.type]) {
         // TODO: Bake a `getOrThrow` into `typeLookup`.
-        throw Error(`No model named ${this.modelName} is registered to ListViewModel.typeLookup`)
+        throw Error(`No model named ${this.type} is registered to ListViewModel.typeLookup`)
       }
-      this.listVM = new ListViewModel.typeLookup![this.modelName]
+      this.listVM = new ListViewModel.typeLookup![this.type]
     }
 
     // Pull initial parameters from the querystring before we setup watchers.
@@ -100,10 +90,9 @@ export default class extends MetadataComponent {
 
 <style lang="scss">
   .c-admin-table-page {
-    padding: 16px;
-    // margin-top: 16px;
-    > *:not(h1) {
-      margin-bottom: 30px;
+    
+    .c-admin-table-page--methods {
+      margin-top: 30px;
     }
 
   }

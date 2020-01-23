@@ -43,7 +43,7 @@
       <v-col>
         <v-btn  
           color="primary" 
-          @click="caller.invokeWithArgs()"
+          @click="invoke"
           :loading="caller.isLoading"
           sm
         >
@@ -63,6 +63,7 @@
             class="c-method--result-value"
             v-model="caller.result" 
             :for="methodMeta.return"
+            :options="resultDisplayOptions"
           />
           <span
             v-else-if="caller.wasSuccessful != null && caller.result == null"
@@ -82,9 +83,15 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent, { getValueMeta } from './c-metadata-component'
-import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel } from 'coalesce-vue';
+import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel, DisplayOptions } from 'coalesce-vue';
 import CInput from './c-input'
 
+const resultDisplayOptions = <DisplayOptions>{
+  collection: {
+    enumeratedItemsMax: Infinity,
+    enumeratedItemsSeparator: "\n"
+  }
+}
 @Component({
   name: 'c-method',
   components: {
@@ -92,6 +99,10 @@ import CInput from './c-input'
   }
 })
 export default class CMethod extends MetadataComponent {
+  resultDisplayOptions = resultDisplayOptions;
+  
+  @Prop({required: false, type: Boolean, default: false})
+  public autoReloadModel!: boolean;
 
   get methodMeta() {
     const meta = getValueMeta(this.for, this.modelMeta);
@@ -118,6 +129,13 @@ export default class CMethod extends MetadataComponent {
     if (this.model instanceof ViewModel) return this.model;
     if (this.model instanceof ListViewModel) return this.model;
     throw Error("c-method: prop `model` is required, and must be a ViewModel or ListViewModel.");
+  }
+
+  async invoke() {
+    await this.caller.invokeWithArgs()
+    if (this.autoReloadModel) {
+      await this.viewModel.$load();
+    }
   }
 }
 

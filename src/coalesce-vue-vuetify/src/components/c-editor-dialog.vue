@@ -23,8 +23,8 @@
         </slot>
       </v-card-title>
       <v-card-text>
-        <c-editor :model="viewModel" v-if="canEdit">
-        </c-editor>
+        <c-admin-editor :model="viewModel" >
+        </c-admin-editor>
 
         <template v-if="hasInstanceMethods">
           <h1 class="pb-1 pt-4">Methods</h1>
@@ -57,12 +57,12 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ViewModel, Property, ModelType, BehaviorFlags } from 'coalesce-vue';
 
-import CEditor from './c-editor.vue'
+import CAdminEditor from './c-admin-editor.vue'
     
 @Component({
   name: 'c-editor-dialog',
   components: {
-    CEditor
+    CAdminEditor
   }
 })
 export default class extends Vue {

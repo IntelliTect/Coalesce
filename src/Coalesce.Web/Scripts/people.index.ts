@@ -6,7 +6,7 @@ module People {
 
     $(function () {
         viewModel = new PeopleModel();
-        ko.applyBindings(viewModel);
+        ko.applyBindings(viewModel, document.body);
 
         viewModel.load();
     });

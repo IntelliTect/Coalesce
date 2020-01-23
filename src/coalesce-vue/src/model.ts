@@ -566,13 +566,30 @@ export function mapValueToDto(value: any, metadata: Value): any | null {
 }
 
 export interface DisplayOptions {
+  /** Date format options. One of:
+   * - A UTS#35 date format string (https://date-fns.org/docs/format)
+   * - An object with options for https://date-fns.org/v2.9.0/docs/formatDistance */
   format?:
     | string
     | {
+        /** Format date with https://date-fns.org/v2.9.0/docs/formatDistanceToNow */
         distance: true;
+        /** Append/prepend `'in'` or `'ago'` if date is after/before now. Default `true`. */
         addSuffix?: boolean;
+        /** Include detail smaller than one minute. Default `false`. */
         includeSeconds?: boolean;
       };
+
+  collection?: {
+    /** If not creating links, the maximum number of items to display individually. 
+     * When there are more than this number of items, the count of items will be displayed instead. 
+     * Default `5`. 
+     * */
+    enumeratedItemsMax?: number
+
+    /** The seaprator to place between enumerated items. Default `', '` */
+    enumeratedItemsSeparator?: string
+  }
 }
 
 /** Visitor that maps its input to a string representation of its value, suitable for display. */
@@ -614,16 +631,20 @@ class DisplayVisitor extends Visitor<
     // Perhaps an prop that controls this would be best.
     if (value.length == 0) return "";
 
-    // TODO: a prop that controls this number would also be good.
-    if (value.length <= 5) {
+    const { 
+      enumeratedItemsMax = 5, 
+      enumeratedItemsSeparator = ", "
+    } = this.options?.collection ?? { }
+
+    if (value.length <= enumeratedItemsMax) {
       return value
         .map<string>(
           childItem => this.visitValue(childItem, meta.itemType) || "???" // TODO: what should this be for un-displayable members of a collection?
         )
-        .join(", ");
+        .join(enumeratedItemsSeparator);
     }
 
-    return value.length.toLocaleString() + " items"; // TODO: i18n
+    return value.length.toLocaleString() + " item" + (value.length == 1 ? '' : "s"); // TODO: i18n
   }
 
   protected visitEnumValue(value: any, meta: EnumValue): string | null {
@@ -643,19 +664,18 @@ class DisplayVisitor extends Visitor<
   protected visitDateValue(value: any, meta: DateValue): string | null {
     const parsed = parseValue(value, meta);
     if (parsed == null) return null;
-    if (typeof this.options == "object") {
-      if (
-        typeof this.options.format == "object" &&
-        this.options.format.distance
-      ) {
+    if (this.options) {
+      if (typeof this.options.format == "string") {
+        return format(parsed, this.options.format);
+      }
+
+      if (this.options.format?.distance) {
         const {
           addSuffix = true, // Default addSuffix to true - most likely, it is desired.
           includeSeconds = false
         } = this.options.format;
 
         return formatDistanceToNow(parsed, { addSuffix, includeSeconds });
-      } else if (typeof this.options.format == "string") {
-        return format(parsed, this.options.format);
       }
     }
 
@@ -715,7 +735,7 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
 export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
   item: T,
   prop: Property | PropNames<TMeta>,
-  options?: DisplayOptions
+  options?: DisplayOptions | null
 ) {
   const propMeta = resolvePropMeta(item.$metadata, prop);
 
@@ -735,7 +755,7 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
 export function valueDisplay(
   value: any,
   meta: Value,
-  options?: DisplayOptions
+  options?: DisplayOptions | null
 ) {
   return (options ? new DisplayVisitor(options) : displayVisitor).visitValue(
     value,

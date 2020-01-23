@@ -6,7 +6,7 @@ module Cases {
     $(function () {
         viewModel = new NewCaseModel();
         viewModel.newCase.isSavingAutomatically = false;
-        ko.applyBindings(viewModel);
+        ko.applyBindings(viewModel, document.body);
     });
 
     class NewCaseModel {

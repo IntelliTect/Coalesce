@@ -1,21 +1,41 @@
 
 <template>
-  <v-expansion-panels v-if="methods.length">
-    <v-expansion-panel
-      v-for="method in methods"
-      :key="method.name"
-    >
-      <v-expansion-panel-header>
-        <div>{{method.displayName}}</div>
-      </v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <c-method
-          :model="model"
-          :for="method">
-        </c-method>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-  </v-expansion-panels>
+
+  <v-expand-transition>
+    <v-expansion-panels v-if="methods.length" class="c-methods">
+      <v-toolbar
+        class="c-admin-editor-page--toolbar"
+        dense color="primary darken-1" dark
+      >
+
+        <v-toolbar-title >
+          Actions
+        </v-toolbar-title>
+
+        <v-divider class="mx-4 my-0" vertical></v-divider>
+
+        <v-toolbar-title v-if="!isStatic">
+          <c-display :model="model"></c-display>
+        </v-toolbar-title>
+      </v-toolbar>
+      <v-expansion-panel
+        v-for="method in methods"
+        :key="method.name"
+      >
+        <v-expansion-panel-header>
+          <div>{{method.displayName}}</div>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <c-method
+            :model="model"
+            :for="method"
+            :autoReloadModel="autoReloadModel"
+          >
+          </c-method>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </v-expand-transition>
 </template>
 
 
@@ -35,6 +55,9 @@ export default class CMethods extends Vue {
   @Prop({required: true, type: Object})
   public model!: ViewModel<Model<ModelType>> | ListViewModel;
 
+  @Prop({required: false, type: Boolean, default: false})
+  public autoReloadModel!: boolean;
+
   get viewModel(): ViewModel | ListViewModel {
     if (this.model instanceof ViewModel) return this.model;
     if (this.model instanceof ListViewModel) return this.model;
@@ -45,10 +68,18 @@ export default class CMethods extends Vue {
     return this.viewModel.$metadata as ModelType;
   }
 
+  get isStatic() {
+    return this.viewModel instanceof ListViewModel
+  }
+
   get methods() {
+    if (this.viewModel instanceof ViewModel && !this.viewModel.$primaryKey) {
+      return []
+    }
+
     return Object
       .values(this.metadata.methods)
-      .filter(m => this.viewModel instanceof ViewModel ? !m.isStatic : m.isStatic)
+      .filter(m => !!m.isStatic == this.isStatic)
   }
 }
 

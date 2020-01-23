@@ -123,7 +123,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             b.Line("    }");
             b.Line("    model.coalesceConfig.autoSaveEnabled(false);");
             b.Line("    model.loadChildren(function() {");
-            b.Line("        ko.applyBindings(model);");
+            b.Line("        ko.applyBindings(model, document.body);");
             b.Line("        model.coalesceConfig.autoSaveEnabled(true);");
             b.Line("    });");
             b.Line("</script>");

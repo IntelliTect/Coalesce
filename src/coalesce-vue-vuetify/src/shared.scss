@@ -1,0 +1,37 @@
+
+
+
+.hide-non-error-details {
+  .v-input {
+    .v-text-field__details,
+    .v-messages,
+    &.v-input--switch .v-input__slot {
+      transition: 
+        min-height .3s cubic-bezier(.25,.8,.5,1),
+        margin-bottom .3s cubic-bezier(.25,.8,.5,1),
+      ;
+    }
+  }
+
+
+  .v-input:not(.error--text) {
+    .v-text-field__details {
+      min-height: 0 !important;
+      margin-bottom: 0 !important;
+
+      .v-messages {
+        min-height: 0 !important;
+      }
+    }
+
+    &.v-input--switch {
+      .v-input__slot {
+        margin-bottom: 0;
+      }
+      
+      .v-messages {
+        min-height: 0 !important;
+      }
+    }
+  }
+}

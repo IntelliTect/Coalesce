@@ -359,7 +359,7 @@
         });
         
         caseList.isSavingAutomatically = false;
-        ko.applyBindings(caseList);
+        ko.applyBindings(caseList, document.body);
         caseList.isSavingAutomatically = true;
         
         caseList.includes = "CaseListGen";

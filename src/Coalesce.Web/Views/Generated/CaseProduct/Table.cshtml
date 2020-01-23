@@ -148,7 +148,7 @@
         });
         
         caseProductList.isSavingAutomatically = false;
-        ko.applyBindings(caseProductList);
+        ko.applyBindings(caseProductList, document.body);
         caseProductList.isSavingAutomatically = true;
         
         caseProductList.includes = "CaseProductListGen";

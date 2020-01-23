@@ -21,6 +21,6 @@ module Demo {
     }
 
     $(function () {
-        ko.applyBindings(new DemoViewModel());
+        ko.applyBindings(new DemoViewModel(), document.body);
     });
 }

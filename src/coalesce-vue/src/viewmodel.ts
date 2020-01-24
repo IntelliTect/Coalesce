@@ -1009,6 +1009,7 @@ function resolveProto(obj: ViewModelCollection<any>): Array<any> {
 export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   readonly $metadata!: ModelCollectionValue | ModelType;
   readonly $parent!: any;
+  $hasLoaded!: boolean;
 
 
   push(...items: T[]): number {
@@ -1037,7 +1038,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     Object.defineProperties(this, {
       // These properties need to be non-enumerable to avoid them from being looped over
       // during iteration of the array if `for ... in ` is used.
-      // We also don't want Vue to bother making them reactive, since they are immutable anyway.
+      // We also don't want Vue to bother making them reactive because it won't be beneficial.
       $metadata: {
         value: $metadata,
         enumerable: false,
@@ -1048,6 +1049,12 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
         value: $parent,
         enumerable: false,
         writable: false,
+        configurable: false
+      },
+      $hasLoaded: {
+        value: false,
+        enumerable: false,
+        writable: true,
         configurable: false
       },
       push: {
@@ -1173,6 +1180,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
 
           : prop.role == "collectionNavigation"
           ? function(this: InstanceType<T>, incomingValue: any) {
+              let hasLoaded = false;
               if (incomingValue == null) {
                 // Usability niceness - make an empty array if the incoming is null.
                 // This shouldn't have any adverse effects that I can think of.
@@ -1182,6 +1190,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 throw Error(
                   `Cannot assign a non-array to ${metadata.name}.${propName}`
                 );
+              } else {
+                hasLoaded = true;
               }
 
               const $data = (this as any).$data;
@@ -1193,6 +1203,10 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               }
 
               const vmc = new ViewModelCollection(prop, this);
+              // Mark the collection so that we can determine that it has been loaded,
+              // versus a collection that was never loaded because the server never populated it.
+              // This lets us tell if the collection is truly empty, or empty because it isn't loaded.
+              vmc.$hasLoaded = hasLoaded
               vmc.push(...incomingValue);
               $data[propName] = vmc;
             }

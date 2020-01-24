@@ -1,6 +1,6 @@
 import Vue, { PropOptions } from "vue";
 import { getValueMeta } from "../c-metadata-component";
-import { propDisplay, Model, ClassType } from "coalesce-vue";
+import { propDisplay, Model, ClassType, ViewModelCollection } from "coalesce-vue";
 import type { RawLocation } from 'vue-router'
 
 import CDisplay from '../display/c-display'
@@ -55,7 +55,11 @@ export default Vue.extend({
           },
           // Use `propDisplay` for our formatted count, forcing the count always by preventing enumeration.
           propDisplay(model, meta, { collection: { enumeratedItemsMax: 0 }})
-            || "None"
+            || (
+              ((model as any)[meta.name] as ViewModelCollection<any>)?.$hasLoaded === false
+                ? "View"
+                : "None"
+            )
         )
       }
       
@@ -75,7 +79,7 @@ export default Vue.extend({
                 }
               } 
             },
-            propDisplay(model, meta)
+            propDisplay(model, meta) ?? fkValue
           )
         }
       }

@@ -201,11 +201,11 @@ export function mapParamsToDto(
   var paramsObject = simpleParams.reduce(
     (obj, key) => {
       if (key in wideParams && wideParams[key] != null) {
-        obj[key] = wideParams[key]!;
+        obj[key] = String(wideParams[key]);
       }
       return obj;
     },
-    {} as { [s: string]: string | number }
+    {} as { [s: string]: string }
   );
 
   // Map the 'filter' object, ensuring all values are strings.

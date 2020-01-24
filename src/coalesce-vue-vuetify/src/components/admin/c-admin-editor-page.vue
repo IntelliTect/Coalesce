@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from '../c-metadata-component'
-import { ViewModel, ModelType, BehaviorFlags } from 'coalesce-vue';
+import { ViewModel, ModelType, BehaviorFlags, ListParameters, mapQueryToParams, mapToModel, mapValueToModel } from 'coalesce-vue';
 
 import CAdminMethods from './c-admin-methods.vue';
 import CAdminEditor from './c-admin-editor.vue';
@@ -63,13 +63,29 @@ export default class extends MetadataComponent {
     if (this.id) {
       await this.viewModel.$load(this.id);
     } else {
-      // TODO: Pull intiial data from the querystring if there is any (like what knockout does).
+
+      const params = mapQueryToParams(this.$route.query, ListParameters, this.metadata);
+      if (params.filter) {
+        for (const propName in this.metadata.props) {
+          const prop = this.metadata.props[propName]
+          const filterValue = params.filter[propName];
+          if (filterValue != null) {
+            try {
+              (this.viewModel as any)[propName] = mapValueToModel(filterValue, prop)
+            } catch (e) {
+              // mapValueToModel will throw for unmappable values.
+              console.error(`Could not map filter parameter ${propName}. ${e}`)
+            }
+          }
+        }
+      }
 
       this.$watch(
         () => this.viewModel.$primaryKey,
         pk => {
           const { href } = this.$router.resolve({
             ...this.$route,
+            query: {},
             params: {
               ...this.$route.params,
               id: this.viewModel.$primaryKey

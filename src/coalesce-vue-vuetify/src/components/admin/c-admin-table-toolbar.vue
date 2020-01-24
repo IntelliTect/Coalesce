@@ -14,7 +14,7 @@
     <v-btn
       class="c-admin-table-toolbar--button-create"
       text
-      :to="{name: 'coalesce-admin-item', params: {type: metadata.name}}"
+      :to="createRoute"
     >
       <v-icon :left="$vuetify.breakpoint.mdAndUp">fa fa-plus</v-icon>
       <span class="hidden-sm-and-down">Create</span>
@@ -82,11 +82,12 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from '../c-metadata-component'
-import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
+import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags, mapParamsToDto } from 'coalesce-vue';
 
 import CListRangeDisplay from '../display/c-list-range-display.vue';
 import CListPage from '../input/c-list-page.vue';
 import CListFilters from '../input/c-list-filters.vue';
+import type { RawLocation } from 'vue-router';
     
 @Component({
   name: 'c-admin-table-toolbar',
@@ -105,6 +106,19 @@ export default class extends MetadataComponent {
 
   get canCreate() {
     return this.metadata && (this.metadata.behaviorFlags & BehaviorFlags.Create) != 0
+  }
+
+  get createRoute() {
+    return <RawLocation>{
+      name: 'coalesce-admin-item', 
+      params: {
+        type: this.metadata.name,
+      },
+      query: Object.fromEntries(Object
+        .entries(mapParamsToDto(this.list.$params) || {})
+        .filter(entry => entry[0].startsWith("filter."))
+      )
+    }
   }
 
   /** Calculated width for the "Page" text input, such that it fits the max page number. */

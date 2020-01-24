@@ -2,6 +2,7 @@
   <v-menu
     class="c-list-filters--menu"
     :close-on-content-click="false"
+    offset-y
   >
     <template #activator="{on}">
       <v-btn
@@ -9,7 +10,7 @@
         text
         v-on="on"
       >
-        <v-badge left :content="activeCount" color="accent">
+        <v-badge :value="activeCount" left :content="activeCount" color="accent">
           <v-icon :left="$vuetify.breakpoint.mdAndUp">fa fa-filter</v-icon>
         </v-badge>
         <span class="hidden-sm-and-down">Filters</span>

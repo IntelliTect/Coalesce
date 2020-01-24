@@ -1,9 +1,9 @@
 import Vue, { PropOptions } from "vue";
-import { getValueMeta } from "./c-metadata-component";
-import { propDisplay, valueDisplay, Property, DisplayOptions, Model, ClassType } from "coalesce-vue";
+import { getValueMeta } from "../c-metadata-component";
+import { propDisplay, Model, ClassType } from "coalesce-vue";
 import type { RawLocation } from 'vue-router'
 
-import CDisplay from './c-display'
+import CDisplay from '../display/c-display'
 
 export default Vue.extend({
   name: "c-admin-display",

@@ -26,12 +26,12 @@
           <div>{{method.displayName}}</div>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <c-method
+          <c-admin-method
             :model="model"
             :for="method"
             :autoReloadModel="autoReloadModel"
           >
-          </c-method>
+          </c-admin-method>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -43,12 +43,12 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel } from 'coalesce-vue';
-import CMethod from './c-method.vue'
+import CAdminMethod from './c-admin-method.vue'
 
 @Component({
-  name: 'c-methods',
+  name: 'c-admin-methods',
   components: {
-    CMethod
+    CAdminMethod
   }
 })
 export default class CMethods extends Vue {

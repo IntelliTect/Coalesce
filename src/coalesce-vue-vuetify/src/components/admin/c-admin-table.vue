@@ -6,6 +6,7 @@
 
     <v-card-text class="pt-3">
       <c-table
+        admin
         :list="viewModel"
         :extra-headers="canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []"
       >
@@ -44,7 +45,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
 
-import CTable from './c-table.vue';
+import CTable from '../display/c-table.vue';
 import CAdminTableToolbar from './c-admin-table-toolbar.vue';
     
 @Component({

@@ -1,5 +1,5 @@
 import Vue, { PropOptions } from "vue";
-import { getValueMeta } from "./c-metadata-component";
+import { getValueMeta } from "../c-metadata-component";
 import { propDisplay, valueDisplay, Property, DisplayOptions, Model, ClassType } from "coalesce-vue";
 
 export default Vue.extend({

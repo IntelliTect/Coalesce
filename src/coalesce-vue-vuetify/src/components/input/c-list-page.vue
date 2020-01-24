@@ -1,5 +1,5 @@
 <template>
-  <div class="c-pagination-page">
+  <div class="c-list-page">
     <v-btn 
       color="accent" 
       outlined small icon
@@ -33,7 +33,7 @@
 
 <script lang="ts">
 export default {
-  name: 'c-pagination-page',
+  name: 'c-list-page',
   props: { 
     list: { required: true },
   }
@@ -43,7 +43,7 @@ export default {
 
 
 <style lang="scss" >
-.c-pagination-page {
+.c-list-page {
   display: flex;
   align-items: center;
   font-size: 16px;

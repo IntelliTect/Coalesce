@@ -221,7 +221,7 @@ export default class extends Vue {
   }
 
   get valueMeta(): Property | Value | null {
-    const valueMeta = getValueMeta(this.for, this.modelMeta);
+    const valueMeta = getValueMeta(this.for, this.modelMeta, this.$coalesce.metadata);
     if (valueMeta && "role" in valueMeta) {
       return valueMeta;
     }

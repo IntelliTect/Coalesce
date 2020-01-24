@@ -5,7 +5,7 @@
       :model="viewModel"
     />
 
-    <c-methods 
+    <c-admin-methods 
       class="c-admin-editor-page--methods" 
       :model="viewModel" 
       auto-reload-model
@@ -15,15 +15,16 @@
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from './c-metadata-component'
+import MetadataComponent from '../c-metadata-component'
 import { ViewModel, ModelType, BehaviorFlags } from 'coalesce-vue';
 
+import CAdminMethods from './c-admin-methods.vue';
 import CAdminEditor from './c-admin-editor.vue';
 
 @Component({
   name: 'c-admin-table-page',
   components: {
-    CAdminEditor, 
+    CAdminEditor, CAdminMethods
   }
 })
 export default class extends MetadataComponent {

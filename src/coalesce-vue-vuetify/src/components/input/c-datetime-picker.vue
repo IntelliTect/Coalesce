@@ -82,13 +82,14 @@ import {
   setDate,
   setHours,
   setMinutes,
-  lightFormat
+  lightFormat,
+  startOfDay
 } from 'date-fns'
 
 // import { format, parse, isValid, setYear, setMonth, setDate, setHours, setMinutes } from 'date-fns'
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-// import CDisplay from './c-display';
-import MetadataComponent from './c-metadata-component'
+// import CDisplay from '../display/c-display';
+import MetadataComponent from '../c-metadata-component'
 
 @Component({
     name: 'c-datetime-picker',
@@ -172,6 +173,14 @@ export default class extends MetadataComponent {
   }
 
   public error: string[] = []
+
+  createDefaultDate() {
+    const date = new Date()
+    if (this.dateKind == "date"){
+      return startOfDay(date)
+    }
+    return date;
+  }
   
   textInputChanged(val: string) {
     this.error = []
@@ -179,7 +188,7 @@ export default class extends MetadataComponent {
     if (!val || !val.trim()) {
       value = null
     } else {
-      value = parse(val, this.internalFormat, new Date())
+      value = parse(val, this.internalFormat, startOfDay(this.createDefaultDate()))
       
       // If the input didn't match our format exactly, 
       // try parsing user input with general formatting interpretation (trying to be a good citizen).
@@ -214,7 +223,7 @@ export default class extends MetadataComponent {
   timeChanged(val: string) {
     this.error = []
     
-    var value = this.value || new Date()
+    var value = this.value || this.createDefaultDate()
 
     var parts = /(\d\d):(\d\d)/.exec(val);
     if (!parts) throw `Time set by vuetify timepicker not in expected format: ${val}`
@@ -228,7 +237,7 @@ export default class extends MetadataComponent {
   dateChanged(val: string) {
     this.error = []
 
-    var value = this.value || new Date()
+    var value = this.value || this.createDefaultDate()
 
     var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
     if (!parts) throw `Date set by vuetify datepicker not in expected format: ${val}`

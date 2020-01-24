@@ -19,6 +19,8 @@
       "@/*": [ "src/*" ],
       "coalesce-vue": [ "../coalesce-vue/src" ],
       "coalesce-vue/*": [ "../coalesce-vue/src/*" ],
+      "vue": [ "node_modules/vue" ],
+      "vue/*": [ "node_modules/vue/*" ],
     },
     "lib": [
       "esnext",

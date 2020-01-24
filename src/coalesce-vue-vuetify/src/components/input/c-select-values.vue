@@ -16,8 +16,8 @@
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from './c-metadata-component'
-import CDisplay from './c-display';
+import MetadataComponent from '../c-metadata-component'
+import CDisplay from '../display/c-display';
 import { convertValueToModel } from 'coalesce-vue';
 
     

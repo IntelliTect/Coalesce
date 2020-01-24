@@ -82,9 +82,9 @@
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent, { getValueMeta } from './c-metadata-component'
+import MetadataComponent, { getValueMeta } from '../c-metadata-component'
 import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel, DisplayOptions } from 'coalesce-vue';
-import CInput from './c-input'
+import CInput from '../input/c-input'
 
 const resultDisplayOptions = <DisplayOptions>{
   collection: {

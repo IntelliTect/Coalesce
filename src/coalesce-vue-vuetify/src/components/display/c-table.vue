@@ -1,11 +1,14 @@
 <template>
-  <c-loader-status
-    :loaders="{'no-initial-content': [list.$load]}"
-    #default
+  <div 
+    class="c-table"
   >
-    <div class="c-table theme--light v-data-table">
-      <div class="v-data-table__wrapper">
-        
+    <c-loader-status
+      :loaders="{'no-initial-content': [list.$load]}"
+      #default
+    >
+      <div class="theme--light v-data-table">
+        <div class="v-data-table__wrapper">
+          
           <table>
             <thead class="v-data-table-header">
               <tr>
@@ -29,13 +32,6 @@
               </tr>
             </thead>
             
-            <!-- <c-table-body
-              :items="list.$items"
-              :props="effectiveProps">
-              <template #item.append="{item}">
-                <slot name="item.append" :item="item" />
-              </template>
-            </c-table-body> -->
             <tbody>
               <tr
                 v-for="(item, index) in list.$items"
@@ -47,16 +43,18 @@
                   :class="['prop-' + prop.name,]"
                   class="text-xs-left" 
                 >
-                  <c-admin-display :model="item" :for="prop" />
+                  <c-admin-display v-if="admin" :model="item" :for="prop" />
+                  <c-display v-else :model="item" :for="prop" />
                 </td>
                 <slot name="item.append" :item="item" />
               </tr>
             </tbody>
             
           </table>
+        </div>
       </div>
-    </div>
-  </c-loader-status>
+    </c-loader-status>
+  </div>
 
   <!-- <v-data-table
     class="c-table"
@@ -88,14 +86,11 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ListViewModel, Property, ModelType } from 'coalesce-vue';
 
-import CTableBody from './c-table-body.vue';
-import CAdminDisplay from './c-admin-display';
+import CAdminDisplay from '../admin/c-admin-display';
     
 @Component({
   name: 'c-table',
-  components: {
-    CTableBody, CAdminDisplay
-  }
+  components: { CAdminDisplay }
 })
 export default class extends Vue {
 
@@ -104,6 +99,9 @@ export default class extends Vue {
 
   @Prop({required: false, type: Array})
   public props?: Array<string>;
+
+  @Prop({required: false, type: Boolean})
+  public admin?: Boolean;
 
   @Prop({required: false, type: Array})
   public extraHeaders?: Array<string>;
@@ -178,6 +176,7 @@ export default class extends Vue {
 
 <style lang="scss">
 .c-table {
+
   word-break: initial;
   th, td {
     padding: 4px 8px;
@@ -188,13 +187,6 @@ export default class extends Vue {
     vertical-align: bottom;
     .v-icon {
       font-size: 16px;
-    }
-  }
-
-  .c-table--header-loader {
-    th {
-      height: #{4px + 1px}; // add one px for the border
-      border: none !important;
     }
   }
 }

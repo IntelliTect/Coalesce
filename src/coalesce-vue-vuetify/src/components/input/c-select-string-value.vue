@@ -17,7 +17,7 @@
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from './c-metadata-component'
+import MetadataComponent from '../c-metadata-component'
 import { ListViewModel, ItemApiState, ModelApiClient, ItemResultPromise } from 'coalesce-vue';
 
     

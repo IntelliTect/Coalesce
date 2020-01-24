@@ -70,8 +70,8 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
 
-import CDisplay from './c-display';
-import MetadataComponent from './c-metadata-component'
+import CDisplay from '../display/c-display';
+import MetadataComponent from '../c-metadata-component'
 import { 
   ApiClient, ModelApiClient, ListApiState, ListResultPromise, ItemApiState, ItemResultPromise, 
   Model, ModelType, ForeignKeyProperty, Value, ModelReferenceNavigationProperty, ListParameters, 

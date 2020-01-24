@@ -5,26 +5,26 @@
       :list="listVM">
     </c-admin-table>
     
-    <c-methods 
+    <c-admin-methods 
       class="c-admin-table-page--methods" 
       :model="listVM"
       auto-reload-model
-    ></c-methods>
+    ></c-admin-methods>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from './c-metadata-component'
+import MetadataComponent from '../c-metadata-component'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags, mapParamsToDto, mapQueryToParams, ListParameters } from 'coalesce-vue';
 
-import CMethodsDialog from './c-methods-dialog.vue';
+import CAdminMethods from './c-admin-methods.vue';
 import CAdminTable from './c-admin-table.vue';
 
 @Component({
   name: 'c-admin-table-page',
   components: {
-    CMethodsDialog, CAdminTable
+    CAdminMethods, CAdminTable
   }
 })
 export default class extends MetadataComponent {
@@ -66,7 +66,7 @@ export default class extends MetadataComponent {
       () => mapParamsToDto(this.listVM.$params),
       (mappedParams) => {
         this.$router.replace({query: {
-          ...this.$route.query,
+          // ...this.$route.query,
           // mappedParams contains numbers and strings. 
           // Vue-router only claims to accept strings. Vue-router can just deal with it.
           ...(mappedParams as any)

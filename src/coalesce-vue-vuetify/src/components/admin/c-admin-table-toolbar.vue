@@ -30,23 +30,17 @@
     </v-btn>
 
     <v-spacer></v-spacer>
-      
+
     <span 
       v-if="list" 
       class="c-admin-table-toolbar--range hidden-sm-and-down"
     >
-      <!-- These use list.$load explicitly so that the numbers match
-      the actual currently displayed data, rather than the state of the parameters. -->
-      Showing {{(list.$load.page-1) * list.$load.pageSize + 1}}
-      - 
-      {{list.$load.page == list.$load.pageCount ? list.$load.totalCount : list.$load.page * list.$load.pageSize}}
-      of
-      {{list.$load.totalCount}}
+      Showing <c-list-range-display :list="list" />
     </span>
 
     <v-spacer></v-spacer>
     
-    <c-pagination-page
+    <c-list-page
       class="c-admin-table-toolbar--page"
       :list="list"
     />
@@ -64,6 +58,10 @@
         single-line
         clearable
       ></v-text-field>
+
+      <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
+
+      <c-list-filters :list="list" />
 
       <v-spacer></v-spacer>
     
@@ -83,13 +81,16 @@
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from './c-metadata-component'
+import MetadataComponent from '../c-metadata-component'
 import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags } from 'coalesce-vue';
 
+import CListRangeDisplay from '../display/c-list-range-display.vue';
+import CListPage from '../input/c-list-page.vue';
+import CListFilters from '../input/c-list-filters.vue';
     
 @Component({
   name: 'c-admin-table-toolbar',
-  components: { }
+  components: { CListRangeDisplay, CListPage, CListFilters }
 })
 export default class extends MetadataComponent {
   @Prop({required: true, type: Object})

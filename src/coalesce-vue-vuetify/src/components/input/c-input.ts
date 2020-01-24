@@ -1,14 +1,16 @@
 
 
 import Vue, { PropOptions } from "vue";
-import { getValueMeta } from "./c-metadata-component";
-import { Model, ViewModel, ClassType, DataSource, DataSourceType, ModelType } from "coalesce-vue";
+import { getValueMeta } from "../c-metadata-component";
+import { Model, ViewModel, ClassType, DataSource, DataSourceType, ModelType, mapToModel, mapValueToModel } from "coalesce-vue";
 
 import CSelect from './c-select.vue'
 import CSelectManyToMany from './c-select-many-to-many.vue'
 import CSelectValues from './c-select-values.vue'
-import CDisplay from './c-display';
+import CDisplay from '../display/c-display';
 import CDatetimePicker from './c-datetime-picker.vue';
+
+const primitiveTypes = ["string", "number", "date", "enum", "boolean"];
 
 export default Vue.extend({
   name: "c-input",
@@ -28,7 +30,7 @@ export default Vue.extend({
 
     const model = ctx.props.model;
     const modelMeta = model ? model.$metadata : null;
-    let valueMeta = getValueMeta(ctx.props.for, modelMeta);
+    let valueMeta = getValueMeta(ctx.props.for, modelMeta, ctx.parent.$coalesce.metadata);
 
     if (!valueMeta || !("role" in valueMeta)) {
       throw Error("c-input requires value metadata. Specify it with the 'for' prop'");
@@ -41,8 +43,10 @@ export default Vue.extend({
 
       props: {
         // If a model is provided, pull the value off the model.
-        value: model && valueMeta
+        value: model
           ? (model as any)[valueMeta.name]
+          : primitiveTypes.includes(valueMeta.type)
+          ? mapValueToModel(ctx.props.value, valueMeta) 
           : ctx.props.value
       } as Exclude<typeof ctxProps, undefined>,
 
@@ -133,6 +137,10 @@ export default Vue.extend({
         // It also uses 'input-value' instead of 'value' for its value prop.
         data.props['input-value'] = data.props.value;
         delete data.props.value;
+        
+        if ('checkbox' in attrs && attrs.checkbox !== false) {
+          return h('v-checkbox', data);
+        }
         return h('v-switch', data);
       
       case 'enum':

@@ -63,6 +63,7 @@ import axios, {
   Cancel
 } from "axios";
 import * as qs from "qs";
+import { format } from 'date-fns';
 
 /* Api Response Objects */
 
@@ -211,8 +212,9 @@ export function mapParamsToDto(
   const filter = wideParams.filter;
   if (typeof filter == "object" && filter) {
     for (var key in filter) {
-      if (filter[key] !== undefined) {
-        paramsObject["filter." + key] = String(filter[key]);
+      let value = filter[key];
+      if (value !== undefined) {
+        paramsObject["filter." + key] = String(value);
       }
     }
   }

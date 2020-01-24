@@ -16,10 +16,10 @@
        <c-display :model="model" />
       </v-card-title>
       <v-card-text>
-        <c-methods
+        <c-admin-methods
           :model="model"
         >
-        </c-methods>
+        </c-admin-methods>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -39,12 +39,12 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ViewModel, Property, Method, ModelType } from 'coalesce-vue';
 
-import CMethods from './c-methods.vue'
+import CAdminMethods from './c-admin-methods.vue'
 
 @Component({
   name: 'c-methods-dialog',
   components: {
-    CMethods
+    CAdminMethods
   }
 })
 export default class extends Vue {

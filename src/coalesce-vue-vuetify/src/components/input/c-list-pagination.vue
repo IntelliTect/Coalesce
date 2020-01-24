@@ -15,19 +15,11 @@
     </div>
 
     <div >
-      <div >
-        <!-- These use list.$load explicitly so that the numbers match
-        the actual currently displayed data, rather than the state of the parameters. -->
-        {{(list.$load.page-1) * list.$load.pageSize + 1}}
-        - 
-        {{list.$load.page == list.$load.pageCount ? list.$load.totalCount : list.$load.page * list.$load.pageSize}}
-        of
-        {{list.$load.totalCount}}
-      </div>
+      <c-list-range-display :list="list" />
     </div>
 
     <div>
-      <c-pagination-page :list="list" />
+      <c-list-page :list="list" />
     </div>
   </div>
 </template>
@@ -35,12 +27,15 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { ListViewModel } from 'coalesce-vue';
-import CPaginationPage from './c-pagination-page.vue';
+
+import CListPage from './c-list-page.vue';
+import CListRangeDisplay from '../display/c-list-range-display.vue';
 
 @Component({
-  name: 'c-pagination',
+  name: 'c-list-pagination',
   components: {
-    CPaginationPage
+    CListPage,
+    CListRangeDisplay
   }
 })
 export default class extends Vue {

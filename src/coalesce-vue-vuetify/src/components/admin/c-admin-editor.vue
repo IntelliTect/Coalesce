@@ -78,7 +78,7 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ViewModel, Property, ModelType, BehaviorFlags } from 'coalesce-vue';
 
-import CInput from './c-input'
+import CInput from '../input/c-input'
 import CAdminDisplay from './c-admin-display'
     
 @Component({

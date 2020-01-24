@@ -2,49 +2,47 @@
 import _Vue from "vue";
 
 // In alphabetical order:
-import CAdminEditorPage from './c-admin-editor-page.vue';
-import CAdminEditor from './c-admin-editor.vue';
-import CAdminTablePage from './c-admin-table-page.vue';
-import CAdminTableToolbar from './c-admin-table-toolbar.vue';
-import CAdminTable from './c-admin-table.vue';
-import CDatetimePicker from './c-datetime-picker.vue';
-import CDisplay from './c-display'
-import CEditorDialog from './c-editor-dialog.vue';
-import CInputPropsProvider from './c-input-props-provider.vue';
-import CInput from './c-input';
-import CLoaderStatus from './c-loader-status.vue';
-import CMetadataComponent from './c-metadata-component'
-import CMethod from './c-method.vue';
-import CMethods from './c-methods.vue';
-import CMethodsDialog from './c-methods-dialog.vue';
-import CPaginationPage from './c-pagination-page.vue';
-import CPagination from './c-pagination.vue';
-import CSelectManyToMany from './c-select-many-to-many.vue';
-import CSelectStringValue from './c-select-string-value.vue';
-import CSelect from './c-select.vue';
-import CTable from './c-table.vue';
+import CAdminDisplay from './admin/c-admin-display';
+import CAdminEditorPage from './admin/c-admin-editor-page.vue';
+import CAdminEditor from './admin/c-admin-editor.vue';
+import CAdminMethod from './admin/c-admin-method.vue';
+import CAdminMethods from './admin/c-admin-methods.vue';
+import CAdminTablePage from './admin/c-admin-table-page.vue';
+import CAdminTableToolbar from './admin/c-admin-table-toolbar.vue';
+import CAdminTable from './admin/c-admin-table.vue';
+import CDatetimePicker from './input/c-datetime-picker.vue';
+import CDisplay from './display/c-display'
+// import CEditorDialog from './admin/c-editor-dialog.vue';
+import CInputPropsProvider from './input/c-input-props-provider.vue';
+import CInput from './input/c-input';
+import CLoaderStatus from './display/c-loader-status.vue';
+// import CMethodsDialog from './admin/c-methods-dialog.vue';
+import CListPage from './input/c-list-page.vue';
+import CListPagination from './input/c-list-pagination.vue';
+import CSelectManyToMany from './input/c-select-many-to-many.vue';
+import CSelectStringValue from './input/c-select-string-value.vue';
+import CSelect from './input/c-select.vue';
+import CTable from './display/c-table.vue';
 
-// import CTable from './c-table-body.vue';
-// import CTable from './c-table-row.vue';
 
 export {
+  CAdminDisplay,
   CAdminEditorPage,
   CAdminEditor,
+  CAdminMethod,
+  CAdminMethods,
   CAdminTablePage,
   CAdminTableToolbar,
   CAdminTable,
   CDatetimePicker,
   CDisplay,
-  CEditorDialog,
+  // CEditorDialog,
   CInputPropsProvider,
   CInput,
   CLoaderStatus,
-  CMetadataComponent,
-  CMethod,
-  CMethods,
-  CMethodsDialog,
-  CPaginationPage,
-  CPagination,
+  // CMethodsDialog,
+  CListPage,
+  CListPagination,
   CSelectManyToMany,
   CSelectStringValue,
   CSelect,
@@ -53,23 +51,23 @@ export {
 
 export default function install(Vue: typeof _Vue) {
   // In alphabetical order:
+  Vue.component('c-admin-display', CAdminDisplay);
   Vue.component('c-admin-editor-page', CAdminEditorPage);
   Vue.component('c-admin-editor', CAdminEditor);
+  Vue.component('c-admin-method', CAdminMethod);
+  Vue.component('c-admin-methods', CAdminMethods);
   Vue.component('c-admin-table-page', CAdminTablePage);
   Vue.component('c-admin-table-toolbar', CAdminTableToolbar);
   Vue.component('c-admin-table', CAdminTable);
   Vue.component('c-datetime-picker', CDatetimePicker);
   Vue.component('c-display', CDisplay);
-  Vue.component('c-editor-dialog', CEditorDialog);
+  // Vue.component('c-editor-dialog', CEditorDialog);
   Vue.component('c-input-props-provider', CInputPropsProvider);
   Vue.component('c-input', CInput);
   Vue.component('c-loader-status', CLoaderStatus);
-  Vue.component('c-metadata-component', CMetadataComponent);
-  Vue.component('c-method', CMethod);
-  Vue.component('c-methods', CMethods);
-  Vue.component('c-methods-dialog', CMethodsDialog);
-  Vue.component('c-pagination-page', CPaginationPage);
-  Vue.component('c-pagination', CPagination);
+  // Vue.component('c-methods-dialog', CMethodsDialog);
+  Vue.component('c-list-page', CListPage);
+  Vue.component('c-list-pagination', CListPagination);
   Vue.component('c-select-many-to-many', CSelectManyToMany);
   Vue.component('c-select-string-value', CSelectStringValue);
   Vue.component('c-select', CSelect);

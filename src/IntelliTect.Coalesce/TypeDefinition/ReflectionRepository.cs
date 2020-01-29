@@ -30,6 +30,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
             = new ConcurrentDictionary<object, ClassViewModel>();
 
+        private object _discoverLock = new object();
+
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
         public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
         public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_behaviors);
@@ -59,57 +61,60 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
         {
-            foreach (var type in types
-                // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
-                // Really not sure why, but lets parallelize to minimize that impact.
-                .AsParallel()
-                .Where(type => type.HasAttribute<CoalesceAttribute>())
-            )
+            lock (_discoverLock)
             {
-                if (type.IsA<DbContext>())
+                foreach (var type in types
+                    // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
+                    // Really not sure why, but lets parallelize to minimize that impact.
+                    .AsParallel()
+                    .Where(type => type.HasAttribute<CoalesceAttribute>())
+                )
                 {
-                    var context = new DbContextTypeUsage(type.ClassViewModel);
-                    _contexts.Add(context);
-                    _entities.UnionWith(context.Entities.Select(e => e.ClassViewModel));
+                    if (type.IsA<DbContext>())
+                    {
+                        var context = new DbContextTypeUsage(type.ClassViewModel);
+                        _contexts.Add(context);
+                        _entities.UnionWith(context.Entities.Select(e => e.ClassViewModel));
 
-                    // Force cache these since they have extra bits of info attached now.
-                    // TODO: eliminate the need for this.
-                    foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
+                        // Force cache these since they have extra bits of info attached now.
+                        // TODO: eliminate the need for this.
+                        foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
 
+                    }
+                    else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
+                    {
+                        // Handled by helper
+                    }
+                    else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
+                    {
+                        // Handled by helper
+                    }
+                    else if (type.IsA(typeof(IClassDto<>)))
+                    {
+                        var classViewModel = type.ClassViewModel;
+
+                        // Force cache this since it has extra bits of info attached.
+                        _customDtos.Add(Cache(classViewModel, force: true));
+
+                        DiscoverNestedCrudStrategiesOn(classViewModel);
+                    }
+                    else if (type.ClassViewModel?.IsService ?? false)
+                    {
+                        var classViewModel = type.ClassViewModel;
+                        _services.Add(Cache(classViewModel));
+                    }
                 }
-                else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
+
+                foreach (var entity in Entities)
                 {
-                    // Handled by helper
+                    DiscoverExternalMethodTypesOn(entity);
+                    DiscoverExternalPropertyTypesOn(entity);
+                    DiscoverNestedCrudStrategiesOn(entity);
                 }
-                else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
+                foreach (var service in Services)
                 {
-                    // Handled by helper
+                    DiscoverExternalMethodTypesOn(service);
                 }
-                else if (type.IsA(typeof(IClassDto<>)))
-                {
-                    var classViewModel = type.ClassViewModel;
-
-                    // Force cache this since it has extra bits of info attached.
-                    _customDtos.Add(Cache(classViewModel, force: true));
-
-                    DiscoverNestedCrudStrategiesOn(classViewModel);
-                }
-                else if (type.ClassViewModel?.IsService ?? false)
-                {
-                    var classViewModel = type.ClassViewModel;
-                    _services.Add(Cache(classViewModel));
-                }
-            }
-
-            foreach (var entity in Entities)
-            {
-                DiscoverExternalMethodTypesOn(entity);
-                DiscoverExternalPropertyTypesOn(entity);
-                DiscoverNestedCrudStrategiesOn(entity);
-            }
-            foreach (var service in Services)
-            {
-                DiscoverExternalMethodTypesOn(service);
             }
         }
 

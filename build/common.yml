@@ -51,11 +51,11 @@ jobs:
   variables:
     COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
 
-  steps:
-  - task: DotNetCoreInstaller@0
-    displayName: 'Use .NET Core sdk 3.1.101'
-    inputs:
-      version: 3.1.101
+ #steps:
+  #- task: DotNetCoreInstaller@0
+  #  displayName: 'Use .NET Core sdk 3.1.101'
+  #  inputs:
+  #    version: 3.1.101
 
   - task: NodeTool@0
     displayName: 'Use Node 10.x'

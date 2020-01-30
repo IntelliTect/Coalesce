@@ -415,11 +415,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;
-                else if (string.Equals(Name, ConventionalIdSuffix, StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(Name, ConventionalIdSuffix, StringComparison.OrdinalIgnoreCase))
                     return true;
-                else if (string.Equals(Name, Parent.Name + ConventionalIdSuffix, StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(Name, Parent.Name + ConventionalIdSuffix, StringComparison.OrdinalIgnoreCase))
                     return true;
-                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Equals(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.InvariantCultureIgnoreCase))
+                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Equals(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.OrdinalIgnoreCase))
                     return true;
                 return false;
 
@@ -593,10 +593,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     // Try to find the inverse by looking for a collection on the
                     // referenced type of this property whose inverse is this property.
-                    var prop = Object.ClientProperties.Where(p =>
+                    var prop = Object.ClientProperties.FirstOrDefault(p =>
                         p.Role == PropertyRole.CollectionNavigation
                         && p.InverseProperty == this
-                    ).FirstOrDefault();
+                    );
 
                     if (prop != null)
                     {

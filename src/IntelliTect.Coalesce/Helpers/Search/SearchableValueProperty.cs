@@ -17,18 +17,20 @@ namespace IntelliTect.Coalesce.Helpers.Search
         {
         }
 
+        [Flags]
         public enum ParseFlags
         {
-            HaveYear = 0x01,
-            HaveMonth = 0x02,
-            HaveDay = 0x04,
-            HaveHour = 0x08,
-            HaveMinute = 0x10,
-            HaveSecond = 0x20,
+            None = 0,
+            HaveYear   = 1 << 0,
+            HaveMonth  = 1 << 1,
+            HaveDay    = 1 << 2,
+            HaveHour   = 1 << 3,
+            HaveMinute = 1 << 4,
+            HaveSecond = 1 << 5,
 
-            HaveDate = 0x7,
-            HaveTime = 0x38,
-            HaveDateTime = 0x3F,
+            HaveDate = HaveYear | HaveMonth | HaveDay,
+            HaveTime = HaveHour | HaveMinute | HaveSecond,
+            HaveDateTime = HaveDate | HaveTime,
         }
 
         public static Dictionary<string, ParseFlags> DateFormats = new Dictionary<string, ParseFlags>
@@ -164,7 +166,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
             else if (propType.IsEnum)
             {
                 var enumValuePair = propType.EnumValues
-                    .FirstOrDefault(kvp => string.Equals(kvp.Value, rawSearchTerm, StringComparison.InvariantCultureIgnoreCase));
+                    .FirstOrDefault(kvp => string.Equals(kvp.Value, rawSearchTerm, StringComparison.OrdinalIgnoreCase));
                 
                 // If the input string mapped to a valid enum value, search by the int value of that enum value.
                 if (enumValuePair.Value != null)

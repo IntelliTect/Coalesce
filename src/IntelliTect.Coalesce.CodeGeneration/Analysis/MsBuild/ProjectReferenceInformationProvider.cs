@@ -24,8 +24,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 
             var referencePaths = new Queue<string>(
                 projectReferences.Select(path => EnsurePathRooted(path, Path.GetDirectoryName(rootProjectPath))));
-            var addedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            addedProjects.Add(rootProjectPath);
+            var addedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                rootProjectPath
+            };
 
             var rootProjDir = Path.GetDirectoryName(rootProjectPath);
             while (referencePaths.Count > 0)

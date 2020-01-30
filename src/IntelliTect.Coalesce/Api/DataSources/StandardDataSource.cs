@@ -75,7 +75,7 @@ namespace IntelliTect.Coalesce
         {
             IQueryable<T> query = Db.Set<T>();
 
-            if (!string.Equals(parameters.Includes, NoDefaultIncludesString, StringComparison.InvariantCultureIgnoreCase))
+            if (!string.Equals(parameters.Includes, NoDefaultIncludesString, StringComparison.OrdinalIgnoreCase))
             {
                 query = query.IncludeChildren();
             }
@@ -124,7 +124,9 @@ namespace IntelliTect.Coalesce
         {
             // If no filter value is specified, do nothing.
             if (string.IsNullOrWhiteSpace(value))
+            {
                 return query;
+            }
 
             if (prop.Type.IsDate)
             {
@@ -175,7 +177,7 @@ namespace IntelliTect.Coalesce
                 else
                 {
                     // Could not parse date string.
-                    return query.Where(q => false);
+                    return query.Where(_ => false);
                 }
             }
             else if (prop.Type.IsString)
@@ -245,7 +247,9 @@ namespace IntelliTect.Coalesce
                 // Make our query return nothing since the targeted field could never equal an 
                 // unparsable value.
                 if (values.Count == 0)
-                    return query.Where(q => false);
+                {
+                    return query.Where(_ => false);
+                }
 
                 return query.Where(
                     string.Join(" || ", values.Select(v => v.Clause)),
@@ -268,7 +272,10 @@ namespace IntelliTect.Coalesce
 
             // Add general search filters.
             // These search specified fields in the class
-            if (string.IsNullOrWhiteSpace(searchTerm)) return query;
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return query;
+            }
 
             // See if the user has specified a field with a colon and search on that first
             if (searchTerm.Contains(":"))
@@ -279,8 +286,8 @@ namespace IntelliTect.Coalesce
                 var value = fieldValueParts[1].Trim();
 
                 var prop = ClassViewModel.ClientProperties.FirstOrDefault(f =>
-                    string.Compare(f.Name, field, true) == 0 ||
-                    string.Compare(f.DisplayName, field, true) == 0);
+                    string.Equals(f.Name, field, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(f.DisplayName, field, StringComparison.OrdinalIgnoreCase));
 
                 if (prop != null && !string.IsNullOrWhiteSpace(value))
                 {
@@ -291,7 +298,7 @@ namespace IntelliTect.Coalesce
                         .ToList();
 
                     // Join these together with an 'or'
-                    if (expressions.Any())
+                    if (expressions.Count > 0)
                     {
                         string finalSearchClause = string.Join(" || ", expressions);
                         return query.Where(finalSearchClause);
@@ -327,13 +334,13 @@ namespace IntelliTect.Coalesce
 
                 // For the given term word, allow any of the properties (so we join clauses with OR)
                 // to match the term word.
-                if (splitOnStringClauses.Any())
+                if (splitOnStringClauses.Count > 0)
                 {
                     splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
                 }
             }
             // Require each "word clause"
-            if (splitOnStringTermClauses.Any())
+            if (splitOnStringTermClauses.Count > 0)
             {
                 completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
             }
@@ -352,23 +359,16 @@ namespace IntelliTect.Coalesce
             completeSearchClauses.AddRange(searchClauses);
 
 
-            if (completeSearchClauses.Any())
+            if (completeSearchClauses.Count > 0)
             {
                 string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                query = query.Where(finalSearchClause);
-            }
-            else
-            {
-                // A search term was specified (we didn't return early from this method), 
-                // but we didn't find any valid properties to search on (we didn't come up with any clauses).
-                // We should therefore return no results since the search term entered can't come up with any results.
-                query = query.Where(q => false);
+                return query.Where(finalSearchClause);
             }
 
-            // Don't put any other code down here. The property:value search handling returns early
-            // if it finds a match. If you need code down here, refactor that part.
-
-            return query;
+            // A search term was specified (we didn't return early from this method), 
+            // but we didn't find any valid properties to search on (we didn't come up with any clauses).
+            // We should therefore return no results since the search term entered can't come up with any results.
+            return query.Where(_ => false);
         }
 
 
@@ -402,65 +402,71 @@ namespace IntelliTect.Coalesce
         public virtual IQueryable<T> ApplyListClientSpecifiedSorting(IQueryable<T> query, IListParameters parameters)
         {
             var orderByParams = parameters.OrderByList;
-            if (!orderByParams.Any(p => p.Key == "none"))
+            if (orderByParams.Any(p => p.Key == "none"))
             {
-                var clauses = orderByParams
-                    .Select(orderByParam =>
-                    {
-                        string fieldName = orderByParam.Key;
-                        string direction = orderByParam.Value.ToString();
+                return query;
+            }
 
-                        // Validate that the field accessor is a valid property
-                        // that the current user is allowed to read.
-                        var parts = fieldName.Split('.');
-                        PropertyViewModel prop = null;
-                        foreach (var part in parts)
-                        {
-                            if (prop != null && !prop.IsPOCO)
-                            {
-                                // We're accessing a nested prop, but the parent isn't an object,
-                                // so this can't be valid.
-                                return null;
-                            }
-
-                            prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
-
-                            // Check if the new prop exists and is readable by user.
-                            if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadable(User))
-                                return null;
-
-                            // If the prop is an object that isn't readable, then this is no good.
-                            if (prop.IsPOCO && !prop.Object.SecurityInfo.IsReadAllowed(User))
-                                return null;
-                        }
-
-                        if (prop.IsPOCO)
-                        {
-                            // The property is a POCO, not a value.
-                            // Get the default order by for the object's type to figure out what field to sort by.
-                            string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
-
-                            // The default order by clause has an order associated, but we want to override it
-                            // with the order that the client specified. A string replacement will do.
-                            return clause
-                                .Replace("ASC", direction.ToUpper())
-                                .Replace("DESC", direction.ToUpper());
-                        }
-                        else
-                        {
-                            // We've validated that `fieldName` is a valid acccessor for a comparable property,
-                            // and that the user is allowed to read it.
-                            return $"{fieldName} {direction}";
-                        }
-                    })
-                    // Take all the clauses up until an invalid one is found.
-                    .TakeWhile(clause => clause != null)
-                    .ToList();
-
-                if (clauses.Any())
+            var clauses = orderByParams
+                .Select(orderByParam =>
                 {
-                    query = query.OrderBy(string.Join(", ", clauses));
-                }
+                    string fieldName = orderByParam.Key;
+                    string direction = orderByParam.Value.ToString();
+
+                    // Validate that the field accessor is a valid property
+                    // that the current user is allowed to read.
+                    var parts = fieldName.Split('.');
+                    PropertyViewModel prop = null;
+                    foreach (var part in parts)
+                    {
+                        if (prop != null && !prop.IsPOCO)
+                        {
+                            // We're accessing a nested prop, but the parent isn't an object,
+                            // so this can't be valid.
+                            return null;
+                        }
+
+                        prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
+
+                        // Check if the new prop exists and is readable by user.
+                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadable(User))
+                        {
+                            return null;
+                        }
+
+                        // If the prop is an object that isn't readable, then this is no good.
+                        if (prop.IsPOCO && !prop.Object.SecurityInfo.IsReadAllowed(User))
+                        {
+                            return null;
+                        }
+                    }
+
+                    if (prop.IsPOCO)
+                    {
+                        // The property is a POCO, not a value.
+                        // Get the default order by for the object's type to figure out what field to sort by.
+                        string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
+
+                        // The default order by clause has an order associated, but we want to override it
+                        // with the order that the client specified. A string replacement will do.
+                        return clause
+                            .Replace("ASC", direction.ToUpper())
+                            .Replace("DESC", direction.ToUpper());
+                    }
+                    else
+                    {
+                        // We've validated that `fieldName` is a valid acccessor for a comparable property,
+                        // and that the user is allowed to read it.
+                        return $"{fieldName} {direction}";
+                    }
+                })
+                // Take all the clauses up until an invalid one is found.
+                .TakeWhile(clause => clause != null)
+                .ToList();
+
+            if (clauses.Count > 0)
+            {
+                query = query.OrderBy(string.Join(", ", clauses));
             }
 
             return query;
@@ -499,7 +505,7 @@ namespace IntelliTect.Coalesce
         public virtual IQueryable<T> ApplyListSorting(IQueryable<T> query, IListParameters parameters)
         {
             var orderByParams = parameters.OrderByList;
-            if (orderByParams.Any())
+            if (orderByParams.Count > 0)
             {
                 return ApplyListClientSpecifiedSorting(query, parameters);
             }
@@ -578,11 +584,11 @@ namespace IntelliTect.Coalesce
         public virtual IList<TDto> TrimListFields<TDto>(IList<TDto> mappedResult, IListParameters parameters)
             where TDto : IClassDto<T>, new()
         {
-            if (parameters.Fields.Any())
+            if (parameters.Fields.Count > 0)
             {
                 var allDtoProps = typeof(TDto).GetProperties();
                 var requestedProps = parameters.Fields
-                    .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.InvariantCultureIgnoreCase)))
+                    .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.OrdinalIgnoreCase)))
                     .Where(prop => prop != null)
                     .ToList();
 
@@ -590,7 +596,11 @@ namespace IntelliTect.Coalesce
                     .Select(dto =>
                     {
                         var newDto = new TDto();
-                        foreach (var prop in requestedProps) prop.SetValue(newDto, prop.GetValue(dto));
+                        foreach (var prop in requestedProps)
+                        {
+                            prop.SetValue(newDto, prop.GetValue(dto));
+                        }
+
                         return newDto;
                     })
                     .ToList();

@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
                 sourceStream.Seek(0, SeekOrigin.Begin);
                 return sourceString.Replace("\r\n", "\n");
             });
-            return !string.Equals(origContents, await newContents, StringComparison.InvariantCulture);
+            return !string.Equals(origContents, await newContents, StringComparison.Ordinal);
         }
 
         public static bool HasDifferences(string fileName1, string fileName2)
@@ -56,7 +56,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
                 return true;
             }
 
-            if (!string.Equals(f1, f2, StringComparison.InvariantCulture))
+            if (!string.Equals(f1, f2, StringComparison.Ordinal))
             {
                 return true;
             }

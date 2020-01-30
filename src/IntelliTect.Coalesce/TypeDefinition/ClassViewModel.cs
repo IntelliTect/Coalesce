@@ -206,8 +206,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </remarks>
         internal IReadOnlyCollection<MethodViewModel> Methods =>
             _Methods ?? (_Methods = RawMethods
-                .Where(m => !excludedMethodNames.Contains(m.Name))
-                .Where(m => !IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo)))
+                .Where(m => !excludedMethodNames.Contains(m.Name)
+                    && (!IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo))))
                 .ToList().AsReadOnly());
 
         public IEnumerable<MethodViewModel> ClientMethods =>
@@ -230,7 +230,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public PropertyViewModel PropertyByName(string key)
         {
             if (string.IsNullOrEmpty(key)) return null;
-            return Properties.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.InvariantCultureIgnoreCase));
+            return Properties.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public MethodViewModel MethodByName(string name, bool? isStatic = null)
         {
             return ClientMethods.FirstOrDefault(f =>
-                string.Equals(f.Name, name, StringComparison.InvariantCultureIgnoreCase)
+                string.Equals(f.Name, name, StringComparison.OrdinalIgnoreCase)
                 && (isStatic == null || f.IsStatic == isStatic));
         }
 
@@ -370,7 +370,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
                 PrimaryKey
             }
-            .Where(p => p != null && p.IsClientProperty && p.HasNotMapped == false)
+            .Where(p => p != null && p.IsClientProperty && !p.HasNotMapped)
             .Select(p => new SearchableValueProperty(p))
             .FirstOrDefault();
         }

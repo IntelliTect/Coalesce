@@ -19,9 +19,6 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
     /// </summary>
     public class IncludableQueryProvider : EntityQueryProvider
     {
-        private static readonly FieldInfo _queryCompilerField
-            = typeof(EntityQueryProvider).GetField("_queryCompiler", BindingFlags.NonPublic | BindingFlags.Instance);
-
         private static readonly IQueryCompiler _nullQueryCompiler = new NullQueryCompiler();
 
         private readonly IQueryProvider _baseProvider;
@@ -81,9 +78,9 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
             public Func<QueryContext, IAsyncEnumerable<TResult>> CreateCompiledAsyncEnumerableQuery<TResult>(Expression query) => null;
             public Func<QueryContext, Task<TResult>> CreateCompiledAsyncTaskQuery<TResult>(Expression query) => null;
             public Func<QueryContext, TResult> CreateCompiledQuery<TResult>(Expression query) => null;
-            public TResult Execute<TResult>(Expression query) => default(TResult);
+            public TResult Execute<TResult>(Expression query) => default;
             public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression query) => null;
-            public Task<TResult> ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken) => null;
+            public Task<TResult> ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken) => Task.FromResult<TResult>(default);
         }
 
         public class WrappedProviderQueryable<T> : IQueryable<T>
@@ -98,7 +95,7 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
 
             public Expression Expression => _queryable.Expression;
             public Type ElementType => _queryable.ElementType;
-            public IQueryProvider Provider { get; private set; }
+            public IQueryProvider Provider { get; }
 
             public IEnumerator<T> GetEnumerator() => _queryable.GetEnumerator();
 

@@ -13,11 +13,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
             TemplateDescriptor = descriptor;
         }
 
-        public TemplateDescriptor TemplateDescriptor { get; private set; }
+        public TemplateDescriptor TemplateDescriptor { get; }
 
         public bool ResolvedFromDisk => true;
 
-        public string FullName { get; private set; }
+        public string FullName { get; }
 
         public Stream GetContents()
         {

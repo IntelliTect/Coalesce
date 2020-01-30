@@ -11,7 +11,7 @@ namespace Coalesce.Web
     {
         public const string AuthenticationScheme = "DemoMiddleware";
 
-        RequestDelegate _next;
+        private readonly RequestDelegate _next;
 
         public DemoMiddleware(RequestDelegate next)
         {
@@ -26,7 +26,7 @@ namespace Coalesce.Web
             var cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "SecurityTestRole");
             if (!cookie.Equals(default(KeyValuePair<string, string>))
                 && validRoles.Contains(cookie.Value)
-                && context.Request.Host.Value.ToLower().Contains("localhost"))
+                && context.Request.Host.Value.ToLower().IndexOf("localhost", System.StringComparison.OrdinalIgnoreCase) != -1)
             {
                 if (cookie.Value != "None")
                 {
@@ -39,7 +39,7 @@ namespace Coalesce.Web
                 cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "DemoUserRole");
                 if (!cookie.Equals(default(KeyValuePair<string, string>))
                     && validRoles.Contains(cookie.Value)
-                    && context.Request.Host.Value.ToLower().Contains("localhost"))
+                    && context.Request.Host.Value.ToLower().IndexOf("localhost", System.StringComparison.OrdinalIgnoreCase) != -1)
                 {
                     await SignInUser(context, "DemoUser", cookie.Value);
                 }
@@ -57,11 +57,17 @@ namespace Coalesce.Web
         private async Task SignInUser(HttpContext context, string name, string role)
         {
             Claim[] claims;
-            if (string.IsNullOrEmpty(role)) claims = new[] { new Claim(ClaimTypes.Name, name) };
-            else claims = new[] {
+            if (string.IsNullOrEmpty(role))
+            {
+                claims = new[] { new Claim(ClaimTypes.Name, name) };
+            }
+            else
+            {
+                claims = new[] {
                     new Claim(ClaimTypes.Name, name),
                     new Claim(ClaimTypes.Role, role)
                 };
+            }
 
             var identity = new ClaimsIdentity(claims, "AutoSignIn");
             await context.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));

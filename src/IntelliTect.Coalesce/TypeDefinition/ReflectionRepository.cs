@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
             = new ConcurrentDictionary<object, ClassViewModel>();
 
-        private object _discoverLock = new object();
+        private readonly object _discoverLock = new object();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
         public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);

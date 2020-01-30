@@ -15,6 +15,6 @@ namespace IntelliTect.Coalesce.Tests.Fixtures
         }
 
         public TestDbContext Db { get; }
-        public CrudContext<TestDbContext> CrudContext { get; private set; }
+        public CrudContext<TestDbContext> CrudContext { get; }
     }
 }

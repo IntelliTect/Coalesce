@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce.Mapping
         public Dictionary<object, object> MappedObjects { get; }
             = new Dictionary<object, object>();
 
-        private Dictionary<string, bool> _roleCache = new Dictionary<string, bool>();
+        private readonly Dictionary<string, bool> _roleCache = new Dictionary<string, bool>();
 
         public MappingContext(ClaimsPrincipal user = null, string includes = null)
         {
@@ -41,7 +41,7 @@ namespace IntelliTect.Coalesce.Mapping
         {
             if (!MappedObjects.TryGetValue(sourceObject, out object existingMapped) || !(existingMapped is TDto))
             {
-                mappedObject = default(TDto);
+                mappedObject = default;
                 return false; 
             }
             mappedObject = (TDto)existingMapped;

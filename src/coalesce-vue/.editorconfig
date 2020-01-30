@@ -1,3 +1,6 @@
-[*.ts]
+[*.{vue,ts,js}]
 indent_style = space
 indent_size = 2
+
+
+[*.cs]

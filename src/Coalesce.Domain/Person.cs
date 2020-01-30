@@ -225,7 +225,7 @@ namespace Coalesce.Domain
         public Person ChangeFirstName (string firstName, Titles? title)
         {
             this.FirstName = firstName;
-            Title = Title ?? title;
+            Title ??= title;
             return this;
         }
 

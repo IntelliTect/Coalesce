@@ -280,7 +280,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     var rules = new List<string>();
 
-                    if (isRequired.HasValue && isRequired.Value)
+                    if (isRequired == true)
                     {
                         rules.Add($"required: val => !!val || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
                     }
@@ -300,7 +300,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         rules.Add($"required: val => !!val || \"{message.EscapeStringLiteralForTypeScript()}\"");
                     }
 
-                    if (rules.Any())
+                    if (rules.Count > 0)
                     {
                         using (b.Block("rules:"))
                         {

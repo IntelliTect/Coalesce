@@ -41,17 +41,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 .AttributeConstructor.Parameters
                 .Zip(attributeData.ConstructorArguments, Tuple.Create)
                 // Look for ctor params with a matching name (case insensitive)
-                .FirstOrDefault(t => t.Item1.Name.ToLowerInvariant() == propertyName.ToLowerInvariant())
+                .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))
                 ?.Item2
                 // If we didn't find one, see if there is just a single ctor param. If so, this is almost certainly what we were looking for.
-                ?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default(TypedConstant));
+                ?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default);
 
             if (constructorArgument.IsNull) return defaultValue;
 
             return constructorArgument.Value;
         }
 
-        public static string ExtractXmlComments(ISymbol symbol)
+        public static string ExtractXmlComments(this ISymbol symbol)
         {
             string returnValue = "";
             XmlDocument xmlDocumentation = new XmlDocument();

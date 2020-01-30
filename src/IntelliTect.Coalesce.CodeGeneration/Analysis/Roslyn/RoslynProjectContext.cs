@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
         {
         }
 
-        public override TypeLocator TypeLocator => _typeLocator = (_typeLocator ?? RoslynTypeLocator.FromProjectContext(this));
+        public override TypeLocator TypeLocator => _typeLocator ??= RoslynTypeLocator.FromProjectContext(this);
 
         public override string RootNamespace => ProjectConfiguration.RootNamespace ?? MsBuildProjectContext.RootNamespace;
 

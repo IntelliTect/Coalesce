@@ -22,9 +22,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
         {
 
             private readonly string _categoryName;
-            private static object sync = new object();
+            private static readonly object sync = new object();
 
-            private static Dictionary<LogLevel, ConsoleColor> colorLevelMap = new Dictionary<LogLevel, ConsoleColor>
+            private static readonly Dictionary<LogLevel, ConsoleColor> colorLevelMap = new Dictionary<LogLevel, ConsoleColor>
             {
                 { LogLevel.Trace, ConsoleColor.DarkGray },
                 { LogLevel.Debug, ConsoleColor.Gray },

@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
             TemplateDescriptor = descriptor;
         }
 
-        public TemplateDescriptor TemplateDescriptor { get; private set; }
+        public TemplateDescriptor TemplateDescriptor { get; }
 
         public bool ResolvedFromDisk => false;
 

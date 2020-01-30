@@ -11,7 +11,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Reflection
 {
     public class ReflectionTypeLocator : TypeLocator
     {
-        private ReflectionProjectContext _projectContext;
+        private readonly ReflectionProjectContext _projectContext;
 
         public ReflectionTypeLocator(ReflectionProjectContext projectContext)
         {

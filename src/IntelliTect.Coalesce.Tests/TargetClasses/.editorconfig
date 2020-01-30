@@ -1,0 +1,6 @@
+# Suppress: EC112
+
+[*.cs]
+
+# RCS1020: Simplify Nullable<T> to T?.
+dotnet_diagnostic.RCS1020.severity = none

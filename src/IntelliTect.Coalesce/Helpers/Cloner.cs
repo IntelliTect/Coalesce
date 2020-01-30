@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Helpers
 {
     public static class Cloner
     {
-        private static System.Collections.Concurrent.ConcurrentDictionary<Type, Type> mappedTypes = new ConcurrentDictionary<Type, Type>();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, Type> mappedTypes = new ConcurrentDictionary<Type, Type>();
 
         /// <summary>
         /// Makes a shallow copy of an object. Public properties only.

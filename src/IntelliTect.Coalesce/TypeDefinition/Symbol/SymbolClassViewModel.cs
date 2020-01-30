@@ -17,26 +17,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Name => Symbol.Name;
 
-        public override string Comment => SymbolExtensions.ExtractXmlComments(Symbol);
-
-        /// <summary>
-        /// Recursive function to get the full namespace.
-        /// </summary>
-        /// <param name="ns"></param>
-        /// <returns></returns>
-        private string FullNamespace(INamespaceSymbol ns)
-        {
-            if (ns.ContainingNamespace != null && !string.IsNullOrWhiteSpace(ns.Name))
-            {
-                var rest = FullNamespace(ns.ContainingNamespace);
-                if (!string.IsNullOrWhiteSpace(rest))
-                {
-                    return FullNamespace(ns.ContainingNamespace) + "." + ns.Name;
-                }
-                return ns.Name;
-            }
-            return "";
-        }
+        public override string Comment => Symbol.ExtractXmlComments();
 
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent)
         {

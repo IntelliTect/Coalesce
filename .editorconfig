@@ -1,0 +1,14 @@
+﻿# Suppress: EC112
+
+[*.{vue,ts,js,scss}]
+indent_style = space
+indent_size = 2
+
+
+[*.cs]
+
+# RCS1036: Remove redundant empty line.
+dotnet_diagnostic.RCS1036.severity = none
+
+# RCS1037: Remove trailing white-space.
+dotnet_diagnostic.RCS1037.severity = none

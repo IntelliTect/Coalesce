@@ -88,16 +88,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             string parameters = "";
             parameters = string.Join(", ", method.ClientParameters.Select(f => $"{f.Name}: {f.Type.TsType} | null"));
-            if (!string.IsNullOrWhiteSpace(parameters)) parameters = parameters + ", ";
-            parameters = parameters + callbackAndReloadParam;
+            if (!string.IsNullOrWhiteSpace(parameters)) parameters += ", ";
+            parameters += callbackAndReloadParam;
 
             using (b.Block($"public invoke = ({parameters}): JQueryPromise<any> =>", ';'))
             {
                 string jsPostObject = "{ ";
                 if (method.IsModelInstanceMethod)
                 {
-                    jsPostObject = jsPostObject + "id: this.parent[this.parent.primaryKeyName]()";
-                    if (method.Parameters.Any()) jsPostObject = jsPostObject + ", ";
+                    jsPostObject += "id: this.parent[this.parent.primaryKeyName]()";
+                    if (method.Parameters.Any()) jsPostObject += ", ";
                 }
 
                 string TsConversion(ParameterViewModel param)
@@ -156,9 +156,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
                     if (!string.IsNullOrEmpty(result))
                     {
-                        result = result + ", ";
+                        result += ", ";
                     }
-                    result = result + "callback";
+                    result += "callback";
 
                     return result;
                 }

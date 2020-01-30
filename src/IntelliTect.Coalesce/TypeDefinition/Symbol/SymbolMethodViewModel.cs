@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class SymbolMethodViewModel : MethodViewModel
     {
-        internal IMethodSymbol Symbol { get; private set; }
+        internal IMethodSymbol Symbol { get; }
 
         public SymbolMethodViewModel(IMethodSymbol symbol, ClassViewModel parent) : base(parent)
         {
@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Name => Symbol.Name;
 
-        public override string Comment => SymbolExtensions.ExtractXmlComments(Symbol);
+        public override string Comment => Symbol.ExtractXmlComments();
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);

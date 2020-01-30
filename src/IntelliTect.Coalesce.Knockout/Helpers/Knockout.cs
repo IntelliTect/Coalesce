@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         /// <summary>
         ///     The default number of Bootstrap grid columns the field label should span when calling
-        ///     <see cref="AddLabel(string,string,System.Nullable{int},System.Nullable{int})" />.  This sets up a site-wide
+        ///     <see cref="AddLabel(string,string,int?,System.Nullable{int})" />.  This sets up a site-wide
         ///     default, which is 3 initially.
         /// </summary>
         public static int DefaultLabelCols { get; set; } = 3;
@@ -106,51 +106,28 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         #region Dates
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="label"></param>
-        /// <param name="dataBinding"></param>
-        /// <param name="format"></param>
-        /// <param name="preserve"></param>
-        /// <param name="stepping"></param>
-        /// <param name="labelCols"></param>
-        /// <param name="inputCols"></param>
-        /// <returns></returns>
         public static HtmlString DateTimeWithLabel(
             string label, string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null, int? labelCols = null, int? inputCols = null)
         {
             return DateTime(dataBinding, format, preserve, stepping).AddLabel(label, labelCols, inputCols);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dataBinding"></param>
-        /// <param name="format"></param>
-        /// <param name="preserve"></param>
-        /// <param name="stepping"></param>
-        /// <returns></returns>
         public static HtmlString DateTime(
             string dataBinding, string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None, int? stepping = null)
         {
             string icon = "fa-calendar";
             if (string.IsNullOrWhiteSpace(format))
             {
-                switch (preserve)
+                format = preserve switch
                 {
-                    case DateTimePreservationOptions.Date:
-                        format = DefaultDateFormat;
-                        break;
-                    case DateTimePreservationOptions.Time:
-                        format = DefaultTimeFormat;
-                        break;
-                    default:
-                        format = DefaultDateTimeFormat;
-                        break;
-                }
+                    DateTimePreservationOptions.Date => DefaultDateFormat,
+                    DateTimePreservationOptions.Time => DefaultTimeFormat,
+                    _ => DefaultDateTimeFormat,
+                };
             }
+
             if (!format.Contains("D")) icon = "fa-clock-o";
+
             string result = $@"
                     <div class=""input-group date"">
                         <input data-bind=""datePicker: {dataBinding}, format: '{format}', preserveTime: {(preserve == DateTimePreservationOptions.Time).ToString().ToLower()}, preserveDate: {(preserve == DateTimePreservationOptions.Date).ToString().ToLower()} {(stepping.HasValue ? $", stepping: {stepping}" : "")}"" type=""text"" class=""form-control"" />
@@ -398,7 +375,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string placeholder = "")
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            placeholder = placeholder ?? propertyModel.DisplayName;
+            placeholder ??= propertyModel.DisplayName;
             return SelectString(propertyModel, endpointName: endpointName, placeholder: placeholder);
         }
 
@@ -603,7 +580,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 using (b.TagBlock("div", "modal-footer"))
                 {
                     b.Line("<button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>");
-                    b.Line(@"<button type='button' class='btn btn-primary btn-ok'");
+                    b.Line("<button type='button' class='btn btn-primary btn-ok'");
                     b.Indented(@"data-bind=""click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)"">");
                     b.Indented("OK");
                     b.Line("</button>");
@@ -704,21 +681,12 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             string format = null, DateTimePreservationOptions preserve = DateTimePreservationOptions.None)
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            HtmlString returnString;
-            switch (preserve)
+            return preserve switch
             {
-                case (DateTimePreservationOptions.Date):
-                    returnString = DisplayDate(propertyModel.JsVariableForBinding(), format);
-                    break;
-                case (DateTimePreservationOptions.Time):
-                    returnString = DisplayTime(propertyModel.JsVariableForBinding(), format);
-                    break;
-                default:
-                    returnString = DisplayDateTime(propertyModel.JsVariableForBinding(), format);
-                    break;
-            }
-
-            return returnString;
+                (DateTimePreservationOptions.Date) => DisplayDate(propertyModel.JsVariableForBinding(), format),
+                (DateTimePreservationOptions.Time) => DisplayTime(propertyModel.JsVariableForBinding(), format),
+                _ => DisplayDateTime(propertyModel.JsVariableForBinding(), format),
+            };
         }
 
         public static HtmlString DisplayDate(string bindingValue, string format = null)
@@ -752,42 +720,39 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString DisplayFor<T>(Expression<Func<T, object>> propertySelector, bool linkObject = false)
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            HtmlString returnString;
 
             if (propertyModel.IsDateOnly)
             {
-                returnString = DisplayDate(propertyModel.JsVariableForBinding());
+                return DisplayDate(propertyModel.JsVariableForBinding());
             }
             else if (propertyModel.Type.IsDate)
             {
-                returnString = DisplayDateTime(propertyModel.JsVariableForBinding());
+                return DisplayDateTime(propertyModel.JsVariableForBinding());
             }
             else if (propertyModel.IsManytoManyCollection)
             {
-                returnString = DisplayManyToMany(propertyModel);
+                return DisplayManyToMany(propertyModel);
             }
             else if (propertyModel.Type.IsBool)
             {
-                returnString = DisplayCheckbox(propertyModel.JsVariableForBinding());
+                return DisplayCheckbox(propertyModel.JsVariableForBinding());
             }
             else if (propertyModel.IsPOCO)
             {
-                returnString = DisplayObject(propertyModel, linkObject);
+                return DisplayObject(propertyModel, linkObject);
             }
             else if (propertyModel.Type.IsEnum)
             {
-                returnString = DisplayEnum(propertyModel);
+                return DisplayEnum(propertyModel);
             }
             else if (propertyModel.IsFile)
             {
-                returnString = DisplayFile(propertyModel);
+                return DisplayFile(propertyModel);
             }
             else
             {
-                returnString = DisplayText(propertyModel.JsVariableForBinding());
+                return DisplayText(propertyModel.JsVariableForBinding());
             }
-
-            return returnString;
         }
 
         public static HtmlString DisplayObject(PropertyViewModel propertyModel, bool linkObject = false)
@@ -805,7 +770,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     $@"  <div class=""form-control-static"" data-bind=""text: {propertyModel.JsVariableForBinding()}().{propertyModel.Object.ListTextProperty.JsVariable}""></div>");
             }
 
-            sb.AppendLine(@"</div>");
+            sb.AppendLine("</div>");
             sb.AppendLine($@"<div data-bind=""if: !{propertyModel.JsVariableForBinding()}()"">
                     <div class=""form-control-static"">None</div>
                 </div>");
@@ -841,7 +806,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString DisplayFile(PropertyViewModel propertyModel)
         {
             var mimeType = propertyModel.GetAttributeValue<FileAttribute>(f => f.MimeType);
-            if (mimeType != null && mimeType.ToLower().Contains("image"))
+            if (mimeType != null && mimeType.IndexOf("image", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return DisplayFileImage(propertyModel);
             }
@@ -850,17 +815,17 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 return DisplayFileDownloadButton(propertyModel);
             }
         }
+
         public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
         {
             var result = new HtmlString($@"
                 <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsUrlPropertyName}}}"" />");
             // Prevent request for unbound images.
-            result = new HtmlString($@"
+            return new HtmlString($@"
                 <!-- ko if: {propertyModel.Parent.PrimaryKey.JsVariable}() -->
                 {result}
                 <!-- /ko -->
             ");
-            return result;
         }
 
         public static HtmlString DisplayFileDownloadButton(PropertyViewModel propertyModel)

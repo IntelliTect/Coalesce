@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 {
     public class ClassViewModelDataTest : IClassFixture<ClassViewModelDataCountTestFixture>
     {
-        ClassViewModelDataCountTestFixture fixture;
+        private readonly ClassViewModelDataCountTestFixture fixture;
 
         public ClassViewModelDataTest(ClassViewModelDataCountTestFixture fixture)
         {

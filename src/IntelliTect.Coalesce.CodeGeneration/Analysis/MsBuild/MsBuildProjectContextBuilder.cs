@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
     /// </summary>
     public class MsBuildProjectContextBuilder
     {
-        private ProjectContext _context;
+        private readonly ProjectContext _context;
         public string TargetsLocation { get; private set; }
         public string Configuration { get; private set; } = "Debug";
         public string Framework { get; private set; } = null;

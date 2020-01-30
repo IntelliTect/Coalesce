@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce.Api
                         {
                             // Ignore if all entries were empty.
                         }
-                        else if (parts.Length == 2 && parts[1].ToUpper().StartsWith("D"))
+                        else if (parts.Length == 2 && parts[1].StartsWith("D", StringComparison.OrdinalIgnoreCase))
                         {
                             result.Add(parts[0], SortDirection.Desc);
                         }

@@ -666,7 +666,7 @@ namespace IntelliTect.Coalesce
             await TransformResultsAsync(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            IList<TDto> mappedResult = result.List.Select(obj => Mapper.MapToDto<T, TDto>(obj, mappingContext, tree)).ToList();
+            IList<TDto> mappedResult = result.List.Select(obj => obj.MapToDto<T, TDto>(mappingContext, tree)).ToList();
             mappedResult = TrimListFields(mappedResult, parameters);
 
             return new ListResult<TDto>(result, mappedResult);
@@ -724,7 +724,7 @@ namespace IntelliTect.Coalesce
             await TransformResultsAsync(Array.AsReadOnly(new[] { result.Object }), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            var mappedResult = Mapper.MapToDto<T, TDto>(result.Object, mappingContext, tree);
+            var mappedResult = result.Object.MapToDto<T, TDto>(mappingContext, tree);
 
             return new ItemResult<TDto>(result, mappedResult);
         }

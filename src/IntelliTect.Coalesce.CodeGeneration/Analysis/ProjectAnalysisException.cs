@@ -5,7 +5,9 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis
 {
+#pragma warning disable RCS1194 // Implement exception constructors.
     public class ProjectAnalysisException : Exception
+#pragma warning restore RCS1194 // Implement exception constructors.
     {
         public ProjectAnalysisException()
         {

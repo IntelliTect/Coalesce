@@ -44,10 +44,8 @@ namespace IntelliTect.Coalesce.Tests.Util
                 .Where(name => name.EndsWith(".cs"))
                 .Select(name =>
                 {
-                    using (var stream = asm.GetManifestResourceStream(name))
-                    {
-                        return CSharpSyntaxTree.ParseText(SourceText.From(stream));
-                    }
+                    using var stream = asm.GetManifestResourceStream(name);
+                    return CSharpSyntaxTree.ParseText(SourceText.From(stream));
                 })
                 .ToList();
 

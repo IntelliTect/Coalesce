@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18165BA2-31F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3D54FE4D-75AC-4E0C-99B9-13C3D7AAFFAF}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		coalesce-ko.json = coalesce-ko.json
@@ -48,7 +49,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6AE7A58D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Swashbuckle", "src\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj", "{7A0788D7-D705-476B-8D89-A0D49A1F201F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.Web.Tests", "src\IntelliTect.Coalesce.Web.Tests\IntelliTect.Coalesce.Web.Tests.csproj", "{F3EB3AE9-0241-445B-8BED-3329E88D6E76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Web.Tests", "src\IntelliTect.Coalesce.Web.Tests\IntelliTect.Coalesce.Web.Tests.csproj", "{F3EB3AE9-0241-445B-8BED-3329E88D6E76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

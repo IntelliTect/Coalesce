@@ -7,7 +7,7 @@ namespace Coalesce.Domain
 {
     public static class SampleData
     {
-        private static object _lock = new object();
+        private static readonly object _lock = new object();
 
         public static void Initialize(AppDbContext context, int randomSeed = 1)
         {

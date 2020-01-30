@@ -4,7 +4,9 @@ using System;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
+#pragma warning disable RCS1203 // Use AttributeUsageAttribute. Class is abstract.
     public abstract class SecurityAttribute : Attribute
+#pragma warning restore RCS1203 // Use AttributeUsageAttribute.
     {
         public virtual SecurityPermissionLevels PermissionLevel { get; set; } = SecurityPermissionLevels.AllowAuthorized;
 

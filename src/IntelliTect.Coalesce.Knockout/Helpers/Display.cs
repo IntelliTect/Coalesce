@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString Property<T, TProp>(Expression<Func<T, TProp>> propertySelector, bool editable)
         {
             var propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            return Property(propertySelector, editable);
+            return Property(propertyModel, editable);
         }
 
         public static HtmlString Property(PropertyViewModel prop, bool editable)
@@ -53,39 +53,34 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     return Knockout.TextInput(prop.JsVariableForBinding());
                 }
             }
+            else if (prop.IsDateOnly)
+            {
+                return Knockout.DisplayDate(prop.JsVariableForBinding());
+            }
+            else if (prop.Type.IsDate)
+            {
+                return Knockout.DisplayDateTime(prop.JsVariableForBinding());
+            }
+            else if (prop.IsManytoManyCollection)
+            {
+                return Knockout.DisplayManyToMany(prop);
+            }
+            else if (prop.Type.IsBool)
+            {
+                return Knockout.DisplayCheckbox(prop.JsVariableForBinding());
+            }
+            else if (prop.IsPOCO)
+            {
+                return Knockout.DisplayObject(prop);
+            }
+            else if (prop.Type.IsEnum)
+            {
+                return Knockout.DisplayEnum(prop);
+            }
             else
             {
-                if (prop.IsDateOnly)
-                {
-                    return Knockout.DisplayDate(prop.JsVariableForBinding());
-                }
-                else if (prop.Type.IsDate)
-                {
-                    return Knockout.DisplayDateTime(prop.JsVariableForBinding());
-                }
-                else if (prop.IsManytoManyCollection)
-                {
-                    return Knockout.DisplayManyToMany(prop);
-                }
-                else if (prop.Type.IsBool)
-                {
-                    return Knockout.DisplayCheckbox(prop.JsVariableForBinding());
-                }
-                else if (prop.IsPOCO)
-                {
-                    return Knockout.DisplayObject(prop);
-                }
-                else if (prop.Type.IsEnum)
-                {
-                    return Knockout.DisplayEnum(prop);
-                }
-                else
-                {
-                    return Knockout.DisplayText(prop.JsVariableForBinding());
-                }
+                return Knockout.DisplayText(prop.JsVariableForBinding());
             }
-            // If in doubt do nothing. But put a comment in
-            //return Knockout.DisplayComment(prop.JsVariable);
         }
 
         public static string PropertyHelper(PropertyViewModel prop, bool editable, string areaName = "", bool objectLink = false)
@@ -94,10 +89,10 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 if (prop.PureTypeOnContext)
                 {
-                    return @"<a data-bind='attr: {href: " + prop.ListEditorUrlName() + @"}, text: " + prop.JsVariableForBinding() + @"().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                    return $"<a data-bind='attr: {{href: {prop.ListEditorUrlName()}}}, text: {prop.JsVariableForBinding()}().length + \" - Edit\"' class='btn btn-default btn-sm'></a>";
                 }
 
-                return @"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (" + prop.JsVariableForBinding() + @"() || []).length + "" Items""' ></div>";
+                return $"<div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: ({prop.JsVariableForBinding()}() || []).length + \" Items\"' ></div>";
             }
             else
             {

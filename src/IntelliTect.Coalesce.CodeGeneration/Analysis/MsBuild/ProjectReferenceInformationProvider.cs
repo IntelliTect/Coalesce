@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 {
-    public class ProjectReferenceInformationProvider
+    public static class ProjectReferenceInformationProvider
     {
         public static IEnumerable<ProjectReferenceInformation> GetProjectReferenceInformation(
             string rootProjectPath,

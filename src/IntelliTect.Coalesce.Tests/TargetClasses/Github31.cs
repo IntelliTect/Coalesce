@@ -5,7 +5,7 @@ using System.Text;
 namespace IntelliTect.Coalesce.Tests.TargetClasses.Github31
 {
     // https://github.com/IntelliTect/Coalesce/issues/31
-    class Person
+    internal class Person
     {
         public int PersonId { get; set; }
         public string Name { get; set; }

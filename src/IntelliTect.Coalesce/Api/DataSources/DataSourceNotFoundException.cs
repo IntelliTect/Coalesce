@@ -5,7 +5,9 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.Api.DataSources
 {
+#pragma warning disable RCS1194 // Implement exception constructors.
     public class DataSourceNotFoundException : Exception
+#pragma warning restore RCS1194 // Implement exception constructors.
     {
         private readonly ClassViewModel servedType;
         private readonly ClassViewModel declaredFor;

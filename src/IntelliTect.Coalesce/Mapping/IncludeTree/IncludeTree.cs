@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce
     /// </summary>
     public class IncludeTree : IReadOnlyDictionary<string, IncludeTree>
     {
-        private Dictionary<string, IncludeTree> _children = new Dictionary<string, IncludeTree>();
+        private readonly Dictionary<string, IncludeTree> _children = new Dictionary<string, IncludeTree>();
 
         public string PropertyName { get; set; }
 
@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce
                 _children[tree.PropertyName] = new IncludeTree { PropertyName = tree.PropertyName };
             }
 
-            if (tree.Any())
+            if (tree.Count > 0)
             {
                 // Recursively merge into the existing tree. Returns the tail.
                 return _children[tree.PropertyName].AddLinearChild(tree.Single().Value);
@@ -108,10 +108,12 @@ namespace IntelliTect.Coalesce
 
             foreach (var member in members)
             {
-                var newNode = new IncludeTree();
-                newNode.PropertyName = member;
+                var newNode = new IncludeTree
+                {
+                    PropertyName = member
+                };
                 if (head == null) head = newNode;
-                if (tail != null) tail.AddChild(newNode);
+                tail?.AddChild(newNode);
                 tail = newNode;
             }
 

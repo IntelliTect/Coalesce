@@ -58,7 +58,10 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
                     propName = propName.Substring(filterPrefix.Length);
                 }
 
-                if (propName == "id") id = kvp.Value;
+                if (propName == "id")
+                {
+                    id = kvp.Value;
+                }
                 else if (propName != string.Empty)
                 {
                     var varName = ClassViewModel.PropertyByName(propName)?.JsVariable;

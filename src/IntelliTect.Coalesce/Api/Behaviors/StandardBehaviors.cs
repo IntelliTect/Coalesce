@@ -139,17 +139,28 @@ namespace IntelliTect.Coalesce
             // Allow validation on the raw DTO before its been mapped.
             var validateDto = ValidateDto(kind, incomingDto);
             if (validateDto == null)
+            {
                 throw new InvalidOperationException("Recieved null from result of ValidateDto. Expected an ItemResult.");
-            if (!validateDto.WasSuccessful) return new ItemResult<TDto>(validateDto);
+            }
+
+            if (!validateDto.WasSuccessful)
+            {
+                return new ItemResult<TDto>(validateDto);
+            }
 
             // Set all properties on the DB-mapped object to the incoming values.
             MapIncomingDto(kind, item, incomingDto, parameters);
 
             // Allow interception of the save.
-            var beforeSave = BeforeSave(kind, originalItem, item);
+            var beforeSave = await BeforeSaveAsync(kind, originalItem, item);
             if (beforeSave == null)
+            {
                 throw new InvalidOperationException("Recieved null from result of BeforeSave. Expected an ItemResult.");
-            if (!beforeSave.WasSuccessful) return new ItemResult<TDto>(beforeSave);
+            }
+            else if (!beforeSave.WasSuccessful)
+            {
+                return new ItemResult<TDto>(beforeSave);
+            }
 
             await Db.SaveChangesAsync();
 
@@ -170,19 +181,25 @@ namespace IntelliTect.Coalesce
             // or signal an error.
             var afterSave = AfterSave(kind, originalItem, ref item, ref includeTree);
             if (afterSave == null)
+            {
                 throw new InvalidOperationException("Recieved null from result of AfterSave. Expected an ItemResult<TDto>.");
-            if (!afterSave.WasSuccessful) return new ItemResult<TDto>(afterSave);
+            } 
+            else if (!afterSave.WasSuccessful)
+            {
+                return new ItemResult<TDto>(afterSave);
+            }
 
             // If the user nulled out the item in their AfterSave,
             // they don't want to send the item back with the save.
             // This is fine - we won't try to map it if its null.
-            if (item == null) return true;
+            if (item == null)
+            {
+                return true;
+            }
 
-            var result = new ItemResult<TDto>(
+            return new ItemResult<TDto>(
                 item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
             );
-
-            return result;
         }
 
         /// <summary>
@@ -221,6 +238,18 @@ namespace IntelliTect.Coalesce
         /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
         /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
         public virtual ItemResult BeforeSave(SaveKind kind, T oldItem, T item) => true;
+
+        /// <summary>
+        /// Code to run before committing a save to the database.
+        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
+        /// The return a failure result will halt the save operation and return any associated message to the client.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
+        /// If kind == SaveKind.Create, this will be null.</param>
+        /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
+        /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
+        public virtual Task<ItemResult> BeforeSaveAsync(SaveKind kind, T oldItem, T item) => Task.FromResult(BeforeSave(kind, oldItem, item));
 
         /// <summary>
         /// Code to run after a save has been committed to the database.
@@ -270,10 +299,16 @@ namespace IntelliTect.Coalesce
 
             var item = existingItem.Object;
 
-            var beforeDelete = BeforeDelete(item);
+            var beforeDelete = await BeforeDeleteAsync(item);
             if (beforeDelete == null)
+            {
                 throw new InvalidOperationException("Recieved null from result of BeforeDelete. Expected an ItemResult.");
-            if (!beforeDelete.WasSuccessful) return new ItemResult<TDto>(beforeDelete);
+            }
+
+            if (!beforeDelete.WasSuccessful)
+            {
+                return new ItemResult<TDto>(beforeDelete);
+            }
 
             // Perform the delete operation against the database.
             // By default, this removes the item from its DbSet<> and calls SaveChanges().
@@ -330,6 +365,16 @@ namespace IntelliTect.Coalesce
         /// <param name="item">The item being deleted.</param>
         /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>
         public virtual ItemResult BeforeDelete(T item) => true;
+
+        /// <summary>
+        /// Code to run before committing the delete operation to the database.
+        /// If a failure result is returned, the delete operation will not execute.
+        /// This method is called by DeleteAsync.
+        /// This may be used to implement row-level security.
+        /// </summary>
+        /// <param name="item">The item being deleted.</param>
+        /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>
+        public virtual Task<ItemResult> BeforeDeleteAsync(T item) => Task.FromResult(BeforeDelete(item));
 
         /// <summary>
         /// Executes the delete action against the database and saves the change.

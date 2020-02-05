@@ -83,6 +83,9 @@ If you have any child objects on your DTO, you can invoke the mapper for some ot
 Using Custom DataSources and Behaviors
 --------------------------------------
 
+Declaring an IClassDto DataSource
+.................................
+
 When you create a custom DTO, it will use the :ref:`StandardDataSource` and :ref:`StandardBehaviors` just like any of your regular :ref:`EntityModels`. If you wish to override this, your custom data source and/or behaviors MUST be declared in one of the following ways:
 
     #. As a nested class of the DTO. The relationship between your data source or behaviors and your DTO will be picked up automatically.
@@ -125,3 +128,28 @@ When you create a custom DTO, it will use the :ref:`StandardDataSource` and :ref
             {
                 ...
             }
+
+.. _ProjectedDtoDataSource:
+ProjectedDtoDataSource
+......................
+
+In addition to creating a :ref:`CustomDataSources` by deriving from :ref:`StandardDataSource`, there also exists a class :cs:`ProjectedDtoDataSource` that can be used to easily perform projection from EF model types to your custom DTO types using EF query projections. :cs:`ProjectedDtoDataSource` inherits from :ref:`StandardDataSource`.
+
+    .. code-block:: c#
+
+        [Coalesce, DeclaredFor(typeof(CaseDto))]
+        public class CaseDtoSource : ProjectedDtoDataSource<Case, CaseDto, AppDbContext>
+        {
+            public CaseDtoSource(CrudContext<AppDbContext> context) : base(context) { }
+
+            public override IQueryable<CaseDto> ApplyProjection(IQueryable<Case> query, IDataSourceParameters parameters)
+            {
+                return query.Select(c => new CaseDto
+                {
+                    CaseId = c.CaseKey,
+                    Title = c.Title,
+                    AssignedToName = c.AssignedTo == null ? null : c.AssignedTo.Name
+                });
+            }
+        }
+

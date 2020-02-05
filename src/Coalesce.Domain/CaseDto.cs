@@ -46,7 +46,7 @@ namespace Coalesce.Domain
     }
 
     [Coalesce, DeclaredFor(typeof(CaseDto))]
-    public class CaseDtoSource : StandardDataSource<Case, AppDbContext>
+    public class CaseDtoSource : ProjectedDtoDataSource<Case, CaseDto, AppDbContext>
     {
         public CaseDtoSource(CrudContext<AppDbContext> context) : base(context)
         {
@@ -55,6 +55,16 @@ namespace Coalesce.Domain
         public override IQueryable<Case> GetQuery(IDataSourceParameters parameters)
         {
             return Db.Cases.Include(c => c.AssignedTo);
+        }
+
+        public override IQueryable<CaseDto> ApplyProjection(IQueryable<Case> query, IDataSourceParameters parameters)
+        {
+            return query.Select(c => new CaseDto
+            {
+                CaseId = c.CaseKey,
+                Title = c.Title,
+                AssignedToName = c.AssignedTo == null ? null : c.AssignedTo.Name
+            });
         }
     }
 

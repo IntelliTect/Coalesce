@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// <para>
         /// Apply a projection (e.g. with <see cref="Queryable.Select{TSource, TResult}(IQueryable{TSource}, System.Linq.Expressions.Expression{Func{TSource, TResult}})"/>)
-        /// to the EF entity query to transform it into instances of <see cref="TDto"/>.
+        /// to the EF entity query to transform it into instances of TDto.
         /// Results will bypass <see cref="IClassDto{T}.MapFrom(T, IMappingContext, IncludeTree)"/>.
         /// </para>
         /// <para>Do not perform filtering to the query in this method, as it will not be accounted for in the total list count.</para>
@@ -114,11 +114,11 @@ namespace IntelliTect.Coalesce
             throw new NotSupportedException($"StandardDtoDataSource does not utilize {nameof(TransformResultsAsync)} - transformations should be performed in {nameof(ApplyProjection)}");
         }
 
-        protected void AssertTMatchesTDto<T>()
+        protected void AssertTMatchesTDto<TActual>()
         {
-            if (typeof(T) != typeof(TDto))
+            if (typeof(TActual) != typeof(TDto))
             {
-                throw new InvalidCastException($"Cannot request DTO of type {typeof(T).FullName} from data source for DTO of type {typeof(TDto).FullName}");
+                throw new InvalidCastException($"Cannot request DTO of type {typeof(TActual).FullName} from data source for DTO of type {typeof(TDto).FullName}");
             }
         }
     }

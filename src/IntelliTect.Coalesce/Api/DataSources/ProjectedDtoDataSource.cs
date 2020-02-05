@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce
         where TDto : class, IClassDto<T>, new()
         where TContext : DbContext
     {
-        protected ProjectedDtoDataSource(CrudContext<TContext> context) : base(context) { }
+        public ProjectedDtoDataSource(CrudContext<TContext> context) : base(context) { }
 
         /// <summary>
         /// <para>

@@ -634,7 +634,7 @@ namespace IntelliTect.Coalesce
 
 
         /// <summary>
-        /// Get an unmapped list of results using all the behaviors defined in the DataSource.
+        /// Get an unmapped list of results using all the functionality defined in the DataSource.
         /// </summary>
         /// <returns>A ListResult with the requested data and paging information,
         /// and an IncludeTree to be used when mapping/serializing the data.</returns>
@@ -659,12 +659,12 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Get a mapped list of results using all the behaviors defined in the data source.
+        /// Get a mapped list of results using all the functionality defined in the data source.
         /// </summary>
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>A ListResult containing the desired data mapped to the desired type.</returns>
         public virtual async Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             var (result, tree) = await GetListAsync(parameters);
 
@@ -722,7 +722,7 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>The desired item, mapped to the desired type.</returns>
         public virtual async Task<ItemResult<TDto>> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             var (result, tree) = await GetItemAsync(id, parameters);
 

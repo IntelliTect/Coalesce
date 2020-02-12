@@ -155,7 +155,7 @@ export interface EnumMember {
 /** A dictionary with both string and numeric keys for looking up `EnumValue` objects by their string or numeric value. */
 export type EnumMembers<K extends string> = 
   { [strValue in K]: EnumMember } 
-& { [n: number]: EnumMember | undefined } 
+& { [n: number]: EnumMember } 
 
 /** Utility function for creating the required properties of `EnumType<>` from an array of `EnumValue`  */
 export function getEnumMeta<K extends string>(values: EnumMember[]): {

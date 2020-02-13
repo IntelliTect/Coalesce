@@ -45,7 +45,7 @@
                 {{prop.displayName}}
               </v-col>
               <v-col class="py-0">
-                <c-input :model="model" :for="prop" :readonly="!canEdit" label="">
+                <c-input :model="model" :for="prop" :readonly="isPropReadOnly(prop)" label="">
                   <c-admin-display :model="model" :for="prop" />
                 </c-input>
               </v-col>
@@ -117,6 +117,14 @@ export default class extends Vue {
     if (!metadata) return false;
 
     return (metadata.behaviorFlags & (this.hasPk ? BehaviorFlags.Edit : BehaviorFlags.Create)) != 0
+  }
+
+  isPropReadOnly(p: Property) {
+    if (!this.canEdit) return true;
+    
+    return p.dontSerialize 
+      && p.role !== "referenceNavigation" 
+      && p.role !== "collectionNavigation"
   }
   
   get showProps() { 

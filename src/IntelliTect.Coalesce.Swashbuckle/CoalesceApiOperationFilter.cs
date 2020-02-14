@@ -1,4 +1,6 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -15,7 +17,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
 
         public ReflectionRepository ReflectionRepository { get; }
 
-        public void Apply(Operation operation, OperationFilterContext context)
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var cvm = ReflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
             var method = new ReflectionMethodViewModel(cvm, context.MethodInfo);
@@ -24,7 +26,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
             ProcessStandardParameters(operation, method);
         }
 
-        private void ProcessStandardParameters(Operation operation, MethodViewModel method)
+        private void ProcessStandardParameters(OpenApiOperation operation, MethodViewModel method)
         {
 
             // Remove behaviors - behaviors accept no input from the client.
@@ -39,7 +41,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
 
                 // Join our ParameterViewModels with the Swashbuckle IParameters.
                 var paramsUnion = paramType.ClientProperties.Join(
-                    operation.Parameters.OfType<NonBodyParameter>(), p => p.Name, p => p.Name, (pvm, nbp) => (PropViewModel: pvm, OperationParam: nbp)
+                    operation.Parameters, p => p.Name, p => p.Name, (pvm, nbp) => (PropViewModel: pvm, OperationParam: nbp)
                 );
 
                 foreach (var noSetterProp in paramsUnion.Where(p =>
@@ -48,9 +50,9 @@ namespace IntelliTect.Coalesce.Swashbuckle
                     !p.PropViewModel.HasSetter
 
                     // Remove the string "DataSource" parameter that is redundant with our data source model binding functionality.
-                    || (p.PropViewModel.Name == nameof(IDataSourceParameters.DataSource) && p.OperationParam.Type == "string")
+                    || (p.PropViewModel.Name == nameof(IDataSourceParameters.DataSource) && p.OperationParam.Schema.Type == "string")
                     // Remove "Filter" - we'll enumerate all available filter params (for lack of a better solution with OpenAPI 2.0
-                    || (p.PropViewModel.Name == nameof(IFilterParameters.Filter) && p.OperationParam.Type == "object")
+                    || (p.PropViewModel.Name == nameof(IFilterParameters.Filter) && p.OperationParam.Schema.Type == "object")
                 ))
                 {
                     operation.Parameters.Remove(noSetterProp.OperationParam);
@@ -67,13 +69,13 @@ namespace IntelliTect.Coalesce.Swashbuckle
                     {
                         foreach (var filterProp in modelType.ClassViewModel.ClientProperties.Where(p => p.IsUrlFilterParameter))
                         {
-                            operation.Parameters.Add(new NonBodyParameter
+                            operation.Parameters.Add(new OpenApiParameter
                             {
-                                In = "query",
+                                In = ParameterLocation.Query,
                                 Name = $"filter.{filterProp.Name}",
                                 Required = false,
                                 Description = $"Filters results by values contained in property '{filterProp.JsonName}'.",
-                                Type = "string",
+                                Schema = new OpenApiSchema { Type = "string" }
                             });
                         }
                     }
@@ -81,15 +83,14 @@ namespace IntelliTect.Coalesce.Swashbuckle
             }
         }
 
-        private void ProcessDataSources(Operation operation, OperationFilterContext context, MethodViewModel method)
+        private void ProcessDataSources(OpenApiOperation operation, OperationFilterContext context, MethodViewModel method)
         {
             // In all reality, there will only ever be one data source parameter per action,
             // but might as well not make assumptions if we don't have to.
             foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA(typeof(IDataSource<>))))
             {
                 var dataSourceParam = operation.Parameters
-                    .OfType<NonBodyParameter>()
-                    .Single(p => p.Name == paramVm.Name && p.Type == "object");
+                    .Single(p => string.Equals(p.Name, paramVm.Name, StringComparison.OrdinalIgnoreCase) && p.Schema.Type == null);
 
                 var declaredFor =
                     paramVm.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)
@@ -97,28 +98,28 @@ namespace IntelliTect.Coalesce.Swashbuckle
 
                 var dataSources = declaredFor.ClassViewModel.ClientDataSources(ReflectionRepository);
 
-                dataSourceParam.Type = "string";
-                dataSourceParam.Enum =
-                    (new object[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
-                    .Concat(dataSources.Select(ds => ds.ClientTypeName as object))
-                    .ToList();
+                dataSourceParam.Schema = new OpenApiSchema
+                {
+                    Type = "string",
+                    Enum = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
+                        .Concat(dataSources.Select(ds => ds.ClientTypeName))
+                        .Select(n => new OpenApiString(n) as IOpenApiAny)
+                        .ToList()
+                };
 
                 foreach (var dataSource in dataSources)
                 {
                     foreach (var dsParam in dataSources.SelectMany(s => s.DataSourceParameters))
                     {
-                        var schema = context.SchemaRegistry.GetOrRegister(dsParam.Type.TypeInfo);
+                        var schema = context.SchemaGenerator.GenerateSchema(dsParam.Type.TypeInfo, context.SchemaRepository);
 
-                        operation.Parameters.Add(new NonBodyParameter
+                        operation.Parameters.Add(new OpenApiParameter
                         {
-                            In = "query",
+                            In = ParameterLocation.Query,
                             Name = $"{paramVm.Name}.{dsParam.Name}",
                             Required = false,
                             Description = $"Used by Data Source {dataSource.ClientTypeName}",
-                            // Data source parameters only support a fairly simple set of params,
-                            // and all *should* be representable with just these two values.
-                            Type = schema.Type,
-                            Format = schema.Format,
+                            Schema = schema,
                         });
                     }
                 }

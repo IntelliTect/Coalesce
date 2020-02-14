@@ -115,10 +115,20 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
                 // The alternative to do this would be to make a full copy of ComplexTypeModelBinder.cs and
                 // change out the desired pieces.
-                await (childBinder
+                var bindModelCoreAsync = childBinder
                     .GetType()
-                    .GetMethod("BindModelCoreAsync", BindingFlags.NonPublic | BindingFlags.Instance)
-                    .Invoke(childBinder, new[] { bindingContext }) as Task);
+                    .GetMethod("BindModelCoreAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (bindModelCoreAsync.GetParameters().Length == 2)
+                {
+                    // aspnetcore 3+
+                    await (bindModelCoreAsync.Invoke(childBinder, new object[] { bindingContext, /*GreedyPropertiesMayHaveData*/ 1 }) as Task);
+                }
+                else
+                {
+                    // aspnetcore 2
+                    await (bindModelCoreAsync.Invoke(childBinder, new[] { bindingContext }) as Task);
+                }
                 // await childBinder.BindModelAsync(bindingContext);
             }
 

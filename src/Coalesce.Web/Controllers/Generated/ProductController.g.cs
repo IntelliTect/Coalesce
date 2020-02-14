@@ -38,11 +38,5 @@ namespace Coalesce.Web.Controllers
         {
             return EditorHtmlImplementation(simple);
         }
-
-        [Authorize(Roles = "Admin")]
-        public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)
-        {
-            return DocsImplementation(hostingEnvironment);
-        }
     }
 }

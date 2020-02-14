@@ -14,6 +14,7 @@ using IntelliTect.Coalesce;
 using Coalesce.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 
 namespace Coalesce.Web
 {
@@ -21,7 +22,11 @@ namespace Coalesce.Web
     {
         public IConfigurationRoot Configuration { get; set; }
 
+#if NETCOREAPP3_1
+        public Startup(IWebHostEnvironment env)
+#else
         public Startup(IHostingEnvironment env)
+#endif
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -62,22 +67,28 @@ namespace Coalesce.Web
             services.AddSwaggerGen(c =>
             {
                 c.AddCoalesce();
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
 
+
+#if NETCOREAPP3_1
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddJsonOptions(options =>
-            {
-                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .AddNewtonsoftJson(options =>
+                 {
+                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
-                var resolver = options.SerializerSettings.ContractResolver;
-                if (resolver != null) (resolver as DefaultContractResolver).NamingStrategy = null;
+                     var resolver = options.SerializerSettings.ContractResolver;
+                     if (resolver != null) (resolver as DefaultContractResolver).NamingStrategy = null;
 
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
-                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-            });
+                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                 });
+#else
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+#endif
 
             services.AddScoped<IWeatherService, WeatherService>();
 
@@ -92,9 +103,29 @@ namespace Coalesce.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
+            app.UseDeveloperExceptionPage();
             app.UseStaticFiles();
 
-            app.UseDeveloperExceptionPage();
+#if NETCOREAPP3_1
+            app.UseRouting();
+
+            // *** DEMO ONLY ***
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseMiddleware<DemoMiddleware>();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
+            });
+#else
 
             // *** DEMO ONLY ***
             app.UseAuthentication();
@@ -117,6 +148,7 @@ namespace Coalesce.Web
                     template: "{controller}/{action}/{id?}",
                     defaults: new { controller = "Home", action = "Index" });
             });
+#endif
         }
 
     }

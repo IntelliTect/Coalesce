@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Swashbuckle;
+using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;

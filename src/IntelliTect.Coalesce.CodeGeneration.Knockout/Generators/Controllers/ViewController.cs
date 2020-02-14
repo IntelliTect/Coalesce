@@ -77,12 +77,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                             b.Line("return EditorHtmlImplementation(simple);");
                         }
 
-                        b.Line();
-                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
-                        using (b.Block("public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)"))
-                        {
-                            b.Line("return DocsImplementation(hostingEnvironment);");
-                        }
+                        // This is defunct.
+                        //b.Line();
+                        //b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        //using (b.Block("public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)"))
+                        //{
+                        //    b.Line("return DocsImplementation(hostingEnvironment);");
+                        //}
                     }
                 }
             }

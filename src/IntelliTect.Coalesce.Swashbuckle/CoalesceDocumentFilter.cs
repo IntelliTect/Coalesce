@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Swagger;
+﻿using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq;
 
@@ -6,10 +7,10 @@ namespace IntelliTect.Coalesce.Swashbuckle
 {
     public class CoalesceDocumentFilter : IDocumentFilter
     {
-        public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
+        public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
             // Get rid of the empty, pointless definitions for IBehaviors and IDataSource.
-            var defsToRemove = swaggerDoc.Definitions.Keys.Where(d =>
+            var defsToRemove = swaggerDoc.Components.Schemas.Keys.Where(d =>
                 d.StartsWith($"{nameof(IDataSource<object>)}[") ||
                 d.StartsWith($"{nameof(IBehaviors<object>)}[") 
             )
@@ -17,7 +18,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
 
             foreach (var definition in defsToRemove)
             {
-                swaggerDoc.Definitions.Remove(definition);
+                swaggerDoc.Components.Schemas.Remove(definition);
             }
         }
     }

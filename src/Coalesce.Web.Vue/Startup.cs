@@ -28,8 +28,8 @@ namespace Coalesce.Web.Vue
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddJsonOptions(options =>
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
@@ -81,26 +81,25 @@ namespace Coalesce.Web.Vue
             }
 
             app.UseStaticFiles();
+            app.UseRouting();
 
             // *** DEMO ONLY ***
             app.UseAuthentication();
+            app.UseAuthorization();
             app.UseMiddleware<DemoMiddleware>();
 
-            app.UseStaticFiles();
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    "default",
-                    "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
             });
 
             app.MapWhen(x => !x.Request.Path.Value.StartsWith("/api"), builder =>
             {
-                builder.UseMvc(routes =>
+                builder.UseRouting();
+                builder.UseEndpoints(endpoints =>
                 {
-                    routes.MapSpaFallbackRoute(
-                        "spa-fallback",
-                        new {controller = "Home", action = "Index"});
+                    endpoints.MapFallbackToController("Index", "Home");
                 });
             });
         }

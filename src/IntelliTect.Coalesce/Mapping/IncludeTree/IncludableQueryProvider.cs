@@ -46,8 +46,36 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
 
         public override TResult Execute<TResult>(Expression expression)
         {
-            return (_baseProvider).Execute<TResult>(expression);
+            return _baseProvider.Execute<TResult>(expression);
         }
+
+#if NETCOREAPP3_1
+
+        public override TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken = default)
+        {
+            if (!(_baseProvider is IAsyncQueryProvider))
+            {
+                throw new ArgumentException("Underlying provider for .IncludedSeparately calls was not of type IAsyncQueryProvider");
+            }
+
+            return ((IAsyncQueryProvider)_baseProvider).ExecuteAsync<TResult>(expression, cancellationToken);
+        }
+
+        /// <summary>
+        /// Do-nothing implementation of IQueryCompiler that we pass 
+        /// to satisfy the base constructor of EntityQueryProvider.
+        /// </summary>
+        private class NullQueryCompiler : IQueryCompiler
+        {
+            public Func<QueryContext, TResult> CreateCompiledAsyncQuery<TResult>(Expression query) => null;
+            public Func<QueryContext, TResult> CreateCompiledQuery<TResult>(Expression query) => null;
+            public TResult Execute<TResult>(Expression query) => default;
+            public TResult ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken) => default;
+        }
+
+
+#else
+
 
         public override IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
         {
@@ -82,6 +110,7 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
             public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression query) => null;
             public Task<TResult> ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken) => Task.FromResult<TResult>(default);
         }
+#endif
 
         public class WrappedProviderQueryable<T> : IQueryable<T>
         {

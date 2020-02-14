@@ -60,8 +60,8 @@ jobs:
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
-      version: '3.1.x'
-      
+      useGlobalJson: true
+
   - task: DotNetCoreCLI@2
     displayName: 'dotnet restore'
     inputs:

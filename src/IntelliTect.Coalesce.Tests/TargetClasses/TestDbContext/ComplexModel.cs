@@ -41,12 +41,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string AdminReadableString { get; set; }
 
         [Read(Roles = RoleNames.Admin)]
-        public int AdminReadableReferenceNavigationId { get; set; }
+        public int? AdminReadableReferenceNavigationId { get; set; }
 
         [Read(Roles = RoleNames.Admin)]
+        [ForeignKey(nameof(AdminReadableReferenceNavigationId))]
         public ComplexModel AdminReadableReferenceNavigation { get; set; }
         
-        public int ReferenceNavigationId { get; set; }
+        public int? ReferenceNavigationId { get; set; }
+        [ForeignKey(nameof(ReferenceNavigationId))]
         public ComplexModel ReferenceNavigation { get; set; }
 
 

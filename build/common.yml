@@ -57,10 +57,17 @@ jobs:
     inputs:
       versionSpec: 10.x
 
+  # Install both 2.2 (for the cli, last version that supports DotnetCliToolReference) and 3.1 (everything else)
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
-      useGlobalJson: true
+      version: '3.1.x'
+
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '2.2.x'
+
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet restore'

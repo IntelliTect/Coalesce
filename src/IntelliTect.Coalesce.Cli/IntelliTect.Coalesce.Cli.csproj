@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Description>.NET Core command-line tooling for IntelliTect.Coalesce code generation</Description>
 
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Exe</OutputType>
 

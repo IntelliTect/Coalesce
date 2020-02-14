@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Query;
 using IntelliTect.Coalesce;
 
+#pragma warning disable EF1001 // Internal EF Core API usage.
+
 namespace IntelliTect.Coalesce.Mapping.IncludeTrees
 {
     /// <summary>
@@ -132,3 +134,5 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
         }
     }
 }
+
+#pragma warning restore EF1001 // Internal EF Core API usage.

@@ -419,7 +419,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return true;
                 else if (string.Equals(Name, Parent.Name + ConventionalIdSuffix, StringComparison.OrdinalIgnoreCase))
                     return true;
-                else if (Parent.IsDto && Parent.BaseViewModel != null && string.Equals(Name, Parent.BaseViewModel.PrimaryKey.Name, StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(Name, Parent.DtoBaseViewModel?.PrimaryKey?.Name, StringComparison.OrdinalIgnoreCase))
                     return true;
                 return false;
 

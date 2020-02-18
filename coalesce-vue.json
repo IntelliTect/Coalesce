@@ -8,7 +8,7 @@
     "framework": "netcoreapp3.1"
   },
   //"rootTypesWhitelist": [
-  //  "AppDbContext"
+  //  "CaseDto"
   //],
   "rootGenerator": "Vue"
 }

@@ -59,11 +59,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> types)
+        internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> rootTypes)
         {
             lock (_discoverLock)
             {
-                foreach (var type in types
+                foreach (var type in rootTypes
                     // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
                     // Really not sure why, but lets parallelize to minimize that impact.
                     .AsParallel()

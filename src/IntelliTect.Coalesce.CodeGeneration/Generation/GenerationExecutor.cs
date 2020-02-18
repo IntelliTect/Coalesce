@@ -80,10 +80,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
             Logger.LogInformation("Gathering Types");
             var rr = ReflectionRepository.Global;
-            var types = (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
+            IEnumerable<Microsoft.CodeAnalysis.INamedTypeSymbol> types = 
+                (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
 
             Logger.LogInformation($"Analyzing {types.Count()} Types");
-            rr.DiscoverCoalescedTypes(types.Select(t => new SymbolTypeViewModel(t)));
+            if (Config.RootTypesWhitelist?.Any() == true)
+            {
+                types = types.Where(t => Config.RootTypesWhitelist.Contains(t.Name));
+                Logger.LogInformation($"Whitelisted Root Types: {string.Join(", ", types.Select(t => t.Name))}");
+            }
+
+            rr.DiscoverCoalescedTypes(types
+                .Select(t => new SymbolTypeViewModel(t))
+            );
 
 
 

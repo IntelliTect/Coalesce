@@ -14,6 +14,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
         public string RootGenerator { get; set; }
 
+        /// <summary>
+        /// If not empty, specifies the names of specific root types
+        /// (i.e. those annotated with [Coalesce])
+        /// that should be used for type discovery.
+        /// If empty or null, all such types will be used.
+        /// </summary>
+        public List<string> RootTypesWhitelist { get; set; }
+
         public OutputConfiguration Output { get; set; } = new OutputConfiguration();
 
         public Dictionary<string, JObject> GeneratorConfig { get; set; } = new Dictionary<string, JObject>();

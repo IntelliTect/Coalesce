@@ -95,8 +95,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                         // Force cache this since it has extra bits of info attached.
                         _customDtos.Add(Cache(classViewModel, force: true));
-
-                        DiscoverNestedCrudStrategiesOn(classViewModel);
                     }
                     else if (type.ClassViewModel?.IsService ?? false)
                     {
@@ -105,12 +103,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     }
                 }
 
-                foreach (var entity in Entities)
+                foreach (var entity in ApiBackedClasses)
                 {
                     DiscoverExternalMethodTypesOn(entity);
                     DiscoverExternalPropertyTypesOn(entity);
                     DiscoverNestedCrudStrategiesOn(entity);
                 }
+
                 foreach (var service in Services)
                 {
                     DiscoverExternalMethodTypesOn(service);

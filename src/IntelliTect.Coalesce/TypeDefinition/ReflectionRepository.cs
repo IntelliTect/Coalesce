@@ -199,10 +199,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     ConditionallyAddAndDiscoverExternalPropertyTypesOn(returnType.ClassViewModel);
                 }
 
-                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.Type.HasClassViewModel))
+                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.PureType.HasClassViewModel))
                 {
                     // Parameter looks like an external type.
-                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.Type.ClassViewModel);
+                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.PureType.ClassViewModel);
                 }
             }
         }

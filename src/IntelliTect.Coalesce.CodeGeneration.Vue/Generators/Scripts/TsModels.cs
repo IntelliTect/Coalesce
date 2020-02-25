@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
 
                 var dataSources = model.ClientDataSources(Model);
-                if (model.IsDbMappedType && dataSources.Any())
+                if (dataSources.Any())
                 {
                     using (b.Block($"export namespace {name}"))
                     {

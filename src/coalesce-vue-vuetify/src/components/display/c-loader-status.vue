@@ -176,7 +176,8 @@ export default class extends Vue {
     opacity: 0;
   }
   .c-loader-status-fade-leave-active {
-    position: absolute;
+    // Important because vuetify specifies position:relative on .v-progress-linear
+    position: absolute !important; 
     transition-delay: 0s !important;
   }
 

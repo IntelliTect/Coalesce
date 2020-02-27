@@ -165,9 +165,8 @@ namespace IntelliTect.Coalesce
             await Db.SaveChangesAsync();
 
             // Pull the object to get any changes.
-            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
             ItemResult<T> newItem;
-            (newItem, includeTree) = await (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
+            (newItem, includeTree) = await FetchObjectAfterSaveAsync(dataSource, parameters, item);
 
             if (!newItem.WasSuccessful)
             {
@@ -183,7 +182,7 @@ namespace IntelliTect.Coalesce
             if (afterSave == null)
             {
                 throw new InvalidOperationException("Recieved null from result of AfterSave. Expected an ItemResult<TDto>.");
-            } 
+            }
             else if (!afterSave.WasSuccessful)
             {
                 return new ItemResult<TDto>(afterSave);
@@ -200,6 +199,18 @@ namespace IntelliTect.Coalesce
             return new ItemResult<TDto>(
                 item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
             );
+        }
+
+        /// <summary>
+        /// Fetches a fresh copy of the object from the <see cref="DbContext" /> after a save has been performed.
+        /// </summary>
+        /// <param name="dataSource">The data source that will be used when loading the item.</param>
+        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
+        /// <param name="item">The saved item to reload</param>
+        protected virtual Task<(ItemResult<T> Item, IncludeTree IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
+        {
+            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
+            return (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
         }
 
         /// <summary>

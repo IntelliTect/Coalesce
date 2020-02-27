@@ -691,6 +691,19 @@ namespace IntelliTect.Coalesce
             return $"{ClassViewModel.DisplayName} item with ID {id} was not found.";
         }
 
+
+        /// <summary>
+        /// Evaluate the given query to find the single object corresponding to the given primary key.
+        /// </summary>
+        /// <param name="id">The primary key to find the desired item by.</param>
+        /// <param name="query">The query to query.</param>
+        /// <returns>The requested object, or null if it was not found.</returns>
+        protected virtual async Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query)
+        {
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            return canUseAsync ? await query.FindItemAsync(id) : query.FindItem(id);
+        }
+
         /// <summary>
         /// Get an unmapped single object corresponding to the given primary key.
         /// </summary>
@@ -701,9 +714,7 @@ namespace IntelliTect.Coalesce
         public virtual async Task<(ItemResult<T> Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = GetQuery(parameters);
-
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            T result = canUseAsync ? await query.FindItemAsync(id) : query.FindItem(id);
+            T result = await EvaluateItemQueryAsync(id, query);
 
             if (result == null)
             {

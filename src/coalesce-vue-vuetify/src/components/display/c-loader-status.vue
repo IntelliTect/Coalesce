@@ -191,6 +191,10 @@ export default class extends Vue {
       flex-grow: 1;
       flex-shrink: 1;
 
+      // Prevents small block-level content from losing its parent width 
+      // when the wrapper becomes positioned absolutely during the transition.
+      width: 100%;
+
       // overflow:hidden breaks nested elements that use position: sticky.
       // My removal of this maybe? broke something somewhere that needs this.
 

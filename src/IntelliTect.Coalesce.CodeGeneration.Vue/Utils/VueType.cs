@@ -40,7 +40,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
             if (type.IsString) return "string";
             if (type.IsBool) return "boolean";
             if (type.IsDate) return "Date";
-            if (type.IsEnum) return modelPrefix + this.type.NullableUnderlyingType.ClientTypeName;
+            if (type.IsEnum) return modelPrefix + type.NullableUnderlyingType.ClientTypeName;
             if (type.IsNumber) return "number";
             if (type.IsVoid) return "void";
             if (type.IsPOCO)

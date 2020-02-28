@@ -603,7 +603,7 @@ export class ApiClient<T extends ApiRoutedType> {
           const value = mappedParams[key];
           if (value instanceof Blob) {
             // Add files normally.
-            formData.set(key, value)
+            formData.append(key, value)
           } else {
             // For non-files, stringify with qs to get properly formatted key/value pairs
             // and then merge them into the formdata.
@@ -612,7 +612,7 @@ export class ApiClient<T extends ApiRoutedType> {
             const formPairs = qs.stringify({[key]: value}).split("&");
             for (const pair of formPairs) {
               const [k,v] = pair.split("=")
-              formData.set(k, v);
+              formData.append(decodeURIComponent(k), decodeURIComponent(v));
             }
           }
         }

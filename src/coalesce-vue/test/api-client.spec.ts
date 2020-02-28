@@ -7,6 +7,7 @@ import { AxiosClient, ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
 import { Student as StudentMeta } from './targets.metadata'
 import { AxiosError, AxiosResponse } from 'axios';
+import { Student } from './targets.models';
 
 
 function makeEndpointMock() {
@@ -87,17 +88,21 @@ describe("$invoke", () => {
       transportType: 'item',
       params: {
         id: { type: 'number', role: 'value', displayName: '', name: 'id' },
-        file: { type: 'file', role: 'value', displayName: '', name: 'file' }
+        file: { type: 'file', role: 'value', displayName: '', name: 'file' },
+        student: { type: 'model', role: 'value', displayName: '', name: 'student', typeDef: StudentMeta }
       }
     };
     const file = new File([new ArrayBuffer(1)], "fileName", { type: "application/pdf" });
 
-    var response = await new StudentApiClient().$invoke(methodMeta, { id:42, file });
+    var response = await new StudentApiClient().$invoke(methodMeta, { 
+      id:42, file, student: <Student>{ name: "bob&bob=bob" } 
+    });
 
     expect(mock).toBeCalledTimes(1);
     expect(mock.mock.calls[0][0].data).toBeInstanceOf(FormData)
     expect((mock.mock.calls[0][0].data as FormData).get('id')).toBe("42")
     expect((mock.mock.calls[0][0].data as FormData).get('file')).toBe(file)
+    expect((mock.mock.calls[0][0].data as FormData).get('student[name]')).toBe("bob&bob=bob")
   })
 })
 

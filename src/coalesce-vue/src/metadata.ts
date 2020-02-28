@@ -339,9 +339,17 @@ export type JsonValue = Exclude<Value, FileValue>
    -----------------------------
 */
 
+export enum HiddenAreas {
+    List = 1 << 0,
+    Edit = 1 << 1,
+}
+
 export interface PropertyBase {
     /** True if the property should be skipped when mapping to a DTO. */
     readonly dontSerialize?: boolean | undefined
+
+    /** Enum indicating what admin views the property is hidden on, if any. */
+    readonly hidden?: HiddenAreas
 }
 
 /** Represents a primitive property */

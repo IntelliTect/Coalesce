@@ -485,18 +485,21 @@ export const Company = domain.types.Company = {
       displayName: "City",
       type: "string",
       role: "value",
+      hidden: 1,
     },
     state: {
       name: "state",
       displayName: "State",
       type: "string",
       role: "value",
+      hidden: 2,
     },
     zipCode: {
       name: "zipCode",
       displayName: "Zip Code",
       type: "string",
       role: "value",
+      hidden: 3,
     },
     isDeleted: {
       name: "isDeleted",
@@ -662,6 +665,7 @@ export const Person = domain.types.Person = {
       noOffset: true,
       type: "date",
       role: "value",
+      hidden: 3,
     },
     nextUpgrade: {
       name: "nextUpgrade",
@@ -669,6 +673,7 @@ export const Person = domain.types.Person = {
       dateKind: "datetime",
       type: "date",
       role: "value",
+      hidden: 3,
     },
     personStats: {
       name: "personStats",
@@ -676,6 +681,7 @@ export const Person = domain.types.Person = {
       type: "object",
       get typeDef() { return (domain.types.PersonStats as ObjectType) },
       role: "value",
+      hidden: 3,
       dontSerialize: true,
     },
     name: {

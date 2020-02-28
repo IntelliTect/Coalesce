@@ -15,8 +15,11 @@ namespace Coalesce.Domain
         public string Name { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
+        [Hidden(HiddenAttribute.Areas.List)]
         public string City { get; set; }
+        [Hidden(HiddenAttribute.Areas.Edit)]
         public string State { get; set; }
+        [Hidden(HiddenAttribute.Areas.All)]
         public string ZipCode { get; set; }
 
         public bool IsDeleted { get; set; }

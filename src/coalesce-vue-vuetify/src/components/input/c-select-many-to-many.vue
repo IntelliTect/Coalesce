@@ -27,7 +27,7 @@ import MetadataComponent from '../c-metadata-component'
 import CDisplay from '../display/c-display';
 import { ModelValue, ViewModel, mapToModel, convertToModel, ViewModelFactory, convertValueToModel, BehaviorFlags } from 'coalesce-vue';
 import { ApiClient, ModelApiClient, ListApiState, ListResultPromise, ItemApiState, ItemResultPromise, 
-Model, ModelType, ForeignKeyProperty, Value, ModelReferenceNavigationProperty, ListParameters, modelDisplay, mapParamsToDto } from 'coalesce-vue'
+Model, ModelType, ForeignKeyProperty, ModelReferenceNavigationProperty, ListParameters, modelDisplay, mapParamsToDto } from 'coalesce-vue'
 
     
 @Component({

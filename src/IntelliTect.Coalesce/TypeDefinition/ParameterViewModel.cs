@@ -94,6 +94,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
 
                 var ret = CsParameterName;
+
+                if (Type.IsFile)
+                {
+                    ret = $"{ret} == null ? null : new File {{ Name = {ret}.FileName, ContentType = {ret}.ContentType, Length = {ret}.Length, Content = file.OpenReadStream() }} ";
+                }
+
                 if (Type.PureType.HasClassViewModel)
                 {
                     if (Type.IsCollection)
@@ -126,9 +132,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                string typeName = IsDI 
-                    ? Type.FullyQualifiedName
-                    : Type.DtoFullyQualifiedName;
+                string typeName;
+                if (Type.IsFile)
+                {
+                    typeName = new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
+                }
+                else if (IsDI)
+                {
+                    typeName = Type.FullyQualifiedName;
+                }
+                else
+                {
+                    typeName = Type.DtoFullyQualifiedName;
+                }
 
                 return $"{(ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {CsParameterName}{(HasDefaultValue ? " = " + CsDefaultValue : "")}";
             }

@@ -11,7 +11,8 @@
         Enum,
         Model,
         Object,
-        Collection
+        Collection,
+        File
     }
 
     public static class TypeDiscriminatorExtensions

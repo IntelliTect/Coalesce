@@ -860,6 +860,20 @@ ko.bindingHandlers.formatNumberText = {
     }
 };
 
+ko.bindingHandlers.fileInput = {
+    init: function (element, valueAccessor) {
+        $(element).change(function () {
+            valueAccessor()(element.files[0]);
+        });
+    },
+    update: function (element, valueAccessor) {
+        if (ko.unwrap(valueAccessor()) === null) {
+            $(element).wrap('<form>').closest('form').get(0).reset();
+            $(element).unwrap();
+        }
+    }
+};
+
 ko.bindingHandlers.fileUpload = {
     init: (element, valueAccessor, allBindingsAccessor, viewModel) => {
         // The incoming observable should be a URL of where to send this.

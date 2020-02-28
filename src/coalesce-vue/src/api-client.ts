@@ -242,7 +242,7 @@ export function mapParamsToDto(
         paramsObject["dataSource." + paramMeta.name] = mapValueToDto(
           paramValue,
           paramMeta
-        );
+        ) as any;
       }
     }
   }
@@ -586,8 +586,46 @@ export class ApiClient<T extends ApiRoutedType> {
     config?: AxiosRequestConfig
   ) {
     const mappedParams = this.$mapParams(method, params);
-    const hasBody = method.httpMethod != "GET" && method.httpMethod != "DELETE";
     const url = `/${this.$metadata.controllerRoute}/${method.name}`;
+
+    let body: any;
+    let query: any;
+
+    if (method.httpMethod != "GET" && method.httpMethod != "DELETE") {
+      // The HTTP method has a body.
+
+      query = undefined;
+      if (Object.values(method.params).some(p => p.type == "file")) {
+        // If the endpoint has any files, we need to craft a FormData.
+        const formData = body = new FormData;
+
+        for (const key in mappedParams) {
+          const value = mappedParams[key];
+          if (value instanceof Blob) {
+            // Add files normally.
+            formData.set(key, value)
+          } else {
+            // For non-files, stringify with qs to get properly formatted key/value pairs
+            // and then merge them into the formdata.
+            // This is done because value could be a complex object that will result in 
+            // lots of flattened key/value pairs
+            const formPairs = qs.stringify({[key]: value}).split("&");
+            for (const pair of formPairs) {
+              const [k,v] = pair.split("=")
+              formData.set(k, v);
+            }
+          }
+        }
+      } else {
+        // No Files. just handle the params normally.
+        body = qs.stringify(mappedParams)
+      }
+    } else {
+      // The HTTP method has no body.
+
+      body = undefined;
+      query = mappedParams
+    }
 
     return this._possiblyCachedRequest(
       method.httpMethod,
@@ -597,8 +635,8 @@ export class ApiClient<T extends ApiRoutedType> {
       () => AxiosClient.request({
           method: method.httpMethod,
           url: url,
-          data: hasBody ? qs.stringify(mappedParams) : undefined,
-          ...this.$options(undefined, config, !hasBody ? mappedParams : undefined)
+          data: body,
+          ...this.$options(undefined, config, query)
         }).then(r => {
           switch (method.transportType) {
             case "item":
@@ -657,10 +695,16 @@ export class ApiClient<T extends ApiRoutedType> {
    * @param params The values of the parameter to map
    */
   protected $mapParams(method: Method, params: { [paramName: string]: any }) {
-    const formatted: { [paramName: string]: any } = {};
+    const formatted: { [paramName: string]: ReturnType<typeof mapValueToDto> | File | Blob } = {};
     for (var paramName in method.params) {
       const paramMeta = method.params[paramName];
-      formatted[paramName] = mapValueToDto(params[paramName], paramMeta);
+      const paramValue = params[paramName];
+
+      if (paramMeta.type == "file") {
+        formatted[paramName] = paramValue as File | Blob | null
+      } else {
+        formatted[paramName] = mapValueToDto(paramValue, paramMeta);
+      }
     }
     return formatted;
   }

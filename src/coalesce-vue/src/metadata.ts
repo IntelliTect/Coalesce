@@ -25,20 +25,25 @@ export interface Domain {
    -----------------------------
 */
 
-/** Type discriminator of non-object types that are natively represented in javascript, i.e. they are valid results of the typeof operator. */
-export type NativeTypeDiscriminator = "string" | "number" | "boolean"
+/** Type discriminators of non-object types that are natively represented in javascript, i.e. they are valid results of the typeof operator. */
+export type NativePrimitiveTypeDiscriminator = "string" | "number" | "boolean"
+
+/** Type discriminators of object types that exist natively in javascript. */
+export type NativeObjectTypeDiscriminator = "date" | "file"
+
 /** 
- * Type discriminator of types that do not have a `CustomType` representation in the metadata.
+ * Type discriminators of types that do not have a `CustomType` representation in the metadata.
  * Enums do have such a representation, and so aren't included.
  */
-export type SimpleTypeDiscriminator = NativeTypeDiscriminator | "date"
-/** Type discriminator of non-object types */
-export type ValueTypeDiscriminator = SimpleTypeDiscriminator | "enum"
+export type NativeTypeDiscriminator = NativePrimitiveTypeDiscriminator | NativeObjectTypeDiscriminator
+
+/** Type discriminators of non-poco types */
+export type ValueTypeDiscriminator = NativeTypeDiscriminator | "enum"
 
 
-/** Type discriminator of object-based types. */
+/** Type discriminators of object-based types. */
 export type ClassTypeDiscriminator = "model" | "object"
-/** Type discriminator of custom types that have their own metadata representation. */
+/** Type discriminators of custom types that have their own metadata representation. */
 export type CustomTypeDiscriminator = ClassTypeDiscriminator | "enum"
 
 /** Type discriminator of all non-collection types */
@@ -53,6 +58,7 @@ export type TypeDiscriminatorToType<T> =
 : T extends "number" ? number
 : T extends "boolean" ? boolean
 : T extends "date" ? Date
+: T extends "file" ? File
 : any
 
 
@@ -254,11 +260,13 @@ export interface ValueMetaWithTypeDef<TType extends TypeDiscriminator, TTypeDef 
     /** Full description of the type represented by this value. */
     readonly typeDef: TTypeDef
 }
+
 /** Represents the usage of a primitive value (string, number, or bool) */
-export interface PrimitiveValue extends ValueMeta<NativeTypeDiscriminator> { 
+export interface PrimitiveValue extends ValueMeta<NativePrimitiveTypeDiscriminator> { 
     readonly role: "value" | "foreignKey" | "primaryKey"
     readonly rules?: Rules
 }
+
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> { 
     readonly role: "value"
@@ -270,15 +278,22 @@ export interface DateValue extends ValueMeta<"date"> {
 
     readonly rules?: Rules
 }
+
+export interface FileValue extends ValueMeta<"file"> { 
+    readonly role: "value"
+}
+
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 
     readonly role: "value"
     readonly rules?: Rules
 }
+
 /** Represents the usage of an 'external type', i.e. an object that is not part of a relational model */
 export interface ObjectValue extends ValueMetaWithTypeDef<"object", ObjectType> { 
     readonly role: "value"
 }
+
 /** Represents the usage of an object that is part of a relational model */
 export interface ModelValue extends ValueMetaWithTypeDef<"model", ModelType> { 
     readonly role: "value" | "referenceNavigation"
@@ -304,14 +319,18 @@ export type CustomTypeValue =
 
 /** Union of all representations of the usage of non-collection types */
 export type NonCollectionValue = 
-  PrimitiveValue
+| PrimitiveValue
 | DateValue
+| FileValue
 | CustomTypeValue
 
 /** Union of all representations of the usage of a type */
 export type Value = 
   NonCollectionValue
 | CollectionValue
+
+/** Union of all type usages that can be represented in JSON. */
+export type JsonValue = Exclude<Value, FileValue>
 
 
 

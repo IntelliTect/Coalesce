@@ -36,6 +36,17 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return (this.caseProducts || []).map($ => $.product!).filter($ => $)
   }
   
+  public get uploadAttachment() {
+    const uploadAttachment = this.$apiClient.$makeCaller(
+      "item", 
+      (c, file: File | null) => c.uploadAttachment(this.$primaryKey, file),
+      () => ({file: null as File | null, }),
+      (c, args) => c.uploadAttachment(this.$primaryKey, args.file))
+    
+    Object.defineProperty(this, 'uploadAttachment', {value: uploadAttachment});
+    return uploadAttachment
+  }
+  
   constructor(initialData?: DeepPartial<$models.Case> | null) {
     super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
   }

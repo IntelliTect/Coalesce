@@ -31,7 +31,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
         {
             if (type.IsByteArray) return "string";
             if (type.IsCollection) return TsTypePlain(type.PureType, modelPrefix, viewModel) + "[]";
-            if (type.IsGuid) return "string";
             return TsTypePlain(type, modelPrefix, viewModel);
         }
 
@@ -42,6 +41,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
             if (type.IsDate) return "Date";
             if (type.IsEnum) return modelPrefix + type.NullableUnderlyingType.ClientTypeName;
             if (type.IsNumber) return "number";
+            if (type.IsGuid) return "string";
+            if (type.IsFile) return "File";
             if (type.IsVoid) return "void";
             if (type.IsPOCO)
             {
@@ -51,7 +52,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
                     modelPrefix = "";
                     viewModelAppend = "ViewModel";
                 }
-                return $"{modelPrefix}{type.PureType.Name}{viewModelAppend}";
+                return modelPrefix + type.PureType.Name + viewModelAppend;
             }
             if (type.IsClass) return type.PureType.Name;
             return "any";

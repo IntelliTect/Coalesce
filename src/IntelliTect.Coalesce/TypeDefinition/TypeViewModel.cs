@@ -87,6 +87,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsDate ? TypeDiscriminator.Date :
             IsEnum ? TypeDiscriminator.Enum :
             IsVoid ? TypeDiscriminator.Void :
+            IsFile ? TypeDiscriminator.File :
             IsCollection ? TypeDiscriminator.Collection :
             HasClassViewModel ? (
                 ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object
@@ -170,6 +171,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsEnum) return "number";
                 if (IsNumber) return "number";
                 if (IsVoid) return "void";
+                if (IsFile) return "File";
                 if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 return "any";
@@ -216,6 +218,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if class is a Byte[]
         /// </summary>
         public bool IsByteArray => IsArray && ArrayType.IsA<Byte>();
+
+        /// <summary>
+        /// Returns true if the type is an <see cref="IntelliTect.Coalesce.Models.IFile"/>
+        /// </summary>
+        public bool IsFile => IsA(typeof(IntelliTect.Coalesce.Models.IFile));
 
         /// <summary>
         /// Returns true if the type is any integral type or a nullable version of such a type, except <see cref="char"/>
@@ -282,7 +289,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if the property is class outside the System namespace, and is not a string or array
         /// </summary>
-        public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass;
+        public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass && !IsFile;
 
         public string TsDeclaration => $"{Name}: {TsType}";
 

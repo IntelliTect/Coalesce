@@ -74,7 +74,7 @@ import CDisplay from '../display/c-display';
 import MetadataComponent from '../c-metadata-component'
 import { 
   ApiClient, ModelApiClient, ListApiState, ListResultPromise, ItemApiState, ItemResultPromise, 
-  Model, ModelType, ForeignKeyProperty, Value, ModelReferenceNavigationProperty, ListParameters, 
+  Model, ModelType, ForeignKeyProperty, ModelReferenceNavigationProperty, ListParameters, 
   mapParamsToDto, getMessageForError, 
   ViewModel, 
   mapValueToModel

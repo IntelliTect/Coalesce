@@ -868,7 +868,7 @@ ko.bindingHandlers.fileInput = {
     },
     update: function (element, valueAccessor) {
         if (ko.unwrap(valueAccessor()) === null) {
-            $(element).wrap('<form>').closest('form').get(0).reset();
+            ($(element).wrap('<form>').closest('form').get(0) as HTMLFormElement).reset();
             $(element).unwrap();
         }
     }

@@ -3,12 +3,14 @@ using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -142,6 +144,15 @@ namespace Coalesce.Domain
             }
 
             db.SaveChanges();
+        }
+
+        [Coalesce]
+        public async Task UploadAttachment(IFile file)
+        {
+            var ms = new MemoryStream();
+            await file.Content.CopyToAsync(ms);
+            Attachment = ms.ToArray();
+            AttachmentName = file.Name;
         }
 
         public class AllOpenCases : StandardDataSource<Case, AppDbContext>

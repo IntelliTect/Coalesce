@@ -37,6 +37,7 @@
   "_comment": "fsevent@1.2.9 is locked in to prevent broken builds on windows for v1.2.11",
   "devDependencies": {
     "@types/jest": "^24.0.25",
+    "cross-blob": "^1.2.1",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",
     "lodash": "^4.17.15",
@@ -52,6 +53,7 @@
     "test": "jest"
   },
   "jest": {
+    "setupFilesAfterEnv": ["<rootDir>/test/global-setup.ts"],
     "transform": {
       "^.+\\.(j|t)sx?$": "ts-jest"
     },
@@ -65,7 +67,6 @@
       "^date-fns/esm$": "date-fns",
       "lodash-es": "lodash"
     },
-    "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",

@@ -254,6 +254,32 @@ export const Case = domain.types.Case = {
         type: "void",
       },
     },
+    uploadAttachment: {
+      name: "uploadAttachment",
+      displayName: "Upload Attachment",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "void",
+      },
+    },
     getCaseSummary: {
       name: "getCaseSummary",
       displayName: "Get Case Summary",

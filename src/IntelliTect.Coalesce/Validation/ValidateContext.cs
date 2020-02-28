@@ -42,6 +42,8 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
+                        assert.IsFalse(prop.Type.IsFile, "IFile is not supported as a property.");
+
                         if (prop.IsPOCO)
                         {
                             assert.IsNotNull(prop.Object.ListTextProperty, "The target object for the property has no discernable display text. Add a [ListTextAttribute] to one of its properties.");
@@ -104,6 +106,8 @@ namespace IntelliTect.Coalesce.Validation
 
                     if (method.IsClientMethod)
                     {
+                        assert.IsFalse(method.ResultType.IsFile, "IFile is not currently supported as a method return type - only as a parameter.");
+
                         // TODO: Assert that the method name isn't a reserved endpoint name:
                         // get, save, delete, list, count, csv{...}
                         foreach (var param in method.Parameters)

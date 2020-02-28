@@ -248,10 +248,23 @@ module Coalesce {
             this.isLoading(true);
             this.message('');
             this.wasSuccessful(null);
+
+            var hasFile = false;
+            var formData = new FormData();
+            $.each(postData, (k: string, v: any) => {
+              if (v instanceof File || v instanceof Blob) {
+                hasFile = true;
+              }
+              formData.append(k, v);
+            })
+
             return $.ajax({
                 method: this.verb,
                 url: this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name,
-                data: postData,
+                data: hasFile ? formData : postData,
+                // https://stackoverflow.com/a/8244082
+                processData: hasFile ? false : undefined,
+                contentType: hasFile ? false : undefined,
                 xhrFields: { withCredentials: true }
             })
                 .done((data: ApiResult) => {

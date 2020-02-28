@@ -206,6 +206,47 @@ module ViewModels {
         }
         
         
+        /**
+            Methods and properties for invoking server method UploadAttachment.
+        */
+        public readonly uploadAttachment = new Case.UploadAttachment(this);
+        public static UploadAttachment = class UploadAttachment extends Coalesce.ClientMethod<Case, void> {
+            public readonly name = 'UploadAttachment';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (UploadAttachment) with the given arguments */
+            public invoke = (file: File | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), file: file }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new UploadAttachment.Args(); 
+            public static Args = class Args {
+                public file: KnockoutObservable<File | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (UploadAttachment) with an instance of UploadAttachment.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.file(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                var file: null = null;
+                return this.invoke(file, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
         
         /** 
             Load the ViewModel object from the DTO.

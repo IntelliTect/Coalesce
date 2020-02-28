@@ -560,8 +560,10 @@ export function mapToDto<T extends Model<ClassType>>(
  * Will serialize objects found in arrays.
  * @param object The object to map.
  */
-export function mapValueToDto(value: any, metadata: Value): any | null {
-  if (value === null || value === undefined) return value;
+export function mapValueToDto(value: any, metadata: Value) {
+  if (value === null || value === undefined) {
+    return value as null | undefined;
+  }
   return new MapToDtoVisitor().visitValue(value, metadata);
 }
 
@@ -786,7 +788,7 @@ export function bindToQueryString(
             ? undefined 
             // Use metadata to format the value if the obj is a DataSource.
             : obj?.$metadata?.params?.[key]
-            ? mapValueToDto(v, obj.$metadata.params[key])
+            ? mapValueToDto(v, obj.$metadata.params[key])?.toString()
             // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
             // Fallback to .tostring()
             : (String(v) ?? undefined)

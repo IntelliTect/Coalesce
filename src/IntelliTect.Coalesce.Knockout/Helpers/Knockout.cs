@@ -103,6 +103,29 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             return content.ToString().AddLabel(label, labelCols, inputCols);
         }
 
+        public static HtmlString InputFor(TypeViewModel type, string bindingValue)
+        {
+            if (type.IsDate)
+            {
+                return DateTime(bindingValue, "M/D/YYYY h:mm a");
+            }
+            else if (type.IsEnum)
+            {
+                return SelectEnum(type, bindingValue);
+            }
+            else if (type.IsBool)
+            {
+                return Checkbox(bindingValue);
+            }
+            else if (type.IsFile)
+            {
+                return FileInput(bindingValue);
+            }
+            else
+            {
+                return TextInput(bindingValue);
+            }
+        }
 
         #region Dates
 
@@ -232,6 +255,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         #endregion
 
         #region File
+
         public static HtmlString FileUploadButton(
             string bindingValue, string bindingName = "fileUpload")
         {
@@ -243,12 +267,17 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         }
 
         public static HtmlString FileUpload(
-   string bindingValue, string bindingName = "fileUpload")
+            string bindingValue, string bindingName = "fileUpload")
         {
-            return new HtmlString($@"
-                <i type=""file"" class=""fa fa-upload"" data-bind=""{bindingName}: {bindingValue}""></i>
-                ");
+            return new HtmlString($@"<i type=""file"" class=""fa fa-upload"" data-bind=""{bindingName}: {bindingValue}""></i>");
         }
+
+        public static HtmlString FileInput(
+            string bindingValue, string bindingName = "fileInput")
+        {
+            return new HtmlString($@"<input type=""file"" data-bind=""{bindingName}: {bindingValue}"" />");
+        }
+
         #endregion
 
         #region TextInput
@@ -256,9 +285,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static HtmlString TextInput(
             string bindingValue, string bindingName = "value")
         {
-            return new HtmlString($@"
-                <input type = ""text"" class=""form-control"" data-bind=""{bindingName}: {bindingValue}"" />
-                ");
+            return new HtmlString($@"<input type=""text"" class=""form-control"" data-bind=""{bindingName}: {bindingValue}"" />");
         }
 
         public static HtmlString TextInputWithLabel(
@@ -571,7 +598,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                             b.Line($"<label class='col-md-4 control-label'>{arg.Name.ToProperCase()}</label>");
                             using (b.TagBlock("div", "col-md-8"))
                             {
-                                b.Line($"<input type='text' class='form-control' data-bind='value: {arg.JsVariable}'>");
+                                b.Line(InputFor(arg.Type, arg.JsVariable).Value);
                             }
                         }
                     }
@@ -621,13 +648,18 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         public static HtmlString SelectEnum(PropertyViewModel propertyModel, string placeholder = "")
         {
+            return SelectEnum(propertyModel.Type, propertyModel.JsVariableForBinding(), placeholder);
+        }
+
+        public static HtmlString SelectEnum(TypeViewModel type, string bindingValue, string placeholder = "")
+        {
             var sb = new StringBuilder();
             sb.AppendLine($@"
                 <select class=""form-control"" 
-                    data-bind=""select2: {propertyModel.JsVariableForBinding()}"" 
+                    data-bind=""select2: {bindingValue}"" 
                     placeholder=""{placeholder}"">");
 
-            foreach (KeyValuePair<int, string> item in propertyModel.Type.EnumValues)
+            foreach (KeyValuePair<int, string> item in type.EnumValues)
             {
                 sb.AppendLine($@"<option value=""{item.Key}"">{item.Value.ToProperCase()}</option>");
             }

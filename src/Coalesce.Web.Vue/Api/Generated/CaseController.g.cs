@@ -157,6 +157,26 @@ namespace Coalesce.Web.Vue.Api
         }
 
         /// <summary>
+        /// Method: UploadAttachment
+        /// </summary>
+        [HttpPost("UploadAttachment")]
+        [Authorize]
+        public virtual async Task<ItemResult> UploadAttachment([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            await item.UploadAttachment(new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            await Db.SaveChangesAsync();
+            var result = new ItemResult();
+            return result;
+        }
+
+        /// <summary>
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]

@@ -2,6 +2,7 @@
 
 import Vue from 'vue';
 
+import { ItemMethod } from '../src/metadata'
 import { AxiosClient, ItemResult, ItemResultPromise } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
 import { Student as StudentMeta } from './targets.metadata'
@@ -69,6 +70,34 @@ describe("$invoke", () => {
       .resolves.toBeTruthy()
 
     expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: 1 } });
+  })
+
+  test("passes files as FormData", async() => {
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: {wasSuccessful: true, object: ''},
+        status: 200
+      })
+
+    const methodMeta: ItemMethod = {
+      name: 'test', 
+      displayName: '', 
+      httpMethod: 'POST', 
+      return: { displayName: '', name: '$return', type: 'void', role: 'value' },
+      transportType: 'item',
+      params: {
+        id: { type: 'number', role: 'value', displayName: '', name: 'id' },
+        file: { type: 'file', role: 'value', displayName: '', name: 'file' }
+      }
+    };
+    const file = new File([new ArrayBuffer(1)], "fileName", { type: "application/pdf" });
+
+    var response = await new StudentApiClient().$invoke(methodMeta, { id:42, file });
+
+    expect(mock).toBeCalledTimes(1);
+    expect(mock.mock.calls[0][0].data).toBeInstanceOf(FormData)
+    expect((mock.mock.calls[0][0].data as FormData).get('id')).toBe("42")
+    expect((mock.mock.calls[0][0].data as FormData).get('file')).toBe(file)
   })
 })
 

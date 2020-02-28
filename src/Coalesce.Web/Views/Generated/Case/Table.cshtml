@@ -209,6 +209,15 @@
                         <td>
                             <!-- Editor buttons -->
                             <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                <!-- Action buttons -->
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Actions <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" data-bind='click: function(){ uploadAttachment.invokeWithPrompts() }'>Upload Attachment</a></li>
+                                    </ul>
+                                </div>
                                 <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
                                     <i class="fa fa-pencil"></i>
                                 </a>

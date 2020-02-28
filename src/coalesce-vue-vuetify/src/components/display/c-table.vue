@@ -84,7 +84,7 @@
 
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import { Model, ClassType, ListViewModel, Property, ModelType } from 'coalesce-vue';
+import { Model, ClassType, ListViewModel, Property, ModelType, HiddenAreas } from 'coalesce-vue';
 
 import CAdminDisplay from '../admin/c-admin-display';
     
@@ -119,7 +119,8 @@ export default class extends Vue {
     .values(this.metadata.props)
     .filter((p: Property) => this.props
       ? this.props.indexOf(p.name) >= 0
-      : p.role != "primaryKey" && p.role != "foreignKey"
+      : (p.role != "primaryKey" && p.role != "foreignKey"
+        && (p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0))
     ); 
   };
 

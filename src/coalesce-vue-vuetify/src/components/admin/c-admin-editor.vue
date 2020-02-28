@@ -76,7 +76,7 @@
 <script lang="ts">
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import { Model, ClassType, ViewModel, Property, ModelType, BehaviorFlags } from 'coalesce-vue';
+import { Model, ClassType, ViewModel, Property, ModelType, BehaviorFlags, HiddenAreas } from 'coalesce-vue';
 
 import CInput from '../input/c-input'
 import CAdminDisplay from './c-admin-display'
@@ -135,6 +135,7 @@ export default class extends Vue {
     .filter((p: Property) => 
       p.role != "primaryKey" 
       && p.role != "foreignKey"
+      && (p.hidden === undefined || (p.hidden & HiddenAreas.Edit) == 0)
       // && (!p.dontSerialize || p.role == "referenceNavigation" || p.role == "collectionNavigation")
     ); 
   }

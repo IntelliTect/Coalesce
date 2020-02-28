@@ -260,6 +260,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         break;
                 }
 
+                int hiddenAreas =
+                        (prop.IsHidden(HiddenAttribute.Areas.List) ? 1 << 0 : 0) |
+                        (prop.IsHidden(HiddenAttribute.Areas.Edit) ? 1 << 1 : 0) |
+                        (prop.IsHidden(HiddenAttribute.Areas.All) ? (1 << 0 | 1 << 1) : 0);
+                if (hiddenAreas != 0)
+                {
+                    b.Prop("hidden", hiddenAreas.ToString());
+                }
+
                 // We store the negative case instead of the positive
                 // because there are likely going to be more that are serializable than not.
                 if (!prop.IsClientSerializable)

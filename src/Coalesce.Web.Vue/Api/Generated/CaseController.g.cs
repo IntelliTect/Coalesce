@@ -170,7 +170,7 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadAttachment(new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            await item.UploadAttachment(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
             await Db.SaveChangesAsync();
             var result = new ItemResult();
             return result;

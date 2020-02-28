@@ -148,6 +148,9 @@ export default Vue.extend({
         data.props['item-text'] = 'displayName';
         data.props['item-value'] = 'value';
         return h('v-select', data);
+
+      case 'file': 
+        return h('v-file-input', data);
     }
 
     // Fall back to just displaying the value.

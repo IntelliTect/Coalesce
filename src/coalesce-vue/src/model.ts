@@ -16,7 +16,8 @@ import {
   CollectionValue,
   DataSourceType,
   ModelValue,
-  ObjectValue
+  ObjectValue,
+  FileValue
 } from "./metadata";
 import { Indexable } from "./util";
 
@@ -53,6 +54,9 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
       case "date":
         return this.visitDateValue(value, meta);
 
+      case "file":
+        return this.visitFileValue(value, meta);
+
       default:
         return this.visitPrimitiveValue(value, meta);
     }
@@ -71,6 +75,8 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
   ): TValue;
 
   protected abstract visitDateValue(value: any, meta: DateValue): TValue;
+  
+  protected abstract visitFileValue(value: any, meta: FileValue): TValue;
 
   protected abstract visitEnumValue(value: any, meta: EnumValue): TValue;
 }
@@ -105,6 +111,7 @@ export function parseValue(
 ): null | boolean;
 export function parseValue(value: any, meta: EnumValue): null | number;
 export function parseValue(value: any, meta: DateValue): null | Date;
+export function parseValue(value: any, meta: FileValue): null | Blob | File;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
@@ -178,6 +185,10 @@ export function parseValue(
       }
 
       return date;
+
+    case "file":
+      if (value instanceof Blob) return value;
+      throw parseError(value, meta);
   }
 }
 
@@ -298,6 +309,10 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   }
 
   protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {
+    return parseValue(value, meta);
+  }
+
+  protected visitFileValue(value: any, meta: FileValue) {
     return parseValue(value, meta);
   }
 
@@ -501,6 +516,10 @@ class MapToDtoVisitor extends Visitor<
     }
   }
 
+  protected visitFileValue(value: any, meta: FileValue): undefined {
+    throw new Error("Files cannot be serialized to JSON.")
+  }
+
   protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {
     return parseValue(value, meta);
   }
@@ -687,6 +706,21 @@ class DisplayVisitor extends Visitor<
       default:
         return lightFormat(parsed, "M/d/yyyy h:mm:ss aaa");
     }
+  }
+
+  protected visitFileValue(value: any, meta: FileValue): string | null {
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+
+    if (parsed instanceof File) {
+      return parsed.name;
+    }
+
+    if (parsed instanceof Blob) {
+      return `${parsed.type}, ${parsed.size} bytes`
+    }
+
+    return null;
   }
 
   protected visitPrimitiveValue(

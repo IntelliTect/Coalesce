@@ -42,7 +42,7 @@
     "jest-junit": "^10.0.0",
     "lodash": "^4.17.15",
     "ts-jest": "^24.3.0",
-    "typescript": "3.8.0-beta",
+    "typescript": "3.8.2",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5"
   },
@@ -53,7 +53,9 @@
     "test": "jest"
   },
   "jest": {
-    "setupFilesAfterEnv": ["<rootDir>/test/global-setup.ts"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/global-setup.ts"
+    ],
     "transform": {
       "^.+\\.(j|t)sx?$": "ts-jest"
     },

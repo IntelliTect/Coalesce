@@ -61,7 +61,6 @@ namespace IntelliTect.Coalesce
             services.TryAddScoped<IBehaviorsFactory, BehaviorsFactory>();
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
 
-            
 
             return services;
         }

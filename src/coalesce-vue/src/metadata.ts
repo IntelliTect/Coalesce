@@ -319,14 +319,18 @@ export type CustomTypeValue =
 
 /** Union of all representations of the usage of non-collection types */
 export type NonCollectionValue = 
-  PrimitiveValue
+| PrimitiveValue
 | DateValue
+| FileValue
 | CustomTypeValue
 
 /** Union of all representations of the usage of a type */
 export type Value = 
   NonCollectionValue
 | CollectionValue
+
+/** Union of all type usages that can be represented in JSON. */
+export type JsonValue = Exclude<Value, FileValue>
 
 
 
@@ -458,8 +462,7 @@ export interface MethodBase extends Metadata {
     readonly isStatic?: boolean,
 
     /** The parameters of the method */
-    readonly params: { [paramName in string]: Value | FileValue } 
-    // NOTE: FileValue is included separately because it is currently only valid as a method parameter. 
+    readonly params: { [paramName in string]: Value } 
 }
 
 export interface ItemMethod extends MethodBase  {

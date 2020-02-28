@@ -250,13 +250,30 @@ module Coalesce {
             this.wasSuccessful(null);
 
             var hasFile = false;
-            var formData = new FormData();
             $.each(postData, (k: string, v: any) => {
               if (v instanceof File || v instanceof Blob) {
                 hasFile = true;
               }
-              formData.append(k, v);
             })
+            var formData = new FormData();
+            if (hasFile) {
+              $.each(postData, (k: string, v: any) => {
+                if (v instanceof File || v instanceof Blob) {
+                  // Add files normally.
+                  formData.append(k, v);
+                } else {
+                  // For non-files, stringify with $.param to get properly formatted key/value pairs
+                  // and then merge them into the formdata.
+                  // This is done because value could be a complex object that will result in 
+                  // lots of flattened key/value pairs
+                  const formPairs = $.param({ [k]: v }).split("&");
+                  for (const pair of formPairs) {
+                    const [k, v] = pair.split("=")
+                    formData.set(k, v);
+                  }
+                }
+              })
+            }
 
             return $.ajax({
                 method: this.verb,

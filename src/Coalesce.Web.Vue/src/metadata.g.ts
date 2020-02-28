@@ -53,7 +53,6 @@ export const Case = domain.types.Case = {
       displayName: "Case Key",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
     },
     title: {
       name: "title",
@@ -85,7 +84,6 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
       get navigationProp() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
-      hidden: 3,
     },
     assignedTo: {
       name: "assignedTo",
@@ -106,7 +104,6 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
       get navigationProp() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
-      hidden: 3,
     },
     reportedBy: {
       name: "reportedBy",
@@ -331,7 +328,6 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Case Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
     },
     title: {
       name: "title",
@@ -399,7 +395,6 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Case Product Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
     },
     caseId: {
       name: "caseId",
@@ -409,7 +404,6 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
       get principalType() { return (domain.types.Case as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
-      hidden: 3,
       rules: {
         required: val => !!val || "Case is required.",
       }
@@ -433,7 +427,6 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Product as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
-      hidden: 3,
       rules: {
         required: val => !!val || "Product is required.",
       }
@@ -468,7 +461,6 @@ export const Company = domain.types.Company = {
       displayName: "Company Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
     },
     name: {
       name: "name",
@@ -593,7 +585,6 @@ export const Person = domain.types.Person = {
       displayName: "Person Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
     },
     title: {
       name: "title",
@@ -708,7 +699,6 @@ export const Person = domain.types.Person = {
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Company as ModelType) },
       get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
-      hidden: 3,
       rules: {
         required: val => !!val || "Company is required.",
       }
@@ -1060,7 +1050,6 @@ export const Product = domain.types.Product = {
       displayName: "Product Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
     },
     name: {
       name: "name",

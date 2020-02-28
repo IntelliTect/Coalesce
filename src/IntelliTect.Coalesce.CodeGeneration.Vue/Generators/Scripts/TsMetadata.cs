@@ -260,13 +260,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         break;
                 }
 
-                int hiddenAreas =
-                        (prop.IsHidden(HiddenAttribute.Areas.List) ? 1 << 0 : 0) |
-                        (prop.IsHidden(HiddenAttribute.Areas.Edit) ? 1 << 1 : 0) |
-                        (prop.IsHidden(HiddenAttribute.Areas.All) ? (1 << 0 | 1 << 1) : 0);
-                if (hiddenAreas != 0)
+                int hiddenAreaFlags = 0;
+                switch (prop.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area))
                 {
-                    b.Prop("hidden", hiddenAreas.ToString());
+                    case HiddenAttribute.Areas.List:
+                        hiddenAreaFlags = 1 << 0;
+                        break;
+                    case HiddenAttribute.Areas.Edit:
+                        hiddenAreaFlags = 1 << 1;
+                        break;
+                    case HiddenAttribute.Areas.All:
+                        hiddenAreaFlags = (1 << 0 | 1 << 1);
+                        break;
+                }
+                if (hiddenAreaFlags != 0)
+                {
+                    b.Prop("hidden", hiddenAreaFlags.ToString());
                 }
 
                 // We store the negative case instead of the positive

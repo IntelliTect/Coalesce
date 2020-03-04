@@ -298,9 +298,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     var rules = new List<string>();
 
+                    // A simple falsey check will treat a numeric zero as "absent," so we explicitly check for
+                    // null/undefined instead.
+                    var requiredPredicate = prop.Type.IsString ? "(val != null && val !== '')" : "val != null";
+
                     if (isRequired == true)
                     {
-                        rules.Add($"required: val => !!val || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
+                        rules.Add($"required: val => {requiredPredicate} || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
                     }
                     else if (prop.IsRequired)
                     {
@@ -315,7 +319,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             message = $"{name} is required.";
                         }
 
-                        rules.Add($"required: val => !!val || \"{message.EscapeStringLiteralForTypeScript()}\"");
+                        rules.Add($"required: val => {requiredPredicate} || \"{message.EscapeStringLiteralForTypeScript()}\"");
                     }
 
                     if (rules.Count > 0)

@@ -300,15 +300,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     // A simple falsey check will treat a numeric zero as "absent," so we explicitly check for
                     // null/undefined instead.
-                    var requiredPredicate = "val != null";
-                    if (prop.Type.IsString)
-                    {
-                        requiredPredicate = "(val != null && val !== '')";
-                    }
-                    else if (prop.Type.IsCollection)
-                    {
-                       requiredPredicate = "(val != null && val.length !== 0)";
-                    }
+                    var requiredPredicate = prop.Type.IsString ? "(val != null && val !== '')" : "val != null";
 
                     if (isRequired == true)
                     {

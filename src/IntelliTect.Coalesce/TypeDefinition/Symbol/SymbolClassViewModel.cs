@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     result.AddRange(parentSymbol.Methods
                         .Cast<SymbolMethodViewModel>()
                         // Don't add overriden methods
-                        .Where(baseMethod => !result.Any(method => method.Symbol.OverriddenMethod == baseMethod.Symbol)
+                        .Where(baseMethod => !result.Any(method => SymbolEqualityComparer.Default.Equals(method.Symbol.OverriddenMethod, baseMethod.Symbol))
                     ));
                 }
 

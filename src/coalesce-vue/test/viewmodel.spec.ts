@@ -364,6 +364,34 @@ describe("ViewModel", () => {
       expect(student.advisor!.$isDirty).toBeTruthy();
     })
 
+    test("non-saved properties cannot be marked dirty", async () => {
+      // Rationale: non-saved properties have no important distinction between clean and dirty,
+      // as they're only ever read from the server - never are they sent to the server.
+
+      // If non-saved properties can be marked dirty, we can land in a state where they
+      // will never be refreshed with the most recent server value via $loadCleanData 
+      // when $loadCleanData is being called by hand outside of a $save().
+
+      var studentModel = new Student({
+        studentId: 1,
+        studentAdvisorId: 3,
+        advisor: { advisorId: 3, name: "Delphine", }
+      });
+      var student = new StudentViewModel();
+      student.$loadCleanData(studentModel);
+
+      // precondition:
+      expect(student.$metadata.props.advisor.dontSerialize).toBeTruthy();
+
+      // Wholesale marking the object is dirty shouldn't mark nonserialized props.
+      student.$isDirty = true;
+      expect(student.$getPropDirty("advisor")).toBeFalsy();
+
+      // Neither should explicit targeting of the prop directly.
+      student.$setPropDirty("advisor", true);
+      expect(student.$getPropDirty("advisor")).toBeFalsy();
+    })
+
     test("$loadCleanData won't trigger autosave on root", async () => {
       var studentModel = new Student({
         studentId: 1,

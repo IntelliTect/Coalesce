@@ -123,6 +123,11 @@ export abstract class ViewModel<
   }
 
   public $setPropDirty(propName: PropNames<TModel["$metadata"]>, dirty = true, triggerAutosave = true) {
+    const propMeta = this.$metadata.props[propName];
+    if (propMeta.dontSerialize) {
+      return;
+    }
+    
     if (dirty) {
       this._dirtyProps.add(propName);
       this._isDirty = true;

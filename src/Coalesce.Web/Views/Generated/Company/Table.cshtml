@@ -81,17 +81,9 @@
                             Address2
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address2', 'fa-caret-down': orderByDescending() == 'Address2'}"></i>
                         </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('City')}">
-                            City
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'City', 'fa-caret-down': orderByDescending() == 'City'}"></i>
-                        </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
                             State
                             <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'State', 'fa-caret-down': orderByDescending() == 'State'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('ZipCode')}">
-                            Zip Code
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'ZipCode', 'fa-caret-down': orderByDescending() == 'ZipCode'}"></i>
                         </th>
                         <th class="sortable-header" data-bind="click: function(){orderByToggle('IsDeleted')}">
                             Is Deleted
@@ -113,9 +105,7 @@
                             <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</td>
                             <td class="prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</td>
                             <td class="prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</td>
-                            <td class="prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</td>
                             <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
-                            <td class="prop-zipCode">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.ZipCode))</td>
                             <td class="prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</td>
                             <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                             <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
@@ -125,9 +115,7 @@
                             <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name, true))</td>
                             <td class="prop-address1">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, true))</td>
                             <td class="prop-address2">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, true))</td>
-                            <td class="prop-city">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.City, true))</td>
                             <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
-                            <td class="prop-zipCode">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.ZipCode, true))</td>
                             <td class="prop-isDeleted">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.IsDeleted, true))</td>
                             <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                             <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>

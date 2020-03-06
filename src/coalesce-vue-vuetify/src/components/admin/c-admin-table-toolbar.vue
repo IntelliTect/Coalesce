@@ -12,6 +12,7 @@
     <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
     
     <v-btn
+      v-if="canCreate"
       class="c-admin-table-toolbar--button-create"
       text
       :to="createRoute"

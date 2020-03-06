@@ -269,7 +269,7 @@ module Coalesce {
                   const formPairs = $.param({ [k]: v }).split("&");
                   for (const pair of formPairs) {
                     const [k, v] = pair.split("=")
-                    formData.set(k, v);
+                    formData.set(decodeURIComponent(k), decodeURIComponent(v));
                   }
                 }
               })

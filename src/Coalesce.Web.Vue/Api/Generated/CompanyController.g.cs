@@ -4,7 +4,6 @@ using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
-using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Models;
@@ -24,7 +23,6 @@ namespace Coalesce.Web.Vue.Api
     [Route("api/Company")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
-    [Create(PermissionLevel = SecurityPermissionLevels.DenyAll)]
     public partial class CompanyController
         : BaseApiController<Coalesce.Domain.Company, CompanyDtoGen, Coalesce.Domain.AppDbContext>
     {

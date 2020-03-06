@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 try
                 {
                     xmlDocumentation.LoadXml(xmlDocs);
-                    returnValue = xmlDocumentation.SelectSingleNode("/member/summary").InnerText.Trim();
+                    returnValue = xmlDocumentation.SelectSingleNode("/member/summary")?.InnerText.Trim() ?? "";
                 }
                 catch (Exception)
                 {

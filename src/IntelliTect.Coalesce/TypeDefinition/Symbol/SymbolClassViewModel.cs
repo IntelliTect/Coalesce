@@ -48,10 +48,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     .Select(s => new SymbolMethodViewModel(s, this))
                     .ToList();
 
-                // Add methods from the base class
-                if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
+                void AddSymbolMethods(INamedTypeSymbol symbol)
                 {
-                    var parentSymbol = new SymbolClassViewModel(Symbol.BaseType);
+                    var parentSymbol = new SymbolClassViewModel(symbol);
                     result.AddRange(parentSymbol.Methods
                         .Cast<SymbolMethodViewModel>()
                         // Don't add overriden methods
@@ -59,7 +58,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     ));
                 }
 
-                return result.ToList().AsReadOnly();
+                // Add methods from the base class
+                if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
+                {
+                    AddSymbolMethods(Symbol.BaseType);
+                }
+
+                // If this type is itself an interface, add inherited interfaces.
+                // This is used for interface-based Service interfaces.
+                if (Symbol.TypeKind == TypeKind.Interface)
+                {
+                    foreach (var iface in Symbol.AllInterfaces)
+                    {
+                        AddSymbolMethods(iface);
+
+                    }
+                }
+
+                return result.Distinct().ToList().AsReadOnly();
             }
         }
 

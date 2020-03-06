@@ -260,7 +260,7 @@ export abstract class ViewModel<
       this.$ignoredRules = remainder
     }
 
-    // Force recompute of effetive rules.
+    // Force recompute of effective rules.
     this._effectiveRules = null;
   }
   
@@ -283,7 +283,7 @@ export abstract class ViewModel<
       [`${propName}.${identifier}`]: true
     }
 
-    // Force recompute of effetive rules.
+    // Force recompute of effective rules.
     this._effectiveRules = null;
   }
 

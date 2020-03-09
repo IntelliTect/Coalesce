@@ -12,9 +12,10 @@
     >
       <v-alert :value="true" type="error" >
         <ul>
-          <li v-for="message in errorMessages">
-            {{message}}
-          </li>
+          <li 
+            v-for="message in errorMessages" 
+            class="c-loader-status--error-message" 
+            v-text="message"></li>
         </ul>
       </v-alert>
     </div>
@@ -199,6 +200,10 @@ export default class extends Vue {
       // My removal of this maybe? broke something somewhere that needs this.
 
       // overflow: hidden;
+    }
+
+    .c-loader-status--error-message {
+      white-space: pre-wrap;
     }
   }
 </style>

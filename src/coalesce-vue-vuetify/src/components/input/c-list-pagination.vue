@@ -1,7 +1,7 @@
 <template>
   <div class="c-list-pagination grey--text">
     <div>
-      <c-list-page-size :list="list" />
+      <c-list-page-size :list="list" :items="pageSizes" />
     </div>
 
     <div >
@@ -33,6 +33,9 @@ import CListRangeDisplay from '../display/c-list-range-display.vue';
 export default class extends Vue {
   @Prop({required: true})
   list!: ListViewModel<any,any>
+
+  @Prop({required: false})
+  pageSizes?: number[]
 }
 </script>
 

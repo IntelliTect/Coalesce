@@ -14,7 +14,6 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "coalesce-vue": "../coalesce-vue",
     "core-js": "^3.4.4",
     "date-fns": "^2.9.0",
     "vue-class-component": "^7.0.2",
@@ -22,12 +21,14 @@
   },
   "peerDependencies": {
     "vue": "^2.6.11",
-    "vuetify": "^2.2.4"
+    "vuetify": "^2.2.4",
+    "coalesce-vue": "../coalesce-vue"
   },
   "optionalDependencies": {
     "vue-router": "^3.1.5"
   },
   "devDependencies": {
+    "coalesce-vue": "../coalesce-vue",
     "@types/jest": "^24.9.0",
     "@vue/cli-plugin-babel": "^4.2.3",
     "@vue/cli-plugin-eslint": "^4.2.3",

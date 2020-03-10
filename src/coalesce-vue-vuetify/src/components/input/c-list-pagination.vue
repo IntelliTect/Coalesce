@@ -1,17 +1,7 @@
 <template>
-  <div class="pagination grey--text">
+  <div class="c-list-pagination grey--text">
     <div>
-      <div>
-        Rows Per Page:
-        <v-select
-          class="ml-4 pt-0 page-size"
-          :items="[10,25,100]"
-          v-model="list.$params.pageSize"
-          hide-details
-          dense
-          single-line
-        ></v-select>
-      </div>
+      <c-list-page-size :list="list" />
     </div>
 
     <div >
@@ -29,12 +19,14 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { ListViewModel } from 'coalesce-vue';
 
 import CListPage from './c-list-page.vue';
+import CListPageSize from './c-list-page-size.vue';
 import CListRangeDisplay from '../display/c-list-range-display.vue';
 
 @Component({
   name: 'c-list-pagination',
   components: {
     CListPage,
+    CListPageSize,
     CListRangeDisplay
   }
 })
@@ -48,38 +40,41 @@ export default class extends Vue {
 
 <style lang="scss" scoped>
 
-  .pagination {
+  .c-list-pagination {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
 
-    .v-text-field {
-      margin-top: 0px
-    }
+    // .v-text-field {
+    //   margin-top: 0px
+    // }
     
-    > * {
-      display: flex;
-      align-items: center;
-      flex-grow: 1;
-      flex-basis:0;
-      // margin: 0 10px;
-      &:nth-child(2) > * {
-        margin: auto;
-      }
-      &:nth-child(3) > * {
-        margin-left: auto;
-      }
-      > * {
-        display: flex;
-        align-items: center;
-        // margin: 0 10px;
-      }
-    }
+    // > * {
+    //   display: flex;
+    //   align-items: center;
+    //   flex-grow: 1;
+    //   flex-basis:0;
+    //   // margin: 0 10px;
+    //   &:nth-child(2) > * {
+    //     margin: auto;
+    //   }
+    //   &:nth-child(3) > * {
+    //     margin-left: auto;
+    //   }
+    //   > * {
+    //     display: flex;
+    //     align-items: center;
+    //     // margin: 0 10px;
+    //   }
+    // }
 
-    .page-size {
-      width: 100px;
-    }
-    .current-page {
-      width: 100px;
-    }
+    // .page-size {
+    //   width: 100px;
+    // }
+    // .current-page {
+    //   width: 100px;
+    // }
   }
 </style>
 

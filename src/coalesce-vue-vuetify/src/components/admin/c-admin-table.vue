@@ -37,6 +37,8 @@
           </td>
         </template>
       </c-table>
+
+      <c-list-pagination :list="list" class="mt-4"></c-list-pagination>
     </v-card-text>
   </v-card>
 </template>

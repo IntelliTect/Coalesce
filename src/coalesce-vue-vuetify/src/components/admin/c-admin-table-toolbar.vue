@@ -66,15 +66,7 @@
 
       <v-spacer></v-spacer>
     
-      <v-select
-        class="d-inline-block c-admin-table-toolbar--page-size ml-1"
-        label="Page Size"
-        outlined
-        :items="[10,25,100]"
-        v-model="list.$params.pageSize"
-        hide-details
-        dense
-      ></v-select>
+      <c-list-page-size :list="list" />
 
     </template>
   </v-toolbar>
@@ -87,12 +79,12 @@ import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, Behavi
 
 import CListRangeDisplay from '../display/c-list-range-display.vue';
 import CListPage from '../input/c-list-page.vue';
+import CListPageSize from '../input/c-list-page-size.vue';
 import CListFilters from '../input/c-list-filters.vue';
-import type { RawLocation } from 'vue-router';
     
 @Component({
   name: 'c-admin-table-toolbar',
-  components: { CListRangeDisplay, CListPage, CListFilters }
+  components: { CListRangeDisplay, CListPage, CListPageSize, CListFilters }
 })
 export default class extends MetadataComponent {
   @Prop({required: true, type: Object})
@@ -110,7 +102,11 @@ export default class extends MetadataComponent {
   }
 
   get createRoute() {
-    return <RawLocation>{
+    // Resolve to an href to allow overriding of admin routes in userspace.
+    // If we just gave a named raw location, it would always use the coalesce admin route
+    // instead of the user-overridden one (that the user overrides by declaring another
+    // route with the same path).
+    return this.$router.resolve({
       name: 'coalesce-admin-item', 
       params: {
         type: this.metadata.name,
@@ -119,7 +115,7 @@ export default class extends MetadataComponent {
         .entries(mapParamsToDto(this.list.$params) || {})
         .filter(entry => entry[0].startsWith("filter."))
       )
-    }
+    }).href
   }
 
   /** Calculated width for the "Page" text input, such that it fits the max page number. */
@@ -144,25 +140,6 @@ export default class extends MetadataComponent {
       caret-color: currentColor !important
     }
 
-    .c-admin-table-toolbar--page-size {
-      max-width: 100px;
-    }
-
-    .v-text-field--outlined .v-input__slot {
-      height: 34px;
-      min-height: 34px !important;
-
-      .v-input__append-inner {
-        margin-top: 4px !important;
-      }
-
-      // https://css-tricks.com/snippets/css/turn-off-number-input-spinners/
-      input[type=number]::-webkit-inner-spin-button, 
-      input[type=number]::-webkit-outer-spin-button { 
-        -webkit-appearance: none; 
-        margin: 0; 
-      }
-    }
   }
 
 </style>

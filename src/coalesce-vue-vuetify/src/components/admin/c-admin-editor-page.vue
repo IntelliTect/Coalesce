@@ -84,7 +84,7 @@ export default class extends MetadataComponent {
         () => this.viewModel.$primaryKey,
         pk => {
           const { href } = this.$router.resolve({
-            ...this.$route,
+            name: this.$route.name!,
             query: {},
             params: {
               ...this.$route.params,

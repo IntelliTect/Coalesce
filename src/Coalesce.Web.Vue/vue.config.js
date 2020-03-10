@@ -3,7 +3,7 @@ var path = require('path');
 module.exports = {
   lintOnSave: false,
   outputDir: 'wwwroot',
-  baseUrl: "/",
+  publicPath: "/",
   configureWebpack: {
     resolve: {
       symlinks: false,

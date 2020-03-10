@@ -1,7 +1,6 @@
 import Vue, { PropOptions } from "vue";
 import { getValueMeta } from "../c-metadata-component";
 import { propDisplay, Model, ClassType, ViewModelCollection } from "coalesce-vue";
-import type { RawLocation } from 'vue-router'
 
 import CDisplay from '../display/c-display'
 
@@ -46,11 +45,15 @@ export default Vue.extend({
         return h(
           'router-link', {
             props: {
-              to: <RawLocation>{ 
+              // Resolve to an href to allow overriding of admin routes in userspace.
+              // If we just gave a named raw location, it would always use the coalesce admin route
+              // instead of the user-overridden one (that the user overrides by declaring another
+              // route with the same path).
+              to: ctx.parent.$router.resolve({ 
                 name: 'coalesce-admin-list', 
                 params: { type: meta.itemType.typeDef.name },
                 query: { ['filter.' + meta.foreignKey.name]: pkValue }
-              }
+              }).href
             } 
           },
           // Use `propDisplay` for our formatted count, forcing the count always by preventing enumeration.
@@ -70,13 +73,17 @@ export default Vue.extend({
           return h(
             'router-link', {
               props: {
-                to: <RawLocation>{ 
+                // Resolve to an href to allow overriding of admin routes in userspace.
+                // If we just gave a named raw location, it would always use the coalesce admin route
+                // instead of the user-overridden one (that the user overrides by declaring another
+                // route with the same path).
+                to: ctx.parent.$router.resolve({ 
                   name: 'coalesce-admin-item', 
                   params: { 
                     type: meta.typeDef.name,
                     id: (model as any)[meta.foreignKey.name]
                   },
-                }
+                }).href
               } 
             },
             propDisplay(model, meta) ?? fkValue

@@ -9,6 +9,7 @@
       <div class="theme--light v-data-table">
         <div class="v-data-table__wrapper">
           
+          <!-- TODO: use v-simple-table instead of hijacking the css of v-data-table -->
           <table>
             <thead class="v-data-table-header">
               <tr>

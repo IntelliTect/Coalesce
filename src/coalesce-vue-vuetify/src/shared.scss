@@ -5,7 +5,9 @@
   .v-input {
     .v-text-field__details,
     .v-messages,
-    &.v-input--switch .v-input__slot {
+    &.v-input--switch .v-input__slot,
+    &.v-input--checkbox .v-input__slot
+    {
       transition: 
         min-height .3s cubic-bezier(.25,.8,.5,1),
         margin-bottom .3s cubic-bezier(.25,.8,.5,1),
@@ -24,7 +26,7 @@
       }
     }
 
-    &.v-input--switch {
+    &.v-input--switch, &.v-input--checkbox {
       .v-input__slot {
         margin-bottom: 0;
       }

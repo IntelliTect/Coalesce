@@ -582,7 +582,7 @@ namespace IntelliTect.Coalesce
         /// <param name="parameters">The parameters by which to trim.</param>
         /// <returns>The trimmed collection of DTOs.</returns>
         public virtual IList<TDto> TrimListFields<TDto>(IList<TDto> mappedResult, IListParameters parameters)
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             if (parameters.Fields.Count > 0)
             {

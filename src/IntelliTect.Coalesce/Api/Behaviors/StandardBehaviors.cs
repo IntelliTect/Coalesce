@@ -65,7 +65,7 @@ namespace IntelliTect.Coalesce
         /// <returns>A SaveKind indicating either Create or Update, 
         /// and the value of the primary key that can be used for database lookups.</returns>
         public virtual (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             var dtoClassViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
             object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
@@ -102,7 +102,7 @@ namespace IntelliTect.Coalesce
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
         )
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             (SaveKind kind, object idValue) = DetermineSaveKind(incomingDto);
 
@@ -221,7 +221,7 @@ namespace IntelliTect.Coalesce
         /// <param name="dto">The incoming item from the client.</param>
         /// <param name="parameters">The additional parameters sent by the client.</param>
         protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters) 
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             dto.MapToModel(item, new MappingContext(User, parameters));
         }
@@ -300,7 +300,7 @@ namespace IntelliTect.Coalesce
             object id,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters)
-            where TDto : IClassDto<T>, new()
+            where TDto : class, IClassDto<T>, new()
         {
             var (existingItem, _) = await (OverrideFetchForDeleteDataSource ?? dataSource).GetItemAsync(id, parameters);
             if (!existingItem.WasSuccessful)

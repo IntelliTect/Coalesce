@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.Mapping
     public static class Mapper
     {
         public static TDto MapToDto<T, TDto>(this T obj, IMappingContext context, IncludeTree tree = null)
-             where TDto : IClassDto<T>, new()
+             where TDto : class, IClassDto<T>, new()
         {
             if (obj == null) return default;
 
@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.Mapping
         }
 
         public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)
-             where TDto : IClassDto<T>, new()
+             where TDto : class, IClassDto<T>, new()
         {
             dto.MapTo(entity, context);
             return entity;

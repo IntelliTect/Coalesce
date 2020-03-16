@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce
         /// <param name="incomingDto"></param>
         /// <returns></returns>
         (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
-            where TDto : IClassDto<T>, new();
+            where TDto : class, IClassDto<T>, new();
 
         /// <summary>
         /// Save an item to the database.
@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce
             TDto incomingDto,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
-        ) where TDto : IClassDto<T>, new();
+        ) where TDto : class, IClassDto<T>, new();
 
 
         /// <summary>
@@ -46,6 +46,6 @@ namespace IntelliTect.Coalesce
             object id,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
-        ) where TDto : IClassDto<T>, new();
+        ) where TDto : class, IClassDto<T>, new();
     }
 }

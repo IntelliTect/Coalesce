@@ -98,6 +98,13 @@ export const Advisor = domain.types.Advisor = {
         get typeDef() { return (domain.types.Student as ModelType) },
       }
     },
+    studentWrapperObject: {
+      name: 'studentWrapperObject',
+      displayName: 'Student Wrapper Object',
+      role: 'value',
+      type: 'object',
+      get typeDef() { return domain.types.DisplaysStudent as ObjectType }
+    },
   }
 };
 
@@ -245,7 +252,7 @@ export const Student = domain.types.Student = {
   }
 };
 
-export const DisplaysStudent = <ObjectType>{
+export const DisplaysStudent = domain.types.DisplaysStudent = <ObjectType>{
   ...metaBase("DisplaysStudent"),
   type: "object",
   get displayProp() {
@@ -260,7 +267,7 @@ export const DisplaysStudent = <ObjectType>{
       ...value("student"),
       type: "model",
       dontSerialize: true,
-      typeDef: Student
+      get typeDef() { return Student }
     }
   }
 };

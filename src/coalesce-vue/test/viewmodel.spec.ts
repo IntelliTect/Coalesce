@@ -802,6 +802,24 @@ describe("ViewModel", () => {
       })
     })
 
+    describe("object getter/setters", () => {
+      test("object setter converts to Model", () => {
+        var advisor = new AdvisorViewModel();
+        advisor.$loadCleanData({
+          studentWrapperObject: {
+            name: "bob",
+            student: {
+              studentId: 1,
+              name: "bob"
+            }
+          }
+        })
+
+        expect(advisor.studentWrapperObject!.$metadata).toBe(metadata.DisplaysStudent)
+        expect(advisor.studentWrapperObject!.student?.$metadata).toBe(metadata.Student)
+      })
+    })
+
     describe("collection navigation getter/setters", () => {
       test("setter creates new ViewModelCollection", () => {
         var student = new StudentViewModel();

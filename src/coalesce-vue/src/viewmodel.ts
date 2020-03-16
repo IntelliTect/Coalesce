@@ -1183,6 +1183,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               }
             }
 
+          // TODO: This should probably be checking prop.type=='collection' && prop.itemType.type == 'model' 
+          // (it shouldn't care about relationalness in the same way that the setter for 'model' also doesn't care.).
           : prop.role == "collectionNavigation"
           ? function(this: InstanceType<T>, incomingValue: any) {
               let hasLoaded = false;
@@ -1233,48 +1235,52 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
           //   }
 
 
-            : function(this: InstanceType<T>, incomingValue: any) {
-              const $data = (this as any).$data;
-              const old = $data[propName];
+          : function(this: InstanceType<T>, incomingValue: any) {
+            const $data = (this as any).$data;
+            const old = $data[propName];
 
-              // First, check strict equality. This will handle the 90% most common case.
-              if (old === incomingValue) {
-                return;
-              }
+            // First, check strict equality. This will handle the 90% most common case.
+            if (old === incomingValue) {
+              return;
+            }
 
-              // If strict equality fails, try to use valueOf() to compare.
-              // valueOf() helps with Date instances that represent the same time value.
-              // If either side is null, it is ok to set $isDirty, since we
-              // know that if we got this var, BOTH sides aren't both null.
-              if (old?.valueOf() !== incomingValue?.valueOf()) {
-                $data[propName] = incomingValue;
-              
-                // TODO: Implement $emit?
-                // this.$emit('valueChanged', prop, value, val);
+            if (prop.type == "object" && !("$metadata" in incomingValue)) {
+              convertToModel(incomingValue, prop.typeDef);
+            }
 
-                this.$setPropDirty(propName);
+            // If strict equality fails, try to use valueOf() to compare.
+            // valueOf() helps with Date instances that represent the same time value.
+            // If either side is null, it is ok to set $isDirty, since we
+            // know that if we got this var, BOTH sides aren't both null.
+            if (old?.valueOf() !== incomingValue?.valueOf()) {
+              $data[propName] = incomingValue;
+            
+              // TODO: Implement $emit?
+              // this.$emit('valueChanged', prop, value, val);
 
-                if (prop.role == "foreignKey" && prop.navigationProp) {
-                  /*
-                    If there's a navigation property for this FK,
-                    we need to null it out if the current value of the 
-                    navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
-                  */
-                  const currentObject = $data[prop.navigationProp.name];
-                  if (
-                    currentObject != null &&
-                    incomingValue != currentObject[prop.principalKey.name]
-                  ) {
-                    // Set on `$data`, not `this`.
-                    // We don't want to trigger the "model" setter
-                    // since it basically does nothing when the value is null,
-                    // and it would also attempt to perform fixup of the FK prop,
-                    // but we're already doing just that.
-                    $data[prop.navigationProp.name] = null;
-                  }
+              this.$setPropDirty(propName);
+
+              if (prop.role == "foreignKey" && prop.navigationProp) {
+                /*
+                  If there's a navigation property for this FK,
+                  we need to null it out if the current value of the 
+                  navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
+                */
+                const currentObject = $data[prop.navigationProp.name];
+                if (
+                  currentObject != null &&
+                  incomingValue != currentObject[prop.principalKey.name]
+                ) {
+                  // Set on `$data`, not `this`.
+                  // We don't want to trigger the "model" setter
+                  // since it basically does nothing when the value is null,
+                  // and it would also attempt to perform fixup of the FK prop,
+                  // but we're already doing just that.
+                  $data[prop.navigationProp.name] = null;
                 }
               }
             }
+          }
     };
   }
 

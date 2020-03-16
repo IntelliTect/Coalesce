@@ -39,6 +39,7 @@ export interface Advisor extends Model<typeof metadata.Advisor> {
   advisorId: number | null
   name: string | null
   students: Student[]
+  studentWrapperObject: DisplaysStudent | null
 }
 export class Advisor {
   /** Mutates the input object and its descendents into a valid Advisor implementation. */
@@ -77,4 +78,9 @@ export class Course {
   constructor(data?: Partial<Course> | {[k: string]: any}) {
     Object.assign(this, Course.map(data || {}));
   }
+}
+
+export interface DisplaysStudent extends Model<typeof metadata.DisplaysStudent> {
+  name: string | null
+  student: Student | null
 }

@@ -42,6 +42,8 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: coalesce-version
 
+
+
 - job: 
   displayName: IntelliTect.Coalesce.*
   dependsOn: Meta
@@ -74,7 +76,7 @@ jobs:
     inputs:
       command: restore
       verbosityRestore: normal
-      projects: '**/*.csproj'
+      projects: 'src/IntelliTect.Coalesce*/*.csproj'
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet build'
@@ -88,22 +90,6 @@ jobs:
       command: test
       projects: 'src/IntelliTect.Coalesce*Test*/*.csproj'
       arguments: '--configuration $(BuildConfiguration)'
-
-  # - task: DotNetCoreCLI@2
-  #   displayName: 'dotnet publish CLI'
-  #   inputs:
-  #     command: publish
-  #     publishWebProjects: false
-  #     projects: 'src/IntelliTect.Coalesce.Cli/*.csproj'
-  #     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/dotnet-coalesce'
-  #     zipAfterPublish: false
-  #     modifyOutputPath: false
-
-  # - task: PublishBuildArtifacts@1
-  #   displayName: 'Publish Artifact: dotnet-coalesce'
-  #   inputs:
-  #     PathtoPublish: '$(Build.ArtifactStagingDirectory)/dotnet-coalesce'
-  #     ArtifactName: 'dotnet-coalesce'
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet pack'
@@ -149,6 +135,13 @@ jobs:
       packageType: 'sdk'
       version: '2.2.x'
 
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet restore'
+    inputs:
+      command: restore
+      verbosityRestore: normal
+      projects: '$(csproj); src/IntelliTect.Coalesce.Cli'
+
   - script: npm ci
     displayName: 'Coalesce.Web: npm ci'
     workingDirectory: $(dir)
@@ -167,23 +160,7 @@ jobs:
       projects: '$(csproj)'
       arguments: '--configuration $(BuildConfiguration)'
 
-  # Commented these out because they're a bit slow, and because Coalesce.Web.Vue hasn't been touched in a long long time,
-  # so they really aren't providing much value.
-  
-  # - script: npm run build-lib
-  #   displayName: 'Coalesce.Web.Vue: npm run build-lib'
-  #   workingDirectory: src/Coalesce.Web.Vue
 
-  # - script: npm ci
-  #   displayName: 'Coalesce.Web.Vue: npm ci'
-  #   workingDirectory: src/Coalesce.Web.Vue
-
-  # - task: DotNetCoreCLI@2
-  #   displayName: 'Coalesce.Web.Vue: dotnet dotnet-coalesce.dll '
-  #   inputs:
-  #     command: custom
-  #     custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
-  #     arguments: 'coalesce-vue.json'
 
 - job:
   displayName: coalesce-vue

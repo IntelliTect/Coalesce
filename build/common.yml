@@ -148,7 +148,7 @@ jobs:
     displayName: 'Coalesce.Web: npm ci'
     workingDirectory: $(dir)
 
-  - script: npx gulp coalesceKoGen
+  - script: npx gulp coalesceKo
     displayName: 'Coalesce.Web: npx gulp copyAll'
     workingDirectory: $(dir)
 

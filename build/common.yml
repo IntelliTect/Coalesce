@@ -144,12 +144,17 @@ jobs:
       packageType: 'sdk'
       version: '3.1.x'
 
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '2.2.x'
+
   - script: npm ci
     displayName: 'Coalesce.Web: npm ci'
     workingDirectory: $(dir)
 
   - script: npx gulp coalesceKo
-    displayName: 'Coalesce.Web: npx gulp copyAll'
+    displayName: 'Coalesce.Web: npx gulp coalesceKo'
     workingDirectory: $(dir)
 
   - script: npx gulp copyAll

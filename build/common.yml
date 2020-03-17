@@ -89,21 +89,21 @@ jobs:
       projects: 'src/IntelliTect.Coalesce*Test*/*.csproj'
       arguments: '--configuration $(BuildConfiguration)'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet publish CLI'
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: 'src/IntelliTect.Coalesce.Cli/*.csproj'
-      arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/dotnet-coalesce'
-      zipAfterPublish: false
-      modifyOutputPath: false
+  # - task: DotNetCoreCLI@2
+  #   displayName: 'dotnet publish CLI'
+  #   inputs:
+  #     command: publish
+  #     publishWebProjects: false
+  #     projects: 'src/IntelliTect.Coalesce.Cli/*.csproj'
+  #     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/dotnet-coalesce'
+  #     zipAfterPublish: false
+  #     modifyOutputPath: false
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: dotnet-coalesce'
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/dotnet-coalesce'
-      ArtifactName: 'dotnet-coalesce'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: dotnet-coalesce'
+  #   inputs:
+  #     PathtoPublish: '$(Build.ArtifactStagingDirectory)/dotnet-coalesce'
+  #     ArtifactName: 'dotnet-coalesce'
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet pack'

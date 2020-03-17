@@ -120,20 +120,47 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/packages'
       ArtifactName: packages
 
+
+
+- job: 
+  displayName: Coalesce.Web (Knockout Demo)
+  dependsOn: Meta
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  variables:
+    COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
+    dir: src/Coalesce.Web
+    csproj: src/Coalesce.Web/Coalesce.Web.csproj
+    
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 10.x'
+    inputs:
+      versionSpec: 10.x
+
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '3.1.x'
+
   - script: npm ci
     displayName: 'Coalesce.Web: npm ci'
-    workingDirectory: src/Coalesce.Web
+    workingDirectory: $(dir)
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Coalesce.Web: dotnet dotnet-coalesce.dll '
-    inputs:
-      command: custom
-      custom: '$(build.artifactstagingdirectory)/dotnet-coalesce/dotnet-coalesce.dll'
-      arguments: 'coalesce-ko.json'
+  - script: npx gulp coalesceKoGen
+    displayName: 'Coalesce.Web: npx gulp copyAll'
+    workingDirectory: $(dir)
 
   - script: npx gulp copyAll
     displayName: 'Coalesce.Web: npx gulp copyAll'
-    workingDirectory: src/Coalesce.Web
+    workingDirectory: $(dir)
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+      projects: '$(csproj)'
+      arguments: '--configuration $(BuildConfiguration)'
 
   # Commented these out because they're a bit slow, and because Coalesce.Web.Vue hasn't been touched in a long long time,
   # so they really aren't providing much value.

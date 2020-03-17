@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from '../c-metadata-component'
-import { ViewModel, ModelType, BehaviorFlags, ListParameters, mapQueryToParams, mapToModel, mapValueToModel } from 'coalesce-vue';
+import { ViewModel, ModelType, BehaviorFlags, ListParameters, mapQueryToParams, mapToModel, mapValueToModel, bindKeyToRouteOnCreate } from 'coalesce-vue';
 
 import CAdminMethods from './c-admin-methods.vue';
 import CAdminEditor from './c-admin-editor.vue';
@@ -79,25 +79,8 @@ export default class extends MetadataComponent {
           }
         }
       }
-
-      this.$watch(
-        () => this.viewModel.$primaryKey,
-        pk => {
-          const { href } = this.$router.resolve({
-            name: this.$route.name!,
-            query: {},
-            params: {
-              ...this.$route.params,
-              id: this.viewModel.$primaryKey
-            }
-          });
-          // Manually replace state with the HTML5 history API
-          // so that vue-router doesn't notice the route change
-          // and therefore won't trigger any route transitions
-          // or router-view component reconstitutions.
-          window.history.replaceState(null, window.document.title, href)
-        }
-      )
+  
+      bindKeyToRouteOnCreate(this, this.viewModel);
     }
 
     this.viewModel.$startAutoSave(this, { wait: 500 })

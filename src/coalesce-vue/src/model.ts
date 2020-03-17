@@ -17,7 +17,8 @@ import {
   DataSourceType,
   ModelValue,
   ObjectValue,
-  FileValue
+  FileValue,
+  ModelType
 } from "./metadata";
 import { Indexable } from "./util";
 
@@ -851,5 +852,35 @@ export function bindToQueryString(
     },
     { immediate: true }
   );
+}
 
+export function bindKeyToRouteOnCreate(
+  vue: Vue,
+  model: Model<ModelType>,
+  routeParamName: string = 'id',
+  keepQuery: boolean = false
+) {
+  vue.$watch(
+    () => (model as any)[model.$metadata.keyProp.name],
+    (pk, o) => {
+      if (!vue.$route.name) {
+        throw Error("Cannot use bindKeyToRouteOnCreate with unnamed routes.")
+      }
+      if (pk && !o) {
+        const { href } = vue.$router.resolve({
+          name: vue.$route.name,
+          query: keepQuery ? vue.$route.query : {},
+          params: {
+            ...vue.$route.params,
+            [routeParamName]: pk
+          }
+        });
+        // Manually replace state with the HTML5 history API
+        // so that vue-router doesn't notice the route change
+        // and therefore won't trigger any route transitions
+        // or router-view component reconstitutions.
+        window.history.replaceState(null, window.document.title, href)
+      }
+    }
+  )
 }

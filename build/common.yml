@@ -140,7 +140,9 @@ jobs:
     inputs:
       command: restore
       verbosityRestore: normal
-      projects: '$(csproj); src/IntelliTect.Coalesce.Cli'
+      projects: |
+        '$(csproj)'
+        src/IntelliTect.Coalesce.Cli/*.csproj
 
   - script: npm ci
     displayName: 'Coalesce.Web: npm ci'

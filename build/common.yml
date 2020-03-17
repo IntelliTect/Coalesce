@@ -95,7 +95,7 @@ jobs:
     displayName: 'dotnet pack'
     inputs:
       command: pack
-      projects: 'src/IntelliTect.Coalesce*/*.csproj'
+      packagesToPack: 'src/IntelliTect.Coalesce*/*.csproj'
       packDirectory: '$(Build.ArtifactStagingDirectory)/packages'
       nobuild: true
       versioningScheme: byEnvVar

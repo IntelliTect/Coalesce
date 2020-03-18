@@ -28,6 +28,10 @@ import CAdminTable from './c-admin-table.vue';
   }
 })
 export default class extends MetadataComponent {
+  /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */
+  get pageTitle() {
+    return this.metadata.displayName + " List"
+  }
 
   @Prop({required: false, type: String, default: null})
   public type!: string | null;

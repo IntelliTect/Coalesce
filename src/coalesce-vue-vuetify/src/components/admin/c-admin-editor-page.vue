@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from '../c-metadata-component'
-import { ViewModel, ModelType, BehaviorFlags, ListParameters, mapQueryToParams, mapToModel, mapValueToModel, bindKeyToRouteOnCreate } from 'coalesce-vue';
+import { ViewModel, ModelType, BehaviorFlags, ListParameters, mapQueryToParams, mapToModel, mapValueToModel, bindKeyToRouteOnCreate, modelDisplay } from 'coalesce-vue';
 
 import CAdminMethods from './c-admin-methods.vue';
 import CAdminEditor from './c-admin-editor.vue';
@@ -28,6 +28,23 @@ import CAdminEditor from './c-admin-editor.vue';
   }
 })
 export default class extends MetadataComponent {
+  /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */
+  get pageTitle() {
+    if (this.isCreate) {
+      return "Create - " + this.metadata.displayName;
+    }
+
+    let display = modelDisplay(this.model);
+    if (!display) {
+      return this.metadata.displayName;
+    }
+
+    const maxLen = 30;
+    if (display.length <= maxLen) {
+      return display + " - " + this.metadata.displayName;
+    }
+    return display.slice(0, maxLen) + '... - ' + this.metadata.displayName;
+  }
 
   @Prop({required: true, type: String})
   public type!: string;

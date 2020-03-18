@@ -34,7 +34,7 @@ export default class extends MetadataComponent {
       return "Create - " + this.metadata.displayName;
     }
 
-    let display = modelDisplay(this.model);
+    let display = this.viewModel ? modelDisplay(this.viewModel) : null;
     if (!display) {
       return this.metadata.displayName;
     }

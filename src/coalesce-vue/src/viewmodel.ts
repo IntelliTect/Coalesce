@@ -34,8 +34,8 @@ import {
   mapToModel
 } from "./model";
 import { Indexable } from "./util";
-import { debounce } from "lodash-es";
-import { Cancelable } from "lodash";
+import debounce from "lodash-es/debounce";
+import type { Cancelable } from "lodash";
 
 export { DeepPartial } from "./util";
 

@@ -19,6 +19,7 @@ import CLoaderStatus from './display/c-loader-status.vue';
 // import CMethodsDialog from './admin/c-methods-dialog.vue';
 import CListPage from './input/c-list-page.vue';
 import CListPageSize from './input/c-list-page-size.vue';
+import CListRangeDisplay from './input/c-list-range-display.vue';
 import CListPagination from './input/c-list-pagination.vue';
 import CSelectManyToMany from './input/c-select-many-to-many.vue';
 import CSelectStringValue from './input/c-select-string-value.vue';
@@ -44,6 +45,7 @@ export {
   // CMethodsDialog,
   CListPage,
   CListPageSize,
+  CListRangeDisplay,
   CListPagination,
   CSelectManyToMany,
   CSelectStringValue,
@@ -70,6 +72,7 @@ export default function install(Vue: typeof _Vue) {
   // Vue.component('c-methods-dialog', CMethodsDialog);
   Vue.component('c-list-page', CListPage);
   Vue.component('c-list-page-size', CListPageSize);
+  Vue.component('c-list-range-display', CListRangeDisplay);
   Vue.component('c-list-pagination', CListPagination);
   Vue.component('c-select-many-to-many', CSelectManyToMany);
   Vue.component('c-select-string-value', CSelectStringValue);

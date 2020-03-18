@@ -808,6 +808,7 @@ export function bindToQueryString(
   key: string, 
   queryKey: string = key, 
   parse?: (v: any) => any,
+  mode: 'push' | 'replace' = 'replace',
 ) {
   const defaultValue = obj[key];
 
@@ -816,7 +817,7 @@ export function bindToQueryString(
     () => obj[key], 
     (v: any) => {
       vue.$router
-        .replace({query: {
+        [mode]({query: {
           ...vue.$route.query, 
           [queryKey]: 
             v == null || v === ""

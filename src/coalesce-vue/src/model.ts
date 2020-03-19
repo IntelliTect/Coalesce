@@ -822,9 +822,13 @@ export function bindToQueryString(
           [queryKey]: 
             v == null || v === ""
             ? undefined 
-            // Use metadata to format the value if the obj is a DataSource.
+
+            // Use metadata to format the value if the obj has any.
             : obj?.$metadata?.params?.[key]
             ? mapValueToDto(v, obj.$metadata.params[key])?.toString()
+            : obj?.$metadata?.props?.[key]
+            ? mapValueToDto(v, obj.$metadata.props[key])?.toString()
+
             // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
             // Fallback to .tostring()
             : (String(v) ?? undefined)

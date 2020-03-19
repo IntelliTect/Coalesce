@@ -65,7 +65,7 @@
       "^vue$": "vue/dist/vue.common.js",
       "//": "Map the esm version of libs to the non-esm for the tests - jest doesn't do well with es modules & typescript. By some sheer chance of luck, the import statements can be written the same between the es and non-es versions of the files.",
       "^date-fns/esm$": "date-fns",
-      "lodash-es": "lodash"
+      "lodash-es(.*)": "lodash$1"
     },
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [

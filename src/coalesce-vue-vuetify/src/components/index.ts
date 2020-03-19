@@ -19,7 +19,7 @@ import CLoaderStatus from './display/c-loader-status.vue';
 // import CMethodsDialog from './admin/c-methods-dialog.vue';
 import CListPage from './input/c-list-page.vue';
 import CListPageSize from './input/c-list-page-size.vue';
-import CListRangeDisplay from './input/c-list-range-display.vue';
+import CListRangeDisplay from './display/c-list-range-display.vue';
 import CListPagination from './input/c-list-pagination.vue';
 import CSelectManyToMany from './input/c-select-many-to-many.vue';
 import CSelectStringValue from './input/c-select-string-value.vue';

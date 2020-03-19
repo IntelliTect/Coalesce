@@ -123,7 +123,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
         {
-            IncludeTree includeTree = null;
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
@@ -131,6 +130,7 @@ namespace Coalesce.Web.Api
                 return new ItemResult<PersonDtoGen>(itemResult);
             }
             var item = itemResult.Object;
+            IncludeTree includeTree = null;
             var methodResult = item.Rename(name, out includeTree);
             await Db.SaveChangesAsync();
             var result = new ItemResult<PersonDtoGen>();
@@ -260,7 +260,6 @@ namespace Coalesce.Web.Api
         [Authorize]
         public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName, Coalesce.Domain.Person.Titles? title)
         {
-            IncludeTree includeTree = null;
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
             if (!itemResult.WasSuccessful)
@@ -268,6 +267,7 @@ namespace Coalesce.Web.Api
                 return new ItemResult<PersonDtoGen>(itemResult);
             }
             var item = itemResult.Object;
+            IncludeTree includeTree = null;
             var methodResult = item.ChangeFirstName(firstName, title);
             await Db.SaveChangesAsync();
             var result = new ItemResult<PersonDtoGen>();

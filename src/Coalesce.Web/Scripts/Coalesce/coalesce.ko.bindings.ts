@@ -654,12 +654,12 @@ ko.bindingHandlers.datePicker = {
                 newValue = newValue;
             } else if (preserveTime) {
                 // This is a date entry, keep the time. 
-                var unwrappedTime = moment.duration((unwrappedValue || moment()).format('HH:mm:ss'));
-                newValue = moment(newValue.format("YYYY/MM/DD"), "YYYY/MM/DD").add(unwrappedTime);
+                const unwrappedTime = (unwrappedValue || moment()).format('HH:mm:ss');
+                newValue = moment(newValue.format("YYYY/MM/DD") + ' ' + unwrappedTime, "YYYY/MM/DD HH:mm:ss");
             } else if (preserveDate) {
                 // This is a time entry, keep the date.
-                var newTime = moment.duration(newValue.format('HH:mm:ss'));
-                newValue = moment((unwrappedValue || moment()).format('YYYY/MM/DD'), "YYYY/MM/DD").add(newTime);
+                const newTime = newValue.format('HH:mm:ss');
+                newValue = moment((unwrappedValue || moment()).format('YYYY/MM/DD') + ' ' + newTime, "YYYY/MM/DD HH:mm:ss");
             }
 
             return newValue;

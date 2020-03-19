@@ -55,12 +55,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
                 using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.Name} ({method.CsParameters})"))
                 {
-                    if (method.ResultType.HasClassViewModel ||
-                       (method.ResultType.PureType.HasClassViewModel && method.ResultType.IsCollection))
-                    {
-                        b.Line("IncludeTree includeTree = null;");
-                    }
-
                     WriteMethodInvocation(b, method, "Service");
 
                     WriteMethodResultProcessBlock(b, method);

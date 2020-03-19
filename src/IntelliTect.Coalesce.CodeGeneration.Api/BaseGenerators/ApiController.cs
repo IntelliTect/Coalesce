@@ -91,6 +91,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// </param>
         public void WriteMethodInvocation(CSharpCodeBuilder b, MethodViewModel method, string owningMember)
         {
+            if (method.ResultType.PureType.ClassViewModel?.IsDto == false)
+            {
+                b.Line("IncludeTree includeTree = null;");
+            }
+
             if (method.Parameters.Any(p => !p.IsDI && p.PureType.HasClassViewModel))
             {
                 b.Line($"var _mappingContext = new {nameof(MappingContext)}(User);");

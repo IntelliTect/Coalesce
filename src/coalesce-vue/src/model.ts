@@ -851,6 +851,8 @@ export function bindToQueryString(
         // Use metadata to parse the value if the obj is a DataSource.
         : obj?.$metadata?.params?.[key]
         ? mapValueToModel(v, obj.$metadata.params[key])
+        : obj?.$metadata?.props?.[key]
+        ? mapValueToModel(v, obj.$metadata.props[key])
         // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
         // Fallback to the raw value
         : v

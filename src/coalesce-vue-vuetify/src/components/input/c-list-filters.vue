@@ -199,7 +199,7 @@ export default Vue.extend({
     },
     addFilter(filterInfo: FilterInfo) {
       if (filterInfo.propMeta?.type == "boolean") {
-        this.setFilter(filterInfo, false);
+        this.setFilter(filterInfo, true);
       } else {
         this.setFilter(filterInfo, '');
       }

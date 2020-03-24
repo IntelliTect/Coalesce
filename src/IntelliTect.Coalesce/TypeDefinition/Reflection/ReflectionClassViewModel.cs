@@ -11,10 +11,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected Type Info { get; }
 
-        public ReflectionClassViewModel(Type type)
+        public ReflectionClassViewModel(Type type) : this(null, type)
+        {
+        }
+
+        internal ReflectionClassViewModel(ReflectionRepository reflectionRepository, Type type)
         {
             Info = type;
-            Type = new ReflectionTypeViewModel(type);
+            Type = new ReflectionTypeViewModel(reflectionRepository, type);
         }
 
         public override string Name => Info.Name;
@@ -23,7 +27,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent) => Info
             .GetProperties()
-            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, new ReflectionTypeViewModel(p.DeclaringType).ClassViewModel, p){ ClassFieldOrder = i })
+            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, this, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
             .ToList().AsReadOnly();
 
@@ -36,7 +40,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Info
             .GetNestedTypes()
-            .Select(t => new ReflectionTypeViewModel(t))
+            .Select(t => new ReflectionTypeViewModel(ReflectionRepository, t))
             .ToList().AsReadOnly();
     }
 }

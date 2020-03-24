@@ -11,15 +11,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal ITypeSymbol Symbol { get; internal set; }
 
-        public SymbolTypeViewModel(ITypeSymbol symbol)
+        public SymbolTypeViewModel(ITypeSymbol symbol) : this(null, symbol)
+        {
+        }
+
+        internal SymbolTypeViewModel(ReflectionRepository reflectionRepository, ITypeSymbol symbol) : base(reflectionRepository)
         {
             Symbol = symbol;
 
-            FirstTypeArgument = IsGeneric && NamedSymbol.Arity > 0 
-                ? new SymbolTypeViewModel(NamedSymbol.TypeArguments.First()) 
+            FirstTypeArgument = IsGeneric && NamedSymbol.Arity > 0
+                ? new SymbolTypeViewModel(reflectionRepository, NamedSymbol.TypeArguments.First())
                 : null;
 
-            ArrayType = IsArray ? new SymbolTypeViewModel(((IArrayTypeSymbol)Symbol).ElementType) : null;
+            ArrayType = IsArray ? new SymbolTypeViewModel(reflectionRepository, ((IArrayTypeSymbol)Symbol).ElementType) : null;
 
             var types = new List<INamedTypeSymbol>();
             var target = Symbol as INamedTypeSymbol;
@@ -153,7 +157,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override TypeViewModel[] GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseTypeSymbol(type)?
             .TypeArguments
-            .Select(t => new SymbolTypeViewModel(t))
+            .Select(t => new SymbolTypeViewModel(ReflectionRepository, t))
             .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;

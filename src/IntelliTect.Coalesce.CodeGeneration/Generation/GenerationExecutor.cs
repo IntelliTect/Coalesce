@@ -91,7 +91,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             }
 
             rr.DiscoverCoalescedTypes(types
-                .Select(t => new SymbolTypeViewModel(t))
+                .Select(t => new SymbolTypeViewModel(rr, t))
             );
 
 

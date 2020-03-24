@@ -11,15 +11,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal Type Info { get; internal set; }
 
-        public ReflectionTypeViewModel(Type type)
+        public ReflectionTypeViewModel(Type type) : this(null, type)
         {
+        }
+
+        internal ReflectionTypeViewModel(ReflectionRepository reflectionRepository, Type type) : base(reflectionRepository)
+        {
+            ReflectionRepository = reflectionRepository;
             Info = type;
 
             FirstTypeArgument = IsGeneric && Info.IsConstructedGenericType
-                ? new ReflectionTypeViewModel(Info.GenericTypeArguments[0])
+                ? new ReflectionTypeViewModel(reflectionRepository, Info.GenericTypeArguments[0])
                 : null;
 
-            ArrayType = IsArray ? new ReflectionTypeViewModel(Info.GetElementType()) : null;
+            ArrayType = IsArray ? new ReflectionTypeViewModel(reflectionRepository, Info.GetElementType()) : null;
 
             IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
             {
@@ -63,7 +68,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override TypeViewModel[] GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseType(type)?
             .GenericTypeArguments
-            .Select(t => new ReflectionTypeViewModel(t))
+            .Select(t => new ReflectionTypeViewModel(ReflectionRepository, t))
             .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;

@@ -15,10 +15,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ReflectionParameterViewModel(MethodViewModel parent, ParameterInfo info) : base(parent)
         {
             Info = info;
-            if (info.ParameterType.IsByRef)
-                Type = new ReflectionTypeViewModel(info.ParameterType.GetElementType());
-            else
-                Type = new ReflectionTypeViewModel(info.ParameterType);
+            Type = new ReflectionTypeViewModel(
+                Parent.Parent.ReflectionRepository, 
+                info.ParameterType.IsByRef 
+                    ? info.ParameterType.GetElementType() 
+                    : info.ParameterType
+            );
 
         }
 

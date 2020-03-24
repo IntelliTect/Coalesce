@@ -58,7 +58,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (ReturnType.IsA(typeof(Task<>))) return ReturnType.FirstTypeArgument;
 
                 // Return type is a task, but not a generic task. Effective type is void.
-                return new ReflectionTypeViewModel(typeof(void));
+                return new ReflectionTypeViewModel(Parent.ReflectionRepository, typeof(void));
             }
         }
 
@@ -87,7 +87,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                       // For ReturnsListResult, the result will be a constructed generic IList<T>
                       ReturnsListResult ? retType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type
                     : retType.IsA(typeof(ItemResult<>)) ? retType.FirstTypeArgument
-                    : retType.IsA(typeof(ItemResult)) ? new ReflectionTypeViewModel(typeof(void))
+                    : retType.IsA(typeof(ItemResult)) ? new ReflectionTypeViewModel(Parent.ReflectionRepository, typeof(void))
                     : retType;
             }
         }

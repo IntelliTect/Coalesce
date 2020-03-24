@@ -28,7 +28,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Info.IsStatic;
 
-        public override TypeViewModel ReturnType => new ReflectionTypeViewModel(Info.ReturnType);
+        public override TypeViewModel ReturnType => new ReflectionTypeViewModel(Parent.ReflectionRepository, Info.ReturnType);
 
         public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
 

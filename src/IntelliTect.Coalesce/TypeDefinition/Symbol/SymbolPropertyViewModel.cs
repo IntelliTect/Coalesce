@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Parent = declaringParent;
             EffectiveParent = effectiveParent;
             Symbol = symbol;
-            Type = new SymbolTypeViewModel(Symbol.Type);
+            Type = new SymbolTypeViewModel(declaringParent.ReflectionRepository, Symbol.Type);
         }
 
         public override string Name => Symbol.Name;

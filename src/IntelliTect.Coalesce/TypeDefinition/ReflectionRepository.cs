@@ -117,13 +117,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public void AddTypes(IEnumerable<TypeViewModel> rootTypes)
+        {
+        }
+
         /// <summary>
-        /// Adds types from the assembly that defines the given type parameter.
+        /// Adds types from the assembly where type T resides.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        internal void AddAssembly<T>() =>
-            DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(t)));
+        public void AddAssembly<T>() =>
+            DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(this, t)));
 
         /// <summary>
         /// Cache the given model so it can be reused when an instance representing its underlying type is requested.
@@ -256,10 +259,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public ClassViewModel GetClassViewModel(Type classType) =>
-            _allClassViewModels.GetOrAdd(classType, _ => new ReflectionClassViewModel(classType));
+            _allClassViewModels.GetOrAdd(classType, _ => new ReflectionClassViewModel(this, classType));
 
         public ClassViewModel GetClassViewModel(INamedTypeSymbol classType) =>
-            _allClassViewModels.GetOrAdd(classType, _ => new SymbolClassViewModel(classType));
+            _allClassViewModels.GetOrAdd(classType, _ => new SymbolClassViewModel(this, classType));
 
         public ClassViewModel GetClassViewModel<T>() => GetClassViewModel(typeof(T));
 

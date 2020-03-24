@@ -10,6 +10,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
     public abstract class TypeViewModel : IAttributeProvider
     {
+        public TypeViewModel()
+        {
+
+        }
+
+        internal TypeViewModel(ReflectionRepository reflectionRepository) : this()
+        {
+            ReflectionRepository = reflectionRepository;
+        }
+
+        public ReflectionRepository ReflectionRepository { get; internal set; }
+
         public abstract string Name { get; }
 
         /// <summary>

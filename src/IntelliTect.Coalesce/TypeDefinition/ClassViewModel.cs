@@ -22,6 +22,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IReadOnlyCollection<PropertyViewModel> _Properties;
         protected IReadOnlyCollection<MethodViewModel> _Methods;
 
+        public ReflectionRepository ReflectionRepository => Type.ReflectionRepository;
+
         public abstract string Name { get; }
         public abstract string Comment { get; }
         public TypeViewModel Type { get; protected set; }

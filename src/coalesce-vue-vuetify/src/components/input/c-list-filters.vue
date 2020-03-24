@@ -46,16 +46,19 @@
               <v-btn 
                 x-small
                 @click="removeFilter(filter)"
+                title="Remove Filter"
               >
                 <i class="fa fa-times"></i>
               </v-btn>
               <v-btn 
                 x-small @click="setFilter(filter, null)"
+                title="Filter where value is null"
               >
                 <pre>null</pre>
               </v-btn>
               <v-btn 
                 x-small @click="setFilter(filter, '')"
+                title="Set custom filter value"
               >
                 <i class="fa fa-ellipsis-h"></i>
               </v-btn>
@@ -97,6 +100,14 @@
               :label="filter.displayName"
               clearable hide-details  disable-lookup
               multiple chips deletable-chips small-chips
+            />
+
+            <v-switch
+              v-else-if="filter.propMeta && filter.propMeta.type == 'boolean'"
+              :input-value="filter.value === 'true' ? true : filter.value === 'false' ? false : null"
+              @change="value => setFilter(filter, value)"
+              :label="filter.displayName"
+              clearable hide-details  
             />
 
             <!-- Text field for everything else -->

@@ -86,12 +86,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             Logger.LogInformation($"Analyzing {types.Count()} Types");
             if (Config.RootTypesWhitelist?.Any() == true)
             {
-                types = types.Where(t => Config.RootTypesWhitelist.Contains(t.Name));
-                Logger.LogInformation($"Whitelisted Root Types: {string.Join(", ", types.Select(t => t.Name))}");
+                rr.SetRootTypeWhitelist(Config.RootTypesWhitelist);
+                Logger.LogInformation($"Whitelisted Root Types: {string.Join(", ", Config.RootTypesWhitelist)}");
             }
 
-            rr.DiscoverCoalescedTypes(types
-                .Select(t => new SymbolTypeViewModel(rr, t))
+            rr.DiscoverCoalescedTypes(
+                types.Select(t => new SymbolTypeViewModel(rr, t))
             );
 
 

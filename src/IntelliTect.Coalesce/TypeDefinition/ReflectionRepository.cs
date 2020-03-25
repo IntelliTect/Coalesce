@@ -67,6 +67,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
+        private HashSet<string> _rootTypeWhitelist = null;
+        internal void SetRootTypeWhitelist(IEnumerable<string> typeNames)
+        {
+            _rootTypeWhitelist = new HashSet<string>(typeNames);
+            if (!_rootTypeWhitelist.Any())
+            {
+                _rootTypeWhitelist = null;
+            }
+        }
+
         internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> rootTypes)
         {
             lock (_discoverLock)
@@ -116,6 +126,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return;
             }
 
+            if (_rootTypeWhitelist != null && !_rootTypeWhitelist.Contains(type.Name))
+            {
+                return;
+            }
+
             if (type.IsA<DbContext>())
             {
                 var context = new DbContextTypeUsage(type.ClassViewModel);
@@ -125,6 +140,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     _contexts.Add(context);
                     _entities.UnionWith(entityCvms);
+                    // Some of our entities may have gotten discovered as external types already.
+                    // Remove them from that set now that we know they're entities
+                    _externalTypes.ExceptWith(entityCvms);
                 }
 
                 // Null this out so it gets recomputed on next access.

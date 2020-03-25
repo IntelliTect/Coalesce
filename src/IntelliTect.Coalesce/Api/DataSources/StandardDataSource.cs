@@ -77,7 +77,7 @@ namespace IntelliTect.Coalesce
 
             if (!string.Equals(parameters.Includes, NoDefaultIncludesString, StringComparison.OrdinalIgnoreCase))
             {
-                query = query.IncludeChildren();
+                query = query.IncludeChildren(this.Context.ReflectionRepository);
             }
 
             return query;
@@ -701,7 +701,9 @@ namespace IntelliTect.Coalesce
         protected virtual async Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query)
         {
             var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? await query.FindItemAsync(id) : query.FindItem(id);
+            return canUseAsync
+                ? await query.FindItemAsync(id, Context.ReflectionRepository) 
+                : query.FindItem(id, Context.ReflectionRepository);
         }
 
         /// <summary>

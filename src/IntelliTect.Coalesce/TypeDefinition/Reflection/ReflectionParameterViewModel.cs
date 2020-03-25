@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ReflectionParameterViewModel(MethodViewModel parent, ParameterInfo info) : base(parent)
         {
             Info = info;
-            Type = new ReflectionTypeViewModel(
+            Type = ReflectionTypeViewModel.GetOrCreate(
                 Parent.Parent.ReflectionRepository, 
                 info.ParameterType.IsByRef 
                     ? info.ParameterType.GetElementType() 

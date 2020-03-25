@@ -9,14 +9,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected ITypeSymbol Symbol { get; }
 
-        public SymbolClassViewModel(INamedTypeSymbol symbol) : this(null, symbol)
+        public SymbolClassViewModel(INamedTypeSymbol symbol) : this(new SymbolTypeViewModel(symbol))
         {
         }
 
-        internal SymbolClassViewModel(ReflectionRepository reflectionRepository, INamedTypeSymbol symbol)
+        public SymbolClassViewModel(SymbolTypeViewModel typeViewModel)
         {
-            Symbol = symbol;
-            Type = new SymbolTypeViewModel(reflectionRepository, Symbol);
+            Symbol = typeViewModel.Symbol;
+            Type = typeViewModel;
+        }
+
+        internal static SymbolClassViewModel GetOrCreate(ReflectionRepository reflectionRepository, INamedTypeSymbol symbol)
+        {
+            return reflectionRepository?.GetClassViewModel(symbol) as SymbolClassViewModel 
+                ?? new SymbolClassViewModel(reflectionRepository.GetOrAddType(symbol));
         }
 
         public override string Name => Symbol.Name;
@@ -35,7 +41,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // Add properties from the base class
             if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
             {
-                var parentSymbol = new SymbolClassViewModel(ReflectionRepository, Symbol.BaseType);
+                var parentSymbol = GetOrCreate(ReflectionRepository, Symbol.BaseType);
                 result.AddRange(parentSymbol.RawProperties(effectiveParent));
             }
             return result.AsReadOnly();
@@ -54,7 +60,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 void AddSymbolMethods(INamedTypeSymbol symbol)
                 {
-                    var parentSymbol = new SymbolClassViewModel(ReflectionRepository, symbol);
+                    var parentSymbol = GetOrCreate(ReflectionRepository, symbol);
                     result.AddRange(parentSymbol.Methods
                         .Cast<SymbolMethodViewModel>()
                         // Don't add overriden methods
@@ -85,7 +91,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Symbol
             .GetTypeMembers()
-            .Select(t => new SymbolTypeViewModel(ReflectionRepository, t))
+            .Select(t => SymbolTypeViewModel.GetOrCreate(ReflectionRepository, t))
             .ToList().AsReadOnly();
     }
 }

@@ -11,14 +11,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected Type Info { get; }
 
-        public ReflectionClassViewModel(Type type) : this(null, type)
+        public ReflectionClassViewModel(Type type) : this(new ReflectionTypeViewModel(type))
         {
         }
 
-        internal ReflectionClassViewModel(ReflectionRepository reflectionRepository, Type type)
+        public ReflectionClassViewModel(ReflectionTypeViewModel typeViewModel)
         {
-            Info = type;
-            Type = new ReflectionTypeViewModel(reflectionRepository, type);
+            Info = typeViewModel.Info;
+            Type = typeViewModel;
+        }
+
+        internal static ReflectionClassViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)
+        {
+            return reflectionRepository?.GetClassViewModel(type) as ReflectionClassViewModel
+                ?? new ReflectionClassViewModel(type);
         }
 
         public override string Name => Info.Name;
@@ -29,18 +35,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .GetProperties()
             .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, this, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
-            .ToList().AsReadOnly();
+            .ToList()
+            .AsReadOnly();
 
         protected override IReadOnlyCollection<MethodViewModel> RawMethods => Info
             .GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
             .Select(m => new ReflectionMethodViewModel(this, m))
             .Cast<MethodViewModel>()
-            .ToList().AsReadOnly();
+            .ToList()
+            .AsReadOnly();
 
         protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Info
             .GetNestedTypes()
-            .Select(t => new ReflectionTypeViewModel(ReflectionRepository, t))
-            .ToList().AsReadOnly();
+            .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
+            .ToList()
+            .AsReadOnly();
     }
 }

@@ -192,7 +192,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
-        public bool HasClassViewModel => !IsPrimitive && IsPOCO;
+        protected bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
+
+        public bool HasClassViewModel => ClassViewModel != null;
 
         public abstract ClassViewModel ClassViewModel { get; }
 
@@ -299,7 +301,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns true if the property is class outside the System namespace, and is not a string or array
+        /// Returns true if the type is class outside the System namespace.
         /// </summary>
         public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass && !IsFile;
 

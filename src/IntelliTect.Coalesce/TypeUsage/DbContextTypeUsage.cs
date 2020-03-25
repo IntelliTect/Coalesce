@@ -22,15 +22,7 @@ namespace IntelliTect.Coalesce.TypeUsage
                 .Where(p => p.Parent.Equals(classViewModel) || !p.PureType.FullNamespace.StartsWith(nameof(Microsoft)))
 
                 .Where(p => p.Type.IsA(typeof(DbSet<>)))
-                .Select(p =>
-                {
-                    var usage = new EntityTypeUsage(this, p.PureType.ClassViewModel, p.Name);
-
-                    // TODO: can this be eliminated?
-                    usage.ClassViewModel.HasDbSet = true;
-
-                    return usage;
-                })
+                .Select(p => new EntityTypeUsage(this, p.PureType, p.Name))
                 .ToList()
                 .AsReadOnly();
 
